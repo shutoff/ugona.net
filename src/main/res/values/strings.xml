@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ugona.net+</string>
+    <string name="notification">Light shock|Low card battery|Supply reserve|Supply regular|ERROR
+        LAN-devices|Low reserve voltage|Roaming. Internet OFF
+    </string>
+    <string name="alarm">Heavy shock|Trunk|Hood|Doors|Ignition Lock|MovTilt sensor|Rogue|Accessory zone</string>
+    <string name="def">default</string>
+    <string name="phone_number_summary">Select car phone number</string>
+    <string name="phone_number">Phone number</string>
+    <string name="alarm_sound">Alarm sound</string>
+    <string name="notify_sound">Notify sound</string>
+    <string name="preferences">Preferences</string>
+    <string name="actions">Actions</string>
+    <string name="sms_mode">Switch to SMS mode</string>
+    <string name="sms_mode_summary">Click here to switch in SMS mode</string>
+    <string name="api_key">API key</string>
+    <string name="api_key_summary">Get API key on car-online.ru and enter here or send via SMS on
+        your phone
+    </string>
+    <string name="sms_error">Can&amp;t send SMS</string>
+    <string name="save">Save</string>
+    <string name="bad_key">Enter valid API-key</string>
+    <string name="ccode">C-Code:</string>
+    <string name="ok">OK</string>
+    <string name="valet_on">VALET On</string>
+    <string name="valet_off">VALET Off</string>
+    <string name="valet_on_sum">Deactivate guard</string>
+    <string name="valet_off_sum">Activate guard</string>
+    <string name="internet_on">Internet On</string>
+    <string name="internet_off">Internet Off</string>
+    <string name="internet_on_sum">Enable internet on the device</string>
+    <string name="internet_off_sum">Disable internet on the device</string>
+    <string name="motor_on">Motor On</string>
+    <string name="motor_off">Motor Off</string>
+    <string name="motor_on_sum">Start engine</string>
+    <string name="motor_off_sum">Stop engine</string>
+    <string name="widget_name">Car alarm</string>
+    <string name="empty_voltage">-- V</string>
+    <string name="empty_balance">---.--</string>
+    <string name="empty_temperature">-- °C</string>
+    <string name="alarm_test">Alarm test</string>
+    <string name="alarm_test_sum">Click for test alarm</string>
+    <string name="map">Map</string>
+    <string name="tracks">Tracks</string>
+    <string name="status" formatted="false">Mileage: %.2f km\nEngine time: %s\nAverage speed: %.2f
+        kmh\nMax speed: %.2f kmh
+    </string>
+    <string name="m_format" formatted="false">%d min</string>
+    <string name="hm_format" formatted="false">%d h %02d min</string>
+    <string name="day">Select a day</string>
+    <string name="no_data">No data</string>
+    <string name="mileage">%.2f km</string>
+    <string name="short_status" formatted="false">Engine time: %s\nAverage speed: %.2f kmh\nMax
+        speed: %.2f kmh\n
+    </string>
+    <string name="saved">Track saved</string>
+    <string name="loading">Loading data...</string>
+    <string name="error_load">Data loading error</string>
+    <string name="about">About</string>
+    <string name="version">Version:</string>
+    <string name="share">Share</string>
+    <string name="invalid_key">Invalid API key</string>
+    <string name="key_error">Check API key error</string>
+    <string name="check_api">Check API key</string>
+    <string name="data_error">Data update error</string>
+    <string name="block">Remote blocking</string>
+    <string name="block_sum">Remote blocking of the car</string>
+    <string name="block_msg">For cancel blocking switch ON and OFF valet mode</string>
+    <string name="autostart">Autostart</string>
+    <string name="autostart_summary">Show autoastart actions</string>
+    <string name="rele1">prestarting heater</string>
+    <string name="rele1_summary">Show prestarting heater action</string>
+    <string name="rele1_action">Send RELE1 impulse</string>
+    <string name="password">Set password</string>
+    <string name="password_summary">Set password for actions</string>
+    <string name="password_old">Old password:</string>
+    <string name="password_text">Password:</string>
+    <string name="password_confirm">Confirm:</string>
+    <string name="password_set">Set password</string>
+    <string name="invalid_password">Invalid password</string>
+    <string name="invalid_confirm">Invalid confirm</string>
+    <string name="input_password">Input password</string>
+    <string name="map_type">Map type</string>
+    <string name="kmh">kmh</string>
+    <string name="close">Close</string>
+    <string name="traffic">Show speed</string>
+    <string name="traffic_summary">Show speed as color track</string>
+    <string name="alarms">Alarms</string>
+    <string name="contacts">Contacts</string>
+    <string name="system">System</string>
+    <string name="event">Event</string>
+    <string name="guard_on">Guard on</string>
+    <string name="guard_off">Guard off</string>
+    <string name="can_on">Guard on via CAN</string>
+    <string name="can_off">Guard off via CAM</string>
+    <string name="end_move">End route by move sensor</string>
+    <string name="lock_off1">Card 1 off</string>
+    <string name="lock_off2">Card 2 off</string>
+    <string name="lock_off3">Card 3 off</string>
+    <string name="lock_off4">Card 4 off</string>
+    <string name="lock_off5">Card 5 off</string>
+    <string name="lock_on1">Card 1 on</string>
+    <string name="lock_on2">Card 2 on</string>
+    <string name="lock_on3">Card 3 on</string>
+    <string name="lock_on4">Card 4 on</string>
+    <string name="lock_on5">Card 5 on</string>
+    <string name="user_call">Request via call</string>
+    <string name="user_sms">Request via SMS</string>
+    <string name="motor_start">Engine start request</string>
+    <string name="request_photo">Photo request</string>
+    <string name="trunk_open">Trunk open</string>
+    <string name="hood_open">Hood open</string>
+    <string name="door_open">Door open</string>
+    <string name="ignition_on">Ignition ON</string>
+    <string name="access_on">Accessories ON</string>
+    <string name="input1_on">Input 1 ON</string>
+    <string name="input2_on">Input 2 ON</string>
+    <string name="input3_on">Input 3 ON</string>
+    <string name="input4_on">Input 4 ON</string>
+    <string name="input5_on">Input 5 ON</string>
+    <string name="input6_on">Input 6 ON</string>
+    <string name="trunk_close">Trunk close</string>
+    <string name="hood_close">Hood close</string>
+    <string name="door_close">Door close</string>
+    <string name="ignition_off">Ignition OFF</string>
+    <string name="access_off">Accessories OFF</string>
+    <string name="input1_off">Input 1 OFF</string>
+    <string name="input2_off">Input 2 OFF</string>
+    <string name="input3_off">Input 3 OFF</string>
+    <string name="input4_off">Input 4 OFF</string>
+    <string name="input5_off">Input 5 OFF</string>
+    <string name="input6_off">Input 6 OFF</string>
+    <string name="gprs_on">GPRS ON</string>
+    <string name="gprs_off">GPRS OFF</string>
+    <string name="reset_modem">Reset modem</string>
+    <string name="reset">Reset</string>
+    <string name="trace_start">Trace start</string>
+    <string name="trace_stop">Trace finish</string>
+    <string name="gsm_fail">GSM fail</string>
+    <string name="gsm_recover">GSM recovery</string>
+    <string name="gps_fail">GPS fail</string>
+    <string name="gps_recover">GPS recovery</string>
+    <string name="till_start">Movement start</string>
+    <string name="net_error">Network error</string>
+    <string name="light_shock">Light shock</string>
+    <string name="ext_zone">External zone MKW</string>
+    <string name="heavy_shock">Heavy shock</string>
+    <string name="inner_zone">Inner zone MKW</string>
+    <string name="tilt">Tilt</string>
+    <string name="main_power_on">Main power ON</string>
+    <string name="main_power_off">Main power OFF</string>
+    <string name="reserve_power_on">Reserve power ON</string>
+    <string name="reserve_power_off">Reserve power OFF</string>
+    <string name="rogue">Rogue</string>
+    <string name="rogue_off">Cancel rogue</string>
+    <string name="alarm_boot">Alarm Trunk</string>
+    <string name="alarm_hood">Alarm hood</string>
+    <string name="alarm_door">Alarm door</string>
+    <string name="ignition_lock">Alarm ignition</string>
+    <string name="alarm_accessories">Alarm accessories zone</string>
+    <string name="alarm_input1">Alarm input 1</string>
+    <string name="alarm_input2">Alarm input 2</string>
+    <string name="alarm_input3">Alarm input 3</string>
+    <string name="alarm_input4">Alarm input 4</string>
+    <string name="sos">SOS</string>
+    <string name="error_read">Error read memory</string>
+    <string name="incomming_sms">Incomming SMS</string>
+    <string name="no_events">No events</string>
+    <string name="unknown">unknown</string>
+    <string name="cars">Cars</string>
+    <string name="cars_sum">Control your cars</string>
+    <string name="new_car">New car</string>
+    <string name="name">Name</string>
+    <string name="car">Car</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+    <string name="select_car">Select car</string>
+    <string name="speed">Speed: %s km/h</string>
+    <string name="temp_correct">Temperature correction</string>
+    <string name="voice">Download voice</string>
+    <string name="download_events">Download events table</string>
+    <string name="low_battery">Low card battery</string>
+    <string name="download_settings">Download settings</string>
+    <string name="lan_change">LAN devices changed</string>
+    <string name="command">Comannd from buttons</string>
+    <string name="brake">Brake</string>
+    <string name="guard2_on">Guard mode 2 on</string>
+    <string name="guard2_off">Guard mode 2 off</string>
+    <string name="valet_on_msg">Turn on VALET require enter C-Code</string>
+    <string name="valet_off_msg">Turn off VALET require enter C-Code</string>
+    <string name="bad_ccode">Invalid C-Code</string>
+    <string name="pswd">Password:</string>
+    <string name="sms_mode_msg">For switch back to voice mode send SMS\nALARM CALL</string>
+    <string name="motor_start_error">Engine start failed</string>
+    <string name="motor_stop">Engine stopped</string>
+    <string name="events">Events</string>
+    <string name="zone_in">Zone in</string>
+    <string name="zone_out">Zone out</string>
+    <string name="position">My position</string>
+    <string name="settings">Settings</string>
+    <string name="no_gps_title">GPS disabled</string>
+    <string name="no_gps_message">GPS disabled is system.\nFor detect location you must turn on it in Settings</string>
+    <string name="net_gps_message">Your location detected by network.\nFor more accuracy you can turn on GPS is Settings</string>
+    <string name="no_location">Unknown localtion</string>
+    <string name="shock_sens">Shock sensitivity</string>
+    <string-array name="levels">
+        <item>Minimal</item>
+        <item>Low</item>
+        <item>Medium</item>
+        <item>High</item>
+        <item>Maximal</item>
+    </string-array>
+    <string name="google">Google maps</string>
+    <string name="osm">OpenStreetMap</string>
+    <string name="show_balance">Show balance</string>
+    <string name="safe_mode">Safe mode</string>
+</resources>

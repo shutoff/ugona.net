@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="root">
+
+    <EditTextPreference
+        android:title="@string/name"
+        android:key="name_" />
+
+    <Preference
+        android:summary="@string/api_key_summary"
+        android:title="@string/api_key"
+        android:key="api_key" />
+
+    <Preference
+        android:summary="@string/phone_number_summary"
+        android:title="@string/phone_number"
+        android:key="phone" />
+
+    <Preference
+        android:title="@string/sms_mode"
+        android:summary="@string/sms_mode_summary"
+        android:key="sms_mode" />
+
+    <CheckBoxPreference
+        android:title="@string/autostart"
+        android:summary="@string/autostart_summary"
+        android:key="autostart" />
+
+    <CheckBoxPreference
+        android:title="@string/rele1"
+        android:summary="@string/rele1_summary"
+        android:key="rele1" />
+
+    <CheckBoxPreference
+        android:title="@string/show_balance"
+        android:defaultValue="true"
+        android:key="show_balance" />
+
+    <net.ugona.plus.SeekBarPreference
+        android:title="@string/temp_correct"
+        android:key="tmp_shift"
+        android:max="10"
+        android:text=" °C" />
+
+    <net.ugona.plus.SeekBarPreference
+        android:title="@string/shock_sens"
+        android:key="shock_sens"
+        android:max="5"
+        android:defaultValue="5" />
+
+</PreferenceScreen>

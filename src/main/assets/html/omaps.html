@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+<meta charset="utf-8">
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.css"/>
+<script src="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.js"></script>
+<script src="../js/Marker.Rotate.js"></script>
+<style>
+    html, body, #map-canvas {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    }
+</style>
+<script>
+
+var map;
+var markers;
+var zones;
+var infos;
+var my_location;
+var my_marker;
+var my_icon;
+var my_arrow;
+
+function initialize() {
+    var data = android.getData();
+    var cars = (data+"").split('|');
+    var car_data = cars[0].split(';');
+
+    map = L.map('map', {
+        center: [car_data[1], car_data[2]],
+        zoom: 15
+    });
+
+    if (car_data[5]){
+        var points = car_data[5].split('_');
+        var min_lat = 180;
+        var max_lat = -180;
+        var min_lon = 180;
+        var max_lon = -180;
+        for (var i in points){
+            var p = points[i].split(',');
+            var lat = parseFloat(p[0]);
+            var lon = parseFloat(p[1]);
+            if (lat < min_lat)
+                min_lat = lat;
+            if (lat > max_lat)
+                max_lat = lat;
+            if (lon < min_lon)
+                min_lon = lon;
+            if (lon > max_lon)
+                max_lon = lon;
+        }
+        var d_lat = (max_lat - min_lat) / 10;
+        var d_lon = (max_lon - min_lon) / 10;
+        min_lat -= d_lat;
+        max_lat += d_lat;
+        min_lon -= d_lon;
+        max_lon += d_lon;
+        var zoom = map.getBoundsZoom([[min_lat, min_lon], [max_lat, max_lon]]);
+        map.setZoom(zoom);
+    }
+
+    L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {
+        maxZoom: 19
+    }).addTo(map);
+
+    markers = [];
+    zones = [];
+    infos = [];
+
+    var icon = L.icon({
+        iconUrl: '../img/arrow.png',
+        iconSize: [ 20, 20 ],
+        iconAnchor: [ 10, 0 ]
+    });
+
+    var icon_small = L.icon({
+        iconUrl: '../img/arrow2.png',
+        iconSize: [ 16, 16 ],
+        iconAnchor: [ 8, 0 ]
+    });
+
+    my_icon = L.icon({
+        iconUrl: '../img/i.png',
+        iconSize: [ 10, 10 ],
+        iconAnchor: [ 5, 5 ]
+    });
+
+    my_arrow = L.icon({
+        iconUrl: '../img/i_arrow.png',
+        iconSize: [ 16, 16 ],
+        iconAnchor: [ 8, 0 ]
+    });
+
+
+    for (var i in cars){
+        (function(i) {
+            var car_data = cars[i].split(';');
+            var lat = car_data[1];
+            var lng = car_data[2];
+            var course = car_data[3];
+            var text = createText(car_data);
+
+            if (car_data[5]){
+                var path = [];
+                var points = car_data[5].split('_');
+                for (var n = 0; n < points.length; n++){
+                    var point = points[n].split(',');
+                    path.push(new L.LatLng(point[0], point[1]));
+                }
+                var zone = L.polygon(path, { 
+                    stroke: true,
+                    color: '#FF0000',
+                    weight: 2,
+                    opacity: 0.5,
+                    fill: true,
+                    fillColor: '#FF0000',
+                    fillOpacity: 0.1
+                }).addTo(map);
+                zones[i] = zone;
+                return;
+            }
+
+            var marker = new L.Marker([ lat, lng ], {
+                icon: (i == 0) ? icon : icon_small,
+                iconAngle: course
+            });
+            map.addLayer(marker);
+
+            var info = L.popup()
+                .setLatLng([lat, lng])
+                .setContent(text);
+            marker.on('click', function(){
+                info.addTo(map);
+            });
+            if (i == 0)
+                info.addTo(map);
+            markers[i] = marker;
+            infos[i] = info;
+        })(i);
+    }
+
+    myLocation();
+}
+
+function myLocation() {
+    if (map == null)
+        return;
+    var location = android.getLocation().split(',');
+    if (location.length < 3)
+        return;
+    var lat = location[0];
+    var lng = location[1];
+    var radius = parseFloat(location[2]);
+    if (my_location == null){
+        my_location = new L.Circle([lat, lng], radius, {
+            stroke: true,
+            color: '#0000FF',
+            weight: 2,
+            opacity: 0.1,
+            fill: true,
+            fillColor: '#0000FF',
+            fillOpacity: 0.05
+        });
+        map.addLayer(my_location);
+        if (location.length > 3){
+            my_marker = new L.Marker([ lat, lng ], {
+                icon: my_arrow,
+                iconAngle: parseInt(location[3])
+            });
+            map.addLayer(my_marker);
+        }else{
+            my_marker = new L.Marker([ lat, lng ], {
+                icon: my_icon
+            });
+            map.addLayer(my_marker);
+        }
+    }else{
+        my_location.setLatLng([lat, lng]);
+        my_location.setRadius(radius);
+        my_marker.setLatLng([lat, lng]);
+        if (location.length > 3){
+            my_marker.setIcon(my_arrow);
+            my_marker.setIconAngle(location[3]);
+        }else{
+            my_marker.setIcon(my_icon);
+        }
+
+    }
+}
+
+function setPosition() {
+    if (map == null)
+        return;
+    if (markers[0] == null){
+        var zone = zones[0];
+        if (zone == null)
+            return;
+        var path = zone.getLatLngs();
+        var min_lat = 180;
+        var max_lat = -180;
+        var min_lng = 180;
+        var max_lng = -180;
+        for (var i in path){
+            var p = path[i];
+            var lat = p.lat;
+            if (lat < min_lat)
+                min_lat = lat;
+            if (lat > max_lat)
+                max_lat = lat;
+            var lng = p.lng;
+            if (lng < min_lng)
+                min_lng = lng;
+            if (lng > max_lng)
+                max_lng = lng;
+        };
+        var d_lat = (max_lat - min_lat) / 10;
+        var d_lng = (max_lng - min_lng) / 10;
+        min_lat -= d_lat;
+        max_lat += d_lat;
+        min_lng -= d_lng;
+        max_lng += d_lng;
+        map.fitBounds([[min_lat, min_lng], [max_lat, max_lng]]);
+        return;
+    }
+    var pos = markers[0].getLatLng();
+    var lat1 = pos.lat;
+    var lng1 = pos.lng;
+    var pos = android.getLocation().split(',');
+    if (pos.length < 3)
+        return;
+    var lat2 = parseFloat(pos[0]);
+    var lng2 = parseFloat(pos[1]);
+    console.log(lat1, lng1, lat2, lng2);
+    if (lat1 > lat2){
+        var r = lat1;
+        lat1 = lat2;
+        lat2 = r;
+    }
+    if (lng1 > lng2){
+        var r = lng1;
+        lng1 = lng2;
+        lng2 = r;
+    }
+    var d_lat = (lat2 - lat1) / 8;
+    var d_lng = (lng2 - lng1) / 8;
+    map.fitBounds([ [lat1 - d_lat, lng1 - d_lng], [lat2 + d_lat, lng2 + d_lng]]);
+}
+
+function createText(data) {
+    var res = data[4];
+    if (data[6])
+        res += '<br/>' + data[6];
+    return res;
+}
+
+function update() {
+    if (map == null)
+        return;
+
+    var data =  android.getData();
+    var cars = data.split('|');
+    for (var i in cars){
+        var car_data = cars[i].split(';');
+        var lat = car_data[1];
+        var lng = car_data[2];
+        var course = car_data[3];
+        var text = createText(car_data);
+        markers[i].setLatLng([lat, lng]);
+        infos[i].setLatLng([lat, lng]).setContent(text);
+    }
+
+    for (i = cars.length; i < markers.length; i++){
+        if (markers[i] == null)
+            continue;
+        map.reoveLayer(markers[i]);
+        markers[i] = null;
+    }
+}
+
+function center() {
+    if (map == null)
+        return;
+    var pos = markers[0].getLatLng();
+    map.setView([ pos.lat, pos.lng ], map.getZoom(), { animate: true });
+}
+
+
+
+
+</script>
+</head>
+<body onload="initialize()">
+<div id="map" style="height: 100%"></div>
+</body>
+</html>

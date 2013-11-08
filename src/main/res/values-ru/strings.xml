@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Угона.нет+</string>
+    <string name="notification">Легкий удар|Батарея в метке разряжена|Отключено бортовое
+        питание|Подключено бортовое питание|Нарушена конфигурация LAN|Аварийная батарея
+        разряжена|Отключен интернет в роуминге
+    </string>
+    <string name="alarm">Сильный удар|Открыт багажник|Открыт капот|Открыты двери|Включено
+        зажигание|Машина движется|Разбойное нападение|Зона аксессуаров
+    </string>
+    <string name="def">по умолчанию</string>
+    <string name="phone_number_summary">Укажите номер телефона автомобиля</string>
+    <string name="phone_number">Номер телефона</string>
+    <string name="alarm_sound">Звук тревоги</string>
+    <string name="notify_sound">Звук уведомления</string>
+    <string name="preferences">Настройки</string>
+    <string name="actions">Действия</string>
+    <string name="sms_mode">Переключиться в режим SMS</string>
+    <string name="sms_mode_summary">Для обработки тревог приложением надо переключить устройство в режим SMS</string>
+    <string name="sms_error">Не могу отправить SMS</string>
+    <string name="api_key">API ключ</string>
+    <string name="api_key_summary">Получите ключ для доступа к API на сайте car-online.ru и введите
+        его в это поле или отправьте в виде SMS на телефон
+    </string>
+    <string name="save">Сохранить</string>
+    <string name="bad_key">Неправильный ключ API</string>
+    <string name="valet_on">Включить режим VALET</string>
+    <string name="valet_off">Выключить режим VALET</string>
+    <string name="ccode">C-код:</string>
+    <string name="ok">Продолжить</string>
+    <string name="internet_on">Включить интернет</string>
+    <string name="internet_off">Выключить интернет</string>
+    <string name="internet_on_sum">Разрешить доступ в интернет на устройстве</string>
+    <string name="internet_off_sum">Запретить доступ в интернет на устройстве</string>
+    <string name="valet_on_sum">Отключить охрану</string>
+    <string name="valet_off_sum">Включить охрану</string>
+    <string name="motor_on">Завести двигатель</string>
+    <string name="motor_off">Заглушить двигатель</string>
+    <string name="motor_on_sum">Произвести дистанционный запуск двигателя</string>
+    <string name="motor_off_sum">Дистанционно остановить двигатель</string>
+    <string name="unknown">неизвестно</string>
+    <string name="alarm_test">Проверка тревоги</string>
+    <string name="alarm_test_sum">Нажмите для проверки тревоги</string>
+    <string name="map">Карта</string>
+    <string name="tracks">Маршруты</string>
+    <string name="status" formatted="false">Расстояние: %.2f км\nВремя в пути: %s\nСредняя скорость:
+        %.2f км/ч\nМаксимальная скорость: %.2f км/ч
+    </string>
+    <string name="m_format" formatted="false">%d мин</string>
+    <string name="hm_format" formatted="false">%d ч %02d мин</string>
+    <string name="day">Выберите день</string>
+    <string name="no_data">Нет данных</string>
+    <string name="mileage">%.2f км</string>
+    <string name="short_status" formatted="false">Время в пути: %s\nСредняя скорость: %.2f
+        км/ч\nМаксимальная скорость: %.2f км/ч\n
+    </string>
+    <string name="saved">Трек сохранен</string>
+    <string name="loading">Загрузка данных...</string>
+    <string name="error_load">Ошибка загрузки данных</string>
+    <string name="about">О программе</string>
+    <string name="version">Версия:</string>
+    <string name="share">Поделиться</string>
+    <string name="invalid_key">Неверный ключ API</string>
+    <string name="key_error">Ошибка проверки API ключа</string>
+    <string name="check_api">Проверка ключа</string>
+    <string name="data_error">Ошибка обновления данных</string>
+    <string name="block">Дистанционная блокировка</string>
+    <string name="block_sum">Включить дистанционную блокировку автомобиля</string>
+    <string name="autostart">Автозапуск</string>
+    <string name="autostart_summary">Отображать действия для дистанционного запуска</string>
+    <string name="rele1">Предпусковой подогреватель</string>
+    <string name="rele1_summary">Отображать действия для предпускового подогревателя</string>
+    <string name="rele1_action">Отправить импульс на РЕЛЕ1</string>
+    <string name="password">Установить пароль</string>
+    <string name="password_summary">Установить пароль для выполнения действий</string>
+    <string name="password_old">Старый пароль:</string>
+    <string name="password_text">Пароль:</string>
+    <string name="password_confirm">Подтверждение:</string>
+    <string name="password_set">Установить</string>
+    <string name="invalid_password">Неверный пароль</string>
+    <string name="invalid_confirm">Пароли не совпадают</string>
+    <string name="input_password">Введите пароль</string>
+    <string name="map_type">Использовать карты</string>
+    <string name="kmh">км/ч</string>
+    <string name="close">Завершить</string>
+    <string name="traffic">Показывать скорости</string>
+    <string name="traffic_summary">Отображать скорость как цветной трек</string>
+    <string name="events">События</string>
+    <string name="alarms">Тревоги</string>
+    <string name="contacts">Контакты</string>
+    <string name="system">Система</string>
+    <string name="event">Событие</string>
+    <string name="guard_on">Постановка в охрану</string>
+    <string name="guard_off">Снятие с охраны</string>
+    <string name="can_on">Постановка в охрану штатной сигнализации</string>
+    <string name="can_off">Снятие с охраны штатной сигнализации</string>
+    <string name="end_move">Конец маршрута по датчику движения</string>
+    <string name="lock_off1">Пропала карта 1</string>
+    <string name="lock_off2">Пропала карта 2</string>
+    <string name="lock_off3">Пропала карта 3</string>
+    <string name="lock_off4">Пропала карта 4</string>
+    <string name="lock_off5">Пропала карта 5</string>
+    <string name="lock_on1">Обнаружена карта 1</string>
+    <string name="lock_on2">Обнаружена карта 2</string>
+    <string name="lock_on3">Обнаружена карта 3</string>
+    <string name="lock_on4">Обнаружена карта 4</string>
+    <string name="lock_on5">Обнаружена карта 5</string>
+    <string name="user_call">Запрос по звонку</string>
+    <string name="user_sms">Запрос по SMS</string>
+    <string name="motor_start">Дистанционный запуск двигателя</string>
+    <string name="request_photo">Запрос фото</string>
+    <string name="trunk_open">Открыт багажник</string>
+    <string name="hood_open">Открыт капот</string>
+    <string name="door_open">Открыта дверь</string>
+    <string name="ignition_on">Зажигание включено</string>
+    <string name="access_on">Аксессуары</string>
+    <string name="input1_on">Вход 1 включен</string>
+    <string name="input2_on">Вход 2 включен</string>
+    <string name="input3_on">Вход 3 включен</string>
+    <string name="input4_on">Вход 4 включен</string>
+    <string name="input5_on">Вход 5 включен</string>
+    <string name="input6_on">Вход 6 включен</string>
+    <string name="trunk_close">Закрыт багажник</string>
+    <string name="hood_close">Закрыт капот</string>
+    <string name="door_close">Закрыта дверь</string>
+    <string name="ignition_off">Зажигание выключено</string>
+    <string name="access_off">Аксессуары</string>
+    <string name="input1_off">Вход 1 выключен</string>
+    <string name="input2_off">Вход 2 выключен</string>
+    <string name="input3_off">Вход 3 выключен</string>
+    <string name="input4_off">Вход 4 выключен</string>
+    <string name="input5_off">Вход 5 выключен</string>
+    <string name="input6_off">Вход 6 выключен</string>
+    <string name="gprs_on">Соединение GPRS восстановлено</string>
+    <string name="gprs_off">Соединение GPRS потеряно</string>
+    <string name="reset_modem">Сброс модема</string>
+    <string name="reset">Сброс</string>
+    <string name="trace_start">Начало маршрута</string>
+    <string name="trace_stop">Конец маршрута</string>
+    <string name="gsm_fail">Потеряна сеть GSM</string>
+    <string name="gsm_recover">Восстановлено соединение GSM </string>
+    <string name="gps_fail">Потеряны спутники GPS</string>
+    <string name="gps_recover">Обнаружены спутники GPS</string>
+    <string name="till_start">Начало движения</string>
+    <string name="net_error">Ошибка передачи данных</string>
+    <string name="light_shock">Слабый удар</string>
+    <string name="ext_zone">Внешняя зона MKW</string>
+    <string name="heavy_shock">Сильный удар</string>
+    <string name="inner_zone">Внутренняя MKW</string>
+    <string name="tilt">Наклон</string>
+    <string name="main_power_on">Подключено основное питание</string>
+    <string name="main_power_off">Отключено основное питание</string>
+    <string name="reserve_power_on">Подключено резервное питание</string>
+    <string name="reserve_power_off">Отключено резервное питание</string>
+    <string name="rogue">Разбойное нападение</string>
+    <string name="rogue_off">Отбой разбойного нападения</string>
+    <string name="alarm_boot">Тревога: открыт багажник</string>
+    <string name="alarm_hood">Тревога: открыт капот</string>
+    <string name="alarm_door">Тревога: открыта дверь</string>
+    <string name="ignition_lock">Тревога: зажигание включено</string>
+    <string name="alarm_accessories">Тревога по зоне аксессуаров</string>
+    <string name="alarm_input1">Тревога: вход 1</string>
+    <string name="alarm_input2">Тревога: вход 2</string>
+    <string name="alarm_input3">Тревога: вход 3</string>
+    <string name="alarm_input4">Тревога: вход 4</string>
+    <string name="sos">SOS</string>
+    <string name="incomming_sms">Входящее SMS</string>
+    <string name="no_events">Нет событий</string>
+    <string name="cars">Автомобили</string>
+    <string name="cars_sum">Настройка ваших машин</string>
+    <string name="new_car">Новый автомобиль</string>
+    <string name="name">Название</string>
+    <string name="car">Автомобиль</string>
+    <string name="add">Добавить</string>
+    <string name="cancel">Отменить</string>
+    <string name="select_car">Выберите автомобиль</string>
+    <string name="error_read">Ошибка чтения данных</string>
+    <string name="speed">Скорость: %s км/ч</string>
+    <string name="temp_correct">Коррекция температуры</string>
+    <string name="voice">Загружен голос</string>
+    <string name="download_events">Загружена таблица событий</string>
+    <string name="low_battery">Батарейка в карточке разряжена</string>
+    <string name="download_settings">Загружены настройки устройства</string>
+    <string name="lan_change">Изменилось количество устройств LAN</string>
+    <string name="command">Комманда с кодонаборника</string>
+    <string name="brake">Тормоз</string>
+    <string name="guard2_on">Включен режим охраны 2</string>
+    <string name="guard2_off">Выключен режим охраны 2</string>
+    <string name="valet_on_msg">Для включения режима VALET требуется ввод C-кода</string>
+    <string name="valet_off_msg">Для отключения режима VALET требуется ввод C-кода</string>
+    <string name="bad_ccode">Неверный С-код</string>
+    <string name="pswd">Пароль:</string>
+    <string name="block_msg">Для отмены блокировки включите и выключите режим VALET</string>
+    <string name="sms_mode_msg">Для переключения обратно в голосовой режим отправьте SMS\nALARM CALL</string>
+    <string name="motor_start_error">Двигатель не заведен или заглох</string>
+    <string name="motor_stop">Двигатель остановлен</string>
+    <string name="zone_in">Въезд в зону</string>
+    <string name="zone_out">Выезд из зоны</string>
+    <string name="position">Мое положение</string>
+    <string name="settings">Настройки</string>
+    <string name="no_gps_title">GPS выключен</string>
+    <string name="no_gps_message">GPS выключен в системе.\nДля определения местоположения надо включить GPS в настройках</string>
+    <string name="net_gps_message">Местоположение определено по сети.\nДля более точного определения положения надо включить GPS в настройках</string>
+    <string name="no_location">Неизвестное местоположение</string>
+    <string name="shock_sens">Чуствительность датчика удара</string>
+    <string-array name="levels">
+        <item>Минимальная</item>
+        <item>Низкая</item>
+        <item>Средняя</item>
+        <item>Высокая</item>
+        <item>Максимальная</item>
+    </string-array>
+    <string name="show_balance">Отображать баланс</string>
+    <string name="safe_mode">Безопасный режим</string>
+</resources>

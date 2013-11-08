@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+<meta charset="utf-8">
+<style>
+    html, body, #map-canvas {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    }
+</style>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true"></script>
+<script src="../../../../../android.js"></script>
+<script>
+
+var map;
+var markers;
+var my_location;
+var my_marker;
+var infos;
+var my_icon;
+var my_arrow;
+var my_options;
+
+function initialize() {
+    var data =  android.getData();
+    var cars = (data+"").split('|');
+    var car_data = cars[0].split(';');
+
+    var mapOptions = {
+        zoom: 15,
+        center: new google.maps.LatLng(car_data[1], car_data[2]),
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        streetViewControl: false,
+        mapTypeControl: false
+    };
+    map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+    markers = [];
+    zones = [];
+    infos = [];
+
+    var icon_main =  {
+        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+        scale: 3,
+        strokeColor: '#000080',
+        fillColor: '#000080',
+        fillOpacity: 0.5
+    };
+
+    var icon_second = {
+        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+        scale: 2,
+        strokeColor: '#00C000',
+        fillColor: '#00C000',
+        fillOpacity: 0.2
+    };
+
+    my_icon = {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 3,
+        strokeColor: '#800000',
+        fillColor: '#800000',
+        fillOpacity: 0.5
+    };
+
+    my_arrow = {
+        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+        scale: 2,
+        strokeColor: '#800000',
+        fillColor: '#800000',
+        fillOpacity: 0.5        
+    };
+
+    for (var i in cars){
+        (function(i){
+            var car_data = cars[i].split(';');
+            var lat = car_data[1];
+            var lng = car_data[2];
+            var course = car_data[3];
+            var text = createText(car_data)
+            if (car_data[5]){
+                var path = [];
+                var points = car_data[5].split('_');
+                for (var n = 0; n < points.length; n++){
+                    var point = points[n].split(',');
+                    path.push(new google.maps.LatLng(point[0], point[1]));
+                }
+                var zone = new google.maps.Polygon({
+                    paths: path,
+                    strokeColor: "#FF0000",
+                    strokeOpacity: 0.5,
+                    strokeWeight: 2,
+                    fillColor: "#FF0000",
+                    fillOpacity: 0.1,
+                    map: map
+                });
+                zones[i] = zone;
+                return;
+            }
+
+            var icon = icon_second;
+            if (i == 0)
+                icon = icon_main;
+            icon.rotation = course;
+
+            var marker = new google.maps.Marker({
+                position: new google.maps.LatLng(lat, lng),
+                icon: icon,
+                map: map
+            });
+            var info = new google.maps.InfoWindow({
+                content: text
+            });
+            google.maps.event.addListener(marker, 'click', function(){
+                info.open(map, marker);
+            });
+            if (i == 0)
+                info.open(map, marker);
+            markers[i] = marker;
+            infos[i] = info;
+        })(i);
+    }
+    myLocation();
+    if (zones[0] != null)
+        setPosition();
+}
+
+function myLocation() {
+    if (map == null)
+        return;
+    var location = android.getLocation().split(',');
+    if (location.length < 3)
+        return;
+    var lat = location[0];
+    var lng = location[1];
+    var radius = parseFloat(location[2]);    
+    if (my_location != null)
+        my_location.setMap(null);
+    my_options = {
+        strokeColor: "#0000FF",
+        strokeOpacity: 0.1,
+        strokeWeight: 2,
+        fillColor: "#0000FF",
+        fillOpacity: 0.05,
+        map: map,
+        center: new google.maps.LatLng(lat, lng),
+        radius: radius
+    };
+    my_location = new google.maps.Circle(my_options);
+    if (my_marker == null){
+        var icon = my_icon;
+        if (location.length > 3){
+            icon = my_arrow;
+            icon.rotation = parseInt(location[3]);
+        }
+        my_marker = new google.maps.Marker({
+            position: new google.maps.LatLng(lat, lng),
+            icon: icon,
+            map: map
+        });
+    }else{
+        my_marker.setPosition(new google.maps.LatLng(lat, lng));
+        var icon = my_icon;
+        if (location.length > 3){
+            icon = my_arrow;
+            icon.rotation = parseInt(location[3]);
+        }
+        my_marker.setIcon(icon);
+    }
+}
+
+function setPosition() {
+    if (map == null)
+        return;
+    if (markers[0] == null){
+        var zone = zones[0];
+        if (zone == null)
+            return;
+        var path = zone.getPath();
+        var min_lat = 180;
+        var max_lat = -180;
+        var min_lng = 180;
+        var max_lng = -180;
+        path.forEach(function(p){
+            var lat = p.lat();
+            if (lat < min_lat)
+                min_lat = lat;
+            if (lat > max_lat)
+                max_lat = lat;
+            var lng = p.lng();
+            if (lng < min_lng)
+                min_lng = lng;
+            if (lng > max_lng)
+                max_lng = lng;
+        });
+        var d_lat = (max_lat - min_lat) / 10;
+        var d_lng = (max_lng - min_lng) / 10;
+        min_lat -= d_lat;
+        max_lat += d_lat;
+        min_lng -= d_lng;
+        max_lng += d_lng;
+        var bounds = new google.maps.LatLngBounds(new google.maps.LatLng(min_lat, min_lng), new google.maps.LatLng(max_lat, max_lng));
+        map.fitBounds(bounds);
+        return;
+    }
+    var pos = markers[0].getPosition();
+    var lat1 = pos.lat();
+    var lng1 = pos.lng();
+    var pos = android.getLocation().split(',');
+    if (pos.length < 3)
+        return;
+    var lat2 = parseFloat(pos[0]);
+    var lng2 = parseFloat(pos[1]);
+    if (lat1 > lat2){
+        var r = lat1;
+        lat1 = lat2;
+        lat2 = r;
+    }
+    if (lng1 > lng2){
+        var r = lng1;
+        lng1 = lng2;
+        lng2 = r;
+    }
+    var d_lat = (lat2 - lat1) / 8;
+    var d_lng = (lng2 - lng1) / 8;
+    var bounds = new google.maps.LatLngBounds(new google.maps.LatLng(lat1 - d_lat, lng1 - d_lng), new google.maps.LatLng(lat2 + d_lat, lng2 + d_lng));
+    map.fitBounds(bounds);
+}
+
+function update() {
+    if (map == null)
+        return;
+
+    var data =  android.getData();
+    var cars = data.split('|');
+
+    for (var i in cars){
+        var car_data = cars[i].split(';');
+        var lat = car_data[1];
+        var lng = car_data[2];
+        var course = car_data[3];
+        var text = createText(car_data);
+        markers[i].setPosition(new google.maps.LatLng(lat, lng));
+        var info = infos[i];
+        info.setContent(text);
+    }
+
+    for (i = cars.length; i < markers.length; i++){
+        if (markers[i] == null)
+            continue;
+        markers[i].setMap(null);
+        marlers[i] = null;
+    }
+}
+
+function createText(data) {
+    var res = data[4];
+    if (data[6])
+        res += '<br/>' + data[6];
+    return res;
+}
+
+function center() {
+    if (map == null)
+        return;
+    map.setCenter(markers[0].getPosition());
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
+
+
+
+
+</script>
+</head>
+<body>
+<div id="map-canvas"></div>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="root">
+    <Preference
+        android:key="block"
+        android:summary="@string/block_sum"
+        android:title="@string/block" />
+    <Preference
+        android:key="rele1"
+        android:summary="@string/rele1_action"
+        android:title="@string/rele1" />
+    <Preference
+        android:key="motor_on"
+        android:summary="@string/motor_on_sum"
+        android:title="@string/motor_on" />
+    <Preference
+        android:key="motor_off"
+        android:summary="@string/motor_off_sum"
+        android:title="@string/motor_off" />
+    <Preference
+        android:key="internet_on"
+        android:summary="@string/internet_on_sum"
+        android:title="@string/internet_on" />
+    <Preference
+        android:key="internet_off"
+        android:summary="@string/internet_off_sum"
+        android:title="@string/internet_off" />
+    <Preference
+        android:key="valet_on"
+        android:summary="@string/valet_on_sum"
+        android:title="@string/valet_on" />
+    <Preference
+        android:key="valet_off"
+        android:summary="@string/valet_off_sum"
+        android:title="@string/valet_off" />
+
+
+</PreferenceScreen>

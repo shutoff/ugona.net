@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:car="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/my"
+        android:title="@string/position"
+        android:icon="@android:drawable/ic_menu_myplaces"
+        car:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/map"
+        android:title="@string/map"
+        android:icon="@android:drawable/ic_menu_mylocation"
+        car:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/google"
+        android:title="@string/google"
+        car:showAsAction="never" />
+    <item
+        android:id="@+id/osm"
+        android:title="@string/osm"
+        car:showAsAction="never" />
+</menu>

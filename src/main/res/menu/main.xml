@@ -1,0 +1,25 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:car="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/map"
+        android:title="@string/map"
+        android:icon="@android:drawable/ic_menu_mylocation"
+        car:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/tracks"
+        android:title="@string/tracks"
+        car:showAsAction="never" />
+    <item
+        android:id="@+id/events"
+        android:title="@string/events"
+        car:showAsAction="never" />
+    <item
+        android:id="@+id/actions"
+        android:title="@string/actions"
+        car:showAsAction="never" />
+    <item
+        android:id="@+id/preferences"
+        android:title="@string/preferences"
+        car:showAsAction="never" />
+</menu>
