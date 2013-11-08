@@ -81,11 +81,6 @@
             android:label="@string/app_name" />
 
         <activity
-            android:name=".About"
-            android:theme="@style/Theme.AppCompat"
-            android:label="@string/app_name" />
-
-        <activity
             android:name=".Alarm"
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:launchMode="singleTop" />
