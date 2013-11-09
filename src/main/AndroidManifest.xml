@@ -48,21 +48,6 @@
         </activity>
 
         <activity
-            android:name=".TracksActivity"
-            android:theme="@style/Theme.AppCompat"
-            android:label="@string/app_name" />
-
-        <activity
-            android:name=".Cars"
-            android:theme="@style/Theme.AppCompat"
-            android:label="@string/cars" />
-
-        <activity
-            android:name=".EventsActivity"
-            android:theme="@style/Theme.AppCompat"
-            android:label="@string/app_name" />
-
-        <activity
             android:name=".Preferences"
             android:label="@string/app_name" />
 
@@ -71,19 +56,36 @@
             android:label="@string/app_name" />
 
         <activity
+            android:name=".Cars"
+            android:theme="@style/Theme.AppCompat"
+            android:label="@string/cars" />
+
+        <activity
             android:name=".MapView"
             android:theme="@style/Theme.AppCompat"
-            android:label="@string/app_name" />
+            android:uiOptions="splitActionBarWhenNarrow">
+            <meta-data
+                android:name="android.support.UI_OPTIONS"
+                android:value="splitActionBarWhenNarrow" />
+        </activity>
 
         <activity
             android:name=".TrackView"
             android:theme="@style/Theme.AppCompat"
-            android:label="@string/app_name" />
+            android:uiOptions="splitActionBarWhenNarrow">
+            <meta-data
+                android:name="android.support.UI_OPTIONS"
+                android:value="splitActionBarWhenNarrow" />
+        </activity>
 
         <activity
             android:name=".Alarm"
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:launchMode="singleTop" />
+
+        <activity
+            android:name="com.codinguser.android.contactpicker.ContactsPickerActivity"
+            android:label="@string/app_name" />
 
         <activity
             android:name=".ConfigWidget"
@@ -94,16 +96,11 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".Actions" />
-
-        <activity
-            android:name=".ContactsPickerActivity"
-            android:label="@string/app_name" />
-
         <receiver android:name=".SmsMonitor">
-            <intent-filter android:priority="6000">
+            <intent-filter android:priority="6500">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
                 <action android:name="net.ugona.plus.SMS_SENT" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
         </receiver>
 
@@ -113,7 +110,7 @@
         <receiver android:name=".CarWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="net.ugona.plus.UPDATE_FORCE" />
                 <action android:name="net.ugona.plus.UPDATE" />
                 <action android:name="net.ugona.plus.NO_UPDATE" />
                 <action android:name="net.ugona.plus.ERROR" />

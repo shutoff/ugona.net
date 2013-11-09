@@ -10,18 +10,17 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDateTime;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
 
 public class CarWidget extends AppWidgetProvider {
 
@@ -119,9 +118,7 @@ public class CarWidget extends AppWidgetProvider {
                         context.startService(i);
                     }
                 }
-                if (action.equalsIgnoreCase(Intent.ACTION_TIMEZONE_CHANGED)) {
-                    DateTimeZone tz = DateTimeZone.forTimeZone(TimeZone.getDefault());
-                    DateTimeZone.setDefault(tz);
+                if (action.equalsIgnoreCase(FetchService.ACTION_UPDATE_FORCE)) {
                     updateWidgets(context, null);
                 }
             }
@@ -156,7 +153,9 @@ public class CarWidget extends AppWidgetProvider {
 
     void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetID) {
 
-        RemoteViews widgetView = new RemoteViews(context.getPackageName(), R.layout.widget);
+        boolean progress = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD);
+
+        RemoteViews widgetView = new RemoteViews(context.getPackageName(), progress ? R.layout.widget : R.layout.widget_22);
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String car_id = Preferences.getCar(preferences, preferences.getString(Names.WIDGET + widgetID, ""));
@@ -202,18 +201,24 @@ public class CarWidget extends AppWidgetProvider {
         widgetView.setViewVisibility(R.id.balance_block, show_balance ? View.VISIBLE : View.GONE);
 
         if ((states == null) || !states.containsKey(car_id)) {
+            if (progress)
+                widgetView.setViewVisibility(R.id.update, View.GONE);
             widgetView.setViewVisibility(R.id.refresh, View.VISIBLE);
-            widgetView.setViewVisibility(R.id.update, View.GONE);
             widgetView.setViewVisibility(R.id.error, View.GONE);
         } else {
             int state = states.get(car_id);
             if (state == STATE_ERROR) {
+                if (progress)
+                    widgetView.setViewVisibility(R.id.update, View.GONE);
                 widgetView.setViewVisibility(R.id.refresh, View.GONE);
-                widgetView.setViewVisibility(R.id.update, View.GONE);
                 widgetView.setViewVisibility(R.id.error, View.VISIBLE);
             } else {
-                widgetView.setViewVisibility(R.id.refresh, View.GONE);
-                widgetView.setViewVisibility(R.id.update, View.VISIBLE);
+                if (progress) {
+                    widgetView.setViewVisibility(R.id.refresh, View.GONE);
+                    widgetView.setViewVisibility(R.id.update, View.VISIBLE);
+                } else {
+                    widgetView.setViewVisibility(R.id.refresh, View.VISIBLE);
+                }
                 widgetView.setViewVisibility(R.id.error, View.GONE);
             }
         }

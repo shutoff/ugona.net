@@ -45,6 +45,7 @@ public class FetchService extends Service {
     static final String ACTION_ERROR = "net.ugona.plus.ERROR";
     static final String ACTION_START = "net.ugona.plus.START";
     static final String ACTION_START_UPDATE = "net.ugona.plus.START_UPDATE";
+    static final String ACTION_UPDATE_FORCE = "net.ugona.plus.UPDATE_FORCE";
 
     private static final Pattern balancePattern = Pattern.compile("-?[0-9]+[\\.,][0-9][0-9]");
 

@@ -213,4 +213,6 @@
     </string-array>
     <string name="show_balance">Отображать баланс</string>
     <string name="safe_mode">Безопасный режим</string>
+    <string name="state">Состояние</string>
+    <string name="ugona_net">УГОНА.НЕТ</string>
 </resources>

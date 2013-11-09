@@ -211,8 +211,10 @@
         <item>High</item>
         <item>Maximal</item>
     </string-array>
-    <string name="google">Google maps</string>
-    <string name="osm">OpenStreetMap</string>
+    <string name="google">Google</string>
+    <string name="osm">OSM</string>
     <string name="show_balance">Show balance</string>
     <string name="safe_mode">Safe mode</string>
+    <string name="state">State</string>
+    <string name="ugona_net">UGONA.NET</string>
 </resources>

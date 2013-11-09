@@ -18,6 +18,8 @@ import android.support.v4.app.NotificationCompat;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 
+import org.joda.time.DateTimeZone;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,7 +75,16 @@ public class SmsMonitor extends BroadcastReceiver {
                     return;
                 }
             }
-
+        }
+        if (action.equals(Intent.ACTION_TIMEZONE_CHANGED)) {
+            DateTimeZone tz = DateTimeZone.getDefault();
+            DateTimeZone.setDefault(tz);
+            try {
+                Intent i = new Intent(FetchService.ACTION_UPDATE_FORCE);
+                context.sendBroadcast(i);
+            } catch (Exception ex) {
+                // ignore
+            }
         }
     }
 

@@ -123,7 +123,8 @@ public class Cars extends ActionBarActivity {
 
     static Car[] getCars(Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String[] cars_id = preferences.getString(Names.CARS, "").split(",");
+        String cars_data = preferences.getString(Names.CARS, "");
+        String[] cars_id = cars_data.split(",");
         Car[] cars = new Car[cars_id.length];
         for (int i = 0; i < cars_id.length; i++) {
             String id = cars_id[i];

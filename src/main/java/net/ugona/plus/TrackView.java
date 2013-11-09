@@ -31,7 +31,7 @@ import java.util.Vector;
 public class TrackView extends WebViewActivity {
 
     SharedPreferences preferences;
-    Vector<TracksActivity.Track> tracks;
+    Vector<Tracks.Track> tracks;
     Menu topSubMenu;
 
     static String TRAFFIC = "traffic";
@@ -44,9 +44,9 @@ public class TrackView extends WebViewActivity {
             StringBuilder track_data = new StringBuilder();
             try {
                 for (int i = 0; i < tracks.size(); i++) {
-                    TracksActivity.Track track = tracks.get(i);
-                    TracksActivity.Point start = track.track.get(0);
-                    TracksActivity.Point finish = track.track.get(track.track.size() - 1);
+                    Tracks.Track track = tracks.get(i);
+                    Tracks.Point start = track.track.get(0);
+                    Tracks.Point finish = track.track.get(track.track.size() - 1);
                     int n_start = markers.size();
                     double d_best = 200.;
                     for (int n = 0; n < markers.size(); n++) {
@@ -73,13 +73,13 @@ public class TrackView extends WebViewActivity {
                     marker.times.get(marker.times.size() - 1).end = track.begin;
 
                     if (i > 0) {
-                        TracksActivity.Track prev = tracks.get(i - 1);
-                        TracksActivity.Point last = prev.track.get(prev.track.size() - 1);
+                        Tracks.Track prev = tracks.get(i - 1);
+                        Tracks.Point last = prev.track.get(prev.track.size() - 1);
                         double delta = Address.calc_distance(start.latitude, start.longitude, last.latitude, last.longitude);
                         if (delta > 200)
                             track_data.append("|");
                     }
-                    for (TracksActivity.Point p : track.track) {
+                    for (Tracks.Point p : track.track) {
                         track_data.append(p.latitude);
                         track_data.append(",");
                         track_data.append(p.longitude);
@@ -185,7 +185,7 @@ public class TrackView extends WebViewActivity {
             }
             ByteArrayInputStream bis = new ByteArrayInputStream(track_data);
             ObjectInput in = new ObjectInputStream(bis);
-            tracks = (Vector<TracksActivity.Track>) in.readObject();
+            tracks = (Vector<Tracks.Track>) in.readObject();
             in.close();
             bis.close();
         } catch (Exception ex) {
@@ -280,8 +280,8 @@ public class TrackView extends WebViewActivity {
 
             long begin = 0;
             long end = 0;
-            for (TracksActivity.Track track : tracks) {
-                for (TracksActivity.Point p : track.track) {
+            for (Tracks.Track track : tracks) {
+                for (Tracks.Point p : track.track) {
                     if ((p.latitude < min_lat) || (p.latitude > max_lat) || (p.longitude < min_lon) || (p.longitude > max_lon))
                         continue;
                     if (begin == 0)
@@ -314,8 +314,8 @@ public class TrackView extends WebViewActivity {
             writer.append("<trk>\n");
 
             boolean trk = false;
-            for (TracksActivity.Track track : tracks) {
-                for (TracksActivity.Point p : track.track) {
+            for (Tracks.Track track : tracks) {
+                for (Tracks.Point p : track.track) {
                     if ((p.latitude < min_lat) || (p.latitude > max_lat) || (p.longitude < min_lon) || (p.longitude > max_lon)) {
                         if (trk) {
                             trk = false;

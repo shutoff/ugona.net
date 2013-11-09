@@ -1,5 +1,6 @@
 package net.ugona.plus;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -9,12 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceClickListener;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -25,108 +21,7 @@ import android.widget.EditText;
 
 import java.util.Date;
 
-public class Actions extends PreferenceActivity {
-
-    private SharedPreferences preferences;
-
-    private String car_id;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        addPreferencesFromResource(R.xml.actions);
-
-        car_id = getIntent().getStringExtra(Names.ID);
-        if (car_id == null)
-            car_id = "";
-
-        PreferenceScreen screen = getPreferenceScreen();
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        final Context context = this;
-
-        Preference pref = findPreference("internet_on");
-        pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                requestPassword(context, car_id, R.string.internet_on, R.string.internet_on_sum, "INTERNET ALL", "INTERNET ALL OK");
-                return true;
-            }
-        });
-
-        pref = findPreference("internet_off");
-        pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                requestPassword(context, car_id, R.string.internet_off, R.string.internet_off_sum, "INTERNET OFF", "INTERNET OFF OK");
-                return true;
-            }
-        });
-
-        pref = findPreference("rele1");
-        if (getBoolPref(Names.CAR_RELE1)) {
-            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-                public boolean onPreferenceClick(Preference preference) {
-                    rele1(context, car_id);
-                    return true;
-                }
-            });
-        } else {
-            screen.removePreference(pref);
-        }
-
-        pref = findPreference("motor_on");
-        if (getBoolPref(Names.CAR_AUTOSTART)) {
-            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-                public boolean onPreferenceClick(Preference preference) {
-                    motorOn(context, car_id);
-                    return true;
-                }
-            });
-        } else {
-            screen.removePreference(pref);
-        }
-
-        pref = findPreference("motor_off");
-        if (getBoolPref(Names.CAR_AUTOSTART)) {
-            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-                public boolean onPreferenceClick(Preference preference) {
-                    motorOff(context, car_id);
-                    return true;
-                }
-            });
-        } else {
-            screen.removePreference(pref);
-        }
-
-        pref = findPreference("valet_on");
-        pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                valetOn(context, car_id);
-                return true;
-            }
-        });
-
-        pref = findPreference("valet_off");
-        pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                valetOff(context, car_id);
-                return true;
-            }
-        });
-
-        pref = findPreference("block");
-        pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                blockMotor(context, car_id);
-                return true;
-            }
-        });
-
-    }
-
-    boolean getBoolPref(String name) {
-        return preferences.getBoolean(name + car_id, false);
-    }
+public class Actions {
 
     static void motorOn(Context context, String car_id) {
         requestPassword(context, car_id, R.string.motor_on, R.string.motor_on_sum, "MOTOR ON", "MOTOR ON OK");
@@ -175,6 +70,15 @@ public class Actions extends PreferenceActivity {
         requestPassword(context, car_id, R.string.block, R.string.block_msg, "BLOCK MTR", "BLOCK MTR OK");
     }
 
+    static void showMessage(Context context, int id_title, int id_message) {
+        AlertDialog dialog = new AlertDialog.Builder(context)
+                .setTitle(id_title)
+                .setMessage(id_message)
+                .setPositiveButton(R.string.ok, null)
+                .create();
+        dialog.show();
+    }
+
     static void requestPassword(final Context context, final String car_id, final int id_title, int id_message, final String sms, final String answer) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setTitle(id_title)
@@ -185,7 +89,7 @@ public class Actions extends PreferenceActivity {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         final String password = preferences.getString(Names.PASSWORD, "");
         if (password.length() > 0) {
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
             builder.setView(inflater.inflate(R.layout.password, null));
         } else if (id_message == 0) {
             send_sms(context, car_id, sms, answer, id_title, null);
@@ -214,7 +118,7 @@ public class Actions extends PreferenceActivity {
     }
 
     static private void requestCCode(final Context context, final String car_id, final int id_title, int id_message, final String sms, final String answer, final Runnable after) {
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         final AlertDialog dialog = new AlertDialog.Builder(context)
                 .setTitle(id_title)
                 .setMessage(id_message)
@@ -264,7 +168,7 @@ public class Actions extends PreferenceActivity {
                     return;
                 smsProgress.dismiss();
                 int result = intent.getIntExtra(Names.ANSWER, 0);
-                if (result == RESULT_OK) {
+                if (result == Activity.RESULT_OK) {
                     if (after != null) {
                         after.run();
                         Intent i = new Intent(FetchService.ACTION_UPDATE);
@@ -291,14 +195,4 @@ public class Actions extends PreferenceActivity {
         });
         SmsMonitor.sendSMS(context, car_id, sms, answer);
     }
-
-    static void showMessage(Context context, int id_title, int id_message) {
-        AlertDialog dialog = new AlertDialog.Builder(context)
-                .setTitle(id_title)
-                .setMessage(id_message)
-                .setPositiveButton(R.string.ok, null)
-                .create();
-        dialog.show();
-    }
-
 }
