@@ -5,8 +5,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -31,7 +29,6 @@ public class Preferences extends PreferenceActivity {
     Preference alarmPref;
     Preference notifyPref;
     Preference testPref;
-    Preference aboutPref;
     Preference pswdPref;
 
     String alarmUri;
@@ -88,15 +85,6 @@ public class Preferences extends PreferenceActivity {
 
         notifyUri = preferences.getString(Names.NOTIFY, "");
         setNotifyTitle();
-
-        aboutPref = findPreference("about");
-        try {
-            PackageManager pkgManager = getPackageManager();
-            PackageInfo info = pkgManager.getPackageInfo("net.ugona.plus", 0);
-            aboutPref.setSummary(aboutPref.getSummary() + " " + info.versionName);
-        } catch (Exception ex) {
-            aboutPref.setSummary("");
-        }
 
         pswdPref = findPreference("password");
         pswdPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {

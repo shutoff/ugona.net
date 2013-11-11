@@ -1,7 +1,6 @@
 package net.ugona.plus;
 
 import android.app.Activity;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -14,7 +13,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 
@@ -157,42 +155,7 @@ public class SmsMonitor extends BroadcastReceiver {
 
     private void showNotification(Context context, String text, String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String title = "Car Alarm";
-        String[] cars = preferences.getString(Names.CARS, "").split(",");
-        if (cars.length > 1) {
-            title = preferences.getString(Names.CAR_NAME + car_id, "");
-            if (title.length() == 0) {
-                title = context.getString(R.string.car);
-                if (car_id.length() > 0)
-                    title += " " + car_id;
-            }
-        }
-
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.ic_launcher)
-                        .setContentTitle(title)
-                        .setContentText(text);
-
-        Intent notificationIntent = new Intent(context, MainActivity.class);
-        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        notificationIntent.putExtra(Names.ID, car_id);
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(contentIntent);
-
-        int id = preferences.getInt(Names.IDS, 0);
-        id++;
-        SharedPreferences.Editor ed = preferences.edit();
-        ed.putInt(Names.IDS, id);
-        ed.putBoolean(Names.SMS_ALARM, true);
-        ed.commit();
-
-        // Add as notification
-        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        manager.notify(id, builder.build());
-
+        Alarm.createNotification(context, text, car_id);
         String sound = preferences.getString(Names.NOTIFY, "");
         Uri uri = Uri.parse(sound);
         Ringtone ringtone = RingtoneManager.getRingtone(context, uri);

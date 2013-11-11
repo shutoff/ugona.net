@@ -14,9 +14,9 @@ public final class Names {
 
     static final String ALARM = "alarm";
     static final String NOTIFY = "notify";
+    static final String N_IDS = "n_ids";
 
     static final String TITLE = "Car Alarm";
-    static final String IDS = "n_id";
 
     static final String TRACK = "track";
     static final String TRACK_FILE = "track_file";

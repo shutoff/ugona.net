@@ -223,4 +223,5 @@
     <string name="phone_work">work</string>
     <string name="phone_mobile">mobile</string>
     <string name="pgsm_version">Device software version</string>
+    <string name="copyright">© 2013 Ugona.net, info@ugona.net</string>
 </resources>

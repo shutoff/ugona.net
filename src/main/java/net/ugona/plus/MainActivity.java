@@ -171,6 +171,12 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        removeNotifications();
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(Names.ID, car_id);
@@ -202,6 +208,11 @@ public class MainActivity extends ActionBarActivity {
         switch (item.getItemId()) {
             case R.id.preferences: {
                 Intent intent = new Intent(this, Preferences.class);
+                startActivity(intent);
+                return true;
+            }
+            case R.id.about: {
+                Intent intent = new Intent(this, About.class);
                 startActivity(intent);
                 return true;
             }
@@ -298,16 +309,19 @@ public class MainActivity extends ActionBarActivity {
 
     private void removeNotifications() {
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        int id = preferences.getInt(Names.IDS, 0);
-        for (int i = 1; i <= id; i++) {
+        String n_ids = preferences.getString(Names.N_IDS + car_id, "");
+        if (n_ids.equals(""))
+            return;
+        String[] ids = n_ids.split(",");
+        for (String id : ids) {
             try {
-                manager.cancel(i);
+                manager.cancel(Integer.parseInt(id));
             } catch (NumberFormatException e) {
                 // ignore
             }
         }
         SharedPreferences.Editor ed = preferences.edit();
-        ed.putInt(Names.IDS, 0);
+        ed.remove(Names.N_IDS);
         ed.commit();
     }
 
@@ -337,6 +351,7 @@ public class MainActivity extends ActionBarActivity {
                     ed.putString(Names.LAST, car_id);
                     ed.commit();
                     update();
+                    removeNotifications();
                     return true;
                 }
             });

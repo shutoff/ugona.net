@@ -127,31 +127,7 @@ public class Alarm extends Activity {
     }
 
     void cancelAlarm() {
-
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(getBaseContext())
-                        .setSmallIcon(R.drawable.ic_launcher)
-                        .setContentTitle("Car Aarm")   //$NON-NLS-1$
-                        .setContentText(tvAlarm.getText());   //$NON-NLS-1$
-
-        Intent notificationIntent = new Intent(getBaseContext(), MainActivity.class);
-        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(contentIntent);
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        int id = preferences.getInt(Names.IDS, 0);
-        id++;
-        SharedPreferences.Editor ed = preferences.edit();
-        ed.putInt(Names.IDS, id);
-        ed.commit();
-
-        // Add as notification
-        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        manager.notify(id, builder.build());
-
+        createNotification(getBaseContext(), tvAlarm.getText().toString(), car_id);
         finish();
     }
 
@@ -243,5 +219,60 @@ public class Alarm extends Activity {
         }
     }
 
+    static void createNotification(Context context, String text, String car_id) {
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String title = context.getString(R.string.app_name);
+        String[] cars = preferences.getString(Names.CARS, "").split(",");
+        if (cars.length > 1) {
+            title = preferences.getString(Names.CAR_NAME + car_id, "");
+            if (title.length() == 0) {
+                title = context.getString(R.string.car);
+                if (car_id.length() > 0)
+                    title += " " + car_id;
+            }
+        }
+
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(context)
+                        .setSmallIcon(R.drawable.warning)
+                        .setContentTitle(title)
+                        .setContentText(text);
+
+        Intent notificationIntent = new Intent(context, MainActivity.class);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        notificationIntent.putExtra(Names.ID, car_id);
+        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(contentIntent);
+
+        int max_id = 0;
+        for (String id : cars) {
+            String[] ids = preferences.getString(Names.N_IDS, "").split(",");
+            for (String n_ids : ids) {
+                try {
+                    int n = Integer.parseInt(n_ids);
+                    if (n > max_id)
+                        max_id = n;
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+        }
+        max_id++;
+
+        SharedPreferences.Editor ed = preferences.edit();
+        String s = preferences.getString(Names.N_IDS + car_id, "");
+        if (!s.equals(""))
+            s += ",";
+        s += max_id;
+        ed.putString(Names.N_IDS + car_id, s);
+        ed.commit();
+
+        // Add as notification
+        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.notify(max_id, builder.build());
+    }
 
 }

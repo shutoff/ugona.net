@@ -10,5 +10,11 @@
         android:id="@+id/preferences"
         android:title="@string/preferences"
         android:icon="@android:drawable/ic_menu_preferences"
-        car:showAsAction="ifRoom" />
+        car:showAsAction="never" />
+
+    <item
+        android:id="@+id/about"
+        android:title="@string/about"
+        car:showAsAction="never" />
+
 </menu>

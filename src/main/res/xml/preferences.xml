@@ -31,9 +31,4 @@
         android:key="safe_mode"
         android:title="@string/safe_mode" />
 
-    <Preference
-        android:title="@string/about"
-        android:summary="@string/version"
-        android:key="about" />
-
 </PreferenceScreen>
