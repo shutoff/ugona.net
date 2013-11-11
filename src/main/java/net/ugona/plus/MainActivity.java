@@ -392,8 +392,11 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public Fragment getItem(int i) {
             switch (i) {
-                case 0:
-                    return new ActionFragment();
+                case 0: {
+                    ActionFragment fragment = new ActionFragment();
+                    fragment.car_id = car_id;
+                    return fragment;
+                }
                 case 1: {
                     StateFragment fragment = new StateFragment();
                     fragment.car_id = car_id;

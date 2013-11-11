@@ -12,7 +12,6 @@
     }
 </style>
 <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true"></script>
-<script src="../../../../../android.js"></script>
 <script>
 
 var map;
@@ -23,6 +22,8 @@ var infos;
 var my_icon;
 var my_arrow;
 var my_options;
+var icon_main;
+var icon_second;
 
 function initialize() {
     var data =  android.getData();
@@ -42,7 +43,7 @@ function initialize() {
     zones = [];
     infos = [];
 
-    var icon_main =  {
+    icon_main =  {
         path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
         scale: 3,
         strokeColor: '#000080',
@@ -50,7 +51,7 @@ function initialize() {
         fillOpacity: 0.5
     };
 
-    var icon_second = {
+    icon_second = {
         path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
         scale: 2,
         strokeColor: '#00C000',
@@ -88,13 +89,19 @@ function initialize() {
                     var point = points[n].split(',');
                     path.push(new google.maps.LatLng(point[0], point[1]));
                 }
+                var color = '#FF0000';
+                var opacity = 0.1;
+                if (i > 0){
+                    color = '#0000FF';
+                    opacity = 0.05;
+                }
                 var zone = new google.maps.Polygon({
                     paths: path,
-                    strokeColor: "#FF0000",
-                    strokeOpacity: 0.5,
+                    strokeColor: color,
+                    strokeOpacity: opacity * 5,
                     strokeWeight: 2,
-                    fillColor: "#FF0000",
-                    fillOpacity: 0.1,
+                    fillColor: color,
+                    fillOpacity: opacity,
                     map: map
                 });
                 zones[i] = zone;
@@ -123,9 +130,9 @@ function initialize() {
             infos[i] = info;
         })(i);
     }
-    myLocation();
     if (zones[0] != null)
-        setPosition();
+        center();
+    myLocation();
 }
 
 function myLocation() {
@@ -175,6 +182,152 @@ function myLocation() {
 function setPosition() {
     if (map == null)
         return;
+    var min_lat = 180;
+    var max_lat = -180;
+    var min_lng = 180;
+    var max_lng = -180;
+    if (markers[0] == null){
+        var zone = zones[0];
+        if (zone == null)
+            return;
+        var path = zone.getPath();
+        path.forEach(function(p){
+            var lat = p.lat();
+            if (lat < min_lat)
+                min_lat = lat;
+            if (lat > max_lat)
+                max_lat = lat;
+            var lng = p.lng();
+            if (lng < min_lng)
+                min_lng = lng;
+            if (lng > max_lng)
+                max_lng = lng;
+        });
+    }else{
+        var pos = markers[0].getPosition();
+        min_lat = pos.lat();
+        max_lat = pos.lat();
+        min_lng = pos.lng();
+        max_lng = pos.lng();
+    }
+
+    var pos = android.getLocation().split(',');
+    if (pos.length < 3)
+        return;
+    var lat = parseFloat(pos[0]);
+    var lng = parseFloat(pos[1]);
+    if (lat > max_lat)
+        max_lat = lat;
+    if (lat < min_lat)
+        min_lat = lat;
+    if (lng > max_lng)
+        max_lng = lng;
+    if (lng < min_lng)
+        min_lng = lng;
+    var d_lat = (max_lat - max_lat) / 8;
+    var d_lng = (max_lng - max_lng) / 8;
+    var bounds = new google.maps.LatLngBounds(new google.maps.LatLng(min_lat - d_lat, min_lng - d_lng), new google.maps.LatLng(max_lat + d_lat, max_lng + d_lng));
+    map.fitBounds(bounds);
+}
+
+function update() {
+    if (map == null)
+        return;
+
+    var data =  android.getData();
+    var cars = data.split('|');
+
+    for (var i in cars){
+        var car_data = cars[i].split(';');
+        var lat = car_data[1];
+        var lng = car_data[2];
+        var course = car_data[3];
+        var text = createText(car_data);
+
+        if (car_data[5]){
+            var path = [];
+            var points = car_data[5].split('_');
+            for (var n = 0; n < points.length; n++){
+                var point = points[n].split(',');
+                path.push(new google.maps.LatLng(point[0], point[1]));
+            }
+            if (zones[i]){
+                zones[i].setPaths(path);
+            }else{
+                if (markers[i]){
+                    infos[i].setMap(null);
+                    markers[i].setMap(null);
+                    markers[i] = null;
+                }
+                var color = '#FF0000';
+                var opacity = 0.1;
+                if (i > 0){
+                    color = '#0000FF';
+                    opacity = 0.05;
+                }
+                var zone = new google.maps.Polygon({
+                    paths: path,
+                    strokeColor: color,
+                    strokeOpacity: opacity * 5,
+                    strokeWeight: 2,
+                    fillColor: color,
+                    fillOpacity: opacity,
+                    map: map
+                });
+                zones[i] = zone;
+            }
+        }else{
+            if (markers[i]){
+                markers[i].setPosition(new google.maps.LatLng(lat, lng));
+                infos[i].setContent(text);
+            }else{
+                if (zones[i]){
+                    zones[i].setMap(null);
+                    zones[i] = null;
+                }
+                var icon = icon_second;
+                if (i == 0)
+                    icon = icon_main;
+                icon.rotation = course;
+                var marker = new google.maps.Marker({
+                    position: new google.maps.LatLng(lat, lng),
+                    icon: icon,
+                    map: map
+                });
+                var info = new google.maps.InfoWindow({
+                    content: text
+                });
+                google.maps.event.addListener(marker, 'click', function(){
+                    info.open(map, marker);
+                });
+                markers[i] = marker;
+                infos[i] = info;
+            }
+        }
+    }
+
+    for (i = cars.length; i < markers.length; i++){
+        if (markers[i]){
+            markers[i].setMap(null);
+            markers[i] = null;
+        }
+        if (zones[i]){
+            zones[i].setMap(null);
+            zones[i] = null;
+        }
+    }
+}
+
+function createText(data) {
+    var res = data[4];
+    if (data[6])
+        res += '<br/>' + data[6];
+    return res;
+}
+
+function center() {
+    if (map == null)
+        return;
     if (markers[0] == null){
         var zone = zones[0];
         if (zone == null)
@@ -206,71 +359,10 @@ function setPosition() {
         map.fitBounds(bounds);
         return;
     }
-    var pos = markers[0].getPosition();
-    var lat1 = pos.lat();
-    var lng1 = pos.lng();
-    var pos = android.getLocation().split(',');
-    if (pos.length < 3)
-        return;
-    var lat2 = parseFloat(pos[0]);
-    var lng2 = parseFloat(pos[1]);
-    if (lat1 > lat2){
-        var r = lat1;
-        lat1 = lat2;
-        lat2 = r;
-    }
-    if (lng1 > lng2){
-        var r = lng1;
-        lng1 = lng2;
-        lng2 = r;
-    }
-    var d_lat = (lat2 - lat1) / 8;
-    var d_lng = (lng2 - lng1) / 8;
-    var bounds = new google.maps.LatLngBounds(new google.maps.LatLng(lat1 - d_lat, lng1 - d_lng), new google.maps.LatLng(lat2 + d_lat, lng2 + d_lng));
-    map.fitBounds(bounds);
-}
-
-function update() {
-    if (map == null)
-        return;
-
-    var data =  android.getData();
-    var cars = data.split('|');
-
-    for (var i in cars){
-        var car_data = cars[i].split(';');
-        var lat = car_data[1];
-        var lng = car_data[2];
-        var course = car_data[3];
-        var text = createText(car_data);
-        markers[i].setPosition(new google.maps.LatLng(lat, lng));
-        var info = infos[i];
-        info.setContent(text);
-    }
-
-    for (i = cars.length; i < markers.length; i++){
-        if (markers[i] == null)
-            continue;
-        markers[i].setMap(null);
-        marlers[i] = null;
-    }
-}
-
-function createText(data) {
-    var res = data[4];
-    if (data[6])
-        res += '<br/>' + data[6];
-    return res;
-}
-
-function center() {
-    if (map == null)
-        return;
     map.setCenter(markers[0].getPosition());
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
-
 
 
 </script>

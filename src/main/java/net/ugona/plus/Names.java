@@ -20,8 +20,8 @@ public final class Names {
 
     static final String TRACK = "track";
     static final String TRACK_FILE = "track_file";
-    static final String TRACK_DATE = "track_date";
     static final String ERROR = "error";
+    static final String VERSION = "version";
 
     static final String POINT_DATA = "point_data";
 

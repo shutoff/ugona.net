@@ -243,6 +243,8 @@ public class EventsFragment extends Fragment
                     info += "</b><br/>";
                     Intent i = new Intent(getActivity(), MapView.class);
                     String[] point = e.point.split(";");
+                    if (point.length < 2)
+                        return;
                     String point_data = ";" + point[0] + ";" + point[1] + ";" + e.course + ";" + info + e.address.replace("\n", "<br/>");
                     if (point.length > 2)
                         point_data += ";" + point[2];

@@ -16,7 +16,6 @@ import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 import android.telephony.SmsMessage;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -28,8 +27,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.codinguser.android.contactpicker.ContactsPickerActivity;
-
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,14 +36,16 @@ public class CarPreferences extends PreferenceActivity {
     SharedPreferences preferences;
 
     Preference smsPref;
-    Preference phonePref;
     Preference apiPref;
+    Preference phonePref;
+    Preference versionPref;
+
     EditTextPreference namePref;
     SeekBarPreference shiftPref;
 
     String car_id;
 
-    private static final int GET_PHONE_NUMBER = 3007;
+    final static int REQUEST_PHONE = 4000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,14 +99,15 @@ public class CarPreferences extends PreferenceActivity {
 
         phonePref = findPreference("phone");
         phonePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
             public boolean onPreferenceClick(Preference preference) {
-                Intent intent = new Intent(Intent.ACTION_PICK);
-                intent.setType(ContactsContract.Contacts.CONTENT_TYPE);
-                startActivityForResult(new Intent(getBaseContext(), ContactsPickerActivity.class),
-                        GET_PHONE_NUMBER);
+                Intent i = new Intent(CarPreferences.this, PhoneNumberDialog.class);
+                i.putExtra(Names.CAR_PHONE, preferences.getString(Names.CAR_PHONE + car_id, ""));
+                startActivityForResult(i, REQUEST_PHONE);
                 return true;
             }
         });
+
         String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
         setPhone(phoneNumber);
 
@@ -182,21 +183,50 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
 
+        versionPref = findPreference("version");
+
+        String version = preferences.getString(Names.VERSION + car_id, "");
+        versionPref.setSummary(version);
+
+        String api_key = preferences.getString(Names.CAR_KEY + car_id, "");
+        if (!api_key.equals("")) {
+            HttpTask verTask = new HttpTask() {
+                @Override
+                void result(JSONObject res) throws JSONException {
+                    try {
+                        JSONArray devices = res.getJSONArray("devices");
+                        JSONObject device = devices.getJSONObject(0);
+                        String ver = device.getString("versionSoftPGSM");
+                        versionPref.setSummary(ver);
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putString(Names.VERSION + car_id, ver);
+                        ed.commit();
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                }
+
+                @Override
+                void error() {
+
+                }
+            };
+            verTask.execute(PROFILE_URL, api_key);
+        }
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode != RESULT_OK)
-            return;
-        switch (requestCode) {
-            case GET_PHONE_NUMBER: {
-                String phoneNumber = (String) data.getExtras().get(ContactsPickerActivity.KEY_PHONE_NUMBER);
-                SharedPreferences.Editor ed = preferences.edit();
-                ed.putString(Names.CAR_PHONE + car_id, phoneNumber);
-                ed.commit();
-                setPhone(phoneNumber);
-                break;
-            }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if ((requestCode == REQUEST_PHONE) && (resultCode == RESULT_OK)) {
+            String number = data.getStringExtra(Names.CAR_PHONE);
+            SharedPreferences.Editor ed = preferences.edit();
+            ed.putString(Names.CAR_PHONE + car_id, number);
+            ed.commit();
+            if (number.equals(""))
+                number = getString(R.string.phone_number_summary);
+            phonePref.setSummary(number);
         }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     void setPhone(String phoneNumber) {
@@ -212,7 +242,7 @@ public class CarPreferences extends PreferenceActivity {
         Actions.requestPassword(this, car_id, R.string.sms_mode, R.string.sms_mode_msg, "ALARM SMS", "ALARM SMS OK");
     }
 
-    final String TEST_URL = "http://api.car-online.ru/v2?get=profile&skey=$1&content=json";
+    final String PROFILE_URL = "http://api.car-online.ru/v2?get=profile&skey=$1&content=json";
 
     void getApiKey() {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -308,6 +338,17 @@ public class CarPreferences extends PreferenceActivity {
                         dlgCheck.dismiss();
                         if (res != null) {
                             res.getInt("id");
+                            try {
+                                JSONArray devices = res.getJSONArray("devices");
+                                JSONObject device = devices.getJSONObject(0);
+                                String ver = device.getString("versionSoftPGSM");
+                                versionPref.setSummary(ver);
+                                SharedPreferences.Editor ed = preferences.edit();
+                                ed.putString(Names.VERSION + car_id, ver);
+                                ed.commit();
+                            } catch (Exception ex) {
+                                // ignore
+                            }
                             SharedPreferences.Editor ed = preferences.edit();
                             ed.putString(Names.CAR_KEY + car_id, etKey.getText().toString());
                             String[] cars = preferences.getString(Names.CARS, "").split(",");
@@ -334,6 +375,7 @@ public class CarPreferences extends PreferenceActivity {
                         if (error_text != null) {
                             if (error_text.equals("Security Service Error")) {
                                 message = getString(R.string.invalid_key);
+                                versionPref.setSummary(R.string.invalid_key);
                             } else {
                                 message += " " + error_text;
                             }
@@ -345,7 +387,7 @@ public class CarPreferences extends PreferenceActivity {
                     }
                 };
 
-                checkCode.execute(TEST_URL, etKey.getText().toString());
+                checkCode.execute(PROFILE_URL, etKey.getText().toString());
             }
         });
     }

@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v7.app.ActionBar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -77,7 +78,7 @@ public class MapView extends WebViewActivity {
                 String lat = preferences.getString(Names.LATITUDE + id, "");
                 String lon = preferences.getString(Names.LONGITUDE + id, "");
                 String zone = "";
-                if ((lat.equals("") || lon.equals("")) && id.equals(car_id) && (point_data == null)) {
+                if (lat.equals("") || lon.equals("")) {
                     zone = preferences.getString(Names.GSM_ZONE + id, "");
                     String points[] = zone.split("_");
                     double min_lat = 180;
@@ -170,6 +171,7 @@ public class MapView extends WebViewActivity {
                 for (String data : car_data) {
                     res += "|" + data;
                 }
+                Log.v("1:", res);
                 return res;
             }
 
@@ -191,6 +193,7 @@ public class MapView extends WebViewActivity {
             }
             if (last != null)
                 first += "|" + last;
+            Log.v("2 ", first);
             return first;
         }
     }

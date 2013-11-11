@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -235,6 +236,8 @@ public class CarWidget extends AppWidgetProvider {
         if (bitmap == null) {
             bitmap = Bitmap.createBitmap(drawable.width, drawable.height, Bitmap.Config.ARGB_8888);
             bitmaps.put(widgetID, bitmap);
+        } else {
+            bitmap.eraseColor(Color.TRANSPARENT);
         }
         Canvas canvas = new Canvas(bitmap);
         Drawable d = drawable.getDrawable();

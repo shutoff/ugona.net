@@ -1,6 +1,7 @@
 package net.ugona.plus;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.ViewGroup;
@@ -9,6 +10,11 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 abstract public class WebViewActivity extends ActionBarActivity {
 
@@ -33,18 +39,19 @@ abstract public class WebViewActivity extends ActionBarActivity {
 
             WebSettings settings = webView.getSettings();
             settings.setJavaScriptEnabled(true);
+            settings.setAppCacheEnabled(true);
+            settings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
             WebChromeClient mChromeClient = new WebChromeClient() {
                 @Override
                 public void onConsoleMessage(String message, int lineNumber, String sourceID) {
                     super.onConsoleMessage(message, lineNumber, sourceID);
-                    Log.v("console", message);
+                    log(sourceID + ":" + lineNumber + " " + message);
                 }
 
                 @Override
                 public boolean onConsoleMessage(ConsoleMessage cm) {
-                    String message = cm.message();
-                    Log.v("console", message);
+                    log(cm.message());
                     return true;
                 }
             };
@@ -59,5 +66,28 @@ abstract public class WebViewActivity extends ActionBarActivity {
         if (webView != null)
             holder.removeView(webView);
         return webView;
+    }
+
+    void log(String text) {
+        Log.v("console", text);
+        File logFile = Environment.getExternalStorageDirectory();
+        logFile = new File(logFile, "car.log");
+        if (!logFile.exists()) {
+            try {
+                if (!logFile.createNewFile())
+                    return;
+            } catch (IOException e) {
+                // ignore
+            }
+        }
+        try {
+            //BufferedWriter for performance, true to set append to file flag
+            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            buf.append(text);
+            buf.newLine();
+            buf.close();
+        } catch (IOException e) {
+            // ignore
+        }
     }
 }

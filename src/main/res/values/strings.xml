@@ -217,4 +217,10 @@
     <string name="safe_mode">Safe mode</string>
     <string name="state">State</string>
     <string name="ugona_net">UGONA.NET</string>
+    <string name="no_phone">No phone number for contact</string>
+    <string name="select_phone">Select phone</string>
+    <string name="phone_home">home</string>
+    <string name="phone_work">work</string>
+    <string name="phone_mobile">mobile</string>
+    <string name="pgsm_version">Device software version</string>
 </resources>

@@ -160,7 +160,7 @@ public class SmsMonitor extends BroadcastReceiver {
         String title = "Car Alarm";
         String[] cars = preferences.getString(Names.CARS, "").split(",");
         if (cars.length > 1) {
-            title = preferences.getString(Names.CAR_NAME, "");
+            title = preferences.getString(Names.CAR_NAME + car_id, "");
             if (title.length() == 0) {
                 title = context.getString(R.string.car);
                 if (car_id.length() > 0)
@@ -177,6 +177,7 @@ public class SmsMonitor extends BroadcastReceiver {
         Intent notificationIntent = new Intent(context, MainActivity.class);
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        notificationIntent.putExtra(Names.ID, car_id);
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(contentIntent);

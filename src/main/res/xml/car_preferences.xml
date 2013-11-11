@@ -49,4 +49,8 @@
         android:max="5"
         android:defaultValue="5" />
 
+    <Preference
+        android:title="@string/pgsm_version"
+        android:key="version" />
+
 </PreferenceScreen>
