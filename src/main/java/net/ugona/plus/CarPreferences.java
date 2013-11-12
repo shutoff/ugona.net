@@ -68,6 +68,8 @@ public class CarPreferences extends PreferenceActivity {
         SharedPreferences.Editor ed = preferences.edit();
         ed.putInt("tmp_shift", preferences.getInt(Names.TEMP_SIFT + car_id, 0));
         ed.putBoolean("show_balance", preferences.getBoolean(Names.SHOW_BALANCE + car_id, true));
+        ed.putBoolean("autostart", preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false));
+        ed.putBoolean("rele1", preferences.getBoolean(Names.CAR_RELE1 + car_id, false));
         ed.putInt("shock_sens", preferences.getInt(Names.SHOCK_SENS + car_id, 5));
         ed.putString("name_", name);
         ed.commit();
@@ -177,6 +179,39 @@ public class CarPreferences extends PreferenceActivity {
                     SharedPreferences.Editor ed = preferences.edit();
                     ed.putBoolean(Names.SHOW_BALANCE + car_id, v);
                     ed.commit();
+                    sendUpdate();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        CheckBoxPreference autoPref = (CheckBoxPreference) findPreference("autostart");
+        autoPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                if (newValue instanceof Boolean) {
+                    boolean v = (Boolean) newValue;
+                    SharedPreferences.Editor ed = preferences.edit();
+                    ed.putBoolean(Names.CAR_AUTOSTART + car_id, v);
+                    ed.commit();
+                    sendUpdate();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        CheckBoxPreference relePref = (CheckBoxPreference) findPreference("rele1");
+        relePref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                if (newValue instanceof Boolean) {
+                    boolean v = (Boolean) newValue;
+                    SharedPreferences.Editor ed = preferences.edit();
+                    ed.putBoolean(Names.CAR_RELE1 + car_id, v);
+                    ed.commit();
+                    sendUpdate();
                     return true;
                 }
                 return false;
@@ -390,5 +425,15 @@ public class CarPreferences extends PreferenceActivity {
                 checkCode.execute(PROFILE_URL, etKey.getText().toString());
             }
         });
+    }
+
+    void sendUpdate() {
+        try {
+            Intent intent = new Intent(FetchService.ACTION_UPDATE_FORCE);
+            intent.putExtra(Names.ID, car_id);
+            sendBroadcast(intent);
+        } catch (Exception e) {
+            // ignore
+        }
     }
 }

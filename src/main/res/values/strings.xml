@@ -224,4 +224,10 @@
     <string name="phone_mobile">mobile</string>
     <string name="pgsm_version">Device software version</string>
     <string name="copyright">© 2013 Ugona.net, info@ugona.net</string>
+    <string name="btn_valet_on">VALET\nON</string>
+    <string name="btn_valet_off">VALET\nOFF</string>
+    <string name="btn_motor_on">MOTOR\nON</string>
+    <string name="btn_motor_off">MOTOR\nOFF</string>
+    <string name="btn_heating_up">HEATING\nUP</string>
+    <string name="btn_block">MOTOR\nBLOCK</string>
 </resources>

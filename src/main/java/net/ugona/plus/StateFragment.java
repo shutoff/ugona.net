@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -28,7 +29,12 @@ public class StateFragment extends Fragment {
     SharedPreferences preferences;
 
     ImageView imgCar;
-    TextView tvAddress;
+
+    View vAddress;
+    TextView tvAddress1;
+    TextView tvAddress2;
+    TextView tvAddress3;
+
     TextView tvLast;
     TextView tvVoltage;
     TextView tvReserve;
@@ -40,10 +46,11 @@ public class StateFragment extends Fragment {
     ImageView imgRefresh;
     ProgressBar prgUpdate;
 
-    ImageView ivMotor;
-    ImageView ivRele;
-    ImageView ivBlock;
-    ImageView ivValet;
+    Button btnMotor;
+    Button btnRele;
+    Button btnBlock;
+    Button btnValet;
+
     View balanceBlock;
     View vTime;
 
@@ -58,7 +65,12 @@ public class StateFragment extends Fragment {
             car_id = savedInstanceState.getString(Names.ID);
 
         imgCar = (ImageView) v.findViewById(R.id.car);
-        tvAddress = (TextView) v.findViewById(R.id.address);
+
+        vAddress = v.findViewById(R.id.address);
+        tvAddress1 = (TextView) v.findViewById(R.id.address1);
+        tvAddress2 = (TextView) v.findViewById(R.id.address2);
+
+        tvAddress3 = (TextView) v.findViewById(R.id.address3);
         tvLast = (TextView) v.findViewById(R.id.last);
         tvVoltage = (TextView) v.findViewById(R.id.voltage);
         tvReserve = (TextView) v.findViewById(R.id.reserve);
@@ -66,10 +78,10 @@ public class StateFragment extends Fragment {
         tvTemperature = (TextView) v.findViewById(R.id.temperature);
         vTemperature = v.findViewById(R.id.temperature_block);
 
-        ivMotor = (ImageView) v.findViewById(R.id.motor);
-        ivRele = (ImageView) v.findViewById(R.id.rele);
-        ivBlock = (ImageView) v.findViewById(R.id.block);
-        ivValet = (ImageView) v.findViewById(R.id.valet);
+        btnMotor = (Button) v.findViewById(R.id.motor);
+        btnRele = (Button) v.findViewById(R.id.rele);
+        btnBlock = (Button) v.findViewById(R.id.block);
+        btnValet = (Button) v.findViewById(R.id.valet);
 
         balanceBlock = v.findViewById(R.id.balance_block);
 
@@ -87,7 +99,7 @@ public class StateFragment extends Fragment {
 
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-        ivMotor.setOnClickListener(new View.OnClickListener() {
+        btnMotor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (preferences.getBoolean(Names.INPUT3 + car_id, false)) {
@@ -97,19 +109,19 @@ public class StateFragment extends Fragment {
                 }
             }
         });
-        ivRele.setOnClickListener(new View.OnClickListener() {
+        btnRele.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Actions.rele1(context, car_id);
             }
         });
-        ivBlock.setOnClickListener(new View.OnClickListener() {
+        btnBlock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Actions.blockMotor(context, car_id);
             }
         });
-        ivValet.setOnClickListener(new View.OnClickListener() {
+        btnValet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (Preferences.getValet(preferences, car_id)) {
@@ -234,52 +246,69 @@ public class StateFragment extends Fragment {
         }
         String lat = preferences.getString(Names.LATITUDE + car_id, "");
         String lon = preferences.getString(Names.LONGITUDE + car_id, "");
+        String addr = "";
         if (lat.equals("") || lon.equals("")) {
             String gsm = preferences.getString(Names.GSM + car_id, "");
             if (!gsm.equals("")) {
                 String[] parts = gsm.split(" ");
                 address += "MCC: " + parts[0] + " NC: " + parts[1] + " LAC: " + parts[2] + " CID: " + parts[3];
-                String addr = preferences.getString(Names.ADDRESS + car_id, "");
-                if (!addr.equals(""))
-                    address += "\n" + addr;
+                addr = preferences.getString(Names.ADDRESS + car_id, "");
             }
         } else {
             address += preferences.getString(Names.LATITUDE + car_id, "") + " ";
-            address += preferences.getString(Names.LONGITUDE + car_id, "") + "\n";
-            address += Address.getAddress(context, car_id);
+            address += preferences.getString(Names.LONGITUDE + car_id, "");
+            addr = Address.getAddress(context, car_id);
         }
-        tvAddress.setText(address);
-        tvAddress.setOnClickListener(new View.OnClickListener() {
+        tvAddress1.setText(address);
+        String parts[] = addr.split(", ");
+        addr = parts[0];
+        if (parts.length > 1)
+            addr += ", " + parts[1];
+        tvAddress2.setText(addr);
+        addr = "";
+        for (int i = 2; i < parts.length; i++){
+            if (!addr.equals(""))
+                addr += ", ";
+            addr += parts[i];
+        }
+        tvAddress3.setText(addr);
+        vAddress.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showMap();
             }
         });
 
+        int n_buttons = 0;
         if (preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false)) {
-            ivMotor.setVisibility(View.VISIBLE);
+            btnMotor.setVisibility(View.VISIBLE);
             if (preferences.getBoolean(Names.INPUT3 + car_id, false)) {
-                ivMotor.setImageResource(R.drawable.motor_off);
+                btnMotor.setText(R.string.btn_motor_off);
             } else {
-                ivMotor.setImageResource(R.drawable.motor_on);
+                btnMotor.setText(R.string.btn_motor_on);
             }
+            n_buttons++;
         } else {
-            ivMotor.setVisibility(View.GONE);
+            btnMotor.setVisibility(View.GONE);
         }
         if (preferences.getBoolean(Names.CAR_RELE1 + car_id, false)) {
-            ivRele.setVisibility(View.VISIBLE);
+            btnRele.setVisibility(View.VISIBLE);
+            n_buttons++;
         } else {
-            ivRele.setVisibility(View.GONE);
+            btnRele.setVisibility(View.GONE);
         }
         if (Preferences.getValet(preferences, car_id)) {
-            ivValet.setImageResource(R.drawable.valet_btn_off);
-        } else {
-            ivValet.setImageResource(R.drawable.valet_btn_on);
+            btnValet.setVisibility(View.VISIBLE);
+            btnValet.setText(R.string.btn_valet_off);
+            n_buttons++;
+        }else{
+            btnValet.setVisibility(View.GONE);
         }
-        if (preferences.getBoolean(Names.INPUT3 + car_id, false)) {
-            ivBlock.setVisibility(View.VISIBLE);
+        if (preferences.getBoolean(Names.INPUT3 + car_id, false) && (n_buttons < 3)) {
+            btnBlock.setVisibility(View.VISIBLE);
+            n_buttons++;
         } else {
-            ivBlock.setVisibility(View.GONE);
+            btnBlock.setVisibility(View.GONE);
         }
 
         balanceBlock.setVisibility(preferences.getBoolean(Names.SHOW_BALANCE + car_id, true) ? View.VISIBLE : View.GONE);
