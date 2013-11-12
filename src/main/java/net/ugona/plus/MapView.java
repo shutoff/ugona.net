@@ -307,8 +307,10 @@ public class MapView extends WebViewActivity {
     public void onDestroy() {
         super.onDestroy();
         unregisterReceiver(br);
-        locationManager.removeUpdates(netListener);
-        locationManager.removeUpdates(gpsListener);
+        if (netListener != null)
+            locationManager.removeUpdates(netListener);
+        if (gpsListener != null)
+            locationManager.removeUpdates(gpsListener);
     }
 
     @Override

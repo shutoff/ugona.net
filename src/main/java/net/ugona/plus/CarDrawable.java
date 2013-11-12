@@ -14,9 +14,9 @@ import java.util.Date;
 
 public class CarDrawable {
 
-    static final int UNKNOWN = 0x888888;
-    static final int NORMAL = 0x6180A0;
-    static final int GUARD = 0x6D936D;
+    static final int UNKNOWN = 0x404040;
+    static final int NORMAL = 0xC0C0C0;
+    static final int GUARD = 0x33B5E5;
     static final int ALARM = 0xC04141;
     static final int BLACK = 0x000000;
 

@@ -28,6 +28,16 @@
         <item name="android:textColor">#ff34b4e3</item>
     </style>
 
+    <style name="ThemeAction" parent="ThemeButton">
+        <item name="android:layout_margin">5dp</item>
+        <item name="android:gravity">left</item>
+    </style>
+
+    <style name="Theme.action" parent="Theme.AppCompat">
+        <item name="android:buttonStyle">@style/ThemeAction</item>
+    </style>
+
+
     <style name="Theme.Transparent" parent="android:Theme.Holo.Dialog">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>

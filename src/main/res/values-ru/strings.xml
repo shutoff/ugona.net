@@ -221,4 +221,10 @@
     <string name="phone_work">рабочий</string>
     <string name="phone_mobile">мобильный</string>
     <string name="pgsm_version">Версия прошивки</string>
+    <string name="btn_valet_on">ВКЛЮЧИТЬ\nVALET</string>
+    <string name="btn_valet_off">ВЫКЛЮЧИТЬ\nVALET</string>
+    <string name="btn_motor_on">ЗАПУСК\nДВИГАТЕЛЯ</string>
+    <string name="btn_motor_off">ОСТАНОВКА\nДВИГАТЕЛЯ</string>
+    <string name="btn_heating_up">ВКЛЮЧИТЬ\nПОДОГРЕВ</string>
+    <string name="btn_block">ЗАБЛОКИРОВАТЬ\nДВИГАТЕЛЬ</string>
 </resources>

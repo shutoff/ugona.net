@@ -39,7 +39,9 @@
     <LinearLayout
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:orientation="horizontal">
+        android:background="@drawable/map_bg"
+        android:orientation="horizontal"
+        android:gravity="center">
 
         <Button
             android:id="@+id/actions"
