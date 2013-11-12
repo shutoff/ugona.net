@@ -44,7 +44,7 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:src="@drawable/accum"
+                android:src="@drawable/icon_voltage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
@@ -65,7 +65,7 @@
             android:visibility="gone">
 
             <ImageView
-                android:src="@drawable/battery"
+                android:src="@drawable/icon_reserve"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
@@ -85,7 +85,7 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:src="@drawable/dollar"
+                android:src="@drawable/icon_balance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
@@ -105,7 +105,7 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:src="@drawable/temperature"
+                android:src="@drawable/icon_temperature"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 

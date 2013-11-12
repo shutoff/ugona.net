@@ -232,12 +232,18 @@
             android:layout_height="wrap_content"
             android:src="@drawable/marker_map"/>
 
-        <LinearLayout
-            android:id="@+id/address"
+        <ScrollView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_gravity="center">
+
+            <LinearLayout
+            android:id="@+id/address"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="5dp">
 
             <TextView
                 android:id="@+id/address1"
@@ -259,6 +265,8 @@
                 android:textAppearance="?android:attr/textAppearanceSmall" />
 
         </LinearLayout>
+
+        </ScrollView>
 
     </LinearLayout>
 

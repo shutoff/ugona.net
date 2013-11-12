@@ -44,7 +44,6 @@
 
     </LinearLayout>
 
-
     <LinearLayout
         android:id="@+id/progress"
         android:orientation="vertical"

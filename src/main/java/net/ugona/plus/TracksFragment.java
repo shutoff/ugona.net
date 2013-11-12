@@ -59,7 +59,8 @@ public class TracksFragment extends Fragment
     boolean loaded;
     int progress;
 
-    TextView tvStatus;
+    TextView tvSummary;
+    View vError;
     ProgressBar prgFirst;
     ProgressBar prgMain;
     TextView tvLoading;
@@ -95,14 +96,23 @@ public class TracksFragment extends Fragment
         preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         api_key = preferences.getString(Names.CAR_KEY + car_id, "");
 
-        tvStatus = (TextView) v.findViewById(R.id.status);
+        tvSummary = (TextView) v.findViewById(R.id.summary);
         lvTracks = (ListView) v.findViewById(R.id.tracks);
         prgFirst = (ProgressBar) v.findViewById(R.id.first_progress);
         prgMain = (ProgressBar) v.findViewById(R.id.progress);
         tvLoading = (TextView) v.findViewById(R.id.loading);
+        vError = v.findViewById(R.id.error);
 
-        tvStatus.setClickable(true);
-        tvStatus.setOnClickListener(new View.OnClickListener() {
+        vError.setClickable(true);
+        vError.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dateChanged(current);
+            }
+        });
+
+        tvSummary.setClickable(true);
+        tvSummary.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (loaded)
@@ -172,7 +182,8 @@ public class TracksFragment extends Fragment
     @Override
     public void dateChanged(LocalDate date) {
         current = date;
-        tvStatus.setVisibility(View.GONE);
+        tvSummary.setText("");
+        vError.setVisibility(View.GONE);
         lvTracks.setVisibility(View.GONE);
         tvLoading.setVisibility(View.VISIBLE);
         prgFirst.setVisibility(View.VISIBLE);
@@ -189,8 +200,7 @@ public class TracksFragment extends Fragment
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                tvStatus.setText(getString(R.string.error_load));
-                tvStatus.setVisibility(View.VISIBLE);
+                vError.setVisibility(View.VISIBLE);
                 lvTracks.setVisibility(View.GONE);
                 tvLoading.setVisibility(View.GONE);
                 prgFirst.setVisibility(View.GONE);
@@ -253,10 +263,9 @@ public class TracksFragment extends Fragment
 
     void all_done() {
         prgFirst.setVisibility(View.GONE);
-        tvStatus.setVisibility(View.VISIBLE);
+        tvSummary.setVisibility(View.VISIBLE);
         if (tracks.size() == 0) {
-            tvStatus.setVisibility(View.VISIBLE);
-            tvStatus.setText(getString(R.string.no_data));
+            tvSummary.setText(getString(R.string.no_data));
             prgMain.setVisibility(View.GONE);
             tvLoading.setVisibility(View.GONE);
             return;
@@ -282,7 +291,7 @@ public class TracksFragment extends Fragment
         double avg_speed = mileage * 3600000. / time;
         String status = getString(R.string.status);
         status = String.format(status, mileage, timeFormat((int) (time / 60000)), avg_speed, max_speed);
-        tvStatus.setText(status);
+        tvSummary.setText(status);
 
         tvLoading.setVisibility(View.GONE);
         prgMain.setVisibility(View.GONE);
@@ -310,7 +319,7 @@ public class TracksFragment extends Fragment
             if ((ways == 0) && noData())
                 return;
             prgFirst.setVisibility(View.GONE);
-            tvStatus.setVisibility(View.VISIBLE);
+            tvSummary.setVisibility(View.VISIBLE);
             if (ways == 0) {
                 all_done();
                 return;
@@ -324,7 +333,7 @@ public class TracksFragment extends Fragment
             int engine_time = data.getInt("engineTime") / 60000;
             String status = getString(R.string.status);
             status = String.format(status, mileage, timeFormat(engine_time), avg_speed, max_speed);
-            tvStatus.setText(status);
+            tvSummary.setText(status);
             TracksFetcher tracksFetcher = new TracksFetcher();
             tracksFetcher.update();
         }

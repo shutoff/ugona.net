@@ -92,7 +92,7 @@
                         android:layout_height="wrap_content">
 
                         <ImageView
-                            android:src="@drawable/accum"
+                            android:src="@drawable/icon_voltage"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
 
@@ -109,7 +109,7 @@
                         android:layout_height="wrap_content">
 
                         <ImageView
-                            android:src="@drawable/battery"
+                            android:src="@drawable/icon_reserve"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
 
@@ -127,7 +127,7 @@
                         android:layout_height="wrap_content">
 
                         <ImageView
-                            android:src="@drawable/dollar"
+                            android:src="@drawable/icon_balance"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
 
@@ -145,7 +145,7 @@
                         android:layout_height="wrap_content">
 
                         <ImageView
-                            android:src="@drawable/temperature"
+                            android:src="@drawable/icon_temperature"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
 
@@ -197,7 +197,7 @@
                 android:layout_width="90dp"
                 android:layout_height="50dp"
                 android:padding="5dp"
-                android:text="@string/btn_valet_on"/>
+                android:text="@string/btn_valet_on" />
 
         </LinearLayout>
 
@@ -213,7 +213,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/marker_map"/>
+            android:src="@drawable/marker_map" />
 
         <LinearLayout
             android:id="@+id/address"

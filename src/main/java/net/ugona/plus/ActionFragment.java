@@ -1,6 +1,7 @@
 package net.ugona.plus;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -8,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -47,8 +47,6 @@ public class ActionFragment extends Fragment {
                     v = inflater.inflate(R.layout.action_item, null);
                 }
                 Action action = actions[position];
-                ImageView iv = (ImageView) v.findViewById(R.id.icon);
-                iv.setImageResource(action.icon);
                 TextView tv = (TextView) v.findViewById(R.id.name);
                 tv.setText(action.text);
                 return v;
@@ -59,6 +57,15 @@ public class ActionFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 actions[position].action(getActivity(), car_id);
+            }
+        });
+        View vLogo = v.findViewById(R.id.logo);
+        vLogo.setClickable(true);
+        vLogo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), About.class);
+                startActivity(intent);
             }
         });
         return v;
@@ -72,43 +79,41 @@ public class ActionFragment extends Fragment {
 
     static abstract class Action {
 
-        Action(int icon_, int text_) {
-            icon = icon_;
+        Action(int text_) {
             text = text_;
         }
 
         abstract void action(Context context, String car_id);
 
-        int icon;
         int text;
     }
 
     static Action[] actions = {
-            new Action(R.drawable.valet_btn_on, R.string.valet_on) {
+            new Action(R.string.valet_on) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.valetOn(context, car_id);
                 }
             },
-            new Action(R.drawable.valet_btn_off, R.string.valet_off) {
+            new Action(R.string.valet_off) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.valetOff(context, car_id);
                 }
             },
-            new Action(R.drawable.motor_block, R.string.block) {
+            new Action(R.string.block) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.blockMotor(context, car_id);
                 }
             },
-            new Action(R.drawable.motor_on, R.string.motor_on) {
+            new Action(R.string.motor_on) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.motorOn(context, car_id);
                 }
             },
-            new Action(R.drawable.motor_off, R.string.motor_off) {
+            new Action(R.string.motor_off) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.motorOff(context, car_id);
