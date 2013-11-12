@@ -22,6 +22,30 @@
         android:visibility="gone" />
 
     <LinearLayout
+        android:id="@+id/error"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/stat_notify_sync" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/error_load"
+            android:paddingLeft="10dp" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
         android:id="@+id/progress"
         android:orientation="vertical"
         android:gravity="center"

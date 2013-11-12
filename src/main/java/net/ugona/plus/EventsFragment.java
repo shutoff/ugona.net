@@ -57,6 +57,7 @@ public class EventsFragment extends Fragment
     ListView lvEvents;
     TextView tvNoEvents;
     View vProgress;
+    View vError;
 
     long current_item;
 
@@ -266,6 +267,13 @@ public class EventsFragment extends Fragment
 
         tvNoEvents = (TextView) v.findViewById(R.id.no_events);
         vProgress = v.findViewById(R.id.progress);
+        vError = v.findViewById(R.id.error);
+        vError.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dateChanged(current);
+            }
+        });
 
         preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         api_key = preferences.getString(Names.CAR_KEY + car_id, "");
@@ -331,6 +339,7 @@ public class EventsFragment extends Fragment
         vProgress.setVisibility(View.VISIBLE);
         lvEvents.setVisibility(View.GONE);
         tvNoEvents.setVisibility(View.GONE);
+        vError.setVisibility(View.GONE);
         DataFetcher fetcher = new DataFetcher();
         fetcher.update(current);
     }
@@ -402,9 +411,9 @@ public class EventsFragment extends Fragment
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    tvNoEvents.setText(getString(R.string.error_load));
-                    tvNoEvents.setVisibility(View.VISIBLE);
+                    tvNoEvents.setVisibility(View.GONE);
                     vProgress.setVisibility(View.GONE);
+                    vError.setVisibility(View.VISIBLE);
                     error = true;
                 }
             });

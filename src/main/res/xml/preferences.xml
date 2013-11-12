@@ -27,8 +27,4 @@
         android:summary="@string/password_summary"
         android:key="password" />
 
-    <CheckBoxPreference
-        android:key="safe_mode"
-        android:title="@string/safe_mode" />
-
 </PreferenceScreen>
