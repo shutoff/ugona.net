@@ -61,6 +61,7 @@ public class TracksFragment extends Fragment
 
     TextView tvSummary;
     View vError;
+    View vSpace;
     ProgressBar prgFirst;
     ProgressBar prgMain;
     TextView tvLoading;
@@ -185,6 +186,7 @@ public class TracksFragment extends Fragment
         tvSummary.setText("");
         vError.setVisibility(View.GONE);
         lvTracks.setVisibility(View.GONE);
+        vSpace.setVisibility(View.VISIBLE);
         tvLoading.setVisibility(View.VISIBLE);
         prgFirst.setVisibility(View.VISIBLE);
         prgMain.setVisibility(View.VISIBLE);
@@ -202,6 +204,7 @@ public class TracksFragment extends Fragment
             public void run() {
                 vError.setVisibility(View.VISIBLE);
                 lvTracks.setVisibility(View.GONE);
+                vSpace.setVisibility(View.VISIBLE);
                 tvLoading.setVisibility(View.GONE);
                 prgFirst.setVisibility(View.GONE);
                 prgMain.setVisibility(View.GONE);
@@ -295,6 +298,7 @@ public class TracksFragment extends Fragment
 
         tvLoading.setVisibility(View.GONE);
         prgMain.setVisibility(View.GONE);
+        vSpace.setVisibility(View.GONE);
         lvTracks.setVisibility(View.VISIBLE);
         lvTracks.setAdapter(new TracksAdapter());
 

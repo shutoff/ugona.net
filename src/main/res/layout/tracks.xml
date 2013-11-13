@@ -59,6 +59,12 @@
         android:visibility="invisible" />
 
     <TextView
+        android:id="@+id/space"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <TextView
         android:id="@+id/summary"
         android:background="@drawable/map_bg"
         android:layout_width="match_parent"
