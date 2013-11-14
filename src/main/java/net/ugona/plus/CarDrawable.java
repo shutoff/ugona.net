@@ -23,23 +23,30 @@ public class CarDrawable {
     static int width;
     static int height;
 
-    CarDrawable(Context ctx) {
+    int small;
+
+    CarDrawable(Context ctx, boolean bSmall) {
 
         init(ctx);
 
+        if (bSmall)
+            small = 1;
+
         Drawable[] parts;
-        parts = new Drawable[4];
-        parts_id = new int[4];
+        parts = new Drawable[5];
+        parts_id = new int[5];
 
         parts[0] = drawables[1];
         parts[1] = drawables[0];
         parts[2] = drawables[0];
         parts[3] = drawables[0];
+        parts[4] = drawables[0];
 
         parts_id[0] = 0;
         parts_id[1] = 0;
         parts_id[2] = 0;
         parts_id[3] = 0;
+        parts_id[4] = 0;
 
         drawable = new LayerDrawable(parts);
         for (int i = 0; i < parts.length; i++)
@@ -51,7 +58,7 @@ public class CarDrawable {
         if (drawables != null)
             return;
 
-        drawables = new Drawable[23];
+        drawables = new Drawable[25];
         drawables[0] = new ColorDrawable(Color.TRANSPARENT);
 
         Resources resources = ctx.getResources();
@@ -81,6 +88,8 @@ public class CarDrawable {
         drawables[20] = resources.getDrawable(R.drawable.trunk_white_open);
         drawables[21] = resources.getDrawable(R.drawable.trunk_blue_open);
         drawables[22] = resources.getDrawable(R.drawable.trunk_red_open);
+        drawables[23] = resources.getDrawable(R.drawable.lock_white);
+        drawables[24] = resources.getDrawable(R.drawable.lock_white_widget);
     }
 
     Drawable getDrawable() {
@@ -115,6 +124,8 @@ public class CarDrawable {
         boolean trunk_open = preferences.getBoolean(Names.INPUT2 + car_id, false);
         boolean trunk_alarm = preferences.getBoolean(Names.ZONE_TRUNK + car_id, false);
         upd |= setModeOpen(2, guard, trunk_open, trunk_alarm);
+
+        setLayer(4, guard ? 23 + small : 0);
 
         return upd;
 

@@ -143,7 +143,7 @@ public class StateFragment extends Fragment {
             }
         });
 
-        drawable = new CarDrawable(context);
+        drawable = new CarDrawable(context, false);
         imgCar.setImageDrawable(drawable.getDrawable());
 
         update(context);
