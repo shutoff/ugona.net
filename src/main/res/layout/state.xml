@@ -75,7 +75,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:padding="5dp"/>
+                android:padding="15dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -87,7 +87,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:layout_gravity="center">
+                android:gravity="center">
 
                 <TableRow
                     android:layout_width="wrap_content"
@@ -96,14 +96,15 @@
                     <ImageView
                         android:src="@drawable/icon_voltage"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:padding="2dp" />
 
                     <TextView
                         android:id="@+id/voltage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textStyle="bold"
-                        android:paddingLeft="8dp"
+                        android:padding="2dp"
                         android:textAppearance="?android:attr/textAppearanceSmall" />
                 </TableRow>
 
@@ -114,14 +115,15 @@
                     <ImageView
                         android:src="@drawable/icon_reserve"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:padding="2dp"/>
 
                     <TextView
                         android:id="@+id/reserve"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textStyle="bold"
-                        android:paddingLeft="8dp"
+                        android:padding="2dp"
                         android:textAppearance="?android:attr/textAppearanceSmall" />
                 </TableRow>
 
@@ -133,14 +135,15 @@
                     <ImageView
                         android:src="@drawable/icon_balance"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:padding="2dp"/>
 
                     <TextView
                         android:id="@+id/balance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textStyle="bold"
-                        android:paddingLeft="8dp"
+                        android:padding="2dp"
                         android:textAppearance="?android:attr/textAppearanceSmall" />
                 </TableRow>
 
@@ -152,14 +155,15 @@
                     <ImageView
                         android:src="@drawable/icon_temperature"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:padding="2dp"/>
 
                     <TextView
                         android:id="@+id/temperature"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textStyle="bold"
-                        android:paddingLeft="8dp"
+                        android:padding="2dp"
                         android:textAppearance="?android:attr/textAppearanceSmall" />
                 </TableRow>
 
@@ -179,6 +183,7 @@
                 android:layout_marginBottom="5dp"
                 android:paddingLeft="10dp"
                 android:gravity="left"
+                android:textAppearance="?android:attr/textAppearanceSmall"
                 style="@style/Theme.action"/>
 
             <Button
@@ -190,7 +195,8 @@
                 android:layout_marginBottom="5dp"
                 android:paddingLeft="10dp"
                 android:gravity="left"
-                style="@style/Theme.action"/>
+                android:textAppearance="?android:attr/textAppearanceSmall"
+            style="@style/Theme.action"/>
 
             <Button
                 android:id="@+id/block"
@@ -201,6 +207,7 @@
                 android:layout_marginBottom="5dp"
                 android:paddingLeft="10dp"
                 android:gravity="left"
+                android:textAppearance="?android:attr/textAppearanceSmall"
                 style="@style/Theme.action"/>
 
             <Button
@@ -212,6 +219,7 @@
                 android:layout_marginBottom="5dp"
                 android:paddingLeft="10dp"
                 android:gravity="left"
+                android:textAppearance="?android:attr/textAppearanceSmall"
                 style="@style/Theme.action"/>
             
             <TextView

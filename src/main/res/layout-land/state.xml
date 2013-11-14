@@ -98,14 +98,15 @@
                     <ImageView
                         android:src="@drawable/icon_voltage"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:padding="2dp" />
 
                     <TextView
                         android:id="@+id/voltage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textStyle="bold"
-                        android:paddingLeft="8dp"
+                        android:padding="2dp"
                         android:textAppearance="?android:attr/textAppearanceSmall" />
                 </TableRow>
 
@@ -116,14 +117,15 @@
                     <ImageView
                         android:src="@drawable/icon_reserve"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:padding="2dp"/>
 
                     <TextView
                         android:id="@+id/reserve"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textStyle="bold"
-                        android:paddingLeft="8dp"
+                        android:padding="2dp"
                         android:textAppearance="?android:attr/textAppearanceSmall" />
                 </TableRow>
 
@@ -135,14 +137,15 @@
                     <ImageView
                         android:src="@drawable/icon_balance"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:padding="2dp"/>
 
                     <TextView
                         android:id="@+id/balance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textStyle="bold"
-                        android:paddingLeft="8dp"
+                        android:padding="2dp"
                         android:textAppearance="?android:attr/textAppearanceSmall" />
                 </TableRow>
 
@@ -154,17 +157,17 @@
                     <ImageView
                         android:src="@drawable/icon_temperature"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:padding="2dp"/>
 
                     <TextView
                         android:id="@+id/temperature"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textStyle="bold"
-                        android:paddingLeft="8dp"
+                        android:padding="2dp"
                         android:textAppearance="?android:attr/textAppearanceSmall" />
                 </TableRow>
-
             </TableLayout>
 
             <LinearLayout

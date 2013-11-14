@@ -227,6 +227,6 @@
     <string name="btn_motor_on">ЗАПУСК\nДВИГАТЕЛЯ</string>
     <string name="btn_motor_off">ОСТАНОВКА\nДВИГАТЕЛЯ</string>
     <string name="btn_heating_up">ВКЛЮЧИТЬ\nПОДОГРЕВ</string>
-    <string name="btn_block">ЗАБЛОКИРОВАТЬ\nДВИГАТЕЛЬ</string>
+    <string name="btn_block">БЛОКИРОВАТЬ\nДВИГАТЕЛЬ</string>
     <string name="delete">Удалить</string>
 </resources>

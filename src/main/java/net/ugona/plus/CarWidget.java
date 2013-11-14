@@ -164,7 +164,6 @@ public class CarWidget extends AppWidgetProvider {
         Intent configIntent = new Intent(context, MainActivity.class);
         configIntent.putExtra(Names.ID, car_id);
         configIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        Utils.appendLog("create widget [" + car_id + "]");
         PendingIntent pIntent = PendingIntent.getActivity(context, widgetID, configIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         widgetView.setOnClickPendingIntent(R.id.widget, pIntent);
 
