@@ -2,11 +2,11 @@ package net.ugona.plus;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 
@@ -14,177 +14,111 @@ import java.util.Date;
 
 public class CarDrawable {
 
-    static final int UNKNOWN = 0x404040;
-    static final int NORMAL = 0xC0C0C0;
-    static final int GUARD = 0x33B5E5;
-    static final int ALARM = 0xC04141;
-    static final int BLACK = 0x000000;
-
-    Drawable dBg;
-    Drawable dCar;
-    Drawable dDoors;
-    Drawable dDoorsOpen;
-    Drawable dHood;
-    Drawable dHoodOpen;
-    Drawable dTrunk;
-    Drawable dTrunkOpen;
-    Drawable dLock;
-    Drawable dUnlock;
-    Drawable dIgnition;
-    Drawable dValet;
+    static Drawable[] drawables;
 
     LayerDrawable drawable;
 
-    int width;
-    int height;
+    int[] parts_id;
+
+    static int width;
+    static int height;
 
     CarDrawable(Context ctx) {
-        dBg = new BitmapDrawable(ctx.getResources(), BitmapFactory.decodeResource(ctx.getResources(), R.drawable.bg));
-        dBg.setColorFilter(new ColorMatrixColorFilter(createMatrix(BLACK)));
 
-        Bitmap bmpCar = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.car);
-        width = bmpCar.getWidth();
-        height = bmpCar.getHeight();
+        init(ctx);
 
-        dCar = new BitmapDrawable(ctx.getResources(), bmpCar);
-        dCar.setColorFilter(new ColorMatrixColorFilter(createMatrix(UNKNOWN)));
+        Drawable[] parts;
+        parts = new Drawable[4];
+        parts_id = new int[4];
 
-        dDoors = new BitmapDrawable(ctx.getResources(), BitmapFactory.decodeResource(ctx.getResources(), R.drawable.doors));
-        dDoors.setColorFilter(new ColorMatrixColorFilter(createMatrix(UNKNOWN)));
+        parts[0] = drawables[1];
+        parts[1] = drawables[0];
+        parts[2] = drawables[0];
+        parts[3] = drawables[0];
 
-        dDoorsOpen = new BitmapDrawable(ctx.getResources(), BitmapFactory.decodeResource(ctx.getResources(), R.drawable.doors_open));
-        dDoorsOpen.setColorFilter(new ColorMatrixColorFilter(createMatrix(UNKNOWN)));
-        dDoorsOpen.setAlpha(0);
+        parts_id[0] = 0;
+        parts_id[1] = 0;
+        parts_id[2] = 0;
+        parts_id[3] = 0;
 
-        dHood = new BitmapDrawable(ctx.getResources(), BitmapFactory.decodeResource(ctx.getResources(), R.drawable.hood));
-        dHood.setColorFilter(new ColorMatrixColorFilter(createMatrix(UNKNOWN)));
+        drawable = new LayerDrawable(parts);
+        for (int i = 0; i < parts.length; i++)
+            drawable.setId(i, i);
+    }
 
-        dHoodOpen = new BitmapDrawable(ctx.getResources(), BitmapFactory.decodeResource(ctx.getResources(), R.drawable.hood_open));
-        dHoodOpen.setColorFilter(new ColorMatrixColorFilter(createMatrix(UNKNOWN)));
-        dHoodOpen.setAlpha(0);
+    static void init(Context ctx) {
 
-        dTrunk = new BitmapDrawable(ctx.getResources(), BitmapFactory.decodeResource(ctx.getResources(), R.drawable.trunk));
-        dTrunk.setColorFilter(new ColorMatrixColorFilter(createMatrix(UNKNOWN)));
+        if (drawables != null)
+            return;
 
-        dTrunkOpen = new BitmapDrawable(ctx.getResources(), BitmapFactory.decodeResource(ctx.getResources(), R.drawable.trunk_open));
-        dTrunkOpen.setColorFilter(new ColorMatrixColorFilter(createMatrix(UNKNOWN)));
-        dTrunkOpen.setAlpha(0);
+        drawables = new Drawable[23];
+        drawables[0] = new ColorDrawable(Color.TRANSPARENT);
 
-        dLock = new BitmapDrawable(ctx.getResources(), BitmapFactory.decodeResource(ctx.getResources(), R.drawable.lock));
-        dLock.setColorFilter(new ColorMatrixColorFilter(createMatrix(BLACK)));
-        dLock.setAlpha(0);
+        Resources resources = ctx.getResources();
+        Bitmap bmp = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.car_black);
+        width = bmp.getWidth();
+        height = bmp.getHeight();
 
-        dUnlock = new BitmapDrawable(ctx.getResources(), BitmapFactory.decodeResource(ctx.getResources(), R.drawable.unlock));
-        dUnlock.setColorFilter(new ColorMatrixColorFilter(createMatrix(BLACK)));
-        dUnlock.setAlpha(0);
-
-        dIgnition = new BitmapDrawable(ctx.getResources(), BitmapFactory.decodeResource(ctx.getResources(), R.drawable.ignition));
-        dIgnition.setColorFilter(new ColorMatrixColorFilter(createMatrix(UNKNOWN)));
-        dIgnition.setAlpha(0);
-
-        dValet = new BitmapDrawable(ctx.getResources(), BitmapFactory.decodeResource(ctx.getResources(), R.drawable.valet));
-        dValet.setAlpha(0);
-
-        Drawable[] drawables =
-                {
-                        dBg,
-                        dCar,
-                        dDoors,
-                        dDoorsOpen,
-                        dHood,
-                        dHoodOpen,
-                        dTrunk,
-                        dTrunkOpen,
-                        dLock,
-                        dUnlock,
-                        dIgnition,
-                        dValet
-                };
-
-        drawable = new LayerDrawable(drawables);
+        drawables[1] = resources.getDrawable(R.drawable.car_black);
+        drawables[2] = resources.getDrawable(R.drawable.car_white);
+        drawables[3] = resources.getDrawable(R.drawable.car_blue);
+        drawables[4] = resources.getDrawable(R.drawable.car_red);
+        drawables[5] = resources.getDrawable(R.drawable.doors_white);
+        drawables[6] = resources.getDrawable(R.drawable.doors_blue);
+        drawables[7] = resources.getDrawable(R.drawable.doors_red);
+        drawables[8] = resources.getDrawable(R.drawable.doors_white_open);
+        drawables[9] = resources.getDrawable(R.drawable.doors_blue_open);
+        drawables[10] = resources.getDrawable(R.drawable.doors_red_open);
+        drawables[11] = resources.getDrawable(R.drawable.hood_white);
+        drawables[12] = resources.getDrawable(R.drawable.hood_blue);
+        drawables[13] = resources.getDrawable(R.drawable.hood_red);
+        drawables[14] = resources.getDrawable(R.drawable.hood_white_open);
+        drawables[15] = resources.getDrawable(R.drawable.hood_blue_open);
+        drawables[16] = resources.getDrawable(R.drawable.hood_red_open);
+        drawables[17] = resources.getDrawable(R.drawable.trunk_white);
+        drawables[18] = resources.getDrawable(R.drawable.trunk_blue);
+        drawables[19] = resources.getDrawable(R.drawable.trunk_red);
+        drawables[20] = resources.getDrawable(R.drawable.trunk_white_open);
+        drawables[21] = resources.getDrawable(R.drawable.trunk_blue_open);
+        drawables[22] = resources.getDrawable(R.drawable.trunk_red_open);
     }
 
     Drawable getDrawable() {
+
         return drawable;
     }
 
-    void update(SharedPreferences preferences, String car_id) {
-        int color = UNKNOWN;
-        int alarm = UNKNOWN;
-
+    boolean update(SharedPreferences preferences, String car_id) {
         long last = preferences.getLong(Names.EVENT_TIME + car_id, 0);
         Date now = new Date();
-        if (last > now.getTime() - 24 * 60 * 60 * 1000) {
-            if (!preferences.contains(Names.GUARD + car_id)) {
-                dLock.setAlpha(0);
-                dUnlock.setAlpha(0);
-            } else if (preferences.getBoolean(Names.GUARD + car_id, false)) {
-                dLock.setAlpha(255);
-                dUnlock.setAlpha(0);
-                color = GUARD;
-                alarm = ALARM;
-            } else {
-                dLock.setAlpha(0);
-                dUnlock.setAlpha(255);
-                color = NORMAL;
-                alarm = NORMAL;
-            }
-        } else {
-            dLock.setAlpha(0);
-            dUnlock.setAlpha(0);
+        boolean upd = false;
+        if (last < now.getTime() - 24 * 60 * 60 * 1000) {
+            upd |= setLayer(0, 1);
+            upd |= setLayer(1, 0);
+            upd |= setLayer(2, 0);
+            upd |= setLayer(3, 0);
+            return upd;
         }
 
-        if (preferences.getBoolean(Names.ZONE_ACCESSORY + car_id, false)) {
-            dCar.setColorFilter(new ColorMatrixColorFilter(createMatrix(alarm)));
-        } else {
-            dCar.setColorFilter(new ColorMatrixColorFilter(createMatrix(color)));
-        }
+        boolean guard = preferences.getBoolean(Names.GUARD + car_id, false);
+        // guard = false;
+        upd |= setModeCar(guard, preferences.getBoolean(Names.ZONE_ACCESSORY + car_id, false));
 
-        Drawable d;
-        if (preferences.getBoolean(Names.INPUT1 + car_id, false)) {
-            dDoors.setAlpha(0);
-            dDoorsOpen.setAlpha(255);
-            d = dDoorsOpen;
-        } else {
-            dDoorsOpen.setAlpha(0);
-            dDoors.setAlpha(255);
-            d = dDoors;
-        }
-        if (preferences.getBoolean(Names.ZONE_DOOR + car_id, false)) {
-            d.setColorFilter(new ColorMatrixColorFilter(createMatrix(alarm)));
-        } else {
-            d.setColorFilter(new ColorMatrixColorFilter(createMatrix(color)));
-        }
+        boolean doors_open = preferences.getBoolean(Names.INPUT1 + car_id, false);
+        boolean doors_alarm = preferences.getBoolean(Names.ZONE_DOOR + car_id, false);
+        upd |= setModeOpen(0, guard, doors_open, doors_alarm);
 
-        if (preferences.getBoolean(Names.INPUT4 + car_id, false)) {
-            dHood.setAlpha(0);
-            dHoodOpen.setAlpha(255);
-            d = dHoodOpen;
-        } else {
-            dHoodOpen.setAlpha(0);
-            dHood.setAlpha(255);
-            d = dHood;
-        }
-        if (preferences.getBoolean(Names.ZONE_HOOD + car_id, false)) {
-            d.setColorFilter(new ColorMatrixColorFilter(createMatrix(alarm)));
-        } else {
-            d.setColorFilter(new ColorMatrixColorFilter(createMatrix(color)));
-        }
+        boolean hood_open = preferences.getBoolean(Names.INPUT4 + car_id, false);
+        boolean hood_alarm = preferences.getBoolean(Names.ZONE_HOOD + car_id, false);
+        upd |= setModeOpen(1, guard, hood_open, hood_alarm);
 
-        if (preferences.getBoolean(Names.INPUT2 + car_id, false)) {
-            dTrunk.setAlpha(0);
-            dTrunkOpen.setAlpha(255);
-            d = dTrunkOpen;
-        } else {
-            dTrunkOpen.setAlpha(0);
-            dTrunk.setAlpha(255);
-            d = dTrunk;
-        }
-        if (preferences.getBoolean(Names.ZONE_TRUNK + car_id, false)) {
-            d.setColorFilter(new ColorMatrixColorFilter(createMatrix(alarm)));
-        } else {
-            d.setColorFilter(new ColorMatrixColorFilter(createMatrix(color)));
-        }
+        boolean trunk_open = preferences.getBoolean(Names.INPUT2 + car_id, false);
+        boolean trunk_alarm = preferences.getBoolean(Names.ZONE_TRUNK + car_id, false);
+        upd |= setModeOpen(2, guard, trunk_open, trunk_alarm);
+
+        return upd;
+
+/*
 
         if (preferences.getBoolean(Names.INPUT3 + car_id, false) ||
                 preferences.getBoolean(Names.ENGINE + car_id, false)) {
@@ -202,20 +136,31 @@ public class CarDrawable {
         } else {
             dValet.setAlpha(0);
         }
+*/
     }
 
-    static ColorMatrix createMatrix(int color) {
-        int red = (color >> 16) & 0xFF;
-        int green = (color >> 8) & 0xFF;
-        int blue = color & 0xFF;
-        float matrix[] =
-                {
-                        red / 255f, 0, 0, 0, 0,
-                        0, green / 255f, 0, 0, 0,
-                        0, 0, blue / 255f, 0, 0,
-                        0, 0, 0, 1, 0
-                };
-        return new ColorMatrix(matrix);
+    boolean setLayer(int n, int id) {
+        if (parts_id[n] == id)
+            return false;
+        drawable.setDrawableByLayerId(n, drawables[id]);
+        parts_id[n] = id;
+        return true;
+    }
+
+    boolean setModeCar(boolean guard, boolean alarm) {
+        int pos = guard ? 1 : 0;
+        if (alarm)
+            pos = 2;
+        return setLayer(0, pos + 2);
+    }
+
+    boolean setModeOpen(int group, boolean guard, boolean open, boolean alarm) {
+        int pos = guard ? 1 : 0;
+        if (alarm)
+            pos = 2;
+        if (open)
+            pos += 3;
+        return setLayer(group + 1, group * 6 + pos + 5);
     }
 
 }

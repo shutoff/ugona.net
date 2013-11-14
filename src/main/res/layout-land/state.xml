@@ -3,243 +3,270 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="horizontal">
 
     <LinearLayout
-        android:id="@+id/error"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:padding="5dp"
-        android:visibility="gone">
+        android:layout_width="200dp"
+        android:layout_height="match_parent"
+        android:background="@drawable/car_bg"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:padding="5dp">
+
+            <ImageView
+                android:src="@android:drawable/stat_notify_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/error_text"
+                android:text="@string/data_error"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:textColor="@color/error"
+                android:singleLine="true"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="5dp">
+
+            <ProgressBar
+                android:id="@+id/update"
+                android:layout_width="24dp"
+                android:layout_height="24dp" />
+
+            <ImageView
+                android:id="@+id/refresh"
+                android:src="@drawable/update"
+                android:layout_width="24dp"
+                android:layout_height="24dp" />
+
+            <TextView
+                android:id="@+id/last"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/caldroid_holo_blue_light"
+                android:singleLine="true"
+                android:paddingLeft="15dp" />
+        </LinearLayout>
 
         <ImageView
-            android:src="@android:drawable/stat_notify_error"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:id="@+id/car"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="5dp"/>
 
-        <TextView
-            android:id="@+id/error_text"
-            android:text="@string/data_error"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:textColor="@color/error"
-            android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal"
-        android:gravity="center">
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center">
+            android:orientation="horizontal"
+            android:gravity="right">
 
-            <LinearLayout
-                android:id="@+id/time"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="5dp">
-
-                <ProgressBar
-                    android:id="@+id/update"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp" />
-
-                <ImageView
-                    android:id="@+id/refresh"
-                    android:src="@android:drawable/stat_notify_sync"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp" />
-
-                <TextView
-                    android:id="@+id/last"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:singleLine="true"
-                    android:paddingLeft="15dp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
+            <TableLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:orientation="horizontal">
+                android:layout_margin="10dp"
+                android:layout_gravity="center">
 
-                <ImageView
-                    android:id="@+id/car"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1" />
-
-                <TableLayout
+                <TableRow
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
 
-                    <TableRow
+                    <ImageView
+                        android:src="@drawable/icon_voltage"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content" />
 
-                        <ImageView
-                            android:src="@drawable/icon_voltage"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                        <TextView
-                            android:id="@+id/voltage"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textStyle="bold"
-                            android:textAppearance="?android:attr/textAppearanceSmall" />
-                    </TableRow>
-
-                    <TableRow
+                    <TextView
+                        android:id="@+id/voltage"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:paddingLeft="8dp"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                </TableRow>
 
-                        <ImageView
-                            android:src="@drawable/icon_reserve"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                <TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
 
-                        <TextView
-                            android:id="@+id/reserve"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textStyle="bold"
-                            android:textAppearance="?android:attr/textAppearanceSmall" />
-                    </TableRow>
-
-                    <TableRow
-                        android:id="@+id/balance_block"
+                    <ImageView
+                        android:src="@drawable/icon_reserve"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content" />
 
-                        <ImageView
-                            android:src="@drawable/icon_balance"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                        <TextView
-                            android:id="@+id/balance"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textStyle="bold"
-                            android:textAppearance="?android:attr/textAppearanceSmall" />
-                    </TableRow>
-
-                    <TableRow
-                        android:id="@+id/temperature_block"
+                    <TextView
+                        android:id="@+id/reserve"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:paddingLeft="8dp"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                </TableRow>
 
-                        <ImageView
-                            android:src="@drawable/icon_temperature"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                <TableRow
+                    android:id="@+id/balance_block"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
 
-                        <TextView
-                            android:id="@+id/temperature"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textStyle="bold"
-                            android:textAppearance="?android:attr/textAppearanceSmall" />
-                    </TableRow>
+                    <ImageView
+                        android:src="@drawable/icon_balance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
 
-                </TableLayout>
+                    <TextView
+                        android:id="@+id/balance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:paddingLeft="8dp"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/temperature_block"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:src="@drawable/icon_temperature"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:id="@+id/temperature"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:paddingLeft="8dp"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                </TableRow>
+
+            </TableLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/motor"
+                    android:text="@string/btn_motor_on"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:paddingLeft="10dp"
+                    android:gravity="left"
+                    style="@style/Theme.action"/>
+
+                <Button
+                    android:id="@+id/rele"
+                    android:text="@string/btn_heating_up"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:paddingLeft="10dp"
+                    android:gravity="left"
+                    style="@style/Theme.action"/>
+
+                <Button
+                    android:id="@+id/block"
+                    android:text="@string/btn_block"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:paddingLeft="10dp"
+                    android:gravity="left"
+                    style="@style/Theme.action"/>
+
+                <Button
+                    android:id="@+id/valet"
+                    android:text="@string/btn_valet_on"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:paddingLeft="10dp"
+                    android:gravity="left"
+                    style="@style/Theme.action"/>
 
             </LinearLayout>
 
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="right">
-
-            <TextView
-                android:layout_height="0dp"
-                android:layout_width="wrap_content"
-                android:layout_weight="1" />
-
-            <Button
-                android:id="@+id/motor"
-                android:layout_width="90dp"
-                android:layout_height="50dp"
-                android:padding="5dp" />
-
-            <Button
-                android:id="@+id/rele"
-                android:layout_width="90dp"
-                android:layout_height="50dp"
-                android:padding="5dp" />
-
-            <Button
-                android:id="@+id/block"
-                android:layout_width="90dp"
-                android:layout_height="50dp"
-                android:padding="5dp" />
-
-            <Button
-                android:id="@+id/valet"
-                android:layout_width="90dp"
-                android:layout_height="50dp"
-                android:padding="5dp"
-                android:text="@string/btn_valet_on" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@drawable/map_bg"
-        android:gravity="center">
-
-        <ImageView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:src="@drawable/marker_map" />
+            android:background="@drawable/map_bg"
+            android:orientation="horizontal"
+            android:gravity="center">
 
-        <LinearLayout
-            android:id="@+id/address"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/address1"
+            <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                android:src="@drawable/marker_map"/>
 
-            <TextView
-                android:id="@+id/address2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/caldroid_holo_blue_light"
-                android:textStyle="bold" />
+            <ScrollView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_gravity="center">
 
-            <TextView
-                android:id="@+id/address3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                <LinearLayout
+                    android:id="@+id/address"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="5dp">
+
+                    <TextView
+                        android:id="@+id/address1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                    <TextView
+                        android:id="@+id/address2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/caldroid_holo_blue_light"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/address3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                </LinearLayout>
+
+            </ScrollView>
 
         </LinearLayout>
 

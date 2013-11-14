@@ -177,7 +177,7 @@ public class Preferences extends PreferenceActivity {
 
     void setPassword() {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        final AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.password)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.save, null)
@@ -233,6 +233,7 @@ public class Preferences extends PreferenceActivity {
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putString(Names.PASSWORD, etPasswd1.getText().toString());
                 ed.commit();
+                dialog.dismiss();
             }
         });
     }

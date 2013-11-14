@@ -21,7 +21,7 @@
 
         <ImageView
             android:id="@+id/car"
-            android:src="@drawable/full"
+            android:src="@drawable/car_black"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1" />
@@ -52,6 +52,7 @@
                 android:id="@+id/voltage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingLeft="5dp"
                 android:text="@string/empty_voltage"
                 android:textStyle="bold"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
@@ -73,6 +74,7 @@
                 android:id="@+id/reserve"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingLeft="5dp"
                 android:text="@string/empty_voltage"
                 android:textStyle="bold"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
@@ -93,6 +95,7 @@
                 android:id="@+id/balance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingLeft="5dp"
                 android:text="@string/empty_balance"
                 android:textStyle="bold"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
@@ -113,6 +116,7 @@
                 android:id="@+id/temperature"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingLeft="5dp"
                 android:text="@string/empty_temperature"
                 android:textStyle="bold"
                 android:textAppearance="?android:attr/textAppearanceSmall" />

@@ -103,6 +103,7 @@ public class TracksFragment extends Fragment
         prgMain = (ProgressBar) v.findViewById(R.id.progress);
         tvLoading = (TextView) v.findViewById(R.id.loading);
         vError = v.findViewById(R.id.error);
+        vSpace = v.findViewById(R.id.space);
 
         vError.setClickable(true);
         vError.setOnClickListener(new View.OnClickListener() {

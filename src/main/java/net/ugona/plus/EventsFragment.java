@@ -1,8 +1,10 @@
 package net.ugona.plus;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -53,6 +55,7 @@ public class EventsFragment extends Fragment
 
     boolean error;
     boolean loaded;
+    boolean no_events;
 
     ListView lvEvents;
     TextView tvNoEvents;
@@ -62,6 +65,7 @@ public class EventsFragment extends Fragment
     long current_item;
 
     LocalDate current;
+    BroadcastReceiver br;
 
     static final String FILTER = "filter";
     static final String DATE = "events_date";
@@ -140,6 +144,7 @@ public class EventsFragment extends Fragment
             new EventType(55, R.string.alarm_input2, R.drawable.alarm_input2, 0),
             new EventType(56, R.string.alarm_input3, R.drawable.alarm_input3, 0),
             new EventType(57, R.string.alarm_input4, R.drawable.alarm_input4, 0),
+            new EventType(58, R.string.sms_request, R.drawable.user_sms, 1),
             new EventType(59, R.string.reset_modem, R.drawable.reset_modem),
             new EventType(60, R.string.gprs_on, R.drawable.gprs_on),
             new EventType(61, R.string.gprs_off, R.drawable.gprs_off),
@@ -288,13 +293,46 @@ public class EventsFragment extends Fragment
         setupButton(v, R.id.system, 4);
 
         if (loaded) {
-            filterEvents();
+            filterEvents(false);
             vProgress.setVisibility(View.GONE);
         } else {
             DataFetcher fetcher = new DataFetcher();
-            fetcher.update(current);
+            error = false;
+            loaded = false;
+            fetcher.update();
         }
+
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent == null)
+                    return;
+                if (!car_id.equals(intent.getStringExtra(Names.ID)))
+                    return;
+                if (intent.getAction().equals(FetchService.ACTION_UPDATE)) {
+                    LocalDate today = new LocalDate();
+                    if (!today.equals(current))
+                        return;
+                    DataFetcher fetcher = new DataFetcher(){
+                        @Override
+                        void error() {
+                        }
+                    };
+                    fetcher.no_reload = true;
+                    fetcher.update();
+                }
+            }
+        };
+        IntentFilter intFilter = new IntentFilter(FetchService.ACTION_UPDATE);
+        getActivity().registerReceiver(br, intFilter);
+
         return v;
+    }
+
+    @Override
+    public void onDestroyView() {
+        getActivity().unregisterReceiver(br);
+        super.onDestroyView();
     }
 
     @Override
@@ -341,7 +379,9 @@ public class EventsFragment extends Fragment
         tvNoEvents.setVisibility(View.GONE);
         vError.setVisibility(View.GONE);
         DataFetcher fetcher = new DataFetcher();
-        fetcher.update(current);
+        error = false;
+        loaded = false;
+        fetcher.update();
     }
 
     void setupButton(View v, int id, int mask) {
@@ -371,7 +411,7 @@ public class EventsFragment extends Fragment
         ed.putInt(FILTER, filter);
         ed.commit();
         if (!error)
-            filterEvents();
+            filterEvents(false);
     }
 
     boolean isShow(int type) {
@@ -385,7 +425,7 @@ public class EventsFragment extends Fragment
         return (filter & 4) != 0;
     }
 
-    void filterEvents() {
+    void filterEvents(boolean no_reload) {
         filtered.clear();
         for (Event e : events) {
             if (isShow(e.type))
@@ -394,14 +434,21 @@ public class EventsFragment extends Fragment
         if (!loaded)
             return;
         if (filtered.size() > 0) {
-            current_item = -1;
-            lvEvents.setAdapter(new EventsAdapter());
-            lvEvents.setVisibility(View.VISIBLE);
-            tvNoEvents.setVisibility(View.GONE);
+            if (no_events || !no_reload){
+                current_item = -1;
+                lvEvents.setAdapter(new EventsAdapter());
+                lvEvents.setVisibility(View.VISIBLE);
+                tvNoEvents.setVisibility(View.GONE);
+            }else{
+                EventsAdapter adapter = (EventsAdapter)lvEvents.getAdapter();
+                adapter.notifyDataSetChanged();
+            }
+            no_events = false;
         } else {
             tvNoEvents.setText(getString(R.string.no_events));
             tvNoEvents.setVisibility(View.VISIBLE);
             lvEvents.setVisibility(View.GONE);
+            no_events = true;
         }
     }
 
@@ -423,11 +470,13 @@ public class EventsFragment extends Fragment
     class DataFetcher extends HttpTask {
 
         LocalDate date;
+        boolean no_reload;
 
         @Override
         void result(JSONObject data) throws JSONException {
             if (!current.equals(date))
                 return;
+            events.clear();
             JSONArray res = data.getJSONArray("events");
             for (int i = 0; i < res.length(); i++) {
                 JSONObject event = res.getJSONObject(i);
@@ -442,8 +491,9 @@ public class EventsFragment extends Fragment
                 e.id = id;
                 events.add(e);
             }
+            error = false;
             loaded = true;
-            filterEvents();
+            filterEvents(no_reload);
             vProgress.setVisibility(View.GONE);
         }
 
@@ -452,15 +502,11 @@ public class EventsFragment extends Fragment
             showError();
         }
 
-        void update(LocalDate d) {
-            date = d;
-            current = d;
+        void update() {
+            date = current;
             DateTime start = date.toDateTime(new LocalTime(0, 0));
             LocalDate next = date.plusDays(1);
             DateTime finish = next.toDateTime(new LocalTime(0, 0));
-            events.clear();
-            error = false;
-            loaded = false;
             execute(EVENTS,
                     api_key,
                     start.toDate().getTime() + "",

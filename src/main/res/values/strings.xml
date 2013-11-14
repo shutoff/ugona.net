@@ -147,6 +147,7 @@
     <string name="ext_zone">External zone MKW</string>
     <string name="heavy_shock">Heavy shock</string>
     <string name="inner_zone">Inner zone MKW</string>
+    <string name="sms_request">SMS request</string>
     <string name="tilt">Tilt</string>
     <string name="main_power_on">Main power ON</string>
     <string name="main_power_off">Main power OFF</string>
@@ -230,4 +231,5 @@
     <string name="btn_motor_off">MOTOR\nOFF</string>
     <string name="btn_heating_up">HEATING\nUP</string>
     <string name="btn_block">MOTOR\nBLOCK</string>
+    <string name="delete">Delete</string>
 </resources>

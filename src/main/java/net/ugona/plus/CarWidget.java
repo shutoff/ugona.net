@@ -164,6 +164,7 @@ public class CarWidget extends AppWidgetProvider {
         Intent configIntent = new Intent(context, MainActivity.class);
         configIntent.putExtra(Names.ID, car_id);
         configIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Utils.appendLog("create widget [" + car_id + "]");
         PendingIntent pIntent = PendingIntent.getActivity(context, widgetID, configIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         widgetView.setOnClickPendingIntent(R.id.widget, pIntent);
 
@@ -227,23 +228,25 @@ public class CarWidget extends AppWidgetProvider {
         if (drawable == null)
             drawable = new CarDrawable(context);
 
-        drawable.update(preferences, car_id);
-        if (bitmaps == null)
-            bitmaps = new HashMap<Integer, Bitmap>();
-        Bitmap bitmap = bitmaps.get(widgetID);
-        if ((bitmap != null) && ((bitmap.getWidth() != drawable.width) || (bitmap.getHeight() != drawable.height)))
-            bitmap = null;
-        if (bitmap == null) {
-            bitmap = Bitmap.createBitmap(drawable.width, drawable.height, Bitmap.Config.ARGB_8888);
-            bitmaps.put(widgetID, bitmap);
-        } else {
-            bitmap.eraseColor(Color.TRANSPARENT);
+        if (drawable.update(preferences, car_id)) {
+            if (bitmaps == null)
+                bitmaps = new HashMap<Integer, Bitmap>();
+            Bitmap bitmap = bitmaps.get(widgetID);
+            if ((bitmap != null) && ((bitmap.getWidth() != drawable.width) || (bitmap.getHeight() != drawable.height)))
+                bitmap = null;
+            if (bitmap == null) {
+                bitmap = Bitmap.createBitmap(drawable.width, drawable.height, Bitmap.Config.ARGB_8888);
+                bitmaps.put(widgetID, bitmap);
+            } else {
+                bitmap.eraseColor(Color.TRANSPARENT);
+            }
+            Canvas canvas = new Canvas(bitmap);
+            Drawable d = drawable.getDrawable();
+            d.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            d.draw(canvas);
+            widgetView.setImageViewBitmap(R.id.car, bitmap);
         }
-        Canvas canvas = new Canvas(bitmap);
-        Drawable d = drawable.getDrawable();
-        d.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        d.draw(canvas);
-        widgetView.setImageViewBitmap(R.id.car, bitmap);
+
         appWidgetManager.updateAppWidget(widgetID, widgetView);
     }
 

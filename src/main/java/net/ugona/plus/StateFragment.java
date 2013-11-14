@@ -21,6 +21,8 @@ import org.joda.time.LocalDateTime;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class StateFragment extends Fragment {
 
@@ -56,6 +58,8 @@ public class StateFragment extends Fragment {
 
     CarDrawable drawable;
     BroadcastReceiver br;
+
+    static Pattern number_pattern = Pattern.compile("^[0-9]+ ?");
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -251,7 +255,7 @@ public class StateFragment extends Fragment {
             String gsm = preferences.getString(Names.GSM + car_id, "");
             if (!gsm.equals("")) {
                 String[] parts = gsm.split(" ");
-                address += "MCC: " + parts[0] + " NC: " + parts[1] + " LAC: " + parts[2] + " CID: " + parts[3];
+                address += parts[0] + "-" + parts[1] + " LAC:" + parts[2] + " CID:" + parts[3];
                 addr = preferences.getString(Names.ADDRESS + car_id, "");
             }
         } else {
@@ -262,11 +266,19 @@ public class StateFragment extends Fragment {
         tvAddress1.setText(address);
         String parts[] = addr.split(", ");
         addr = parts[0];
+        int start = 2;
         if (parts.length > 1)
             addr += ", " + parts[1];
+        if (parts.length > 2){
+            Matcher matcher = number_pattern.matcher(parts[2]);
+            if (matcher.matches()){
+                addr += ", " + parts[2];
+                start++;
+            }
+        }
         tvAddress2.setText(addr);
         addr = "";
-        for (int i = 2; i < parts.length; i++){
+        for (int i = start; i < parts.length; i++){
             if (!addr.equals(""))
                 addr += ", ";
             addr += parts[i];

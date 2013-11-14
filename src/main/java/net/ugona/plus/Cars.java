@@ -1,6 +1,8 @@
 package net.ugona.plus;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -79,8 +81,28 @@ public class Cars extends ActionBarActivity {
                     ivDelete.setTag(cars[position].id);
                     ivDelete.setOnClickListener(new View.OnClickListener() {
                         @Override
-                        public void onClick(View v) {
-                            deleteCar(v.getTag().toString());
+                        public void onClick(final View v) {
+                            String id = v.getTag().toString();
+                            String message = getString(R.string.delete);
+                            Car[] cars = getCars(Cars.this);
+                            for (Car car: cars){
+                                if (car.id.equals(id)){
+                                    message += " " + car.name;
+                                }
+                            }
+                            message += "?";
+                            AlertDialog dialog = new AlertDialog.Builder(Cars.this)
+                                    .setTitle(R.string.delete)
+                                    .setMessage(message)
+                                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            deleteCar(v.getTag().toString());
+                                        }
+                                    })
+                                    .setNegativeButton(R.string.cancel, null)
+                                    .create();
+                            dialog.show();
                         }
                     });
                     ivDelete.setVisibility(View.VISIBLE);

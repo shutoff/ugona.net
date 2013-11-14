@@ -91,12 +91,18 @@ public class MainActivity extends ActionBarActivity {
 
         if (savedInstanceState != null) {
             car_id = savedInstanceState.getString(Names.ID);
+            Utils.appendLog("from saved [" + car_id + "]");
             current = new LocalDate(savedInstanceState.getLong(DATE));
         } else {
             car_id = getIntent().getStringExtra(Names.ID);
-            if (car_id == null)
+            if (car_id == null){
                 car_id = preferences.getString(Names.LAST, "");
+                Utils.appendLog("From last state [" + car_id + "]");
+            }else{
+                Utils.appendLog("From intent [" + car_id + "]");
+            }
             car_id = Preferences.getCar(preferences, car_id);
+            Utils.appendLog("Using [" + car_id + "]");
         }
 
         mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -285,9 +291,12 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         removeNotifications();
+        Utils.appendLog("new intent [" + car_id + "]");
         String id = intent.getStringExtra(Names.ID);
         if (id != null) {
+            Utils.appendLog("from intent [" + id + "]");
             id = Preferences.getCar(preferences, id);
+            Utils.appendLog("set [" + id + "]");
             if (!id.equals(car_id)) {
                 car_id = id;
                 setActionBar();
@@ -347,6 +356,7 @@ public class MainActivity extends ActionBarActivity {
                     if (cars[i].id.equals(car_id))
                         return true;
                     car_id = cars[i].id;
+                    Utils.appendLog("select [" + car_id + "]");
                     SharedPreferences.Editor ed = preferences.edit();
                     ed.putString(Names.LAST, car_id);
                     ed.commit();
