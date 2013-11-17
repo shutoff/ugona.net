@@ -101,6 +101,12 @@ public class ActionFragment extends Fragment {
                     Actions.valetOff(context, car_id);
                 }
             },
+            new Action(R.string.status_title) {
+                @Override
+                void action(Context context, String car_id) {
+                    Actions.status(context, car_id);
+                }
+            },
             new Action(R.string.block) {
                 @Override
                 void action(Context context, String car_id) {
@@ -117,6 +123,24 @@ public class ActionFragment extends Fragment {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.motorOff(context, car_id);
+                }
+            },
+            new Action(R.string.turbo_on) {
+                @Override
+                void action(Context context, String car_id) {
+                    Actions.turboOn(context, car_id);
+                }
+            },
+            new Action(R.string.turbo_off) {
+                @Override
+                void action(Context context, String car_id) {
+                    Actions.turboOff(context, car_id);
+                }
+            },
+            new Action(R.string.reset) {
+                @Override
+                void action(Context context, String car_id) {
+                    Actions.reset(context, car_id);
                 }
             },
     };

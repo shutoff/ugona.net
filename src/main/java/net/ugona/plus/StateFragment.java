@@ -33,7 +33,8 @@ public class StateFragment extends Fragment {
     ImageView imgCar;
 
     View vAddress;
-    TextView tvAddress1;
+    TextView tvTime;
+    TextView tvLocation;
     TextView tvAddress2;
     TextView tvAddress3;
 
@@ -71,7 +72,8 @@ public class StateFragment extends Fragment {
         imgCar = (ImageView) v.findViewById(R.id.car);
 
         vAddress = v.findViewById(R.id.address);
-        tvAddress1 = (TextView) v.findViewById(R.id.address1);
+        tvTime = (TextView) v.findViewById(R.id.addr_time);
+        tvLocation = (TextView) v.findViewById(R.id.location);
         tvAddress2 = (TextView) v.findViewById(R.id.address2);
 
         tvAddress3 = (TextView) v.findViewById(R.id.address3);
@@ -98,6 +100,20 @@ public class StateFragment extends Fragment {
         prgUpdate.setVisibility(View.GONE);
 
         vTime = v.findViewById(R.id.time);
+
+        vAddress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showMap();
+            }
+        });
+        View v_addr = v.findViewById(R.id.addr_data);
+        v_addr.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showMap();
+            }
+        });
 
         final Context context = getActivity();
 
@@ -227,69 +243,66 @@ public class StateFragment extends Fragment {
         }
 
         drawable.update(preferences, car_id);
-        String address = "";
+        String time = "";
         long last_stand = preferences.getLong(Names.LAST_STAND + car_id, 0);
         if (last_stand > 0) {
             LocalDateTime stand = new LocalDateTime(last_stand);
             LocalDateTime now = new LocalDateTime();
             if (stand.toLocalDate().equals(now.toLocalDate())) {
-                address = stand.toString("HH:mm");
+                time = stand.toString("HH:mm");
             } else {
-                address = stand.toString("d-MM-yy HH:mm");
+                time = stand.toString("d-MM-yy HH:mm");
             }
-            address += " ";
+            time += " ";
         } else if (last_stand < 0) {
             String speed = preferences.getString(Names.SPEED + car_id, "");
             try {
                 double s = Double.parseDouble(speed);
                 if (s > 0)
-                    address += String.format(getString(R.string.speed, speed)) + " ";
+                    time += String.format(getString(R.string.speed, speed)) + " ";
             } catch (Exception ex) {
                 // ignore
             }
         }
+        tvTime.setText(time);
         String lat = preferences.getString(Names.LATITUDE + car_id, "");
         String lon = preferences.getString(Names.LONGITUDE + car_id, "");
         String addr = "";
+        String location = "";
         if (lat.equals("") || lon.equals("")) {
             String gsm = preferences.getString(Names.GSM + car_id, "");
             if (!gsm.equals("")) {
                 String[] parts = gsm.split(" ");
-                address += parts[0] + "-" + parts[1] + " LAC:" + parts[2] + " CID:" + parts[3];
+                location = parts[0] + "-" + parts[1] + " LAC:" + parts[2] + " CID:" + parts[3];
                 addr = preferences.getString(Names.ADDRESS + car_id, "");
             }
         } else {
-            address += preferences.getString(Names.LATITUDE + car_id, "") + " ";
-            address += preferences.getString(Names.LONGITUDE + car_id, "");
+            location = preferences.getString(Names.LATITUDE + car_id, "") + " ";
+            location += preferences.getString(Names.LONGITUDE + car_id, "");
             addr = Address.getAddress(context, car_id);
         }
-        tvAddress1.setText(address);
+        tvTime.setText(time);
+        tvLocation.setText(location);
         String parts[] = addr.split(", ");
         addr = parts[0];
         int start = 2;
         if (parts.length > 1)
             addr += ", " + parts[1];
-        if (parts.length > 2){
+        if (parts.length > 2) {
             Matcher matcher = number_pattern.matcher(parts[2]);
-            if (matcher.matches()){
+            if (matcher.matches()) {
                 addr += ", " + parts[2];
                 start++;
             }
         }
         tvAddress2.setText(addr);
         addr = "";
-        for (int i = start; i < parts.length; i++){
+        for (int i = start; i < parts.length; i++) {
             if (!addr.equals(""))
                 addr += ", ";
             addr += parts[i];
         }
         tvAddress3.setText(addr);
-        vAddress.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showMap();
-            }
-        });
 
         int n_buttons = 0;
         if (preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false)) {
@@ -309,18 +322,23 @@ public class StateFragment extends Fragment {
         } else {
             btnRele.setVisibility(View.GONE);
         }
-        if (Preferences.getValet(preferences, car_id)) {
-            btnValet.setVisibility(View.VISIBLE);
-            btnValet.setText(R.string.btn_valet_off);
-            n_buttons++;
-        }else{
-            btnValet.setVisibility(View.GONE);
-        }
         if (preferences.getBoolean(Names.INPUT3 + car_id, false) && (n_buttons < 3)) {
             btnBlock.setVisibility(View.VISIBLE);
             n_buttons++;
         } else {
             btnBlock.setVisibility(View.GONE);
+        }
+        if (n_buttons < 3) {
+            if (Preferences.getValet(preferences, car_id)) {
+                btnValet.setVisibility(View.VISIBLE);
+                btnValet.setText(R.string.btn_valet_off);
+                n_buttons++;
+            } else {
+                btnValet.setVisibility(View.GONE);
+                btnValet.setText(R.string.btn_valet_on);
+            }
+        } else {
+            btnValet.setVisibility(View.GONE);
         }
 
         balanceBlock.setVisibility(preferences.getBoolean(Names.SHOW_BALANCE + car_id, true) ? View.VISIBLE : View.GONE);

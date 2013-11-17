@@ -46,9 +46,17 @@ public class SmsMonitor extends BroadcastReceiver {
                 i.putExtra(Names.ID, intent.getStringExtra(Names.ID));
                 context.sendBroadcast(i);
             }
+            String answer = intent.getStringExtra(Names.ANSWER);
+            if (answer == null) {
+                Intent i = new Intent(SMS_ANSWER);
+                i.putExtra(Names.ANSWER, Activity.RESULT_OK);
+                i.putExtra(Names.ID, intent.getStringExtra(Names.ID));
+                context.sendBroadcast(i);
+                return;
+            }
             if (answers == null)
                 answers = new HashMap<String, String>();
-            answers.put(intent.getStringExtra(Names.ID), intent.getStringExtra(Names.ANSWER));
+            answers.put(intent.getStringExtra(Names.ID), answer);
             return;
         }
         if (action.equals(ACTION)) {
@@ -119,7 +127,8 @@ public class SmsMonitor extends BroadcastReceiver {
             "ALARM Doors",
             "ALARM Lock",
             "ALARM MovTilt sensor",
-            "ALARM Rogue"
+            "ALARM Rogue",
+            "ALARM Ignition Lock"
     };
 
     boolean processCarMessage(Context context, String body, String car_id) {
@@ -129,6 +138,7 @@ public class SmsMonitor extends BroadcastReceiver {
                 answers.remove(car_id);
                 Intent i = new Intent(SMS_ANSWER);
                 i.putExtra(Names.ANSWER, Activity.RESULT_OK);
+                i.putExtra(Names.SMS_TEXT, body.substring(answer.length()));
                 i.putExtra(Names.ID, car_id);
                 context.sendBroadcast(i);
                 return true;

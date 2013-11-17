@@ -206,6 +206,12 @@ public class MainActivity extends ActionBarActivity {
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.car_setup: {
+                Intent intent = new Intent(this, CarPreferences.class);
+                intent.putExtra(Names.ID, car_id);
+                startActivity(intent);
+                return true;
+            }
             case R.id.preferences: {
                 Intent intent = new Intent(this, Preferences.class);
                 startActivity(intent);
@@ -284,16 +290,24 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
+        State.appendLog("new intent");
         String id = intent.getStringExtra(Names.ID);
         if (id != null) {
-            id = Preferences.getCar(preferences, id);
-            if (!id.equals(car_id)) {
-                car_id = id;
-                setActionBar();
-                update();
-            }
+            State.appendLog("new intent " + id);
+            setCar(id);
         }
+        State.appendLog("ok " + car_id);
+        mViewPager.setCurrentItem(1);
         removeNotifications();
+    }
+
+    void setCar(String id) {
+        id = Preferences.getCar(preferences, id);
+        if (id.equals(car_id))
+            return;
+        car_id = id;
+        setActionBar();
+        update();
     }
 
     void startTimer(boolean now) {
@@ -328,29 +342,19 @@ public class MainActivity extends ActionBarActivity {
     void setActionBar() {
         ActionBar actionBar = getSupportActionBar();
         cars = Cars.getCars(this);
-        boolean found = false;
-        for (Cars.Car car : cars) {
-            if (car.id.equals(car_id)) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            car_id = cars[0].id;
-            update();
-        }
+        setCar(car_id);
         if (cars.length > 1) {
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
             actionBar.setListNavigationCallbacks(new CarsAdapter(), new ActionBar.OnNavigationListener() {
                 @Override
                 public boolean onNavigationItemSelected(int i, long l) {
-                    if (cars[i].id.equals(car_id))
+                    String id = Preferences.getCar(preferences, cars[i].id);
+                    if (id.equals(car_id))
                         return true;
-                    car_id = cars[i].id;
                     SharedPreferences.Editor ed = preferences.edit();
-                    ed.putString(Names.LAST, car_id);
+                    ed.putString(Names.LAST, id);
                     ed.commit();
-                    update();
+                    setCar(id);
                     removeNotifications();
                     return true;
                 }
@@ -442,7 +446,7 @@ public class MainActivity extends ActionBarActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return getString(R.string.actions);
+                    return getString(R.string.control);
                 case 1:
                     return getString(R.string.state);
                 case 2:

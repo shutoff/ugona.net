@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -161,14 +162,17 @@ public class CarWidget extends AppWidgetProvider {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String car_id = Preferences.getCar(preferences, preferences.getString(Names.WIDGET + widgetID, ""));
 
-        Intent configIntent = new Intent(context, MainActivity.class);
+        Intent configIntent = new Intent(context, WidgetService.class);
         configIntent.putExtra(Names.ID, car_id);
-        configIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pIntent = PendingIntent.getActivity(context, widgetID, configIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        configIntent.setAction(WidgetService.ACTION_SHOW);
+        Uri data = Uri.withAppendedPath(Uri.parse("http://widget/id/"), String.valueOf(widgetID));
+        configIntent.setData(data);
+        PendingIntent pIntent = PendingIntent.getService(context, widgetID, configIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         widgetView.setOnClickPendingIntent(R.id.widget, pIntent);
 
         configIntent = new Intent(FetchService.ACTION_START_UPDATE);
         configIntent.putExtra(Names.ID, car_id);
+        configIntent.setData(data);
         pIntent = PendingIntent.getBroadcast(context, widgetID, configIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         widgetView.setOnClickPendingIntent(R.id.update_block, pIntent);
 
@@ -181,6 +185,7 @@ public class CarWidget extends AppWidgetProvider {
             widgetView.setTextViewText(R.id.last, "??:??");
         }
 
+        int show_count = 2;
         widgetView.setTextViewText(R.id.voltage, preferences.getString(Names.VOLTAGE_MAIN + car_id, "--") + " V");
         widgetView.setTextViewText(R.id.reserve, preferences.getString(Names.VOLTAGE_RESERVED + car_id, "--") + " V");
         widgetView.setTextViewText(R.id.balance, preferences.getString(Names.BALANCE + car_id, "---.--"));
@@ -190,13 +195,16 @@ public class CarWidget extends AppWidgetProvider {
         } else {
             widgetView.setTextViewText(R.id.temperature, temperature);
             widgetView.setViewVisibility(R.id.temperature_block, View.VISIBLE);
+            show_count++;
         }
 
         int height = preferences.getInt(HEIGHT + widgetID, 40);
         boolean show_balance = preferences.getBoolean(Names.SHOW_BALANCE + car_id, true);
-        boolean show_reserve = (height >= 60);
-        if (!show_reserve && !show_balance)
-            show_reserve = true;
+        if (show_balance)
+            show_count++;
+
+        int max_count = (height >= 60) ? 4 : 3;
+        boolean show_reserve = show_count <= max_count;
 
         widgetView.setViewVisibility(R.id.reserve_block, show_reserve ? View.VISIBLE : View.GONE);
         widgetView.setViewVisibility(R.id.balance_block, show_balance ? View.VISIBLE : View.GONE);

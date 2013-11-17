@@ -4,7 +4,7 @@
     <string name="notification">Light shock|Low card battery|Supply reserve|Supply regular|ERROR
         LAN-devices|Low reserve voltage|Roaming. Internet OFF
     </string>
-    <string name="alarm">Heavy shock|Trunk|Hood|Doors|Ignition Lock|MovTilt sensor|Rogue|Accessory zone</string>
+    <string name="alarm">Heavy shock|Trunk|Hood|Doors|Ignition Lock|MovTilt sensor|Rogue|Accessory zone|Ignition lock</string>
     <string name="def">default</string>
     <string name="phone_number_summary">Select car phone number</string>
     <string name="phone_number">Phone number</string>
@@ -12,6 +12,7 @@
     <string name="notify_sound">Notify sound</string>
     <string name="preferences">Preferences</string>
     <string name="actions">Actions</string>
+    <string name="control">Control</string>
     <string name="sms_mode">Switch to SMS mode</string>
     <string name="sms_mode_summary">Click here to switch in SMS mode</string>
     <string name="api_key">API key</string>
@@ -35,6 +36,11 @@
     <string name="motor_off">Motor Off</string>
     <string name="motor_on_sum">Start engine</string>
     <string name="motor_off_sum">Stop engine</string>
+    <string name="reset_sum">Reset device</string>
+    <string name="turbo_on">Turbo On</string>
+    <string name="turbo_off">Turbo Off</string>
+    <string name="turbo_on_sum">Start turbo mode</string>
+    <string name="turbo_off_sum">Cancel turbo mode</string>
     <string name="widget_name">Car alarm</string>
     <string name="empty_voltage">-- V</string>
     <string name="empty_balance">---.--</string>
@@ -232,4 +238,21 @@
     <string name="btn_heating_up">HEATING\nUP</string>
     <string name="btn_block">MOTOR\nBLOCK</string>
     <string name="delete">Delete</string>
+    <string name="status_title">Status</string>
+    <string name="status_sum">Request car state</string>
+    <string name="guard_state">Guard ON</string>
+    <string name="gps_state">GPS position founs</string>
+    <string name="gprs_none_state">No GPRS connection</string>
+    <string name="gprs_home_state">GPRS connected</string>
+    <string name="gprs_roaming_state">GPRS connected (roaming)</string>
+    <string name="car_setup">Car setup</string>
+    <string name="phones">Control phones</string>
+    <string name="phones_sum">Manage control phones</string>
+    <string name="add_phone">Add phone</string>
+    <string name="erase_phones">Erase all phones</string>
+    <string name="clear">Clear</string>
+    <string name="timer">Timer</string>
+    <string name="timer_sum">Car connection period</string>
+    <string name="timer_on">Timer ON</string>
+    <string name="minutes">min</string>
 </resources>

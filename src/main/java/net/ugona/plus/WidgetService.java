@@ -20,6 +20,7 @@ public class WidgetService extends Service {
 
     static final String ACTION_STOP = "net.ugona.plus.WIDGET_STOP";
     static final String ACTION_UPDATE = "net.ugona.plus.WIDGET_UPDATE";
+    static final String ACTION_SHOW = "net.ugona.plus.WIDGET_SHOW";
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -75,6 +76,15 @@ public class WidgetService extends Service {
                     stopTimer();
                     if (powerMgr.isScreenOn())
                         startTimer(false);
+                    return START_STICKY;
+                }
+                if (action.equals(ACTION_SHOW)) {
+                    Intent i = new Intent(this, MainActivity.class);
+                    String id = intent.getStringExtra(Names.ID);
+                    State.appendLog("show + " + id);
+                    i.putExtra(Names.ID, id);
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    getApplicationContext().startActivity(i);
                     return START_STICKY;
                 }
             }

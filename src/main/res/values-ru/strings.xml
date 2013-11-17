@@ -2,20 +2,16 @@
 <resources>
 
     <string name="app_name">Угона.нет+</string>
-    <string name="notification">Легкий удар|Батарея в метке разряжена|Отключено бортовое
-        питание|Подключено бортовое питание|Нарушена конфигурация LAN|Аварийная батарея
-        разряжена|Отключен интернет в роуминге
-    </string>
-    <string name="alarm">Сильный удар|Открыт багажник|Открыт капот|Открыты двери|Включено
-        зажигание|Машина движется|Разбойное нападение|Зона аксессуаров
-    </string>
+    <string name="notification">Легкий удар|Батарея в метке разряжена|Отключено бортовое питание|Подключено бортовое питание|Нарушена конфигурация LAN|Аварийная батарея разряжена|Отключен интернет в роуминге</string>
+    <string name="alarm">Сильный удар|Открыт багажник|Открыт капот|Открыты двери|Включено зажигание|Машина движется|Разбойное нападение|Зона аксессуаров|Включено зажигание</string>
     <string name="def">по умолчанию</string>
     <string name="phone_number_summary">Укажите номер телефона автомобиля</string>
     <string name="phone_number">Номер телефона</string>
     <string name="alarm_sound">Звук тревоги</string>
     <string name="notify_sound">Звук уведомления</string>
-    <string name="preferences">Настройки</string>
+    <string name="preferences">Настройки приложения</string>
     <string name="actions">Действия</string>
+    <string name="control">Управление</string>
     <string name="sms_mode">Переключиться в режим SMS</string>
     <string name="sms_mode_summary">Для обработки тревог приложением надо переключить устройство в режим SMS</string>
     <string name="sms_error">Не могу отправить SMS</string>
@@ -25,8 +21,8 @@
     </string>
     <string name="save">Сохранить</string>
     <string name="bad_key">Неправильный ключ API</string>
-    <string name="valet_on">Включить режим VALET</string>
-    <string name="valet_off">Выключить режим VALET</string>
+    <string name="valet_on">Включить режим АВТОСЕРВИС</string>
+    <string name="valet_off">Выключить режим АВТОСЕРВИС</string>
     <string name="ccode">C-код:</string>
     <string name="ok">Продолжить</string>
     <string name="internet_on">Включить интернет</string>
@@ -39,6 +35,11 @@
     <string name="motor_off">Заглушить двигатель</string>
     <string name="motor_on_sum">Произвести дистанционный запуск двигателя</string>
     <string name="motor_off_sum">Дистанционно остановить двигатель</string>
+    <string name="turbo_on">Включить турбо режим</string>
+    <string name="turbo_off">Выключить турбо режим</string>
+    <string name="turbo_on_sum">Режим преследования, в этом режиме устройство отправляет данные так часто, как это возможно</string>
+    <string name="turbo_off_sum">Отменить режим преследования</string>
+    <string name="reset_sum">Выполнить принудительную загрузку устройства</string>
     <string name="unknown">неизвестно</string>
     <string name="alarm_test">Проверка тревоги</string>
     <string name="alarm_test_sum">Нажмите для проверки тревоги</string>
@@ -188,11 +189,11 @@
     <string name="brake">Тормоз</string>
     <string name="guard2_on">Включен режим охраны 2</string>
     <string name="guard2_off">Выключен режим охраны 2</string>
-    <string name="valet_on_msg">Для включения режима VALET требуется ввод C-кода</string>
-    <string name="valet_off_msg">Для отключения режима VALET требуется ввод C-кода</string>
+    <string name="valet_on_msg">Для включения режима АВТОСЕРВИС требуется ввод C-кода</string>
+    <string name="valet_off_msg">Для отключения режима АВТОСЕРВИС требуется ввод C-кода</string>
     <string name="bad_ccode">Неверный С-код</string>
     <string name="pswd">Пароль:</string>
-    <string name="block_msg">Для отмены блокировки включите и выключите режим VALET</string>
+    <string name="block_msg">Для отмены блокировки включите и выключите режим АВТОСЕРВИС</string>
     <string name="sms_mode_msg">Для переключения обратно в голосовой режим отправьте SMS\nALARM CALL</string>
     <string name="motor_start_error">Двигатель не заведен или заглох</string>
     <string name="motor_stop">Двигатель остановлен</string>
@@ -222,11 +223,28 @@
     <string name="phone_work">рабочий</string>
     <string name="phone_mobile">мобильный</string>
     <string name="pgsm_version">Версия прошивки</string>
-    <string name="btn_valet_on">ВКЛЮЧИТЬ\nVALET</string>
-    <string name="btn_valet_off">ВЫКЛЮЧИТЬ\nVALET</string>
+    <string name="btn_valet_on">В-ТЬ Р-М\nАВТОСЕРВИС</string>
+    <string name="btn_valet_off">ВЫ-ТЬ Р-М\nАВТОСЕРСИС</string>
     <string name="btn_motor_on">ЗАПУСК\nДВИГАТЕЛЯ</string>
     <string name="btn_motor_off">ОСТАНОВКА\nДВИГАТЕЛЯ</string>
     <string name="btn_heating_up">ВКЛЮЧИТЬ\nПОДОГРЕВ</string>
     <string name="btn_block">БЛОКИРОВАТЬ\nДВИГАТЕЛЬ</string>
     <string name="delete">Удалить</string>
+    <string name="status_title">Статус</string>
+    <string name="status_sum">Запрос текущего состояния</string>
+    <string name="guard_state">В охране</string>
+    <string name="gps_state">Местоположение по GPS установлено</string>
+    <string name="gprs_none_state">Нет соединения с интернетом</string>
+    <string name="gprs_home_state">Соединение с интернетом установлено</string>
+    <string name="gprs_roaming_state">Соединение с интернетом установлено в роуминге</string>
+    <string name="car_setup">Настройки автомобиля</string>
+    <string name="phones">Управляющие телефоны</string>
+    <string name="phones_sum">Настройка управляющих телефонов</string>
+    <string name="add_phone">Добавить телефон</string>
+    <string name="erase_phones">Удалить все телефоны кроме текущего</string>
+    <string name="clear">Очистить</string>
+    <string name="timer">Настройка таймера</string>
+    <string name="timer_sum">Настройка периодичности соединения автомобиля с сервером</string>
+    <string name="timer_on">Включить таймер</string>
+    <string name="minutes">мин</string>
 </resources>

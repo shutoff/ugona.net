@@ -75,7 +75,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:padding="15dp"/>
+                android:padding="15dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -116,7 +116,7 @@
                         android:src="@drawable/icon_reserve"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="2dp"/>
+                        android:padding="2dp" />
 
                     <TextView
                         android:id="@+id/reserve"
@@ -136,7 +136,7 @@
                         android:src="@drawable/icon_balance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="2dp"/>
+                        android:padding="2dp" />
 
                     <TextView
                         android:id="@+id/balance"
@@ -156,7 +156,7 @@
                         android:src="@drawable/icon_temperature"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="2dp"/>
+                        android:padding="2dp" />
 
                     <TextView
                         android:id="@+id/temperature"
@@ -184,7 +184,7 @@
                 android:paddingLeft="10dp"
                 android:gravity="left"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                style="@style/Theme.action"/>
+                style="@style/Theme.action" />
 
             <Button
                 android:id="@+id/rele"
@@ -196,7 +196,7 @@
                 android:paddingLeft="10dp"
                 android:gravity="left"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-            style="@style/Theme.action"/>
+                style="@style/Theme.action" />
 
             <Button
                 android:id="@+id/block"
@@ -208,7 +208,7 @@
                 android:paddingLeft="10dp"
                 android:gravity="left"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                style="@style/Theme.action"/>
+                style="@style/Theme.action" />
 
             <Button
                 android:id="@+id/valet"
@@ -220,8 +220,8 @@
                 android:paddingLeft="10dp"
                 android:gravity="left"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                style="@style/Theme.action"/>
-            
+                style="@style/Theme.action" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="10dp" />
@@ -231,6 +231,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/address"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/map_bg"
@@ -240,7 +241,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/marker_map"/>
+            android:src="@drawable/marker_map" />
 
         <ScrollView
             android:layout_width="0dp"
@@ -249,32 +250,51 @@
             android:layout_gravity="center">
 
             <LinearLayout
-            android:id="@+id/address"
+                android:id="@+id/addr_data"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
+                android:gravity="center"
                 android:padding="5dp">
 
-            <TextView
-                android:id="@+id/address1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center">
 
-            <TextView
-                android:id="@+id/address2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/caldroid_holo_blue_light"
-                android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/addr_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/caldroid_holo_blue_light"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/address3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                    <TextView
+                        android:id="@+id/location"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
 
-        </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/address2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textColor="@color/caldroid_holo_blue_light"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/address3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
+            </LinearLayout>
 
         </ScrollView>
 
