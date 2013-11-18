@@ -65,6 +65,10 @@
             android:label="@string/about" />
 
         <activity
+            android:name=".Phones"
+            android:label="@string/phones" />
+
+        <activity
             android:name=".MapView"
             android:uiOptions="splitActionBarWhenNarrow">
             <meta-data
@@ -85,6 +89,10 @@
             android:theme="@style/Theme.Transparent" />
 
         <activity
+            android:name=".StatusDialog"
+            android:theme="@style/Theme.Transparent" />
+
+        <activity
             android:name=".Alarm"
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:launchMode="singleTop" />
@@ -99,7 +107,7 @@
         </activity>
 
         <receiver android:name=".SmsMonitor">
-            <intent-filter android:priority="6500">
+            <intent-filter android:priority="60000">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
                 <action android:name="net.ugona.plus.SMS_SENT" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />

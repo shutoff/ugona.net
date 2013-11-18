@@ -23,7 +23,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -215,6 +218,24 @@ public class CarPreferences extends PreferenceActivity {
                     return true;
                 }
                 return false;
+            }
+        });
+
+        Preference phonesPref = findPreference("phones");
+        phonesPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Actions.users(CarPreferences.this, car_id);
+                return true;
+            }
+        });
+
+        Preference timerPref = findPreference("timer");
+        timerPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                setTimer();
+                return true;
             }
         });
 
@@ -435,5 +456,56 @@ public class CarPreferences extends PreferenceActivity {
         } catch (Exception e) {
             // ignore
         }
+    }
+
+    void setTimer() {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.timer)
+                .setPositiveButton(R.string.ok, null)
+                .setNegativeButton(R.string.cancel, null)
+                .setView(inflater.inflate(R.layout.timer_setup, null))
+                .create();
+        dialog.show();
+        final TextView tvLabel = (TextView) dialog.findViewById(R.id.period);
+        final SeekBar seekBar = (SeekBar) dialog.findViewById(R.id.timer);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                tvLabel.setText((progress + 1) + " " + getString(R.string.minutes));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        seekBar.setProgress(9);
+        final CheckBox checkBox = (CheckBox) dialog.findViewById(R.id.timer_on);
+        checkBox.setChecked(true);
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                seekBar.setEnabled(isChecked);
+                tvLabel.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+            }
+        });
+        Button btnOk = dialog.getButton(Dialog.BUTTON_POSITIVE);
+        btnOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int timeout = 0;
+                if (checkBox.isChecked())
+                    timeout = seekBar.getProgress() + 1;
+                dialog.dismiss();
+                String text = String.format("TIMER %04d", timeout);
+                Actions.send_sms(CarPreferences.this, car_id, text, "TIMER OK", R.string.timer, null);
+            }
+        });
     }
 }

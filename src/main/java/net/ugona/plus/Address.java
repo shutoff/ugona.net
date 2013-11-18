@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import java.util.Locale;
+
 public class Address {
 
     static Request addr_request;
@@ -41,6 +43,7 @@ public class Address {
             ed.putString(Names.ADDR_LAT + id, latitude);
             ed.putString(Names.ADDR_LNG + id, longitude);
             ed.putString(Names.ADDRESS + id, address);
+            ed.putString(Names.ADDR_LANG + id, Locale.getDefault().getLanguage());
             ed.commit();
 
             try {
@@ -93,6 +96,8 @@ public class Address {
                 double lng2 = Double.parseDouble(preferences.getString(Names.ADDR_LNG + car_id, "0"));
                 double distance = calc_distance(lat1, lng1, lat2, lng2);
                 result = preferences.getString(Names.ADDRESS + car_id, "");
+                if (!preferences.getString(Names.ADDR_LANG + car_id, "").equals(Locale.getDefault().getLanguage()))
+                    result = "";
                 if (distance > 200)
                     result = "";
                 if ((distance < 20) && (result.length() > 0))

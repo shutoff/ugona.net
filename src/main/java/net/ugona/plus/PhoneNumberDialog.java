@@ -10,6 +10,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,14 +42,14 @@ public class PhoneNumberDialog extends Activity {
                 .create();
         dialog.show();
         edNumber = (EditText) dialog.findViewById(R.id.number);
-        edNumber.setText(getIntent().getStringExtra(Names.CAR_PHONE));
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
                 finish();
             }
         });
-        Button btnOk = dialog.getButton(Dialog.BUTTON_POSITIVE);
+        final Button btnOk = dialog.getButton(Dialog.BUTTON_POSITIVE);
+        btnOk.setEnabled(false);
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -57,6 +59,25 @@ public class PhoneNumberDialog extends Activity {
                 dialog.dismiss();
             }
         });
+        edNumber.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                btnOk.setEnabled(s.length() > 7);
+            }
+        });
+        String phone = getIntent().getStringExtra(Names.CAR_PHONE);
+        if (phone != null)
+            edNumber.setText(phone);
         View iv = dialog.findViewById(R.id.contacts);
         iv.setClickable(true);
         iv.setOnClickListener(new View.OnClickListener() {

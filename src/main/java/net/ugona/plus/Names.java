@@ -72,7 +72,10 @@ public final class Names {
     static final String MAP_TYPE = "map_type";
 
     static final String ADDRESS = "Address";
+    static final String ADDR_LANG = "AddressLanguage";
     static final String ADDR_LAT = "AddrLatitude";
     static final String ADDR_LNG = "AddrLongitude";
+
+    static final String SMS_TEXT = "sms_text";
 
 }

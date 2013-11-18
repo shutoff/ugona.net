@@ -68,7 +68,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:padding="5dp"/>
+            android:padding="5dp" />
 
     </LinearLayout>
 
@@ -118,7 +118,7 @@
                         android:src="@drawable/icon_reserve"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="2dp"/>
+                        android:padding="2dp" />
 
                     <TextView
                         android:id="@+id/reserve"
@@ -138,7 +138,7 @@
                         android:src="@drawable/icon_balance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="2dp"/>
+                        android:padding="2dp" />
 
                     <TextView
                         android:id="@+id/balance"
@@ -158,7 +158,7 @@
                         android:src="@drawable/icon_temperature"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="2dp"/>
+                        android:padding="2dp" />
 
                     <TextView
                         android:id="@+id/temperature"
@@ -184,7 +184,7 @@
                     android:layout_marginBottom="5dp"
                     android:paddingLeft="10dp"
                     android:gravity="left"
-                    style="@style/Theme.action"/>
+                    style="@style/Theme.action" />
 
                 <Button
                     android:id="@+id/rele"
@@ -195,7 +195,7 @@
                     android:layout_marginBottom="5dp"
                     android:paddingLeft="10dp"
                     android:gravity="left"
-                    style="@style/Theme.action"/>
+                    style="@style/Theme.action" />
 
                 <Button
                     android:id="@+id/block"
@@ -206,7 +206,7 @@
                     android:layout_marginBottom="5dp"
                     android:paddingLeft="10dp"
                     android:gravity="left"
-                    style="@style/Theme.action"/>
+                    style="@style/Theme.action" />
 
                 <Button
                     android:id="@+id/valet"
@@ -217,13 +217,14 @@
                     android:layout_marginBottom="5dp"
                     android:paddingLeft="10dp"
                     android:gravity="left"
-                    style="@style/Theme.action"/>
+                    style="@style/Theme.action" />
 
             </LinearLayout>
 
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/map_bg"
@@ -233,7 +234,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/marker_map"/>
+                android:src="@drawable/marker_map" />
 
             <ScrollView
                 android:layout_width="0dp"
@@ -242,22 +243,40 @@
                 android:layout_gravity="center">
 
                 <LinearLayout
-                    android:id="@+id/address"
+                    android:id="@+id/addr_data"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
+                    android:gravity="center"
                     android:padding="5dp">
 
-                    <TextView
-                        android:id="@+id/address1"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                        android:orientation="horizontal"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/addr_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/caldroid_holo_blue_light"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/location"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/address2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:gravity="center"
                         android:textColor="@color/caldroid_holo_blue_light"
                         android:textStyle="bold" />
 
@@ -265,6 +284,7 @@
                         android:id="@+id/address3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:gravity="center"
                         android:textAppearance="?android:attr/textAppearanceSmall" />
 
                 </LinearLayout>

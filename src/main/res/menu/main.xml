@@ -7,6 +7,11 @@
         car:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/car_setup"
+        android:title="@string/car_setup"
+        car:showAsAction="never" />
+
+    <item
         android:id="@+id/preferences"
         android:title="@string/preferences"
         android:icon="@android:drawable/ic_menu_preferences"
