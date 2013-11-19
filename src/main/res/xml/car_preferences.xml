@@ -53,6 +53,21 @@
         android:defaultValue="true"
         android:key="show_balance" />
 
+    <Preference
+        android:title="@string/alarm_sound"
+        android:summary="@string/def"
+        android:key="alarm" />
+
+    <Preference
+        android:title="@string/alarm_test"
+        android:summary="@string/alarm_test_sum"
+        android:key="alarm_test" />
+
+    <Preference
+        android:title="@string/notify_sound"
+        android:summary="@string/def"
+        android:key="notify" />
+
     <net.ugona.plus.SeekBarPreference
         android:title="@string/temp_correct"
         android:key="tmp_shift"

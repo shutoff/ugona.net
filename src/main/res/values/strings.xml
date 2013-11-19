@@ -245,7 +245,6 @@
     <string name="gprs_none_state">No GPRS connection</string>
     <string name="gprs_home_state">GPRS connected</string>
     <string name="gprs_roaming_state">GPRS connected (roaming)</string>
-    <string name="car_setup">Car setup</string>
     <string name="phones">Control phones</string>
     <string name="phones_sum">Manage control phones</string>
     <string name="add_phone">Add phone</string>

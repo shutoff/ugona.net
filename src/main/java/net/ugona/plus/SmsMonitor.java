@@ -71,6 +71,7 @@ public class SmsMonitor extends BroadcastReceiver {
                 bodyText.append(m.getMessageBody());
             }
             String body = bodyText.toString();
+            State.appendLog("sms: " + body);
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
             String[] cars = preferences.getString(Names.CARS, "").split(",");
             for (String car : cars) {
@@ -178,7 +179,7 @@ public class SmsMonitor extends BroadcastReceiver {
     private void showNotification(Context context, String text, String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         Alarm.createNotification(context, text, car_id);
-        String sound = preferences.getString(Names.NOTIFY, "");
+        String sound = Preferences.getNotify(preferences, car_id);
         Uri uri = Uri.parse(sound);
         Ringtone ringtone = RingtoneManager.getRingtone(context, uri);
         if (ringtone == null)

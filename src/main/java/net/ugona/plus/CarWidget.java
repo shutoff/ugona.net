@@ -161,6 +161,7 @@ public class CarWidget extends AppWidgetProvider {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String car_id = Preferences.getCar(preferences, preferences.getString(Names.WIDGET + widgetID, ""));
+        State.appendLog("Update " + widgetID + ": " + car_id);
 
         Intent configIntent = new Intent(context, WidgetService.class);
         configIntent.putExtra(Names.ID, car_id);
@@ -172,6 +173,7 @@ public class CarWidget extends AppWidgetProvider {
 
         configIntent = new Intent(FetchService.ACTION_START_UPDATE);
         configIntent.putExtra(Names.ID, car_id);
+        configIntent.putExtra(Names.WIDGET, widgetID);
         configIntent.setData(data);
         pIntent = PendingIntent.getBroadcast(context, widgetID, configIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         widgetView.setOnClickPendingIntent(R.id.update_block, pIntent);

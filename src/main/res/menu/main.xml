@@ -7,14 +7,18 @@
         car:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/car_setup"
-        android:title="@string/car_setup"
+        android:id="@+id/preferences"
+        android:title="@string/preferences"
         car:showAsAction="never" />
 
     <item
-        android:id="@+id/preferences"
-        android:title="@string/preferences"
-        android:icon="@android:drawable/ic_menu_preferences"
+        android:id="@+id/cars"
+        android:title="@string/cars"
+        car:showAsAction="never" />
+
+    <item
+        android:id="@+id/passwd"
+        android:title="@string/password"
         car:showAsAction="never" />
 
     <item

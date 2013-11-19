@@ -81,7 +81,7 @@ public class WidgetService extends Service {
                 if (action.equals(ACTION_SHOW)) {
                     Intent i = new Intent(this, MainActivity.class);
                     String id = intent.getStringExtra(Names.ID);
-                    State.appendLog("show + " + id);
+                    State.appendLog("show " + id + " from " + intent.getIntExtra(Names.WIDGET, 0));
                     i.putExtra(Names.ID, id);
                     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     getApplicationContext().startActivity(i);

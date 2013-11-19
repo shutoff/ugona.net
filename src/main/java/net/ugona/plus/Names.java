@@ -11,6 +11,7 @@ public final class Names {
 
     static final String CAR_AUTOSTART = "autostart_";
     static final String CAR_RELE1 = "rele1_";
+    static final String CAR_TIMER = "timer";
 
     static final String ALARM = "alarm";
     static final String NOTIFY = "notify";

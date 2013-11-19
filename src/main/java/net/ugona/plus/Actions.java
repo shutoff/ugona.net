@@ -43,6 +43,14 @@ public class Actions {
         requestPassword(context, car_id, R.string.turbo_off, R.string.turbo_off_sum, "TURBO OFF", "TURBO OFF OK");
     }
 
+    static void internetOn(Context context, String car_id) {
+        requestPassword(context, car_id, R.string.internet_on, R.string.internet_on_sum, "INTERNET ON", "INTERNET ON OK");
+    }
+
+    static void internetOff(Context context, String car_id) {
+        requestPassword(context, car_id, R.string.internet_off, R.string.internet_off_sum, "INTERNET OFF", "INTERNET OFF OK");
+    }
+
     static void reset(Context context, String car_id) {
         requestPassword(context, car_id, R.string.reset, R.string.reset_sum, "RESET", null);
     }
@@ -206,12 +214,13 @@ public class Actions {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
-                after.answer(ccode.toString());
+                after.answer(ccode.getText().toString());
             }
         });
     }
 
     static void send_sms(final Context context, final String car_id, String sms, String answer, final int id_title, final Answer after) {
+        State.appendLog("send sms " + sms);
         final ProgressDialog smsProgress = new ProgressDialog(context);
         smsProgress.setMessage(context.getString(id_title));
         smsProgress.show();

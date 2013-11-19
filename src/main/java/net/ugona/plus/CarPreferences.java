@@ -10,6 +10,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
@@ -42,6 +45,14 @@ public class CarPreferences extends PreferenceActivity {
     Preference apiPref;
     Preference phonePref;
     Preference versionPref;
+    Preference phonesPref;
+    Preference timerPref;
+    Preference notifyPref;
+    Preference alarmPref;
+    SeekBarPreference sensPref;
+
+    String alarmUri;
+    String notifyUri;
 
     EditTextPreference namePref;
     SeekBarPreference shiftPref;
@@ -49,6 +60,8 @@ public class CarPreferences extends PreferenceActivity {
     String car_id;
 
     final static int REQUEST_PHONE = 4000;
+    private static final int GET_ALARM_SOUND = 3008;
+    private static final int GET_NOTIFY_SOUND = 3009;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,9 +126,6 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
 
-        String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
-        setPhone(phoneNumber);
-
         apiPref = findPreference("api_key");
         apiPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
@@ -147,7 +157,7 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
 
-        SeekBarPreference sensPref = (SeekBarPreference) findPreference("shock_sens");
+        sensPref = (SeekBarPreference) findPreference("shock_sens");
         sensPref.mMin = 1;
         sensPref.summaryGenerator = new SeekBarPreference.SummaryGenerator() {
             @Override
@@ -221,7 +231,7 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
 
-        Preference phonesPref = findPreference("phones");
+        phonesPref = findPreference("phones");
         phonesPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -230,11 +240,22 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
 
-        Preference timerPref = findPreference("timer");
+        timerPref = findPreference("timer");
         timerPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 setTimer();
+                return true;
+            }
+        });
+
+        Preference testPref = findPreference("alarm_test");
+        testPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+                Intent intent = new Intent(getBaseContext(), Alarm.class);
+                intent.putExtra(Names.ID, car_id);
+                intent.putExtra(Names.ALARM, getString(R.string.alarm_test));
+                startActivity(intent);
                 return true;
             }
         });
@@ -269,18 +290,86 @@ public class CarPreferences extends PreferenceActivity {
             };
             verTask.execute(PROFILE_URL, api_key);
         }
+
+        alarmPref = findPreference("alarm");
+        alarmPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+                Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_RINGTONE);
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
+                if (alarmUri != null) {
+                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, Uri.parse(alarmUri));
+                } else {
+                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, (Uri) null);
+                }
+
+                startActivityForResult(intent, GET_ALARM_SOUND);
+                return true;
+            }
+        });
+
+        alarmUri = Preferences.getAlarm(preferences, car_id);
+        setAlarmTitle();
+
+        notifyPref = findPreference("notify");
+        notifyPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+                Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION);
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
+                if (notifyUri != null) {
+                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, Uri.parse(notifyUri));
+                } else {
+                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, (Uri) null);
+                }
+
+                startActivityForResult(intent, GET_NOTIFY_SOUND);
+                return true;
+            }
+        });
+
+        notifyUri = Preferences.getNotify(preferences, car_id);
+        setNotifyTitle();
+
+        String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
+        setPhone(phoneNumber);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if ((requestCode == REQUEST_PHONE) && (resultCode == RESULT_OK)) {
-            String number = data.getStringExtra(Names.CAR_PHONE);
-            SharedPreferences.Editor ed = preferences.edit();
-            ed.putString(Names.CAR_PHONE + car_id, number);
-            ed.commit();
-            if (number.equals(""))
-                number = getString(R.string.phone_number_summary);
-            phonePref.setSummary(number);
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case GET_ALARM_SOUND: {
+                    Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+                    if (uri != null) {
+                        alarmUri = uri.toString();
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putString(Names.ALARM, alarmUri);
+                        ed.commit();
+                        setAlarmTitle();
+                    }
+                    return;
+                }
+                case GET_NOTIFY_SOUND: {
+                    Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+                    if (uri != null) {
+                        notifyUri = uri.toString();
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putString(Names.NOTIFY, notifyUri);
+                        ed.commit();
+                        setNotifyTitle();
+                    }
+                    return;
+                }
+                case REQUEST_PHONE: {
+                    String number = data.getStringExtra(Names.CAR_PHONE);
+                    SharedPreferences.Editor ed = preferences.edit();
+                    ed.putString(Names.CAR_PHONE + car_id, number);
+                    ed.commit();
+                    setPhone(number);
+                    return;
+                }
+            }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -289,8 +378,15 @@ public class CarPreferences extends PreferenceActivity {
         if (phoneNumber.length() > 0) {
             phonePref.setSummary(phoneNumber);
             smsPref.setEnabled(true);
+            phonesPref.setEnabled(true);
+            timerPref.setEnabled(true);
+            sensPref.setEnabled(true);
         } else {
+            phonePref.setSummary(getString(R.string.phone_number_summary));
             smsPref.setEnabled(false);
+            phonesPref.setEnabled(false);
+            timerPref.setEnabled(false);
+            sensPref.setEnabled(true);
         }
     }
 
@@ -374,7 +470,6 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
 
-
         etKey.addTextChangedListener(watcher);
         etKey.setText(preferences.getString(Names.CAR_KEY + car_id, ""));
         watcher.afterTextChanged(etKey.getText());
@@ -448,6 +543,32 @@ public class CarPreferences extends PreferenceActivity {
         });
     }
 
+    void setAlarmTitle() {
+        Uri uri = Uri.parse(alarmUri);
+        Ringtone ringtone = RingtoneManager.getRingtone(getBaseContext(), uri);
+        if (ringtone == null) {
+            uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+            ringtone = RingtoneManager.getRingtone(getBaseContext(), uri);
+        }
+        if (ringtone != null) {
+            String name = ringtone.getTitle(getBaseContext());
+            alarmPref.setSummary(name);
+        }
+    }
+
+    void setNotifyTitle() {
+        Uri uri = Uri.parse(notifyUri);
+        Ringtone ringtone = RingtoneManager.getRingtone(getBaseContext(), uri);
+        if (ringtone == null) {
+            uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            ringtone = RingtoneManager.getRingtone(getBaseContext(), uri);
+        }
+        if (ringtone != null) {
+            String name = ringtone.getTitle(getBaseContext());
+            notifyPref.setSummary(name);
+        }
+    }
+
     void sendUpdate() {
         try {
             Intent intent = new Intent(FetchService.ACTION_UPDATE_FORCE);
@@ -467,6 +588,7 @@ public class CarPreferences extends PreferenceActivity {
                 .setView(inflater.inflate(R.layout.timer_setup, null))
                 .create();
         dialog.show();
+        int timeout = preferences.getInt(Names.CAR_TIMER + car_id, 10);
         final TextView tvLabel = (TextView) dialog.findViewById(R.id.period);
         final SeekBar seekBar = (SeekBar) dialog.findViewById(R.id.timer);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -485,9 +607,8 @@ public class CarPreferences extends PreferenceActivity {
 
             }
         });
-        seekBar.setProgress(9);
+        seekBar.setProgress((timeout > 0) ? timeout - 1 : 9);
         final CheckBox checkBox = (CheckBox) dialog.findViewById(R.id.timer_on);
-        checkBox.setChecked(true);
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -495,16 +616,22 @@ public class CarPreferences extends PreferenceActivity {
                 tvLabel.setVisibility(isChecked ? View.VISIBLE : View.GONE);
             }
         });
+        checkBox.setChecked(timeout > 0);
         Button btnOk = dialog.getButton(Dialog.BUTTON_POSITIVE);
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int timeout = 0;
-                if (checkBox.isChecked())
-                    timeout = seekBar.getProgress() + 1;
+                final int timeout = (checkBox.isChecked()) ? seekBar.getProgress() + 1 : 0;
                 dialog.dismiss();
                 String text = String.format("TIMER %04d", timeout);
-                Actions.send_sms(CarPreferences.this, car_id, text, "TIMER OK", R.string.timer, null);
+                Actions.requestPassword(CarPreferences.this, car_id, R.string.timer, R.string.timer_sum, text, "TIMER OK", new Actions.Answer() {
+                    @Override
+                    void answer(String body) {
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putInt(Names.CAR_TIMER + car_id, timeout);
+                        ed.commit();
+                    }
+                });
             }
         });
     }

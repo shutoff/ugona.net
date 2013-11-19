@@ -44,6 +44,7 @@ public class Alarm extends Activity {
     Timer timer;
     String car_id;
     SharedPreferences preferences;
+    boolean show_main;
 
     /**
      * Called when the activity is first created.
@@ -82,9 +83,11 @@ public class Alarm extends Activity {
     }
 
     void showMain() {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(Names.ID, car_id);
-        startActivity(intent);
+        if (show_main) {
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.putExtra(Names.ID, car_id);
+            startActivity(intent);
+        }
         finish();
     }
 
@@ -171,6 +174,7 @@ public class Alarm extends Activity {
 
         String alarm = intent.getStringExtra(Names.ALARM);
         if (alarm != null) {
+            show_main = !alarm.equals(getString(R.string.alarm_test));
             String[] cars = preferences.getString(Names.CARS, "").split(",");
             if (cars.length > 1) {
                 String name = preferences.getString(Names.CAR_NAME, "");
@@ -182,7 +186,7 @@ public class Alarm extends Activity {
                 alarm = name + "\n" + alarm;
             }
             tvAlarm.setText(alarm);
-            String sound = preferences.getString(Names.ALARM, "");
+            String sound = Preferences.getAlarm(preferences, car_id);
             Uri uri = Uri.parse(sound);
             Ringtone ringtone = RingtoneManager.getRingtone(getBaseContext(), uri);
             if (ringtone == null)

@@ -33,20 +33,24 @@ public class CarDrawable {
             small = 1;
 
         Drawable[] parts;
-        parts = new Drawable[5];
-        parts_id = new int[5];
+        parts = new Drawable[7];
+        parts_id = new int[7];
 
         parts[0] = drawables[1];
         parts[1] = drawables[0];
         parts[2] = drawables[0];
         parts[3] = drawables[0];
         parts[4] = drawables[0];
+        parts[5] = drawables[0];
+        parts[6] = drawables[0];
 
         parts_id[0] = 0;
         parts_id[1] = 0;
         parts_id[2] = 0;
         parts_id[3] = 0;
         parts_id[4] = 0;
+        parts_id[5] = 0;
+        parts_id[6] = 0;
 
         drawable = new LayerDrawable(parts);
         for (int i = 0; i < parts.length; i++)
@@ -58,7 +62,7 @@ public class CarDrawable {
         if (drawables != null)
             return;
 
-        drawables = new Drawable[25];
+        drawables = new Drawable[29];
         drawables[0] = new ColorDrawable(Color.TRANSPARENT);
 
         Resources resources = ctx.getResources();
@@ -90,6 +94,10 @@ public class CarDrawable {
         drawables[22] = resources.getDrawable(R.drawable.trunk_red_open);
         drawables[23] = resources.getDrawable(R.drawable.lock_white);
         drawables[24] = resources.getDrawable(R.drawable.lock_white_widget);
+        drawables[25] = resources.getDrawable(R.drawable.engine_blue);
+        drawables[26] = resources.getDrawable(R.drawable.engine_red);
+        drawables[27] = resources.getDrawable(R.drawable.valet);
+        drawables[28] = resources.getDrawable(R.drawable.block);
     }
 
     Drawable getDrawable() {
@@ -110,7 +118,6 @@ public class CarDrawable {
         }
 
         boolean guard = preferences.getBoolean(Names.GUARD + car_id, false);
-        // guard = false;
         upd |= setModeCar(guard, preferences.getBoolean(Names.ZONE_ACCESSORY + car_id, false));
 
         boolean doors_open = preferences.getBoolean(Names.INPUT1 + car_id, false);
@@ -127,27 +134,18 @@ public class CarDrawable {
 
         setLayer(4, guard ? 23 + small : 0);
 
-        return upd;
-
-/*
-
+        int engine = 0;
         if (preferences.getBoolean(Names.INPUT3 + car_id, false) ||
-                preferences.getBoolean(Names.ENGINE + car_id, false)) {
-            dIgnition.setAlpha(255);
-            if (preferences.getBoolean(Names.ZONE_IGNITION + car_id, false)) {
-                dIgnition.setColorFilter(new ColorMatrixColorFilter(createMatrix(alarm)));
-            } else {
-                dIgnition.setColorFilter(new ColorMatrixColorFilter(createMatrix(color)));
-            }
-        } else {
-            dIgnition.setAlpha(0);
-        }
-        if (Preferences.getValet(preferences, car_id)) {
-            dValet.setAlpha(255);
-        } else {
-            dValet.setAlpha(0);
-        }
-*/
+                preferences.getBoolean(Names.ENGINE + car_id, false))
+            engine = preferences.getBoolean(Names.ZONE_IGNITION + car_id, false) ? 26 : 25;
+        setLayer(5, engine);
+
+        int state = 0;
+        if (Preferences.getValet(preferences, car_id))
+            state = 27;
+        setLayer(6, state);
+
+        return upd;
     }
 
     boolean setLayer(int n, int id) {

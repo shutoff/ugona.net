@@ -37,7 +37,7 @@ public class Cars extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.cars);
+        setContentView(R.layout.list);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         setupCars();
@@ -85,8 +85,8 @@ public class Cars extends ActionBarActivity {
                             String id = v.getTag().toString();
                             String message = getString(R.string.delete);
                             Car[] cars = getCars(Cars.this);
-                            for (Car car: cars){
-                                if (car.id.equals(id)){
+                            for (Car car : cars) {
+                                if (car.id.equals(id)) {
                                     message += " " + car.name;
                                 }
                             }
@@ -226,6 +226,13 @@ public class Cars extends ActionBarActivity {
         ed.commit();
         setupCars();
         ((BaseAdapter) lvCars.getAdapter()).notifyDataSetChanged();
+        try {
+            Intent intent = new Intent(FetchService.ACTION_UPDATE_FORCE);
+            intent.putExtra(Names.ID, id);
+            sendBroadcast(intent);
+        } catch (Exception e) {
+            // ignore
+        }
     }
 
 }

@@ -2,6 +2,8 @@ package net.ugona.plus;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -17,6 +19,8 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,6 +29,8 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.romorama.caldroid.CaldroidFragment;
@@ -206,17 +212,20 @@ public class MainActivity extends ActionBarActivity {
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.car_setup: {
+            case R.id.preferences: {
                 Intent intent = new Intent(this, CarPreferences.class);
                 intent.putExtra(Names.ID, car_id);
                 startActivity(intent);
                 return true;
             }
-            case R.id.preferences: {
-                Intent intent = new Intent(this, Preferences.class);
+            case R.id.cars: {
+                Intent intent = new Intent(getBaseContext(), Cars.class);
                 startActivity(intent);
                 return true;
             }
+            case R.id.passwd:
+                setPassword();
+                return true;
             case R.id.about: {
                 Intent intent = new Intent(this, About.class);
                 startActivity(intent);
@@ -513,6 +522,70 @@ public class MainActivity extends ActionBarActivity {
 
     static interface DateChangeListener {
         abstract void dateChanged(LocalDate current);
+    }
+
+    void setPassword() {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.password)
+                .setMessage(R.string.password_summary)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.save, null)
+                .setView(inflater.inflate(R.layout.setpassword, null))
+                .create();
+        dialog.show();
+        final String password = preferences.getString(Names.PASSWORD, "");
+        final EditText etOldPswd = (EditText) dialog.findViewById(R.id.old_password);
+        if (password.length() == 0) {
+            TextView tvOldLabel = (TextView) dialog.findViewById(R.id.old_password_label);
+            tvOldLabel.setVisibility(View.GONE);
+            etOldPswd.setVisibility(View.GONE);
+        }
+        final EditText etPasswd1 = (EditText) dialog.findViewById(R.id.password);
+        final EditText etPasswd2 = (EditText) dialog.findViewById(R.id.password1);
+        final TextView tvConfrim = (TextView) dialog.findViewById(R.id.invalid_confirm);
+        final Button btnSave = dialog.getButton(Dialog.BUTTON_POSITIVE);
+        final Context context = this;
+
+        TextWatcher watcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (etPasswd1.getText().toString().equals(etPasswd2.getText().toString())) {
+                    tvConfrim.setVisibility(View.INVISIBLE);
+                    btnSave.setEnabled(true);
+                } else {
+                    tvConfrim.setVisibility(View.VISIBLE);
+                    btnSave.setEnabled(false);
+                }
+            }
+        };
+
+        etPasswd1.addTextChangedListener(watcher);
+        etPasswd2.addTextChangedListener(watcher);
+
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!password.equals(etOldPswd.getText().toString())) {
+                    Actions.showMessage(context, R.string.password, R.string.invalid_password);
+                    return;
+                }
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putString(Names.PASSWORD, etPasswd1.getText().toString());
+                ed.commit();
+                dialog.dismiss();
+            }
+        });
     }
 
 }

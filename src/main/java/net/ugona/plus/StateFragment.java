@@ -242,7 +242,8 @@ public class StateFragment extends Fragment {
             vTemperature.setVisibility(View.VISIBLE);
         }
 
-        drawable.update(preferences, car_id);
+        if (drawable.update(preferences, car_id))
+            imgCar.setImageDrawable(drawable.getDrawable());
         String time = "";
         long last_stand = preferences.getLong(Names.LAST_STAND + car_id, 0);
         if (last_stand > 0) {

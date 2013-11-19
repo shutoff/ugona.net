@@ -137,6 +137,18 @@ public class ActionFragment extends Fragment {
                     Actions.turboOff(context, car_id);
                 }
             },
+            new Action(R.string.internet_on) {
+                @Override
+                void action(Context context, String car_id) {
+                    Actions.internetOn(context, car_id);
+                }
+            },
+            new Action(R.string.internet_off) {
+                @Override
+                void action(Context context, String car_id) {
+                    Actions.internetOff(context, car_id);
+                }
+            },
             new Action(R.string.reset) {
                 @Override
                 void action(Context context, String car_id) {

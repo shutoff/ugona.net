@@ -9,7 +9,7 @@
     <string name="phone_number">Номер телефона</string>
     <string name="alarm_sound">Звук тревоги</string>
     <string name="notify_sound">Звук уведомления</string>
-    <string name="preferences">Настройки приложения</string>
+    <string name="preferences">Настройки</string>
     <string name="actions">Действия</string>
     <string name="control">Управление</string>
     <string name="sms_mode">Переключиться в режим SMS</string>
@@ -35,8 +35,8 @@
     <string name="motor_off">Заглушить двигатель</string>
     <string name="motor_on_sum">Произвести дистанционный запуск двигателя</string>
     <string name="motor_off_sum">Дистанционно остановить двигатель</string>
-    <string name="turbo_on">Включить турбо режим</string>
-    <string name="turbo_off">Выключить турбо режим</string>
+    <string name="turbo_on">Включить режим слежения</string>
+    <string name="turbo_off">Выключить режим слежения</string>
     <string name="turbo_on_sum">Режим преследования, в этом режиме устройство отправляет данные так часто, как это возможно</string>
     <string name="turbo_off_sum">Отменить режим преследования</string>
     <string name="reset_sum">Выполнить принудительную загрузку устройства</string>
@@ -66,7 +66,7 @@
     <string name="key_error">Ошибка проверки API ключа</string>
     <string name="check_api">Проверка ключа</string>
     <string name="data_error">Ошибка обновления данных</string>
-    <string name="block">Дистанционная блокировка</string>
+    <string name="block">Заблокировать двигатель</string>
     <string name="block_sum">Включить дистанционную блокировку автомобиля</string>
     <string name="autostart">Автозапуск</string>
     <string name="autostart_summary">Отображать действия для дистанционного запуска</string>
@@ -74,7 +74,7 @@
     <string name="rele1_summary">Отображать действия для предпускового подогревателя</string>
     <string name="rele1_action">Отправить импульс на РЕЛЕ1</string>
     <string name="password">Установить пароль</string>
-    <string name="password_summary">Установить пароль для выполнения действий</string>
+    <string name="password_summary">Укажите пароль для управления устройством из приложения</string>
     <string name="password_old">Старый пароль:</string>
     <string name="password_text">Пароль:</string>
     <string name="password_confirm">Подтверждение:</string>
@@ -169,9 +169,7 @@
     <string name="sms_request">Запрос по SMS</string>
     <string name="incomming_sms">Входящее SMS</string>
     <string name="no_events">Нет событий</string>
-    <string name="cars">Автомобили</string>
-    <string name="cars_sum">Настройка ваших машин</string>
-    <string name="new_car">Новый автомобиль</string>
+    <string name="cars">Список автомобилей</string>
     <string name="name">Название</string>
     <string name="car">Автомобиль</string>
     <string name="add">Добавить</string>
@@ -205,7 +203,7 @@
     <string name="no_gps_message">GPS выключен в системе.\nДля определения местоположения надо включить GPS в настройках</string>
     <string name="net_gps_message">Местоположение определено по сети.\nДля более точного определения положения надо включить GPS в настройках</string>
     <string name="no_location">Неизвестное местоположение</string>
-    <string name="shock_sens">Чуствительность датчика удара</string>
+    <string name="shock_sens">Чувствительность датчика удара</string>
     <string-array name="levels">
         <item>Минимальная</item>
         <item>Низкая</item>
@@ -237,7 +235,6 @@
     <string name="gprs_none_state">Нет соединения с интернетом</string>
     <string name="gprs_home_state">Соединение с интернетом установлено</string>
     <string name="gprs_roaming_state">Соединение с интернетом установлено в роуминге</string>
-    <string name="car_setup">Настройки автомобиля</string>
     <string name="phones">Управляющие телефоны</string>
     <string name="phones_sum">Настройка управляющих телефонов</string>
     <string name="add_phone">Добавить телефон</string>
