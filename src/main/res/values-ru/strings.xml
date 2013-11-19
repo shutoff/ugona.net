@@ -238,10 +238,12 @@
     <string name="phones">Управляющие телефоны</string>
     <string name="phones_sum">Настройка управляющих телефонов</string>
     <string name="add_phone">Добавить телефон</string>
-    <string name="erase_phones">Удалить все телефоны кроме текущего</string>
+    <string name="erase_phones">Для очистки списка сделайте повторную инициализацию главного телефона</string>
     <string name="clear">Очистить</string>
     <string name="timer">Настройка таймера</string>
     <string name="timer_sum">Настройка периодичности соединения автомобиля с сервером</string>
     <string name="timer_on">Включить таймер</string>
     <string name="minutes">мин</string>
+    <string name="init_phone">Инициализация главного телефона</string>
+    <string name="main_phone">Главный телефон</string>
 </resources>

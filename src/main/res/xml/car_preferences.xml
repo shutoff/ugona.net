@@ -23,6 +23,11 @@
         android:key="sms_mode" />
 
     <Preference
+        android:title="@string/main_phone"
+        android:summary="@string/init_phone"
+        android:key="main_phone" />
+
+    <Preference
         android:title="@string/phones"
         android:summary="@string/phones_sum"
         android:key="phones" />

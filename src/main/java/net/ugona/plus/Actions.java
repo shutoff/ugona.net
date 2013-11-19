@@ -128,6 +128,22 @@ public class Actions {
         });
     }
 
+
+    static void init_phone(final Context context, final String car_id) {
+        requestCCode(context, R.string.init_phone, 0, new Actions.Answer() {
+
+            @Override
+            void answer(final String ccode) {
+                Actions.send_sms(context, car_id, ccode, null, R.string.init_phone, new Actions.Answer() {
+                    @Override
+                    void answer(String body) {
+                        Actions.send_sms(context, car_id, ccode + " INIT", "Main user OK", R.string.init_phone, null);
+                    }
+                });
+            }
+        });
+    }
+
     static void showMessage(Context context, int id_title, int id_message) {
         AlertDialog dialog = new AlertDialog.Builder(context)
                 .setTitle(id_title)
@@ -181,13 +197,14 @@ public class Actions {
 
     static void requestCCode(final Context context, final int id_title, int id_message, final Answer after) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-        final AlertDialog dialog = new AlertDialog.Builder(context)
+        AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setTitle(id_title)
-                .setMessage(id_message)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.ok, null)
-                .setView(inflater.inflate(R.layout.ccode, null))
-                .create();
+                .setView(inflater.inflate(R.layout.ccode, null));
+        if (id_message > 0)
+            builder.setMessage(id_message);
+        final AlertDialog dialog = builder.create();
         dialog.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         dialog.show();
@@ -220,7 +237,6 @@ public class Actions {
     }
 
     static void send_sms(final Context context, final String car_id, String sms, String answer, final int id_title, final Answer after) {
-        State.appendLog("send sms " + sms);
         final ProgressDialog smsProgress = new ProgressDialog(context);
         smsProgress.setMessage(context.getString(id_title));
         smsProgress.show();

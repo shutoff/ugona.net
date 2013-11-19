@@ -128,7 +128,6 @@
                 <action android:name="net.ugona.plus.NO_UPDATE" />
                 <action android:name="net.ugona.plus.ERROR" />
                 <action android:name="net.ugona.plus.START" />
-                <action android:name="net.ugona.plus.START_UPDATE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"

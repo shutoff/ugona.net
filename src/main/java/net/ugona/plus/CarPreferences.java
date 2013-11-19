@@ -49,6 +49,7 @@ public class CarPreferences extends PreferenceActivity {
     Preference timerPref;
     Preference notifyPref;
     Preference alarmPref;
+    Preference mainPref;
     SeekBarPreference sensPref;
 
     String alarmUri;
@@ -331,6 +332,15 @@ public class CarPreferences extends PreferenceActivity {
         notifyUri = Preferences.getNotify(preferences, car_id);
         setNotifyTitle();
 
+        mainPref = findPreference("main_phone");
+        mainPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Actions.init_phone(CarPreferences.this, car_id);
+                return true;
+            }
+        });
+
         String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
         setPhone(phoneNumber);
     }
@@ -381,12 +391,14 @@ public class CarPreferences extends PreferenceActivity {
             phonesPref.setEnabled(true);
             timerPref.setEnabled(true);
             sensPref.setEnabled(true);
+            mainPref.setEnabled(true);
         } else {
             phonePref.setSummary(getString(R.string.phone_number_summary));
             smsPref.setEnabled(false);
             phonesPref.setEnabled(false);
             timerPref.setEnabled(false);
-            sensPref.setEnabled(true);
+            sensPref.setEnabled(false);
+            mainPref.setEnabled(false);
         }
     }
 

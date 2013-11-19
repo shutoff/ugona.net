@@ -1,8 +1,10 @@
 package net.ugona.plus;
 
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -139,24 +141,18 @@ public class Phones extends ActionBarActivity {
                 return true;
             }
             case R.id.erase: {
-                Actions.requestCCode(Phones.this, R.string.clear, R.string.erase_phones, new Actions.Answer() {
-
-                    @Override
-                    void answer(final String ccode) {
-                        Actions.send_sms(Phones.this, car_id, ccode, null, R.string.clear, new Actions.Answer() {
+                AlertDialog dialog = new AlertDialog.Builder(this)
+                        .setTitle(R.string.init_phone)
+                        .setMessage(R.string.erase_phones)
+                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
-                            void answer(String body) {
-                                Actions.send_sms(Phones.this, car_id, ccode + " INIT", "Main user OK", R.string.clear, new Actions.Answer() {
-
-                                    @Override
-                                    void answer(String body) {
-                                        finish();
-                                    }
-                                });
+                            public void onClick(DialogInterface dialog, int which) {
+                                Actions.init_phone(Phones.this, car_id);
                             }
-                        });
-                    }
-                });
+                        })
+                        .setNegativeButton(R.string.cancel, null)
+                        .create();
+                dialog.show();
                 return true;
             }
         }

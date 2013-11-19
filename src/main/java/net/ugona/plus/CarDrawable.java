@@ -33,8 +33,8 @@ public class CarDrawable {
             small = 1;
 
         Drawable[] parts;
-        parts = new Drawable[7];
-        parts_id = new int[7];
+        parts = new Drawable[8];
+        parts_id = new int[8];
 
         parts[0] = drawables[1];
         parts[1] = drawables[0];
@@ -43,6 +43,7 @@ public class CarDrawable {
         parts[4] = drawables[0];
         parts[5] = drawables[0];
         parts[6] = drawables[0];
+        parts[7] = drawables[0];
 
         parts_id[0] = 0;
         parts_id[1] = 0;
@@ -51,10 +52,9 @@ public class CarDrawable {
         parts_id[4] = 0;
         parts_id[5] = 0;
         parts_id[6] = 0;
+        parts_id[7] = 0;
 
         drawable = new LayerDrawable(parts);
-        for (int i = 0; i < parts.length; i++)
-            drawable.setId(i, i);
     }
 
     static void init(Context ctx) {
@@ -62,7 +62,7 @@ public class CarDrawable {
         if (drawables != null)
             return;
 
-        drawables = new Drawable[29];
+        drawables = new Drawable[30];
         drawables[0] = new ColorDrawable(Color.TRANSPARENT);
 
         Resources resources = ctx.getResources();
@@ -94,10 +94,12 @@ public class CarDrawable {
         drawables[22] = resources.getDrawable(R.drawable.trunk_red_open);
         drawables[23] = resources.getDrawable(R.drawable.lock_white);
         drawables[24] = resources.getDrawable(R.drawable.lock_white_widget);
-        drawables[25] = resources.getDrawable(R.drawable.engine_blue);
-        drawables[26] = resources.getDrawable(R.drawable.engine_red);
-        drawables[27] = resources.getDrawable(R.drawable.valet);
-        drawables[28] = resources.getDrawable(R.drawable.block);
+        drawables[25] = resources.getDrawable(R.drawable.engine);
+        drawables[26] = resources.getDrawable(R.drawable.engine_blue);
+        drawables[27] = resources.getDrawable(R.drawable.ignition);
+        drawables[28] = resources.getDrawable(R.drawable.ignition_red);
+        drawables[28] = resources.getDrawable(R.drawable.valet);
+        drawables[29] = resources.getDrawable(R.drawable.block);
     }
 
     Drawable getDrawable() {
@@ -114,44 +116,62 @@ public class CarDrawable {
             upd |= setLayer(1, 0);
             upd |= setLayer(2, 0);
             upd |= setLayer(3, 0);
-            return upd;
+        } else {
+
+            boolean guard = preferences.getBoolean(Names.GUARD + car_id, false);
+            upd |= setModeCar(guard, preferences.getBoolean(Names.ZONE_ACCESSORY + car_id, false));
+
+            boolean doors_open = preferences.getBoolean(Names.INPUT1 + car_id, false);
+            boolean doors_alarm = preferences.getBoolean(Names.ZONE_DOOR + car_id, false);
+            upd |= setModeOpen(0, guard, doors_open, doors_alarm);
+
+            boolean hood_open = preferences.getBoolean(Names.INPUT4 + car_id, false);
+            boolean hood_alarm = preferences.getBoolean(Names.ZONE_HOOD + car_id, false);
+            upd |= setModeOpen(1, guard, hood_open, hood_alarm);
+
+            boolean trunk_open = preferences.getBoolean(Names.INPUT2 + car_id, false);
+            boolean trunk_alarm = preferences.getBoolean(Names.ZONE_TRUNK + car_id, false);
+            upd |= setModeOpen(2, guard, trunk_open, trunk_alarm);
+
+            upd |= setLayer(4, guard ? 23 + small : 0);
+
+            boolean engine = preferences.getBoolean(Names.ENGINE + car_id, false);
+            upd |= setLayer(5, engine ? 25 : 0);
+
+            int ignition = 0;
+            if (preferences.getBoolean(Names.INPUT3 + car_id, false))
+                ignition = 27;
+            if (preferences.getBoolean(Names.ZONE_IGNITION + car_id, false))
+                ignition = 28;
+            upd |= setLayer(6, ignition);
+
+            int state = 0;
+            if (Preferences.getValet(preferences, car_id))
+                state = 28;
+            upd |= setLayer(7, state);
         }
 
-        boolean guard = preferences.getBoolean(Names.GUARD + car_id, false);
-        upd |= setModeCar(guard, preferences.getBoolean(Names.ZONE_ACCESSORY + car_id, false));
+        if (!upd)
+            return false;
 
-        boolean doors_open = preferences.getBoolean(Names.INPUT1 + car_id, false);
-        boolean doors_alarm = preferences.getBoolean(Names.ZONE_DOOR + car_id, false);
-        upd |= setModeOpen(0, guard, doors_open, doors_alarm);
-
-        boolean hood_open = preferences.getBoolean(Names.INPUT4 + car_id, false);
-        boolean hood_alarm = preferences.getBoolean(Names.ZONE_HOOD + car_id, false);
-        upd |= setModeOpen(1, guard, hood_open, hood_alarm);
-
-        boolean trunk_open = preferences.getBoolean(Names.INPUT2 + car_id, false);
-        boolean trunk_alarm = preferences.getBoolean(Names.ZONE_TRUNK + car_id, false);
-        upd |= setModeOpen(2, guard, trunk_open, trunk_alarm);
-
-        setLayer(4, guard ? 23 + small : 0);
-
-        int engine = 0;
-        if (preferences.getBoolean(Names.INPUT3 + car_id, false) ||
-                preferences.getBoolean(Names.ENGINE + car_id, false))
-            engine = preferences.getBoolean(Names.ZONE_IGNITION + car_id, false) ? 26 : 25;
-        setLayer(5, engine);
-
-        int state = 0;
-        if (Preferences.getValet(preferences, car_id))
-            state = 27;
-        setLayer(6, state);
-
-        return upd;
+        int count = 0;
+        for (int part : parts_id) {
+            if (part > 0)
+                count++;
+        }
+        Drawable[] parts = new Drawable[count];
+        int n = 0;
+        for (int part : parts_id) {
+            if (part > 0)
+                parts[n++] = drawables[part];
+        }
+        drawable = new LayerDrawable(parts);
+        return true;
     }
 
     boolean setLayer(int n, int id) {
         if (parts_id[n] == id)
             return false;
-        drawable.setDrawableByLayerId(n, drawables[id]);
         parts_id[n] = id;
         return true;
     }

@@ -111,15 +111,6 @@ public class CarWidget extends AppWidgetProvider {
                         updateWidgets(context, car_id);
                     }
                 }
-                if (action.equalsIgnoreCase(FetchService.ACTION_START_UPDATE)) {
-                    if (!states.containsKey(car_id) || (states.get(car_id) != STATE_UPDATE)) {
-                        states.put(car_id, STATE_UPDATE);
-                        updateWidgets(context, car_id);
-                        Intent i = new Intent(context, FetchService.class);
-                        i.putExtra(Names.ID, car_id);
-                        context.startService(i);
-                    }
-                }
                 if (action.equalsIgnoreCase(FetchService.ACTION_UPDATE_FORCE)) {
                     updateWidgets(context, null);
                 }
@@ -161,7 +152,6 @@ public class CarWidget extends AppWidgetProvider {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String car_id = Preferences.getCar(preferences, preferences.getString(Names.WIDGET + widgetID, ""));
-        State.appendLog("Update " + widgetID + ": " + car_id);
 
         Intent configIntent = new Intent(context, WidgetService.class);
         configIntent.putExtra(Names.ID, car_id);
@@ -171,11 +161,11 @@ public class CarWidget extends AppWidgetProvider {
         PendingIntent pIntent = PendingIntent.getService(context, widgetID, configIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         widgetView.setOnClickPendingIntent(R.id.widget, pIntent);
 
-        configIntent = new Intent(FetchService.ACTION_START_UPDATE);
+        configIntent = new Intent(context, WidgetService.class);
         configIntent.putExtra(Names.ID, car_id);
-        configIntent.putExtra(Names.WIDGET, widgetID);
+        configIntent.setAction(WidgetService.ACTION_START);
         configIntent.setData(data);
-        pIntent = PendingIntent.getBroadcast(context, widgetID, configIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        pIntent = PendingIntent.getService(context, widgetID, configIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         widgetView.setOnClickPendingIntent(R.id.update_block, pIntent);
 
         long last = preferences.getLong(Names.EVENT_TIME + car_id, 0);

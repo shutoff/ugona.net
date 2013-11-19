@@ -248,10 +248,12 @@
     <string name="phones">Control phones</string>
     <string name="phones_sum">Manage control phones</string>
     <string name="add_phone">Add phone</string>
-    <string name="erase_phones">Erase all phones</string>
+    <string name="erase_phones">You must reinitialize main phone for clear phones list</string>
     <string name="clear">Clear</string>
     <string name="timer">Timer</string>
     <string name="timer_sum">Car connection period</string>
     <string name="timer_on">Timer ON</string>
     <string name="minutes">min</string>
+    <string name="init_phone">Main phone initialization</string>
+    <string name="main_phone">Main phone</string>
 </resources>

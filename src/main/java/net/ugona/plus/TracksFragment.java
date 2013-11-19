@@ -8,7 +8,6 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -378,11 +377,6 @@ public class TracksFragment extends Fragment
                 JSONObject e = list.getJSONObject(i);
                 int type = e.getInt("eventType");
                 if ((type == 37) || (type == 38) || (type == 39)) {
-
-                    if ((type == 37) || (type == 38)) {
-                        Log.v("event", type + " " + e.getLong("eventId"));
-                    }
-
                     events.put(e.getLong("eventId"), type);
                     long time = e.getLong("eventTime");
                     if (time < first_time) {
@@ -602,11 +596,6 @@ public class TracksFragment extends Fragment
                 if (!events.containsKey(id))
                     continue;
                 int type = events.get(id);
-
-                if ((type == 37) || (type == 38)) {
-                    Log.v("t", type + " " + p.toString());
-                }
-
                 events.remove(id);
                 if (!p.getBoolean("valid"))
                     continue;

@@ -299,13 +299,9 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
-        State.appendLog("new intent");
         String id = intent.getStringExtra(Names.ID);
-        if (id != null) {
-            State.appendLog("new intent " + id);
+        if (id != null)
             setCar(id);
-        }
-        State.appendLog("ok " + car_id);
         mViewPager.setCurrentItem(1);
         removeNotifications();
     }

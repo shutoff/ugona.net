@@ -154,6 +154,5 @@ public class ConfigWidget extends Activity {
         ed.putString(Names.WIDGET + widgetID, car_id);
         ed.commit();
         setResult(RESULT_OK, resultValue);
-        State.appendLog("SaveWidget " + widgetID + ": " + car_id);
     }
 }

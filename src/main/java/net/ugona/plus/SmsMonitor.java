@@ -71,7 +71,6 @@ public class SmsMonitor extends BroadcastReceiver {
                 bodyText.append(m.getMessageBody());
             }
             String body = bodyText.toString();
-            State.appendLog("sms: " + body);
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
             String[] cars = preferences.getString(Names.CARS, "").split(",");
             for (String car : cars) {

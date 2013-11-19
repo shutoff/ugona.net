@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v7.app.ActionBar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -171,7 +170,6 @@ public class MapView extends WebViewActivity {
                 for (String data : car_data) {
                     res += "|" + data;
                 }
-                Log.v("1:", res);
                 return res;
             }
 
@@ -193,7 +191,6 @@ public class MapView extends WebViewActivity {
             }
             if (last != null)
                 first += "|" + last;
-            Log.v("2 ", first);
             return first;
         }
     }
