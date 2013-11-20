@@ -308,7 +308,7 @@ public class StateFragment extends Fragment {
         int n_buttons = 0;
         if (preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false)) {
             btnMotor.setVisibility(View.VISIBLE);
-            if (preferences.getBoolean(Names.INPUT3 + car_id, false)) {
+            if (preferences.getBoolean(Names.ENGINE + car_id, false)) {
                 btnMotor.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_motor_off, 0, 0, 0);
             } else {
                 btnMotor.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_motor_on, 0, 0, 0);
@@ -323,23 +323,20 @@ public class StateFragment extends Fragment {
         } else {
             btnRele.setVisibility(View.GONE);
         }
-        if (n_buttons < 2) {
-            if (preferences.getBoolean(Names.INPUT3 + car_id, false) && (n_buttons < 3)) {
-                btnBlock.setVisibility(View.VISIBLE);
-                n_buttons++;
-            } else {
-                btnBlock.setVisibility(View.GONE);
-            }
+        if (preferences.getBoolean(Names.INPUT3 + car_id, false)) {
+            btnBlock.setVisibility(View.VISIBLE);
+            n_buttons++;
         } else {
             btnBlock.setVisibility(View.GONE);
         }
-        if (n_buttons < 2) {
+        if (n_buttons < 3) {
             if (Preferences.getValet(preferences, car_id)) {
-                btnValet.setVisibility(View.VISIBLE);
-                n_buttons++;
+                btnValet.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_valet_off, 0, 0, 0);
             } else {
-                btnValet.setVisibility(View.GONE);
+                btnValet.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_valet_on, 0, 0, 0);
             }
+            btnValet.setVisibility(View.VISIBLE);
+            n_buttons++;
         } else {
             btnValet.setVisibility(View.GONE);
         }

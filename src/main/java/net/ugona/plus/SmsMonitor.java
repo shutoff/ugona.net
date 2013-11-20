@@ -94,10 +94,11 @@ public class SmsMonitor extends BroadcastReceiver {
         }
         if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-            if (preferences.getBoolean(Names.SAFE_MODE, false)) {
-                String[] cars = preferences.getString(Names.CARS, "").split(",");
+
+            String[] cars = preferences.getString(Names.CARS, "").split(",");
                 for (String id : cars) {
-                    Intent i = new Intent(context, FetchService.class);
+                    if (preferences.getBoolean(Names.NOSLEEP_MODE + id, false)) {
+                        Intent i = new Intent(context, FetchService.class);
                     i.putExtra(Names.ID, id);
                     i.setAction(FetchService.ACTION_UPDATE);
                     context.startService(i);

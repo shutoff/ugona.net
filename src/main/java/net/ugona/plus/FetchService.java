@@ -63,6 +63,13 @@ public class FetchService extends Service {
 
     @Override
     public void onCreate() {
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread thread, Throwable ex) {
+                State.print(ex);
+            }
+        });
+
         super.onCreate();
         preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -122,7 +129,7 @@ public class FetchService extends Service {
             requests.remove(key);
             new StatusRequest(car_id);
             long timeout = (error_text != null) ? REPEAT_AFTER_500 : REPEAT_AFTER_ERROR;
-            alarmMgr.setInexactRepeating(preferences.getBoolean(Names.SAFE_MODE, false) ? AlarmManager.RTC_WAKEUP : AlarmManager.RTC,
+            alarmMgr.setInexactRepeating(preferences.getBoolean(Names.NOSLEEP_MODE + car_id, false) ? AlarmManager.RTC_WAKEUP : AlarmManager.RTC,
                     System.currentTimeMillis() + timeout, timeout, pi);
             sendError(error_text, car_id);
         }
@@ -141,7 +148,7 @@ public class FetchService extends Service {
                 registerReceiver(mReceiver, filter);
                 return;
             }
-            if (!preferences.getBoolean(Names.SAFE_MODE, false) && !powerMgr.isScreenOn()) {
+            if (!preferences.getBoolean(Names.NOSLEEP_MODE + car_id, false) && !powerMgr.isScreenOn()) {
                 IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
                 registerReceiver(mReceiver, filter);
                 return;
@@ -176,7 +183,7 @@ public class FetchService extends Service {
 
             if (eventId == preferences.getLong(Names.EVENT_ID + car_id, 0)) {
                 sendUpdate(ACTION_NOUPDATE, car_id);
-                if (preferences.getBoolean(Names.SAFE_MODE, false)) {
+                if (preferences.getBoolean(Names.NOSLEEP_MODE + car_id, false)) {
                     alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, SAFEMODE_TIMEOUT, SAFEMODE_TIMEOUT, pi);
                 }
                 return;
@@ -242,7 +249,7 @@ public class FetchService extends Service {
                 FetchService.this.startActivity(alarmIntent);
             }
 
-            if (preferences.getBoolean(Names.SAFE_MODE, false))
+            if (preferences.getBoolean(Names.NOSLEEP_MODE + car_id, false))
                 alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, SAFEMODE_TIMEOUT, SAFEMODE_TIMEOUT, pi);
 
             new EventsRequest(car_id, voltage_req, gsm_req);

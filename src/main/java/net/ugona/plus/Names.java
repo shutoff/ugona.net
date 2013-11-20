@@ -69,7 +69,7 @@ public final class Names {
 
     static final String TEMPERATURE = "Temperature";
     static final String TEMP_SIFT = "TempShift";
-    static final String SAFE_MODE = "safe_mode";
+    static final String NOSLEEP_MODE = "safe_mode";
     static final String MAP_TYPE = "map_type";
 
     static final String ADDRESS = "Address";

@@ -141,7 +141,7 @@ public class CarDrawable {
             int ignition = 0;
             if (preferences.getBoolean(Names.INPUT3 + car_id, false))
                 ignition = 27;
-            if (guard && preferences.getBoolean(Names.ZONE_IGNITION + car_id, false))
+            if (guard && !engine && preferences.getBoolean(Names.ZONE_IGNITION + car_id, false))
                 ignition = 28;
             upd |= setLayer(6, ignition);
 

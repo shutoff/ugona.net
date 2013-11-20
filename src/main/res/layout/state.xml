@@ -235,6 +235,10 @@
         android:orientation="horizontal"
         android:gravity="center">
 
+        <TextView
+            android:layout_width="10dp"
+            android:layout_height="wrap_content" />
+
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -249,12 +253,14 @@
             <LinearLayout
                 android:id="@+id/addr_data"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:layout_gravity="center"
-                android:padding="5dp"
-                android:paddingTop="20dp">
+                android:layout_gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="10dp" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -291,8 +297,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:paddingBottom="15dp"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="10dp" />
 
             </LinearLayout>
 

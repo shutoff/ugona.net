@@ -7,6 +7,10 @@
     android:padding="5dp"
     android:gravity="center">
 
+    <TextView
+        android:layout_width="10dp"
+        android:layout_height="wrap_content" />
+
     <ImageView
         android:id="@+id/icon"
         android:layout_width="32dp"
@@ -19,5 +23,11 @@
         android:layout_weight="1"
         android:padding="10dp"
         android:textStyle="bold" />
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:visibility="gone" />
 
 </LinearLayout>
