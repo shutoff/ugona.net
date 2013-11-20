@@ -313,7 +313,7 @@ public class EventsFragment extends Fragment
                     LocalDate today = new LocalDate();
                     if (!today.equals(current))
                         return;
-                    DataFetcher fetcher = new DataFetcher(){
+                    DataFetcher fetcher = new DataFetcher() {
                         @Override
                         void error() {
                         }
@@ -434,13 +434,13 @@ public class EventsFragment extends Fragment
         if (!loaded)
             return;
         if (filtered.size() > 0) {
-            if (no_events || !no_reload){
+            if (no_events || !no_reload) {
                 current_item = -1;
                 lvEvents.setAdapter(new EventsAdapter());
                 lvEvents.setVisibility(View.VISIBLE);
                 tvNoEvents.setVisibility(View.GONE);
-            }else{
-                EventsAdapter adapter = (EventsAdapter)lvEvents.getAdapter();
+            } else {
+                EventsAdapter adapter = (EventsAdapter) lvEvents.getAdapter();
                 adapter.notifyDataSetChanged();
             }
             no_events = false;
@@ -526,7 +526,7 @@ public class EventsFragment extends Fragment
 
         @Override
         void error() {
-            setAddress(getString(R.string.error_load), null, null);
+            setAddress(error_text.equals("empty answer") ? "" : getString(R.string.error_load), null, null);
         }
 
         void setAddress(String result, String point, String course) {

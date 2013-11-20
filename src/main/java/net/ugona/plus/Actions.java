@@ -67,7 +67,7 @@ public class Actions {
     }
 
     static void rele1(Context context, String car_id) {
-        requestPassword(context, car_id, R.string.rele1, R.string.rele1_summary, "REL1 IMPULS", "REL1 IMPULS OK");
+        requestPassword(context, car_id, R.string.rele1, R.string.rele1_action, "REL1 IMPULS", "REL1 IMPULS OK");
     }
 
     static void valetOff(final Context context, final String car_id) {

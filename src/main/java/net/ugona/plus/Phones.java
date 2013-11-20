@@ -91,20 +91,19 @@ public class Phones extends ActionBarActivity {
                         Uri photoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
                         Cursor cursor = getContentResolver().query(photoUri,
                                 new String[]{ContactsContract.Contacts.Photo.PHOTO}, null, null, null);
-                        if (cursor == null) {
-                            return null;
-                        }
-                        try {
-                            if (cursor.moveToFirst()) {
-                                byte[] data = cursor.getBlob(0);
-                                if (data != null) {
-                                    Bitmap photo = BitmapFactory.decodeStream(new ByteArrayInputStream(data));
-                                    ImageView ivPhoto = (ImageView) v.findViewById(R.id.photo);
-                                    ivPhoto.setImageBitmap(photo);
+                        if (cursor != null) {
+                            try {
+                                if (cursor.moveToFirst()) {
+                                    byte[] data = cursor.getBlob(0);
+                                    if (data != null) {
+                                        Bitmap photo = BitmapFactory.decodeStream(new ByteArrayInputStream(data));
+                                        ImageView ivPhoto = (ImageView) v.findViewById(R.id.photo);
+                                        ivPhoto.setImageBitmap(photo);
+                                    }
                                 }
+                            } finally {
+                                cursor.close();
                             }
-                        } finally {
-                            cursor.close();
                         }
                     }
                 } catch (Exception ex) {

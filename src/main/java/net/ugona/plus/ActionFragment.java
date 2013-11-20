@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -67,6 +68,8 @@ public class ActionFragment extends Fragment
                 Action action = actions.get(position);
                 TextView tv = (TextView) v.findViewById(R.id.name);
                 tv.setText(action.text);
+                ImageView iv = (ImageView) v.findViewById(R.id.icon);
+                iv.setImageResource(action.icon);
                 return v;
             }
         });
@@ -133,91 +136,94 @@ public class ActionFragment extends Fragment
 
     static abstract class Action {
 
-        Action(int text_) {
+        Action(int icon_, int text_) {
             text = text_;
+            icon = icon_;
             flags = 0;
         }
 
-        Action(int text_, int flags_) {
+        Action(int icon_, int text_, int flags_) {
             text = text_;
+            icon = icon_;
             flags = flags_;
         }
 
 
         abstract void action(Context context, String car_id);
 
+        int icon;
         int text;
         int flags;
     }
 
     static Action[] def_actions = {
-            new Action(R.string.valet_on) {
+            new Action(R.drawable.icon_valet_on, R.string.valet_on) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.valetOn(context, car_id);
                 }
             },
-            new Action(R.string.valet_off) {
+            new Action(R.drawable.icon_valet_off, R.string.valet_off) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.valetOff(context, car_id);
                 }
             },
-            new Action(R.string.status_title) {
+            new Action(R.drawable.icon_status, R.string.status_title) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.status(context, car_id);
                 }
             },
-            new Action(R.string.block) {
+            new Action(R.drawable.icon_block, R.string.block) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.blockMotor(context, car_id);
                 }
             },
-            new Action(R.string.motor_on, FLAG_AZ) {
+            new Action(R.drawable.icon_motor_on, R.string.motor_on, FLAG_AZ) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.motorOn(context, car_id);
                 }
             },
-            new Action(R.string.motor_off, FLAG_AZ) {
+            new Action(R.drawable.icon_motor_off, R.string.motor_off, FLAG_AZ) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.motorOff(context, car_id);
                 }
             },
-            new Action(R.string.rele1, FLAG_R1) {
+            new Action(R.drawable.icon_heater, R.string.rele1, FLAG_R1) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.rele1(context, car_id);
                 }
             },
-            new Action(R.string.turbo_on) {
+            new Action(R.drawable.icon_turbo_on, R.string.turbo_on) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.turboOn(context, car_id);
                 }
             },
-            new Action(R.string.turbo_off) {
+            new Action(R.drawable.icon_turbo_off, R.string.turbo_off) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.turboOff(context, car_id);
                 }
             },
-            new Action(R.string.internet_on) {
+            new Action(R.drawable.icon_internet_on, R.string.internet_on) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.internetOn(context, car_id);
                 }
             },
-            new Action(R.string.internet_off) {
+            new Action(R.drawable.icon_internet_off, R.string.internet_off) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.internetOff(context, car_id);
                 }
             },
-            new Action(R.string.reset) {
+            new Action(R.drawable.icon_reset, R.string.reset) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.reset(context, car_id);

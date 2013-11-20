@@ -46,11 +46,16 @@ public abstract class HttpTask extends AsyncTask<String, Void, JSONObject> {
             response.getEntity().writeTo(out);
             out.close();
             res = out.toString();
-            JSONObject result = new JSONObject(res);
             if (status != HttpStatus.SC_OK) {
+                JSONObject result = new JSONObject(res);
                 error_text = result.getString("error");
                 return null;
             }
+            if (res.length() == 0) {
+                error_text = "empty answer";
+                return null;
+            }
+            JSONObject result = new JSONObject(res);
             background(result);
             return result;
         } catch (Exception ex) {

@@ -30,6 +30,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -153,13 +154,30 @@ public class Alarm extends Activity {
                         String contactId = contactLookup.getString(contactLookup.getColumnIndex(BaseColumns._ID));
                         Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, Long.parseLong(contactId));
                         Uri displayPhotoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.DISPLAY_PHOTO);
-                        AssetFileDescriptor fd =
-                                getContentResolver().openAssetFileDescriptor(displayPhotoUri, "r");
-                        InputStream inputStream = fd.createInputStream();
-                        if (inputStream != null) {
+                        try {
+                            AssetFileDescriptor fd =
+                                    getContentResolver().openAssetFileDescriptor(displayPhotoUri, "r");
+                            InputStream inputStream = fd.createInputStream();
                             Bitmap photo = BitmapFactory.decodeStream(inputStream);
                             imgPhoto.setImageBitmap(photo);
                             inputStream.close();
+                        } catch (Exception ex) {
+                            Uri photoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
+                            Cursor cursor = getContentResolver().query(photoUri,
+                                    new String[]{ContactsContract.Contacts.Photo.PHOTO}, null, null, null);
+                            if (cursor != null) {
+                                try {
+                                    if (cursor.moveToFirst()) {
+                                        byte[] data = cursor.getBlob(0);
+                                        if (data != null) {
+                                            Bitmap photo = BitmapFactory.decodeStream(new ByteArrayInputStream(data));
+                                            imgPhoto.setImageBitmap(photo);
+                                        }
+                                    }
+                                } finally {
+                                    cursor.close();
+                                }
+                            }
                         }
                     }
                 }
@@ -177,7 +195,7 @@ public class Alarm extends Activity {
             show_main = !alarm.equals(getString(R.string.alarm_test));
             String[] cars = preferences.getString(Names.CARS, "").split(",");
             if (cars.length > 1) {
-                String name = preferences.getString(Names.CAR_NAME, "");
+                String name = preferences.getString(Names.CAR_NAME + car_id, "");
                 if (name.length() == 0) {
                     name = getString(R.string.car);
                     if (car_id.length() > 0)

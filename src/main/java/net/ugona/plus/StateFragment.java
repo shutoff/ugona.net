@@ -260,7 +260,7 @@ public class StateFragment extends Fragment {
             try {
                 double s = Double.parseDouble(speed);
                 if (s > 0)
-                    time += String.format(getString(R.string.speed, speed)) + " ";
+                    time += " " + speed + " " + getString(R.string.kmh) + " ";
             } catch (Exception ex) {
                 // ignore
             }
@@ -309,9 +309,9 @@ public class StateFragment extends Fragment {
         if (preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false)) {
             btnMotor.setVisibility(View.VISIBLE);
             if (preferences.getBoolean(Names.INPUT3 + car_id, false)) {
-                btnMotor.setText(R.string.btn_motor_off);
+                btnMotor.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_motor_off, 0, 0, 0);
             } else {
-                btnMotor.setText(R.string.btn_motor_on);
+                btnMotor.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_motor_on, 0, 0, 0);
             }
             n_buttons++;
         } else {
@@ -323,20 +323,22 @@ public class StateFragment extends Fragment {
         } else {
             btnRele.setVisibility(View.GONE);
         }
-        if (preferences.getBoolean(Names.INPUT3 + car_id, false) && (n_buttons < 3)) {
-            btnBlock.setVisibility(View.VISIBLE);
-            n_buttons++;
+        if (n_buttons < 2) {
+            if (preferences.getBoolean(Names.INPUT3 + car_id, false) && (n_buttons < 3)) {
+                btnBlock.setVisibility(View.VISIBLE);
+                n_buttons++;
+            } else {
+                btnBlock.setVisibility(View.GONE);
+            }
         } else {
             btnBlock.setVisibility(View.GONE);
         }
-        if (n_buttons < 3) {
+        if (n_buttons < 2) {
             if (Preferences.getValet(preferences, car_id)) {
                 btnValet.setVisibility(View.VISIBLE);
-                btnValet.setText(R.string.btn_valet_off);
                 n_buttons++;
             } else {
                 btnValet.setVisibility(View.GONE);
-                btnValet.setText(R.string.btn_valet_on);
             }
         } else {
             btnValet.setVisibility(View.GONE);

@@ -62,7 +62,7 @@ public class CarDrawable {
         if (drawables != null)
             return;
 
-        drawables = new Drawable[30];
+        drawables = new Drawable[31];
         drawables[0] = new ColorDrawable(Color.TRANSPARENT);
 
         Resources resources = ctx.getResources();
@@ -98,8 +98,8 @@ public class CarDrawable {
         drawables[26] = resources.getDrawable(R.drawable.engine_blue);
         drawables[27] = resources.getDrawable(R.drawable.ignition);
         drawables[28] = resources.getDrawable(R.drawable.ignition_red);
-        drawables[28] = resources.getDrawable(R.drawable.valet);
-        drawables[29] = resources.getDrawable(R.drawable.block);
+        drawables[29] = resources.getDrawable(R.drawable.valet);
+        drawables[30] = resources.getDrawable(R.drawable.block);
     }
 
     Drawable getDrawable() {
@@ -141,13 +141,13 @@ public class CarDrawable {
             int ignition = 0;
             if (preferences.getBoolean(Names.INPUT3 + car_id, false))
                 ignition = 27;
-            if (preferences.getBoolean(Names.ZONE_IGNITION + car_id, false))
+            if (guard && preferences.getBoolean(Names.ZONE_IGNITION + car_id, false))
                 ignition = 28;
             upd |= setLayer(6, ignition);
 
             int state = 0;
             if (Preferences.getValet(preferences, car_id))
-                state = 28;
+                state = 29;
             upd |= setLayer(7, state);
         }
 

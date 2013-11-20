@@ -177,46 +177,46 @@
 
                 <Button
                     android:id="@+id/motor"
-                    android:text="@string/btn_motor_on"
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="60dp"
+                    android:layout_height="50dp"
                     android:layout_marginRight="5dp"
-                    android:layout_marginBottom="5dp"
+                    android:layout_marginTop="5dp"
+                    android:drawableLeft="@drawable/icon_motor_on"
                     android:paddingLeft="10dp"
-                    android:gravity="left"
+                    android:gravity="center"
                     style="@style/Theme.action" />
 
                 <Button
                     android:id="@+id/rele"
-                    android:text="@string/btn_heating_up"
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="60dp"
+                    android:layout_height="50dp"
                     android:layout_marginRight="5dp"
-                    android:layout_marginBottom="5dp"
+                    android:layout_marginTop="5dp"
+                    android:drawableLeft="@drawable/icon_heater"
                     android:paddingLeft="10dp"
-                    android:gravity="left"
+                    android:gravity="center"
                     style="@style/Theme.action" />
 
                 <Button
                     android:id="@+id/block"
-                    android:text="@string/btn_block"
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="60dp"
+                    android:layout_height="50dp"
                     android:layout_marginRight="5dp"
-                    android:layout_marginBottom="5dp"
+                    android:layout_marginTop="5dp"
+                    android:drawableLeft="@drawable/icon_block"
                     android:paddingLeft="10dp"
-                    android:gravity="left"
+                    android:gravity="center"
                     style="@style/Theme.action" />
 
                 <Button
                     android:id="@+id/valet"
-                    android:text="@string/btn_valet_on"
-                    android:layout_width="120dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="60dp"
+                    android:layout_height="50dp"
                     android:layout_marginRight="5dp"
-                    android:layout_marginBottom="5dp"
+                    android:layout_marginTop="5dp"
+                    android:drawableLeft="@drawable/icon_valet_on"
                     android:paddingLeft="10dp"
-                    android:gravity="left"
+                    android:gravity="center"
                     style="@style/Theme.action" />
 
             </LinearLayout>
