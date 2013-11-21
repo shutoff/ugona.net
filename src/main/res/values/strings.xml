@@ -211,6 +211,7 @@
     <string name="net_gps_message">Your location detected by network.\nFor more accuracy you can turn on GPS is Settings</string>
     <string name="no_location">Unknown localtion</string>
     <string name="shock_sens">Shock sensitivity</string>
+    <string name="shock_sens_msg">Setup shock sensitivity level. Wroks only for SuperAgent</string>
     <string-array name="levels">
         <item>Minimal</item>
         <item>Low</item>
@@ -231,12 +232,6 @@
     <string name="phone_mobile">mobile</string>
     <string name="pgsm_version">Device software version</string>
     <string name="copyright">© 2013 Ugona.net, info@ugona.net</string>
-    <string name="btn_valet_on">VALET\nON</string>
-    <string name="btn_valet_off">VALET\nOFF</string>
-    <string name="btn_motor_on">MOTOR\nON</string>
-    <string name="btn_motor_off">MOTOR\nOFF</string>
-    <string name="btn_heating_up">HEATING\nUP</string>
-    <string name="btn_block">MOTOR\nBLOCK</string>
     <string name="delete">Delete</string>
     <string name="status_title">Status</string>
     <string name="status_sum">Request car state</string>

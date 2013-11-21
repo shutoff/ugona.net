@@ -23,121 +23,170 @@ import java.util.Date;
 
 public class Actions {
 
-    static abstract class Answer {
-        abstract void answer(String body);
-    }
-
-    static void motorOn(Context context, String car_id) {
-        requestPassword(context, car_id, R.string.motor_on, R.string.motor_on_sum, "MOTOR ON", "MOTOR ON OK");
-    }
-
-    static void motorOff(Context context, String car_id) {
-        requestPassword(context, car_id, R.string.motor_off, R.string.motor_off_sum, "MOTOR OFF", "MOTOR OFF OK");
-    }
-
-    static void turboOn(Context context, String car_id) {
-        requestPassword(context, car_id, R.string.turbo_on, R.string.turbo_on_sum, "TURBO ON", "TURBO ON OK");
-    }
-
-    static void turboOff(Context context, String car_id) {
-        requestPassword(context, car_id, R.string.turbo_off, R.string.turbo_off_sum, "TURBO OFF", "TURBO OFF OK");
-    }
-
-    static void internetOn(Context context, String car_id) {
-        requestPassword(context, car_id, R.string.internet_on, R.string.internet_on_sum, "INTERNET ON", "INTERNET ON OK");
-    }
-
-    static void internetOff(Context context, String car_id) {
-        requestPassword(context, car_id, R.string.internet_off, R.string.internet_off_sum, "INTERNET OFF", "INTERNET OFF OK");
-    }
-
-    static void reset(Context context, String car_id) {
-        requestPassword(context, car_id, R.string.reset, R.string.reset_sum, "RESET", null);
-    }
-
-    static void status(final Context context, String car_id) {
-        requestPassword(context, car_id, R.string.status_title, R.string.status_sum, "STATUS?", "STATUS? ", new Answer() {
+    static void motor_on(final Context context, final String car_id) {
+        requestPassword(context, R.string.motor_on, R.string.motor_on_sum, new Runnable() {
             @Override
-            void answer(String body) {
-                Intent intent = new Intent(context, StatusDialog.class);
-                intent.putExtra(Names.SMS_TEXT, body);
-                context.startActivity(intent);
+            public void run() {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_on, "MOTOR ON", "MOTOR ON OK"));
             }
         });
     }
 
-    static void rele1(Context context, String car_id) {
-        requestPassword(context, car_id, R.string.rele1, R.string.rele1_action, "REL1 IMPULS", "REL1 IMPULS OK");
+    static void motor_off(final Context context, final String car_id) {
+        requestPassword(context, R.string.motor_off, R.string.motor_off_sum, new Runnable() {
+            @Override
+            public void run() {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_off, "MOTOR OFF", "MOTOR OFF OK"));
+            }
+        });
     }
 
-    static void valetOff(final Context context, final String car_id) {
-        requestCCode(context, R.string.valet_off, R.string.valet_off_msg, new Answer() {
+    static void turbo_on(final Context context, final String car_id) {
+        requestPassword(context, R.string.turbo_on, R.string.turbo_on_sum, new Runnable() {
             @Override
-            void answer(String ccode) {
-                send_sms(context, car_id, ccode + " INIT", "Main user OK", R.string.valet_off, new Answer() {
+            public void run() {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.turbo_on, "TURBO ON", "TURBO ON OK"));
+            }
+        });
+    }
+
+    static void turbo_off(final Context context, final String car_id) {
+        requestPassword(context, R.string.turbo_off, R.string.turbo_off_sum, new Runnable() {
+            @Override
+            public void run() {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.turbo_off, "TURBO OFF", "TURBO OFF OK"));
+            }
+        });
+    }
+
+    static void internet_on(final Context context, final String car_id) {
+        requestPassword(context, R.string.internet_on, R.string.internet_on_sum, new Runnable() {
+            @Override
+            public void run() {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.internet_on, "INTERNET ALL", "INTERNET ALL OK"));
+            }
+        });
+    }
+
+    static void internet_off(final Context context, final String car_id) {
+        requestPassword(context, R.string.internet_off, R.string.internet_off_sum, new Runnable() {
+            @Override
+            public void run() {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.internet_off, "INTERNET OFF", "INTERNET OFF OK"));
+            }
+        });
+    }
+
+    static void reset(final Context context, final String car_id) {
+        requestPassword(context, R.string.reset, R.string.reset_sum, new Runnable() {
+            @Override
+            public void run() {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.reset, "RESET", null));
+            }
+        });
+    }
+
+    static void status(final Context context, final String car_id) {
+        requestPassword(context, R.string.status_title, R.string.status_sum, new Runnable() {
+            @Override
+            public void run() {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.status_title, "STATUS?", "STATUS?") {
                     @Override
-                    void answer(String body) {
-                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-                        SharedPreferences.Editor ed = preferences.edit();
-                        ed.putBoolean(Names.VALET + car_id, false);
-                        Date now = new Date();
-                        ed.putLong(Names.INIT_TIME + car_id, now.getTime() / 1000);
-                        ed.remove(Names.VALET_TIME);
-                        ed.commit();
+                    void process_answer(Context context, String car_id, String text) {
+                        Intent intent = new Intent(context, StatusDialog.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putExtra(Names.SMS_TEXT, text);
+                        context.startActivity(intent);
                     }
                 });
             }
         });
     }
 
-    static void valetOn(final Context context, final String car_id) {
-        requestCCode(context, R.string.valet_on, R.string.valet_on_msg, new Answer() {
+    static void rele1(final Context context, final String car_id) {
+        requestPassword(context, R.string.rele1, R.string.rele1_action, new Runnable() {
+            @Override
+            public void run() {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.rele1, "REL1 IMPUL", "REL1 IMPULS OK"));
+            }
+        });
+    }
+
+    static void valet_on(final Context context, final String car_id) {
+        requestCCode(context, R.string.valet_on, R.string.valet_on_msg, new Actions.Answer() {
             @Override
             void answer(String ccode) {
-                send_sms(context, car_id, ccode + " VALET", "Valet OK", R.string.valet_on, new Answer() {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_on, ccode + " VALET", "Valet OK") {
                     @Override
-                    void answer(String body) {
+                    void process_answer(Context context, String car_id, String text) {
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                         SharedPreferences.Editor ed = preferences.edit();
                         ed.putBoolean(Names.VALET + car_id, true);
-                        ed.putBoolean(Names.GUARD + car_id, false);
                         Date now = new Date();
                         ed.putLong(Names.VALET_TIME + car_id, now.getTime() / 1000);
                         ed.remove(Names.INIT_TIME);
                         ed.commit();
+                        try {
+                            Intent intent = new Intent(FetchService.ACTION_UPDATE);
+                            intent.putExtra(Names.ID, car_id);
+                            context.sendBroadcast(intent);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
-
             }
         });
     }
 
-    static void blockMotor(Context context, String car_id) {
-        requestPassword(context, car_id, R.string.block, R.string.block_msg, "BLOCK MTR", "BLOCK MTR OK");
-    }
-
-    static void users(final Context context, final String car_id) {
-        requestPassword(context, car_id, R.string.phones, R.string.phones_sum, "USERS?", "USERS? ", new Answer() {
+    static void valet_off(final Context context, final String car_id) {
+        requestCCode(context, R.string.valet_off, R.string.valet_off_msg, new Actions.Answer() {
             @Override
-            void answer(String body) {
-                Intent intent = new Intent(context, Phones.class);
-                intent.putExtra(Names.SMS_TEXT, body);
-                intent.putExtra(Names.ID, car_id);
-                context.startActivity(intent);
+            void answer(String ccode) {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_off, ccode + " INIT", "Main user OK") {
+                    @Override
+                    void process_answer(Context context, String car_id, String text) {
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putBoolean(Names.VALET + car_id, true);
+                        Date now = new Date();
+                        ed.putLong(Names.VALET_TIME + car_id, now.getTime() / 1000);
+                        ed.remove(Names.INIT_TIME);
+                        ed.commit();
+                        try {
+                            Intent intent = new Intent(FetchService.ACTION_UPDATE);
+                            intent.putExtra(Names.ID, car_id);
+                            context.sendBroadcast(intent);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             }
         });
     }
 
+    static void block_motor(final Context context, final String car_id) {
+        requestPassword(context, R.string.valet_off, R.string.valet_off_msg, new Runnable() {
+            @Override
+            public void run() {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.block, "BLOCK MTR", "BLOCK MTR OK"));
+            }
+        });
+    }
 
     static void init_phone(final Context context, final String car_id) {
         requestCCode(context, R.string.init_phone, 0, new Actions.Answer() {
-
             @Override
-            void answer(final String ccode) {
-                Actions.send_sms(context, car_id, ccode, null, R.string.init_phone, new Actions.Answer() {
+            void answer(String ccode) {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_off, ccode + " INIT", "Main user OK") {
                     @Override
-                    void answer(String body) {
-                        Actions.send_sms(context, car_id, ccode + " INIT", "Main user OK", R.string.init_phone, null);
+                    void process_answer(Context context, String car_id, String text) {
+                        if (answer == null) {
+                            text += " INIT";
+                            answer = "Main user OK";
+                            SmsMonitor.sendSMS(context, car_id, this);
+                        }
                     }
                 });
             }
@@ -153,7 +202,7 @@ public class Actions {
         dialog.show();
     }
 
-    static void requestPassword(final Context context, final String car_id, final int id_title, int id_message, final String sms, final String answer, final Answer after) {
+    static void requestPassword(final Context context, final int id_title, int id_message, final Runnable action) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setTitle(id_title)
                 .setMessage((id_message == 0) ? R.string.input_password : id_message)
@@ -166,7 +215,7 @@ public class Actions {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
             builder.setView(inflater.inflate(R.layout.password, null));
         } else if (id_message == 0) {
-            send_sms(context, car_id, sms, answer, id_title, null);
+            action.run();
             return;
         }
 
@@ -174,7 +223,6 @@ public class Actions {
         dialog.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         dialog.show();
-
         dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -186,13 +234,13 @@ public class Actions {
                     }
                 }
                 dialog.dismiss();
-                send_sms(context, car_id, sms, answer, id_title, after);
+                action.run();
             }
         });
     }
 
-    static void requestPassword(final Context context, final String car_id, final int id_title, int id_message, final String sms, final String answer) {
-        requestPassword(context, car_id, id_title, id_message, sms, answer, null);
+    static abstract class Answer {
+        abstract void answer(String text);
     }
 
     static void requestCCode(final Context context, final int id_title, int id_message, final Answer after) {
@@ -236,7 +284,7 @@ public class Actions {
         });
     }
 
-    static void send_sms(final Context context, final String car_id, String sms, String answer, final int id_title, final Answer after) {
+    static void send_sms(final Context context, final String car_id, final int id_title, final SmsMonitor.Sms sms, final Answer after) {
         final ProgressDialog smsProgress = new ProgressDialog(context);
         smsProgress.setMessage(context.getString(id_title));
         smsProgress.show();
@@ -245,24 +293,11 @@ public class Actions {
             public void onReceive(Context context, Intent intent) {
                 if (!intent.getStringExtra(Names.ID).equals(car_id))
                     return;
-                smsProgress.dismiss();
-                int result = intent.getIntExtra(Names.ANSWER, 0);
-                if (result == Activity.RESULT_OK) {
-                    if (after != null) {
-                        after.answer(intent.getStringExtra(Names.SMS_TEXT));
-                        Intent i = new Intent(FetchService.ACTION_UPDATE);
-                        i.putExtra(Names.ID, car_id);
-                        context.sendBroadcast(i);
-                    } else {
-                        Intent i = new Intent(context, FetchService.class);
-                        i.setAction(FetchService.ACTION_START);
-                        i.putExtra(Names.ID, car_id);
-                        context.startService(i);
-                    }
+                if (SmsMonitor.isProcessed(car_id, sms.id))
                     return;
-                }
-                showMessage(context, id_title,
-                        (result == SmsMonitor.INCORRECT_MESSAGE) ? R.string.bad_ccode : R.string.sms_error);
+                smsProgress.dismiss();
+                if (intent.getIntExtra(Names.ANSWER, 0) == Activity.RESULT_OK)
+                    after.answer(intent.getStringExtra(Names.SMS_TEXT));
             }
         };
         context.registerReceiver(br, new IntentFilter(SmsMonitor.SMS_ANSWER));
@@ -270,8 +305,10 @@ public class Actions {
             @Override
             public void onDismiss(DialogInterface dialog) {
                 context.unregisterReceiver(br);
+                SmsMonitor.cancelSMS(car_id, sms.id);
             }
         });
-        SmsMonitor.sendSMS(context, car_id, sms, answer);
+        if (!SmsMonitor.sendSMS(context, car_id, sms))
+            smsProgress.dismiss();
     }
 }

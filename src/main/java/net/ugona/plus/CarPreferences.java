@@ -171,10 +171,16 @@ public class CarPreferences extends PreferenceActivity {
         sensPref.setSummary(sensPref.summary());
         sensPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
+            public boolean onPreferenceChange(Preference preference, final Object newValue) {
                 if (newValue instanceof Integer) {
                     int v = (Integer) newValue;
-                    Actions.requestPassword(CarPreferences.this, car_id, R.string.shock_sens, 0, "SET 1," + newValue, "SET OK");
+                    Actions.requestPassword(CarPreferences.this, R.string.shock_sens, R.string.shock_sens_msg, new Runnable() {
+                        @Override
+                        public void run() {
+                            SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.shock_sens, "SET 1," + newValue, "SET OK");
+                            SmsMonitor.sendSMS(CarPreferences.this, car_id, sms);
+                        }
+                    });
                     SharedPreferences.Editor ed = preferences.edit();
                     ed.putInt(Names.SHOCK_SENS + car_id, v);
                     ed.commit();
@@ -236,7 +242,14 @@ public class CarPreferences extends PreferenceActivity {
         phonesPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Actions.users(CarPreferences.this, car_id);
+                Actions.requestPassword(CarPreferences.this, R.string.phones, R.string.phones_sum, new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent i = new Intent(CarPreferences.this, Phones.class);
+                        i.putExtra(Names.ID, car_id);
+                        startActivity(i);
+                    }
+                });
                 return true;
             }
         });
@@ -403,7 +416,13 @@ public class CarPreferences extends PreferenceActivity {
     }
 
     void smsMode() {
-        Actions.requestPassword(this, car_id, R.string.sms_mode, R.string.sms_mode_msg, "ALARM SMS", "ALARM SMS OK");
+        Actions.requestPassword(this, R.string.sms_mode, R.string.sms_mode_msg, new Runnable() {
+            @Override
+            public void run() {
+                SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.sms_mode, "ALARM SMS", "ALARM SMS OK");
+                Actions.send_sms(CarPreferences.this, car_id, R.string.sms_mode, sms, null);
+            }
+        });
     }
 
     final String PROFILE_URL = "http://api.car-online.ru/v2?get=profile&skey=$1&content=json";
@@ -635,15 +654,21 @@ public class CarPreferences extends PreferenceActivity {
             public void onClick(View v) {
                 final int timeout = (checkBox.isChecked()) ? seekBar.getProgress() + 1 : 0;
                 dialog.dismiss();
-                String text = String.format("TIMER %04d", timeout);
-                Actions.requestPassword(CarPreferences.this, car_id, R.string.timer, R.string.timer_sum, text, "TIMER OK", new Actions.Answer() {
-                    @Override
-                    void answer(String body) {
-                        SharedPreferences.Editor ed = preferences.edit();
-                        ed.putInt(Names.CAR_TIMER + car_id, timeout);
-                        ed.commit();
-                    }
-                });
+                final String text = String.format("TIMER %04d", timeout);
+                Actions.requestPassword(CarPreferences.this, R.string.timer, R.string.timer_sum,
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.timer, text, "TIMER_OK"){
+                                    @Override
+                                    void process_answer(Context context, String car_id, String text) {
+                                        SharedPreferences.Editor ed = preferences.edit();
+                                        ed.putInt(Names.CAR_TIMER + car_id, timeout);
+                                        ed.commit();
+                                    }
+                                };
+                            }
+                        });
             }
         });
     }

@@ -162,9 +162,10 @@ public class Phones extends ActionBarActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if ((requestCode == ADD_PHONE) && (resultCode == RESULT_OK)) {
             final String number = data.getStringExtra(Names.CAR_PHONE).replaceAll("[^0-9+]+", "");
-            Actions.send_sms(this, car_id, "NEW USER " + number, "NEW USER OK", R.string.add_phone, new Actions.Answer() {
+            SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.add_phone, "NEW USER " + number, " NEW USER OK");
+            Actions.send_sms(this, car_id, R.string.add_phone, sms, new Actions.Answer() {
                 @Override
-                void answer(String body) {
+                void answer(String text) {
                     String[] new_phones = new String[phones.length + 1];
                     System.arraycopy(phones, 0, new_phones, 0, phones.length);
                     new_phones[phones.length] = number;

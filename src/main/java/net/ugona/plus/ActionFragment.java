@@ -1,8 +1,10 @@
 package net.ugona.plus;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -31,6 +33,8 @@ public class ActionFragment extends Fragment
     Vector<Action> actions;
 
     ListView list;
+
+    BroadcastReceiver br;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -70,6 +74,8 @@ public class ActionFragment extends Fragment
                 tv.setText(action.text);
                 ImageView iv = (ImageView) v.findViewById(R.id.icon);
                 iv.setImageResource(action.icon);
+                View ip = v.findViewById(R.id.progress);
+                ip.setVisibility(SmsMonitor.isProcessed(car_id, action.text) ? View.VISIBLE : View.GONE);
                 return v;
             }
         });
@@ -89,7 +95,24 @@ public class ActionFragment extends Fragment
                 startActivity(intent);
             }
         });
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String id = intent.getStringExtra(Names.ID);
+                if (car_id.equals(id))
+                    refresh();
+            }
+        };
+        IntentFilter filter = new IntentFilter(SmsMonitor.SMS_SEND);
+        filter.addAction(SmsMonitor.SMS_ANSWER);
+        getActivity().registerReceiver(br, filter);
         return v;
+    }
+
+    @Override
+    public void onDestroyView() {
+        getActivity().unregisterReceiver(br);
+        super.onDestroyView();
     }
 
     @Override
@@ -127,6 +150,11 @@ public class ActionFragment extends Fragment
         }
     }
 
+    void refresh() {
+        BaseAdapter adapter = (BaseAdapter) list.getAdapter();
+        adapter.notifyDataSetChanged();
+    }
+
     @Override
     public void dateChanged(LocalDate current) {
         fill_actions();
@@ -160,13 +188,13 @@ public class ActionFragment extends Fragment
             new Action(R.drawable.icon_valet_on, R.string.valet_on) {
                 @Override
                 void action(Context context, String car_id) {
-                    Actions.valetOn(context, car_id);
+                    Actions.valet_on(context, car_id);
                 }
             },
             new Action(R.drawable.icon_valet_off, R.string.valet_off) {
                 @Override
                 void action(Context context, String car_id) {
-                    Actions.valetOff(context, car_id);
+                    Actions.valet_off(context, car_id);
                 }
             },
             new Action(R.drawable.icon_status, R.string.status_title) {
@@ -178,19 +206,19 @@ public class ActionFragment extends Fragment
             new Action(R.drawable.icon_block, R.string.block) {
                 @Override
                 void action(Context context, String car_id) {
-                    Actions.blockMotor(context, car_id);
+                    Actions.block_motor(context, car_id);
                 }
             },
             new Action(R.drawable.icon_motor_on, R.string.motor_on, FLAG_AZ) {
                 @Override
                 void action(Context context, String car_id) {
-                    Actions.motorOn(context, car_id);
+                    Actions.motor_on(context, car_id);
                 }
             },
             new Action(R.drawable.icon_motor_off, R.string.motor_off, FLAG_AZ) {
                 @Override
                 void action(Context context, String car_id) {
-                    Actions.motorOff(context, car_id);
+                    Actions.motor_off(context, car_id);
                 }
             },
             new Action(R.drawable.icon_heater, R.string.rele1, FLAG_R1) {
@@ -202,25 +230,25 @@ public class ActionFragment extends Fragment
             new Action(R.drawable.icon_turbo_on, R.string.turbo_on) {
                 @Override
                 void action(Context context, String car_id) {
-                    Actions.turboOn(context, car_id);
+                    Actions.turbo_on(context, car_id);
                 }
             },
             new Action(R.drawable.icon_turbo_off, R.string.turbo_off) {
                 @Override
                 void action(Context context, String car_id) {
-                    Actions.turboOff(context, car_id);
+                    Actions.turbo_off(context, car_id);
                 }
             },
             new Action(R.drawable.icon_internet_on, R.string.internet_on) {
                 @Override
                 void action(Context context, String car_id) {
-                    Actions.internetOn(context, car_id);
+                    Actions.internet_on(context, car_id);
                 }
             },
             new Action(R.drawable.icon_internet_off, R.string.internet_off) {
                 @Override
                 void action(Context context, String car_id) {
-                    Actions.internetOff(context, car_id);
+                    Actions.internet_off(context, car_id);
                 }
             },
             new Action(R.drawable.icon_reset, R.string.reset) {

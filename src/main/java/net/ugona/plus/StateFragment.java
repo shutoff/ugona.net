@@ -123,9 +123,9 @@ public class StateFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (preferences.getBoolean(Names.INPUT3 + car_id, false)) {
-                    Actions.motorOff(context, car_id);
+                    Actions.motor_off(context, car_id);
                 } else {
-                    Actions.motorOn(context, car_id);
+                    Actions.motor_on(context, car_id);
                 }
             }
         });
@@ -138,16 +138,16 @@ public class StateFragment extends Fragment {
         btnBlock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Actions.blockMotor(context, car_id);
+                Actions.block_motor(context, car_id);
             }
         });
         btnValet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (Preferences.getValet(preferences, car_id)) {
-                    Actions.valetOff(context, car_id);
+                    Actions.valet_off(context, car_id);
                 } else {
-                    Actions.valetOn(context, car_id);
+                    Actions.valet_on(context, car_id);
                 }
             }
         });

@@ -204,6 +204,7 @@
     <string name="net_gps_message">Местоположение определено по сети.\nДля более точного определения положения надо включить GPS в настройках</string>
     <string name="no_location">Неизвестное местоположение</string>
     <string name="shock_sens">Чувствительность датчика удара</string>
+    <string name="shock_sens_msg">Установка уровня учвствительности датчика удара. Работает только для СуперАгент</string>
     <string-array name="levels">
         <item>Минимальная</item>
         <item>Низкая</item>
@@ -221,12 +222,6 @@
     <string name="phone_work">рабочий</string>
     <string name="phone_mobile">мобильный</string>
     <string name="pgsm_version">Версия прошивки</string>
-    <string name="btn_valet_on">В-ТЬ Р-М\nАВТОСЕРВИС</string>
-    <string name="btn_valet_off">ВЫ-ТЬ Р-М\nАВТОСЕРСИС</string>
-    <string name="btn_motor_on">ЗАПУСК\nДВИГАТЕЛЯ</string>
-    <string name="btn_motor_off">ОСТАНОВКА\nДВИГАТЕЛЯ</string>
-    <string name="btn_heating_up">ВКЛЮЧИТЬ\nПОДОГРЕВ</string>
-    <string name="btn_block">БЛОКИРОВАТЬ\nДВИГАТЕЛЬ</string>
     <string name="delete">Удалить</string>
     <string name="status_title">Статус</string>
     <string name="status_sum">Запрос текущего состояния</string>

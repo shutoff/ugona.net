@@ -15,21 +15,46 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
+import android.widget.Toast;
 
 import org.joda.time.DateTimeZone;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class SmsMonitor extends BroadcastReceiver {
 
     private static final String ACTION = "android.provider.Telephony.SMS_RECEIVED";
-    private static final String SMS_SENT = "net.ugona.plus.SMS_SENT";
 
+    static final String SMS_SENT   = "net.ugona.plus.SMS_SENT";
     static final String SMS_ANSWER = "net.ugona.plus.SMS_ANSWER";
+    static final String SMS_SEND   = "net.ugona.plus.SMS_SEND";
+
     static final int INCORRECT_MESSAGE = 10001;
 
-    static Map<String, String> answers;
+    static class Sms {
+        Sms(int id_, String text_, String answer_) {
+            id = id_;
+            text = text_;
+            answer = answer_;
+        }
+        int     id;
+        String  text;
+        String  answer;
+        void process_answer(Context context, String car_id, String text){
+        }
+    }
+
+    static class SmsQueue extends HashMap<Integer, Sms> {
+    }
+
+    static class SmsQueues {
+        SmsQueue    send;
+        SmsQueue    wait;
+    }
+
+    static Map<String, SmsQueues> processed;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -40,23 +65,37 @@ public class SmsMonitor extends BroadcastReceiver {
             return;
         if (action.equals(SMS_SENT)) {
             int result_code = getResultCode();
+            String car_id = intent.getStringExtra(Names.ID);
+            int id = intent.getIntExtra(Names.ANSWER, 0);
+            if (processed == null)
+                return;
+            SmsQueues queues = processed.get(car_id);
+            if (queues == null)
+                return;
+            Sms sms = queues.send.get(id);
+            if (sms == null)
+                return;
+            queues.send.remove(id);
             if (result_code != Activity.RESULT_OK) {
+                Toast toast = Toast.makeText(context, R.string.sms_error, Toast.LENGTH_SHORT);
+                toast.show();
                 Intent i = new Intent(SMS_ANSWER);
                 i.putExtra(Names.ANSWER, result_code);
-                i.putExtra(Names.ID, intent.getStringExtra(Names.ID));
-                context.sendBroadcast(i);
-            }
-            String answer = intent.getStringExtra(Names.ANSWER);
-            if (answer == null) {
-                Intent i = new Intent(SMS_ANSWER);
-                i.putExtra(Names.ANSWER, Activity.RESULT_OK);
-                i.putExtra(Names.ID, intent.getStringExtra(Names.ID));
+                i.putExtra(Names.ID, car_id);
                 context.sendBroadcast(i);
                 return;
             }
-            if (answers == null)
-                answers = new HashMap<String, String>();
-            answers.put(intent.getStringExtra(Names.ID), answer);
+            if (sms.answer == null) {
+                sms.process_answer(context, car_id, null);
+                Intent i = new Intent(SMS_ANSWER);
+                i.putExtra(Names.ANSWER, Activity.RESULT_OK);
+                i.putExtra(Names.ID, car_id);
+                context.sendBroadcast(i);
+                return;
+            }
+            if (queues.wait == null)
+                queues.wait = new SmsQueue();
+            queues.wait.put(sms.id, sms);
             return;
         }
         if (action.equals(ACTION)) {
@@ -133,24 +172,26 @@ public class SmsMonitor extends BroadcastReceiver {
     };
 
     boolean processCarMessage(Context context, String body, String car_id) {
-        if ((answers != null) && answers.containsKey(car_id)) {
-            String answer = answers.get(car_id);
-            if (body.substring(0, answer.length()).equalsIgnoreCase(answer)) {
-                answers.remove(car_id);
-                Intent i = new Intent(SMS_ANSWER);
-                i.putExtra(Names.ANSWER, Activity.RESULT_OK);
-                i.putExtra(Names.SMS_TEXT, body.substring(answer.length()));
-                i.putExtra(Names.ID, car_id);
-                context.sendBroadcast(i);
-                return true;
-            }
-            if (body.equals("Incorrect Message")) {
-                answers.remove(car_id);
-                Intent i = new Intent(SMS_ANSWER);
-                i.putExtra(Names.ANSWER, INCORRECT_MESSAGE);
-                i.putExtra(Names.ID, car_id);
-                context.sendBroadcast(i);
-                return true;
+        SmsQueues queues = null;
+        if (processed != null)
+            queues = processed.get(car_id);
+        SmsQueue wait = null;
+        if (queues != null)
+            wait = queues.wait;
+        if (wait != null){
+            Set<Map.Entry<Integer, Sms>> entries = wait.entrySet();
+            for (Map.Entry<Integer, Sms> entry: entries){
+                String answer = entry.getValue().answer;
+                if (body.substring(0, answer.length()).equalsIgnoreCase(answer)) {
+                    wait.remove(entry.getKey());
+                    entry.getValue().process_answer(context, car_id, body.substring(answer.length()));
+                    Intent i = new Intent(SMS_ANSWER);
+                    i.putExtra(Names.ANSWER, Activity.RESULT_OK);
+                    i.putExtra(Names.SMS_TEXT, body.substring(answer.length()));
+                    i.putExtra(Names.ID, car_id);
+                    context.sendBroadcast(i);
+                    return true;
+                }
             }
         }
         for (int i = 0; i < notifications.length; i++) {
@@ -215,22 +256,61 @@ public class SmsMonitor extends BroadcastReceiver {
         context.startActivity(alarmIntent);
     }
 
-    static void sendSMS(Context context, String car_id, String sms, String answer) {
+    static boolean sendSMS(Context context, String car_id, Sms sms) {
+        if (processed == null)
+            processed = new HashMap<String, SmsQueues>();
+        if (!processed.containsKey(car_id))
+            processed.put(car_id, new SmsQueues());
+        SmsQueues queues = processed.get(car_id);
+        if (queues.send == null)
+            queues.send = new SmsQueue();
+        SmsQueue send = queues.send;
+        if (send.containsKey(sms.id))
+            return false;
+        if ((queues.wait != null) && queues.wait.containsKey(sms.id))
+            return false;
         Intent intent = new Intent(SMS_SENT);
         intent.putExtra(Names.ID, car_id);
-        intent.putExtra(Names.ANSWER, answer);
-        PendingIntent sendPI = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        intent.putExtra(Names.ANSWER, sms.id);
+        PendingIntent sendPI = PendingIntent.getBroadcast(context, sms.id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         SmsManager smsManager = SmsManager.getDefault();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
         try {
-            smsManager.sendTextMessage(phoneNumber, null, sms, sendPI, null);
+            smsManager.sendTextMessage(phoneNumber, null, sms.text, sendPI, null);
+            Intent i = new Intent(SMS_SEND);
+            i.putExtra(Names.ID, car_id);
+            context.sendBroadcast(i);
         } catch (Exception ex) {
-            try {
-                sendPI.send(context, Activity.RESULT_CANCELED, intent);
-            } catch (Exception e) {
-                // ignore
-            }
+            return false;
         }
+        send.put(sms.id, sms);
+        return true;
     }
+
+    static void cancelSMS(String car_id, int id) {
+        if (processed == null)
+            return;
+        SmsQueues queues = processed.get(car_id);
+        if (queues == null)
+            return;
+        if (queues.send != null)
+            queues.send.remove(id);
+        if (queues.wait != null)
+            queues.wait.remove(id);
+    }
+
+    static boolean isProcessed(String car_id, int id) {
+        if (processed == null)
+            return false;
+        SmsQueues queues = processed.get(car_id);
+        if (queues == null)
+            return false;
+        if ((queues.send != null) && queues.send.containsKey(id))
+            return true;
+        if ((queues.wait != null) && queues.wait.containsKey(id))
+            return true;
+        return false;
+    }
+
 }
