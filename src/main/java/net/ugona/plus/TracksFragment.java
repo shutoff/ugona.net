@@ -265,6 +265,8 @@ public class TracksFragment extends Fragment
     }
 
     void all_done() {
+        if (getActivity() == null)
+            return;
         prgFirst.setVisibility(View.GONE);
         tvSummary.setVisibility(View.VISIBLE);
         if (tracks.size() == 0) {

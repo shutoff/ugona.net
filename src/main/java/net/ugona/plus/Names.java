@@ -38,6 +38,7 @@ public final class Names {
     static final String VOLTAGE_RESERVED = "VoltageReserved";
 
     static final String BALANCE = "Balance";
+    static final String BALANCE_TIME = "balance_time";
     static final String SHOW_BALANCE = "show_balance_";
     static final String SHOCK_SENS = "shock_sens_";
 
@@ -78,5 +79,6 @@ public final class Names {
     static final String ADDR_LNG = "AddrLongitude";
 
     static final String SMS_TEXT = "sms_text";
+    static final String STATE = "state";
 
 }

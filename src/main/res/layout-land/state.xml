@@ -175,49 +175,105 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-                <Button
+                <RelativeLayout
                     android:id="@+id/motor"
-                    android:layout_width="60dp"
+                    android:layout_width="100dp"
                     android:layout_height="50dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginTop="5dp"
-                    android:drawableLeft="@drawable/icon_motor_on"
-                    android:paddingLeft="10dp"
-                    android:gravity="center"
-                    style="@style/Theme.action" />
+                    android:background="@drawable/button_normal"
+                    android:layout_margin="5dp"
+                    android:gravity="center">
 
-                <Button
+                    <ImageView
+                        android:id="@+id/motor_img"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/icon_motor_on"
+                        android:layout_centerInParent="true"
+                        android:padding="5dp" />
+
+                    <ProgressBar
+                        android:id="@+id/motor_prg"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_centerInParent="true"
+                        android:visibility="gone" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:id="@+id/rele"
-                    android:layout_width="60dp"
+                    android:layout_width="100dp"
                     android:layout_height="50dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginTop="5dp"
-                    android:drawableLeft="@drawable/icon_heater"
-                    android:paddingLeft="10dp"
-                    android:gravity="center"
-                    style="@style/Theme.action" />
+                    android:background="@drawable/button_normal"
+                    android:layout_margin="5dp"
+                    android:gravity="center">
 
-                <Button
+                    <ImageView
+                        android:id="@+id/rele_img"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/icon_heater"
+                        android:layout_centerInParent="true"
+                        android:padding="5dp" />
+
+                    <ProgressBar
+                        android:id="@+id/rele_prg"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_centerInParent="true"
+                        android:visibility="gone" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:id="@+id/block"
-                    android:layout_width="60dp"
+                    android:layout_width="100dp"
                     android:layout_height="50dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginTop="5dp"
-                    android:drawableLeft="@drawable/icon_block"
-                    android:paddingLeft="10dp"
-                    android:gravity="center"
-                    style="@style/Theme.action" />
+                    android:background="@drawable/button_normal"
+                    android:layout_margin="5dp"
+                    android:gravity="center">
 
-                <Button
+                    <ImageView
+                        android:id="@+id/block_img"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/icon_block"
+                        android:layout_centerInParent="true"
+                        android:padding="5dp" />
+
+                    <ProgressBar
+                        android:id="@+id/block_prg"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_centerInParent="true"
+                        android:visibility="gone" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:id="@+id/valet"
-                    android:layout_width="60dp"
+                    android:layout_width="100dp"
                     android:layout_height="50dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginTop="5dp"
-                    android:drawableLeft="@drawable/icon_valet_on"
-                    android:paddingLeft="10dp"
-                    android:gravity="center"
-                    style="@style/Theme.action" />
+                    android:background="@drawable/button_normal"
+                    android:layout_margin="5dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/valet_img"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/icon_valet_on"
+                        android:layout_centerInParent="true"
+                        android:padding="5dp" />
+
+                    <ProgressBar
+                        android:id="@+id/valet_prg"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_centerInParent="true"
+                        android:visibility="gone" />
+
+                </RelativeLayout>
 
             </LinearLayout>
 

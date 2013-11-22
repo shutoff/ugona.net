@@ -9,9 +9,9 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -24,7 +24,8 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class StateFragment extends Fragment {
+public class StateFragment extends Fragment
+        implements View.OnTouchListener {
 
     String car_id;
 
@@ -49,10 +50,18 @@ public class StateFragment extends Fragment {
     ImageView imgRefresh;
     ProgressBar prgUpdate;
 
-    Button btnMotor;
-    Button btnRele;
-    Button btnBlock;
-    Button btnValet;
+    View vMotor;
+    View vRele;
+    View vBlock;
+    View vValet;
+
+    View pMotor;
+    View pRele;
+    View pBlock;
+    View pValet;
+
+    ImageView ivMotor;
+    ImageView ivValet;
 
     View balanceBlock;
     View vTime;
@@ -84,10 +93,23 @@ public class StateFragment extends Fragment {
         tvTemperature = (TextView) v.findViewById(R.id.temperature);
         vTemperature = v.findViewById(R.id.temperature_block);
 
-        btnMotor = (Button) v.findViewById(R.id.motor);
-        btnRele = (Button) v.findViewById(R.id.rele);
-        btnBlock = (Button) v.findViewById(R.id.block);
-        btnValet = (Button) v.findViewById(R.id.valet);
+        vMotor = v.findViewById(R.id.motor);
+        vRele = v.findViewById(R.id.rele);
+        vBlock = v.findViewById(R.id.block);
+        vValet = v.findViewById(R.id.valet);
+
+        pMotor = v.findViewById(R.id.motor_prg);
+        pRele = v.findViewById(R.id.rele_prg);
+        pBlock = v.findViewById(R.id.block_prg);
+        pValet = v.findViewById(R.id.valet_prg);
+
+        ivMotor = (ImageView) v.findViewById(R.id.motor_img);
+        ivValet = (ImageView) v.findViewById(R.id.valet_img);
+
+        vMotor.setOnTouchListener(this);
+        vRele.setOnTouchListener(this);
+        vBlock.setOnTouchListener(this);
+        vValet.setOnTouchListener(this);
 
         balanceBlock = v.findViewById(R.id.balance_block);
 
@@ -119,39 +141,6 @@ public class StateFragment extends Fragment {
 
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-        btnMotor.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (preferences.getBoolean(Names.INPUT3 + car_id, false)) {
-                    Actions.motor_off(context, car_id);
-                } else {
-                    Actions.motor_on(context, car_id);
-                }
-            }
-        });
-        btnRele.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Actions.rele1(context, car_id);
-            }
-        });
-        btnBlock.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Actions.block_motor(context, car_id);
-            }
-        });
-        btnValet.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Preferences.getValet(preferences, car_id)) {
-                    Actions.valet_off(context, car_id);
-                } else {
-                    Actions.valet_on(context, car_id);
-                }
-            }
-        });
-
         vTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -181,6 +170,12 @@ public class StateFragment extends Fragment {
                     prgUpdate.setVisibility(View.GONE);
                     update(context);
                 }
+                if (intent.getAction().equals(SmsMonitor.SMS_SEND)) {
+                    update(context);
+                }
+                if (intent.getAction().equals(SmsMonitor.SMS_ANSWER)) {
+                    update(context);
+                }
                 if (intent.getAction().equals(FetchService.ACTION_START)) {
                     prgUpdate.setVisibility(View.VISIBLE);
                     imgRefresh.setVisibility(View.GONE);
@@ -205,6 +200,8 @@ public class StateFragment extends Fragment {
         intFilter.addAction(FetchService.ACTION_NOUPDATE);
         intFilter.addAction(FetchService.ACTION_ERROR);
         intFilter.addAction(FetchService.ACTION_UPDATE_FORCE);
+        intFilter.addAction(SmsMonitor.SMS_SEND);
+        intFilter.addAction(SmsMonitor.SMS_ANSWER);
         context.registerReceiver(br, intFilter);
 
         return v;
@@ -242,7 +239,7 @@ public class StateFragment extends Fragment {
             vTemperature.setVisibility(View.VISIBLE);
         }
 
-        if (drawable.update(preferences, car_id))
+        if (drawable.update(context, car_id))
             imgCar.setImageDrawable(drawable.getDrawable());
         String time = "";
         long last_stand = preferences.getLong(Names.LAST_STAND + car_id, 0);
@@ -307,38 +304,43 @@ public class StateFragment extends Fragment {
 
         int n_buttons = 0;
         if (preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false)) {
-            btnMotor.setVisibility(View.VISIBLE);
+            vMotor.setVisibility(View.VISIBLE);
             if (preferences.getBoolean(Names.ENGINE + car_id, false)) {
-                btnMotor.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_motor_off, 0, 0, 0);
+                ivMotor.setImageResource(R.drawable.icon_motor_off);
+                pMotor.setVisibility(SmsMonitor.isProcessed(car_id, R.string.motor_off) ? View.VISIBLE : View.GONE);
             } else {
-                btnMotor.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_motor_on, 0, 0, 0);
+                ivMotor.setImageResource(R.drawable.icon_motor_on);
+                pMotor.setVisibility(SmsMonitor.isProcessed(car_id, R.string.motor_on) ? View.VISIBLE : View.GONE);
             }
             n_buttons++;
         } else {
-            btnMotor.setVisibility(View.GONE);
+            vMotor.setVisibility(View.GONE);
         }
         if (preferences.getBoolean(Names.CAR_RELE1 + car_id, false)) {
-            btnRele.setVisibility(View.VISIBLE);
+            vRele.setVisibility(View.VISIBLE);
+            pRele.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele1) ? View.VISIBLE : View.GONE);
             n_buttons++;
         } else {
-            btnRele.setVisibility(View.GONE);
+            vRele.setVisibility(View.GONE);
         }
         if (preferences.getBoolean(Names.INPUT3 + car_id, false)) {
-            btnBlock.setVisibility(View.VISIBLE);
+            vBlock.setVisibility(View.VISIBLE);
+            pBlock.setVisibility(SmsMonitor.isProcessed(car_id, R.string.block) ? View.VISIBLE : View.GONE);
             n_buttons++;
         } else {
-            btnBlock.setVisibility(View.GONE);
+            vBlock.setVisibility(View.GONE);
         }
         if (n_buttons < 3) {
             if (Preferences.getValet(preferences, car_id)) {
-                btnValet.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_valet_off, 0, 0, 0);
+                ivValet.setImageResource(R.drawable.icon_valet_off);
+                pValet.setVisibility(SmsMonitor.isProcessed(car_id, R.string.valet_off) ? View.VISIBLE : View.GONE);
             } else {
-                btnValet.setCompoundDrawablesWithIntrinsicBounds(R.drawable.icon_valet_on, 0, 0, 0);
+                ivValet.setImageResource(R.drawable.icon_valet_on);
+                pValet.setVisibility(SmsMonitor.isProcessed(car_id, R.string.valet_on) ? View.VISIBLE : View.GONE);
             }
-            btnValet.setVisibility(View.VISIBLE);
-            n_buttons++;
+            vValet.setVisibility(View.VISIBLE);
         } else {
-            btnValet.setVisibility(View.GONE);
+            vValet.setVisibility(View.GONE);
         }
 
         balanceBlock.setVisibility(preferences.getBoolean(Names.SHOW_BALANCE + car_id, true) ? View.VISIBLE : View.GONE);
@@ -364,5 +366,69 @@ public class StateFragment extends Fragment {
         Intent intent = new Intent(getActivity(), MapView.class);
         intent.putExtra(Names.ID, car_id);
         startActivity(intent);
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                v.setBackgroundResource(R.drawable.button_pressed);
+                return true;
+            case MotionEvent.ACTION_UP:
+                if (v == vMotor) {
+                    if (preferences.getBoolean(Names.INPUT3 + car_id, false)) {
+                        if (SmsMonitor.isProcessed(car_id, R.string.motor_off)) {
+                            SmsMonitor.cancelSMS(getActivity(), car_id, R.string.motor_off);
+                            update(getActivity());
+                        } else {
+                            Actions.motor_off(getActivity(), car_id);
+                        }
+                    } else {
+                        if (SmsMonitor.isProcessed(car_id, R.string.motor_on)) {
+                            SmsMonitor.cancelSMS(getActivity(), car_id, R.string.motor_on);
+                            update(getActivity());
+                        } else {
+                            Actions.motor_on(getActivity(), car_id);
+                        }
+                    }
+                }
+                if (v == vRele) {
+                    if (SmsMonitor.isProcessed(car_id, R.string.rele1)) {
+                        SmsMonitor.cancelSMS(getActivity(), car_id, R.string.rele1);
+                        update(getActivity());
+                    } else {
+                        Actions.rele1(getActivity(), car_id);
+                    }
+                }
+                if (v == vBlock) {
+                    if (SmsMonitor.isProcessed(car_id, R.string.block)) {
+                        SmsMonitor.cancelSMS(getActivity(), car_id, R.string.block);
+                        update(getActivity());
+                    } else {
+                        Actions.block_motor(getActivity(), car_id);
+                    }
+                }
+                if (v == vValet) {
+                    if (Preferences.getValet(preferences, car_id)) {
+                        if (SmsMonitor.isProcessed(car_id, R.string.valet_off)) {
+                            SmsMonitor.cancelSMS(getActivity(), car_id, R.string.valet_off);
+                            update(getActivity());
+                        } else {
+                            Actions.valet_off(getActivity(), car_id);
+                        }
+                    } else {
+                        if (SmsMonitor.isProcessed(car_id, R.string.valet_on)) {
+                            SmsMonitor.cancelSMS(getActivity(), car_id, R.string.valet_on);
+                            update(getActivity());
+                        } else {
+                            Actions.valet_on(getActivity(), car_id);
+                        }
+                    }
+                }
+            case MotionEvent.ACTION_CANCEL:
+                v.setBackgroundResource(R.drawable.button_normal);
+                return true;
+        }
+        return false;
     }
 }

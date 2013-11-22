@@ -20,14 +20,17 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import java.util.Date;
+import java.util.regex.Matcher;
 
 public class Actions {
+
+    static final String INCORRECT_MESSAGE = "Incorrect message";
 
     static void motor_on(final Context context, final String car_id) {
         requestPassword(context, R.string.motor_on, R.string.motor_on_sum, new Runnable() {
             @Override
             public void run() {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_on, "MOTOR ON", "MOTOR ON OK"));
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_on, "MOTOR ON", "MOTOR ON OK", "ERROR;Engine", R.string.motor_start_error));
             }
         });
     }
@@ -86,17 +89,102 @@ public class Actions {
         });
     }
 
+    static String[] alarms = {
+            "Heavy shock",
+            "Trunk",
+            "Hood",
+            "Doors",
+            "Lock",
+            "MovTilt sensor",
+            "Rogue",
+            "Ignition Lock"
+    };
+
     static void status(final Context context, final String car_id) {
         requestPassword(context, R.string.status_title, R.string.status_sum, new Runnable() {
             @Override
             public void run() {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.status_title, "STATUS?", "STATUS?") {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.status_title, "STATUS?", "STATUS? ") {
                     @Override
-                    void process_answer(Context context, String car_id, String text) {
+                    boolean process_answer(Context context, String car_id, String text) {
+
+                        Intent intent = new Intent(context, StatusDialog.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putExtra(Names.TITLE, context.getString(R.string.status_title));
+                        intent.putExtra(Names.SMS_TEXT, text);
+
+                        String[] parts = text.split(",");
+                        if (parts.length > 1) {
+                            String alarm = parts[1];
+                            if (!alarm.equals("Alarm NO")) {
+                                if (alarm.equals("Light shock")) {
+                                    intent.putExtra(Names.ALARM, context.getString(R.string.light_shock));
+                                } else {
+                                    int i;
+                                    for (i = 0; i < alarms.length; i++) {
+                                        if (alarms[i].equals(alarm)) {
+                                            intent.putExtra(Names.ALARM, context.getString(R.string.alarms).split("\\|")[i]);
+                                            break;
+                                        }
+                                    }
+                                    if (i >= alarms.length)
+                                        intent.putExtra(Names.ALARM, alarm);
+                                }
+                            }
+                        }
+
+                        String state = "";
+                        if (parts[0].equals("Guard ON"))
+                            state = context.getString(R.string.guard_state) + "\n";
+                        for (int i = 2; i < parts.length; i++) {
+                            String part = parts[i];
+                            if (part.equals("GPS"))
+                                state += context.getString(R.string.gps_state) + "\n";
+                            if (part.equals("GPRS: None"))
+                                state += context.getString(R.string.gprs_none_state) + "\n";
+                            if (part.equals("GPRS: Home"))
+                                state += context.getString(R.string.gprs_home_state) + "\n";
+                            if (part.equals("GPRS: Roaming"))
+                                state += context.getString(R.string.gprs_roaming_state) + "\n";
+                            if (part.equals("Supply regular"))
+                                state += context.getString(R.string.supply_regular) + "\n";
+                        }
+                        intent.putExtra(Names.STATE, state);
+                        context.startActivity(intent);
+
+                        return true;
+                    }
+                });
+            }
+        });
+    }
+
+    static void balance(final Context context, final String car_id) {
+        requestPassword(context, R.string.balance, R.string.balance_request, new Runnable() {
+            @Override
+            public void run() {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.balance, "BALANCE?", "") {
+                    @Override
+                    boolean process_answer(Context context, String car_id, String text) {
+                        Matcher matcher = FetchService.balancePattern.matcher(text);
+                        if (!matcher.find())
+                            return false;
+                        String balance = matcher.group(0).replaceAll(",", ".");
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putLong(Names.BALANCE_TIME + car_id, preferences.getLong(Names.EVENT_TIME + car_id, 0));
+                        ed.putString(Names.BALANCE + car_id, balance);
+                        ed.commit();
                         Intent intent = new Intent(context, StatusDialog.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtra(Names.SMS_TEXT, text);
+                        intent.putExtra(Names.STATE, balance);
+                        intent.putExtra(Names.TITLE, context.getString(R.string.balance));
                         context.startActivity(intent);
+                        Intent i = new Intent(FetchService.ACTION_UPDATE);
+                        i.putExtra(Names.ID, car_id);
+                        context.sendBroadcast(i);
+                        return true;
                     }
                 });
             }
@@ -116,12 +204,13 @@ public class Actions {
         requestCCode(context, R.string.valet_on, R.string.valet_on_msg, new Actions.Answer() {
             @Override
             void answer(String ccode) {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_on, ccode + " VALET", "Valet OK") {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_on, ccode + " VALET", "Valet OK", INCORRECT_MESSAGE, R.string.invalid_ccode) {
                     @Override
-                    void process_answer(Context context, String car_id, String text) {
+                    boolean process_answer(Context context, String car_id, String text) {
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                         SharedPreferences.Editor ed = preferences.edit();
                         ed.putBoolean(Names.VALET + car_id, true);
+                        ed.putBoolean(Names.GUARD + car_id, false);
                         Date now = new Date();
                         ed.putLong(Names.VALET_TIME + car_id, now.getTime() / 1000);
                         ed.remove(Names.INIT_TIME);
@@ -133,6 +222,7 @@ public class Actions {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+                        return true;
                     }
                 });
             }
@@ -143,15 +233,15 @@ public class Actions {
         requestCCode(context, R.string.valet_off, R.string.valet_off_msg, new Actions.Answer() {
             @Override
             void answer(String ccode) {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_off, ccode + " INIT", "Main user OK") {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_off, ccode + " INIT", "Main user OK", INCORRECT_MESSAGE, R.string.invalid_ccode) {
                     @Override
-                    void process_answer(Context context, String car_id, String text) {
+                    boolean process_answer(Context context, String car_id, String text) {
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                         SharedPreferences.Editor ed = preferences.edit();
-                        ed.putBoolean(Names.VALET + car_id, true);
+                        ed.putBoolean(Names.VALET + car_id, false);
                         Date now = new Date();
-                        ed.putLong(Names.VALET_TIME + car_id, now.getTime() / 1000);
-                        ed.remove(Names.INIT_TIME);
+                        ed.putLong(Names.INIT_TIME + car_id, now.getTime() / 1000);
+                        ed.remove(Names.VALET_TIME);
                         ed.commit();
                         try {
                             Intent intent = new Intent(FetchService.ACTION_UPDATE);
@@ -160,6 +250,7 @@ public class Actions {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+                        return true;
                     }
                 });
             }
@@ -179,14 +270,15 @@ public class Actions {
         requestCCode(context, R.string.init_phone, 0, new Actions.Answer() {
             @Override
             void answer(String ccode) {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_off, ccode + " INIT", "Main user OK") {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_off, ccode + " INIT", null, INCORRECT_MESSAGE, R.string.invalid_ccode) {
                     @Override
-                    void process_answer(Context context, String car_id, String text) {
+                    boolean process_answer(Context context, String car_id, String body) {
                         if (answer == null) {
                             text += " INIT";
                             answer = "Main user OK";
                             SmsMonitor.sendSMS(context, car_id, this);
                         }
+                        return true;
                     }
                 });
             }
@@ -296,7 +388,7 @@ public class Actions {
                 if (SmsMonitor.isProcessed(car_id, sms.id))
                     return;
                 smsProgress.dismiss();
-                if (intent.getIntExtra(Names.ANSWER, 0) == Activity.RESULT_OK)
+                if ((intent.getIntExtra(Names.ANSWER, 0) == Activity.RESULT_OK) && (after != null))
                     after.answer(intent.getStringExtra(Names.SMS_TEXT));
             }
         };
@@ -305,7 +397,7 @@ public class Actions {
             @Override
             public void onDismiss(DialogInterface dialog) {
                 context.unregisterReceiver(br);
-                SmsMonitor.cancelSMS(car_id, sms.id);
+                SmsMonitor.cancelSMS(context, car_id, sms.id);
             }
         });
         if (!SmsMonitor.sendSMS(context, car_id, sms))

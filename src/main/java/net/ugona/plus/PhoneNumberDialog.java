@@ -72,7 +72,7 @@ public class PhoneNumberDialog extends Activity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                btnOk.setEnabled(s.length() > 7);
+                btnOk.setEnabled(s.length() >= 4);
             }
         });
         String phone = getIntent().getStringExtra(Names.CAR_PHONE);
@@ -101,7 +101,7 @@ public class PhoneNumberDialog extends Activity {
                 int typeIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA2);
 
                 if (cursor.moveToFirst()) {
-                    while (cursor.isAfterLast() == false) {
+                    while (!cursor.isAfterLast()) {
                         PhoneWithType phone = new PhoneWithType();
                         phone.number = cursor.getString(phoneIdx);
                         phone.type = cursor.getInt(typeIdx);
@@ -110,6 +110,7 @@ public class PhoneNumberDialog extends Activity {
                     }
                 }
             } catch (Exception ex) {
+                // ignore
             }
             if (allNumbers.size() == 0) {
                 Toast toast = Toast.makeText(this, R.string.no_phone, Toast.LENGTH_SHORT);

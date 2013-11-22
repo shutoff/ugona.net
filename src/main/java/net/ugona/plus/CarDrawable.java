@@ -2,19 +2,15 @@ package net.ugona.plus;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.preference.PreferenceManager;
 
 import java.util.Date;
 
 public class CarDrawable {
-
-    static Drawable[] drawables;
 
     LayerDrawable drawable;
 
@@ -32,18 +28,7 @@ public class CarDrawable {
         if (bSmall)
             small = 1;
 
-        Drawable[] parts;
-        parts = new Drawable[8];
         parts_id = new int[8];
-
-        parts[0] = drawables[1];
-        parts[1] = drawables[0];
-        parts[2] = drawables[0];
-        parts[3] = drawables[0];
-        parts[4] = drawables[0];
-        parts[5] = drawables[0];
-        parts[6] = drawables[0];
-        parts[7] = drawables[0];
 
         parts_id[0] = 0;
         parts_id[1] = 0;
@@ -54,51 +39,51 @@ public class CarDrawable {
         parts_id[6] = 0;
         parts_id[7] = 0;
 
+        Drawable[] parts = new Drawable[1];
+        parts[0] = ctx.getResources().getDrawable(drawablesId[0]);
         drawable = new LayerDrawable(parts);
     }
 
+    static final int[] drawablesId = {
+            R.drawable.car_black,
+            R.drawable.car_white,
+            R.drawable.car_blue,
+            R.drawable.car_red,
+            R.drawable.doors_white,
+            R.drawable.doors_blue,
+            R.drawable.doors_red,
+            R.drawable.doors_white_open,
+            R.drawable.doors_blue_open,
+            R.drawable.doors_red_open,
+            R.drawable.hood_white,
+            R.drawable.hood_blue,
+            R.drawable.hood_red,
+            R.drawable.hood_white_open,
+            R.drawable.hood_blue_open,
+            R.drawable.hood_red_open,
+            R.drawable.trunk_white,
+            R.drawable.trunk_blue,
+            R.drawable.trunk_red,
+            R.drawable.trunk_white_open,
+            R.drawable.trunk_blue_open,
+            R.drawable.trunk_red_open,
+            R.drawable.lock_white,
+            R.drawable.lock_white_widget,
+            R.drawable.engine,
+            R.drawable.ignition,
+            R.drawable.ignition_red,
+            R.drawable.valet,
+            R.drawable.block,
+    };
+
     static void init(Context ctx) {
 
-        if (drawables != null)
+        if (width > 0)
             return;
 
-        drawables = new Drawable[30];
-        drawables[0] = new ColorDrawable(Color.TRANSPARENT);
-
-        Resources resources = ctx.getResources();
         Bitmap bmp = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.car_black);
         width = bmp.getWidth();
         height = bmp.getHeight();
-
-        drawables[1] = resources.getDrawable(R.drawable.car_black);
-        drawables[2] = resources.getDrawable(R.drawable.car_white);
-        drawables[3] = resources.getDrawable(R.drawable.car_blue);
-        drawables[4] = resources.getDrawable(R.drawable.car_red);
-        drawables[5] = resources.getDrawable(R.drawable.doors_white);
-        drawables[6] = resources.getDrawable(R.drawable.doors_blue);
-        drawables[7] = resources.getDrawable(R.drawable.doors_red);
-        drawables[8] = resources.getDrawable(R.drawable.doors_white_open);
-        drawables[9] = resources.getDrawable(R.drawable.doors_blue_open);
-        drawables[10] = resources.getDrawable(R.drawable.doors_red_open);
-        drawables[11] = resources.getDrawable(R.drawable.hood_white);
-        drawables[12] = resources.getDrawable(R.drawable.hood_blue);
-        drawables[13] = resources.getDrawable(R.drawable.hood_red);
-        drawables[14] = resources.getDrawable(R.drawable.hood_white_open);
-        drawables[15] = resources.getDrawable(R.drawable.hood_blue_open);
-        drawables[16] = resources.getDrawable(R.drawable.hood_red_open);
-        drawables[17] = resources.getDrawable(R.drawable.trunk_white);
-        drawables[18] = resources.getDrawable(R.drawable.trunk_blue);
-        drawables[19] = resources.getDrawable(R.drawable.trunk_red);
-        drawables[20] = resources.getDrawable(R.drawable.trunk_white_open);
-        drawables[21] = resources.getDrawable(R.drawable.trunk_blue_open);
-        drawables[22] = resources.getDrawable(R.drawable.trunk_red_open);
-        drawables[23] = resources.getDrawable(R.drawable.lock_white);
-        drawables[24] = resources.getDrawable(R.drawable.lock_white_widget);
-        drawables[25] = resources.getDrawable(R.drawable.engine);
-        drawables[26] = resources.getDrawable(R.drawable.ignition);
-        drawables[27] = resources.getDrawable(R.drawable.ignition_red);
-        drawables[28] = resources.getDrawable(R.drawable.valet);
-        drawables[29] = resources.getDrawable(R.drawable.block);
     }
 
     Drawable getDrawable() {
@@ -106,19 +91,20 @@ public class CarDrawable {
         return drawable;
     }
 
-    boolean update(SharedPreferences preferences, String car_id) {
+    boolean update(Context ctx, String car_id) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
         long last = preferences.getLong(Names.EVENT_TIME + car_id, 0);
         Date now = new Date();
         boolean upd = false;
         if (last < now.getTime() - 24 * 60 * 60 * 1000) {
-            upd |= setLayer(0, 1);
+            upd = setLayer(0, 1);
             upd |= setLayer(1, 0);
             upd |= setLayer(2, 0);
             upd |= setLayer(3, 0);
         } else {
 
             boolean guard = preferences.getBoolean(Names.GUARD + car_id, false);
-            upd |= setModeCar(guard, preferences.getBoolean(Names.ZONE_ACCESSORY + car_id, false));
+            upd = setModeCar(guard, preferences.getBoolean(Names.ZONE_ACCESSORY + car_id, false));
 
             boolean doors_open = preferences.getBoolean(Names.INPUT1 + car_id, false);
             boolean doors_alarm = preferences.getBoolean(Names.ZONE_DOOR + car_id, false);
@@ -162,7 +148,7 @@ public class CarDrawable {
         int n = 0;
         for (int part : parts_id) {
             if (part > 0)
-                parts[n++] = drawables[part];
+                parts[n++] = ctx.getResources().getDrawable(drawablesId[part - 1]);
         }
         drawable = new LayerDrawable(parts);
         return true;

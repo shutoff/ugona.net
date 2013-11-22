@@ -178,7 +178,7 @@ public class CarPreferences extends PreferenceActivity {
                         @Override
                         public void run() {
                             SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.shock_sens, "SET 1," + newValue, "SET OK");
-                            SmsMonitor.sendSMS(CarPreferences.this, car_id, sms);
+                            Actions.send_sms(CarPreferences.this, car_id, R.string.shock_sens, sms, null);
                         }
                     });
                     SharedPreferences.Editor ed = preferences.edit();
@@ -439,7 +439,7 @@ public class CarPreferences extends PreferenceActivity {
         dialog.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         dialog.show();
-        final Button btnSave = (Button) dialog.getButton(Dialog.BUTTON_POSITIVE);
+        final Button btnSave = dialog.getButton(Dialog.BUTTON_POSITIVE);
         final EditText etKey = (EditText) dialog.findViewById(R.id.api_key);
         final TextView tvMessage = (TextView) dialog.findViewById(R.id.message);
         TextWatcher watcher = new TextWatcher() {
@@ -659,14 +659,16 @@ public class CarPreferences extends PreferenceActivity {
                         new Runnable() {
                             @Override
                             public void run() {
-                                SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.timer, text, "TIMER_OK"){
+                                SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.timer, text, "TIMER OK") {
                                     @Override
-                                    void process_answer(Context context, String car_id, String text) {
+                                    boolean process_answer(Context context, String car_id, String text) {
                                         SharedPreferences.Editor ed = preferences.edit();
                                         ed.putInt(Names.CAR_TIMER + car_id, timeout);
                                         ed.commit();
+                                        return true;
                                     }
                                 };
+                                Actions.send_sms(CarPreferences.this, car_id, R.string.timer, sms, null);
                             }
                         });
             }

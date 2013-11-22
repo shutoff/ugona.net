@@ -75,7 +75,7 @@
     <string name="block_msg">For cancel blocking switch ON and OFF valet mode</string>
     <string name="autostart">Autostart</string>
     <string name="autostart_summary">Show autoastart actions</string>
-    <string name="rele1">prestarting heater</string>
+    <string name="rele1">Prestarting heater</string>
     <string name="rele1_summary">Show prestarting heater action</string>
     <string name="rele1_action">Send RELE1 impulse</string>
     <string name="password">Set password</string>
@@ -251,4 +251,13 @@
     <string name="minutes">min</string>
     <string name="init_phone">Main phone initialization</string>
     <string name="main_phone">Main phone</string>
+    <string name="invalid_ccode">Invalid C-code</string>
+    <string name="supply_regular">Supply regular</string>
+    <string name="service">FEDERAL SERVICE</string>
+    <string name="application">Application UGONA.NET+ works with MS-PGSM devices</string>
+    <string name="service_btn">Service Ugona.net</string>
+    <string name="forum_btn">Support forum</string>
+    <string name="log">Log state</string>
+    <string name="balance">Balance</string>
+    <string name="balance_request">Balance request</string>
 </resources>

@@ -227,7 +227,7 @@ public class CarWidget extends AppWidgetProvider {
         if (drawable == null)
             drawable = new CarDrawable(context, true);
 
-        if (drawable.update(preferences, car_id)) {
+        if (drawable.update(context, car_id)) {
             if (bitmaps == null)
                 bitmaps = new HashMap<Integer, Bitmap>();
             Bitmap bitmap = bitmaps.get(widgetID);

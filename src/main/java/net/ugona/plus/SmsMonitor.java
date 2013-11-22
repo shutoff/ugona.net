@@ -13,6 +13,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.widget.Toast;
@@ -27,11 +28,9 @@ public class SmsMonitor extends BroadcastReceiver {
 
     private static final String ACTION = "android.provider.Telephony.SMS_RECEIVED";
 
-    static final String SMS_SENT   = "net.ugona.plus.SMS_SENT";
+    static final String SMS_SENT = "net.ugona.plus.SMS_SENT";
     static final String SMS_ANSWER = "net.ugona.plus.SMS_ANSWER";
-    static final String SMS_SEND   = "net.ugona.plus.SMS_SEND";
-
-    static final int INCORRECT_MESSAGE = 10001;
+    static final String SMS_SEND = "net.ugona.plus.SMS_SEND";
 
     static class Sms {
         Sms(int id_, String text_, String answer_) {
@@ -39,10 +38,24 @@ public class SmsMonitor extends BroadcastReceiver {
             text = text_;
             answer = answer_;
         }
-        int     id;
-        String  text;
-        String  answer;
-        void process_answer(Context context, String car_id, String text){
+
+        Sms(int id_, String text_, String answer_, String error_, int error_msg_) {
+            id = id_;
+            text = text_;
+            answer = answer_;
+            error = error_;
+            error_msg = error_msg_;
+        }
+
+        int id;
+        int error_msg;
+
+        String text;
+        String answer;
+        String error;
+
+        boolean process_answer(Context context, String car_id, String text) {
+            return true;
         }
     }
 
@@ -50,11 +63,17 @@ public class SmsMonitor extends BroadcastReceiver {
     }
 
     static class SmsQueues {
-        SmsQueue    send;
-        SmsQueue    wait;
+        SmsQueue send;
+        SmsQueue wait;
     }
 
     static Map<String, SmsQueues> processed;
+
+    static boolean compareNumbers(String config, String from) {
+        if (config.length() == 4)
+            return from.substring(from.length() - 4).equals(config);
+        return PhoneNumberUtils.compare(config, from);
+    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -113,8 +132,8 @@ public class SmsMonitor extends BroadcastReceiver {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
             String[] cars = preferences.getString(Names.CARS, "").split(",");
             for (String car : cars) {
-                String phone_config = digitsOnly(preferences.getString(Names.CAR_PHONE + car, ""));
-                if ((phone_config.length() > 0) && phone_config.equals(digitsOnly(sms_from))) {
+                String phone_config = preferences.getString(Names.CAR_PHONE + car, "");
+                if (compareNumbers(phone_config, sms_from)) {
                     if (processCarMessage(context, body, car))
                         abortBroadcast();
                     return;
@@ -135,19 +154,15 @@ public class SmsMonitor extends BroadcastReceiver {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
             String[] cars = preferences.getString(Names.CARS, "").split(",");
-                for (String id : cars) {
-                    if (preferences.getBoolean(Names.NOSLEEP_MODE + id, false)) {
-                        Intent i = new Intent(context, FetchService.class);
+            for (String id : cars) {
+                if (preferences.getBoolean(Names.NOSLEEP_MODE + id, false)) {
+                    Intent i = new Intent(context, FetchService.class);
                     i.putExtra(Names.ID, id);
                     i.setAction(FetchService.ACTION_UPDATE);
                     context.startService(i);
                 }
             }
         }
-    }
-
-    String digitsOnly(String phone) {
-        return phone.replaceAll("[^0-9]", "");
     }
 
     static String[] notifications = {
@@ -178,18 +193,31 @@ public class SmsMonitor extends BroadcastReceiver {
         SmsQueue wait = null;
         if (queues != null)
             wait = queues.wait;
-        if (wait != null){
+        if (wait != null) {
             Set<Map.Entry<Integer, Sms>> entries = wait.entrySet();
-            for (Map.Entry<Integer, Sms> entry: entries){
+            for (Map.Entry<Integer, Sms> entry : entries) {
                 String answer = entry.getValue().answer;
-                if (body.substring(0, answer.length()).equalsIgnoreCase(answer)) {
+                if (compare(body, answer)) {
                     wait.remove(entry.getKey());
-                    entry.getValue().process_answer(context, car_id, body.substring(answer.length()));
+                    if (entry.getValue().process_answer(context, car_id, body.substring(answer.length()))) {
+                        Intent i = new Intent(SMS_ANSWER);
+                        i.putExtra(Names.ANSWER, Activity.RESULT_OK);
+                        i.putExtra(Names.SMS_TEXT, body.substring(answer.length()));
+                        i.putExtra(Names.ID, car_id);
+                        context.sendBroadcast(i);
+                        return true;
+                    }
+                }
+                answer = entry.getValue().error;
+                if ((answer != null) && compare(body, answer)) {
+                    wait.remove(entry.getKey());
+                    entry.getValue().process_answer(context, car_id, null);
                     Intent i = new Intent(SMS_ANSWER);
-                    i.putExtra(Names.ANSWER, Activity.RESULT_OK);
-                    i.putExtra(Names.SMS_TEXT, body.substring(answer.length()));
+                    i.putExtra(Names.ANSWER, Activity.RESULT_CANCELED);
                     i.putExtra(Names.ID, car_id);
                     context.sendBroadcast(i);
+                    Toast toast = Toast.makeText(context, entry.getValue().error_msg, Toast.LENGTH_LONG);
+                    toast.show();
                     return true;
                 }
             }
@@ -288,7 +316,7 @@ public class SmsMonitor extends BroadcastReceiver {
         return true;
     }
 
-    static void cancelSMS(String car_id, int id) {
+    static void cancelSMS(Context context, String car_id, int id) {
         if (processed == null)
             return;
         SmsQueues queues = processed.get(car_id);
@@ -298,6 +326,10 @@ public class SmsMonitor extends BroadcastReceiver {
             queues.send.remove(id);
         if (queues.wait != null)
             queues.wait.remove(id);
+        Intent i = new Intent(SMS_ANSWER);
+        i.putExtra(Names.ANSWER, Activity.RESULT_CANCELED);
+        i.putExtra(Names.ID, car_id);
+        context.sendBroadcast(i);
     }
 
     static boolean isProcessed(String car_id, int id) {

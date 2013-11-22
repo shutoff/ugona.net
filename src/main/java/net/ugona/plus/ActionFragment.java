@@ -83,7 +83,13 @@ public class ActionFragment extends Fragment
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                actions.get(position).action(getActivity(), car_id);
+                Action action = actions.get(position);
+                if (SmsMonitor.isProcessed(car_id, action.text)) {
+                    SmsMonitor.cancelSMS(getActivity(), car_id, action.text);
+                    refresh();
+                    return;
+                }
+                action.action(getActivity(), car_id);
             }
         });
         View vLogo = v.findViewById(R.id.logo);
@@ -249,6 +255,12 @@ public class ActionFragment extends Fragment
                 @Override
                 void action(Context context, String car_id) {
                     Actions.internet_off(context, car_id);
+                }
+            },
+            new Action(R.drawable.balance, R.string.balance) {
+                @Override
+                void action(Context context, String car_id) {
+                    Actions.balance(context, car_id);
                 }
             },
             new Action(R.drawable.icon_reset, R.string.reset) {

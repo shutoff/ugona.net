@@ -20,6 +20,7 @@ import org.json.JSONObject;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -46,15 +47,16 @@ public class FetchService extends Service {
     static final String ACTION_START = "net.ugona.plus.START";
     static final String ACTION_UPDATE_FORCE = "net.ugona.plus.UPDATE_FORCE";
 
-    private static final Pattern balancePattern = Pattern.compile("-?[0-9]+[\\.,][0-9][0-9]");
+    static final Pattern balancePattern = Pattern.compile("-?[0-9]+[\\.,][0-9][0-9]");
 
-    private static final String STATUS_URL = "http://api.car-online.ru/v2?get=lastinfo&skey=$1&content=json";
+    static final String STATUS_URL = "http://api.car-online.ru/v2?get=lastinfo&skey=$1&content=json";
     private static final String EVENTS_URL = "http://api.car-online.ru/v2?get=events&skey=$1&begin=$2&end=$3&content=json";
     private static final String TEMP_URL = "http://api.car-online.ru/v2?get=temperaturelist&skey=$1&begin=$2&end=$3&content=json";
     private static final String VOLTAGE_URL = "http://api.car-online.ru/v2?get=voltagelist&skey=$1&begin=$2&end=$3&content=json";
     private static final String GSM_URL = "http://api.car-online.ru/v2?get=gsmlist&skey=$1&begin=$2&end=$3&content=json";
     private static final String GPS_URL = "http://api.car-online.ru/v2?get=gps&skey=$1&id=$2&time=$3&content=json";
     private static final String SECTOR_URL = "http://api.car-online.ru/v2?get=gsmsector&skey=$1&cc=$2&nc=$3&lac=$4&cid=$5&content=json";
+    private static final String BALANCE_URL = "http://api.car-online.ru/v2?get=balancelist&skey=$1&begin=$2&content=json";
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -203,10 +205,12 @@ public class FetchService extends Service {
                 ed.putString(Names.VOLTAGE_RESERVED + car_id, voltage.getString("reserved"));
             }
 
-            JSONObject balance = res.getJSONObject("balance");
-            Matcher m = balancePattern.matcher(balance.getString("source"));
-            if (m.find())
-                ed.putString(Names.BALANCE + car_id, m.group(0).replaceAll(",", "."));
+            if (preferences.getLong(Names.BALANCE_TIME + car_id, 0) == 0) {
+                JSONObject balance = res.getJSONObject("balance");
+                Matcher m = balancePattern.matcher(balance.getString("source"));
+                if (m.find())
+                    ed.putString(Names.BALANCE + car_id, m.group(0).replaceAll(",", "."));
+            }
 
             JSONObject contact = res.getJSONObject("contact");
             boolean guard = contact.getBoolean("stGuard");
@@ -253,6 +257,15 @@ public class FetchService extends Service {
                 alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, SAFEMODE_TIMEOUT, SAFEMODE_TIMEOUT, pi);
 
             new EventsRequest(car_id, voltage_req, gsm_req);
+
+            long balance_time = preferences.getLong(Names.BALANCE_TIME + car_id, 0);
+            if (balance_time > 0) {
+                long now = new Date().getTime() - 6 * 3600 * 1000;
+                if (balance_time < now)
+                    balance_time = now;
+                new BalanceRequest(car_id, balance_time);
+            }
+
         }
 
         @Override
@@ -270,6 +283,37 @@ public class FetchService extends Service {
             ed.putBoolean(id + car_id, state);
         }
 
+    }
+
+    class BalanceRequest extends ServerRequest {
+
+        long begin;
+
+        BalanceRequest(String id, long time) {
+            super("B", id);
+            begin = time;
+        }
+
+        @Override
+        void background(JSONObject res) throws JSONException {
+            if (res == null)
+                return;
+            JSONArray balances = res.getJSONArray("balanceList");
+            if (balances.length() == 0)
+                return;
+            JSONObject balance = balances.getJSONObject(0);
+            String data = balance.getString("value");
+            SharedPreferences.Editor ed = preferences.edit();
+            ed.putString(Names.BALANCE, data);
+            ed.remove(Names.BALANCE_TIME);
+            ed.commit();
+            sendUpdate(ACTION_UPDATE, car_id);
+        }
+
+        @Override
+        void exec(String api_key) {
+            execute(BALANCE_URL, api_key, begin + "");
+        }
     }
 
     class EventsRequest extends ServerRequest {

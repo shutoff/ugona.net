@@ -1,11 +1,13 @@
 package net.ugona.plus;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -32,22 +34,55 @@ public class Phones extends ActionBarActivity {
 
     final static int ADD_PHONE = 3000;
 
+    final String USERS = "net.ugona.plus.USERS";
+
     String[] phones;
     String car_id;
 
     ListView lvPhones;
+    View vMsg;
+    View vProgress;
+
+    BroadcastReceiver br;
+
     Menu topSubMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.list);
-        phones = getIntent().getStringExtra(Names.SMS_TEXT).split(",");
+        setContentView(R.layout.phones);
+
         car_id = getIntent().getStringExtra(Names.ID);
+
         lvPhones = (ListView) findViewById(R.id.list);
+        vMsg = findViewById(R.id.msg);
+        vProgress = findViewById(R.id.progress);
+
+        if (savedInstanceState != null)
+            phones = savedInstanceState.getStringArray(Names.CAR_PHONE);
+        if (phones == null) {
+            if (!SmsMonitor.isProcessed(car_id, R.string.phones)) {
+                SmsMonitor.sendSMS(this, car_id, new SmsMonitor.Sms(R.string.phones, "USERS?", "USERS? ") {
+                    @Override
+                    boolean process_answer(Context context, String car_id, String text) {
+                        Intent i = new Intent(USERS);
+                        i.putExtra(Names.CAR_PHONE, text);
+                        i.putExtra(Names.ID, car_id);
+                        context.sendBroadcast(i);
+                        return true;
+                    }
+                });
+            }
+            showProgress();
+        } else {
+            showList();
+        }
+
         lvPhones.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
+                if (phones == null)
+                    return 0;
                 return phones.length;
             }
 
@@ -71,13 +106,17 @@ public class Phones extends ActionBarActivity {
                 }
 
                 String number = phones[position];
+                TextView tvNumber = (TextView) v.findViewById(R.id.number);
+                tvNumber.setText(PhoneNumberUtils.formatNumber(number));
+
+                ImageView ivPhoto = (ImageView) v.findViewById(R.id.photo);
+                ivPhoto.setImageResource(R.drawable.unknown_contact);
+
                 Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
                 ContentResolver contentResolver = getContentResolver();
                 Cursor contactLookup = contentResolver.query(uri, new String[]{BaseColumns._ID,
                         ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
 
-                TextView tvNumber = (TextView) v.findViewById(R.id.number);
-                tvNumber.setText(PhoneNumberUtils.formatNumber(number));
                 TextView tvName = (TextView) v.findViewById(R.id.name);
                 tvName.setText("");
 
@@ -97,7 +136,7 @@ public class Phones extends ActionBarActivity {
                                     byte[] data = cursor.getBlob(0);
                                     if (data != null) {
                                         Bitmap photo = BitmapFactory.decodeStream(new ByteArrayInputStream(data));
-                                        ImageView ivPhoto = (ImageView) v.findViewById(R.id.photo);
+                                        ivPhoto = (ImageView) v.findViewById(R.id.photo);
                                         ivPhoto.setImageBitmap(photo);
                                     }
                                 }
@@ -106,9 +145,6 @@ public class Phones extends ActionBarActivity {
                             }
                         }
                     }
-                } catch (Exception ex) {
-                    ImageView ivPhoto = (ImageView) v.findViewById(R.id.photo);
-                    ivPhoto.setImageResource(R.drawable.unknown_contact);
                 } finally {
                     if (contactLookup != null) {
                         contactLookup.close();
@@ -118,6 +154,33 @@ public class Phones extends ActionBarActivity {
                 return v;
             }
         });
+
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(USERS)) {
+                    phones = intent.getStringExtra(Names.CAR_PHONE).split(",");
+                    BaseAdapter adapter = (BaseAdapter) lvPhones.getAdapter();
+                    adapter.notifyDataSetChanged();
+                    showList();
+                }
+            }
+        };
+        IntentFilter filter = new IntentFilter(USERS);
+        registerReceiver(br, filter);
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(br);
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (phones != null)
+            outState.putStringArray(Names.CAR_PHONE, phones);
     }
 
     @Override
@@ -125,9 +188,13 @@ public class Phones extends ActionBarActivity {
         topSubMenu = menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.phones, menu);
-        if (phones.length >= 5)
+        if ((phones == null) || (phones.length >= 5)) {
             menu.removeItem(R.id.add);
-        if (phones.length < 2)
+        } else {
+            MenuItem item = menu.findItem(R.id.add);
+            item.setEnabled(!SmsMonitor.isProcessed(car_id, R.string.add_phone));
+        }
+        if ((phones == null) || (phones.length < 2))
             menu.removeItem(R.id.erase);
         return super.onCreateOptionsMenu(menu);
     }
@@ -160,24 +227,53 @@ public class Phones extends ActionBarActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if ((requestCode == ADD_PHONE) && (resultCode == RESULT_OK)) {
-            final String number = data.getStringExtra(Names.CAR_PHONE).replaceAll("[^0-9+]+", "");
-            SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.add_phone, "NEW USER " + number, " NEW USER OK");
-            Actions.send_sms(this, car_id, R.string.add_phone, sms, new Actions.Answer() {
-                @Override
-                void answer(String text) {
-                    String[] new_phones = new String[phones.length + 1];
-                    System.arraycopy(phones, 0, new_phones, 0, phones.length);
-                    new_phones[phones.length] = number;
-                    phones = new_phones;
-                    BaseAdapter adapter = (BaseAdapter) lvPhones.getAdapter();
-                    adapter.notifyDataSetChanged();
-                    updateMenu();
+        if ((requestCode == ADD_PHONE) && (resultCode == RESULT_OK) && (phones != null)) {
+            String number = data.getStringExtra(Names.CAR_PHONE).replaceAll("[^0-9+]+", "");
+            String result = null;
+            for (String phone : phones) {
+                if (result == null) {
+                    result = phone;
+                } else {
+                    result += "," + phone;
                 }
-            });
+            }
+            if (result == null) {
+                result = number;
+            } else {
+                result += "," + number;
+            }
+
+            final String r = result;
+            SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.add_phone, "NEW USER " + number, "NEW USER OK") {
+                @Override
+                boolean process_answer(Context context, String car_id, String text) {
+                    Intent i = new Intent(USERS);
+                    i.putExtra(Names.CAR_PHONE, r);
+                    i.putExtra(Names.ID, car_id);
+                    context.sendBroadcast(i);
+                    return true;
+                }
+            };
+
+            showProgress();
+            SmsMonitor.sendSMS(this, car_id, sms);
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    void showList() {
+        vMsg.setVisibility(View.GONE);
+        vProgress.setVisibility(View.GONE);
+        lvPhones.setVisibility(View.VISIBLE);
+        updateMenu();
+    }
+
+    void showProgress() {
+        vMsg.setVisibility(View.VISIBLE);
+        vProgress.setVisibility(View.VISIBLE);
+        lvPhones.setVisibility(View.GONE);
+        updateMenu();
     }
 
     void updateMenu() {

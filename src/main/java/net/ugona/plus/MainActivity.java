@@ -39,6 +39,8 @@ import com.viewpagerindicator.TitlePageIndicator;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.lang.reflect.Field;
 import java.util.Date;
@@ -81,6 +83,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
                 State.print(ex);
+                ex.printStackTrace();
             }
         });
 
@@ -235,6 +238,22 @@ public class MainActivity extends ActionBarActivity {
             case R.id.passwd:
                 setPassword();
                 return true;
+            case R.id.log: {
+                HttpTask task = new HttpTask() {
+                    @Override
+                    void result(JSONObject res) throws JSONException {
+                        State.appendLog(res.toString());
+                    }
+
+                    @Override
+                    void error() {
+                        State.appendLog("get status error");
+                    }
+                };
+                String key = preferences.getString(Names.CAR_KEY + car_id, "");
+                task.execute(FetchService.STATUS_URL, key);
+                return true;
+            }
             case R.id.about: {
                 Intent intent = new Intent(this, About.class);
                 startActivity(intent);
