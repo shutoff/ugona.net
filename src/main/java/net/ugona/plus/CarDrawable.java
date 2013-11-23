@@ -108,14 +108,26 @@ public class CarDrawable {
 
             boolean doors_open = preferences.getBoolean(Names.INPUT1 + car_id, false);
             boolean doors_alarm = preferences.getBoolean(Names.ZONE_DOOR + car_id, false);
+            if (!guard && doors_alarm) {
+                doors_alarm = false;
+                doors_open = true;
+            }
             upd |= setModeOpen(0, guard, doors_open, doors_alarm);
 
             boolean hood_open = preferences.getBoolean(Names.INPUT4 + car_id, false);
             boolean hood_alarm = preferences.getBoolean(Names.ZONE_HOOD + car_id, false);
+            if (!guard && hood_alarm) {
+                hood_alarm = false;
+                hood_open = true;
+            }
             upd |= setModeOpen(1, guard, hood_open, hood_alarm);
 
             boolean trunk_open = preferences.getBoolean(Names.INPUT2 + car_id, false);
             boolean trunk_alarm = preferences.getBoolean(Names.ZONE_TRUNK + car_id, false);
+            if (!guard && trunk_alarm) {
+                trunk_alarm = false;
+                trunk_open = true;
+            }
             upd |= setModeOpen(2, guard, trunk_open, trunk_alarm);
 
             upd |= setLayer(4, guard ? 23 + small : 0);
@@ -126,8 +138,9 @@ public class CarDrawable {
             int ignition = 0;
             if (preferences.getBoolean(Names.INPUT3 + car_id, false))
                 ignition = 26;
-            if (guard && !engine && preferences.getBoolean(Names.ZONE_IGNITION + car_id, false))
-                ignition = 27;
+            if (!engine && preferences.getBoolean(Names.ZONE_IGNITION + car_id, false)) {
+                ignition = guard ? 27 : 26;
+            }
             upd |= setLayer(6, ignition);
 
             int state = 0;

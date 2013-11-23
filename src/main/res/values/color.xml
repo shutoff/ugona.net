@@ -14,6 +14,6 @@
     <color name="caldroid_holo_blue_dark">#ff0099cc</color>
     <!-- A really bright Holo shade of blue -->
     <color name="caldroid_sky_blue">#FFA3E8F7</color>
-    <color name="error">#FF0000</color>
+    <color name="error">#FF4040</color>
 
 </resources>

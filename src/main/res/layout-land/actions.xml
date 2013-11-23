@@ -28,7 +28,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/map_bg"
                 android:orientation="horizontal"
-                android:gravity="center">
+                android:gravity="right">
 
                 <ImageView
                     android:id="@+id/logo"

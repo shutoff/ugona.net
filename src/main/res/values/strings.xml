@@ -260,4 +260,6 @@
     <string name="log">Log state</string>
     <string name="balance">Balance</string>
     <string name="balance_request">Balance request</string>
+    <string name="valet_warning">VALET mode ON</string>
+    <string name="net_warning">No data connection</string>
 </resources>

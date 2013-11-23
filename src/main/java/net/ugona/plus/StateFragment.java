@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -63,6 +65,9 @@ public class StateFragment extends Fragment
     ImageView ivMotor;
     ImageView ivValet;
 
+    View mValet;
+    View mNet;
+
     View balanceBlock;
     View vTime;
 
@@ -105,6 +110,9 @@ public class StateFragment extends Fragment
 
         ivMotor = (ImageView) v.findViewById(R.id.motor_img);
         ivValet = (ImageView) v.findViewById(R.id.valet_img);
+
+        mValet = v.findViewById(R.id.valet_warning);
+        mNet = v.findViewById(R.id.net_warning);
 
         vMotor.setOnTouchListener(this);
         vRele.setOnTouchListener(this);
@@ -162,6 +170,10 @@ public class StateFragment extends Fragment
                     update(context);
                     return;
                 }
+                if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                    updateNetStatus(context);
+                    return;
+                }
                 if (!car_id.equals(intent.getStringExtra(Names.ID)))
                     return;
                 if (intent.getAction().equals(FetchService.ACTION_UPDATE)) {
@@ -202,6 +214,7 @@ public class StateFragment extends Fragment
         intFilter.addAction(FetchService.ACTION_UPDATE_FORCE);
         intFilter.addAction(SmsMonitor.SMS_SEND);
         intFilter.addAction(SmsMonitor.SMS_ANSWER);
+        intFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         context.registerReceiver(br, intFilter);
 
         return v;
@@ -344,6 +357,17 @@ public class StateFragment extends Fragment
         }
 
         balanceBlock.setVisibility(preferences.getBoolean(Names.SHOW_BALANCE + car_id, true) ? View.VISIBLE : View.GONE);
+
+        mValet.setVisibility(Preferences.getValet(preferences, car_id) ? View.VISIBLE : View.GONE);
+        updateNetStatus(context);
+    }
+
+    void updateNetStatus(Context context) {
+        ConnectivityManager cm =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        mNet.setVisibility(isConnected ? View.GONE : View.VISIBLE);
     }
 
     void startUpdate(Context context) {
@@ -376,7 +400,7 @@ public class StateFragment extends Fragment
                 return true;
             case MotionEvent.ACTION_UP:
                 if (v == vMotor) {
-                    if (preferences.getBoolean(Names.INPUT3 + car_id, false)) {
+                    if (preferences.getBoolean(Names.ENGINE + car_id, false)) {
                         if (SmsMonitor.isProcessed(car_id, R.string.motor_off)) {
                             SmsMonitor.cancelSMS(getActivity(), car_id, R.string.motor_off);
                             update(getActivity());

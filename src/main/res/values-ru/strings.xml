@@ -249,4 +249,6 @@
     <string name="forum_btn">Форум поддержки</string>
     <string name="balance">Баланс</string>
     <string name="balance_request">Запрос баланса</string>
+    <string name="valet_warning">Не забудьте отключить режим АВТОСЕРВИС</string>
+    <string name="net_warning">Нет соединения для передачи данных</string>
 </resources>

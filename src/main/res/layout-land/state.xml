@@ -31,8 +31,28 @@
                 android:layout_width="wrap_content"
                 android:textColor="@color/error"
                 android:singleLine="true"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:textAppearance="?android:attr/textAppearanceSmall" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/valet_warning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/valet_warning"
+            android:textColor="@color/error"
+            android:gravity="center"
+            android:visibility="gone"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        <TextView
+            android:id="@+id/net_warning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/net_warning"
+            android:textColor="@color/error"
+            android:gravity="center"
+            android:visibility="gone"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <LinearLayout
             android:id="@+id/time"
@@ -106,6 +126,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textStyle="bold"
+                        android:layout_gravity="right"
                         android:padding="2dp"
                         android:textAppearance="?android:attr/textAppearanceSmall" />
                 </TableRow>
@@ -125,6 +146,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textStyle="bold"
+                        android:layout_gravity="right"
                         android:padding="2dp"
                         android:textAppearance="?android:attr/textAppearanceSmall" />
                 </TableRow>
@@ -145,6 +167,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textStyle="bold"
+                        android:layout_gravity="right"
                         android:padding="2dp"
                         android:textAppearance="?android:attr/textAppearanceSmall" />
                 </TableRow>
@@ -165,6 +188,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textStyle="bold"
+                        android:layout_gravity="right"
                         android:padding="2dp"
                         android:textAppearance="?android:attr/textAppearanceSmall" />
                 </TableRow>
