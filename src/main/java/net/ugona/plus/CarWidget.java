@@ -86,6 +86,7 @@ public class CarWidget extends AppWidgetProvider {
                 if (states == null)
                     states = new HashMap<String, Integer>();
                 String car_id = intent.getStringExtra(Names.ID);
+                State.appendLog("widget service " + action + " (" + car_id + ")");
                 if (action.equalsIgnoreCase(FetchService.ACTION_UPDATE)) {
                     states.remove(car_id);
                     updateWidgets(context, car_id);
@@ -131,6 +132,7 @@ public class CarWidget extends AppWidgetProvider {
     }
 
     void updateWidgets(Context context, String car_id) {
+        State.appendLog("update widgets " + car_id);
         ComponentName thisAppWidget = new ComponentName(
                 context.getPackageName(), getClass().getName());
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
@@ -152,6 +154,8 @@ public class CarWidget extends AppWidgetProvider {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String car_id = Preferences.getCar(preferences, preferences.getString(Names.WIDGET + widgetID, ""));
+
+        State.appendLog("update widget " + widgetID + " " + car_id);
 
         Intent configIntent = new Intent(context, WidgetService.class);
         configIntent.putExtra(Names.ID, car_id);

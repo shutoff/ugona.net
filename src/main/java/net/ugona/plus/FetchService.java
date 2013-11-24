@@ -224,6 +224,10 @@ public class FetchService extends Service {
             setState(Names.ZONE_TRUNK, contact, "stZoneTrunk", 1);
             setState(Names.ZONE_ACCESSORY, contact, "stZoneAccessoryOn", 7);
             setState(Names.ZONE_IGNITION, contact, "stZoneIgnitionOn", 4);
+            boolean engine = contact.getBoolean("stEngine");
+            if (engine && (msg_id == 4))
+                msg_id = 0;
+            ed.putBoolean(Names.ENGINE + car_id, engine);
 
             if (res.has("gps")) {
                 gsm_req = false;
@@ -243,18 +247,18 @@ public class FetchService extends Service {
             ed.commit();
             sendUpdate(ACTION_UPDATE, car_id);
 
-            if (!sms_alarm && (msg_id > 0) && guard) {
-                Intent alarmIntent = new Intent(FetchService.this, Alarm.class);
-                alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                alarmIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                String[] alarms = getString(R.string.alarm).split("\\|");
-                alarmIntent.putExtra(Names.ALARM, alarms[msg_id]);
-                alarmIntent.putExtra(Names.ID, car_id);
-                FetchService.this.startActivity(alarmIntent);
-            }
-
-            if (preferences.getBoolean(Names.NOSLEEP_MODE + car_id, false))
+            if (preferences.getBoolean(Names.NOSLEEP_MODE + car_id, false)) {
+                if (!sms_alarm && (msg_id > 0) && guard) {
+                    Intent alarmIntent = new Intent(FetchService.this, Alarm.class);
+                    alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    alarmIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    String[] alarms = getString(R.string.alarm).split("\\|");
+                    alarmIntent.putExtra(Names.ALARM, alarms[msg_id]);
+                    alarmIntent.putExtra(Names.ID, car_id);
+                    FetchService.this.startActivity(alarmIntent);
+                }
                 alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, SAFEMODE_TIMEOUT, SAFEMODE_TIMEOUT, pi);
+            }
 
             new EventsRequest(car_id, voltage_req, gsm_req);
 
@@ -336,8 +340,6 @@ public class FetchService extends Service {
             if (events.length() > 0) {
                 boolean valet_state = preferences.getBoolean(Names.VALET + car_id, false);
                 boolean valet = valet_state;
-                boolean engine_state = preferences.getBoolean(Names.ENGINE + car_id, false);
-                boolean engine = engine_state;
                 long last_stand = preferences.getLong(Names.LAST_STAND, 0);
                 long stand = last_stand;
                 long event_id = 0;
@@ -347,21 +349,11 @@ public class FetchService extends Service {
                     switch (type) {
                         case 120:
                             valet_state = true;
-                            engine_state = false;
                             break;
                         case 110:
                         case 24:
                         case 25:
                             valet_state = false;
-                            engine_state = false;
-                            break;
-                        case 45:
-                        case 46:
-                            engine_state = true;
-                            break;
-                        case 47:
-                        case 48:
-                            engine_state = false;
                             break;
                         case 37:
                             last_stand = -event.getLong("eventTime");
@@ -379,10 +371,6 @@ public class FetchService extends Service {
                 ed.putLong(Names.LAST_EVENT + car_id, eventTime);
                 if (valet_state != valet) {
                     ed.putBoolean(Names.VALET + car_id, valet_state);
-                    changed = true;
-                }
-                if (engine_state != engine) {
-                    ed.putBoolean(Names.ENGINE + car_id, engine_state);
                     changed = true;
                 }
                 if (last_stand != stand) {

@@ -187,6 +187,7 @@ public class SmsMonitor extends BroadcastReceiver {
     };
 
     boolean processCarMessage(Context context, String body, String car_id) {
+        State.appendLog("Process car message: " + body);
         SmsQueues queues = null;
         if (processed != null)
             queues = processed.get(car_id);
@@ -304,6 +305,7 @@ public class SmsMonitor extends BroadcastReceiver {
         SmsManager smsManager = SmsManager.getDefault();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
+        State.appendLog("SEND SMS: " + sms.text);
         try {
             smsManager.sendTextMessage(phoneNumber, null, sms.text, sendPI, null);
             Intent i = new Intent(SMS_SEND);
