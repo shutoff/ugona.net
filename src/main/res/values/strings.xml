@@ -15,10 +15,8 @@
     <string name="control">Control</string>
     <string name="sms_mode">Switch to SMS mode</string>
     <string name="sms_mode_summary">Click here to switch in SMS mode</string>
-    <string name="api_key">API key</string>
-    <string name="api_key_summary">Get API key on car-online.ru and enter here or send via SMS on
-        your phone
-    </string>
+    <string name="auth">Authorization</string>
+    <string name="auth_summary">Authorization on car-online.ru</string>
     <string name="sms_error">Can&amp;t send SMS</string>
     <string name="save">Save</string>
     <string name="bad_key">Enter valid API-key</string>
@@ -67,8 +65,8 @@
     <string name="version">Version:</string>
     <string name="share">Share</string>
     <string name="invalid_key">Invalid API key</string>
-    <string name="key_error">Check API key error</string>
-    <string name="check_api">Check API key</string>
+    <string name="auth_error">Check authorization error</string>
+    <string name="check_auth">Check authorization</string>
     <string name="data_error">Data update error</string>
     <string name="block">Remote blocking</string>
     <string name="block_sum">Remote blocking of the car</string>
@@ -262,4 +260,6 @@
     <string name="balance_request">Balance request</string>
     <string name="valet_warning">VALET mode ON</string>
     <string name="net_warning">No data connection</string>
+    <string name="login">Login:</string>
+    <string name="passwd">Password:</string>
 </resources>

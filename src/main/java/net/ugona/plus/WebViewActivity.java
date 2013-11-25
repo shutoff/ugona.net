@@ -1,5 +1,8 @@
 package net.ugona.plus;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
@@ -40,7 +43,13 @@ abstract public class WebViewActivity extends ActionBarActivity {
             WebSettings settings = webView.getSettings();
             settings.setJavaScriptEnabled(true);
             settings.setAppCacheEnabled(true);
-            settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+            settings.setAppCachePath(getApplicationContext().getCacheDir().getAbsolutePath());
+
+            ConnectivityManager cm =
+                    (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            boolean isConnected = (activeNetwork != null) && activeNetwork.isConnected();
+            settings.setCacheMode(isConnected ? WebSettings.LOAD_DEFAULT : WebSettings.LOAD_CACHE_ELSE_NETWORK);
 
             WebChromeClient mChromeClient = new WebChromeClient() {
                 @Override

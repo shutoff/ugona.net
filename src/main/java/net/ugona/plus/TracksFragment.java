@@ -66,9 +66,9 @@ public class TracksFragment extends Fragment
     TextView tvLoading;
     ListView lvTracks;
 
-    final static String TELEMETRY = "http://api.car-online.ru/v2?get=telemetry&skey=$1&begin=$2&end=$3&content=json";
-    final static String EVENTS = "http://api.car-online.ru/v2?get=events&skey=$1&begin=$2&end=$3&content=json";
-    final static String GPSLIST = "http://api.car-online.ru/v2?get=gpslist&skey=$1&begin=$2&end=$3&content=json";
+    final static String TELEMETRY = "http://dev.car-online.ru/api/v2?get=telemetry&skey=$1&begin=$2&end=$3&content=json";
+    final static String EVENTS = "http://dev.car-online.ru/api/v2?get=events&skey=$1&begin=$2&end=$3&content=json";
+    final static String GPSLIST = "http://dev.car-online.ru/api/v2?get=gpslist&skey=$1&begin=$2&end=$3&content=json";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

@@ -38,10 +38,10 @@ import java.util.Vector;
 public class EventsFragment extends Fragment
         implements MainActivity.DateChangeListener {
 
-    final static String EVENTS = "http://api.car-online.ru/v2?get=events&skey=$1&begin=$2&end=$3&content=json";
-    final static String EVENT_GPS = "http://api.car-online.ru/v2?get=gps&skey=$1&id=$2&time=$3&content=json";
-    final static String EVENT_GSM = "http://api.car-online.ru/v2?get=gsm&skey=$1&id=$2&time=$3&content=json";
-    final static String SECTOR_GSM = "http://api.car-online.ru/v2?get=gsmsector&skey=$1&cc=$2&nc=$3&lac=$4&cid=$5&content=json";
+    final static String EVENTS = "http://dev.car-online.ru/api/v2?get=events&skey=$1&begin=$2&end=$3&content=json";
+    final static String EVENT_GPS = "http://dev.car-online.ru/api/v2?get=gps&skey=$1&id=$2&time=$3&content=json";
+    final static String EVENT_GSM = "http://dev.car-online.ru/api/v2?get=gsm&skey=$1&id=$2&time=$3&content=json";
+    final static String SECTOR_GSM = "http://dev.car-online.ru/api/v2?get=gsmsector&skey=$1&cc=$2&nc=$3&lac=$4&cid=$5&content=json";
 
     String car_id;
     String api_key;

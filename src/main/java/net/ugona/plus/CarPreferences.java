@@ -3,11 +3,8 @@ package net.ugona.plus;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.media.Ringtone;
@@ -19,7 +16,6 @@ import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import android.telephony.SmsMessage;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -63,6 +59,9 @@ public class CarPreferences extends PreferenceActivity {
     final static int REQUEST_PHONE = 4000;
     private static final int GET_ALARM_SOUND = 3008;
     private static final int GET_NOTIFY_SOUND = 3009;
+
+    final String KEY_URL = "http://dev.car-online.ru/api/v2?get=securityKey&login=$1&password=$2&content=json";
+    final String PROFILE_URL = "http://dev.car-online.ru/api/v2?get=profile&skey=$1&content=json";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -280,30 +279,8 @@ public class CarPreferences extends PreferenceActivity {
         versionPref.setSummary(version);
 
         String api_key = preferences.getString(Names.CAR_KEY + car_id, "");
-        if (!api_key.equals("")) {
-            HttpTask verTask = new HttpTask() {
-                @Override
-                void result(JSONObject res) throws JSONException {
-                    try {
-                        JSONArray devices = res.getJSONArray("devices");
-                        JSONObject device = devices.getJSONObject(0);
-                        String ver = device.getString("versionSoftPGSM");
-                        versionPref.setSummary(ver);
-                        SharedPreferences.Editor ed = preferences.edit();
-                        ed.putString(Names.VERSION + car_id, ver);
-                        ed.commit();
-                    } catch (Exception ex) {
-                        // ignore
-                    }
-                }
-
-                @Override
-                void error() {
-
-                }
-            };
-            verTask.execute(PROFILE_URL, api_key);
-        }
+        if (!api_key.equals(""))
+            getVersion(api_key);
 
         alarmPref = findPreference("alarm");
         alarmPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -356,6 +333,9 @@ public class CarPreferences extends PreferenceActivity {
 
         String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
         setPhone(phoneNumber);
+
+        if (preferences.getString(Names.CAR_KEY + car_id, "").equals(""))
+            getApiKey();
     }
 
     @Override
@@ -425,13 +405,11 @@ public class CarPreferences extends PreferenceActivity {
         });
     }
 
-    final String PROFILE_URL = "http://api.car-online.ru/v2?get=profile&skey=$1&content=json";
-
     void getApiKey() {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         final AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.api_key)
-                .setMessage(R.string.api_key_summary)
+                .setTitle(R.string.auth)
+                .setMessage(R.string.auth_summary)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.ok, null)
                 .setView(inflater.inflate(R.layout.apikeydialog, null))
@@ -439,139 +417,102 @@ public class CarPreferences extends PreferenceActivity {
         dialog.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         dialog.show();
+
+        final EditText edLogin = (EditText) dialog.findViewById(R.id.login);
+        final EditText edPasswd = (EditText) dialog.findViewById(R.id.passwd);
+        final TextView tvError = (TextView) dialog.findViewById(R.id.error);
+
         final Button btnSave = dialog.getButton(Dialog.BUTTON_POSITIVE);
-        final EditText etKey = (EditText) dialog.findViewById(R.id.api_key);
-        final TextView tvMessage = (TextView) dialog.findViewById(R.id.message);
+
         TextWatcher watcher = new TextWatcher() {
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (etKey.getText().toString().matches("[0-9A-Fa-f]{30}")) {
-                    btnSave.setEnabled(true);
-                    tvMessage.setText("");
-                } else {
-                    btnSave.setEnabled(false);
-                    if (etKey.getText().length() == 0) {
-                        tvMessage.setText("");
-                    } else {
-                        tvMessage.setText(getString(R.string.bad_key));
-                    }
-                }
-            }
-
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+
             }
 
-        };
-
-        final BroadcastReceiver br = new BroadcastReceiver() {
             @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent == null)
-                    return;
-                Object[] pduArray = (Object[]) intent.getExtras().get("pdus");
-                SmsMessage[] messages = new SmsMessage[pduArray.length];
-                for (int i = 0; i < pduArray.length; i++) {
-                    messages[i] = SmsMessage.createFromPdu((byte[]) pduArray[i]);
-                }
-                StringBuilder bodyText = new StringBuilder();
-                for (SmsMessage m : messages) {
-                    bodyText.append(m.getMessageBody());
-                }
-                String body = bodyText.toString();
-                if (body.matches("[0-9A-Fa-f]{30}")) {
-                    etKey.setText(body);
-                    abortBroadcast();
-                }
+            public void afterTextChanged(Editable s) {
+                btnSave.setEnabled(!edLogin.getText().toString().equals("") && !edPasswd.getText().toString().equals(""));
+                tvError.setVisibility(View.GONE);
             }
         };
-        IntentFilter filter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
-        filter.setPriority(5000);
-        registerReceiver(br, filter);
-
-        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                unregisterReceiver(br);
-            }
-        });
-
-        etKey.addTextChangedListener(watcher);
-        etKey.setText(preferences.getString(Names.CAR_KEY + car_id, ""));
-        watcher.afterTextChanged(etKey.getText());
-
-        final Context context = this;
+        edLogin.addTextChangedListener(watcher);
+        edPasswd.addTextChangedListener(watcher);
+        btnSave.setEnabled(false);
 
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final ProgressDialog dlgCheck = new ProgressDialog(context);
-                dlgCheck.setMessage(getString(R.string.check_api));
+                final ProgressDialog dlgCheck = new ProgressDialog(CarPreferences.this);
+                dlgCheck.setMessage(getString(R.string.check_auth));
                 dlgCheck.show();
 
-                HttpTask checkCode = new HttpTask() {
+                HttpTask apiTask = new HttpTask() {
                     @Override
                     void result(JSONObject res) throws JSONException {
                         dlgCheck.dismiss();
-                        if (res != null) {
-                            res.getInt("id");
-                            try {
-                                JSONArray devices = res.getJSONArray("devices");
-                                JSONObject device = devices.getJSONObject(0);
-                                String ver = device.getString("versionSoftPGSM");
-                                versionPref.setSummary(ver);
-                                SharedPreferences.Editor ed = preferences.edit();
-                                ed.putString(Names.VERSION + car_id, ver);
-                                ed.commit();
-                            } catch (Exception ex) {
-                                // ignore
-                            }
-                            SharedPreferences.Editor ed = preferences.edit();
-                            ed.putString(Names.CAR_KEY + car_id, etKey.getText().toString());
-                            String[] cars = preferences.getString(Names.CARS, "").split(",");
-                            boolean is_new = true;
-                            for (String car : cars) {
-                                if (car.equals(car_id))
-                                    is_new = false;
-                            }
-                            if (is_new)
-                                ed.putString(Names.CARS, preferences.getString(Names.CARS, "") + "," + car_id);
-                            ed.commit();
-                            dialog.dismiss();
-                            Intent intent = new Intent(context, FetchService.class);
-                            intent.putExtra(Names.ID, car_id);
-                            startService(intent);
-                            return;
+                        String key = res.getString("data");
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putString(Names.CAR_KEY + car_id, key);
+                        String[] cars = preferences.getString(Names.CARS, "").split(",");
+                        boolean is_new = true;
+                        for (String car : cars) {
+                            if (car.equals(car_id))
+                                is_new = false;
                         }
-                        error();
+                        if (is_new)
+                            ed.putString(Names.CARS, preferences.getString(Names.CARS, "") + "," + car_id);
+                        ed.commit();
+                        dialog.dismiss();
+                        Intent intent = new Intent(CarPreferences.this, FetchService.class);
+                        intent.putExtra(Names.ID, car_id);
+                        startService(intent);
+                        getVersion(key);
                     }
 
                     @Override
                     void error() {
-                        String message = getString(R.string.key_error);
-                        if (error_text != null) {
-                            if (error_text.equals("Security Service Error")) {
-                                message = getString(R.string.invalid_key);
-                                versionPref.setSummary(R.string.invalid_key);
-                            } else {
-                                message += " " + error_text;
-                            }
-                        }
-                        Toast toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
+                        Toast toast = Toast.makeText(CarPreferences.this, getString(R.string.auth_error), Toast.LENGTH_LONG);
                         toast.show();
-                        tvMessage.setText(message);
+                        tvError.setText(R.string.auth_error);
+                        tvError.setVisibility(View.VISIBLE);
                         dlgCheck.dismiss();
                     }
                 };
 
-                checkCode.execute(PROFILE_URL, etKey.getText().toString());
+                apiTask.execute(KEY_URL, edLogin.getText().toString(), edPasswd.getText().toString());
             }
         });
+    }
+
+    void getVersion(String api_key) {
+        HttpTask verTask = new HttpTask() {
+            @Override
+            void result(JSONObject res) throws JSONException {
+                try {
+                    JSONArray devices = res.getJSONArray("devices");
+                    JSONObject device = devices.getJSONObject(0);
+                    String ver = device.getString("versionSoftPGSM");
+                    versionPref.setSummary(ver);
+                    SharedPreferences.Editor ed = preferences.edit();
+                    ed.putString(Names.VERSION + car_id, ver);
+                    ed.commit();
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+
+            @Override
+            void error() {
+
+            }
+        };
+        verTask.execute(PROFILE_URL, api_key);
     }
 
     void setAlarmTitle() {

@@ -15,10 +15,8 @@
     <string name="sms_mode">Переключиться в режим SMS</string>
     <string name="sms_mode_summary">Для обработки тревог приложением надо переключить устройство в режим SMS</string>
     <string name="sms_error">Не могу отправить SMS</string>
-    <string name="api_key">API ключ</string>
-    <string name="api_key_summary">Получите ключ для доступа к API на сайте car-online.ru и введите
-        его в это поле или отправьте в виде SMS на телефон
-    </string>
+    <string name="auth">Авторизация</string>
+    <string name="auth_summary">Авторизация на car-online.ru</string>
     <string name="save">Сохранить</string>
     <string name="bad_key">Неправильный ключ API</string>
     <string name="valet_on">Включить режим АВТОСЕРВИС</string>
@@ -63,8 +61,8 @@
     <string name="version">Версия:</string>
     <string name="share">Поделиться</string>
     <string name="invalid_key">Неверный ключ API</string>
-    <string name="key_error">Ошибка проверки API ключа</string>
-    <string name="check_api">Проверка ключа</string>
+    <string name="auth_error">Ошибка авторизации</string>
+    <string name="check_auth">Проверка авторизации</string>
     <string name="data_error">Ошибка обновления данных</string>
     <string name="block">Заблокировать двигатель</string>
     <string name="block_sum">Включить дистанционную блокировку автомобиля</string>
@@ -251,4 +249,6 @@
     <string name="balance_request">Запрос баланса</string>
     <string name="valet_warning">Не забудьте отключить режим АВТОСЕРВИС</string>
     <string name="net_warning">Нет соединения для передачи данных</string>
+    <string name="login">Имя пользователя:</string>
+    <string name="passwd">Пароль:</string>
 </resources>

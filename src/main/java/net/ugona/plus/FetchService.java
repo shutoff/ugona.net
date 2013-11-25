@@ -49,14 +49,14 @@ public class FetchService extends Service {
 
     static final Pattern balancePattern = Pattern.compile("-?[0-9]+[\\.,][0-9][0-9]");
 
-    static final String STATUS_URL = "http://api.car-online.ru/v2?get=lastinfo&skey=$1&content=json";
-    private static final String EVENTS_URL = "http://api.car-online.ru/v2?get=events&skey=$1&begin=$2&end=$3&content=json";
-    private static final String TEMP_URL = "http://api.car-online.ru/v2?get=temperaturelist&skey=$1&begin=$2&end=$3&content=json";
-    private static final String VOLTAGE_URL = "http://api.car-online.ru/v2?get=voltagelist&skey=$1&begin=$2&end=$3&content=json";
-    private static final String GSM_URL = "http://api.car-online.ru/v2?get=gsmlist&skey=$1&begin=$2&end=$3&content=json";
-    private static final String GPS_URL = "http://api.car-online.ru/v2?get=gps&skey=$1&id=$2&time=$3&content=json";
-    private static final String SECTOR_URL = "http://api.car-online.ru/v2?get=gsmsector&skey=$1&cc=$2&nc=$3&lac=$4&cid=$5&content=json";
-    private static final String BALANCE_URL = "http://api.car-online.ru/v2?get=balancelist&skey=$1&begin=$2&content=json";
+    static final String STATUS_URL = "http://dev.car-online.ru/api/v2?get=lastinfo&skey=$1&content=json";
+    private static final String EVENTS_URL = "http://dev.car-online.ru/api/v2?get=events&skey=$1&begin=$2&end=$3&content=json";
+    private static final String TEMP_URL = "http://dev.car-online.ru/api/v2?get=temperaturelist&skey=$1&begin=$2&end=$3&content=json";
+    private static final String VOLTAGE_URL = "http://dev.car-online.ru/api/v2?get=voltagelist&skey=$1&begin=$2&end=$3&content=json";
+    private static final String GSM_URL = "http://dev.car-online.ru/api/v2?get=gsmlist&skey=$1&begin=$2&end=$3&content=json";
+    private static final String GPS_URL = "http://dev.car-online.ru/api/v2?get=gps&skey=$1&id=$2&time=$3&content=json";
+    private static final String SECTOR_URL = "http://dev.car-online.ru/api/v2?get=gsmsector&skey=$1&cc=$2&nc=$3&lac=$4&cid=$5&content=json";
+    private static final String BALANCE_URL = "http://dev.car-online.ru/api/v2?get=balancelist&skey=$1&begin=$2&content=json";
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -213,18 +213,18 @@ public class FetchService extends Service {
             }
 
             JSONObject contact = res.getJSONObject("contact");
-            boolean guard = contact.getBoolean("stGuard");
+            boolean guard = contact.getBoolean("guard");
             ed.putBoolean(Names.GUARD + car_id, guard);
-            ed.putBoolean(Names.INPUT1 + car_id, contact.getBoolean("stInput1"));
-            ed.putBoolean(Names.INPUT2 + car_id, contact.getBoolean("stInput2"));
-            ed.putBoolean(Names.INPUT3 + car_id, contact.getBoolean("stInput3"));
-            ed.putBoolean(Names.INPUT4 + car_id, contact.getBoolean("stInput4"));
-            setState(Names.ZONE_DOOR, contact, "stZoneDoor", 3);
-            setState(Names.ZONE_HOOD, contact, "stZoneHood", 2);
-            setState(Names.ZONE_TRUNK, contact, "stZoneTrunk", 1);
-            setState(Names.ZONE_ACCESSORY, contact, "stZoneAccessoryOn", 7);
-            setState(Names.ZONE_IGNITION, contact, "stZoneIgnitionOn", 4);
-            boolean engine = contact.getBoolean("stEngine");
+            ed.putBoolean(Names.INPUT1 + car_id, contact.getBoolean("input1"));
+            ed.putBoolean(Names.INPUT2 + car_id, contact.getBoolean("input2"));
+            ed.putBoolean(Names.INPUT3 + car_id, contact.getBoolean("input3"));
+            ed.putBoolean(Names.INPUT4 + car_id, contact.getBoolean("input4"));
+            setState(Names.ZONE_DOOR, contact, "door", 3);
+            setState(Names.ZONE_HOOD, contact, "hood", 2);
+            setState(Names.ZONE_TRUNK, contact, "trunk", 1);
+            setState(Names.ZONE_ACCESSORY, contact, "accessory", 7);
+            setState(Names.ZONE_IGNITION, contact, "ignition", 4);
+            boolean engine = contact.getBoolean("engine");
             if (engine && (msg_id == 4))
                 msg_id = 0;
             ed.putBoolean(Names.ENGINE + car_id, engine);
@@ -235,7 +235,7 @@ public class FetchService extends Service {
                 ed.putString(Names.LATITUDE + car_id, gps.getString("latitude"));
                 ed.putString(Names.LONGITUDE + car_id, gps.getString("longitude"));
                 ed.putString(Names.SPEED + car_id, gps.getString("speed"));
-                if (contact.getBoolean("stGPS") && contact.getBoolean("stGPSValid"))
+                if (contact.getBoolean("gpsValid"))
                     ed.putString(Names.COURSE + car_id, gps.getString("course"));
             }
 

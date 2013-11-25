@@ -8,8 +8,8 @@
         android:key="name_" />
 
     <Preference
-        android:summary="@string/api_key_summary"
-        android:title="@string/api_key"
+        android:summary="@string/auth_summary"
+        android:title="@string/auth"
         android:key="api_key" />
 
     <Preference

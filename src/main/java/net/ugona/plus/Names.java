@@ -5,7 +5,7 @@ public final class Names {
     static final String ID = "id";
 
     static final String CAR_PHONE = "phone";
-    static final String CAR_KEY = "key";
+    static final String CAR_KEY = "apikey";
     static final String CAR_NAME = "name";
     static final String LAST = "LastID";
 

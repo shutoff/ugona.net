@@ -109,9 +109,6 @@ public class MainActivity extends ActionBarActivity {
             car_id = savedInstanceState.getString(Names.ID);
             current = new LocalDate(savedInstanceState.getLong(DATE));
         } else {
-            if (preferences.getString(Names.CARS, "").equals("") && preferences.getString(Names.CAR_KEY, "").equals(""))
-                import_data();
-
             car_id = getIntent().getStringExtra(Names.ID);
             if (car_id == null) {
                 car_id = preferences.getString(Names.LAST, "");
@@ -621,22 +618,4 @@ public class MainActivity extends ActionBarActivity {
         });
     }
 
-    void import_data() {
-        try {
-            Context context = createPackageContext("ru.shutoff.caralarm", 0);
-            SharedPreferences pref = context.getSharedPreferences("cars", MODE_PRIVATE);
-            SharedPreferences.Editor ed = preferences.edit();
-            String cars = pref.getString(Names.CARS, "");
-            ed.putString(Names.CARS, cars);
-            String[] cars_id = cars.split(",");
-            for (String id : cars_id) {
-                ed.putString(Names.CAR_KEY + id, pref.getString(Names.CAR_KEY + id, ""));
-                ed.putString(Names.CAR_PHONE + id, pref.getString(Names.CAR_PHONE + id, ""));
-                ed.putString(Names.CAR_NAME + id, pref.getString(Names.CAR_NAME + id, ""));
-            }
-            ed.commit();
-        } catch (Exception ex) {
-            // ignore
-        }
-    }
 }

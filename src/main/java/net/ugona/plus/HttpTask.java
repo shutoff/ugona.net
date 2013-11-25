@@ -55,6 +55,8 @@ public abstract class HttpTask extends AsyncTask<String, Void, JSONObject> {
                 error_text = "empty answer";
                 return null;
             }
+            if (res.substring(0, 1).equals("\""))
+                res = "{ \"data\": " + res + "}";
             JSONObject result = new JSONObject(res);
             background(result);
             return result;
