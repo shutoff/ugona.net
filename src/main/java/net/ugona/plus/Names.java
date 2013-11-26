@@ -49,14 +49,12 @@ public final class Names {
     static final String GSM = "gsm";
     static final String GSM_ZONE = "gsmzone";
 
-    static final String VALET_TIME = "ValetTime";
-    static final String INIT_TIME = "InitTime";
-
-    static final String VALET = "Valet";
     static final String ENGINE = "Engine";
     static final String LAST_EVENT = "LastEvent";
     static final String LAST_STAND = "LastStand";
     static final String GUARD = "Guard";
+    static final String GUARD0 = "Guard1";
+    static final String GUARD1 = "Guard2";
     static final String INPUT1 = "Input1";
     static final String INPUT2 = "Input2";
     static final String INPUT3 = "Input3";

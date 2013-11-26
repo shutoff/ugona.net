@@ -66,7 +66,6 @@ public class TracksFragment extends Fragment
     TextView tvLoading;
     ListView lvTracks;
 
-    final static String TELEMETRY = "http://dev.car-online.ru/api/v2?get=telemetry&skey=$1&begin=$2&end=$3&content=json";
     final static String EVENTS = "http://dev.car-online.ru/api/v2?get=events&skey=$1&begin=$2&end=$3&content=json";
     final static String GPSLIST = "http://dev.car-online.ru/api/v2?get=gpslist&skey=$1&begin=$2&end=$3&content=json";
 
@@ -136,10 +135,11 @@ public class TracksFragment extends Fragment
         });
 
         if (loaded) {
+            tracks_done();
             all_done();
         } else {
-            DataFetcher fetcher = new DataFetcher();
-            fetcher.update(current);
+            TracksFetcher fetcher = new TracksFetcher();
+            fetcher.update();
         }
         return v;
     }
@@ -191,8 +191,8 @@ public class TracksFragment extends Fragment
         prgFirst.setVisibility(View.VISIBLE);
         prgMain.setVisibility(View.VISIBLE);
         prgMain.setProgress(0);
-        DataFetcher fetcher = new DataFetcher();
-        fetcher.update(current);
+        TracksFetcher fetcher = new TracksFetcher();
+        fetcher.update();
     }
 
     void showError() {
@@ -264,10 +264,9 @@ public class TracksFragment extends Fragment
         return true;
     }
 
-    void all_done() {
+    void tracks_done() {
         if (getActivity() == null)
             return;
-        prgFirst.setVisibility(View.GONE);
         tvSummary.setVisibility(View.VISIBLE);
         if (tracks.size() == 0) {
             tvSummary.setText(getString(R.string.no_data));
@@ -297,70 +296,18 @@ public class TracksFragment extends Fragment
         String status = getString(R.string.status);
         status = String.format(status, mileage, timeFormat((int) (time / 60000)), avg_speed, max_speed);
         tvSummary.setText(status);
+    }
 
+    void all_done() {
+        if (getActivity() == null)
+            return;
+        prgFirst.setVisibility(View.GONE);
         tvLoading.setVisibility(View.GONE);
         prgMain.setVisibility(View.GONE);
         vSpace.setVisibility(View.GONE);
         lvTracks.setVisibility(View.VISIBLE);
         lvTracks.setAdapter(new TracksAdapter());
-
         loaded = true;
-    }
-
-    class DataFetcher extends HttpTask {
-
-        LocalDate date;
-
-        boolean noData() {
-            return false;
-        }
-
-        @Override
-        void result(JSONObject data) throws JSONException {
-            if (!current.equals(date))
-                return;
-            tracks = new Vector<Tracks.Track>();
-            events = new HashMap<Long, Integer>();
-            int ways = data.getInt("waysCount");
-            if ((ways == 0) && noData())
-                return;
-            prgFirst.setVisibility(View.GONE);
-            tvSummary.setVisibility(View.VISIBLE);
-            if (ways == 0) {
-                all_done();
-                return;
-            }
-            prgMain.setMax(ways * 2 + 5);
-            progress = 1;
-            prgMain.setProgress(1);
-            double mileage = data.getDouble("mileage") / 1000;
-            double avg_speed = data.getDouble("averageSpeed");
-            double max_speed = data.getDouble("maxSpeed");
-            int engine_time = data.getInt("engineTime") / 60000;
-            String status = getString(R.string.status);
-            status = String.format(status, mileage, timeFormat(engine_time), avg_speed, max_speed);
-            tvSummary.setText(status);
-            TracksFetcher tracksFetcher = new TracksFetcher();
-            tracksFetcher.update();
-        }
-
-        @Override
-        void error() {
-            showError();
-        }
-
-        void update(LocalDate d) {
-            date = d;
-            current = d;
-            loaded = false;
-            DateTime start = date.toDateTime(new LocalTime(0, 0));
-            LocalDate next = date.plusDays(1);
-            DateTime finish = next.toDateTime(new LocalTime(0, 0));
-            execute(TELEMETRY,
-                    api_key,
-                    start.toDate().getTime() + "",
-                    finish.toDate().getTime() + "");
-        }
     }
 
     class TracksFetcher extends HttpTask {
@@ -375,9 +322,14 @@ public class TracksFragment extends Fragment
             int last_type = 0;
             long first_time = end_time;
             long last_time = start_time;
+            events = new HashMap<Long, Integer>();
+            tracks = new Vector<Tracks.Track>();
+            int count = 0;
             for (int i = list.length() - 1; i >= 0; i--) {
                 JSONObject e = list.getJSONObject(i);
                 int type = e.getInt("eventType");
+                if ((type == 37) || (type == 39))
+                    count++;
                 if ((type == 37) || (type == 38) || (type == 39)) {
                     events.put(e.getLong("eventId"), type);
                     long time = e.getLong("eventTime");
@@ -399,6 +351,7 @@ public class TracksFragment extends Fragment
             time = first_time - 600000;
             if (first_type == 37)
                 time = first_time - 60000;
+
             if (time < start_time) {
                 PrevTracksFetcher fetcher = new PrevTracksFetcher(next);
                 fetcher.update(start_time, end_time);
@@ -410,6 +363,7 @@ public class TracksFragment extends Fragment
                 return;
             }
 
+            prgMain.setMax(count + 3);
             prgMain.setProgress(++progress);
             TrackDataFetcher fetcher = new TrackDataFetcher();
             fetcher.update(id, start_time, end_time);
@@ -711,9 +665,13 @@ public class TracksFragment extends Fragment
 
             prgMain.setProgress(++progress);
             if (tracks.size() == 0) {
+                tracks_done();
                 all_done();
                 return;
             }
+            prgMain.setMax(tracks.size() * 2 + progress);
+
+            tracks_done();
 
             TrackStartPositionFetcher fetcher = new TrackStartPositionFetcher();
             fetcher.update(id, 0);

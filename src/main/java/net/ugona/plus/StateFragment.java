@@ -343,8 +343,9 @@ public class StateFragment extends Fragment
         } else {
             vBlock.setVisibility(View.GONE);
         }
+        boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1, false);
         if (n_buttons < 3) {
-            if (Preferences.getValet(preferences, car_id)) {
+            if (valet) {
                 ivValet.setImageResource(R.drawable.icon_valet_off);
                 pValet.setVisibility(SmsMonitor.isProcessed(car_id, R.string.valet_off) ? View.VISIBLE : View.GONE);
             } else {
@@ -358,7 +359,7 @@ public class StateFragment extends Fragment
 
         balanceBlock.setVisibility(preferences.getBoolean(Names.SHOW_BALANCE + car_id, true) ? View.VISIBLE : View.GONE);
 
-        mValet.setVisibility(Preferences.getValet(preferences, car_id) ? View.VISIBLE : View.GONE);
+        mValet.setVisibility(valet ? View.VISIBLE : View.GONE);
         updateNetStatus(context);
     }
 
@@ -433,7 +434,7 @@ public class StateFragment extends Fragment
                     }
                 }
                 if (v == vValet) {
-                    if (Preferences.getValet(preferences, car_id)) {
+                    if (preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1, false)) {
                         if (SmsMonitor.isProcessed(car_id, R.string.valet_off)) {
                             SmsMonitor.cancelSMS(getActivity(), car_id, R.string.valet_off);
                             update(getActivity());

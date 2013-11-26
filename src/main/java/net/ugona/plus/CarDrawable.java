@@ -28,7 +28,7 @@ public class CarDrawable {
         if (bSmall)
             small = 1;
 
-        parts_id = new int[8];
+        parts_id = new int[7];
 
         parts_id[0] = 0;
         parts_id[1] = 0;
@@ -37,7 +37,6 @@ public class CarDrawable {
         parts_id[4] = 0;
         parts_id[5] = 0;
         parts_id[6] = 0;
-        parts_id[7] = 0;
 
         Drawable[] parts = new Drawable[1];
         parts[0] = ctx.getResources().getDrawable(drawablesId[0]);
@@ -45,35 +44,37 @@ public class CarDrawable {
     }
 
     static final int[] drawablesId = {
-            R.drawable.car_black,
-            R.drawable.car_white,
-            R.drawable.car_blue,
-            R.drawable.car_red,
-            R.drawable.doors_white,
-            R.drawable.doors_blue,
-            R.drawable.doors_red,
-            R.drawable.doors_white_open,
-            R.drawable.doors_blue_open,
-            R.drawable.doors_red_open,
-            R.drawable.hood_white,
-            R.drawable.hood_blue,
-            R.drawable.hood_red,
-            R.drawable.hood_white_open,
-            R.drawable.hood_blue_open,
-            R.drawable.hood_red_open,
-            R.drawable.trunk_white,
-            R.drawable.trunk_blue,
-            R.drawable.trunk_red,
-            R.drawable.trunk_white_open,
-            R.drawable.trunk_blue_open,
-            R.drawable.trunk_red_open,
-            R.drawable.lock_white,
-            R.drawable.lock_white_widget,
-            R.drawable.engine,
-            R.drawable.ignition,
-            R.drawable.ignition_red,
-            R.drawable.valet,
-            R.drawable.block,
+            R.drawable.car_black,           // 1
+            R.drawable.car_white,           // 2
+            R.drawable.car_blue,            // 3
+            R.drawable.car_red,             // 4
+            R.drawable.doors_white,         // 5
+            R.drawable.doors_blue,          // 6
+            R.drawable.doors_red,           // 7
+            R.drawable.doors_white_open,    // 8
+            R.drawable.doors_blue_open,     // 9
+            R.drawable.doors_red_open,      // 10
+            R.drawable.hood_white,          // 11
+            R.drawable.hood_blue,           // 12
+            R.drawable.hood_red,            // 13
+            R.drawable.hood_white_open,     // 14
+            R.drawable.hood_blue_open,      // 15
+            R.drawable.hood_red_open,       // 16
+            R.drawable.trunk_white,         // 17
+            R.drawable.trunk_blue,          // 18
+            R.drawable.trunk_red,           // 19
+            R.drawable.trunk_white_open,    // 20
+            R.drawable.trunk_blue_open,     // 21
+            R.drawable.trunk_red_open,      // 22
+            R.drawable.engine,              // 23
+            R.drawable.ignition,            // 24
+            R.drawable.ignition_red,        // 25
+            R.drawable.lock_white,          // 26
+            R.drawable.lock_white_widget,   // 27
+            R.drawable.lock_blue,           // 28
+            R.drawable.lock_blue_widget,    // 29
+            R.drawable.valet,               // 30
+            R.drawable.block,               // 31
     };
 
     static void init(Context ctx) {
@@ -104,49 +105,55 @@ public class CarDrawable {
         } else {
 
             boolean guard = preferences.getBoolean(Names.GUARD + car_id, false);
-            upd = setModeCar(guard, preferences.getBoolean(Names.ZONE_ACCESSORY + car_id, false));
+            boolean guard0 = preferences.getBoolean(Names.GUARD0 + car_id, false);
+            boolean guard1 = preferences.getBoolean(Names.GUARD1 + car_id, false);
+
+            boolean white = !guard || (guard0 && guard1);
+
+            upd = setModeCar(!white, preferences.getBoolean(Names.ZONE_ACCESSORY + car_id, false));
 
             boolean doors_open = preferences.getBoolean(Names.INPUT1 + car_id, false);
             boolean doors_alarm = preferences.getBoolean(Names.ZONE_DOOR + car_id, false);
-            if (!guard && doors_alarm) {
+            if (white && doors_alarm) {
                 doors_alarm = false;
                 doors_open = true;
             }
-            upd |= setModeOpen(0, guard, doors_open, doors_alarm);
+            upd |= setModeOpen(0, !white, doors_open, doors_alarm);
 
             boolean hood_open = preferences.getBoolean(Names.INPUT4 + car_id, false);
             boolean hood_alarm = preferences.getBoolean(Names.ZONE_HOOD + car_id, false);
-            if (!guard && hood_alarm) {
+            if (white && hood_alarm) {
                 hood_alarm = false;
                 hood_open = true;
             }
-            upd |= setModeOpen(1, guard, hood_open, hood_alarm);
+            upd |= setModeOpen(1, !white, hood_open, hood_alarm);
 
             boolean trunk_open = preferences.getBoolean(Names.INPUT2 + car_id, false);
             boolean trunk_alarm = preferences.getBoolean(Names.ZONE_TRUNK + car_id, false);
-            if (!guard && trunk_alarm) {
+            if (white && trunk_alarm) {
                 trunk_alarm = false;
                 trunk_open = true;
             }
-            upd |= setModeOpen(2, guard, trunk_open, trunk_alarm);
-
-            upd |= setLayer(4, guard ? 23 + small : 0);
+            upd |= setModeOpen(2, !white, trunk_open, trunk_alarm);
 
             boolean engine = preferences.getBoolean(Names.ENGINE + car_id, false);
-            upd |= setLayer(5, engine ? 25 : 0);
+            upd |= setLayer(4, engine ? 23 : 0);
 
             int ignition = 0;
             if (preferences.getBoolean(Names.INPUT3 + car_id, false))
-                ignition = 26;
-            if (!engine && preferences.getBoolean(Names.ZONE_IGNITION + car_id, false)) {
-                ignition = guard ? 27 : 26;
-            }
-            upd |= setLayer(6, ignition);
+                ignition = 24;
+            if (!engine && preferences.getBoolean(Names.ZONE_IGNITION + car_id, false))
+                ignition = guard ? 25 : 24;
+            upd |= setLayer(5, ignition);
 
             int state = 0;
-            if (Preferences.getValet(preferences, car_id))
-                state = 28;
-            upd |= setLayer(7, state);
+            if (guard)
+                state = (white ? 28 : 26) + small;
+            if (guard0 && !guard1)
+                state = 30;
+            if (!guard0 && guard1)
+                state = 31;
+            upd |= setLayer(6, state);
         }
 
         if (!upd)

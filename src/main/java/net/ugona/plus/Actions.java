@@ -19,7 +19,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
-import java.util.Date;
 import java.util.regex.Matcher;
 
 public class Actions {
@@ -209,11 +208,9 @@ public class Actions {
                     boolean process_answer(Context context, String car_id, String text) {
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                         SharedPreferences.Editor ed = preferences.edit();
-                        ed.putBoolean(Names.VALET + car_id, true);
+                        ed.putBoolean(Names.GUARD0 + car_id, true);
+                        ed.putBoolean(Names.GUARD1 + car_id, true);
                         ed.putBoolean(Names.GUARD + car_id, false);
-                        Date now = new Date();
-                        ed.putLong(Names.VALET_TIME + car_id, now.getTime() / 1000);
-                        ed.remove(Names.INIT_TIME);
                         ed.commit();
                         try {
                             Intent intent = new Intent(FetchService.ACTION_UPDATE);
@@ -238,10 +235,8 @@ public class Actions {
                     boolean process_answer(Context context, String car_id, String text) {
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                         SharedPreferences.Editor ed = preferences.edit();
-                        ed.putBoolean(Names.VALET + car_id, false);
-                        Date now = new Date();
-                        ed.putLong(Names.INIT_TIME + car_id, now.getTime() / 1000);
-                        ed.remove(Names.VALET_TIME);
+                        ed.putBoolean(Names.GUARD0 + car_id, false);
+                        ed.putBoolean(Names.GUARD1 + car_id, false);
                         ed.commit();
                         try {
                             Intent intent = new Intent(FetchService.ACTION_UPDATE);
@@ -261,7 +256,24 @@ public class Actions {
         requestPassword(context, R.string.valet_off, R.string.valet_off_msg, new Runnable() {
             @Override
             public void run() {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.block, "BLOCK MTR", "BLOCK MTR OK"));
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.block, "BLOCK MTR", "BLOCK MTR OK") {
+                    @Override
+                    boolean process_answer(Context context, String car_id, String text) {
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putBoolean(Names.GUARD0 + car_id, false);
+                        ed.putBoolean(Names.GUARD1 + car_id, true);
+                        ed.commit();
+                        try {
+                            Intent intent = new Intent(FetchService.ACTION_UPDATE);
+                            intent.putExtra(Names.ID, car_id);
+                            context.sendBroadcast(intent);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        return true;
+                    }
+                });
             }
         });
     }

@@ -219,11 +219,13 @@ public class FetchService extends Service {
             ed.putBoolean(Names.INPUT2 + car_id, contact.getBoolean("input2"));
             ed.putBoolean(Names.INPUT3 + car_id, contact.getBoolean("input3"));
             ed.putBoolean(Names.INPUT4 + car_id, contact.getBoolean("input4"));
+            ed.putBoolean(Names.GUARD0 + car_id, contact.getBoolean("guardMode0"));
+            ed.putBoolean(Names.GUARD1 + car_id, contact.getBoolean("guardMode1"));
             setState(Names.ZONE_DOOR, contact, "door", 3);
             setState(Names.ZONE_HOOD, contact, "hood", 2);
             setState(Names.ZONE_TRUNK, contact, "trunk", 1);
             setState(Names.ZONE_ACCESSORY, contact, "accessory", 7);
-            setState(Names.ZONE_IGNITION, contact, "ignition", 4);
+            setState(Names.ZONE_IGNITION, contact, "realIgnition", 4);
             boolean engine = contact.getBoolean("engine");
             if (engine && (msg_id == 4))
                 msg_id = 0;
@@ -338,8 +340,6 @@ public class FetchService extends Service {
 
             JSONArray events = res.getJSONArray("events");
             if (events.length() > 0) {
-                boolean valet_state = preferences.getBoolean(Names.VALET + car_id, false);
-                boolean valet = valet_state;
                 long last_stand = preferences.getLong(Names.LAST_STAND, 0);
                 long stand = last_stand;
                 long event_id = 0;
@@ -347,14 +347,6 @@ public class FetchService extends Service {
                     JSONObject event = events.getJSONObject(i);
                     int type = event.getInt("eventType");
                     switch (type) {
-                        case 120:
-                            valet_state = true;
-                            break;
-                        case 110:
-                        case 24:
-                        case 25:
-                            valet_state = false;
-                            break;
                         case 37:
                             last_stand = -event.getLong("eventTime");
                             break;
@@ -369,10 +361,6 @@ public class FetchService extends Service {
                 boolean changed = false;
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putLong(Names.LAST_EVENT + car_id, eventTime);
-                if (valet_state != valet) {
-                    ed.putBoolean(Names.VALET + car_id, valet_state);
-                    changed = true;
-                }
                 if (last_stand != stand) {
                     ed.putLong(Names.LAST_STAND + car_id, last_stand);
                     changed = true;

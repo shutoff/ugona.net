@@ -2,8 +2,6 @@ package net.ugona.plus;
 
 import android.content.SharedPreferences;
 
-import java.util.Date;
-
 public class Preferences {
 
     static String getCar(SharedPreferences preferences, String car_id) {
@@ -36,16 +34,6 @@ public class Preferences {
         } catch (Exception ex) {
         }
         return null;
-    }
-
-    static boolean getValet(SharedPreferences preferences, String car_id) {
-        Date now = new Date();
-        long d = now.getTime() / 1000;
-        if (d - preferences.getLong(Names.VALET_TIME + car_id, 0) < 30)
-            return true;
-        if (d - preferences.getLong(Names.INIT_TIME + car_id, 0) < 30)
-            return false;
-        return preferences.getBoolean(Names.VALET + car_id, false);
     }
 
     static String getAlarm(SharedPreferences preferences, String car_id) {
