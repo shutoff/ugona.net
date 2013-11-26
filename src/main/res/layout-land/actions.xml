@@ -48,11 +48,65 @@
         android:layout_height="match_parent"
         android:orientation="horizontal">
 
-        <ListView
-            android:id="@+id/actions"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <ListView
+                android:id="@+id/actions"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:id="@+id/no_photos"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/no_photos"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/error"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@android:drawable/stat_notify_sync" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/error_load"
+                    android:paddingLeft="10dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/progress"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:visibility="gone">
+
+                <ProgressBar
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    style="?android:attr/progressBarStyleLarge" />
+
+            </LinearLayout>
+        </LinearLayout>
 
         <TextView
             android:layout_height="wrap_content"

@@ -253,4 +253,5 @@
     <string name="passwd">Пароль:</string>
     <string name="show_photo">Показывать фотографии</string>
     <string name="photo">Фото</string>
+    <string name="no_photos">Нет фотографий</string>
 </resources>
