@@ -262,4 +262,6 @@
     <string name="net_warning">No data connection</string>
     <string name="login">Login:</string>
     <string name="passwd">Password:</string>
+    <string name="show_photo">Show photos</string>
+    <string name="photo">Photo</string>
 </resources>

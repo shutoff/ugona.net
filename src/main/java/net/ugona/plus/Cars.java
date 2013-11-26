@@ -182,18 +182,7 @@ public class Cars extends ActionBarActivity {
         startActivityForResult(intent, CAR_SETUP);
     }
 
-    void deleteCar(String id) {
-        String[] cars = preferences.getString(Names.CARS, "").split(",");
-        String res = null;
-        for (String car : cars) {
-            if (car.equals(id))
-                continue;
-            if (res == null) {
-                res = car;
-            } else {
-                res += "," + car;
-            }
-        }
+    static void deleteCarKeys(SharedPreferences preferences, String id) {
         SharedPreferences.Editor ed = preferences.edit();
         ed.remove(Names.CAR_NAME + id);
         ed.remove(Names.CAR_KEY + id);
@@ -207,6 +196,8 @@ public class Cars extends ActionBarActivity {
         ed.remove(Names.LONGITUDE + id);
         ed.remove(Names.SPEED + id);
         ed.remove(Names.GUARD + id);
+        ed.remove(Names.GUARD0 + id);
+        ed.remove(Names.GUARD1 + id);
         ed.remove(Names.INPUT1 + id);
         ed.remove(Names.INPUT2 + id);
         ed.remove(Names.INPUT3 + id);
@@ -221,6 +212,23 @@ public class Cars extends ActionBarActivity {
         ed.remove(Names.TEMPERATURE + id);
         ed.remove(Names.GSM + id);
         ed.remove(Names.GSM_ZONE + id);
+        ed.commit();
+    }
+
+    void deleteCar(String id) {
+        deleteCarKeys(preferences, id);
+        String[] cars = preferences.getString(Names.CARS, "").split(",");
+        String res = null;
+        for (String car : cars) {
+            if (car.equals(id))
+                continue;
+            if (res == null) {
+                res = car;
+            } else {
+                res += "," + car;
+            }
+        }
+        SharedPreferences.Editor ed = preferences.edit();
         ed.putString(Names.CARS, res);
         ed.commit();
         setupCars();

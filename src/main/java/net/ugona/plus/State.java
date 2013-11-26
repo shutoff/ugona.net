@@ -12,7 +12,7 @@ import java.util.Date;
 
 public class State {
 
-    static public void appendLog(String text) {
+    static void appendLog(String text) {
         File logFile = Environment.getExternalStorageDirectory();
         logFile = new File(logFile, "car.log");
         if (!logFile.exists()) {

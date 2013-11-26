@@ -67,10 +67,14 @@ public class MainActivity extends ActionBarActivity {
 
     boolean show_date;
     boolean show_tracks;
+    boolean show_photo;
+
     LocalDate current;
     Menu topSubMenu;
 
     boolean active;
+
+    StateFragment state_fragment;
 
     CaldroidFragment caldroidFragment;
 
@@ -110,19 +114,17 @@ public class MainActivity extends ActionBarActivity {
             current = new LocalDate(savedInstanceState.getLong(DATE));
         } else {
             car_id = getIntent().getStringExtra(Names.ID);
-            if (car_id == null) {
+            if (car_id == null)
                 car_id = preferences.getString(Names.LAST, "");
-                State.appendLog("get id from last");
-            }
             car_id = Preferences.getCar(preferences, car_id);
-            State.appendLog("set car " + car_id);
         }
 
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
-        mViewPager.setCurrentItem(1);
 
+        mViewPager.setCurrentItem(1);
         setShowTracks();
+        mViewPager.setCurrentItem(preferences.getBoolean(Names.SHOW_PHOTO + car_id, false) ? 2 : 1);
 
         TitlePageIndicator titleIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
         titleIndicator.setViewPager(mViewPager);
@@ -136,11 +138,11 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             public void onPageSelected(int i) {
-                boolean new_show_date = (i >= 2);
-                if (new_show_date != show_date) {
-                    show_date = new_show_date;
-                    updateMenu();
-                }
+                setShowDate(i);
+                if (!show_photo)
+                    i++;
+                if ((i == 2) && (state_fragment != null))
+                    state_fragment.startAnimation();
             }
 
             @Override
@@ -181,8 +183,18 @@ public class MainActivity extends ActionBarActivity {
 
         alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         pi = createPendingResult(REQUEST_ALARM, new Intent(), 0);
+    }
 
-        State.appendLog("create done");
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (state_fragment != null) {
+            int item = mViewPager.getCurrentItem();
+            if (!show_photo)
+                item++;
+            if (item == 2)
+                state_fragment.startAnimation();
+        }
     }
 
     @Override
@@ -331,12 +343,9 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         String id = intent.getStringExtra(Names.ID);
-        State.appendLog("new intent");
-        if (id != null) {
-            State.appendLog("set car " + id);
+        if (id != null)
             setCar(id);
-        }
-        mViewPager.setCurrentItem(1);
+        mViewPager.setCurrentItem(preferences.getBoolean(Names.SHOW_PHOTO + car_id, false) ? 2 : 1);
         removeNotifications();
     }
 
@@ -344,9 +353,18 @@ public class MainActivity extends ActionBarActivity {
         id = Preferences.getCar(preferences, id);
         if (id.equals(car_id))
             return;
+        int current = mViewPager.getCurrentItem();
+        if (!preferences.getBoolean(Names.SHOW_PHOTO + car_id, false))
+            current++;
         car_id = id;
+        if (!preferences.getBoolean(Names.SHOW_PHOTO + car_id, false))
+            current--;
+        if (current < 0)
+            current = 0;
         setActionBar();
         update();
+        mViewPager.setCurrentItem(current);
+        setShowDate(current);
     }
 
     void startTimer(boolean now) {
@@ -416,10 +434,28 @@ public class MainActivity extends ActionBarActivity {
     }
 
     void setShowTracks() {
+        boolean changed = false;
         boolean new_show_tracks = !preferences.getString(Names.LATITUDE + car_id, "").equals("");
         if (show_tracks != new_show_tracks) {
             show_tracks = new_show_tracks;
+            changed = true;
+        }
+        boolean new_show_photo = preferences.getBoolean(Names.SHOW_PHOTO + car_id, false);
+        if (show_photo != new_show_photo) {
+            show_photo = new_show_photo;
+            changed = true;
+        }
+        if (changed)
             mViewPager.getAdapter().notifyDataSetChanged();
+    }
+
+    void setShowDate(int i) {
+        if (!show_photo)
+            i++;
+        boolean new_show_date = ((i >= 3) || (i == 0));
+        if (new_show_date != show_date) {
+            show_date = new_show_date;
+            updateMenu();
         }
     }
 
@@ -449,24 +485,31 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         public Fragment getItem(int i) {
-            switch (i) {
+            switch (id(i)) {
                 case 0: {
+                    PhotoFragment fragment = new PhotoFragment();
+                    fragment.car_id = car_id;
+                    fragment.current = current;
+                    return fragment;
+                }
+                case 1: {
                     ActionFragment fragment = new ActionFragment();
                     fragment.car_id = car_id;
                     return fragment;
                 }
-                case 1: {
+                case 2: {
                     StateFragment fragment = new StateFragment();
                     fragment.car_id = car_id;
+                    state_fragment = fragment;
                     return fragment;
                 }
-                case 2: {
+                case 3: {
                     EventsFragment fragment = new EventsFragment();
                     fragment.car_id = car_id;
                     fragment.current = current;
                     return fragment;
                 }
-                case 3: {
+                case 4: {
                     TracksFragment fragment = new TracksFragment();
                     fragment.car_id = car_id;
                     fragment.current = current;
@@ -478,23 +521,36 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         public int getCount() {
-            return show_tracks ? 4 : 3;
+            int count = 3;
+            if (show_photo)
+                count++;
+            if (show_tracks)
+                count++;
+            return count;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (position) {
+            switch (id(position)) {
                 case 0:
-                    return getString(R.string.control);
+                    return getString(R.string.photo);
                 case 1:
-                    return getString(R.string.state);
+                    return getString(R.string.control);
                 case 2:
-                    return getString(R.string.events);
+                    return getString(R.string.state);
                 case 3:
+                    return getString(R.string.events);
+                case 4:
                     return getString(R.string.tracks);
 
             }
             return super.getPageTitle(position);
+        }
+
+        int id(int position) {
+            if (!show_photo)
+                position++;
+            return position;
         }
     }
 

@@ -1,7 +1,7 @@
 package net.ugona.plus;
 
 public final class Names {
-    static final String CARS = "cars";
+    static final String CARS = "car_list";
     static final String ID = "id";
 
     static final String CAR_PHONE = "phone";
@@ -31,8 +31,8 @@ public final class Names {
 
     static final String WIDGET = "Widget";
 
-    static final String EVENT_ID = "EventId";
-    static final String EVENT_TIME = "EventTime";
+    static final String EVENT_ID = "EventId_";
+    static final String EVENT_TIME = "EventTime_";
 
     static final String VOLTAGE_MAIN = "VoltageMain";
     static final String VOLTAGE_RESERVED = "VoltageReserved";
@@ -52,9 +52,9 @@ public final class Names {
     static final String ENGINE = "Engine";
     static final String LAST_EVENT = "LastEvent";
     static final String LAST_STAND = "LastStand";
-    static final String GUARD = "Guard";
-    static final String GUARD0 = "Guard1";
-    static final String GUARD1 = "Guard2";
+    static final String GUARD = "Guard_";
+    static final String GUARD0 = "Guard1_";
+    static final String GUARD1 = "Guard2_";
     static final String INPUT1 = "Input1";
     static final String INPUT2 = "Input2";
     static final String INPUT3 = "Input3";
@@ -78,5 +78,7 @@ public final class Names {
 
     static final String SMS_TEXT = "sms_text";
     static final String STATE = "state";
+
+    static final String SHOW_PHOTO = "show_photo_";
 
 }

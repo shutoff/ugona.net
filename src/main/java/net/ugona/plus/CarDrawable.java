@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.preference.PreferenceManager;
@@ -12,22 +14,11 @@ import java.util.Date;
 
 public class CarDrawable {
 
-    LayerDrawable drawable;
+    static Bitmap bitmap;
 
     int[] parts_id;
 
-    static int width;
-    static int height;
-
-    int small;
-
-    CarDrawable(Context ctx, boolean bSmall) {
-
-        init(ctx);
-
-        if (bSmall)
-            small = 1;
-
+    CarDrawable() {
         parts_id = new int[7];
 
         parts_id[0] = 0;
@@ -37,10 +28,6 @@ public class CarDrawable {
         parts_id[4] = 0;
         parts_id[5] = 0;
         parts_id[6] = 0;
-
-        Drawable[] parts = new Drawable[1];
-        parts[0] = ctx.getResources().getDrawable(drawablesId[0]);
-        drawable = new LayerDrawable(parts);
     }
 
     static final int[] drawablesId = {
@@ -66,7 +53,7 @@ public class CarDrawable {
             R.drawable.trunk_white_open,    // 20
             R.drawable.trunk_blue_open,     // 21
             R.drawable.trunk_red_open,      // 22
-            R.drawable.engine,              // 23
+            R.drawable.engine1,             // 23
             R.drawable.ignition,            // 24
             R.drawable.ignition_red,        // 25
             R.drawable.lock_white,          // 26
@@ -77,22 +64,7 @@ public class CarDrawable {
             R.drawable.block,               // 31
     };
 
-    static void init(Context ctx) {
-
-        if (width > 0)
-            return;
-
-        Bitmap bmp = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.car_black);
-        width = bmp.getWidth();
-        height = bmp.getHeight();
-    }
-
-    Drawable getDrawable() {
-
-        return drawable;
-    }
-
-    boolean update(Context ctx, String car_id) {
+    private boolean update(Context ctx, String car_id, boolean small) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
         long last = preferences.getLong(Names.EVENT_TIME + car_id, 0);
         Date now = new Date();
@@ -137,7 +109,7 @@ public class CarDrawable {
             upd |= setModeOpen(2, !white, trunk_open, trunk_alarm);
 
             boolean engine = preferences.getBoolean(Names.ENGINE + car_id, false);
-            upd |= setLayer(4, engine ? 23 : 0);
+            upd |= setLayer(4, (engine && small) ? 23 : 0);
 
             int ignition = 0;
             if (preferences.getBoolean(Names.INPUT3 + car_id, false))
@@ -147,17 +119,23 @@ public class CarDrawable {
             upd |= setLayer(5, ignition);
 
             int state = 0;
-            if (guard)
-                state = (white ? 28 : 26) + small;
+            if (guard) {
+                state = white ? 28 : 26;
+                if (small)
+                    state++;
+            }
             if (guard0 && !guard1)
                 state = 30;
             if (!guard0 && guard1)
                 state = 31;
             upd |= setLayer(6, state);
         }
+        return upd;
+    }
 
-        if (!upd)
-            return false;
+    Drawable getDrawable(Context ctx, String car_id) {
+        if (!update(ctx, car_id, false))
+            return null;
 
         int count = 0;
         for (int part : parts_id) {
@@ -170,8 +148,30 @@ public class CarDrawable {
             if (part > 0)
                 parts[n++] = ctx.getResources().getDrawable(drawablesId[part - 1]);
         }
-        drawable = new LayerDrawable(parts);
-        return true;
+        return new LayerDrawable(parts);
+    }
+
+    Bitmap getBitmap(Context ctx, String car_id) {
+        if (!update(ctx, car_id, true) && (bitmap != null))
+            return bitmap;
+
+        if (bitmap == null) {
+            Bitmap bmp = BitmapFactory.decodeResource(ctx.getResources(), R.drawable.car_black);
+            int width = bmp.getWidth();
+            int height = bmp.getHeight();
+            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        } else {
+            bitmap.eraseColor(Color.TRANSPARENT);
+        }
+        Canvas canvas = new Canvas(bitmap);
+        for (int part : parts_id) {
+            if (part == 0)
+                continue;
+            Drawable d = ctx.getResources().getDrawable(drawablesId[part - 1]);
+            d.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            d.draw(canvas);
+        }
+        return bitmap;
     }
 
     boolean setLayer(int n, int id) {

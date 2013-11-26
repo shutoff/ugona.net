@@ -196,13 +196,16 @@ public class FetchService extends Service {
             ed.putLong(Names.EVENT_ID + car_id, eventId);
             ed.putLong(Names.EVENT_TIME + car_id, eventTime);
 
-            boolean voltage_req = true;
-            boolean gsm_req = true;
+            boolean voltage_request = true;
             if (res.has("voltage")) {
-                voltage_req = false;
+                voltage_request = false;
                 JSONObject voltage = res.getJSONObject("voltage");
                 ed.putString(Names.VOLTAGE_MAIN + car_id, voltage.getString("main"));
                 ed.putString(Names.VOLTAGE_RESERVED + car_id, voltage.getString("reserved"));
+            }
+            if (res.has("temperature")) {
+                JSONObject temp = res.getJSONObject("temperature");
+                ed.putString(Names.TEMPERATURE + car_id, temp.getString("value"));
             }
 
             if (preferences.getLong(Names.BALANCE_TIME + car_id, 0) == 0) {
@@ -231,6 +234,7 @@ public class FetchService extends Service {
                 msg_id = 0;
             ed.putBoolean(Names.ENGINE + car_id, engine);
 
+            boolean gsm_req = true;
             if (res.has("gps")) {
                 gsm_req = false;
                 JSONObject gps = res.getJSONObject("gps");
@@ -262,7 +266,7 @@ public class FetchService extends Service {
                 alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, SAFEMODE_TIMEOUT, SAFEMODE_TIMEOUT, pi);
             }
 
-            new EventsRequest(car_id, voltage_req, gsm_req);
+            new EventsRequest(car_id, voltage_request, gsm_req);
 
             long balance_time = preferences.getLong(Names.BALANCE_TIME + car_id, 0);
             if (balance_time > 0) {
@@ -369,13 +373,10 @@ public class FetchService extends Service {
                 if (changed)
                     sendUpdate(ACTION_UPDATE, car_id);
             }
-
             if (voltage)
                 new VoltageRequest(car_id);
             if (gsm)
                 new GsmRequest(car_id);
-
-            new TemperatureRequest(car_id);
         }
 
         @Override
@@ -389,70 +390,6 @@ public class FetchService extends Service {
         }
 
         long eventTime;
-
-    }
-
-    class GPSRequest extends ServerRequest {
-
-        final String event_id;
-        final String event_time;
-
-        GPSRequest(String id, long eventId, long eventTime) {
-            super("G", id);
-            event_id = eventId + "";
-            event_time = eventTime + "";
-        }
-
-        @Override
-        void background(JSONObject res) throws JSONException {
-            if (res == null)
-                return;
-            SharedPreferences.Editor ed = preferences.edit();
-            ed.putString(Names.COURSE + car_id, res.getString("course"));
-            ed.commit();
-        }
-
-        @Override
-        void exec(String api_key) {
-            execute(GPS_URL, api_key, event_id, event_time);
-        }
-
-        @Override
-        void error() {
-            requests.remove(key);
-        }
-    }
-
-    class TemperatureRequest extends ServerRequest {
-
-        TemperatureRequest(String id) {
-            super("T", id);
-        }
-
-        @Override
-        void background(JSONObject res) throws JSONException {
-            if (res == null)
-                return;
-            JSONArray arr = res.getJSONArray("temperatureList");
-            if (arr.length() == 0)
-                return;
-            JSONObject value = arr.getJSONObject(0);
-            String temp = value.getString("value");
-            if (temp.equals(preferences.getString(Names.TEMPERATURE + car_id, "")))
-                return;
-            SharedPreferences.Editor ed = preferences.edit();
-            ed.putString(Names.TEMPERATURE + car_id, temp);
-            ed.commit();
-            sendUpdate(ACTION_UPDATE, car_id);
-        }
-
-        @Override
-        void exec(String api_key) {
-            long eventTime = preferences.getLong(Names.LAST_EVENT + car_id, 0);
-            execute(TEMP_URL, api_key,
-                    (eventTime - 24 * 60 * 60 * 1000) + "",
-                    eventTime + "");
-        }
     }
 
     class VoltageRequest extends ServerRequest {
@@ -487,6 +424,37 @@ public class FetchService extends Service {
             execute(VOLTAGE_URL, api_key,
                     (eventTime - 24 * 60 * 60 * 1000) + "",
                     eventTime + "");
+        }
+    }
+
+    class GPSRequest extends ServerRequest {
+
+        final String event_id;
+        final String event_time;
+
+        GPSRequest(String id, long eventId, long eventTime) {
+            super("G", id);
+            event_id = eventId + "";
+            event_time = eventTime + "";
+        }
+
+        @Override
+        void background(JSONObject res) throws JSONException {
+            if (res == null)
+                return;
+            SharedPreferences.Editor ed = preferences.edit();
+            ed.putString(Names.COURSE + car_id, res.getString("course"));
+            ed.commit();
+        }
+
+        @Override
+        void exec(String api_key) {
+            execute(GPS_URL, api_key, event_id, event_time);
+        }
+
+        @Override
+        void error() {
+            requests.remove(key);
         }
     }
 

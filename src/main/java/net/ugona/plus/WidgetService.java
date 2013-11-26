@@ -82,7 +82,6 @@ public class WidgetService extends Service {
                 if (action.equals(ACTION_SHOW)) {
                     Intent i = new Intent(this, MainActivity.class);
                     String id = intent.getStringExtra(Names.ID);
-                    State.appendLog("from widget " + id);
                     i.putExtra(Names.ID, id);
                     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     getApplicationContext().startActivity(i);
@@ -109,12 +108,10 @@ public class WidgetService extends Service {
         if (appWidgetManager != null) {
             int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            State.appendLog("widget service update all");
             for (int appWidgetID : ids) {
                 String car_id = preferences.getString(Names.WIDGET + appWidgetID, "");
                 Intent i = new Intent(this, FetchService.class);
                 i.putExtra(Names.ID, car_id);
-                State.appendLog("widget service update car " + car_id + " for " + appWidgetID);
                 startService(i);
             }
         }

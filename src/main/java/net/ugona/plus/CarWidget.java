@@ -8,13 +8,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -26,7 +24,7 @@ import java.util.Map;
 
 public class CarWidget extends AppWidgetProvider {
 
-    CarDrawable drawable;
+    static CarDrawable drawable;
 
     static final int STATE_UPDATE = 1;
     static final int STATE_ERROR = 2;
@@ -34,8 +32,6 @@ public class CarWidget extends AppWidgetProvider {
     static Map<String, Integer> states;
 
     static final String HEIGHT = "Height_";
-
-    static Map<Integer, Bitmap> bitmaps;
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -55,8 +51,6 @@ public class CarWidget extends AppWidgetProvider {
         for (int id : appWidgetIds) {
             ed.remove(HEIGHT + id);
             ed.remove(Names.WIDGET + id);
-            if (bitmaps != null)
-                bitmaps.remove(id);
         }
         ed.commit();
     }
@@ -75,7 +69,6 @@ public class CarWidget extends AppWidgetProvider {
         Intent i = new Intent(context, WidgetService.class);
         i.setAction(WidgetService.ACTION_STOP);
         context.startService(i);
-        bitmaps = null;
     }
 
     @Override
@@ -86,7 +79,6 @@ public class CarWidget extends AppWidgetProvider {
                 if (states == null)
                     states = new HashMap<String, Integer>();
                 String car_id = intent.getStringExtra(Names.ID);
-                State.appendLog("widget service " + action + " (" + car_id + ")");
                 if (action.equalsIgnoreCase(FetchService.ACTION_UPDATE)) {
                     states.remove(car_id);
                     updateWidgets(context, car_id);
@@ -132,7 +124,6 @@ public class CarWidget extends AppWidgetProvider {
     }
 
     void updateWidgets(Context context, String car_id) {
-        State.appendLog("update widgets " + car_id);
         ComponentName thisAppWidget = new ComponentName(
                 context.getPackageName(), getClass().getName());
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
@@ -154,8 +145,6 @@ public class CarWidget extends AppWidgetProvider {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String car_id = Preferences.getCar(preferences, preferences.getString(Names.WIDGET + widgetID, ""));
-
-        State.appendLog("update widget " + widgetID + " " + car_id);
 
         Intent configIntent = new Intent(context, WidgetService.class);
         configIntent.putExtra(Names.ID, car_id);
@@ -228,27 +217,14 @@ public class CarWidget extends AppWidgetProvider {
             }
         }
 
-        if (drawable == null)
-            drawable = new CarDrawable(context, true);
-
-        if (drawable.update(context, car_id)) {
-            if (bitmaps == null)
-                bitmaps = new HashMap<Integer, Bitmap>();
-            Bitmap bitmap = bitmaps.get(widgetID);
-            if ((bitmap != null) && ((bitmap.getWidth() != drawable.width) || (bitmap.getHeight() != drawable.height)))
-                bitmap = null;
-            if (bitmap == null) {
-                bitmap = Bitmap.createBitmap(drawable.width, drawable.height, Bitmap.Config.ARGB_8888);
-                bitmaps.put(widgetID, bitmap);
-            } else {
-                bitmap.eraseColor(Color.TRANSPARENT);
-            }
-            Canvas canvas = new Canvas(bitmap);
-            Drawable d = drawable.getDrawable();
-            d.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-            d.draw(canvas);
-            widgetView.setImageViewBitmap(R.id.car, bitmap);
+        if (drawable == null) {
+            Log.v("vvv", "create drawable");
+            drawable = new CarDrawable();
         }
+
+        Bitmap bmp = drawable.getBitmap(context, car_id);
+        if (bmp != null)
+            widgetView.setImageViewBitmap(R.id.car, bmp);
 
         appWidgetManager.updateAppWidget(widgetID, widgetView);
     }

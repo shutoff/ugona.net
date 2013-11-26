@@ -251,4 +251,6 @@
     <string name="net_warning">Нет соединения для передачи данных</string>
     <string name="login">Имя пользователя:</string>
     <string name="passwd">Пароль:</string>
+    <string name="show_photo">Показывать фотографии</string>
+    <string name="photo">Фото</string>
 </resources>

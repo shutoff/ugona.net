@@ -58,6 +58,10 @@
         android:defaultValue="true"
         android:key="show_balance" />
 
+    <CheckBoxPreference
+        android:title="@string/show_photo"
+        android:key="show_photo" />
+
     <Preference
         android:title="@string/alarm_sound"
         android:summary="@string/def"

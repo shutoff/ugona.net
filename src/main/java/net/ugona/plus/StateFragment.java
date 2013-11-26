@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -34,6 +36,7 @@ public class StateFragment extends Fragment
     SharedPreferences preferences;
 
     ImageView imgCar;
+    ImageView imgEngine;
 
     View vAddress;
     TextView tvTime;
@@ -84,6 +87,7 @@ public class StateFragment extends Fragment
             car_id = savedInstanceState.getString(Names.ID);
 
         imgCar = (ImageView) v.findViewById(R.id.car);
+        imgEngine = (ImageView) v.findViewById(R.id.engine);
 
         vAddress = v.findViewById(R.id.address);
         tvTime = (TextView) v.findViewById(R.id.addr_time);
@@ -156,8 +160,7 @@ public class StateFragment extends Fragment
             }
         });
 
-        drawable = new CarDrawable(context, false);
-        imgCar.setImageDrawable(drawable.getDrawable());
+        drawable = new CarDrawable();
 
         update(context);
 
@@ -252,8 +255,9 @@ public class StateFragment extends Fragment
             vTemperature.setVisibility(View.VISIBLE);
         }
 
-        if (drawable.update(context, car_id))
-            imgCar.setImageDrawable(drawable.getDrawable());
+        Drawable d = drawable.getDrawable(context, car_id);
+        if (d != null)
+            imgCar.setImageDrawable(d);
         String time = "";
         long last_stand = preferences.getLong(Names.LAST_STAND + car_id, 0);
         if (last_stand > 0) {
@@ -355,9 +359,18 @@ public class StateFragment extends Fragment
             vValet.setVisibility(View.VISIBLE);
         } else {
             vValet.setVisibility(View.GONE);
+            AnimationDrawable animation = (AnimationDrawable) imgEngine.getDrawable();
+            animation.stop();
         }
 
         balanceBlock.setVisibility(preferences.getBoolean(Names.SHOW_BALANCE + car_id, true) ? View.VISIBLE : View.GONE);
+
+        if (preferences.getBoolean(Names.ENGINE + car_id, false)) {
+            imgEngine.setVisibility(View.VISIBLE);
+            startAnimation();
+        } else {
+            imgEngine.setVisibility(View.GONE);
+        }
 
         mValet.setVisibility(valet ? View.VISIBLE : View.GONE);
         updateNetStatus(context);
@@ -455,5 +468,12 @@ public class StateFragment extends Fragment
                 return true;
         }
         return false;
+    }
+
+    void startAnimation() {
+        if (imgEngine.getVisibility() == View.GONE)
+            return;
+        AnimationDrawable animation = (AnimationDrawable) imgEngine.getDrawable();
+        animation.start();
     }
 }

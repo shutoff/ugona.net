@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:drawable="@drawable/engine1"
+        android:duration="100" />
+    <item
+        android:drawable="@drawable/engine2"
+        android:duration="100" />
+    <item
+        android:drawable="@drawable/engine3"
+        android:duration="100" />
+    <item
+        android:drawable="@drawable/engine4"
+        android:duration="100" />
+    <item
+        android:drawable="@drawable/engine5"
+        android:duration="100" />
+    <item
+        android:drawable="@drawable/engine6"
+        android:duration="100" />
+</animation-list>

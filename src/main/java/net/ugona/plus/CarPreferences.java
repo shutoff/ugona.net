@@ -80,12 +80,18 @@ public class CarPreferences extends PreferenceActivity {
             if (!car_id.equals(""))
                 name += " " + car_id;
         }
+        if (preferences.getString(Names.CAR_KEY + car_id, "").equals("")) {
+            Cars.deleteCarKeys(preferences, car_id);
+            getApiKey();
+        }
+
         setTitle(title);
         SharedPreferences.Editor ed = preferences.edit();
         ed.putInt("tmp_shift", preferences.getInt(Names.TEMP_SIFT + car_id, 0));
         ed.putBoolean("show_balance", preferences.getBoolean(Names.SHOW_BALANCE + car_id, true));
         ed.putBoolean("autostart", preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false));
         ed.putBoolean("rele1", preferences.getBoolean(Names.CAR_RELE1 + car_id, false));
+        ed.putBoolean("show_photo", preferences.getBoolean(Names.SHOW_PHOTO + car_id, false));
         ed.putInt("shock_sens", preferences.getInt(Names.SHOCK_SENS + car_id, 5));
         ed.putString("name_", name);
         ed.commit();
@@ -237,6 +243,22 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
 
+        CheckBoxPreference photoPref = (CheckBoxPreference) findPreference("show_photo");
+        photoPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                if (newValue instanceof Boolean) {
+                    boolean v = (Boolean) newValue;
+                    SharedPreferences.Editor ed = preferences.edit();
+                    ed.putBoolean(Names.SHOW_PHOTO + car_id, v);
+                    ed.commit();
+                    sendUpdate();
+                    return true;
+                }
+                return false;
+            }
+        });
+
         phonesPref = findPreference("phones");
         phonesPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -333,9 +355,6 @@ public class CarPreferences extends PreferenceActivity {
 
         String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
         setPhone(phoneNumber);
-
-        if (preferences.getString(Names.CAR_KEY + car_id, "").equals(""))
-            getApiKey();
     }
 
     @Override
