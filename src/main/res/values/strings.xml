@@ -276,4 +276,5 @@
     </string-array>
     <string name="sms_mode_msg">Switch to SMS mode require password</string>
     <string name="call_mode_msg">Switch to call mode require password</string>
+    <string name="photo_error">Loading image error</string>
 </resources>

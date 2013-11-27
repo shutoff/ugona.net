@@ -199,8 +199,8 @@ public class SmsMonitor extends BroadcastReceiver {
             for (Map.Entry<Integer, Sms> entry : entries) {
                 String answer = entry.getValue().answer;
                 if (compare(body, answer)) {
-                    wait.remove(entry.getKey());
                     if (entry.getValue().process_answer(context, car_id, body.substring(answer.length()))) {
+                        wait.remove(entry.getKey());
                         Intent i = new Intent(SMS_ANSWER);
                         i.putExtra(Names.ANSWER, Activity.RESULT_OK);
                         i.putExtra(Names.SMS_TEXT, body.substring(answer.length()));

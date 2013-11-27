@@ -261,4 +261,5 @@
         <item>SMS (для обработки приложением)</item>
         <item>Звонки</item>
     </string-array>
+    <string name="photo_error">Ошибка загрузки изображения</string>
 </resources>

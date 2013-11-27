@@ -86,6 +86,8 @@
             android:name=".PhoneNumberDialog"
             android:theme="@style/Theme.Transparent" />
 
+        <activity android:name=".PhotoView" />
+
         <activity
             android:name=".StatusDialog"
             android:theme="@style/Theme.Transparent" />
