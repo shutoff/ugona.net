@@ -94,6 +94,7 @@ public class CarPreferences extends PreferenceActivity {
         ed.putBoolean("show_photo", preferences.getBoolean(Names.SHOW_PHOTO + car_id, false));
         ed.putInt("shock_sens", preferences.getInt(Names.SHOCK_SENS + car_id, 5));
         ed.putString("name_", name);
+        ed.putString("call_mode", preferences.getString(Names.ALARM_MODE + car_id, "SMS"));
         ed.commit();
 
         addPreferencesFromResource(R.xml.car_preferences);
@@ -113,11 +114,18 @@ public class CarPreferences extends PreferenceActivity {
         });
         namePref.setSummary(name);
 
-        smsPref = findPreference("sms_mode");
-        smsPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                smsMode();
-                return true;
+        smsPref = findPreference("call_mode");
+        smsPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
+
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                String mode = newValue.toString();
+                if (mode.equals("CALL")){
+                    callMode();
+                }else{
+                    smsMode();
+                }
+                return false;
             }
         });
 
@@ -415,13 +423,49 @@ public class CarPreferences extends PreferenceActivity {
     }
 
     void smsMode() {
-        Actions.requestPassword(this, R.string.sms_mode, R.string.sms_mode_msg, new Runnable() {
+        Runnable send = new Runnable() {
             @Override
             public void run() {
-                SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.sms_mode, "ALARM SMS", "ALARM SMS OK");
+                SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.sms_mode, "ALARM SMS", "ALARM SMS OK"){
+                    @Override
+                    boolean process_answer(Context context, String car_id, String text) {
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putString(Names.ALARM_MODE + car_id, "SMS");
+                        ed.commit();
+                        return true;
+                    }
+                };
                 Actions.send_sms(CarPreferences.this, car_id, R.string.sms_mode, sms, null);
             }
-        });
+        };
+        if (preferences.getString(Names.PASSWORD, "").equals("")){
+            send.run();
+            return;
+        }
+        Actions.requestPassword(this, R.string.sms_mode, R.string.sms_mode_msg, send);
+    }
+
+    void callMode() {
+        Runnable send = new Runnable() {
+            @Override
+            public void run() {
+                SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.call_mode, "ALARM CALL", "ALARM CALL OK"){
+                    @Override
+                    boolean process_answer(Context context, String car_id, String text) {
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putString(Names.ALARM_MODE + car_id, "CALL");
+                        ed.commit();
+                        return true;
+                    }
+                };
+                Actions.send_sms(CarPreferences.this, car_id, R.string.call_mode, sms, null);
+            }
+        };
+        if (preferences.getString(Names.PASSWORD, "").equals("")){
+            send.run();
+            return;
+        }
+        Actions.requestPassword(this, R.string.call_mode, R.string.call_mode_msg, send);
     }
 
     void getApiKey() {

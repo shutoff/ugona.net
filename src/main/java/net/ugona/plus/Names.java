@@ -80,5 +80,6 @@ public final class Names {
     static final String STATE = "state";
 
     static final String SHOW_PHOTO = "show_photo_";
+    static final String ALARM_MODE = "alarm_mode";
 
 }

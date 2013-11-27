@@ -3,13 +3,18 @@ package net.ugona.plus;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -20,12 +25,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.InputStream;
 import java.util.Vector;
 
 public class PhotoFragment extends Fragment
         implements MainActivity.DateChangeListener {
 
     final static String PHOTOS = "http://dev.car-online.ru/api/v2?get=photos&skey=$1&begin=$2&end=$3&content=json";
+    final static String PHOTO = "http://dev.car-online.ru/api/v2?get=photo&skey=";
 
     String car_id;
     LocalDate current;
@@ -161,6 +168,15 @@ public class PhotoFragment extends Fragment
                         DateTime time = new DateTime(photo.time);
                         TextView tvTime = (TextView) v.findViewById(R.id.time);
                         tvTime.setText(time.toString("HH:mm:ss"));
+                        ImageView iv = (ImageView) v.findViewById(R.id.photo);
+                        if (photo.photo != null){
+                            iv.setImageBitmap(photo.photo);
+                            Log.v("vvv", "photo != null");
+                        }else {
+                            iv.setImageResource(R.drawable.photo_bg);
+                            PhotoFetcher fetcher = new PhotoFetcher();
+                            fetcher.execute(photo);
+                        }
                         return v;
                     }
                 });
@@ -184,8 +200,36 @@ public class PhotoFragment extends Fragment
         }
     }
 
+    class PhotoFetcher extends AsyncTask<Photo, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Photo... params) {
+            String url = PHOTO + api_key;
+            url += "&id=" + params[0].id;
+            Log.v("vvv", "url=" + url);
+            Bitmap bmp = null;
+            try {
+                InputStream in = new java.net.URL(url).openStream();
+                bmp = BitmapFactory.decodeStream(in);
+                params[0].photo = bmp;
+                Log.v("vvv", "photo get");
+                Log.v("vvv", bmp.getWidth() + "*" + bmp.getHeight());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            BaseAdapter adapter = (BaseAdapter) list.getAdapter();
+            adapter.notifyDataSetChanged();
+        }
+    }
+
     static class Photo {
         long time;
         long id;
+        Bitmap photo;
     }
 }

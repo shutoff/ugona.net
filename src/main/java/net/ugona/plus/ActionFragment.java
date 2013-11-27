@@ -203,18 +203,6 @@ public class ActionFragment extends Fragment
                     Actions.valet_off(context, car_id);
                 }
             },
-            new Action(R.drawable.icon_status, R.string.status_title) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.status(context, car_id);
-                }
-            },
-            new Action(R.drawable.icon_block, R.string.block) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.block_motor(context, car_id);
-                }
-            },
             new Action(R.drawable.icon_motor_on, R.string.motor_on, FLAG_AZ) {
                 @Override
                 void action(Context context, String car_id) {
@@ -231,6 +219,18 @@ public class ActionFragment extends Fragment
                 @Override
                 void action(Context context, String car_id) {
                     Actions.rele1(context, car_id);
+                }
+            },
+            new Action(R.drawable.icon_status, R.string.status_title) {
+                @Override
+                void action(Context context, String car_id) {
+                    Actions.status(context, car_id);
+                }
+            },
+            new Action(R.drawable.icon_block, R.string.block) {
+                @Override
+                void action(Context context, String car_id) {
+                    Actions.block_motor(context, car_id);
                 }
             },
             new Action(R.drawable.icon_turbo_on, R.string.turbo_on) {

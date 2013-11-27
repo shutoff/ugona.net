@@ -17,10 +17,12 @@
         android:title="@string/phone_number"
         android:key="phone" />
 
-    <Preference
-        android:title="@string/sms_mode"
+    <ListPreference
+        android:title="@string/alarm_mode"
         android:summary="@string/sms_mode_summary"
-        android:key="sms_mode" />
+        android:entryValues="@array/alarm_mode_values"
+        android:entries="@array/alarm_mode"
+        android:key="call_mode" />
 
     <Preference
         android:title="@string/main_phone"

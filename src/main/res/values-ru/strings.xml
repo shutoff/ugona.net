@@ -13,7 +13,9 @@
     <string name="actions">Действия</string>
     <string name="control">Управление</string>
     <string name="sms_mode">Переключиться в режим SMS</string>
-    <string name="sms_mode_summary">Для обработки тревог приложением надо переключить устройство в режим SMS</string>
+    <string name="call_mode">Переключиться в режим звонка</string>
+    <string name="alarm_mode">Оповещение о тревогах</string>
+    <string name="sms_mode_summary">Выберите способ оповещения: звонки или СМС</string>
     <string name="sms_error">Не могу отправить SMS</string>
     <string name="auth">Авторизация</string>
     <string name="auth_summary">Авторизация на car-online.ru</string>
@@ -29,8 +31,8 @@
     <string name="internet_off_sum">Запретить доступ в интернет на устройстве</string>
     <string name="valet_on_sum">Отключить охрану</string>
     <string name="valet_off_sum">Включить охрану</string>
-    <string name="motor_on">Завести двигатель</string>
-    <string name="motor_off">Заглушить двигатель</string>
+    <string name="motor_on">АВТОЗАПСУК включить</string>
+    <string name="motor_off">АВТОЗАПУСК выключить</string>
     <string name="motor_on_sum">Произвести дистанционный запуск двигателя</string>
     <string name="motor_off_sum">Дистанционно остановить двигатель</string>
     <string name="turbo_on">Включить режим слежения</string>
@@ -190,7 +192,6 @@
     <string name="bad_ccode">Неверный С-код</string>
     <string name="pswd">Пароль:</string>
     <string name="block_msg">Для отмены блокировки включите и выключите режим АВТОСЕРВИС</string>
-    <string name="sms_mode_msg">Для переключения обратно в голосовой режим отправьте SMS\nALARM CALL</string>
     <string name="motor_start_error">Двигатель не заведен или заглох</string>
     <string name="motor_stop">Двигатель остановлен</string>
     <string name="zone_in">Въезд в зону</string>
@@ -254,4 +255,10 @@
     <string name="show_photo">Показывать фотографии</string>
     <string name="photo">Фото</string>
     <string name="no_photos">Нет фотографий</string>
+    <string name="sms_mode_msg">Для перевода устройства в режим отправки SMS требуется пароль</string>
+    <string name="call_mode_msg">Для перевода устройства в режим звонков требуется пароль</string>
+    <string-array name="alarm_mode">
+        <item>SMS (для обработки приложением)</item>
+        <item>Звонки</item>
+    </string-array>
 </resources>

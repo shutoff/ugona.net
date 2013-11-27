@@ -13,8 +13,10 @@
     <string name="preferences">Preferences</string>
     <string name="actions">Actions</string>
     <string name="control">Control</string>
+    <string name="alarm_mode">Alarm notification</string>
     <string name="sms_mode">Switch to SMS mode</string>
-    <string name="sms_mode_summary">Click here to switch in SMS mode</string>
+    <string name="call_mode">Switch to call mode</string>
+    <string name="sms_mode_summary">Select alarm mode: SMS or call</string>
     <string name="auth">Authorization</string>
     <string name="auth_summary">Authorization on car-online.ru</string>
     <string name="sms_error">Can&amp;t send SMS</string>
@@ -196,7 +198,6 @@
     <string name="valet_off_msg">Turn off VALET require enter C-Code</string>
     <string name="bad_ccode">Invalid C-Code</string>
     <string name="pswd">Password:</string>
-    <string name="sms_mode_msg">For switch back to voice mode send SMS\nALARM CALL</string>
     <string name="motor_start_error">Engine start failed</string>
     <string name="motor_stop">Engine stopped</string>
     <string name="events">Events</string>
@@ -265,4 +266,14 @@
     <string name="show_photo">Show photos</string>
     <string name="photo">Photo</string>
     <string name="no_photos">No photos</string>
+    <string-array name="alarm_mode">
+        <item>SMS (recomended)</item>
+        <item>CALL</item>
+    </string-array>
+    <string-array name="alarm_mode_values">
+        <item>SMS</item>
+        <item>CALL</item>
+    </string-array>
+    <string name="sms_mode_msg">Switch to SMS mode require password</string>
+    <string name="call_mode_msg">Switch to call mode require password</string>
 </resources>

@@ -172,6 +172,7 @@ public class MainActivity extends ActionBarActivity {
                     return;
                 }
                 if (action.equals(FetchService.ACTION_UPDATE_FORCE)) {
+                    setShowTracks();
                     changeDate(current.toDate());
                     return;
                 }
