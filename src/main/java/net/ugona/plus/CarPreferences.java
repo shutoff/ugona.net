@@ -94,7 +94,7 @@ public class CarPreferences extends PreferenceActivity {
         ed.putBoolean("show_photo", preferences.getBoolean(Names.SHOW_PHOTO + car_id, false));
         ed.putInt("shock_sens", preferences.getInt(Names.SHOCK_SENS + car_id, 5));
         ed.putString("name_", name);
-        ed.putString("call_mode", preferences.getString(Names.ALARM_MODE + car_id, "SMS"));
+        ed.putString("call_mode", preferences.getString(Names.ALARM_MODE + car_id, ""));
         ed.commit();
 
         addPreferencesFromResource(R.xml.car_preferences);

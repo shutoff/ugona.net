@@ -97,6 +97,16 @@ public class PhotoFragment extends Fragment
         api_key = preferences.getString(Names.CAR_KEY + car_id, "");
         photos = new Vector<Photo>();
 
+        View vLogo = v.findViewById(R.id.logo);
+        vLogo.setClickable(true);
+        vLogo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), About.class);
+                startActivity(intent);
+            }
+        });
+
         dateChanged(current);
         return v;
     }

@@ -29,7 +29,16 @@ public class Actions {
         requestPassword(context, R.string.motor_on, R.string.motor_on_sum, new Runnable() {
             @Override
             public void run() {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_on, "MOTOR ON", "MOTOR ON OK", "ERROR;Engine", R.string.motor_start_error));
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_on, "MOTOR ON", "", "ERROR;Engine", R.string.motor_start_error) {
+                    @Override
+                    boolean process_answer(Context context, String car_id, String text) {
+                        if (SmsMonitor.compare(text, "MOTOR ON OK"))
+                            return true;
+                        if (SmsMonitor.compare(text, "Remote Engine Start OK"))
+                            return true;
+                        return false;
+                    }
+                });
             }
         });
     }
