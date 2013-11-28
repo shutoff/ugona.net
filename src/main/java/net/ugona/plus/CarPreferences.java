@@ -33,6 +33,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Date;
+
 public class CarPreferences extends PreferenceActivity {
 
     SharedPreferences preferences;
@@ -47,6 +49,7 @@ public class CarPreferences extends PreferenceActivity {
     Preference alarmPref;
     Preference mainPref;
     SeekBarPreference sensPref;
+    CheckBoxPreference photoPref;
 
     String alarmUri;
     String notifyUri;
@@ -60,8 +63,9 @@ public class CarPreferences extends PreferenceActivity {
     private static final int GET_ALARM_SOUND = 3008;
     private static final int GET_NOTIFY_SOUND = 3009;
 
-    final String KEY_URL = "http://dev.car-online.ru/api/v2?get=securityKey&login=$1&password=$2&content=json";
-    final String PROFILE_URL = "http://dev.car-online.ru/api/v2?get=profile&skey=$1&content=json";
+    final static String KEY_URL = "http://dev.car-online.ru/api/v2?get=securityKey&login=$1&password=$2&content=json";
+    final static String PROFILE_URL = "http://dev.car-online.ru/api/v2?get=profile&skey=$1&content=json";
+    final static String PHOTOS_URL = "http://dev.car-online.ru/api/v2?get=photos&skey=$1&begin=$2&content=json";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -251,7 +255,7 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
 
-        CheckBoxPreference photoPref = (CheckBoxPreference) findPreference("show_photo");
+        photoPref = (CheckBoxPreference) findPreference("show_photo");
         photoPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -536,6 +540,7 @@ public class CarPreferences extends PreferenceActivity {
                         intent.putExtra(Names.ID, car_id);
                         startService(intent);
                         getVersion(key);
+                        getPhotos(key);
                     }
 
                     @Override
@@ -551,6 +556,27 @@ public class CarPreferences extends PreferenceActivity {
                 apiTask.execute(KEY_URL, edLogin.getText().toString(), edPasswd.getText().toString());
             }
         });
+    }
+
+    void getPhotos(String api_key) {
+        HttpTask verTask = new HttpTask() {
+            @Override
+            void result(JSONObject res) throws JSONException {
+                try {
+                    JSONArray array = res.getJSONArray("photos");
+                    photoPref.setChecked(array.length() > 0);
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+
+            @Override
+            void error() {
+
+            }
+        };
+        Date now = new Date();
+        verTask.execute(PHOTOS_URL, api_key, (now.getTime() - 24 * 60 * 60 * 1000) + "");
     }
 
     void getVersion(String api_key) {
