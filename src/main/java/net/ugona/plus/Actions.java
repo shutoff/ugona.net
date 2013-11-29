@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -18,12 +19,24 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.util.regex.Matcher;
 
 public class Actions {
 
     static final String INCORRECT_MESSAGE = "Incorrect message";
+
+    static void done(final Context context, int id) {
+        try {
+            Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+            vibrator.vibrate(1000);
+        } catch (Exception ex) {
+            // ignore
+        }
+        Toast toast = Toast.makeText(context, id, Toast.LENGTH_LONG);
+        toast.show();
+    }
 
     static void motor_on(final Context context, final String car_id) {
         requestPassword(context, R.string.motor_on, R.string.motor_on_sum, new Runnable() {
@@ -32,10 +45,11 @@ public class Actions {
                 SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_on, "MOTOR ON", "", "ERROR;Engine", R.string.motor_start_error) {
                     @Override
                     boolean process_answer(Context context, String car_id, String text) {
-                        if (SmsMonitor.compare(text, "MOTOR ON OK"))
+                        if (SmsMonitor.compare(text, "MOTOR ON OK") ||
+                                SmsMonitor.compare(text, "Remote Engine Start OK")) {
+                            done(context, R.string.motor_on_ok);
                             return true;
-                        if (SmsMonitor.compare(text, "Remote Engine Start OK"))
-                            return true;
+                        }
                         return false;
                     }
                 });
@@ -47,7 +61,13 @@ public class Actions {
         requestPassword(context, R.string.motor_off, R.string.motor_off_sum, new Runnable() {
             @Override
             public void run() {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_off, "MOTOR OFF", "MOTOR OFF OK"));
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_off, "MOTOR OFF", "MOTOR OFF OK") {
+                    @Override
+                    boolean process_answer(Context context, String car_id, String text) {
+                        done(context, R.string.motor_off_ok);
+                        return true;
+                    }
+                });
             }
         });
     }
@@ -228,6 +248,7 @@ public class Actions {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+                        done(context, R.string.valet_on_ok);
                         return true;
                     }
                 });
@@ -254,6 +275,7 @@ public class Actions {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+                        done(context, R.string.valet_off_ok);
                         return true;
                     }
                 });

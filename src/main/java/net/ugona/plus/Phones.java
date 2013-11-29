@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.support.v7.app.ActionBarActivity;
-import android.telephony.PhoneNumberUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,7 +27,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
+
 import java.io.ByteArrayInputStream;
+import java.util.Locale;
 
 public class Phones extends ActionBarActivity {
 
@@ -107,7 +110,7 @@ public class Phones extends ActionBarActivity {
 
                 String number = phones[position];
                 TextView tvNumber = (TextView) v.findViewById(R.id.number);
-                tvNumber.setText(PhoneNumberUtils.formatNumber(number));
+                tvNumber.setText(formatPhoneNumber(number));
 
                 ImageView ivPhoto = (ImageView) v.findViewById(R.id.photo);
                 ivPhoto.setImageResource(R.drawable.unknown_contact);
@@ -281,5 +284,16 @@ public class Phones extends ActionBarActivity {
             return;
         topSubMenu.clear();
         onCreateOptionsMenu(topSubMenu);
+    }
+
+    static String formatPhoneNumber(String number) {
+        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+        try {
+            Phonenumber.PhoneNumber n = phoneUtil.parse(number, Locale.getDefault().getCountry());
+            return phoneUtil.format(n, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return number;
     }
 }

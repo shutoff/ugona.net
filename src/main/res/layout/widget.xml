@@ -1,178 +1,193 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/widget"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="horizontal">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/MainLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
 
-    <LinearLayout
-        android:layout_width="0dp"
+    <ImageView
+        android:id="@+id/bg"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:cropToPadding="true"
+        android:scaleType="fitXY" />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/widget"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/car"
-            android:src="@drawable/car_black"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:paddingBottom="2dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/ugona_net"
-            android:textStyle="bold"
-            android:textSize="9sp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_height="0dp"
-            android:layout_width="wrap_content"
-            android:layout_weight="1" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:gravity="center"
+            android:orientation="vertical">
 
             <ImageView
-                android:src="@drawable/icon_voltage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="1dp"/>
+                android:id="@+id/car"
+                android:src="@drawable/car_black"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp" />
 
             <TextView
-                android:id="@+id/voltage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingLeft="2dp"
-                android:layout_margin="1dp"
-                android:text="@string/empty_voltage"
+                android:text="@string/ugona_net"
                 android:textStyle="bold"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                android:textSize="9sp" />
+
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/reserve_block"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <ImageView
-                android:src="@drawable/icon_reserve"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="1dp"/>
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/reserve"
+                android:layout_height="0dp"
+                android:layout_width="wrap_content"
+                android:layout_weight="1" />
+
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingLeft="2dp"
-                android:layout_margin="1dp"
-                android:text="@string/empty_voltage"
-                android:textStyle="bold"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
-        </LinearLayout>
+                android:orientation="horizontal">
 
-        <LinearLayout
-            android:id="@+id/balance_block"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+                <ImageView
+                    android:src="@drawable/icon_voltage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp" />
 
-            <ImageView
-                android:src="@drawable/icon_balance"
+                <TextView
+                    android:id="@+id/voltage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="2dp"
+                    android:layout_margin="1dp"
+                    android:text="@string/empty_voltage"
+                    android:textStyle="bold"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/reserve_block"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="1dp"/>
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageView
+                    android:src="@drawable/icon_reserve"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp" />
+
+                <TextView
+                    android:id="@+id/reserve"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="2dp"
+                    android:layout_margin="1dp"
+                    android:text="@string/empty_voltage"
+                    android:textStyle="bold"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/balance_block"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:src="@drawable/icon_balance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp" />
+
+                <TextView
+                    android:id="@+id/balance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="2dp"
+                    android:layout_margin="1dp"
+                    android:text="@string/empty_balance"
+                    android:textStyle="bold"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/temperature_block"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:src="@drawable/icon_temperature"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp" />
+
+                <TextView
+                    android:id="@+id/temperature"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="2dp"
+                    android:layout_margin="1dp"
+                    android:text="@string/empty_temperature"
+                    android:textStyle="bold"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/balance"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:id="@+id/update_block"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingLeft="2dp"
-                android:layout_margin="1dp"
-                android:text="@string/empty_balance"
-                android:textStyle="bold"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/temperature_block"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:src="@drawable/icon_temperature"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="1dp"/>
-
-            <TextView
-                android:id="@+id/temperature"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="2dp"
-                android:layout_margin="1dp"
-                android:text="@string/empty_temperature"
-                android:textStyle="bold"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <LinearLayout
-            android:id="@+id/update_block"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="bottom"
-            android:orientation="horizontal">
-
-            <ProgressBar
-                android:id="@+id/update"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:visibility="gone" />
-
-            <ImageView
-                android:id="@+id/refresh"
-                android:src="@android:drawable/stat_notify_sync"
-                android:layout_width="15dp"
-                android:layout_height="15dp" />
-
-            <ImageView
-                android:id="@+id/error"
-                android:src="@android:drawable/stat_notify_error"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/last"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="10dp"
-                android:text="\??:??"
                 android:gravity="bottom"
-                android:textSize="12sp" />
-        </LinearLayout>
+                android:orientation="horizontal">
 
+                <ProgressBar
+                    android:id="@+id/update"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/refresh"
+                    android:src="@android:drawable/stat_notify_sync"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp" />
+
+                <ImageView
+                    android:id="@+id/error"
+                    android:src="@android:drawable/stat_notify_error"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/last"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="10dp"
+                    android:text="\??:??"
+                    android:gravity="bottom"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+
+</RelativeLayout>

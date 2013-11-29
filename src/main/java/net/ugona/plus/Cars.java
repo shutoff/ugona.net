@@ -212,6 +212,7 @@ public class Cars extends ActionBarActivity {
         ed.remove(Names.TEMPERATURE + id);
         ed.remove(Names.GSM + id);
         ed.remove(Names.GSM_ZONE + id);
+        ed.remove(Names.LOGIN + id);
         ed.commit();
     }
 

@@ -277,4 +277,9 @@
     <string name="sms_mode_msg">Switch to SMS mode require password</string>
     <string name="call_mode_msg">Switch to call mode require password</string>
     <string name="photo_error">Loading image error</string>
+    <string name="motor_on_ok">Engine started</string>
+    <string name="motor_off_ok">Engine stopped</string>
+    <string name="valet_on_ok">VALET mode is ON</string>
+    <string name="valet_off_ok">VALET mode is OFF</string>
+    <string name="background">Background</string>
 </resources>

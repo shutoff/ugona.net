@@ -262,4 +262,9 @@
         <item>Звонки</item>
     </string-array>
     <string name="photo_error">Ошибка загрузки изображения</string>
+    <string name="motor_on_ok">Двигатель заведен</string>
+    <string name="motor_off_ok">Двигатель заглушен</string>
+    <string name="valet_on_ok">Режим АВТОСЕРВИС включен</string>
+    <string name="valet_off_ok">Режим АВТОСЕРВИС выключен</string>
+    <string name="background">Фон</string>
 </resources>

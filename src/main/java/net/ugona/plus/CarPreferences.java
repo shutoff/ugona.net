@@ -410,7 +410,7 @@ public class CarPreferences extends PreferenceActivity {
 
     void setPhone(String phoneNumber) {
         if (phoneNumber.length() > 0) {
-            phonePref.setSummary(phoneNumber);
+            phonePref.setSummary(Phones.formatPhoneNumber(phoneNumber));
             smsPref.setEnabled(true);
             phonesPref.setEnabled(true);
             timerPref.setEnabled(true);

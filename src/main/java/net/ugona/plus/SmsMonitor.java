@@ -75,6 +75,15 @@ public class SmsMonitor extends BroadcastReceiver {
         return PhoneNumberUtils.compare(config, from);
     }
 
+    static void vibrate(Context context) {
+        try {
+            Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+            vibrator.vibrate(500);
+        } catch (Exception ex) {
+            // ignore
+        }
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent == null)
@@ -98,6 +107,7 @@ public class SmsMonitor extends BroadcastReceiver {
             if (result_code != Activity.RESULT_OK) {
                 Toast toast = Toast.makeText(context, R.string.sms_error, Toast.LENGTH_SHORT);
                 toast.show();
+                vibrate(context);
                 Intent i = new Intent(SMS_ANSWER);
                 i.putExtra(Names.ANSWER, result_code);
                 i.putExtra(Names.ID, car_id);
@@ -219,6 +229,7 @@ public class SmsMonitor extends BroadcastReceiver {
                     context.sendBroadcast(i);
                     Toast toast = Toast.makeText(context, entry.getValue().error_msg, Toast.LENGTH_LONG);
                     toast.show();
+                    vibrate(context);
                     return true;
                 }
             }

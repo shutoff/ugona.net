@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -24,6 +25,7 @@ public class ConfigWidget extends Activity {
     String car_id;
     int widgetID;
     Intent resultValue;
+    int transparency;
 
     static final int CAR_CONFIG = 1000;
 
@@ -75,6 +77,7 @@ public class ConfigWidget extends Activity {
                 .create();
         dialog.show();
 
+
         final Spinner lv = (Spinner) dialog.findViewById(R.id.list);
         lv.setAdapter(new BaseAdapter() {
             @Override
@@ -118,6 +121,8 @@ public class ConfigWidget extends Activity {
                 return v;
             }
         });
+        final SeekBar sbTransparency = (SeekBar) dialog.findViewById(R.id.background);
+
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
@@ -129,6 +134,7 @@ public class ConfigWidget extends Activity {
             @Override
             public void onClick(View v) {
                 car_id = cars[lv.getSelectedItemPosition()].id;
+                transparency = sbTransparency.getProgress();
                 saveWidget();
                 dialog.dismiss();
             }
@@ -152,6 +158,7 @@ public class ConfigWidget extends Activity {
     void saveWidget() {
         SharedPreferences.Editor ed = preferences.edit();
         ed.putString(Names.WIDGET + widgetID, car_id);
+        ed.putInt(Names.TRANSPARENCY + widgetID, transparency);
         ed.commit();
         setResult(RESULT_OK, resultValue);
     }

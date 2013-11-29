@@ -12,7 +12,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -145,6 +144,10 @@ public class CarWidget extends AppWidgetProvider {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String car_id = Preferences.getCar(preferences, preferences.getString(Names.WIDGET + widgetID, ""));
+        int transparency = preferences.getInt(Names.TRANSPARENCY + widgetID, 0);
+        widgetView.setInt(R.id.bg, "setAlpha", transparency);
+        if (transparency > 0)
+            widgetView.setImageViewResource(R.id.bg, R.drawable.widget);
 
         Intent configIntent = new Intent(context, WidgetService.class);
         configIntent.putExtra(Names.ID, car_id);
@@ -217,10 +220,8 @@ public class CarWidget extends AppWidgetProvider {
             }
         }
 
-        if (drawable == null) {
-            Log.v("vvv", "create drawable");
+        if (drawable == null)
             drawable = new CarDrawable();
-        }
 
         Bitmap bmp = drawable.getBitmap(context, car_id);
         if (bmp != null)

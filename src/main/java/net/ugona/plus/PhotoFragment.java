@@ -54,6 +54,9 @@ public class PhotoFragment extends Fragment
 
     Vector<Photo> photos;
 
+    long loading;
+    boolean isLoaded;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.actions, container, false);
@@ -72,10 +75,9 @@ public class PhotoFragment extends Fragment
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Photo photo = photos.get(position);
-                if (photo.error) {
-                    photo.error = false;
-                    PhotoFetcher fetcher = new PhotoFetcher();
-                    fetcher.execute(photo);
+                if (photo.loading < 0) {
+                    photo.loading = ++loading;
+                    startLoading();
                 } else if (photo.photo != null) {
                     try {
                         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -122,6 +124,7 @@ public class PhotoFragment extends Fragment
     public void onDestroy() {
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.unregisterDateListener(this);
+        photos.clear();
         super.onDestroy();
     }
 
@@ -158,6 +161,26 @@ public class PhotoFragment extends Fragment
                 }
             });
         }
+    }
+
+    void startLoading() {
+        if (isLoaded)
+            return;
+        Photo photo = null;
+        for (Photo p : photos) {
+            if (p.loading <= 0)
+                continue;
+            if (photo == null) {
+                photo = p;
+                continue;
+            }
+            if (p.loading > photo.loading)
+                photo = p;
+        }
+        if (photo == null)
+            return;
+        PhotoFetcher fetcher = new PhotoFetcher();
+        fetcher.execute(photo);
     }
 
     class DataFetcher extends HttpTask {
@@ -221,14 +244,14 @@ public class PhotoFragment extends Fragment
                             vError.setVisibility(View.GONE);
                         } else {
                             iv.setImageResource(R.drawable.photo_bg);
-                            if (photo.error) {
+                            if (photo.loading < 0) {
                                 vProgress.setVisibility(View.GONE);
                                 vError.setVisibility(View.VISIBLE);
                             } else {
                                 vProgress.setVisibility(View.VISIBLE);
                                 vError.setVisibility(View.GONE);
-                                PhotoFetcher fetcher = new PhotoFetcher();
-                                fetcher.execute(photo);
+                                photo.loading = ++loading;
+                                startLoading();
                             }
                         }
                         return v;
@@ -263,8 +286,9 @@ public class PhotoFragment extends Fragment
             try {
                 InputStream in = new java.net.URL(url).openStream();
                 params[0].photo = BitmapFactory.decodeStream(in);
+                params[0].loading = 0;
             } catch (Exception e) {
-                params[0].error = true;
+                params[0].loading = -1;
                 e.printStackTrace();
             }
             return null;
@@ -274,13 +298,15 @@ public class PhotoFragment extends Fragment
         protected void onPostExecute(Void aVoid) {
             BaseAdapter adapter = (BaseAdapter) list.getAdapter();
             adapter.notifyDataSetChanged();
+            isLoaded = false;
+            startLoading();
         }
     }
 
     static class Photo {
         long time;
         long id;
-        boolean error;
+        long loading;
         Bitmap photo;
     }
 }
