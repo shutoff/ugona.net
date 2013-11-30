@@ -36,7 +36,7 @@ public class About extends Activity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://forum.ugona.net/topic41638.html"));
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://forum.ugona.net/topic325615.html"));
                 startActivity(browserIntent);
             }
         });

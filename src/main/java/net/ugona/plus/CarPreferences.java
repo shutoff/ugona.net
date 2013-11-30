@@ -119,14 +119,14 @@ public class CarPreferences extends PreferenceActivity {
         namePref.setSummary(name);
 
         smsPref = findPreference("call_mode");
-        smsPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
+        smsPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
 
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 String mode = newValue.toString();
-                if (mode.equals("CALL")){
+                if (mode.equals("CALL")) {
                     callMode();
-                }else{
+                } else {
                     smsMode();
                 }
                 return false;
@@ -430,7 +430,7 @@ public class CarPreferences extends PreferenceActivity {
         Runnable send = new Runnable() {
             @Override
             public void run() {
-                SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.sms_mode, "ALARM SMS", "ALARM SMS OK"){
+                SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.sms_mode, "ALARM SMS", "ALARM SMS OK") {
                     @Override
                     boolean process_answer(Context context, String car_id, String text) {
                         SharedPreferences.Editor ed = preferences.edit();
@@ -442,7 +442,7 @@ public class CarPreferences extends PreferenceActivity {
                 Actions.send_sms(CarPreferences.this, car_id, R.string.sms_mode, sms, null);
             }
         };
-        if (preferences.getString(Names.PASSWORD, "").equals("")){
+        if (preferences.getString(Names.PASSWORD, "").equals("")) {
             send.run();
             return;
         }
@@ -453,7 +453,7 @@ public class CarPreferences extends PreferenceActivity {
         Runnable send = new Runnable() {
             @Override
             public void run() {
-                SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.call_mode, "ALARM CALL", "ALARM CALL OK"){
+                SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.call_mode, "ALARM CALL", "ALARM CALL OK") {
                     @Override
                     boolean process_answer(Context context, String car_id, String text) {
                         SharedPreferences.Editor ed = preferences.edit();
@@ -465,7 +465,7 @@ public class CarPreferences extends PreferenceActivity {
                 Actions.send_sms(CarPreferences.this, car_id, R.string.call_mode, sms, null);
             }
         };
-        if (preferences.getString(Names.PASSWORD, "").equals("")){
+        if (preferences.getString(Names.PASSWORD, "").equals("")) {
             send.run();
             return;
         }
@@ -511,6 +511,7 @@ public class CarPreferences extends PreferenceActivity {
         edLogin.addTextChangedListener(watcher);
         edPasswd.addTextChangedListener(watcher);
         btnSave.setEnabled(false);
+        edLogin.setText(preferences.getString(Names.LOGIN + car_id, ""));
 
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -519,6 +520,8 @@ public class CarPreferences extends PreferenceActivity {
                 dlgCheck.setMessage(getString(R.string.check_auth));
                 dlgCheck.show();
 
+                final String login = edLogin.getText().toString();
+
                 HttpTask apiTask = new HttpTask() {
                     @Override
                     void result(JSONObject res) throws JSONException {
@@ -526,6 +529,7 @@ public class CarPreferences extends PreferenceActivity {
                         String key = res.getString("data");
                         SharedPreferences.Editor ed = preferences.edit();
                         ed.putString(Names.CAR_KEY + car_id, key);
+                        ed.putString(Names.LOGIN + car_id, login);
                         String[] cars = preferences.getString(Names.CARS, "").split(",");
                         boolean is_new = true;
                         for (String car : cars) {
@@ -553,7 +557,7 @@ public class CarPreferences extends PreferenceActivity {
                     }
                 };
 
-                apiTask.execute(KEY_URL, edLogin.getText().toString(), edPasswd.getText().toString());
+                apiTask.execute(KEY_URL, login, edPasswd.getText().toString());
             }
         });
     }
@@ -564,7 +568,12 @@ public class CarPreferences extends PreferenceActivity {
             void result(JSONObject res) throws JSONException {
                 try {
                     JSONArray array = res.getJSONArray("photos");
-                    photoPref.setChecked(array.length() > 0);
+                    boolean is_photo = array.length() > 0;
+                    photoPref.setChecked(is_photo);
+                    SharedPreferences.Editor ed = preferences.edit();
+                    ed.putBoolean(Names.SHOW_PHOTO + car_id, is_photo);
+                    ed.commit();
+                    sendUpdate();
                 } catch (Exception ex) {
                     // ignore
                 }
@@ -576,7 +585,7 @@ public class CarPreferences extends PreferenceActivity {
             }
         };
         Date now = new Date();
-        verTask.execute(PHOTOS_URL, api_key, (now.getTime() - 24 * 60 * 60 * 1000) + "");
+        verTask.execute(PHOTOS_URL, api_key, (now.getTime() - 3 * 24 * 60 * 60 * 1000) + "");
     }
 
     void getVersion(String api_key) {

@@ -23,6 +23,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
+
+import java.util.Locale;
 import java.util.Vector;
 
 public class PhoneNumberDialog extends Activity {
@@ -54,7 +58,7 @@ public class PhoneNumberDialog extends Activity {
             @Override
             public void onClick(View v) {
                 Intent i = getIntent();
-                i.putExtra(Names.CAR_PHONE, edNumber.getText().toString());
+                i.putExtra(Names.CAR_PHONE, Phones.formatPhoneNumber(edNumber.getText().toString()));
                 setResult(RESULT_OK, i);
                 dialog.dismiss();
             }
@@ -72,7 +76,7 @@ public class PhoneNumberDialog extends Activity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                btnOk.setEnabled(s.length() >= 4);
+                btnOk.setEnabled(isValidPhoneNumber(s.toString()));
             }
         });
         String phone = getIntent().getStringExtra(Names.CAR_PHONE);
@@ -185,5 +189,16 @@ public class PhoneNumberDialog extends Activity {
     static class PhoneWithType {
         String number;
         int type;
+    }
+
+    static boolean isValidPhoneNumber(String number) {
+        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+        try {
+            Phonenumber.PhoneNumber n = phoneUtil.parse(number, Locale.getDefault().getCountry());
+            return phoneUtil.isValidNumber(n);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return false;
     }
 }

@@ -220,6 +220,11 @@ public class StateFragment extends Fragment
         intFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         context.registerReceiver(br, intFilter);
 
+        if (FetchService.isProcessed(car_id)) {
+            prgUpdate.setVisibility(View.VISIBLE);
+            imgRefresh.setVisibility(View.GONE);
+        }
+
         return v;
     }
 
@@ -340,7 +345,10 @@ public class StateFragment extends Fragment
         } else {
             vRele.setVisibility(View.GONE);
         }
-        if (preferences.getBoolean(Names.INPUT3 + car_id, false)) {
+        if ((preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false)) &&
+                !preferences.getBoolean(Names.GUARD + car_id, false) &&
+                !preferences.getBoolean(Names.ENGINE + car_id, false) &&
+                !(!preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false))) {
             vBlock.setVisibility(View.VISIBLE);
             pBlock.setVisibility(SmsMonitor.isProcessed(car_id, R.string.block) ? View.VISIBLE : View.GONE);
             n_buttons++;

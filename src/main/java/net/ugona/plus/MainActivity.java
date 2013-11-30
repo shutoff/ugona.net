@@ -172,7 +172,18 @@ public class MainActivity extends ActionBarActivity {
                     return;
                 }
                 if (action.equals(FetchService.ACTION_UPDATE_FORCE)) {
-                    setShowTracks();
+                    boolean new_show_photo = preferences.getBoolean(Names.SHOW_PHOTO + car_id, false);
+                    if (new_show_photo != show_photo) {
+                        int id = mViewPager.getCurrentItem();
+                        if (!show_photo)
+                            id++;
+                        update();
+                        if (!show_photo)
+                            id--;
+                        if (id < 0)
+                            id = 0;
+                        mViewPager.setCurrentItem(id);
+                    }
                     changeDate(current.toDate());
                     return;
                 }

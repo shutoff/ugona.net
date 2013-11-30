@@ -223,7 +223,7 @@ public class Actions {
         requestPassword(context, R.string.rele1, R.string.rele1_action, new Runnable() {
             @Override
             public void run() {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.rele1, "REL1 IMPUL", "REL1 IMPULS OK"));
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.rele1, "REL1 IMPULS", "REL1 IMPULS OK"));
             }
         });
     }
@@ -284,7 +284,7 @@ public class Actions {
     }
 
     static void block_motor(final Context context, final String car_id) {
-        requestPassword(context, R.string.valet_off, R.string.valet_off_msg, new Runnable() {
+        requestPassword(context, R.string.block, R.string.block_msg, new Runnable() {
             @Override
             public void run() {
                 SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.block, "BLOCK MTR", "BLOCK MTR OK") {

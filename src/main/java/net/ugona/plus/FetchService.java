@@ -104,7 +104,13 @@ public class FetchService extends Service {
         }
     }
 
-    private Map<String, ServerRequest> requests;
+    static private Map<String, ServerRequest> requests;
+
+    static boolean isProcessed(String id) {
+        if (requests == null)
+            return false;
+        return requests.containsKey("S" + id);
+    }
 
     abstract class ServerRequest extends HttpTask {
 
