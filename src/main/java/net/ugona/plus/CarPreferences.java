@@ -85,7 +85,7 @@ public class CarPreferences extends PreferenceActivity {
                 name += " " + car_id;
         }
         if (preferences.getString(Names.CAR_KEY + car_id, "").equals("")) {
-            Cars.deleteCarKeys(preferences, car_id);
+            Cars.deleteCarKeys(this, car_id);
             getApiKey();
         }
 

@@ -282,4 +282,5 @@
     <string name="valet_on_ok">VALET mode is ON</string>
     <string name="valet_off_ok">VALET mode is OFF</string>
     <string name="background">Background</string>
+    <string name="rotate">Rotate</string>
 </resources>

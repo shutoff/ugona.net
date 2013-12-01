@@ -355,7 +355,7 @@ public class StateFragment extends Fragment
         } else {
             vBlock.setVisibility(View.GONE);
         }
-        boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1, false);
+        boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
         if (n_buttons < 3) {
             if (valet) {
                 ivValet.setImageResource(R.drawable.icon_valet_off);

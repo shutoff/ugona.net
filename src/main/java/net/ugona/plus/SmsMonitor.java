@@ -57,6 +57,7 @@ public class SmsMonitor extends BroadcastReceiver {
         boolean process_answer(Context context, String car_id, String text) {
             return true;
         }
+
     }
 
     static class SmsQueue extends HashMap<Integer, Sms> {

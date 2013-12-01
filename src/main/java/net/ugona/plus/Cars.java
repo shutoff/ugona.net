@@ -19,6 +19,9 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.FilenameFilter;
+
 public class Cars extends ActionBarActivity {
 
     final static int CAR_SETUP = 4000;
@@ -182,7 +185,8 @@ public class Cars extends ActionBarActivity {
         startActivityForResult(intent, CAR_SETUP);
     }
 
-    static void deleteCarKeys(SharedPreferences preferences, String id) {
+    static void deleteCarKeys(Context context, String id) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor ed = preferences.edit();
         ed.remove(Names.CAR_NAME + id);
         ed.remove(Names.CAR_KEY + id);
@@ -214,10 +218,23 @@ public class Cars extends ActionBarActivity {
         ed.remove(Names.GSM_ZONE + id);
         ed.remove(Names.LOGIN + id);
         ed.commit();
+        File cache = context.getCacheDir();
+        final String prefix = "p" + id + "_";
+        File[] files = cache.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String filename) {
+                if (filename.length() < prefix.length())
+                    return false;
+                return filename.substring(0, prefix.length()).equals(prefix);
+            }
+        });
+        for (File f : files) {
+            f.delete();
+        }
     }
 
     void deleteCar(String id) {
-        deleteCarKeys(preferences, id);
+        deleteCarKeys(this, id);
         String[] cars = preferences.getString(Names.CARS, "").split(",");
         String res = null;
         for (String car : cars) {

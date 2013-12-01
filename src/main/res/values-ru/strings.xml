@@ -267,4 +267,5 @@
     <string name="valet_on_ok">Режим АВТОСЕРВИС включен</string>
     <string name="valet_off_ok">Режим АВТОСЕРВИС выключен</string>
     <string name="background">Фон</string>
+    <string name="rotate">Перевернуть</string>
 </resources>

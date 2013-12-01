@@ -47,6 +47,17 @@ public class Actions {
                     boolean process_answer(Context context, String car_id, String text) {
                         if (SmsMonitor.compare(text, "MOTOR ON OK") ||
                                 SmsMonitor.compare(text, "Remote Engine Start OK")) {
+                            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                            SharedPreferences.Editor ed = preferences.edit();
+                            ed.putBoolean(Names.ENGINE + car_id, true);
+                            ed.commit();
+                            try {
+                                Intent intent = new Intent(FetchService.ACTION_UPDATE);
+                                intent.putExtra(Names.ID, car_id);
+                                context.sendBroadcast(intent);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                             done(context, R.string.motor_on_ok);
                             return true;
                         }

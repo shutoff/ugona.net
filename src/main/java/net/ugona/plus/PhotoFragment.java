@@ -1,11 +1,14 @@
 package net.ugona.plus;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -19,6 +22,12 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -26,17 +35,24 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 public class PhotoFragment extends Fragment
         implements MainActivity.DateChangeListener {
 
+    final static String ROTATE = "net.ugona.plus.ROTATE";
+
     final static String PHOTOS = "http://dev.car-online.ru/api/v2?get=photos&skey=$1&begin=$2&end=$3&content=json";
     final static String PHOTO = "http://dev.car-online.ru/api/v2?get=photo&skey=";
 
     final static String DATE = "date";
+
+    final static int MAX_CACHE = 6;
 
     String car_id;
     LocalDate current;
@@ -54,8 +70,20 @@ public class PhotoFragment extends Fragment
 
     Vector<Photo> photos;
 
+    PhotoFetcher fetcher;
+
+    BroadcastReceiver br;
+
     long loading;
-    boolean isLoaded;
+
+    File cacheDir;
+
+    static class BitmapCache {
+        Bitmap bitmap;
+        long counter;
+    }
+
+    Map<String, BitmapCache> memCache;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -70,23 +98,23 @@ public class PhotoFragment extends Fragment
         vNoPhotos = v.findViewById(R.id.no_photos);
         vError = v.findViewById(R.id.error);
         list = (ListView) v.findViewById(R.id.actions);
+        cacheDir = getActivity().getCacheDir();
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Photo photo = photos.get(position);
+                File file = new File(cacheDir, "p" + car_id + "_" + photo.id);
                 if (photo.loading < 0) {
                     photo.loading = ++loading;
                     startLoading();
-                } else if (photo.photo != null) {
+                } else if (file.exists()) {
                     try {
-                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                        photo.photo.compress(Bitmap.CompressFormat.PNG, 90, bos);
-                        byte[] data = bos.toByteArray();
-                        bos.close();
                         Intent intent = new Intent(getActivity(), PhotoView.class);
-                        intent.putExtra(Names.SHOW_PHOTO, data);
+                        intent.putExtra(Names.SHOW_PHOTO, photo.id);
                         intent.putExtra(Names.TITLE, photo.time);
+                        intent.putExtra(Names.CAMERA, photo.camera);
+                        intent.putExtra(Names.ID, car_id);
                         getActivity().startActivity(intent);
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -110,6 +138,21 @@ public class PhotoFragment extends Fragment
         });
 
         dateChanged(current);
+
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int camera = intent.getIntExtra(Names.CAMERA, 0);
+                String id = intent.getStringExtra(Names.ID);
+                if (car_id.equals(id)) {
+                    BaseAdapter adapter = (BaseAdapter) list.getAdapter();
+                    if (adapter != null)
+                        adapter.notifyDataSetChanged();
+                }
+            }
+        };
+        getActivity().registerReceiver(br, new IntentFilter(ROTATE));
+
         return v;
     }
 
@@ -145,6 +188,7 @@ public class PhotoFragment extends Fragment
         DataFetcher fetcher = new DataFetcher();
         error = false;
         loaded = false;
+        memCache = new HashMap<String, BitmapCache>();
         fetcher.update();
     }
 
@@ -164,22 +208,27 @@ public class PhotoFragment extends Fragment
     }
 
     void startLoading() {
-        if (isLoaded)
+        if (fetcher != null)
             return;
         Photo photo = null;
-        for (Photo p : photos) {
+        int pos = -1;
+        for (int i = 0; i < photos.size(); i++) {
+            Photo p = photos.get(i);
             if (p.loading <= 0)
                 continue;
             if (photo == null) {
                 photo = p;
+                pos = i;
                 continue;
             }
-            if (p.loading > photo.loading)
+            if (p.loading > photo.loading) {
                 photo = p;
+                pos = i;
+            }
         }
         if (photo == null)
             return;
-        PhotoFetcher fetcher = new PhotoFetcher();
+        fetcher = new PhotoFetcher();
         fetcher.execute(photo);
     }
 
@@ -198,6 +247,7 @@ public class PhotoFragment extends Fragment
                 Photo photo = new Photo();
                 photo.id = p.getLong("id");
                 photo.time = p.getLong("eventTime");
+                photo.camera = p.getInt("cameraNumber");
                 photos.add(photo);
             }
             error = false;
@@ -235,24 +285,28 @@ public class PhotoFragment extends Fragment
                         DateTime time = new DateTime(photo.time);
                         TextView tvTime = (TextView) v.findViewById(R.id.time);
                         tvTime.setText(time.toString("HH:mm:ss"));
+                        TextView tvCamera = (TextView) v.findViewById(R.id.camera);
+                        tvCamera.setText("#" + photo.camera);
                         ImageView iv = (ImageView) v.findViewById(R.id.photo);
                         View vProgress = v.findViewById(R.id.progress);
                         View vError = v.findViewById(R.id.error);
-                        if (photo.photo != null) {
-                            iv.setImageBitmap(photo.photo);
+                        String name = "p" + car_id + "_" + photo.id;
+                        if (memCache.containsKey(name)) {
+                            BitmapCache b = memCache.get(name);
+                            b.counter = ++loading;
+                            iv.setImageBitmap(b.bitmap);
                             vProgress.setVisibility(View.GONE);
                             vError.setVisibility(View.GONE);
+                        } else if (photo.loading < 0) {
+                            iv.setImageResource(R.drawable.photo_bg);
+                            vProgress.setVisibility(View.GONE);
+                            vError.setVisibility(View.VISIBLE);
                         } else {
                             iv.setImageResource(R.drawable.photo_bg);
-                            if (photo.loading < 0) {
-                                vProgress.setVisibility(View.GONE);
-                                vError.setVisibility(View.VISIBLE);
-                            } else {
-                                vProgress.setVisibility(View.VISIBLE);
-                                vError.setVisibility(View.GONE);
-                                photo.loading = ++loading;
-                                startLoading();
-                            }
+                            vProgress.setVisibility(View.VISIBLE);
+                            vError.setVisibility(View.GONE);
+                            CacheLoader loader = new CacheLoader();
+                            loader.execute(photo);
                         }
                         return v;
                     }
@@ -277,19 +331,87 @@ public class PhotoFragment extends Fragment
         }
     }
 
+    class CacheLoader extends AsyncTask<Photo, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Photo... params) {
+            Photo photo = params[0];
+            String name = "p" + car_id + "_" + photo.id;
+            File file = new File(cacheDir, name);
+            if (file.exists()) {
+                try {
+                    Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
+                    if (preferences.getBoolean(Names.ROTATE + photo.camera + "_" + car_id, false)) {
+                        Matrix matrix = new Matrix();
+                        matrix.postRotate(180);
+                        bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+                    }
+                    BitmapCache b = new BitmapCache();
+                    b.bitmap = bmp;
+                    b.counter = ++loading;
+                    memCache.put(name, b);
+                    while (memCache.size() > MAX_CACHE) {
+                        Set<Map.Entry<String, BitmapCache>> entries = memCache.entrySet();
+                        Map.Entry<String, BitmapCache> last = null;
+                        for (Map.Entry<String, BitmapCache> entry : entries) {
+                            if (last == null) {
+                                last = entry;
+                                continue;
+                            }
+                            if (last.getValue().counter < entry.getValue().counter)
+                                continue;
+                            last = entry;
+                        }
+                        if (last != null)
+                            memCache.remove(last.getKey());
+                    }
+                    return true;
+                } catch (Exception ex) {
+                    file.delete();
+                    photo.loading = -1;
+                    return true;
+                }
+            }
+            photo.loading = ++loading;
+            startLoading();
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean changed) {
+            BaseAdapter adapter = (BaseAdapter) list.getAdapter();
+            if (adapter != null)
+                adapter.notifyDataSetChanged();
+        }
+    }
+
     class PhotoFetcher extends AsyncTask<Photo, Void, Void> {
 
         @Override
         protected Void doInBackground(Photo... params) {
             String url = PHOTO + api_key;
             url += "&id=" + params[0].id;
+            Photo p = params[0];
             try {
-                InputStream in = new java.net.URL(url).openStream();
-                params[0].photo = BitmapFactory.decodeStream(in);
-                params[0].loading = 0;
+                HttpClient httpclient = new DefaultHttpClient();
+                HttpResponse response = httpclient.execute(new HttpGet(url));
+                StatusLine statusLine = response.getStatusLine();
+                int status = statusLine.getStatusCode();
+                if (status != HttpStatus.SC_OK)
+                    return null;
+                File file = new File(cacheDir, "t" + car_id + "_" + p.id);
+                file.createNewFile();
+                FileOutputStream out = new FileOutputStream(file);
+                response.getEntity().writeTo(out);
+                out.close();
+                File new_file = new File(cacheDir, "p" + car_id + "_" + p.id);
+                new_file.delete();
+                file.renameTo(new_file);
+                p.loading = 0;
             } catch (Exception e) {
-                params[0].loading = -1;
+                p.loading = -1;
                 e.printStackTrace();
+                State.appendLog(e.getMessage());
             }
             return null;
         }
@@ -298,7 +420,7 @@ public class PhotoFragment extends Fragment
         protected void onPostExecute(Void aVoid) {
             BaseAdapter adapter = (BaseAdapter) list.getAdapter();
             adapter.notifyDataSetChanged();
-            isLoaded = false;
+            fetcher = null;
             startLoading();
         }
     }
@@ -306,7 +428,7 @@ public class PhotoFragment extends Fragment
     static class Photo {
         long time;
         long id;
+        int camera;
         long loading;
-        Bitmap photo;
     }
 }
