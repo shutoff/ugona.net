@@ -15,5 +15,7 @@
     <!-- A really bright Holo shade of blue -->
     <color name="caldroid_sky_blue">#FFA3E8F7</color>
     <color name="error">#FF4040</color>
+    <color name="hour">#20FFFFFF</color>
+    <color name="hour_active">#FFFFFFFF</color>
 
 </resources>

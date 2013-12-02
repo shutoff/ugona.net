@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -60,6 +61,7 @@ public class PhotoFragment extends Fragment
     View vProgress;
     View vNoPhotos;
     View vError;
+    View vPhotos;
     ListView list;
 
     boolean error;
@@ -87,7 +89,7 @@ public class PhotoFragment extends Fragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.actions, container, false);
+        View v = inflater.inflate(R.layout.photos, container, false);
         if (current == null)
             current = new LocalDate();
         if (savedInstanceState != null) {
@@ -96,8 +98,9 @@ public class PhotoFragment extends Fragment
         }
         vProgress = v.findViewById(R.id.progress);
         vNoPhotos = v.findViewById(R.id.no_photos);
+        vPhotos = v.findViewById(R.id.photos);
         vError = v.findViewById(R.id.error);
-        list = (ListView) v.findViewById(R.id.actions);
+        list = (ListView) v.findViewById(R.id.list);
         cacheDir = getActivity().getCacheDir();
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -153,6 +156,46 @@ public class PhotoFragment extends Fragment
         };
         getActivity().registerReceiver(br, new IntentFilter(ROTATE));
 
+        View.OnTouchListener touchListener = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                TextView tv = (TextView) v;
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        tv.setTextColor(getResources().getColor(R.color.hour_active));
+                        return true;
+                    case MotionEvent.ACTION_UP: {
+                        int h = 0;
+                        try {
+                            h = Integer.parseInt(tv.getText().toString());
+                        } catch (Exception ex) {
+                            // ignore
+                        }
+                        int i;
+                        for (i = 0; i < photos.size(); i++) {
+                            Photo p = photos.get(i);
+                            LocalTime time = new LocalTime(p.time);
+                            if (time.getHourOfDay() < h)
+                                break;
+                        }
+                        i--;
+                        if (i < 0)
+                            i = 0;
+                        list.setSelection(i);
+                    }
+                    case MotionEvent.ACTION_CANCEL:
+                        tv.setTextColor(getResources().getColor(R.color.hour));
+                        return true;
+                }
+                return false;
+            }
+        };
+
+        ViewGroup vHours = (ViewGroup) v.findViewById(R.id.hours);
+        for (int i = 0; i < vHours.getChildCount(); i++) {
+            vHours.getChildAt(i).setOnTouchListener(touchListener);
+        }
+
         return v;
     }
 
@@ -182,7 +225,7 @@ public class PhotoFragment extends Fragment
     public void dateChanged(LocalDate date) {
         current = date;
         vProgress.setVisibility(View.VISIBLE);
-        list.setVisibility(View.GONE);
+        vPhotos.setVisibility(View.GONE);
         vNoPhotos.setVisibility(View.GONE);
         vError.setVisibility(View.GONE);
         DataFetcher fetcher = new DataFetcher();
@@ -201,6 +244,7 @@ public class PhotoFragment extends Fragment
                     vNoPhotos.setVisibility(View.GONE);
                     vProgress.setVisibility(View.GONE);
                     vError.setVisibility(View.VISIBLE);
+                    vPhotos.setVisibility(View.GONE);
                     error = true;
                 }
             });
@@ -256,7 +300,7 @@ public class PhotoFragment extends Fragment
             if (photos.size() == 0) {
                 vNoPhotos.setVisibility(View.VISIBLE);
             } else {
-                list.setVisibility(View.VISIBLE);
+                vPhotos.setVisibility(View.VISIBLE);
                 list.setAdapter(new BaseAdapter() {
                     @Override
                     public int getCount() {
@@ -411,7 +455,6 @@ public class PhotoFragment extends Fragment
             } catch (Exception e) {
                 p.loading = -1;
                 e.printStackTrace();
-                State.appendLog(e.getMessage());
             }
             return null;
         }

@@ -65,13 +65,6 @@ public class FetchService extends Service {
 
     @Override
     public void onCreate() {
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread thread, Throwable ex) {
-                State.print(ex);
-            }
-        });
-
         super.onCreate();
         preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);

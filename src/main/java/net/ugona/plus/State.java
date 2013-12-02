@@ -1,5 +1,6 @@
 package net.ugona.plus;
 
+/*
 import android.os.Environment;
 
 import java.io.BufferedWriter;
@@ -9,9 +10,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Date;
+*/
 
 public class State {
 
+/*
     static void appendLog(String text) {
         File logFile = Environment.getExternalStorageDirectory();
         logFile = new File(logFile, "car.log");
@@ -45,5 +48,5 @@ public class State {
         String s = sw.toString();
         appendLog(s);
     }
-
+*/
 }
