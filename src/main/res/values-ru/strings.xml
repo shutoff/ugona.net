@@ -268,4 +268,5 @@
     <string name="valet_off_ok">Режим АВТОСЕРВИС выключен</string>
     <string name="background">Фон</string>
     <string name="rotate">Перевернуть</string>
+    <string name="new_car">Новый автомобиль</string>
 </resources>

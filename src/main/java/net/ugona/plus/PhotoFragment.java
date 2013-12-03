@@ -212,6 +212,7 @@ public class PhotoFragment extends Fragment
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.unregisterDateListener(this);
         photos.clear();
+        getActivity().unregisterReceiver(br);
         super.onDestroy();
     }
 

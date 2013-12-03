@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 
 import org.apache.http.HttpResponse;
@@ -42,7 +43,14 @@ public abstract class HttpTask extends AsyncTask<String, Void, JsonObject> {
             HttpResponse response = httpclient.execute(new HttpGet(url));
             StatusLine statusLine = response.getStatusLine();
             int status = statusLine.getStatusCode();
-            JsonObject result = JsonObject.readFrom(new InputStreamReader(response.getEntity().getContent()));
+            JsonValue res = JsonValue.readFrom(new InputStreamReader(response.getEntity().getContent()));
+            JsonObject result;
+            if (res.isObject()) {
+                result = res.asObject();
+            } else {
+                result = new JsonObject();
+                result.set("data", res);
+            }
             if (status != HttpStatus.SC_OK) {
                 error_text = result.get("error").asString();
                 return null;

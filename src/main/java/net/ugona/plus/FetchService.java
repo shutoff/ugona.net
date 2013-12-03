@@ -201,8 +201,8 @@ public class FetchService extends Service {
             if (voltage_value != null) {
                 voltage_request = false;
                 JsonObject voltage = voltage_value.asObject();
-                ed.putString(Names.VOLTAGE_MAIN + car_id, voltage.get("main").asString());
-                ed.putString(Names.VOLTAGE_RESERVED + car_id, voltage.get("reserved").asString());
+                ed.putString(Names.VOLTAGE_MAIN + car_id, voltage.get("main").asDouble() + "");
+                ed.putString(Names.VOLTAGE_RESERVED + car_id, voltage.get("reserved").asDouble() + "");
             }
             JsonValue temp_value = res.get("temperature");
             if (temp_value != null) {
@@ -446,7 +446,7 @@ public class FetchService extends Service {
             if (res == null)
                 return;
             SharedPreferences.Editor ed = preferences.edit();
-            ed.putString(Names.COURSE + car_id, res.get("course").asString());
+            ed.putString(Names.COURSE + car_id, res.get("course").asInt() + "");
             ed.commit();
         }
 
