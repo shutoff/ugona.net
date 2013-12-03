@@ -14,9 +14,10 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
+import com.eclipsesource.json.ParseException;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -120,7 +121,7 @@ public class FetchService extends Service {
         }
 
         @Override
-        void result(JSONObject res) throws JSONException {
+        void result(JsonObject res) throws ParseException {
             requests.remove(key);
             startRequest();
         }
@@ -178,9 +179,9 @@ public class FetchService extends Service {
         }
 
         @Override
-        void background(JSONObject res) throws JSONException {
-            JSONObject event = res.getJSONObject("event");
-            long eventId = event.getLong("eventId");
+        void background(JsonObject res) throws ParseException {
+            JsonObject event = res.get("event").asObject();
+            long eventId = event.get("eventId").asLong();
 
             if (eventId == preferences.getLong(Names.EVENT_ID + car_id, 0)) {
                 sendUpdate(ACTION_NOUPDATE, car_id);
@@ -190,58 +191,61 @@ public class FetchService extends Service {
                 return;
             }
 
-            long eventTime = event.getLong("eventTime");
+            long eventTime = event.get("eventTime").asLong();
             ed = preferences.edit();
             ed.putLong(Names.EVENT_ID + car_id, eventId);
             ed.putLong(Names.EVENT_TIME + car_id, eventTime);
 
             boolean voltage_request = true;
-            if (res.has("voltage")) {
+            JsonValue voltage_value = res.get("voltage");
+            if (voltage_value != null) {
                 voltage_request = false;
-                JSONObject voltage = res.getJSONObject("voltage");
-                ed.putString(Names.VOLTAGE_MAIN + car_id, voltage.getString("main"));
-                ed.putString(Names.VOLTAGE_RESERVED + car_id, voltage.getString("reserved"));
+                JsonObject voltage = voltage_value.asObject();
+                ed.putString(Names.VOLTAGE_MAIN + car_id, voltage.get("main").asString());
+                ed.putString(Names.VOLTAGE_RESERVED + car_id, voltage.get("reserved").asString());
             }
-            if (res.has("temperature")) {
-                JSONObject temp = res.getJSONObject("temperature");
-                ed.putString(Names.TEMPERATURE + car_id, temp.getString("value"));
+            JsonValue temp_value = res.get("temperature");
+            if (temp_value != null) {
+                JsonObject temp = temp_value.asObject();
+                ed.putString(Names.TEMPERATURE + car_id, temp.get("value").asInt() + "");
             }
 
             if (preferences.getLong(Names.BALANCE_TIME + car_id, 0) == 0) {
-                JSONObject balance = res.getJSONObject("balance");
-                Matcher m = balancePattern.matcher(balance.getString("source"));
+                JsonObject balance = res.get("balance").asObject();
+                Matcher m = balancePattern.matcher(balance.get("source").asString());
                 if (m.find())
                     ed.putString(Names.BALANCE + car_id, m.group(0).replaceAll(",", "."));
             }
 
-            JSONObject contact = res.getJSONObject("contact");
-            boolean guard = contact.getBoolean("guard");
+            JsonObject contact = res.get("contact").asObject();
+            boolean guard = contact.get("guard").asBoolean();
             ed.putBoolean(Names.GUARD + car_id, guard);
-            ed.putBoolean(Names.INPUT1 + car_id, contact.getBoolean("input1"));
-            ed.putBoolean(Names.INPUT2 + car_id, contact.getBoolean("input2"));
-            ed.putBoolean(Names.INPUT3 + car_id, contact.getBoolean("input3"));
-            ed.putBoolean(Names.INPUT4 + car_id, contact.getBoolean("input4"));
-            ed.putBoolean(Names.GUARD0 + car_id, contact.getBoolean("guardMode0"));
-            ed.putBoolean(Names.GUARD1 + car_id, contact.getBoolean("guardMode1"));
+            ed.putBoolean(Names.INPUT1 + car_id, contact.get("input1").asBoolean());
+            ed.putBoolean(Names.INPUT2 + car_id, contact.get("input2").asBoolean());
+            ed.putBoolean(Names.INPUT3 + car_id, contact.get("input3").asBoolean());
+            ed.putBoolean(Names.INPUT4 + car_id, contact.get("input4").asBoolean());
+            ed.putBoolean(Names.GUARD0 + car_id, contact.get("guardMode0").asBoolean());
+            ed.putBoolean(Names.GUARD1 + car_id, contact.get("guardMode1").asBoolean());
             setState(Names.ZONE_DOOR, contact, "door", 3);
             setState(Names.ZONE_HOOD, contact, "hood", 2);
             setState(Names.ZONE_TRUNK, contact, "trunk", 1);
             setState(Names.ZONE_ACCESSORY, contact, "accessory", 7);
             setState(Names.ZONE_IGNITION, contact, "realIgnition", 4);
-            boolean engine = contact.getBoolean("engine");
+            boolean engine = contact.get("engine").asBoolean();
             if (engine && (msg_id == 4))
                 msg_id = 0;
             ed.putBoolean(Names.ENGINE + car_id, engine);
 
             boolean gsm_req = true;
-            if (res.has("gps")) {
+            JsonValue gps_value = res.get("gps");
+            if (gps_value != null) {
                 gsm_req = false;
-                JSONObject gps = res.getJSONObject("gps");
-                ed.putString(Names.LATITUDE + car_id, gps.getString("latitude"));
-                ed.putString(Names.LONGITUDE + car_id, gps.getString("longitude"));
-                ed.putString(Names.SPEED + car_id, gps.getString("speed"));
-                if (contact.getBoolean("gpsValid"))
-                    ed.putString(Names.COURSE + car_id, gps.getString("course"));
+                JsonObject gps = gps_value.asObject();
+                ed.putString(Names.LATITUDE + car_id, gps.get("latitude").asDouble() + "");
+                ed.putString(Names.LONGITUDE + car_id, gps.get("longitude").asDouble() + "");
+                ed.putString(Names.SPEED + car_id, gps.get("speed").asDouble() + "");
+                if (contact.get("gpsValid").asBoolean())
+                    ed.putString(Names.COURSE + car_id, gps.get("course").asInt() + "");
             }
 
 
@@ -283,8 +287,8 @@ public class FetchService extends Service {
             execute(STATUS_URL, api_key);
         }
 
-        void setState(String id, JSONObject contact, String key, int msg) throws JSONException {
-            boolean state = contact.getBoolean(key);
+        void setState(String id, JsonObject contact, String key, int msg) throws ParseException {
+            boolean state = contact.get(key).asBoolean();
             if (state) {
                 if (!preferences.getBoolean(id + car_id, false))
                     msg_id = msg;
@@ -304,14 +308,14 @@ public class FetchService extends Service {
         }
 
         @Override
-        void background(JSONObject res) throws JSONException {
+        void background(JsonObject res) throws ParseException {
             if (res == null)
                 return;
-            JSONArray balances = res.getJSONArray("balanceList");
-            if (balances.length() == 0)
+            JsonArray balances = res.get("balanceList").asArray();
+            if (balances.size() == 0)
                 return;
-            JSONObject balance = balances.getJSONObject(0);
-            String data = balance.getString("value");
+            JsonObject balance = balances.get(0).asObject();
+            String data = balance.get("value").asString();
             SharedPreferences.Editor ed = preferences.edit();
             ed.putString(Names.BALANCE, data);
             ed.remove(Names.BALANCE_TIME);
@@ -337,25 +341,25 @@ public class FetchService extends Service {
         }
 
         @Override
-        void background(JSONObject res) throws JSONException {
+        void background(JsonObject res) throws ParseException {
             if (res == null)
                 return;
 
-            JSONArray events = res.getJSONArray("events");
-            if (events.length() > 0) {
+            JsonArray events = res.get("events").asArray();
+            if (events.size() > 0) {
                 long last_stand = preferences.getLong(Names.LAST_STAND, 0);
                 long stand = last_stand;
                 long event_id = 0;
-                for (int i = events.length() - 1; i >= 0; i--) {
-                    JSONObject event = events.getJSONObject(i);
-                    int type = event.getInt("eventType");
+                for (int i = events.size() - 1; i >= 0; i--) {
+                    JsonObject event = events.get(i).asObject();
+                    int type = event.get("eventType").asInt();
                     switch (type) {
                         case 37:
-                            last_stand = -event.getLong("eventTime");
+                            last_stand = -event.get("eventTime").asLong();
                             break;
                         case 38:
-                            last_stand = event.getLong("eventTime");
-                            event_id = event.getLong("eventId");
+                            last_stand = event.get("eventTime").asLong();
+                            event_id = event.get("eventId").asLong();
                             break;
                     }
                 }
@@ -398,15 +402,15 @@ public class FetchService extends Service {
         }
 
         @Override
-        void background(JSONObject res) throws JSONException {
+        void background(JsonObject res) throws ParseException {
             if (res == null)
                 return;
-            JSONArray arr = res.getJSONArray("voltageList");
-            if (arr.length() == 0)
+            JsonArray arr = res.get("voltageList").asArray();
+            if (arr.size() == 0)
                 return;
-            JSONObject value = arr.getJSONObject(0);
-            String main = value.getString("main");
-            String reserved = value.getString("reserved");
+            JsonObject value = arr.get(0).asObject();
+            String main = value.get("main").asDouble() + "";
+            String reserved = value.get("reserved").asDouble() + "";
             if (main.equals(preferences.getString(Names.VOLTAGE_MAIN + car_id, "")) &&
                     reserved.equals(preferences.getString(Names.VOLTAGE_RESERVED + car_id, "")))
                 return;
@@ -438,11 +442,11 @@ public class FetchService extends Service {
         }
 
         @Override
-        void background(JSONObject res) throws JSONException {
+        void background(JsonObject res) throws ParseException {
             if (res == null)
                 return;
             SharedPreferences.Editor ed = preferences.edit();
-            ed.putString(Names.COURSE + car_id, res.getString("course"));
+            ed.putString(Names.COURSE + car_id, res.get("course").asString());
             ed.commit();
         }
 
@@ -464,17 +468,17 @@ public class FetchService extends Service {
         }
 
         @Override
-        void background(JSONObject res) throws JSONException {
+        void background(JsonObject res) throws ParseException {
             if (res == null)
                 return;
-            JSONArray arr = res.getJSONArray("gsmlist");
-            if (arr.length() == 0)
+            JsonArray arr = res.get("gsmlist").asArray();
+            if (arr.size() == 0)
                 return;
-            JSONObject value = arr.getJSONObject(0);
-            int cc = value.getInt("cc");
-            int nc = value.getInt("nc");
-            int cid = value.getInt("cid");
-            int lac = value.getInt("lac");
+            JsonObject value = arr.get(0).asObject();
+            int cc = value.get("cc").asInt();
+            int nc = value.get("nc").asInt();
+            int cid = value.get("cid").asInt();
+            int lac = value.get("lac").asInt();
             String gsm = cc + " " + nc + " " + lac + " " + cid;
             if (gsm.equals(preferences.getString(Names.GSM + car_id, "")) &&
                     !preferences.getString(Names.GSM_ZONE + car_id, "").equals(""))
@@ -504,23 +508,23 @@ public class FetchService extends Service {
         }
 
         @Override
-        void background(JSONObject res) throws JSONException {
+        void background(JsonObject res) throws ParseException {
             if (res == null)
                 return;
-            JSONArray arr = res.getJSONArray("gps");
-            if (arr.length() == 0)
+            JsonArray arr = res.get("gps").asArray();
+            if (arr.size() == 0)
                 return;
             double max_lat = -180;
             double min_lat = 180;
             double max_lon = -180;
             double min_lon = 180;
             Vector<Point> P = new Vector<Point>();
-            for (int i = 0; i < arr.length(); i++) {
-                JSONObject point = arr.getJSONObject(i);
+            for (int i = 0; i < arr.size(); i++) {
+                JsonObject point = arr.get(i).asObject();
                 try {
                     Point p = new Point();
-                    p.x = point.getDouble("latitude");
-                    p.y = point.getDouble("longitude");
+                    p.x = point.get("latitude").asDouble();
+                    p.y = point.get("longitude").asDouble();
                     if (p.x > max_lat)
                         max_lat = p.x;
                     if (p.x < min_lat)

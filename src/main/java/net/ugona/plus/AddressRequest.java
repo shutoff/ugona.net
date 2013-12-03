@@ -2,9 +2,9 @@ package net.ugona.plus;
 
 import android.content.SharedPreferences;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
 
 import java.util.Locale;
 
@@ -43,11 +43,11 @@ abstract public class AddressRequest {
         String longitude;
 
         @Override
-        void result(JSONObject data) throws JSONException {
+        void result(JsonObject data) throws ParseException {
 
-            JSONArray res = data.getJSONArray("results");
-            if (res.length() == 0) {
-                String status = data.getString("status");
+            JsonArray res = data.get("results").asArray();
+            if (res.size() == 0) {
+                String status = data.get("status").asString();
                 if ((status != null) && status.equals("OVER_QUERY_LIMIT")) {
                     request = new GoogleRequest();
                     request.pause = 1000;
@@ -56,7 +56,7 @@ abstract public class AddressRequest {
                 }
             }
 
-            if (res.length() == 0) {
+            if (res.size() == 0) {
                 String[] p = new String[1];
                 p[0] = latitude + "," + longitude;
                 addressResult(p);
@@ -64,34 +64,34 @@ abstract public class AddressRequest {
             }
 
             int i;
-            for (i = 0; i < res.length(); i++) {
-                JSONObject addr = res.getJSONObject(i);
-                JSONArray types = addr.getJSONArray("types");
+            for (i = 0; i < res.size(); i++) {
+                JsonObject addr = res.get(i).asObject();
+                JsonArray types = addr.get("types").asArray();
                 int n;
-                for (n = 0; n < types.length(); n++) {
-                    if (types.getString(n).equals("street_address"))
+                for (n = 0; n < types.size(); n++) {
+                    if (types.get(n).asString().equals("street_address"))
                         break;
                 }
-                if (n < types.length())
+                if (n < types.size())
                     break;
             }
-            if (i >= res.length())
+            if (i >= res.size())
                 i = 0;
 
-            JSONObject addr = res.getJSONObject(i);
-            String[] parts = addr.getString("formatted_address").split(", ");
-            JSONArray components = addr.getJSONArray("address_components");
-            for (i = 0; i < components.length(); i++) {
-                JSONObject component = components.getJSONObject(i);
-                JSONArray types = component.getJSONArray("types");
+            JsonObject addr = res.get(i).asObject();
+            String[] parts = addr.get("formatted_address").asString().split(", ");
+            JsonArray components = addr.get("address_components").asArray();
+            for (i = 0; i < components.size(); i++) {
+                JsonObject component = components.get(i).asObject();
+                JsonArray types = component.get("types").asArray();
                 int n;
-                for (n = 0; n < types.length(); n++) {
-                    if (types.getString(n).equals("postal_code"))
+                for (n = 0; n < types.size(); n++) {
+                    if (types.get(n).asString().equals("postal_code"))
                         break;
                 }
-                if (n >= types.length())
+                if (n >= types.size())
                     continue;
-                String name = component.getString("long_name");
+                String name = component.get("long_name").asString();
                 for (n = 0; n < parts.length; n++) {
                     if (name.equals(parts[n]))
                         parts[n] = null;
@@ -127,15 +127,15 @@ abstract public class AddressRequest {
         }
 
         @Override
-        void result(JSONObject res) throws JSONException {
-            JSONObject address = res.getJSONObject("address");
-            String[] parts = res.getString("display_name").split(", ");
+        void result(JsonObject res) throws ParseException {
+            JsonObject address = res.get("address").asObject();
+            String[] parts = res.get("display_name").asString().split(", ");
             String[] result = new String[parts.length - 2];
             for (int i = 0; i < result.length; i++) {
                 result[i] = parts[i];
             }
             try {
-                String house_number = address.getString("house_number");
+                String house_number = address.get("house_number").asString();
                 for (int i = 0; i < result.length - 1; i++) {
                     if (result[i].equals(house_number)) {
                         result[i] = result[i + 1];

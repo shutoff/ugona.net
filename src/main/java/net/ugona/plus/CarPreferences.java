@@ -29,9 +29,9 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
 
 import java.util.Date;
 
@@ -524,9 +524,9 @@ public class CarPreferences extends PreferenceActivity {
 
                 HttpTask apiTask = new HttpTask() {
                     @Override
-                    void result(JSONObject res) throws JSONException {
+                    void result(JsonObject res) throws ParseException {
                         dlgCheck.dismiss();
-                        String key = res.getString("data");
+                        String key = res.get("data").asString();
                         SharedPreferences.Editor ed = preferences.edit();
                         ed.putString(Names.CAR_KEY + car_id, key);
                         ed.putString(Names.LOGIN + car_id, login);
@@ -565,10 +565,10 @@ public class CarPreferences extends PreferenceActivity {
     void getPhotos(String api_key) {
         HttpTask verTask = new HttpTask() {
             @Override
-            void result(JSONObject res) throws JSONException {
+            void result(JsonObject res) throws ParseException {
                 try {
-                    JSONArray array = res.getJSONArray("photos");
-                    boolean is_photo = array.length() > 0;
+                    JsonArray array = res.get("photos").asArray();
+                    boolean is_photo = array.size() > 0;
                     photoPref.setChecked(is_photo);
                     SharedPreferences.Editor ed = preferences.edit();
                     ed.putBoolean(Names.SHOW_PHOTO + car_id, is_photo);
@@ -591,11 +591,11 @@ public class CarPreferences extends PreferenceActivity {
     void getVersion(String api_key) {
         HttpTask verTask = new HttpTask() {
             @Override
-            void result(JSONObject res) throws JSONException {
+            void result(JsonObject res) throws ParseException {
                 try {
-                    JSONArray devices = res.getJSONArray("devices");
-                    JSONObject device = devices.getJSONObject(0);
-                    String ver = device.getString("versionSoftPGSM");
+                    JsonArray devices = res.get("devices").asArray();
+                    JsonObject device = devices.get(0).asObject();
+                    String ver = device.get("versionSoftPGSM").asString();
                     versionPref.setSummary(ver);
                     SharedPreferences.Editor ed = preferences.edit();
                     ed.putString(Names.VERSION + car_id, ver);

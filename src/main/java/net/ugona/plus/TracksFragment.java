@@ -17,13 +17,14 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
+
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -314,10 +315,10 @@ public class TracksFragment extends Fragment
         int id;
 
         @Override
-        void result(JSONObject res) throws JSONException {
+        void result(JsonObject res) throws ParseException {
             if (id != track_id)
                 return;
-            JSONArray list = res.getJSONArray("events");
+            JsonArray list = res.get("events").asArray();
             int first_type = 0;
             int last_type = 0;
             long first_time = end_time;
@@ -325,14 +326,14 @@ public class TracksFragment extends Fragment
             events = new HashMap<Long, Integer>();
             tracks = new Vector<Tracks.Track>();
             int count = 0;
-            for (int i = list.length() - 1; i >= 0; i--) {
-                JSONObject e = list.getJSONObject(i);
-                int type = e.getInt("eventType");
+            for (int i = list.size() - 1; i >= 0; i--) {
+                JsonObject e = list.get(i).asObject();
+                int type = e.get("eventType").asInt();
                 if ((type == 37) || (type == 39))
                     count++;
                 if ((type == 37) || (type == 38) || (type == 39)) {
-                    events.put(e.getLong("eventId"), type);
-                    long time = e.getLong("eventTime");
+                    events.put(e.get("eventId").asLong(), type);
+                    long time = e.get("eventTime").asLong();
                     if (time < first_time) {
                         first_time = time;
                         first_type = type;
@@ -397,19 +398,19 @@ public class TracksFragment extends Fragment
         }
 
         @Override
-        void result(JSONObject res) throws JSONException {
+        void result(JsonObject res) throws ParseException {
             if (id != track_id)
                 return;
-            JSONArray list = res.getJSONArray("events");
-            if (list.length() > 0) {
+            JsonArray list = res.get("events").asArray();
+            if (list.size() > 0) {
                 Vector<EventInfo> es = new Vector<EventInfo>();
-                for (int i = list.length() - 1; i >= 0; i--) {
-                    JSONObject e = list.getJSONObject(i);
-                    int type = e.getInt("eventType");
+                for (int i = list.size() - 1; i >= 0; i--) {
+                    JsonObject e = list.get(i).asObject();
+                    int type = e.get("eventType").asInt();
                     if ((type == 37) || (type == 38) || (type == 39)) {
                         EventInfo event = new EventInfo();
-                        event.time = e.getLong("eventTime");
-                        event.id = e.getLong("eventId");
+                        event.time = e.get("eventTime").asLong();
+                        event.id = e.get("eventId").asLong();
                         event.type = type;
                         es.add(event);
                     }
@@ -470,19 +471,19 @@ public class TracksFragment extends Fragment
         int id;
 
         @Override
-        void result(JSONObject res) throws JSONException {
+        void result(JsonObject res) throws ParseException {
             if (id != track_id)
                 return;
-            JSONArray list = res.getJSONArray("events");
-            if (list.length() > 0) {
+            JsonArray list = res.get("events").asArray();
+            if (list.size() > 0) {
                 Vector<EventInfo> es = new Vector<EventInfo>();
-                for (int i = list.length() - 1; i >= 0; i--) {
-                    JSONObject e = list.getJSONObject(i);
-                    int type = e.getInt("eventType");
+                for (int i = list.size() - 1; i >= 0; i--) {
+                    JsonObject e = list.get(i).asObject();
+                    int type = e.get("eventType").asInt();
                     if ((type == 37) || (type == 38) || (type == 39)) {
                         EventInfo event = new EventInfo();
-                        event.time = e.getLong("eventTime");
-                        event.id = e.getLong("eventId");
+                        event.time = e.get("eventTime").asLong();
+                        event.id = e.get("eventId").asLong();
                         event.type = type;
                         es.add(event);
                     }
@@ -539,28 +540,28 @@ public class TracksFragment extends Fragment
         int id;
 
         @Override
-        void result(JSONObject res) throws JSONException {
+        void result(JsonObject res) throws ParseException {
             if (id != track_id)
                 return;
 
             Vector<PointInfo> points = new Vector<PointInfo>();
 
-            JSONArray list = res.getJSONArray("gpslist");
-            for (int i = list.length() - 1; i >= 0; i--) {
-                JSONObject p = list.getJSONObject(i);
-                long id = p.getLong("eventId");
+            JsonArray list = res.get("gpslist").asArray();
+            for (int i = list.size() - 1; i >= 0; i--) {
+                JsonObject p = list.get(i).asObject();
+                long id = p.get("eventId").asLong();
                 if (!events.containsKey(id))
                     continue;
                 int type = events.get(id);
                 events.remove(id);
-                if (!p.getBoolean("valid"))
+                if (!p.get("valid").asBoolean())
                     continue;
 
                 Tracks.Point point = new Tracks.Point();
-                point.speed = p.getDouble("speed");
-                point.latitude = p.getDouble("latitude");
-                point.longitude = p.getDouble("longitude");
-                point.time = p.getLong("gpsTime");
+                point.speed = p.get("speed").asDouble();
+                point.latitude = p.get("latitude").asDouble();
+                point.longitude = p.get("longitude").asDouble();
+                point.time = p.get("gpsTime").asLong();
 
                 PointInfo pi = new PointInfo();
                 pi.point = point;

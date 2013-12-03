@@ -19,12 +19,13 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
+
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -473,18 +474,18 @@ public class EventsFragment extends Fragment
         boolean no_reload;
 
         @Override
-        void result(JSONObject data) throws JSONException {
+        void result(JsonObject data) throws ParseException {
             if (!current.equals(date))
                 return;
             events.clear();
-            JSONArray res = data.getJSONArray("events");
-            for (int i = 0; i < res.length(); i++) {
-                JSONObject event = res.getJSONObject(i);
-                int type = event.getInt("eventType");
+            JsonArray res = data.get("events").asArray();
+            for (int i = 0; i < res.size(); i++) {
+                JsonObject event = res.get(i).asObject();
+                int type = event.get("eventType").asInt();
                 if ((type == 94) || (type == 98) || (type == 41) || (type == 33) || (type == 39) || (type == 127))
                     continue;
-                long time = event.getLong("eventTime");
-                long id = event.getLong("eventId");
+                long time = event.get("eventTime").asLong();
+                long id = event.get("eventId").asLong();
                 Event e = new Event();
                 e.type = type;
                 e.time = time;
@@ -551,10 +552,10 @@ public class EventsFragment extends Fragment
         }
 
         @Override
-        void result(JSONObject res) throws JSONException {
-            final double lat = res.getDouble("latitude");
-            final double lng = res.getDouble("longitude");
-            final String course = res.getString("course");
+        void result(JsonObject res) throws ParseException {
+            final double lat = res.get("latitude").asDouble();
+            final double lng = res.get("longitude").asDouble();
+            final String course = res.get("course").asString();
             AddressRequest request = new AddressRequest() {
                 @Override
                 void addressResult(String[] parts) {
@@ -581,11 +582,11 @@ public class EventsFragment extends Fragment
         }
 
         @Override
-        void result(JSONObject res) throws JSONException {
-            int cc = res.getInt("cc");
-            int nc = res.getInt("nc");
-            int cid = res.getInt("cid");
-            int lac = res.getInt("lac");
+        void result(JsonObject res) throws ParseException {
+            int cc = res.get("cc").asInt();
+            int nc = res.get("nc").asInt();
+            int cid = res.get("cid").asInt();
+            int lac = res.get("lac").asInt();
             String gsm = cc + " " + nc + " " + lac + " " + cid;
             if (gsm.equals(preferences.getString(Names.GSM + car_id, ""))
                     && !preferences.getString(Names.GSM_ZONE + car_id, "").equals("")) {
@@ -609,21 +610,21 @@ public class EventsFragment extends Fragment
         }
 
         @Override
-        void result(JSONObject res) throws JSONException {
-            JSONArray arr = res.getJSONArray("gps");
-            if (arr.length() == 0)
+        void result(JsonObject res) throws ParseException {
+            JsonArray arr = res.get("gps").asArray();
+            if (arr.size() == 0)
                 return;
             double max_lat = -180;
             double min_lat = 180;
             double max_lon = -180;
             double min_lon = 180;
             Vector<FetchService.Point> P = new Vector<FetchService.Point>();
-            for (int i = 0; i < arr.length(); i++) {
-                JSONObject point = arr.getJSONObject(i);
+            for (int i = 0; i < arr.size(); i++) {
+                JsonObject point = arr.get(i).asObject();
                 try {
                     FetchService.Point p = new FetchService.Point();
-                    p.x = point.getDouble("latitude");
-                    p.y = point.getDouble("longitude");
+                    p.x = point.get("latitude").asDouble();
+                    p.y = point.get("longitude").asDouble();
                     if (p.x > max_lat)
                         max_lat = p.x;
                     if (p.x < min_lat)

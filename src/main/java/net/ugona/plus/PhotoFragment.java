@@ -23,6 +23,10 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
@@ -32,9 +36,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -281,17 +282,17 @@ public class PhotoFragment extends Fragment
         LocalDate date;
 
         @Override
-        void result(JSONObject data) throws JSONException {
+        void result(JsonObject data) throws ParseException {
             if (!current.equals(date))
                 return;
             photos.clear();
-            JSONArray array = data.getJSONArray("photos");
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject p = array.getJSONObject(i);
+            JsonArray array = data.get("photos").asArray();
+            for (int i = 0; i < array.size(); i++) {
+                JsonObject p = array.get(i).asObject();
                 Photo photo = new Photo();
-                photo.id = p.getLong("id");
-                photo.time = p.getLong("eventTime");
-                photo.camera = p.getInt("cameraNumber");
+                photo.id = p.get("id").asLong();
+                photo.time = p.get("eventTime").asLong();
+                photo.camera = p.get("cameraNumber").asInt();
                 photos.add(photo);
             }
             error = false;
