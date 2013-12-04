@@ -16,6 +16,7 @@ import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -365,8 +366,23 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
 
-        String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
-        setPhone(phoneNumber);
+        if (State.hasTelephony(this)) {
+            String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
+            setPhone(phoneNumber);
+        } else {
+            PreferenceScreen ps = getPreferenceScreen();
+            ps.removePreference(smsPref);
+            ps.removePreference(phonePref);
+            ps.removePreference(sensPref);
+            ps.removePreference(autoPref);
+            ps.removePreference(relePref);
+            ps.removePreference(mainPref);
+            ps.removePreference(phonesPref);
+            ps.removePreference(timerPref);
+            ps.removePreference(alarmPref);
+            ps.removePreference(notifyPref);
+            ps.removePreference(testPref);
+        }
     }
 
     @Override

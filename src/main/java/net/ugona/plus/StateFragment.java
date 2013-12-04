@@ -325,7 +325,7 @@ public class StateFragment extends Fragment
         tvAddress3.setText(addr);
 
         int n_buttons = 0;
-        if (preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false)) {
+        if (State.hasTelephony(context) && preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false)) {
             vMotor.setVisibility(View.VISIBLE);
             if (preferences.getBoolean(Names.ENGINE + car_id, false)) {
                 ivMotor.setImageResource(R.drawable.icon_motor_off);
@@ -338,14 +338,15 @@ public class StateFragment extends Fragment
         } else {
             vMotor.setVisibility(View.GONE);
         }
-        if (preferences.getBoolean(Names.CAR_RELE1 + car_id, false)) {
+        if (State.hasTelephony(context) && preferences.getBoolean(Names.CAR_RELE1 + car_id, false)) {
             vRele.setVisibility(View.VISIBLE);
             pRele.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele1) ? View.VISIBLE : View.GONE);
             n_buttons++;
         } else {
             vRele.setVisibility(View.GONE);
         }
-        if ((preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false)) &&
+        if (State.hasTelephony(context) &&
+                (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false)) &&
                 !preferences.getBoolean(Names.GUARD + car_id, false) &&
                 !preferences.getBoolean(Names.ENGINE + car_id, false) &&
                 !(!preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false))) {
@@ -356,7 +357,7 @@ public class StateFragment extends Fragment
             vBlock.setVisibility(View.GONE);
         }
         boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
-        if (n_buttons < 3) {
+        if (State.hasTelephony(context) && (n_buttons < 3)) {
             if (valet) {
                 ivValet.setImageResource(R.drawable.icon_valet_off);
                 pValet.setVisibility(SmsMonitor.isProcessed(car_id, R.string.valet_off) ? View.VISIBLE : View.GONE);

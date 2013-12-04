@@ -54,6 +54,12 @@ public class MainActivity extends ActionBarActivity {
 
     static final String DATE = "date";
 
+    static final int PAGE_PHOTO = 0;
+    static final int PAGE_ACTIONS = 1;
+    static final int PAGE_STATE = 2;
+    static final int PAGE_EVENT = 3;
+    static final int PAGE_TRACK = 4;
+
     ViewPager mViewPager;
     SharedPreferences preferences;
     BroadcastReceiver br;
@@ -64,8 +70,8 @@ public class MainActivity extends ActionBarActivity {
     Cars.Car[] cars;
 
     boolean show_date;
-    boolean show_tracks;
-    boolean show_photo;
+
+    boolean[] show_pages;
 
     LocalDate current;
     Menu topSubMenu;
@@ -99,6 +105,13 @@ public class MainActivity extends ActionBarActivity {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         current = new LocalDate();
 
+        show_pages = new boolean[5];
+        show_pages[0] = preferences.getBoolean(Names.SHOW_PHOTO + car_id, false);
+        show_pages[1] = State.hasTelephony(this);
+        show_pages[2] = true;
+        show_pages[3] = true;
+        show_pages[4] = false;
+
         if (savedInstanceState != null) {
             car_id = savedInstanceState.getString(Names.ID);
             current = new LocalDate(savedInstanceState.getLong(DATE));
@@ -112,9 +125,8 @@ public class MainActivity extends ActionBarActivity {
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
 
-        mViewPager.setCurrentItem(1);
         setShowTracks();
-        mViewPager.setCurrentItem(preferences.getBoolean(Names.SHOW_PHOTO + car_id, false) ? 2 : 1);
+        mViewPager.setCurrentItem(getPagePosition(PAGE_STATE));
 
         TitlePageIndicator titleIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
         titleIndicator.setViewPager(mViewPager);
@@ -129,9 +141,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onPageSelected(int i) {
                 setShowDate(i);
-                if (!show_photo)
-                    i++;
-                if ((i == 2) && (state_fragment != null))
+                if ((getPageId(i) == PAGE_STATE) && (state_fragment != null))
                     state_fragment.startAnimation();
             }
 
@@ -144,7 +154,7 @@ public class MainActivity extends ActionBarActivity {
         if (savedInstanceState == null) {
             String phone = preferences.getString(Names.CAR_PHONE + car_id, "");
             String key = preferences.getString(Names.CAR_KEY + car_id, "");
-            if ((phone.length() == 0) || (key.length() == 0)) {
+            if ((State.hasTelephony(this) && (phone.length() == 0)) || (key.length() == 0)) {
                 Intent intent = new Intent(this, CarPreferences.class);
                 intent.putExtra(Names.ID, car_id);
                 startActivityForResult(intent, CAR_SETUP);
@@ -163,16 +173,10 @@ public class MainActivity extends ActionBarActivity {
                 }
                 if (action.equals(FetchService.ACTION_UPDATE_FORCE)) {
                     boolean new_show_photo = preferences.getBoolean(Names.SHOW_PHOTO + car_id, false);
-                    if (new_show_photo != show_photo) {
-                        int id = mViewPager.getCurrentItem();
-                        if (!show_photo)
-                            id++;
+                    if (new_show_photo != show_pages[PAGE_PHOTO]) {
+                        int id = getPageId(mViewPager.getCurrentItem());
                         update();
-                        if (!show_photo)
-                            id--;
-                        if (id < 0)
-                            id = 0;
-                        mViewPager.setCurrentItem(id);
+                        mViewPager.setCurrentItem(getPagePosition(id));
                     }
                     changeDate(current.toDate());
                     return;
@@ -191,10 +195,7 @@ public class MainActivity extends ActionBarActivity {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (state_fragment != null) {
-            int item = mViewPager.getCurrentItem();
-            if (!show_photo)
-                item++;
-            if (item == 2)
+            if (getPageId(mViewPager.getCurrentItem()) == PAGE_STATE)
                 state_fragment.startAnimation();
         }
     }
@@ -229,6 +230,8 @@ public class MainActivity extends ActionBarActivity {
         } else {
             menu.removeItem(R.id.date);
         }
+        if (!State.hasTelephony(this))
+            menu.removeItem(R.id.passwd);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -419,16 +422,38 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    int getPageId(int n) {
+        int last = 0;
+        for (int i = 0; i < 5; i++) {
+            if (!show_pages[i])
+                continue;
+            last = i;
+            if (n == 0)
+                return i;
+            n--;
+        }
+        return last;
+    }
+
+    int getPagePosition(int id) {
+        int pos = 0;
+        for (int i = 0; i < id; i++) {
+            if (show_pages[i])
+                pos++;
+        }
+        return pos;
+    }
+
     void setShowTracks() {
         boolean changed = false;
-        boolean new_show_tracks = !preferences.getString(Names.LATITUDE + car_id, "").equals("");
-        if (show_tracks != new_show_tracks) {
-            show_tracks = new_show_tracks;
+        boolean show_tracks = !preferences.getString(Names.LATITUDE + car_id, "").equals("");
+        if (show_pages[PAGE_TRACK] != show_tracks) {
+            show_pages[PAGE_TRACK] = show_tracks;
             changed = true;
         }
-        boolean new_show_photo = preferences.getBoolean(Names.SHOW_PHOTO + car_id, false);
-        if (show_photo != new_show_photo) {
-            show_photo = new_show_photo;
+        boolean show_photo = preferences.getBoolean(Names.SHOW_PHOTO + car_id, false);
+        if (show_pages[PAGE_PHOTO] != show_photo) {
+            show_pages[PAGE_PHOTO] = show_photo;
             changed = true;
         }
         if (changed)
@@ -436,9 +461,8 @@ public class MainActivity extends ActionBarActivity {
     }
 
     void setShowDate(int i) {
-        if (!show_photo)
-            i++;
-        boolean new_show_date = ((i >= 3) || (i == 0));
+        int id = getPageId(i);
+        boolean new_show_date = ((id >= 3) || (id == 0));
         if (new_show_date != show_date) {
             show_date = new_show_date;
             updateMenu();
@@ -471,31 +495,31 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         public Fragment getItem(int i) {
-            switch (id(i)) {
-                case 0: {
+            switch (getPageId(i)) {
+                case PAGE_PHOTO: {
                     PhotoFragment fragment = new PhotoFragment();
                     fragment.car_id = car_id;
                     fragment.current = current;
                     return fragment;
                 }
-                case 1: {
+                case PAGE_ACTIONS: {
                     ActionFragment fragment = new ActionFragment();
                     fragment.car_id = car_id;
                     return fragment;
                 }
-                case 2: {
+                case PAGE_STATE: {
                     StateFragment fragment = new StateFragment();
                     fragment.car_id = car_id;
                     state_fragment = fragment;
                     return fragment;
                 }
-                case 3: {
+                case PAGE_EVENT: {
                     EventsFragment fragment = new EventsFragment();
                     fragment.car_id = car_id;
                     fragment.current = current;
                     return fragment;
                 }
-                case 4: {
+                case PAGE_TRACK: {
                     TracksFragment fragment = new TracksFragment();
                     fragment.car_id = car_id;
                     fragment.current = current;
@@ -507,37 +531,28 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         public int getCount() {
-            int count = 3;
-            if (show_photo)
-                count++;
-            if (show_tracks)
-                count++;
-            return count;
+            return getPagePosition(5);
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (id(position)) {
-                case 0:
+            switch (getPageId(position)) {
+                case PAGE_PHOTO:
                     return getString(R.string.photo);
-                case 1:
+                case PAGE_ACTIONS:
                     return getString(R.string.control);
-                case 2:
+                case PAGE_STATE:
                     return getString(R.string.state);
-                case 3:
+                case PAGE_EVENT:
                     return getString(R.string.events);
-                case 4:
+                case PAGE_TRACK:
                     return getString(R.string.tracks);
 
             }
             return super.getPageTitle(position);
         }
 
-        int id(int position) {
-            if (!show_photo)
-                position++;
-            return position;
-        }
+
     }
 
     class CarsAdapter extends BaseAdapter {

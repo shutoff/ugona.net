@@ -15,6 +15,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.InputStreamReader;
+import java.io.Reader;
 
 public abstract class HttpTask extends AsyncTask<String, Void, JsonObject> {
 
@@ -36,6 +37,7 @@ public abstract class HttpTask extends AsyncTask<String, Void, JsonObject> {
             url = url.replace("$" + i, params[i]);
         }
         Log.v("url", url);
+        Reader reader = null;
         try {
             if (pause > 0)
                 Thread.sleep(pause);
@@ -43,7 +45,10 @@ public abstract class HttpTask extends AsyncTask<String, Void, JsonObject> {
             HttpResponse response = httpclient.execute(new HttpGet(url));
             StatusLine statusLine = response.getStatusLine();
             int status = statusLine.getStatusCode();
-            JsonValue res = JsonValue.readFrom(new InputStreamReader(response.getEntity().getContent()));
+            reader = new InputStreamReader(response.getEntity().getContent());
+            JsonValue res = JsonValue.readFrom(reader);
+            reader.close();
+            reader = null;
             JsonObject result;
             if (res.isObject()) {
                 result = res.asObject();
@@ -59,7 +64,14 @@ public abstract class HttpTask extends AsyncTask<String, Void, JsonObject> {
             return result;
         } catch (Exception ex) {
             ex.printStackTrace();
-            // ignore
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
         }
         return null;
     }

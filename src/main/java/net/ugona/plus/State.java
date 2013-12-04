@@ -12,7 +12,30 @@ import java.io.StringWriter;
 import java.util.Date;
 */
 
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.telephony.TelephonyManager;
+
 public class State {
+
+    static int telephony_state = 0;
+
+    static boolean hasTelephony(Context context) {
+        if (telephony_state == 0) {
+            PackageManager pm = context.getPackageManager();
+            if (!pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+                telephony_state = -1;
+                return false;
+            }
+            TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            if (tm.getSimState() == TelephonyManager.SIM_STATE_ABSENT) {
+                telephony_state = -1;
+                return false;
+            }
+            telephony_state = 1;
+        }
+        return telephony_state > 0;
+    }
 
 /*
     static void appendLog(String text) {
