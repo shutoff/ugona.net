@@ -75,9 +75,7 @@
     <string name="block_msg">For cancel blocking switch ON and OFF valet mode</string>
     <string name="autostart">Autostart</string>
     <string name="autostart_summary">Show autoastart actions</string>
-    <string name="rele1">Prestarting heater</string>
-    <string name="rele1_summary">Show prestarting heater action</string>
-    <string name="rele1_action">Send RELE1 impulse</string>
+    <string name="rele">Prestarting heater</string>
     <string name="password">Set password</string>
     <string name="password_summary">Set password for actions</string>
     <string name="password_old">Old password:</string>
@@ -283,4 +281,17 @@
     <string name="valet_off_ok">VALET mode is OFF</string>
     <string name="background">Background</string>
     <string name="rotate">Rotate</string>
+    <string-array name="rele_values">
+        <item></item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="rele">
+        <item>not connected</item>
+        <item>RELE1 (default)</item>
+        <item>RELE2</item>
+    </string-array>
+    <string name="rele1_action">Send impulse on RELE1</string>
+    <string name="rele2_action">Send impules on RELE2</string>
+    <string name="gsm_register_fail">GSM register failed</string>
 </resources>

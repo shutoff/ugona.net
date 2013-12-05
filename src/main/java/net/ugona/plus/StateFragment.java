@@ -338,9 +338,9 @@ public class StateFragment extends Fragment
         } else {
             vMotor.setVisibility(View.GONE);
         }
-        if (State.hasTelephony(context) && preferences.getBoolean(Names.CAR_RELE1 + car_id, false)) {
+        if (State.hasTelephony(context) && !preferences.getString(Names.CAR_RELE + car_id, "").equals("")) {
             vRele.setVisibility(View.VISIBLE);
-            pRele.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele1) ? View.VISIBLE : View.GONE);
+            pRele.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele) ? View.VISIBLE : View.GONE);
             n_buttons++;
         } else {
             vRele.setVisibility(View.GONE);
@@ -440,8 +440,8 @@ public class StateFragment extends Fragment
                     }
                 }
                 if (v == vRele) {
-                    if (SmsMonitor.isProcessed(car_id, R.string.rele1)) {
-                        SmsMonitor.cancelSMS(getActivity(), car_id, R.string.rele1);
+                    if (SmsMonitor.isProcessed(car_id, R.string.rele)) {
+                        SmsMonitor.cancelSMS(getActivity(), car_id, R.string.rele);
                         update(getActivity());
                     } else {
                         Actions.rele1(getActivity(), car_id);

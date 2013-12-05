@@ -36,6 +36,7 @@
                 android:paddingBottom="2dp" />
 
             <TextView
+                android:id="@+id/name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/ugona_net"

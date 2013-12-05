@@ -70,9 +70,7 @@
     <string name="block_sum">Включить дистанционную блокировку автомобиля</string>
     <string name="autostart">Автозапуск</string>
     <string name="autostart_summary">Отображать действия для дистанционного запуска</string>
-    <string name="rele1">Предпусковой подогреватель</string>
-    <string name="rele1_summary">Отображать действия для предпускового подогревателя</string>
-    <string name="rele1_action">Отправить импульс на РЕЛЕ1</string>
+    <string name="rele">Предпусковой подогреватель</string>
     <string name="password">Установить пароль</string>
     <string name="password_summary">Укажите пароль для управления устройством из приложения</string>
     <string name="password_old">Старый пароль:</string>
@@ -269,4 +267,12 @@
     <string name="background">Фон</string>
     <string name="rotate">Перевернуть</string>
     <string name="new_car">Новый автомобиль</string>
+    <string-array name="rele">
+        <item>не подключен</item>
+        <item>RELE1 (обычно)</item>
+        <item>RELE2</item>
+    </string-array>
+    <string name="rele1_action">Отправить импульс на RELE1</string>
+    <string name="rele2_action">Отправить импульс на RELE2</string>
+    <string name="gsm_register_fail">Невозможно зарегестрироваться в GSM сети</string>
 </resources>

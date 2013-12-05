@@ -258,6 +258,24 @@ public class MainActivity extends ActionBarActivity {
             case R.id.passwd:
                 setPassword();
                 return true;
+/*
+            case R.id.log: {
+                HttpTask task = new HttpTask() {
+                    @Override
+                    void result(JsonObject res) throws ParseException {
+                        State.appendLog(res.toString());
+                    }
+
+                    @Override
+                    void error() {
+                        State.appendLog("log error");
+                    }
+                };
+                String api_key = preferences.getString(Names.CAR_KEY + car_id, "");
+                task.execute(FetchService.STATUS_URL, api_key);
+                return true;
+            }
+*/
             case R.id.about: {
                 Intent intent = new Intent(this, About.class);
                 startActivity(intent);

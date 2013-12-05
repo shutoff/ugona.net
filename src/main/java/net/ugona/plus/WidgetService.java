@@ -71,7 +71,7 @@ public class WidgetService extends Service {
                 if (action.equals(ACTION_STOP)) {
                     stopTimer();
                     stopSelf();
-                    return START_STICKY;
+                    return START_NOT_STICKY;
                 }
                 if (action.equals(ACTION_UPDATE)) {
                     stopTimer();
@@ -105,15 +105,20 @@ public class WidgetService extends Service {
         }
         ComponentName thisAppWidget = new ComponentName(getPackageName(), CarWidget.class.getName());
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
-        if (appWidgetManager != null) {
-            int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            for (int appWidgetID : ids) {
-                String car_id = preferences.getString(Names.WIDGET + appWidgetID, "");
-                Intent i = new Intent(this, FetchService.class);
-                i.putExtra(Names.ID, car_id);
-                startService(i);
-            }
+        if (appWidgetManager == null)
+            return START_NOT_STICKY;
+        int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        for (int appWidgetID : ids) {
+            String car_id = preferences.getString(Names.WIDGET + appWidgetID, "");
+            Intent i = new Intent(this, FetchService.class);
+            i.putExtra(Names.ID, car_id);
+            startService(i);
+        }
+        if (ids.length == 0) {
+            stopTimer();
+            stopSelf();
+            return START_NOT_STICKY;
         }
         return START_STICKY;
     }

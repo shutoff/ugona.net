@@ -50,10 +50,11 @@
         android:summary="@string/autostart_summary"
         android:key="autostart" />
 
-    <CheckBoxPreference
-        android:title="@string/rele1"
-        android:summary="@string/rele1_summary"
-        android:key="rele1" />
+    <ListPreference
+        android:title="@string/rele"
+        android:key="rele"
+        android:entries="@array/rele"
+        android:entryValues="@array/rele_values" />
 
     <CheckBoxPreference
         android:title="@string/show_balance"

@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
@@ -51,6 +52,7 @@ public class CarPreferences extends PreferenceActivity {
     Preference mainPref;
     SeekBarPreference sensPref;
     CheckBoxPreference photoPref;
+    ListPreference relePref;
 
     String alarmUri;
     String notifyUri;
@@ -95,7 +97,7 @@ public class CarPreferences extends PreferenceActivity {
         ed.putInt("tmp_shift", preferences.getInt(Names.TEMP_SIFT + car_id, 0));
         ed.putBoolean("show_balance", preferences.getBoolean(Names.SHOW_BALANCE + car_id, true));
         ed.putBoolean("autostart", preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false));
-        ed.putBoolean("rele1", preferences.getBoolean(Names.CAR_RELE1 + car_id, false));
+        ed.putString("rele", preferences.getString(Names.CAR_RELE + car_id, ""));
         ed.putBoolean("show_photo", preferences.getBoolean(Names.SHOW_PHOTO + car_id, false));
         ed.putInt("shock_sens", preferences.getInt(Names.SHOCK_SENS + car_id, 5));
         ed.putString("name_", name);
@@ -240,21 +242,19 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
 
-        CheckBoxPreference relePref = (CheckBoxPreference) findPreference("rele1");
+        relePref = (ListPreference) findPreference("rele");
         relePref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                if (newValue instanceof Boolean) {
-                    boolean v = (Boolean) newValue;
-                    SharedPreferences.Editor ed = preferences.edit();
-                    ed.putBoolean(Names.CAR_RELE1 + car_id, v);
-                    ed.commit();
-                    sendUpdate();
-                    return true;
-                }
-                return false;
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putString(Names.CAR_RELE + car_id, newValue.toString());
+                ed.commit();
+                sendUpdate();
+                setRele();
+                return true;
             }
         });
+        setRele();
 
         photoPref = (CheckBoxPreference) findPreference("show_photo");
         photoPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -422,6 +422,18 @@ public class CarPreferences extends PreferenceActivity {
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    void setRele() {
+        String rele = preferences.getString(Names.CAR_RELE + car_id, "");
+        String[] values = getResources().getStringArray(R.array.rele_values);
+        String[] names = getResources().getStringArray(R.array.rele);
+        for (int i = 0; i < values.length; i++) {
+            if (values[i].equals(rele)) {
+                relePref.setSummary(names[i]);
+                break;
+            }
+        }
     }
 
     void setPhone(String phoneNumber) {

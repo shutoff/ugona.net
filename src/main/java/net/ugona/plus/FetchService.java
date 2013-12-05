@@ -83,19 +83,22 @@ public class FetchService extends Service {
             if (car_id != null)
                 new StatusRequest(Preferences.getCar(preferences, car_id));
         }
-        startRequest();
-        return START_STICKY;
+        if (startRequest())
+            return START_STICKY;
+        return START_NOT_STICKY;
     }
 
-    void startRequest() {
+    boolean startRequest() {
         for (Map.Entry<String, ServerRequest> entry : requests.entrySet()) {
             if (entry.getValue().started)
-                return;
+                return true;
         }
         for (Map.Entry<String, ServerRequest> entry : requests.entrySet()) {
             entry.getValue().start();
-            return;
+            return true;
         }
+        stopSelf();
+        return false;
     }
 
     static private Map<String, ServerRequest> requests;

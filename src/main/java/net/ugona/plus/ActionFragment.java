@@ -146,7 +146,7 @@ public class ActionFragment extends Fragment
         int flags = 0;
         if (preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false))
             flags += FLAG_AZ;
-        if (preferences.getBoolean(Names.CAR_RELE1 + car_id, false))
+        if (!preferences.getString(Names.CAR_RELE + car_id, "").equals(""))
             flags += FLAG_R1;
         actions = new Vector<Action>();
         for (Action action : def_actions) {
@@ -215,7 +215,7 @@ public class ActionFragment extends Fragment
                     Actions.motor_off(context, car_id);
                 }
             },
-            new Action(R.drawable.icon_heater, R.string.rele1, FLAG_R1) {
+            new Action(R.drawable.icon_heater, R.string.rele, FLAG_R1) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.rele1(context, car_id);

@@ -231,10 +231,20 @@ public class Actions {
     }
 
     static void rele1(final Context context, final String car_id) {
-        requestPassword(context, R.string.rele1, R.string.rele1_action, new Runnable() {
+        int id = R.string.rele1_action;
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String text = "REL1 IMPULS";
+        String answer = "REL1 IMPULS OK";
+        if (preferences.getString(Names.CAR_RELE, "").equals("2")) {
+            id = R.string.rele2_action;
+            text = "REL2 IMPULS";
+            answer = "REL2 IMPULS OK";
+        }
+        final SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.rele, text, answer);
+        requestPassword(context, R.string.rele, id, new Runnable() {
             @Override
             public void run() {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.rele1, "REL1 IMPULS", "REL1 IMPULS OK"));
+                SmsMonitor.sendSMS(context, car_id, sms);
             }
         });
     }

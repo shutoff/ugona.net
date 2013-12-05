@@ -1,17 +1,5 @@
 package net.ugona.plus;
 
-/*
-import android.os.Environment;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Date;
-*/
-
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.telephony.TelephonyManager;
