@@ -275,4 +275,5 @@
     <string name="rele1_action">Отправить импульс на RELE1</string>
     <string name="rele2_action">Отправить импульс на RELE2</string>
     <string name="gsm_register_fail">Невозможно зарегестрироваться в GSM сети</string>
+    <string name="widget_config">Настройка виджета</string>
 </resources>

@@ -105,8 +105,8 @@
         <activity
             android:name=".ConfigWidget"
             android:theme="@style/Theme.Transparent"
-            android:label="@string/select_car">
-            <intent-filter android:priority="999">
+            android:label="@string/widget_config">
+        <intent-filter android:priority="999">
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>

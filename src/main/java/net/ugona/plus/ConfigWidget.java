@@ -53,30 +53,15 @@ public class ConfigWidget extends Activity {
 
         final Cars.Car[] cars = Cars.getCars(this);
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (cars.length == 1) {
-            car_id = Preferences.getCar(preferences, "");
-            String api_key = preferences.getString(Names.CAR_KEY + car_id, "");
-            String phone = preferences.getString(Names.CAR_PHONE + car_id, "");
-            if ((api_key.length() > 0) && (phone.length() > 0)) {
-                saveWidget();
-                finish();
-                return;
-            }
-            Intent carIntent = new Intent(this, CarPreferences.class);
-            carIntent.putExtra(Names.ID, car_id);
-            startActivityForResult(carIntent, CAR_CONFIG);
-            return;
-        }
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         final AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.select_car)
+                .setTitle(R.string.widget_config)
                 .setPositiveButton(R.string.ok, null)
                 .setNegativeButton(R.string.cancel, null)
                 .setView(inflater.inflate(R.layout.config_widget, null))
                 .create();
         dialog.show();
-
 
         final Spinner lv = (Spinner) dialog.findViewById(R.id.list);
         lv.setAdapter(new BaseAdapter() {
@@ -121,6 +106,11 @@ public class ConfigWidget extends Activity {
                 return v;
             }
         });
+
+
+        if (cars.length <= 1)
+            lv.setVisibility(View.GONE);
+
         final SeekBar sbTransparency = (SeekBar) dialog.findViewById(R.id.background);
 
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
