@@ -276,4 +276,8 @@
     <string name="rele2_action">Отправить импульс на RELE2</string>
     <string name="gsm_register_fail">Невозможно зарегестрироваться в GSM сети</string>
     <string name="widget_config">Настройка виджета</string>
+    <string-array name="themes">
+        <item>Темный фон</item>
+        <item>Светлый фон</item>
+    </string-array>
 </resources>

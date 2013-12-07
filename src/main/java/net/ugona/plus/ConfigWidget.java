@@ -26,6 +26,7 @@ public class ConfigWidget extends Activity {
     int widgetID;
     Intent resultValue;
     int transparency;
+    int theme;
 
     static final int CAR_CONFIG = 1000;
 
@@ -111,6 +112,52 @@ public class ConfigWidget extends Activity {
         if (cars.length <= 1)
             lv.setVisibility(View.GONE);
 
+        final String[] themes = getResources().getStringArray(R.array.themes);
+
+        final Spinner lvTheme = (Spinner) dialog.findViewById(R.id.theme);
+        lvTheme.setAdapter(new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return themes.length;
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return themes[position];
+            }
+
+            @Override
+            public long getItemId(int position) {
+                return position;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View v = convertView;
+                if (v == null) {
+                    LayoutInflater inflater = (LayoutInflater) getBaseContext()
+                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = inflater.inflate(R.layout.car_key_item, null);
+                }
+                TextView tvName = (TextView) v.findViewById(R.id.name);
+                tvName.setText(themes[position]);
+                return v;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View v = convertView;
+                if (v == null) {
+                    LayoutInflater inflater = (LayoutInflater) getBaseContext()
+                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = inflater.inflate(R.layout.car_key_item, null);
+                }
+                TextView tvName = (TextView) v.findViewById(R.id.name);
+                tvName.setText(themes[position]);
+                return v;
+            }
+        });
+
         final SeekBar sbTransparency = (SeekBar) dialog.findViewById(R.id.background);
 
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -125,6 +172,7 @@ public class ConfigWidget extends Activity {
             public void onClick(View v) {
                 car_id = cars[lv.getSelectedItemPosition()].id;
                 transparency = sbTransparency.getProgress();
+                theme = lvTheme.getSelectedItemPosition();
                 saveWidget();
                 dialog.dismiss();
             }
@@ -149,6 +197,7 @@ public class ConfigWidget extends Activity {
         SharedPreferences.Editor ed = preferences.edit();
         ed.putString(Names.WIDGET + widgetID, car_id);
         ed.putInt(Names.TRANSPARENCY + widgetID, transparency);
+        ed.putInt(Names.THEME + widgetID, theme);
         ed.commit();
         setResult(RESULT_OK, resultValue);
     }

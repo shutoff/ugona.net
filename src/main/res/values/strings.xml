@@ -295,4 +295,8 @@
     <string name="rele2_action">Send impules on RELE2</string>
     <string name="gsm_register_fail">GSM register failed</string>
     <string name="widget_config">Widget configuration</string>
+    <string-array name="themes">
+        <item>Dark background</item>
+        <item>Light background</item>
+    </string-array>
 </resources>

@@ -41,7 +41,6 @@ public abstract class HttpTask extends AsyncTask<String, Void, JsonObject> {
         try {
             if (pause > 0)
                 Thread.sleep(pause);
-            error_text = null;
             HttpResponse response = httpclient.execute(new HttpGet(url));
             StatusLine statusLine = response.getStatusLine();
             int status = statusLine.getStatusCode();
@@ -63,6 +62,7 @@ public abstract class HttpTask extends AsyncTask<String, Void, JsonObject> {
             background(result);
             return result;
         } catch (Exception ex) {
+            error_text = "Parse data error";
             ex.printStackTrace();
         } finally {
             if (reader != null) {

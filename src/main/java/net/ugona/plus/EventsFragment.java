@@ -528,7 +528,7 @@ public class EventsFragment extends Fragment
 
         @Override
         void error() {
-            setAddress(error_text.equals("empty answer") ? "" : getString(R.string.error_load), null, null);
+            setAddress(getString(R.string.error_load), null, null);
         }
 
         void setAddress(String result, String point, String course) {
@@ -556,7 +556,7 @@ public class EventsFragment extends Fragment
         void result(JsonObject res) throws ParseException {
             final double lat = res.get("latitude").asDouble();
             final double lng = res.get("longitude").asDouble();
-            final String course = res.get("course").asString();
+            final String course = res.get("course").asInt() + "";
             AddressRequest request = new AddressRequest() {
                 @Override
                 void addressResult(String[] parts) {

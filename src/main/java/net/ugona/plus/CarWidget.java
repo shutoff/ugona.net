@@ -30,8 +30,6 @@ public class CarWidget extends AppWidgetProvider {
 
     static Map<String, Integer> states;
 
-    static final String HEIGHT = "Height_";
-
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
@@ -40,18 +38,6 @@ public class CarWidget extends AppWidgetProvider {
         for (int id : appWidgetIds) {
             updateWidget(context, appWidgetManager, id);
         }
-    }
-
-    @Override
-    public void onDeleted(Context context, int[] appWidgetIds) {
-        super.onDeleted(context, appWidgetIds);
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor ed = preferences.edit();
-        for (int id : appWidgetIds) {
-            ed.remove(HEIGHT + id);
-            ed.remove(Names.WIDGET + id);
-        }
-        ed.commit();
     }
 
     @Override
@@ -109,13 +95,7 @@ public class CarWidget extends AppWidgetProvider {
     }
 
     @Override
-    public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager,
-                                          int appWidgetId, Bundle newOptions) {
-        int minHeight = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT);
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor ed = preferences.edit();
-        ed.putInt(HEIGHT + appWidgetId, minHeight);
-        ed.commit();
+    public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
         updateWidget(context, appWidgetManager, appWidgetId);
     }
 
@@ -141,18 +121,49 @@ public class CarWidget extends AppWidgetProvider {
         }
     }
 
+    static final int id_layout[] = {
+            R.layout.widget,
+            R.layout.widget_light
+    };
+
+    static final int id_layout_22[] = {
+            R.layout.widget_22,
+            R.layout.widget_light_22
+    };
+
+    static final int id_bg[] = {
+            R.drawable.widget,
+            R.drawable.widget_light
+    };
+
     void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetID) {
 
         boolean progress = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD);
 
-        RemoteViews widgetView = new RemoteViews(context.getPackageName(), progress ? R.layout.widget : R.layout.widget_22);
+        int rows = 3;
+        try {
+            Bundle options = appWidgetManager.getAppWidgetOptions(widgetID);
+            int maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
+            if (maxHeight < 70)
+                rows = 2;
+            if (maxHeight > 100)
+                rows = 4;
+            State.appendLog(maxHeight + ", " + rows);
+        } catch (Exception ex) {
+            // ignore
+        }
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        int theme = preferences.getInt(Names.THEME + widgetID, 0);
+        if ((theme < 0) || (theme >= id_layout.length))
+            theme = 0;
+        RemoteViews widgetView = new RemoteViews(context.getPackageName(), progress ? id_layout[theme] : id_layout_22[theme]);
+
         String car_id = Preferences.getCar(preferences, preferences.getString(Names.WIDGET + widgetID, ""));
         int transparency = preferences.getInt(Names.TRANSPARENCY + widgetID, 0);
         widgetView.setInt(R.id.bg, "setAlpha", transparency);
         if (transparency > 0)
-            widgetView.setImageViewResource(R.id.bg, R.drawable.widget);
+            widgetView.setImageViewResource(R.id.bg, id_bg[theme]);
 
         Intent configIntent = new Intent(context, WidgetService.class);
         configIntent.putExtra(Names.ID, car_id);
@@ -178,10 +189,9 @@ public class CarWidget extends AppWidgetProvider {
             widgetView.setTextViewText(R.id.last, "??:??");
         }
 
-        int show_count = 2;
+        int show_count = 1;
         widgetView.setTextViewText(R.id.voltage, preferences.getString(Names.VOLTAGE_MAIN + car_id, "--") + " V");
-        widgetView.setTextViewText(R.id.reserve, preferences.getString(Names.VOLTAGE_RESERVED + car_id, "--") + " V");
-        widgetView.setTextViewText(R.id.balance, preferences.getString(Names.BALANCE + car_id, "---.--"));
+
         String temperature = Preferences.getTemperature(preferences, car_id);
         if (temperature == null) {
             widgetView.setViewVisibility(R.id.temperature_block, View.GONE);
@@ -191,16 +201,19 @@ public class CarWidget extends AppWidgetProvider {
             show_count++;
         }
 
-        int height = preferences.getInt(HEIGHT + widgetID, 40);
-        boolean show_balance = preferences.getBoolean(Names.SHOW_BALANCE + car_id, true);
-        if (show_balance)
+        boolean show_balance = false;
+        if (show_count < rows)
+            show_balance = preferences.getBoolean(Names.SHOW_BALANCE + car_id, true);
+        if (show_balance) {
+            widgetView.setTextViewText(R.id.balance, preferences.getString(Names.BALANCE + car_id, "---.--"));
             show_count++;
-
-        int max_count = (height >= 60) ? 4 : 3;
-        boolean show_reserve = show_count <= max_count;
-
-        widgetView.setViewVisibility(R.id.reserve_block, show_reserve ? View.VISIBLE : View.GONE);
+        }
         widgetView.setViewVisibility(R.id.balance_block, show_balance ? View.VISIBLE : View.GONE);
+
+        boolean show_reserve = (show_count < rows);
+        if (show_reserve)
+            widgetView.setTextViewText(R.id.reserve, preferences.getString(Names.VOLTAGE_RESERVED + car_id, "--") + " V");
+        widgetView.setViewVisibility(R.id.reserve_block, show_reserve ? View.VISIBLE : View.GONE);
 
         Cars.Car[] cars = Cars.getCars(context);
         if (cars.length > 1) {
