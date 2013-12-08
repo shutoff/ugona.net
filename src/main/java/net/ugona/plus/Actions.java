@@ -10,7 +10,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -19,7 +18,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import java.util.regex.Matcher;
 
@@ -27,15 +25,8 @@ public class Actions {
 
     static final String INCORRECT_MESSAGE = "Incorrect message";
 
-    static void done(final Context context, int id) {
-        try {
-            Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-            vibrator.vibrate(1000);
-        } catch (Exception ex) {
-            // ignore
-        }
-        Toast toast = Toast.makeText(context, id, Toast.LENGTH_LONG);
-        toast.show();
+    static void done(final Context context, int id, int pictId, String car_id) {
+        SmsMonitor.showNotification(context, context.getString(id), car_id);
     }
 
     static void motor_on(final Context context, final String car_id) {
@@ -49,6 +40,7 @@ public class Actions {
                                 SmsMonitor.compare(text, "Remote Engine Start OK")) {
                             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                             SharedPreferences.Editor ed = preferences.edit();
+                            ed.putBoolean(Names.AZ + car_id, true);
                             ed.putBoolean(Names.ENGINE + car_id, true);
                             ed.commit();
                             try {
@@ -58,7 +50,7 @@ public class Actions {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                            done(context, R.string.motor_on_ok);
+                            done(context, R.string.motor_on_ok, R.drawable.white_motor_on, car_id);
                             return true;
                         }
                         return false;
@@ -75,7 +67,18 @@ public class Actions {
                 SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_off, "MOTOR OFF", "MOTOR OFF OK") {
                     @Override
                     boolean process_answer(Context context, String car_id, String text) {
-                        done(context, R.string.motor_off_ok);
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putBoolean(Names.AZ + car_id, false);
+                        ed.commit();
+                        try {
+                            Intent intent = new Intent(FetchService.ACTION_UPDATE);
+                            intent.putExtra(Names.ID, car_id);
+                            context.sendBroadcast(intent);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        done(context, R.string.motor_off_ok, R.drawable.white_motor_off, car_id);
                         return true;
                     }
                 });
@@ -269,7 +272,7 @@ public class Actions {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        done(context, R.string.valet_on_ok);
+                        done(context, R.string.valet_on_ok, R.drawable.white_valet_on, car_id);
                         return true;
                     }
                 });
@@ -296,7 +299,7 @@ public class Actions {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        done(context, R.string.valet_off_ok);
+                        done(context, R.string.valet_off_ok, R.drawable.white_valet_off, car_id);
                         return true;
                     }
                 });

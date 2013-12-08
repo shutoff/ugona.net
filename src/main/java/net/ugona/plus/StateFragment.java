@@ -252,6 +252,19 @@ public class StateFragment extends Fragment
         tvVoltage.setText(preferences.getString(Names.VOLTAGE_MAIN + car_id, "?") + " V");
         tvReserve.setText(preferences.getString(Names.VOLTAGE_RESERVED + car_id, "?") + " V");
         tvBalance.setText(preferences.getString(Names.BALANCE + car_id, "?"));
+
+        int balance_limit = preferences.getInt(Names.LIMIT + car_id, 50);
+        tvBalance.setTextColor(getResources().getColor(android.R.color.secondary_text_dark));
+        if (balance_limit >= 0) {
+            try {
+                double balance = Double.parseDouble(preferences.getString(Names.BALANCE + car_id, "?"));
+                if (balance <= balance_limit)
+                    tvBalance.setTextColor(getResources().getColor(R.color.error));
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+
         String temperature = Preferences.getTemperature(preferences, car_id);
         if (temperature == null) {
             vTemperature.setVisibility(View.GONE);
@@ -327,7 +340,7 @@ public class StateFragment extends Fragment
         int n_buttons = 0;
         if (State.hasTelephony(context) && preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false)) {
             vMotor.setVisibility(View.VISIBLE);
-            if (preferences.getBoolean(Names.ENGINE + car_id, false)) {
+            if (preferences.getBoolean(Names.AZ + car_id, false)) {
                 ivMotor.setImageResource(R.drawable.icon_motor_off);
                 pMotor.setVisibility(SmsMonitor.isProcessed(car_id, R.string.motor_off) ? View.VISIBLE : View.GONE);
             } else {
@@ -348,7 +361,7 @@ public class StateFragment extends Fragment
         if (State.hasTelephony(context) &&
                 (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false)) &&
                 !preferences.getBoolean(Names.GUARD + car_id, false) &&
-                !preferences.getBoolean(Names.ENGINE + car_id, false) &&
+                !preferences.getBoolean(Names.AZ + car_id, false) &&
                 !(!preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false))) {
             vBlock.setVisibility(View.VISIBLE);
             pBlock.setVisibility(SmsMonitor.isProcessed(car_id, R.string.block) ? View.VISIBLE : View.GONE);
@@ -374,7 +387,12 @@ public class StateFragment extends Fragment
 
         balanceBlock.setVisibility(preferences.getBoolean(Names.SHOW_BALANCE + car_id, true) ? View.VISIBLE : View.GONE);
 
-        if (preferences.getBoolean(Names.ENGINE + car_id, false)) {
+        if (preferences.getBoolean(Names.AZ + car_id, false) && preferences.getBoolean(Names.GUARD + car_id, false)) {
+            if (preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false)) {
+                imgEngine.setImageResource(R.drawable.engine_blue);
+            } else {
+                imgEngine.setImageResource(R.drawable.engine);
+            }
             imgEngine.setVisibility(View.VISIBLE);
             startAnimation();
         } else {
@@ -423,7 +441,7 @@ public class StateFragment extends Fragment
                 return true;
             case MotionEvent.ACTION_UP:
                 if (v == vMotor) {
-                    if (preferences.getBoolean(Names.ENGINE + car_id, false)) {
+                    if (preferences.getBoolean(Names.AZ + car_id, false)) {
                         if (SmsMonitor.isProcessed(car_id, R.string.motor_off)) {
                             SmsMonitor.cancelSMS(getActivity(), car_id, R.string.motor_off);
                             update(getActivity());

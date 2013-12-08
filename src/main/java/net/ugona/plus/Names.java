@@ -50,6 +50,7 @@ public final class Names {
     static final String GSM_ZONE = "gsmzone";
 
     static final String ENGINE = "Engine";
+    static final String AZ = "AZ";
     static final String LAST_EVENT = "LastEvent";
     static final String LAST_STAND = "LastStand";
     static final String GUARD = "Guard_";
@@ -86,5 +87,8 @@ public final class Names {
     static final String THEME = "theme";
     static final String ROTATE = "rotate";
     static final String CAMERA = "camera";
+    static final String LIMIT = "limit";
+
+    static final String BALANCE_NOTIFICATION = "balance_id";
 
 }

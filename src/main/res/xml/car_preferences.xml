@@ -61,6 +61,12 @@
         android:defaultValue="true"
         android:key="show_balance" />
 
+    <ListPreference
+        android:title="@string/balance_notification"
+        android:key="balance_limit"
+        android:entries="@array/balance_limit"
+        android:entryValues="@array/balance_values" />
+
     <CheckBoxPreference
         android:title="@string/show_photo"
         android:key="show_photo" />

@@ -108,7 +108,7 @@ public class CarDrawable {
             }
             upd |= setModeOpen(2, !white, trunk_open, trunk_alarm);
 
-            boolean engine = preferences.getBoolean(Names.ENGINE + car_id, false);
+            boolean engine = preferences.getBoolean(Names.AZ + car_id, false);
             upd |= setLayer(4, (engine && small) ? 23 : 0);
 
             int ignition = 0;

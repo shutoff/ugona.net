@@ -50,6 +50,7 @@ public class CarPreferences extends PreferenceActivity {
     Preference notifyPref;
     Preference alarmPref;
     Preference mainPref;
+    Preference limitPref;
     SeekBarPreference sensPref;
     CheckBoxPreference photoPref;
     ListPreference relePref;
@@ -102,6 +103,7 @@ public class CarPreferences extends PreferenceActivity {
         ed.putInt("shock_sens", preferences.getInt(Names.SHOCK_SENS + car_id, 5));
         ed.putString("name_", name);
         ed.putString("call_mode", preferences.getString(Names.ALARM_MODE + car_id, ""));
+        ed.putString("balance_limit", preferences.getInt(Names.LIMIT + car_id, 50) + "");
         ed.commit();
 
         addPreferencesFromResource(R.xml.car_preferences);
@@ -297,6 +299,24 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
 
+        limitPref = findPreference("balance_limit");
+        limitPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                try {
+                    SharedPreferences.Editor ed = preferences.edit();
+                    ed.putInt(Names.LIMIT + car_id, Integer.parseInt(newValue.toString()));
+                    ed.commit();
+                    setBalance();
+                    sendUpdate();
+                } catch (Exception ex) {
+                    // ignore
+                }
+                return true;
+            }
+        });
+        setBalance();
+
         Preference testPref = findPreference("alarm_test");
         testPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
@@ -451,6 +471,19 @@ public class CarPreferences extends PreferenceActivity {
             timerPref.setEnabled(false);
             sensPref.setEnabled(false);
             mainPref.setEnabled(false);
+        }
+    }
+
+    void setBalance() {
+        try {
+            int v = preferences.getInt(Names.LIMIT + car_id, 50);
+            if (v < 0) {
+                limitPref.setSummary(getResources().getStringArray(R.array.balance_limit)[0]);
+            } else {
+                limitPref.setSummary(v + "");
+            }
+        } catch (Exception ex) {
+            // ignore
         }
     }
 

@@ -11,12 +11,10 @@ import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
-import android.widget.Toast;
 
 import org.joda.time.DateTimeZone;
 
@@ -76,15 +74,6 @@ public class SmsMonitor extends BroadcastReceiver {
         return PhoneNumberUtils.compare(config, from);
     }
 
-    static void vibrate(Context context) {
-        try {
-            Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-            vibrator.vibrate(500);
-        } catch (Exception ex) {
-            // ignore
-        }
-    }
-
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent == null)
@@ -106,9 +95,7 @@ public class SmsMonitor extends BroadcastReceiver {
                 return;
             queues.send.remove(id);
             if (result_code != Activity.RESULT_OK) {
-                Toast toast = Toast.makeText(context, R.string.sms_error, Toast.LENGTH_SHORT);
-                toast.show();
-                vibrate(context);
+                showNotification(context, context.getString(R.string.sms_error), car_id);
                 Intent i = new Intent(SMS_ANSWER);
                 i.putExtra(Names.ANSWER, result_code);
                 i.putExtra(Names.ID, car_id);
@@ -198,6 +185,7 @@ public class SmsMonitor extends BroadcastReceiver {
     };
 
     boolean processCarMessage(Context context, String body, String car_id) {
+        State.appendLog("Process SMS " + body);
         SmsQueues queues = null;
         if (processed != null)
             queues = processed.get(car_id);
@@ -227,9 +215,7 @@ public class SmsMonitor extends BroadcastReceiver {
                     i.putExtra(Names.ANSWER, Activity.RESULT_CANCELED);
                     i.putExtra(Names.ID, car_id);
                     context.sendBroadcast(i);
-                    Toast toast = Toast.makeText(context, entry.getValue().error_msg, Toast.LENGTH_LONG);
-                    toast.show();
-                    vibrate(context);
+                    showNotification(context, context.getString(entry.getValue().error_msg), car_id);
                     return true;
                 }
             }
@@ -257,9 +243,13 @@ public class SmsMonitor extends BroadcastReceiver {
         return body.substring(0, message.length()).equalsIgnoreCase(message);
     }
 
-    private void showNotification(Context context, String text, String car_id) {
+    static void showNotification(Context context, String text, String car_id) {
+        showNotification(context, text, R.drawable.warning, car_id);
+    }
+
+    static void showNotification(Context context, String text, int picId, String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        Alarm.createNotification(context, text, car_id);
+        Alarm.createNotification(context, text, picId, car_id);
         String sound = Preferences.getNotify(preferences, car_id);
         Uri uri = Uri.parse(sound);
         Ringtone ringtone = RingtoneManager.getRingtone(context, uri);
@@ -275,9 +265,6 @@ public class SmsMonitor extends BroadcastReceiver {
                 player.prepare();
                 player.start();
             }
-            Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-            if (vibrator != null)
-                vibrator.vibrate(500);
         } catch (Exception err) {
             // ignore
         }
@@ -317,6 +304,7 @@ public class SmsMonitor extends BroadcastReceiver {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
         try {
+            State.appendLog("SMS send " + sms.text);
             smsManager.sendTextMessage(phoneNumber, null, sms.text, sendPI, null);
             Intent i = new Intent(SMS_SEND);
             i.putExtra(Names.ID, car_id);

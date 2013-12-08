@@ -18,6 +18,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
@@ -242,6 +243,10 @@ public class Alarm extends Activity {
     }
 
     static void createNotification(Context context, String text, String car_id) {
+        createNotification(context, text, R.drawable.warning, car_id);
+    }
+
+    static int createNotification(Context context, String text, int pictId, String car_id) {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String title = context.getString(R.string.app_name);
@@ -257,7 +262,7 @@ public class Alarm extends Activity {
 
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.warning)
+                        .setSmallIcon(pictId)
                         .setContentTitle(title)
                         .setContentText(text);
 
@@ -265,6 +270,8 @@ public class Alarm extends Activity {
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         notificationIntent.putExtra(Names.ID, car_id);
+        Uri data = Uri.withAppendedPath(Uri.parse("http://notification/id/"), car_id);
+        notificationIntent.setData(data);
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(contentIntent);
@@ -292,9 +299,57 @@ public class Alarm extends Activity {
         ed.putString(Names.N_IDS + car_id, s);
         ed.commit();
 
+        Intent clearIntent = new Intent(context, FetchService.class);
+        clearIntent.setAction(FetchService.ACTION_CLEAR);
+        clearIntent.putExtra(Names.ID, car_id);
+        clearIntent.putExtra(Names.NOTIFY, max_id);
+        data = Uri.withAppendedPath(Uri.parse("http://notification_clear/id/"), max_id + "");
+        clearIntent.setData(data);
+        PendingIntent deleteIntent = PendingIntent.getService(context, 0, clearIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setDeleteIntent(deleteIntent);
+
         // Add as notification
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         manager.notify(max_id, builder.build());
+
+        try {
+            Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+            vibrator.vibrate(500);
+        } catch (Exception ex) {
+            // ignore
+        }
+        return max_id;
+    }
+
+    static void removeNotification(Context context, String car_id, int n_id) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        String n_ids = preferences.getString(Names.N_IDS + car_id, "");
+        String[] ids = n_ids.split(",");
+        String res = null;
+        for (String id : ids) {
+            if (id.equals(n_id)) {
+                try {
+                    manager.cancel(Integer.parseInt(id));
+                } catch (NumberFormatException e) {
+                    // ignore
+                }
+                continue;
+            }
+            if (res == null) {
+                res = id;
+                continue;
+            }
+            res += ",";
+            res += id;
+        }
+        SharedPreferences.Editor ed = preferences.edit();
+        if (res == null) {
+            ed.remove(Names.N_IDS + car_id);
+        } else {
+            ed.putString(Names.N_IDS + car_id, res);
+        }
+        ed.commit();
     }
 
 }

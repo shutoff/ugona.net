@@ -47,12 +47,12 @@ public class FetchService extends Service {
     static final String ACTION_ERROR = "net.ugona.plus.ERROR";
     static final String ACTION_START = "net.ugona.plus.START";
     static final String ACTION_UPDATE_FORCE = "net.ugona.plus.UPDATE_FORCE";
+    static final String ACTION_CLEAR = "net.ugona.plus.CLEAR";
 
     static final Pattern balancePattern = Pattern.compile("-?[0-9]+[\\.,][0-9][0-9]");
 
     static final String STATUS_URL = "http://dev.car-online.ru/api/v2?get=lastinfo&skey=$1&content=json";
     private static final String EVENTS_URL = "http://dev.car-online.ru/api/v2?get=events&skey=$1&begin=$2&end=$3&content=json";
-    private static final String TEMP_URL = "http://dev.car-online.ru/api/v2?get=temperaturelist&skey=$1&begin=$2&end=$3&content=json";
     private static final String VOLTAGE_URL = "http://dev.car-online.ru/api/v2?get=voltagelist&skey=$1&begin=$2&end=$3&content=json";
     private static final String GSM_URL = "http://dev.car-online.ru/api/v2?get=gsmlist&skey=$1&begin=$2&end=$3&content=json";
     private static final String GPS_URL = "http://dev.car-online.ru/api/v2?get=gps&skey=$1&id=$2&time=$3&content=json";
@@ -80,6 +80,11 @@ public class FetchService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             String car_id = intent.getStringExtra(Names.ID);
+            String action = intent.getAction();
+            if (action != null) {
+                if (action.equals(ACTION_CLEAR))
+                    clearNotification(car_id, intent.getIntExtra(Names.NOTIFY, 0));
+            }
             if (car_id != null)
                 new StatusRequest(Preferences.getCar(preferences, car_id));
         }
@@ -216,8 +221,32 @@ public class FetchService extends Service {
             if (preferences.getLong(Names.BALANCE_TIME + car_id, 0) == 0) {
                 JsonObject balance = res.get("balance").asObject();
                 Matcher m = balancePattern.matcher(balance.get("source").asString());
-                if (m.find())
-                    ed.putString(Names.BALANCE + car_id, m.group(0).replaceAll(",", "."));
+                if (m.find()) {
+                    String balance_str = m.group(0).replaceAll(",", ".");
+                    if (!balance_str.equals(preferences.getString(Names.BALANCE + car_id, ""))) {
+                        ed.putString(Names.BALANCE + car_id, balance_str);
+                        int limit = preferences.getInt(Names.LIMIT + car_id, 50);
+                        if (limit >= 0) {
+                            int balance_id = preferences.getInt(Names.BALANCE_NOTIFICATION + car_id, 0);
+                            try {
+                                double value = Double.parseDouble(balance_str);
+                                if (value <= limit) {
+                                    if (balance_id == 0) {
+                                        balance_id = Alarm.createNotification(FetchService.this, getString(R.string.low_balance), R.drawable.white_balance, car_id);
+                                        ed.putInt(Names.BALANCE_NOTIFICATION + car_id, balance_id);
+                                    }
+                                } else {
+                                    if (balance_id > 0) {
+                                        Alarm.removeNotification(FetchService.this, car_id, balance_id);
+                                        ed.remove(Names.BALANCE_NOTIFICATION + car_id);
+                                    }
+                                }
+                            } catch (Exception ex) {
+                                // ignore
+                            }
+                        }
+                    }
+                }
             }
 
             JsonObject contact = res.get("contact").asObject();
@@ -237,7 +266,12 @@ public class FetchService extends Service {
             boolean engine = contact.get("engine").asBoolean();
             if (engine && (msg_id == 4))
                 msg_id = 0;
-            ed.putBoolean(Names.ENGINE + car_id, engine);
+            if (engine != preferences.getBoolean(Names.ENGINE + car_id, false)) {
+                ed.putBoolean(Names.ENGINE + car_id, engine);
+                ed.putBoolean(Names.AZ + car_id, engine);
+            }
+            if (preferences.getBoolean(Names.AZ + car_id, false) && !guard)
+                ed.putBoolean(Names.AZ + car_id, false);
 
             boolean gsm_req = true;
             JsonValue gps_value = res.get("gps");
@@ -580,6 +614,29 @@ public class FetchService extends Service {
             sendBroadcast(intent);
         } catch (Exception e) {
             // ignore
+        }
+    }
+
+    void clearNotification(String car_id, int id) {
+        String[] ids = preferences.getString(Names.N_IDS + car_id, "").split(",");
+        String res = null;
+        for (String n_id : ids) {
+            if (n_id.equals(id))
+                continue;
+            if (res == null) {
+                res = n_id;
+                continue;
+            }
+            res += ",";
+            res += n_id;
+        }
+        SharedPreferences.Editor ed = preferences.edit();
+        if (id == preferences.getInt(Names.BALANCE_NOTIFICATION + car_id, 0))
+            ed.remove(Names.BALANCE_NOTIFICATION + car_id);
+        if (res == null) {
+            ed.remove(Names.N_IDS + car_id);
+        } else {
+            ed.putString(Names.N_IDS + car_id, res);
         }
     }
 

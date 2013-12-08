@@ -399,7 +399,8 @@ public class MainActivity extends ActionBarActivity {
             }
         }
         SharedPreferences.Editor ed = preferences.edit();
-        ed.remove(Names.N_IDS);
+        ed.remove(Names.N_IDS + car_id);
+        ed.remove(Names.BALANCE_NOTIFICATION + car_id);
         ed.commit();
     }
 
