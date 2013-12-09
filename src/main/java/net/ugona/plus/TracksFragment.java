@@ -23,7 +23,6 @@ import com.eclipsesource.json.ParseException;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 
 import java.io.ByteArrayInputStream;
@@ -34,6 +33,7 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.text.DateFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -220,9 +220,9 @@ public class TracksFragment extends Fragment
         track1.add(track);
         if (!setTrack(track1, intent))
             return;
-        LocalDateTime begin = new LocalDateTime(track.begin);
-        LocalDateTime end = new LocalDateTime(track.end);
-        intent.putExtra(Names.TITLE, begin.toString("d MMMM HH:mm") + "-" + end.toString("HH:mm"));
+        DateFormat df = android.text.format.DateFormat.getMediumDateFormat(getActivity());
+        DateFormat tf = android.text.format.DateFormat.getTimeFormat(getActivity());
+        intent.putExtra(Names.TITLE, df.format(track.begin) + " " + tf.format(track.begin) + "-" + tf.format(track.end));
         startActivity(intent);
     }
 
@@ -230,7 +230,8 @@ public class TracksFragment extends Fragment
         Intent intent = new Intent(getActivity(), TrackView.class);
         if (!setTrack(tracks, intent))
             return;
-        intent.putExtra(Names.TITLE, current.toString("d MMMM"));
+        DateFormat df = android.text.format.DateFormat.getMediumDateFormat(getActivity());
+        intent.putExtra(Names.TITLE, df.format(current.toDate()));
         startActivity(intent);
     }
 
@@ -841,9 +842,8 @@ public class TracksFragment extends Fragment
             }
             TextView tvTitle = (TextView) v.findViewById(R.id.title);
             Tracks.Track track = (Tracks.Track) getItem(position);
-            LocalDateTime begin = new LocalDateTime(track.begin);
-            LocalDateTime end = new LocalDateTime(track.end);
-            tvTitle.setText(begin.toString("HH:mm") + "-" + end.toString("HH:mm"));
+            DateFormat tf = android.text.format.DateFormat.getTimeFormat(getActivity());
+            tvTitle.setText(tf.format(track.begin) + "-" + tf.format(track.end));
             TextView tvMileage = (TextView) v.findViewById(R.id.mileage);
             String s = String.format(getString(R.string.mileage), track.mileage);
             tvMileage.setText(s);

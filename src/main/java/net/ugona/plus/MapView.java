@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 import org.joda.time.LocalDateTime;
 
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,6 +50,8 @@ public class MapView extends WebViewActivity {
     LocationListener gpsListener;
     Cars.Car[] cars;
     Menu topSubMenu;
+    DateFormat df;
+    DateFormat tf;
 
     static final int REQUEST_ALARM = 4000;
     static final int UPDATE_INTERVAL = 30 * 1000;
@@ -69,7 +72,6 @@ public class MapView extends WebViewActivity {
 
         @JavascriptInterface
         public String getData() {
-
             Cars.Car[] cars = Cars.getCars(getBaseContext());
             String[] car_data = new String[cars.length];
             for (int i = 0; i < cars.length; i++) {
@@ -123,9 +125,9 @@ public class MapView extends WebViewActivity {
                     LocalDateTime now = new LocalDateTime();
                     data += "<b>";
                     if (stand.toLocalDate().equals(now.toLocalDate())) {
-                        data += stand.toString("HH:mm");
+                        data += tf.format(last_stand);
                     } else {
-                        data += stand.toString("d-MM-yy HH:mm");
+                        data += df.format(last_stand) + " " + tf.format(last_stand);
                     }
                     data += "</b> ";
                 } else if (last_stand < 0) {
@@ -210,6 +212,7 @@ public class MapView extends WebViewActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         car_id = getIntent().getStringExtra(Names.ID);
@@ -226,6 +229,8 @@ public class MapView extends WebViewActivity {
             }
         }
 
+        df = android.text.format.DateFormat.getDateFormat(this);
+        tf = android.text.format.DateFormat.getTimeFormat(this);
         super.onCreate(savedInstanceState);
 
         alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);

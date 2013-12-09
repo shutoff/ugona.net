@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -191,6 +192,15 @@ public class ActionFragment extends Fragment
     }
 
     static Action[] def_actions = {
+            new Action(R.drawable.icon_phone, R.string.call) {
+                @Override
+                void action(Context context, String car_id) {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                    Intent intent = new Intent(Intent.ACTION_CALL);
+                    intent.setData(Uri.parse("tel:" + preferences.getString(Names.CAR_PHONE + car_id, "")));
+                    context.startActivity(intent);
+                }
+            },
             new Action(R.drawable.icon_valet_on, R.string.valet_on) {
                 @Override
                 void action(Context context, String car_id) {

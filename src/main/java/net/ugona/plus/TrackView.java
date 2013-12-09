@@ -26,6 +26,7 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
+import java.text.DateFormat;
 import java.util.Vector;
 
 public class TrackView extends WebViewActivity {
@@ -124,14 +125,14 @@ public class TrackView extends WebViewActivity {
                     track_data.append(",<b>");
                     for (TimeInterval interval : marker.times) {
                         if (interval.begin > 0) {
-                            LocalDateTime begin = new LocalDateTime(interval.begin);
-                            track_data.append(begin.toString("HH:mm"));
+                            DateFormat tf = android.text.format.DateFormat.getTimeFormat(TrackView.this);
+                            track_data.append(tf.format(interval.begin));
                             if (interval.end > 0)
                                 track_data.append("-");
                         }
                         if (interval.end > 0) {
-                            LocalDateTime end = new LocalDateTime(interval.end);
-                            track_data.append(end.toString("HH:mm"));
+                            DateFormat tf = android.text.format.DateFormat.getTimeFormat(TrackView.this);
+                            track_data.append(tf.format(interval.end));
                         }
                         track_data.append(" ");
                     }

@@ -237,8 +237,7 @@ public class EventsFragment extends Fragment
                     Event e = filtered.get(position);
                     if (e.point == null)
                         return;
-                    LocalTime time = new LocalTime(e.time);
-                    String info = "<b>" + time.toString("H:mm:ss") + " ";
+                    String info = "<b>" + State.formatTime(getActivity(), e.time) + " ";
                     boolean found = false;
                     for (EventType et : event_types) {
                         if (et.type == e.type) {
@@ -688,8 +687,7 @@ public class EventsFragment extends Fragment
             TextView tvName = (TextView) v.findViewById(R.id.name);
             TextView tvTime = (TextView) v.findViewById(R.id.time);
             ImageView icon = (ImageView) v.findViewById(R.id.icon);
-            LocalTime time = new LocalTime(e.time);
-            tvTime.setText(time.toString("H:mm:ss"));
+            tvTime.setText(State.formatTime(getActivity(), e.time));
             boolean found = false;
             for (EventType et : event_types) {
                 if (et.type == e.type) {

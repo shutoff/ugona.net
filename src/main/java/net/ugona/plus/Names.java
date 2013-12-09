@@ -90,5 +90,6 @@ public final class Names {
     static final String LIMIT = "limit";
 
     static final String BALANCE_NOTIFICATION = "balance_id";
+    static final String POINTER = "pointer";
 
 }

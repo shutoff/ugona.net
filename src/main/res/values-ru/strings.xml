@@ -288,4 +288,5 @@
         <item>300</item>
     </string-array>
     <string name="low_balance">Вы приблизились к порогу отключения</string>
+    <string name="call">Позвонить на автомобиль</string>
 </resources>

@@ -23,8 +23,7 @@ import android.widget.Toast;
 
 import org.joda.time.LocalDateTime;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.text.DateFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -243,9 +242,9 @@ public class StateFragment extends Fragment
     void update(Context context) {
         long last = preferences.getLong(Names.EVENT_TIME + car_id, 0);
         if (last != 0) {
-            Date d = new Date(last);
-            SimpleDateFormat sf = new SimpleDateFormat();
-            tvLast.setText(sf.format(d));
+            DateFormat df = android.text.format.DateFormat.getDateFormat(context);
+            DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
+            tvLast.setText(df.format(last) + " " + tf.format(last));
         } else {
             tvLast.setText(getString(R.string.unknown));
         }
@@ -282,9 +281,12 @@ public class StateFragment extends Fragment
             LocalDateTime stand = new LocalDateTime(last_stand);
             LocalDateTime now = new LocalDateTime();
             if (stand.toLocalDate().equals(now.toLocalDate())) {
-                time = stand.toString("HH:mm");
+                DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
+                time = tf.format(last_stand);
             } else {
-                time = stand.toString("d-MM-yy HH:mm");
+                DateFormat df = android.text.format.DateFormat.getDateFormat(context);
+                DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
+                time = df.format(last_stand) + " " + tf.format(last_stand);
             }
             time += " ";
         } else if (last_stand < 0) {

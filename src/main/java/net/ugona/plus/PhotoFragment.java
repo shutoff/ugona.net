@@ -328,9 +328,8 @@ public class PhotoFragment extends Fragment
                             v = inflater.inflate(R.layout.photo_item, null);
                         }
                         Photo photo = photos.get(position);
-                        DateTime time = new DateTime(photo.time);
                         TextView tvTime = (TextView) v.findViewById(R.id.time);
-                        tvTime.setText(time.toString("HH:mm:ss"));
+                        tvTime.setText(State.formatTime(getActivity(), photo.time));
                         TextView tvCamera = (TextView) v.findViewById(R.id.camera);
                         tvCamera.setText("#" + photo.camera);
                         ImageView iv = (ImageView) v.findViewById(R.id.photo);

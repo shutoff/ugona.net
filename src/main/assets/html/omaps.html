@@ -4,9 +4,9 @@
 <title></title>
 <meta charset="utf-8">
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.css"/>
-<script src="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.js"></script>
-<script src="../js/Marker.Rotate.js"></script>
+<link rel="stylesheet" href="../leaflet/leaflet.css"/>
+<script src="../leaflet/leaflet.js"></script>
+<script src="../leaflet/Marker.Rotate.js"></script>
 <style>
     html, body, #map-canvas {
     margin: 0;
@@ -379,6 +379,7 @@ function center() {
     var pos = markers[0].getLatLng();
     map.setView([ pos.lat, pos.lng ], map.getZoom(), { animate: true });
 }
+
 
 
 

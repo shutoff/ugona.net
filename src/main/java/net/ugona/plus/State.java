@@ -3,6 +3,7 @@ package net.ugona.plus;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Environment;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 
 import java.io.BufferedWriter;
@@ -11,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class State {
@@ -32,6 +34,19 @@ public class State {
             telephony_state = 1;
         }
         return telephony_state > 0;
+    }
+
+    static String formatTime(Context context, long time) {
+        try {
+            if (Settings.System.getInt(context.getContentResolver(), Settings.System.TIME_12_24) == 12) {
+                SimpleDateFormat sf = new SimpleDateFormat("KK:mm:ss a");
+                return sf.format(time);
+            }
+        } catch (Exception ex) {
+            // ignore
+        }
+        SimpleDateFormat sf = new SimpleDateFormat("HH:mm:ss");
+        return sf.format(time);
     }
 
     static void appendLog(String text) {

@@ -313,4 +313,5 @@
         <item>300</item>
     </string-array>
     <string name="low_balance">Low balance</string>
+    <string name="call">Call to car</string>
 </resources>

@@ -267,11 +267,14 @@ public class FetchService extends Service {
             if (engine && (msg_id == 4))
                 msg_id = 0;
             if (engine != preferences.getBoolean(Names.ENGINE + car_id, false)) {
+                State.appendLog("Set AZ state " + engine);
                 ed.putBoolean(Names.ENGINE + car_id, engine);
                 ed.putBoolean(Names.AZ + car_id, engine);
             }
-            if (preferences.getBoolean(Names.AZ + car_id, false) && !guard)
+            if (preferences.getBoolean(Names.AZ + car_id, false) && !guard) {
+                State.appendLog("Reset AZ state");
                 ed.putBoolean(Names.AZ + car_id, false);
+            }
 
             boolean gsm_req = true;
             JsonValue gps_value = res.get("gps");
@@ -390,6 +393,8 @@ public class FetchService extends Service {
                 for (int i = events.size() - 1; i >= 0; i--) {
                     JsonObject event = events.get(i).asObject();
                     int type = event.get("eventType").asInt();
+                    if ((type != 94) && (type != 98) && (type != 41) && (type != 33) && (type != 39) && (type != 127))
+                        State.appendLog("Event " + type);
                     switch (type) {
                         case 37:
                             last_stand = -event.get("eventTime").asLong();

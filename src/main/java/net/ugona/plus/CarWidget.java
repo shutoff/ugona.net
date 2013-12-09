@@ -15,8 +15,7 @@ import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import org.joda.time.LocalDateTime;
-
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -153,7 +152,6 @@ public class CarWidget extends AppWidgetProvider {
                 rows = 2;
             if (maxHeight > 100)
                 rows = 4;
-            State.appendLog(maxHeight + ", " + rows);
         } catch (Exception ex) {
             // ignore
         }
@@ -188,8 +186,8 @@ public class CarWidget extends AppWidgetProvider {
         long last = preferences.getLong(Names.EVENT_TIME + car_id, 0);
         Date now = new Date();
         if (last > now.getTime() - 24 * 60 * 60 * 1000) {
-            LocalDateTime d = new LocalDateTime(last);
-            widgetView.setTextViewText(R.id.last, d.toString("HH:mm"));
+            DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
+            widgetView.setTextViewText(R.id.last, tf.format(last));
         } else {
             widgetView.setTextViewText(R.id.last, "??:??");
         }
