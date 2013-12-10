@@ -289,4 +289,17 @@
     </string-array>
     <string name="low_balance">Вы приблизились к порогу отключения</string>
     <string name="call">Позвонить на автомобиль</string>
+    <string name="timer_event">Соединение по таймеру</string>
+    <string name="find">Включить режим поиска</string>
+    <string name="find_sum">Передавать координаты 3 часа каждые 10 минут</string>
+    <string name="map_req">Запрос местоположение</string>
+    <string name="map_sum">Однократный запрос местоположения</string>
+    <string name="mode_a">Режим A</string>
+    <string name="mode_a_sum">Передача GSM координат каждые 6 часов</string>
+    <string name="mode_b">Режим B</string>
+    <string name="mode_b_sum">Передача GSM координат каждые 12 часов</string>
+    <string name="mode_c">Режим C</string>
+    <string name="mode_c_sum">Передача GPS координат каждые 24 часа</string>
+    <string name="mode_d">Режим D</string>
+    <string name="mode_d_sum">Одидание комманды каждые 12 часов</string>
 </resources>

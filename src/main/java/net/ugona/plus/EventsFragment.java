@@ -34,6 +34,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.text.DateFormat;
 import java.util.Vector;
 
 public class EventsFragment extends Fragment
@@ -57,6 +58,7 @@ public class EventsFragment extends Fragment
     boolean error;
     boolean loaded;
     boolean no_events;
+    boolean pointer;
 
     ListView lvEvents;
     TextView tvNoEvents;
@@ -130,6 +132,7 @@ public class EventsFragment extends Fragment
             new EventType(35, R.string.gps_fail, R.drawable.gps_fail),
             new EventType(37, R.string.trace_start, R.drawable.trace_start),
             new EventType(38, R.string.trace_stop, R.drawable.trace_stop),
+            new EventType(41, R.string.timer_event, R.drawable.timer),
             new EventType(42, R.string.user_call, R.drawable.user_call, 1),
             new EventType(43, R.string.rogue, R.drawable.rogue, 0),
             new EventType(44, R.string.rogue_off, R.drawable.rogue, 0),
@@ -283,15 +286,24 @@ public class EventsFragment extends Fragment
 
         preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         api_key = preferences.getString(Names.CAR_KEY + car_id, "");
+        pointer = preferences.getBoolean(Names.POINTER + car_id, false);
 
         filtered = new Vector<Event>();
         if (events == null)
             events = new Vector<Event>();
 
-        filter = preferences.getInt(FILTER, 3);
-        setupButton(v, R.id.actions, 1);
-        setupButton(v, R.id.contacts, 2);
-        setupButton(v, R.id.system, 4);
+        if (pointer) {
+            filter = 7;
+            v.findViewById(R.id.actions).setVisibility(View.GONE);
+            v.findViewById(R.id.contacts).setVisibility(View.GONE);
+            v.findViewById(R.id.system).setVisibility(View.GONE);
+            v.findViewById(R.id.logo).setVisibility(View.VISIBLE);
+        } else {
+            filter = preferences.getInt(FILTER, 3);
+            setupButton(v, R.id.actions, 1);
+            setupButton(v, R.id.contacts, 2);
+            setupButton(v, R.id.system, 4);
+        }
 
         if (loaded) {
             filterEvents(false);
@@ -482,7 +494,7 @@ public class EventsFragment extends Fragment
             for (int i = 0; i < res.size(); i++) {
                 JsonObject event = res.get(i).asObject();
                 int type = event.get("eventType").asInt();
-                if ((type == 94) || (type == 98) || (type == 41) || (type == 33) || (type == 39) || (type == 127))
+                if (!pointer && ((type == 94) || (type == 98) || (type == 41) || (type == 33) || (type == 39) || (type == 127)))
                     continue;
                 long time = event.get("eventTime").asLong();
                 long id = event.get("eventId").asLong();
@@ -508,6 +520,10 @@ public class EventsFragment extends Fragment
             DateTime start = date.toDateTime(new LocalTime(0, 0));
             LocalDate next = date.plusDays(1);
             DateTime finish = next.toDateTime(new LocalTime(0, 0));
+            if (pointer) {
+                finish = new DateTime();
+                start = finish.minusDays(30);
+            }
             execute(EVENTS,
                     api_key,
                     start.toDate().getTime() + "",
@@ -572,6 +588,9 @@ public class EventsFragment extends Fragment
             request.getAddress(preferences, lat + "", lng + "");
         }
 
+        void error() {
+            new GsmEventRequest(event_id, event_time);
+        }
     }
 
     class GsmEventRequest extends EventRequest {
@@ -588,11 +607,6 @@ public class EventsFragment extends Fragment
             int cid = res.get("cid").asInt();
             int lac = res.get("lac").asInt();
             String gsm = cc + " " + nc + " " + lac + " " + cid;
-            if (gsm.equals(preferences.getString(Names.GSM + car_id, ""))
-                    && !preferences.getString(Names.GSM_ZONE + car_id, "").equals("")) {
-                setAddress(preferences.getString(Names.ADDRESS + car_id, ""), preferences.getString(Names.GSM_ZONE + car_id, ""), null);
-                return;
-            }
             new GsmSectorRequest(event_id, event_time, gsm);
         }
 
@@ -687,7 +701,12 @@ public class EventsFragment extends Fragment
             TextView tvName = (TextView) v.findViewById(R.id.name);
             TextView tvTime = (TextView) v.findViewById(R.id.time);
             ImageView icon = (ImageView) v.findViewById(R.id.icon);
-            tvTime.setText(State.formatTime(getActivity(), e.time));
+            if (pointer) {
+                DateFormat df = android.text.format.DateFormat.getDateFormat(getActivity());
+                tvTime.setText(df.format(e.time) + " " + State.formatTime(getActivity(), e.time));
+            } else {
+                tvTime.setText(State.formatTime(getActivity(), e.time));
+            }
             boolean found = false;
             for (EventType et : event_types) {
                 if (et.type == e.type) {

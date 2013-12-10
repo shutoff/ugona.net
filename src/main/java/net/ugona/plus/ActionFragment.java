@@ -65,16 +65,25 @@ public class ActionFragment extends Fragment
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View v = convertView;
+                Action action = actions.get(position);
                 if (v == null) {
                     LayoutInflater inflater = (LayoutInflater) getActivity()
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     v = inflater.inflate(R.layout.action_item, null);
                 }
-                Action action = actions.get(position);
                 TextView tv = (TextView) v.findViewById(R.id.name);
                 tv.setText(action.text);
-                ImageView iv = (ImageView) v.findViewById(R.id.icon);
-                iv.setImageResource(action.icon);
+                if (action.icon > 0) {
+                    ImageView iv = (ImageView) v.findViewById(R.id.icon);
+                    iv.setImageResource(action.icon);
+                    iv.setVisibility(View.VISIBLE);
+                    v.findViewById(R.id.sum).setVisibility(View.GONE);
+                } else {
+                    v.findViewById(R.id.icon).setVisibility(View.GONE);
+                    TextView ts = (TextView) v.findViewById(R.id.sum);
+                    ts.setVisibility(View.VISIBLE);
+                    ts.setText(action.flags);
+                }
                 View ip = v.findViewById(R.id.progress);
                 ip.setVisibility(SmsMonitor.isProcessed(car_id, action.text) ? View.VISIBLE : View.GONE);
                 return v;
@@ -144,6 +153,13 @@ public class ActionFragment extends Fragment
 
     void fill_actions() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        if (preferences.getBoolean(Names.POINTER + car_id, false)) {
+            actions = new Vector<Action>();
+            for (Action action : pointer_actions) {
+                actions.add(action);
+            }
+            return;
+        }
         int flags = 0;
         if (preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false))
             flags += FLAG_AZ;
@@ -190,6 +206,75 @@ public class ActionFragment extends Fragment
         int text;
         int flags;
     }
+
+    static Action[] pointer_actions = {
+            new Action(R.drawable.icon_turbo_on, R.string.find) {
+                @Override
+                void action(final Context context, final String car_id) {
+                    Actions.requestPassword(context, R.string.find, R.string.find_sum, new Runnable() {
+                        @Override
+                        public void run() {
+                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "FIND", null));
+                        }
+                    });
+                }
+            },
+            new Action(R.drawable.icon_status, R.string.map_req) {
+                @Override
+                void action(final Context context, final String car_id) {
+                    Actions.requestPassword(context, R.string.map_req, R.string.map_sum, new Runnable() {
+                        @Override
+                        public void run() {
+                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MAP", null));
+                        }
+                    });
+                }
+            },
+            new Action(0, R.string.mode_a, R.string.mode_a_sum) {
+                @Override
+                void action(final Context context, final String car_id) {
+                    Actions.requestPassword(context, R.string.mode_a, R.string.mode_a_sum, new Runnable() {
+                        @Override
+                        public void run() {
+                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MODE A", null));
+                        }
+                    });
+                }
+            },
+            new Action(0, R.string.mode_b, R.string.mode_b_sum) {
+                @Override
+                void action(final Context context, final String car_id) {
+                    Actions.requestPassword(context, R.string.mode_b, R.string.mode_b_sum, new Runnable() {
+                        @Override
+                        public void run() {
+                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MODE B", null));
+                        }
+                    });
+                }
+            },
+            new Action(0, R.string.mode_c, R.string.mode_c_sum) {
+                @Override
+                void action(final Context context, final String car_id) {
+                    Actions.requestPassword(context, R.string.mode_c, R.string.mode_c_sum, new Runnable() {
+                        @Override
+                        public void run() {
+                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MODE C", null));
+                        }
+                    });
+                }
+            },
+            new Action(0, R.string.mode_d, R.string.mode_d_sum) {
+                @Override
+                void action(final Context context, final String car_id) {
+                    Actions.requestPassword(context, R.string.mode_d, R.string.mode_d_sum, new Runnable() {
+                        @Override
+                        public void run() {
+                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MODE D", null));
+                        }
+                    });
+                }
+            },
+    };
 
     static Action[] def_actions = {
             new Action(R.drawable.icon_phone, R.string.call) {

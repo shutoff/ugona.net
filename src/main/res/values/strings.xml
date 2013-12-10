@@ -314,4 +314,17 @@
     </string-array>
     <string name="low_balance">Low balance</string>
     <string name="call">Call to car</string>
+    <string name="timer_event">Timer connection</string>
+    <string name="find">Find mode</string>
+    <string name="find_sum">Send coordinates at 3 hours every 10 minutes</string>
+    <string name="map_req">Location request</string>
+    <string name="map_sum">Once location request</string>
+    <string name="mode_a">Mode A</string>
+    <string name="mode_a_sum">Send GSM coordinates every 6 hours</string>
+    <string name="mode_b">Mode B</string>
+    <string name="mode_b_sum">Send GSM coordinates every 12 hours</string>
+    <string name="mode_c">Mode C</string>
+    <string name="mode_c_sum">Send GPS coordinates every 24 hours</string>
+    <string name="mode_d">Mode D</string>
+    <string name="mode_d_sum">Wait command every 12 hours</string>
 </resources>

@@ -72,6 +72,7 @@ public class MainActivity extends ActionBarActivity {
     Cars.Car[] cars;
 
     boolean show_date;
+    boolean pointer;
 
     boolean[] show_pages;
 
@@ -468,6 +469,9 @@ public class MainActivity extends ActionBarActivity {
     void setShowTracks() {
         boolean changed = false;
         boolean show_tracks = !preferences.getString(Names.LATITUDE + car_id, "").equals("");
+        pointer = preferences.getBoolean(Names.POINTER + car_id, false);
+        if (pointer)
+            show_tracks = false;
         if (show_pages[PAGE_TRACK] != show_tracks) {
             show_pages[PAGE_TRACK] = show_tracks;
             changed = true;
@@ -484,6 +488,8 @@ public class MainActivity extends ActionBarActivity {
     void setShowDate(int i) {
         int id = getPageId(i);
         boolean new_show_date = ((id >= 3) || (id == 0));
+        if (pointer && (id == 3))
+            new_show_date = false;
         if (new_show_date != show_date) {
             show_date = new_show_date;
             updateMenu();

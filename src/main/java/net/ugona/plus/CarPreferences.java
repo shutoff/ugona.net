@@ -659,8 +659,11 @@ public class CarPreferences extends PreferenceActivity {
                     String ver = device.get("versionSoftPGSM").asString();
                     versionPref.setSummary(ver);
                     SharedPreferences.Editor ed = preferences.edit();
-                    if (ver.toUpperCase().substring(0, 5).equals("MS TR"))
+                    if (ver.toUpperCase().substring(0, 5).equals("MS-TR")) {
                         ed.putBoolean(Names.POINTER + car_id, true);
+                    } else {
+                        ed.remove(Names.POINTER + car_id);
+                    }
                     ed.putString(Names.VERSION + car_id, ver);
                     ed.commit();
                 } catch (Exception ex) {
