@@ -28,9 +28,6 @@ public class ActionFragment extends Fragment
 
     String car_id;
 
-    static final int FLAG_AZ = 1;
-    static final int FLAG_R1 = 2;
-
     ActionAdapter adapter;
 
     @Override
@@ -84,11 +81,7 @@ public class ActionFragment extends Fragment
 
     void fill_actions() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        int flags = 0;
-        if (preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false))
-            flags += FLAG_AZ;
-        if (!preferences.getString(Names.CAR_RELE + car_id, "").equals(""))
-            flags += FLAG_R1;
+        int flags = State.getCommands(preferences, car_id);
         adapter.actions = new Vector<Action>();
         for (Action action : def_actions) {
             if ((action.flags > 0) && ((action.flags & flags) == 0))
@@ -302,19 +295,19 @@ public class ActionFragment extends Fragment
                     Actions.valet_off(context, car_id);
                 }
             },
-            new Action(R.drawable.icon_motor_on, R.string.motor_on, FLAG_AZ) {
+            new Action(R.drawable.icon_motor_on, R.string.motor_on, State.CMD_AZ) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.motor_on(context, car_id);
                 }
             },
-            new Action(R.drawable.icon_motor_off, R.string.motor_off, FLAG_AZ) {
+            new Action(R.drawable.icon_motor_off, R.string.motor_off, State.CMD_AZ) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.motor_off(context, car_id);
                 }
             },
-            new Action(R.drawable.icon_heater, R.string.rele, FLAG_R1) {
+            new Action(R.drawable.icon_heater, R.string.rele, State.CMD_RELE) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.rele1(context, car_id);

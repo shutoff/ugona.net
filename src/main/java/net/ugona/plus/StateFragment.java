@@ -9,6 +9,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -60,6 +61,7 @@ public class StateFragment extends Fragment
     View vRele;
     View vBlock;
     View vValet;
+    View vPhone;
 
     View pMotor;
     View pRele;
@@ -117,6 +119,7 @@ public class StateFragment extends Fragment
         vRele = v.findViewById(R.id.rele);
         vBlock = v.findViewById(R.id.block);
         vValet = v.findViewById(R.id.valet);
+        vPhone = v.findViewById(R.id.phone);
 
         pMotor = v.findViewById(R.id.motor_prg);
         pRele = v.findViewById(R.id.rele_prg);
@@ -134,6 +137,7 @@ public class StateFragment extends Fragment
             vRele.setOnTouchListener(this);
             vBlock.setOnTouchListener(this);
             vValet.setOnTouchListener(this);
+            vPhone.setOnTouchListener(this);
         }
 
         balanceBlock = v.findViewById(R.id.balance_block);
@@ -366,8 +370,10 @@ public class StateFragment extends Fragment
         }
         tvTime.setText(time);
 
+        int commands = State.getCommands(preferences, car_id);
+
         int n_buttons = 0;
-        if (State.hasTelephony(context) && preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false)) {
+        if (State.hasTelephony(context) && ((commands & State.CMD_AZ) != 0)) {
             vMotor.setVisibility(View.VISIBLE);
             if (preferences.getBoolean(Names.AZ + car_id, false)) {
                 ivMotor.setImageResource(R.drawable.icon_motor_off);
@@ -380,14 +386,14 @@ public class StateFragment extends Fragment
         } else {
             vMotor.setVisibility(View.GONE);
         }
-        if (State.hasTelephony(context) && !preferences.getString(Names.CAR_RELE + car_id, "").equals("")) {
+        if (State.hasTelephony(context) && ((commands & State.CMD_RELE) != 0)) {
             vRele.setVisibility(View.VISIBLE);
             pRele.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele) ? View.VISIBLE : View.GONE);
             n_buttons++;
         } else {
             vRele.setVisibility(View.GONE);
         }
-        if (State.hasTelephony(context) &&
+        if (State.hasTelephony(context) && ((commands & State.CMD_BLOCK) != 0) &&
                 (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false)) &&
                 !preferences.getBoolean(Names.GUARD + car_id, false) &&
                 !preferences.getBoolean(Names.AZ + car_id, false) &&
@@ -399,7 +405,7 @@ public class StateFragment extends Fragment
             vBlock.setVisibility(View.GONE);
         }
         boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
-        if (State.hasTelephony(context) && (n_buttons < 3)) {
+        if (State.hasTelephony(context) && (n_buttons < 3) && ((commands & State.CMD_VALET) != 0)) {
             if (valet) {
                 ivValet.setImageResource(R.drawable.icon_valet_off);
                 pValet.setVisibility(SmsMonitor.isProcessed(car_id, R.string.valet_off) ? View.VISIBLE : View.GONE);
@@ -412,6 +418,11 @@ public class StateFragment extends Fragment
             vValet.setVisibility(View.GONE);
             AnimationDrawable animation = (AnimationDrawable) imgEngine.getDrawable();
             animation.stop();
+        }
+        if (State.hasTelephony(context) && (n_buttons < 3) && ((commands & State.CMD_CALL) != 0)) {
+            vPhone.setVisibility(View.VISIBLE);
+        } else {
+            vPhone.setVisibility(View.GONE);
         }
 
         balanceBlock.setVisibility(preferences.getBoolean(Names.SHOW_BALANCE + car_id, true) ? View.VISIBLE : View.GONE);
@@ -517,6 +528,11 @@ public class StateFragment extends Fragment
                             Actions.valet_on(getActivity(), car_id);
                         }
                     }
+                }
+                if (v == vPhone) {
+                    Intent intent = new Intent(Intent.ACTION_CALL);
+                    intent.setData(Uri.parse("tel:" + preferences.getString(Names.CAR_PHONE + car_id, "")));
+                    startActivity(intent);
                 }
             case MotionEvent.ACTION_CANCEL:
                 v.setBackgroundResource(R.drawable.button_normal);

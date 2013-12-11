@@ -1,6 +1,7 @@
 package net.ugona.plus;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.provider.Settings;
@@ -81,6 +82,27 @@ public class State {
         ex.printStackTrace(new PrintWriter(sw));
         String s = sw.toString();
         appendLog(s);
+    }
+
+    static final int CMD_CALL = 1;
+    static final int CMD_VALET = 2;
+    static final int CMD_BLOCK = 4;
+    static final int CMD_AZ = 8;
+    static final int CMD_RELE = 16;
+
+    static int getCommands(SharedPreferences preferences, String car_id) {
+        int res = preferences.getInt(Names.COMMANDS + car_id, -1);
+        if (res != -1)
+            return res;
+        res = CMD_VALET | CMD_BLOCK;
+        if (preferences.getBoolean("autostart_" + car_id, false))
+            res |= CMD_AZ;
+        if (!preferences.getString(Names.CAR_RELE + car_id, "").equals(""))
+            res |= CMD_RELE;
+        SharedPreferences.Editor ed = preferences.edit();
+        ed.putInt(Names.COMMANDS + car_id, res);
+        ed.commit();
+        return res;
     }
 
 }

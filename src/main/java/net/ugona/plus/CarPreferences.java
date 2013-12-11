@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -22,11 +23,14 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -97,7 +101,6 @@ public class CarPreferences extends PreferenceActivity {
         SharedPreferences.Editor ed = preferences.edit();
         ed.putInt("tmp_shift", preferences.getInt(Names.TEMP_SIFT + car_id, 0));
         ed.putBoolean("show_balance", preferences.getBoolean(Names.SHOW_BALANCE + car_id, true));
-        ed.putBoolean("autostart", preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false));
         ed.putString("rele", preferences.getString(Names.CAR_RELE + car_id, ""));
         ed.putBoolean("show_photo", preferences.getBoolean(Names.SHOW_PHOTO + car_id, false));
         ed.putInt("shock_sens", preferences.getInt(Names.SHOCK_SENS + car_id, 5));
@@ -220,22 +223,6 @@ public class CarPreferences extends PreferenceActivity {
                     boolean v = (Boolean) newValue;
                     SharedPreferences.Editor ed = preferences.edit();
                     ed.putBoolean(Names.SHOW_BALANCE + car_id, v);
-                    ed.commit();
-                    sendUpdate();
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        CheckBoxPreference autoPref = (CheckBoxPreference) findPreference("autostart");
-        autoPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                if (newValue instanceof Boolean) {
-                    boolean v = (Boolean) newValue;
-                    SharedPreferences.Editor ed = preferences.edit();
-                    ed.putBoolean(Names.CAR_AUTOSTART + car_id, v);
                     ed.commit();
                     sendUpdate();
                     return true;
@@ -386,6 +373,15 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
 
+        Preference cmdPref = findPreference("cmd");
+        cmdPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                selectCommands();
+                return true;
+            }
+        });
+
         if (State.hasTelephony(this)) {
             String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
             setPhone(phoneNumber);
@@ -394,7 +390,6 @@ public class CarPreferences extends PreferenceActivity {
             ps.removePreference(smsPref);
             ps.removePreference(phonePref);
             ps.removePreference(sensPref);
-            ps.removePreference(autoPref);
             ps.removePreference(relePref);
             ps.removePreference(mainPref);
             ps.removePreference(phonesPref);
@@ -535,6 +530,79 @@ public class CarPreferences extends PreferenceActivity {
         Actions.requestPassword(this, R.string.call_mode, R.string.call_mode_msg, send);
     }
 
+    final static int[] Command = {
+            R.string.call,
+            R.string.valet_cmd,
+            R.string.block,
+            R.string.autostart,
+            R.string.rele
+    };
+
+    int commands;
+
+    void selectCommands() {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.commands)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putInt(Names.COMMANDS + car_id, commands);
+                        ed.commit();
+                        sendUpdate();
+                    }
+                })
+                .setView(inflater.inflate(R.layout.checklist, null))
+                .create();
+        dialog.getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        dialog.show();
+        commands = State.getCommands(preferences, car_id);
+        ListView lv = (ListView) dialog.findViewById(R.id.list);
+        lv.setAdapter(new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return Command.length;
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return Command[position];
+            }
+
+            @Override
+            public long getItemId(int position) {
+                return position;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View v = convertView;
+                if (v == null) {
+                    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = inflater.inflate(R.layout.checklist_item, null);
+                }
+                int mask = 1 << position;
+                CheckBox checkBox = (CheckBox) v.findViewById(R.id.item);
+                checkBox.setText(Command[position]);
+                checkBox.setTag(mask);
+                checkBox.setChecked((commands & mask) != 0);
+                checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        int mask = (Integer) buttonView.getTag();
+                        commands &= ~mask;
+                        if (isChecked)
+                            commands |= mask;
+                    }
+                });
+                return v;
+            }
+        });
+    }
+
     void getApiKey() {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         final AlertDialog dialog = new AlertDialog.Builder(this)
@@ -652,6 +720,8 @@ public class CarPreferences extends PreferenceActivity {
     }
 
     void setupPointer() {
+        if (!preferences.getBoolean(Names.POINTER + car_id, false))
+            return;
         removePreference("call_mode");
         removePreference("main_phone");
         removePreference("phones");
@@ -664,6 +734,7 @@ public class CarPreferences extends PreferenceActivity {
         removePreference("alarm_test");
         removePreference("notify");
         removePreference("tmp_shift");
+        removePreference("cmd");
     }
 
     void removePreference(String key) {

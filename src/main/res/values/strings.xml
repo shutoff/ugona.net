@@ -327,4 +327,7 @@
     <string name="mode_c_sum">Send GPS coordinates every 24 hours</string>
     <string name="mode_d">Mode D</string>
     <string name="mode_d_sum">Wait command every 12 hours</string>
+    <string name="commands">Control commands</string>
+    <string name="commands_sum">Select commands on main screen</string>
+    <string name="valet_cmd">VALET</string>
 </resources>

@@ -9,7 +9,6 @@ public final class Names {
     static final String CAR_NAME = "name";
     static final String LAST = "LastID";
 
-    static final String CAR_AUTOSTART = "autostart_";
     static final String CAR_RELE = "rele_";
     static final String CAR_TIMER = "timer";
 
@@ -91,5 +90,7 @@ public final class Names {
 
     static final String BALANCE_NOTIFICATION = "balance_id";
     static final String POINTER = "pointer";
+
+    static final String COMMANDS = "commands";
 
 }

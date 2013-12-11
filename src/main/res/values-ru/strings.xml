@@ -302,4 +302,7 @@
     <string name="mode_c_sum">Передача GPS координат каждые 24 часа</string>
     <string name="mode_d">Режим D</string>
     <string name="mode_d_sum">Одидание комманды каждые 12 часов</string>
+    <string name="commands">Комманды управления</string>
+    <string name="commands_sum">Выбор комманд на главном экране</string>
+    <string name="valet_cmd">Режим АВТОСЕРВИС</string>
 </resources>

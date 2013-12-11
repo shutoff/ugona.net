@@ -312,6 +312,24 @@
 
                 </RelativeLayout>
 
+                <RelativeLayout
+                    android:id="@+id/phone"
+                    android:layout_width="100dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/button_normal"
+                    android:layout_margin="5dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/phone_img"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/icon_phone"
+                        android:layout_centerInParent="true"
+                        android:padding="5dp" />
+
+                </RelativeLayout>
+
             </LinearLayout>
 
         </LinearLayout>

@@ -45,10 +45,10 @@
         android:summary="@string/timer_sum"
         android:key="timer" />
 
-    <CheckBoxPreference
-        android:title="@string/autostart"
-        android:summary="@string/autostart_summary"
-        android:key="autostart" />
+    <Preference
+        android:title="@string/commands"
+        android:summary="@string/commands_sum"
+        android:key="cmd" />
 
     <ListPreference
         android:title="@string/rele"
