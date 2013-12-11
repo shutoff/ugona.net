@@ -17,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 import org.joda.time.LocalDateTime;
 
 import java.text.DateFormat;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,14 +78,24 @@ public class StateFragment extends Fragment
     CarDrawable drawable;
     BroadcastReceiver br;
 
+    ActionFragment.ActionAdapter adapter;
+
+    boolean pointer;
+
     static Pattern number_pattern = Pattern.compile("^[0-9]+ ?");
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.state, container, false);
+
+        final Context context = getActivity();
+        preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         if (savedInstanceState != null)
             car_id = savedInstanceState.getString(Names.ID);
+
+        pointer = preferences.getBoolean(Names.POINTER + car_id, false);
+
+        View v = inflater.inflate(pointer ? R.layout.pointer : R.layout.state, container, false);
 
         imgCar = (ImageView) v.findViewById(R.id.car);
         imgEngine = (ImageView) v.findViewById(R.id.engine);
@@ -117,10 +129,12 @@ public class StateFragment extends Fragment
         mValet = v.findViewById(R.id.valet_warning);
         mNet = v.findViewById(R.id.net_warning);
 
-        vMotor.setOnTouchListener(this);
-        vRele.setOnTouchListener(this);
-        vBlock.setOnTouchListener(this);
-        vValet.setOnTouchListener(this);
+        if (!pointer) {
+            vMotor.setOnTouchListener(this);
+            vRele.setOnTouchListener(this);
+            vBlock.setOnTouchListener(this);
+            vValet.setOnTouchListener(this);
+        }
 
         balanceBlock = v.findViewById(R.id.balance_block);
 
@@ -147,10 +161,6 @@ public class StateFragment extends Fragment
                 showMap();
             }
         });
-
-        final Context context = getActivity();
-
-        preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         vTime.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -224,11 +234,23 @@ public class StateFragment extends Fragment
             imgRefresh.setVisibility(View.GONE);
         }
 
+        if (pointer) {
+            ListView lvActions = (ListView) v.findViewById(R.id.actions);
+            adapter = new ActionFragment.ActionAdapter(car_id);
+            adapter.actions = new Vector<ActionFragment.Action>();
+            for (ActionFragment.Action action : ActionFragment.pointer_actions) {
+                adapter.actions.add(action);
+            }
+            adapter.attach(getActivity(), lvActions);
+        }
+
         return v;
     }
 
     @Override
     public void onDestroyView() {
+        if (adapter != null)
+            adapter.detach(getActivity());
         getActivity().unregisterReceiver(br);
         super.onDestroyView();
     }
@@ -249,6 +271,49 @@ public class StateFragment extends Fragment
             tvLast.setText(getString(R.string.unknown));
         }
         tvVoltage.setText(preferences.getString(Names.VOLTAGE_MAIN + car_id, "?") + " V");
+        updateNetStatus(context);
+
+        String lat = preferences.getString(Names.LATITUDE + car_id, "");
+        String lon = preferences.getString(Names.LONGITUDE + car_id, "");
+        String addr = "";
+        String location = "";
+        if (lat.equals("") || lon.equals("")) {
+            String gsm = preferences.getString(Names.GSM + car_id, "");
+            if (!gsm.equals("")) {
+                String[] parts = gsm.split(" ");
+                location = parts[0] + "-" + parts[1] + " LAC:" + parts[2] + " CID:" + parts[3];
+                addr = preferences.getString(Names.ADDRESS + car_id, "");
+            }
+        } else {
+            location = preferences.getString(Names.LATITUDE + car_id, "") + " ";
+            location += preferences.getString(Names.LONGITUDE + car_id, "");
+            addr = Address.getAddress(context, car_id);
+        }
+        tvLocation.setText(location);
+        String parts[] = addr.split(", ");
+        addr = parts[0];
+        int start = 2;
+        if (parts.length > 1)
+            addr += ", " + parts[1];
+        if (parts.length > 2) {
+            Matcher matcher = number_pattern.matcher(parts[2]);
+            if (matcher.matches()) {
+                addr += ", " + parts[2];
+                start++;
+            }
+        }
+        tvAddress2.setText(addr);
+        addr = "";
+        for (int i = start; i < parts.length; i++) {
+            if (!addr.equals(""))
+                addr += ", ";
+            addr += parts[i];
+        }
+        tvAddress3.setText(addr);
+
+        if (pointer)
+            return;
+
         tvReserve.setText(preferences.getString(Names.VOLTAGE_RESERVED + car_id, "?") + " V");
         tvBalance.setText(preferences.getString(Names.BALANCE + car_id, "?"));
 
@@ -300,44 +365,6 @@ public class StateFragment extends Fragment
             }
         }
         tvTime.setText(time);
-        String lat = preferences.getString(Names.LATITUDE + car_id, "");
-        String lon = preferences.getString(Names.LONGITUDE + car_id, "");
-        String addr = "";
-        String location = "";
-        if (lat.equals("") || lon.equals("")) {
-            String gsm = preferences.getString(Names.GSM + car_id, "");
-            if (!gsm.equals("")) {
-                String[] parts = gsm.split(" ");
-                location = parts[0] + "-" + parts[1] + " LAC:" + parts[2] + " CID:" + parts[3];
-                addr = preferences.getString(Names.ADDRESS + car_id, "");
-            }
-        } else {
-            location = preferences.getString(Names.LATITUDE + car_id, "") + " ";
-            location += preferences.getString(Names.LONGITUDE + car_id, "");
-            addr = Address.getAddress(context, car_id);
-        }
-        tvTime.setText(time);
-        tvLocation.setText(location);
-        String parts[] = addr.split(", ");
-        addr = parts[0];
-        int start = 2;
-        if (parts.length > 1)
-            addr += ", " + parts[1];
-        if (parts.length > 2) {
-            Matcher matcher = number_pattern.matcher(parts[2]);
-            if (matcher.matches()) {
-                addr += ", " + parts[2];
-                start++;
-            }
-        }
-        tvAddress2.setText(addr);
-        addr = "";
-        for (int i = start; i < parts.length; i++) {
-            if (!addr.equals(""))
-                addr += ", ";
-            addr += parts[i];
-        }
-        tvAddress3.setText(addr);
 
         int n_buttons = 0;
         if (State.hasTelephony(context) && preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false)) {
@@ -402,7 +429,6 @@ public class StateFragment extends Fragment
         }
 
         mValet.setVisibility(valet ? View.VISIBLE : View.GONE);
-        updateNetStatus(context);
     }
 
     void updateNetStatus(Context context) {
@@ -500,6 +526,8 @@ public class StateFragment extends Fragment
     }
 
     void startAnimation() {
+        if (imgEngine == null)
+            return;
         if (imgEngine.getVisibility() == View.GONE)
             return;
         AnimationDrawable animation = (AnimationDrawable) imgEngine.getDrawable();

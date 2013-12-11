@@ -31,7 +31,7 @@
     <string name="internet_off_sum">Запретить доступ в интернет на устройстве</string>
     <string name="valet_on_sum">Отключить охрану</string>
     <string name="valet_off_sum">Включить охрану</string>
-    <string name="motor_on">АВТОЗАПСУК включить</string>
+    <string name="motor_on">АВТОЗАПУСК включить</string>
     <string name="motor_off">АВТОЗАПУСК выключить</string>
     <string name="motor_on_sum">Произвести дистанционный запуск двигателя</string>
     <string name="motor_off_sum">Дистанционно остановить двигатель</string>

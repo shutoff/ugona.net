@@ -109,11 +109,11 @@ public class MainActivity extends ActionBarActivity {
         current = new LocalDate();
 
         show_pages = new boolean[5];
-        show_pages[0] = preferences.getBoolean(Names.SHOW_PHOTO + car_id, false);
-        show_pages[1] = State.hasTelephony(this);
-        show_pages[2] = true;
-        show_pages[3] = true;
-        show_pages[4] = false;
+        show_pages[PAGE_PHOTO] = preferences.getBoolean(Names.SHOW_PHOTO + car_id, false);
+        show_pages[PAGE_ACTIONS] = State.hasTelephony(this);
+        show_pages[PAGE_STATE] = true;
+        show_pages[PAGE_EVENT] = true;
+        show_pages[PAGE_TRACK] = false;
 
         if (savedInstanceState != null) {
             car_id = savedInstanceState.getString(Names.ID);
@@ -363,16 +363,11 @@ public class MainActivity extends ActionBarActivity {
         id = Preferences.getCar(preferences, id);
         if (id.equals(car_id))
             return;
-        int current = mViewPager.getCurrentItem();
-        if (!preferences.getBoolean(Names.SHOW_PHOTO + car_id, false))
-            current++;
+        int current_id = getPageId(mViewPager.getCurrentItem());
         car_id = id;
-        if (!preferences.getBoolean(Names.SHOW_PHOTO + car_id, false))
-            current--;
-        if (current < 0)
-            current = 0;
         setActionBar();
         update();
+        int current = getPagePosition(current_id);
         mViewPager.setCurrentItem(current);
         setShowDate(current);
     }
@@ -472,6 +467,11 @@ public class MainActivity extends ActionBarActivity {
         pointer = preferences.getBoolean(Names.POINTER + car_id, false);
         if (pointer)
             show_tracks = false;
+        boolean show_actions = !pointer && State.hasTelephony(this);
+        if (show_pages[PAGE_ACTIONS] != show_actions) {
+            show_pages[PAGE_ACTIONS] = show_actions;
+            changed = true;
+        }
         if (show_pages[PAGE_TRACK] != show_tracks) {
             show_pages[PAGE_TRACK] = show_tracks;
             changed = true;

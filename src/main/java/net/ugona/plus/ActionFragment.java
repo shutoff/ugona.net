@@ -31,11 +31,7 @@ public class ActionFragment extends Fragment
     static final int FLAG_AZ = 1;
     static final int FLAG_R1 = 2;
 
-    Vector<Action> actions;
-
-    ListView list;
-
-    BroadcastReceiver br;
+    ActionAdapter adapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -43,65 +39,11 @@ public class ActionFragment extends Fragment
         if (savedInstanceState != null)
             car_id = savedInstanceState.getString(Names.ID);
 
+        ListView list = (ListView) v.findViewById(R.id.actions);
+        adapter = new ActionAdapter(car_id);
         fill_actions();
+        adapter.attach(getActivity(), list);
 
-        list = (ListView) v.findViewById(R.id.actions);
-        list.setAdapter(new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return actions.size();
-            }
-
-            @Override
-            public Object getItem(int position) {
-                return actions.get(position);
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                Action action = actions.get(position);
-                if (v == null) {
-                    LayoutInflater inflater = (LayoutInflater) getActivity()
-                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = inflater.inflate(R.layout.action_item, null);
-                }
-                TextView tv = (TextView) v.findViewById(R.id.name);
-                tv.setText(action.text);
-                if (action.icon > 0) {
-                    ImageView iv = (ImageView) v.findViewById(R.id.icon);
-                    iv.setImageResource(action.icon);
-                    iv.setVisibility(View.VISIBLE);
-                    v.findViewById(R.id.sum).setVisibility(View.GONE);
-                } else {
-                    v.findViewById(R.id.icon).setVisibility(View.GONE);
-                    TextView ts = (TextView) v.findViewById(R.id.sum);
-                    ts.setVisibility(View.VISIBLE);
-                    ts.setText(action.flags);
-                }
-                View ip = v.findViewById(R.id.progress);
-                ip.setVisibility(SmsMonitor.isProcessed(car_id, action.text) ? View.VISIBLE : View.GONE);
-                return v;
-            }
-        });
-        list.setClickable(true);
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Action action = actions.get(position);
-                if (SmsMonitor.isProcessed(car_id, action.text)) {
-                    SmsMonitor.cancelSMS(getActivity(), car_id, action.text);
-                    refresh();
-                    return;
-                }
-                action.action(getActivity(), car_id);
-            }
-        });
         View vLogo = v.findViewById(R.id.logo);
         vLogo.setClickable(true);
         vLogo.setOnClickListener(new View.OnClickListener() {
@@ -111,23 +53,12 @@ public class ActionFragment extends Fragment
                 startActivity(intent);
             }
         });
-        br = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String id = intent.getStringExtra(Names.ID);
-                if (car_id.equals(id))
-                    refresh();
-            }
-        };
-        IntentFilter filter = new IntentFilter(SmsMonitor.SMS_SEND);
-        filter.addAction(SmsMonitor.SMS_ANSWER);
-        getActivity().registerReceiver(br, filter);
         return v;
     }
 
     @Override
     public void onDestroyView() {
-        getActivity().unregisterReceiver(br);
+        adapter.detach(getActivity());
         super.onDestroyView();
     }
 
@@ -153,36 +84,109 @@ public class ActionFragment extends Fragment
 
     void fill_actions() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        if (preferences.getBoolean(Names.POINTER + car_id, false)) {
-            actions = new Vector<Action>();
-            for (Action action : pointer_actions) {
-                actions.add(action);
-            }
-            return;
-        }
         int flags = 0;
         if (preferences.getBoolean(Names.CAR_AUTOSTART + car_id, false))
             flags += FLAG_AZ;
         if (!preferences.getString(Names.CAR_RELE + car_id, "").equals(""))
             flags += FLAG_R1;
-        actions = new Vector<Action>();
+        adapter.actions = new Vector<Action>();
         for (Action action : def_actions) {
             if ((action.flags > 0) && ((action.flags & flags) == 0))
                 continue;
-            actions.add(action);
+            adapter.actions.add(action);
         }
-    }
-
-    void refresh() {
-        BaseAdapter adapter = (BaseAdapter) list.getAdapter();
-        adapter.notifyDataSetChanged();
     }
 
     @Override
     public void dateChanged(LocalDate current) {
         fill_actions();
-        BaseAdapter adapter = (BaseAdapter) list.getAdapter();
         adapter.notifyDataSetChanged();
+    }
+
+    static class ActionAdapter extends BaseAdapter {
+
+        Vector<Action> actions;
+        String car_id;
+        BroadcastReceiver br;
+        LayoutInflater inflater;
+
+        ActionAdapter(String id) {
+            car_id = id;
+        }
+
+        void attach(final Context context, ListView list) {
+            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            list.setAdapter(this);
+            list.setClickable(true);
+            list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Action action = actions.get(position);
+                    if (SmsMonitor.isProcessed(car_id, action.text)) {
+                        SmsMonitor.cancelSMS(context, car_id, action.text);
+                        notifyDataSetChanged();
+                        return;
+                    }
+                    action.action(context, car_id);
+                }
+            });
+            br = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String id = intent.getStringExtra(Names.ID);
+                    if (car_id.equals(id))
+                        notifyDataSetChanged();
+                }
+            };
+            IntentFilter filter = new IntentFilter(SmsMonitor.SMS_SEND);
+            filter.addAction(SmsMonitor.SMS_ANSWER);
+            context.registerReceiver(br, filter);
+        }
+
+        void detach(Context context) {
+            context.unregisterReceiver(br);
+        }
+
+        @Override
+        public int getCount() {
+            return actions.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return actions.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View v = convertView;
+            Action action = actions.get(position);
+            if (v == null) {
+
+                v = inflater.inflate(R.layout.action_item, null);
+            }
+            TextView tv = (TextView) v.findViewById(R.id.name);
+            tv.setText(action.text);
+            if (action.icon > 0) {
+                ImageView iv = (ImageView) v.findViewById(R.id.icon);
+                iv.setImageResource(action.icon);
+                iv.setVisibility(View.VISIBLE);
+                v.findViewById(R.id.sum).setVisibility(View.GONE);
+            } else {
+                v.findViewById(R.id.icon).setVisibility(View.GONE);
+                TextView ts = (TextView) v.findViewById(R.id.sum);
+                ts.setVisibility(View.VISIBLE);
+                ts.setText(action.flags);
+            }
+            View ip = v.findViewById(R.id.progress);
+            ip.setVisibility(SmsMonitor.isProcessed(car_id, action.text) ? View.VISIBLE : View.GONE);
+            return v;
+        }
     }
 
     static abstract class Action {

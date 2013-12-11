@@ -403,6 +403,8 @@ public class CarPreferences extends PreferenceActivity {
             ps.removePreference(notifyPref);
             ps.removePreference(testPref);
         }
+
+        setupPointer();
     }
 
     @Override
@@ -649,6 +651,28 @@ public class CarPreferences extends PreferenceActivity {
         verTask.execute(PHOTOS_URL, api_key, (now.getTime() - 3 * 24 * 60 * 60 * 1000) + "");
     }
 
+    void setupPointer() {
+        removePreference("call_mode");
+        removePreference("main_phone");
+        removePreference("phones");
+        removePreference("shock_sens");
+        removePreference("timer");
+        removePreference("autostart");
+        removePreference("rele");
+        removePreference("show_photo");
+        removePreference("alarm");
+        removePreference("alarm_test");
+        removePreference("notify");
+        removePreference("tmp_shift");
+    }
+
+    void removePreference(String key) {
+        Preference pref = getPreferenceScreen().findPreference(key);
+        if (pref == null)
+            return;
+        getPreferenceScreen().removePreference(pref);
+    }
+
     void getVersion(String api_key) {
         HttpTask verTask = new HttpTask() {
             @Override
@@ -661,6 +685,7 @@ public class CarPreferences extends PreferenceActivity {
                     SharedPreferences.Editor ed = preferences.edit();
                     if (ver.toUpperCase().substring(0, 5).equals("MS-TR")) {
                         ed.putBoolean(Names.POINTER + car_id, true);
+                        setupPointer();
                     } else {
                         ed.remove(Names.POINTER + car_id);
                     }
