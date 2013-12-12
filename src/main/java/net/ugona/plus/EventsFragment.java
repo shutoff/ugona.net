@@ -50,6 +50,7 @@ public class EventsFragment extends Fragment
 
     Vector<Event> events;
     Vector<Event> filtered;
+    Event firstEvent;
 
     SharedPreferences preferences;
 
@@ -170,6 +171,7 @@ public class EventsFragment extends Fragment
             new EventType(89, R.string.request_photo, R.drawable.request_photo, 1),
             new EventType(90, R.string.till_start, R.drawable.till_start),
             new EventType(91, R.string.end_move, R.drawable.system),
+            new EventType(98, R.string.data_transfer, R.drawable.system),
             new EventType(100, R.string.reset, R.drawable.reset),
             new EventType(101, R.string.reset, R.drawable.reset),
             new EventType(105, R.string.reset_modem, R.drawable.reset_modem),
@@ -440,6 +442,8 @@ public class EventsFragment extends Fragment
 
     void filterEvents(boolean no_reload) {
         filtered.clear();
+        if (firstEvent != null)
+            filtered.add(firstEvent);
         for (Event e : events) {
             if (isShow(e.type))
                 filtered.add(e);
@@ -491,7 +495,15 @@ public class EventsFragment extends Fragment
                 return;
             events.clear();
             JsonArray res = data.get("events").asArray();
-            for (int i = 0; i < res.size(); i++) {
+            firstEvent = null;
+            if (res.size() > 0) {
+                JsonObject event = res.get(0).asObject();
+                firstEvent = new Event();
+                firstEvent.type = event.get("eventType").asInt();
+                firstEvent.time = event.get("eventTime").asLong();
+                firstEvent.id = event.get("eventId").asLong();
+            }
+            for (int i = 1; i < res.size(); i++) {
                 JsonObject event = res.get(i).asObject();
                 int type = event.get("eventType").asInt();
                 if (!pointer && ((type == 94) || (type == 98) || (type == 41) || (type == 33) || (type == 39) || (type == 127)))

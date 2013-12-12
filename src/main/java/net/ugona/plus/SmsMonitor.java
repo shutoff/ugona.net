@@ -6,8 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -131,7 +129,7 @@ public class SmsMonitor extends BroadcastReceiver {
             String[] cars = preferences.getString(Names.CARS, "").split(",");
             for (String car : cars) {
                 String phone_config = preferences.getString(Names.CAR_PHONE + car, "");
-                if (compareNumbers(phone_config, sms_from)) {
+                if (compareNumbers(phone_config, sms_from) || State.isDebug()) {
                     if (processCarMessage(context, body, car))
                         abortBroadcast();
                     return;
@@ -153,12 +151,10 @@ public class SmsMonitor extends BroadcastReceiver {
 
             String[] cars = preferences.getString(Names.CARS, "").split(",");
             for (String id : cars) {
-                if (preferences.getBoolean(Names.NOSLEEP_MODE + id, false)) {
-                    Intent i = new Intent(context, FetchService.class);
-                    i.putExtra(Names.ID, id);
-                    i.setAction(FetchService.ACTION_UPDATE);
-                    context.startService(i);
-                }
+                Intent i = new Intent(context, FetchService.class);
+                i.putExtra(Names.ID, id);
+                i.setAction(FetchService.ACTION_UPDATE);
+                context.startService(i);
             }
         }
     }
@@ -244,30 +240,19 @@ public class SmsMonitor extends BroadcastReceiver {
     }
 
     static void showNotification(Context context, String text, String car_id) {
-        showNotification(context, text, R.drawable.warning, car_id);
+        showNotification(context, text, R.drawable.warning, car_id, null);
     }
 
-    static void showNotification(Context context, String text, int picId, String car_id) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        Alarm.createNotification(context, text, picId, car_id);
-        String sound = Preferences.getNotify(preferences, car_id);
-        Uri uri = Uri.parse(sound);
-        Ringtone ringtone = RingtoneManager.getRingtone(context, uri);
-        if (ringtone == null)
-            uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        try {
-            AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-            MediaPlayer player = new MediaPlayer();
-            player.setDataSource(context, uri);
-            if (audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION) != 0) {
-                player.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
-                player.setLooping(false);
-                player.prepare();
-                player.start();
-            }
-        } catch (Exception err) {
-            // ignore
+    static void showNotification(Context context, String text, int picId, String car_id, Uri uri) {
+        if (uri == null) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            String sound = Preferences.getNotify(preferences, car_id);
+            uri = Uri.parse(sound);
+            Ringtone ringtone = RingtoneManager.getRingtone(context, uri);
+            if (ringtone == null)
+                uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         }
+        Alarm.createNotification(context, text, picId, car_id, uri);
     }
 
     private void showAlarm(Context context, String text, String car_id) {

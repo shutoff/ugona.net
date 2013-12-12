@@ -33,6 +33,7 @@ public class FetchService extends Service {
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;
     private static final long SAFEMODE_TIMEOUT = 300 * 1000;
+    private static final long LONG_TIMEOUT = 8 * 60 * 60 * 1000;
 
     private BroadcastReceiver mReceiver;
     private PendingIntent pi;
@@ -195,6 +196,8 @@ public class FetchService extends Service {
                 sendUpdate(ACTION_NOUPDATE, car_id);
                 if (preferences.getBoolean(Names.NOSLEEP_MODE + car_id, false)) {
                     alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, SAFEMODE_TIMEOUT, SAFEMODE_TIMEOUT, pi);
+                } else {
+                    alarmMgr.setRepeating(AlarmManager.RTC, LONG_TIMEOUT, LONG_TIMEOUT, pi);
                 }
                 return;
             }
@@ -232,7 +235,7 @@ public class FetchService extends Service {
                                 double value = Double.parseDouble(balance_str);
                                 if (value <= limit) {
                                     if (balance_id == 0) {
-                                        balance_id = Alarm.createNotification(FetchService.this, getString(R.string.low_balance), R.drawable.white_balance, car_id);
+                                        balance_id = Alarm.createNotification(FetchService.this, getString(R.string.low_balance), R.drawable.white_balance, car_id, null);
                                         ed.putInt(Names.BALANCE_NOTIFICATION + car_id, balance_id);
                                     }
                                 } else {
@@ -307,6 +310,8 @@ public class FetchService extends Service {
                     FetchService.this.startActivity(alarmIntent);
                 }
                 alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, SAFEMODE_TIMEOUT, SAFEMODE_TIMEOUT, pi);
+            } else {
+                alarmMgr.setRepeating(AlarmManager.RTC, LONG_TIMEOUT, LONG_TIMEOUT, pi);
             }
 
             new EventsRequest(car_id, voltage_request, gsm_req);

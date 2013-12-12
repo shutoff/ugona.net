@@ -281,16 +281,6 @@
     <string name="valet_off_ok">VALET mode is OFF</string>
     <string name="background">Background</string>
     <string name="rotate">Rotate</string>
-    <string-array name="rele_values">
-        <item></item>
-        <item>1</item>
-        <item>2</item>
-    </string-array>
-    <string-array name="rele">
-        <item>not connected</item>
-        <item>RELE1 (default)</item>
-        <item>RELE2</item>
-    </string-array>
     <string name="rele1_action">Send impulse on RELE1</string>
     <string name="rele2_action">Send impules on RELE2</string>
     <string name="gsm_register_fail">GSM register failed</string>
@@ -330,4 +320,9 @@
     <string name="commands">Control commands</string>
     <string name="commands_sum">Select commands on main screen</string>
     <string name="valet_cmd">VALET</string>
+    <string name="work_time">Work time</string>
+    <string name="rele_sum">Prestarting heater settings</string>
+    <string name="connection">Connection:</string>
+    <string name="show_map">Show map</string>
+    <string name="data_transfer">Data transfer</string>
 </resources>

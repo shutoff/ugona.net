@@ -181,7 +181,7 @@
     <string name="low_battery">Батарейка в карточке разряжена</string>
     <string name="download_settings">Загружены настройки устройства</string>
     <string name="lan_change">Изменилось количество устройств LAN</string>
-    <string name="command">Комманда с кодонаборника</string>
+    <string name="command">Команда с кодонаборника</string>
     <string name="brake">Тормоз</string>
     <string name="guard2_on">Включен режим охраны 2</string>
     <string name="guard2_off">Выключен режим охраны 2</string>
@@ -267,11 +267,6 @@
     <string name="background">Фон</string>
     <string name="rotate">Перевернуть</string>
     <string name="new_car">Новый автомобиль</string>
-    <string-array name="rele">
-        <item>не подключен</item>
-        <item>RELE1 (обычно)</item>
-        <item>RELE2</item>
-    </string-array>
     <string name="rele1_action">Отправить импульс на RELE1</string>
     <string name="rele2_action">Отправить импульс на RELE2</string>
     <string name="gsm_register_fail">Невозможно зарегестрироваться в GSM сети</string>
@@ -292,7 +287,7 @@
     <string name="timer_event">Соединение по таймеру</string>
     <string name="find">Включить режим поиска</string>
     <string name="find_sum">Передавать координаты 3 часа каждые 10 минут</string>
-    <string name="map_req">Запрос местоположение</string>
+    <string name="map_req">Запрос местоположения</string>
     <string name="map_sum">Однократный запрос местоположения</string>
     <string name="mode_a">Режим A</string>
     <string name="mode_a_sum">Передача GSM координат каждые 6 часов</string>
@@ -301,8 +296,13 @@
     <string name="mode_c">Режим C</string>
     <string name="mode_c_sum">Передача GPS координат каждые 24 часа</string>
     <string name="mode_d">Режим D</string>
-    <string name="mode_d_sum">Одидание комманды каждые 12 часов</string>
-    <string name="commands">Комманды управления</string>
-    <string name="commands_sum">Выбор комманд на главном экране</string>
+    <string name="mode_d_sum">Одидание команды каждые 12 часов</string>
+    <string name="commands">Команды управления</string>
+    <string name="commands_sum">Выбор команд на главном экране</string>
     <string name="valet_cmd">Режим АВТОСЕРВИС</string>
+    <string name="work_time">Время прогрева</string>
+    <string name="rele_sum">Настройки предпускового подогревателя</string>
+    <string name="connection">Подключение:</string>
+    <string name="show_map">Карта</string>
+    <string name="data_transfer">Передача данных</string>
 </resources>

@@ -3,6 +3,7 @@ package net.ugona.plus;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
@@ -20,7 +21,13 @@ public class State {
 
     static int telephony_state = 0;
 
+    static boolean isDebug() {
+        return Build.FINGERPRINT.startsWith("generic");
+    }
+
     static boolean hasTelephony(Context context) {
+        if (isDebug())
+            return true;
         if (telephony_state == 0) {
             PackageManager pm = context.getPackageManager();
             if (!pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {

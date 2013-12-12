@@ -243,10 +243,10 @@ public class Alarm extends Activity {
     }
 
     static void createNotification(Context context, String text, String car_id) {
-        createNotification(context, text, R.drawable.warning, car_id);
+        createNotification(context, text, R.drawable.warning, car_id, null);
     }
 
-    static int createNotification(Context context, String text, int pictId, String car_id) {
+    static int createNotification(Context context, String text, int pictId, String car_id, Uri sound) {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String title = context.getString(R.string.app_name);
@@ -265,6 +265,8 @@ public class Alarm extends Activity {
                         .setSmallIcon(pictId)
                         .setContentTitle(title)
                         .setContentText(text);
+        if (sound != null)
+            builder.setSound(sound);
 
         Intent notificationIntent = new Intent(context, MainActivity.class);
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -50,11 +50,10 @@
         android:summary="@string/commands_sum"
         android:key="cmd" />
 
-    <ListPreference
+    <Preference
         android:title="@string/rele"
-        android:key="rele"
-        android:entries="@array/rele"
-        android:entryValues="@array/rele_values" />
+        android:summary="@string/rele_sum"
+        android:key="rele" />
 
     <CheckBoxPreference
         android:title="@string/show_balance"

@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -19,14 +20,16 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
+import java.util.Date;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Actions {
 
     static final String INCORRECT_MESSAGE = "Incorrect message";
 
-    static void done(final Context context, int id, int pictId, String car_id) {
-        SmsMonitor.showNotification(context, context.getString(id), car_id);
+    static void done(final Context context, int id, int pictId, String car_id, Uri sound) {
+        SmsMonitor.showNotification(context, context.getString(id), pictId, car_id, sound);
     }
 
     static void motor_on(final Context context, final String car_id) {
@@ -56,7 +59,7 @@ public class Actions {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                            done(context, R.string.motor_on_ok, R.drawable.white_motor_on, car_id);
+                            done(context, R.string.motor_on_ok, R.drawable.white_motor_on, car_id, Uri.parse("android.resource://net.ugona.plus/raw/start"));
                             return true;
                         }
                         return false;
@@ -86,7 +89,7 @@ public class Actions {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        done(context, R.string.motor_off_ok, R.drawable.white_motor_off, car_id);
+                        done(context, R.string.motor_off_ok, R.drawable.white_motor_off, car_id, null);
                         return true;
                     }
                 });
@@ -135,6 +138,42 @@ public class Actions {
             @Override
             public void run() {
                 SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.reset, "RESET", null));
+            }
+        });
+    }
+
+    static Pattern location;
+
+    static void map_query(final Context context, final String car_id) {
+        requestPassword(context, R.string.map_req, R.string.map_req, new Runnable() {
+            @Override
+            public void run() {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.map_req, "MAP", "") {
+                    @Override
+                    boolean process_answer(final Context context, final String car_id, String text) {
+                        if (location == null)
+                            location = Pattern.compile("\\&lat=(-?[0-9]+\\.[0-9]+)\\&lon=(-?[0-9]+\\.[0-9]+)");
+                        Matcher matcher = location.matcher(text);
+                        if (!matcher.find())
+                            return false;
+                        try {
+                            final double lat = Double.parseDouble(matcher.group(1));
+                            final double lon = Double.parseDouble(matcher.group(2));
+                            Intent intent = new Intent(context, StatusDialog.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.putExtra(Names.TITLE, context.getString(R.string.map_req));
+                            intent.putExtra(Names.SMS_TEXT, text);
+                            intent.putExtra(Names.LATITUDE, lat);
+                            intent.putExtra(Names.LONGITUDE, lon);
+                            intent.putExtra(Names.ID, car_id);
+                            context.startActivity(intent);
+                            return true;
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                        return false;
+                    }
+                });
             }
         });
     }
@@ -251,7 +290,16 @@ public class Actions {
             text = "REL2 IMPULS";
             answer = "REL2 IMPULS OK";
         }
-        final SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.rele, text, answer);
+        final SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.rele, text, answer) {
+            @Override
+            boolean process_answer(Context context, String car_id, String text) {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putLong(Names.RELE_START + car_id, new Date().getTime());
+                ed.commit();
+                return true;
+            }
+        };
         requestPassword(context, R.string.rele, id, new Runnable() {
             @Override
             public void run() {
@@ -280,7 +328,7 @@ public class Actions {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        done(context, R.string.valet_on_ok, R.drawable.white_valet_on, car_id);
+                        done(context, R.string.valet_on_ok, R.drawable.white_valet_on, car_id, null);
                         return true;
                     }
                 });
@@ -307,7 +355,7 @@ public class Actions {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        done(context, R.string.valet_off_ok, R.drawable.white_valet_off, car_id);
+                        done(context, R.string.valet_off_ok, R.drawable.white_valet_off, car_id, null);
                         return true;
                     }
                 });

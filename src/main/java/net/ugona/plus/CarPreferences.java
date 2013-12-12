@@ -14,7 +14,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
-import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
@@ -32,6 +31,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -57,7 +57,7 @@ public class CarPreferences extends PreferenceActivity {
     Preference limitPref;
     SeekBarPreference sensPref;
     CheckBoxPreference photoPref;
-    ListPreference relePref;
+    Preference relePref;
 
     String alarmUri;
     String notifyUri;
@@ -101,7 +101,6 @@ public class CarPreferences extends PreferenceActivity {
         SharedPreferences.Editor ed = preferences.edit();
         ed.putInt("tmp_shift", preferences.getInt(Names.TEMP_SIFT + car_id, 0));
         ed.putBoolean("show_balance", preferences.getBoolean(Names.SHOW_BALANCE + car_id, true));
-        ed.putString("rele", preferences.getString(Names.CAR_RELE + car_id, ""));
         ed.putBoolean("show_photo", preferences.getBoolean(Names.SHOW_PHOTO + car_id, false));
         ed.putInt("shock_sens", preferences.getInt(Names.SHOCK_SENS + car_id, 5));
         ed.putString("name_", name);
@@ -231,19 +230,14 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
 
-        relePref = (ListPreference) findPreference("rele");
-        relePref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+        relePref = findPreference("rele");
+        relePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                SharedPreferences.Editor ed = preferences.edit();
-                ed.putString(Names.CAR_RELE + car_id, newValue.toString());
-                ed.commit();
-                sendUpdate();
-                setRele();
+            public boolean onPreferenceClick(Preference preference) {
+                setupRele();
                 return true;
             }
         });
-        setRele();
 
         photoPref = (CheckBoxPreference) findPreference("show_photo");
         photoPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -399,6 +393,7 @@ public class CarPreferences extends PreferenceActivity {
             ps.removePreference(testPref);
         }
 
+        setupCommands();
         setupPointer();
     }
 
@@ -439,18 +434,6 @@ public class CarPreferences extends PreferenceActivity {
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    void setRele() {
-        String rele = preferences.getString(Names.CAR_RELE + car_id, "");
-        String[] values = getResources().getStringArray(R.array.rele_values);
-        String[] names = getResources().getStringArray(R.array.rele);
-        for (int i = 0; i < values.length; i++) {
-            if (values[i].equals(rele)) {
-                relePref.setSummary(names[i]);
-                break;
-            }
-        }
     }
 
     void setPhone(String phoneNumber) {
@@ -530,6 +513,98 @@ public class CarPreferences extends PreferenceActivity {
         Actions.requestPassword(this, R.string.call_mode, R.string.call_mode_msg, send);
     }
 
+    void setupCommands() {
+        int flags = State.getCommands(preferences, car_id);
+        relePref.setEnabled((flags & State.CMD_RELE) != 0);
+    }
+
+    final static String[] rele_connection = {
+            "RELE1",
+            "RELE2"
+    };
+
+    void setupRele() {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.rele)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.ok, null)
+                .setView(inflater.inflate(R.layout.prestarter, null))
+                .create();
+        dialog.show();
+        final Spinner rele = (Spinner) dialog.findViewById(R.id.rele);
+        rele.setAdapter(new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return rele_connection.length;
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return rele_connection[position];
+            }
+
+            @Override
+            public long getItemId(int position) {
+                return position;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View v = convertView;
+                if (v == null) {
+                    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = inflater.inflate(R.layout.car_list_item, null);
+                }
+                TextView tv = (TextView) v.findViewById(R.id.name);
+                tv.setText(rele_connection[position]);
+                return v;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View v = convertView;
+                if (v == null) {
+                    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = inflater.inflate(R.layout.car_list_dropdown_item, null);
+                }
+                TextView tv = (TextView) v.findViewById(R.id.name);
+                tv.setText(rele_connection[position]);
+                return v;
+            }
+        });
+        rele.setSelection(preferences.getString(Names.CAR_RELE + car_id, "").equals("2") ? 1 : 0);
+        final TextView tvTime = (TextView) dialog.findViewById(R.id.time);
+        final SeekBar seek = (SeekBar) dialog.findViewById(R.id.seek);
+        seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                tvTime.setText((progress + 10) + " " + getString(R.string.minutes));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        seek.setProgress(preferences.getInt(Names.RELE_TIME, 30) - 10);
+        dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putString(Names.CAR_RELE + car_id, (rele.getSelectedItemPosition() == 1) ? "1" : "2");
+                ed.putInt(Names.RELE_TIME + car_id, seek.getProgress() + 10);
+                ed.commit();
+                dialog.dismiss();
+            }
+        });
+    }
+
     final static int[] Command = {
             R.string.call,
             R.string.valet_cmd,
@@ -551,13 +626,12 @@ public class CarPreferences extends PreferenceActivity {
                         SharedPreferences.Editor ed = preferences.edit();
                         ed.putInt(Names.COMMANDS + car_id, commands);
                         ed.commit();
+                        setupCommands();
                         sendUpdate();
                     }
                 })
                 .setView(inflater.inflate(R.layout.checklist, null))
                 .create();
-        dialog.getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         dialog.show();
         commands = State.getCommands(preferences, car_id);
         ListView lv = (ListView) dialog.findViewById(R.id.list);

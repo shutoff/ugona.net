@@ -58,7 +58,10 @@ public class PhoneNumberDialog extends Activity {
             @Override
             public void onClick(View v) {
                 Intent i = getIntent();
-                i.putExtra(Names.CAR_PHONE, Phones.formatPhoneNumber(edNumber.getText().toString()));
+                String number = edNumber.getText().toString();
+                if (!State.isDebug())
+                    number = Phones.formatPhoneNumber(number);
+                i.putExtra(Names.CAR_PHONE, number);
                 setResult(RESULT_OK, i);
                 dialog.dismiss();
             }
@@ -192,6 +195,8 @@ public class PhoneNumberDialog extends Activity {
     }
 
     static boolean isValidPhoneNumber(String number) {
+        if (State.isDebug())
+            return true;
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
         try {
             Phonenumber.PhoneNumber n = phoneUtil.parse(number, Locale.getDefault().getCountry());

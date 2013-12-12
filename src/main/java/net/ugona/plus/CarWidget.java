@@ -145,15 +145,13 @@ public class CarWidget extends AppWidgetProvider {
         boolean progress = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD);
 
         int rows = 3;
-        try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             Bundle options = appWidgetManager.getAppWidgetOptions(widgetID);
             int maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
-            if (maxHeight < 70)
+            if (maxHeight < 66)
                 rows = 2;
             if (maxHeight > 100)
                 rows = 4;
-        } catch (Exception ex) {
-            // ignore
         }
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
