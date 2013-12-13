@@ -305,4 +305,5 @@
     <string name="connection">Подключение:</string>
     <string name="show_map">Карта</string>
     <string name="data_transfer">Передача данных</string>
+    <string name="timeout">Долгое время не было сообщений от маяка</string>
 </resources>

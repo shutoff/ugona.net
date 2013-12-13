@@ -148,7 +148,8 @@ public class CarWidget extends AppWidgetProvider {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             Bundle options = appWidgetManager.getAppWidgetOptions(widgetID);
             int maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
-            if (maxHeight < 66)
+            State.appendLog("widget height=" + maxHeight);
+            if (maxHeight < 62)
                 rows = 2;
             if (maxHeight > 100)
                 rows = 4;

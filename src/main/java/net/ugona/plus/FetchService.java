@@ -324,6 +324,32 @@ public class FetchService extends Service {
                 new BalanceRequest(car_id, balance_time);
             }
 
+            if (preferences.getBoolean(Names.POINTER + car_id, false)) {
+                long now = new Date().getTime();
+                boolean new_state = ((now - eventTime) > 25 * 60 * 60 * 1000);
+                if (new_state != preferences.getBoolean(Names.TIMEOUT + car_id, false)) {
+                    SharedPreferences.Editor ed = preferences.edit();
+                    ed.putBoolean(Names.TIMEOUT + car_id, new_state);
+                    int timeout_id = preferences.getInt(Names.TIMEOUT_NOTIFICATION + car_id, 0);
+                    try {
+                        if (new_state) {
+                            if (timeout_id == 0) {
+                                timeout_id = Alarm.createNotification(FetchService.this, getString(R.string.timeout), R.drawable.warning, car_id, null);
+                                ed.putInt(Names.TIMEOUT_NOTIFICATION + car_id, timeout_id);
+                            }
+                        } else {
+                            if (timeout_id > 0) {
+                                Alarm.removeNotification(FetchService.this, car_id, timeout_id);
+                                ed.remove(Names.TIMEOUT_NOTIFICATION + car_id);
+                            }
+                        }
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                    ed.commit();
+                }
+            }
+
         }
 
         @Override

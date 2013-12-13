@@ -156,22 +156,17 @@ public class Actions {
                         Matcher matcher = location.matcher(text);
                         if (!matcher.find())
                             return false;
-                        try {
-                            final double lat = Double.parseDouble(matcher.group(1));
-                            final double lon = Double.parseDouble(matcher.group(2));
-                            Intent intent = new Intent(context, StatusDialog.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            intent.putExtra(Names.TITLE, context.getString(R.string.map_req));
-                            intent.putExtra(Names.SMS_TEXT, text);
-                            intent.putExtra(Names.LATITUDE, lat);
-                            intent.putExtra(Names.LONGITUDE, lon);
-                            intent.putExtra(Names.ID, car_id);
-                            context.startActivity(intent);
-                            return true;
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
-                        return false;
+                        final String lat = matcher.group(1);
+                        final String lon = matcher.group(2);
+                        Intent intent = new Intent(context, StatusDialog.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putExtra(Names.TITLE, context.getString(R.string.map_req));
+                        intent.putExtra(Names.SMS_TEXT, text);
+                        intent.putExtra(Names.LATITUDE, lat);
+                        intent.putExtra(Names.LONGITUDE, lon);
+                        intent.putExtra(Names.ID, car_id);
+                        context.startActivity(intent);
+                        return true;
                     }
                 });
             }

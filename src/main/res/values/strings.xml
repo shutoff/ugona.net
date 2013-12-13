@@ -325,4 +325,5 @@
     <string name="connection">Connection:</string>
     <string name="show_map">Show map</string>
     <string name="data_transfer">Data transfer</string>
+    <string name="timeout">Long time no events from pointer</string>
 </resources>

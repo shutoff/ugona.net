@@ -22,8 +22,8 @@ public class StatusDialog extends Activity {
 
         String state = getIntent().getStringExtra(Names.STATE);
         if (state == null) {
-            final double lat = getIntent().getDoubleExtra(Names.LATITUDE, 0);
-            final double lon = getIntent().getDoubleExtra(Names.LONGITUDE, 0);
+            final String lat = getIntent().getStringExtra(Names.LATITUDE);
+            final String lon = getIntent().getStringExtra(Names.LONGITUDE);
             final String car_id = getIntent().getStringExtra(Names.ID);
             builder.setPositiveButton(R.string.show_map, new DialogInterface.OnClickListener() {
                 @Override

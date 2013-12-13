@@ -95,4 +95,7 @@ public final class Names {
     static final String RELE_TIME = "rele_time";
     static final String RELE_START = "rele_start";
 
+    static final String TIMEOUT = "timeout";
+    static final String TIMEOUT_NOTIFICATION = "timeout_id";
+
 }
