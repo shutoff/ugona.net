@@ -1,0 +1,19 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:car="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/date"
+        android:title=""
+        car:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/preferences"
+        android:title="@string/preferences"
+        car:showAsAction="never" />
+
+    <item
+        android:id="@+id/about"
+        android:title="@string/about"
+        car:showAsAction="never" />
+
+</menu>

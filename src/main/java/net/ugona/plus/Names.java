@@ -68,7 +68,6 @@ public final class Names {
 
     static final String TEMPERATURE = "Temperature";
     static final String TEMP_SIFT = "TempShift";
-    static final String NOSLEEP_MODE = "safe_mode";
     static final String MAP_TYPE = "map_type";
 
     static final String ADDRESS = "Address";
@@ -91,11 +90,14 @@ public final class Names {
     static final String BALANCE_NOTIFICATION = "balance_id";
     static final String POINTER = "pointer";
 
-    static final String COMMANDS = "commands";
+    static final String COMMANDS = "commands_";
     static final String RELE_TIME = "rele_time";
     static final String RELE_START = "rele_start";
 
     static final String TIMEOUT = "timeout";
     static final String TIMEOUT_NOTIFICATION = "timeout_id";
+    static final String POINTERS = "pointers";
+
+    static final String INIT_POINTER = "init_pointer";
 
 }

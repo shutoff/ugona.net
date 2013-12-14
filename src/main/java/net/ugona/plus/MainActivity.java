@@ -8,6 +8,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -128,6 +129,15 @@ public class MainActivity extends ActionBarActivity {
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
 
+        update(car_id);
+        cars = Cars.getCars(this);
+        for (Cars.Car car : cars) {
+            update(car.id);
+            for (String p : car.pointers) {
+                update(p);
+            }
+        }
+
         setShowTracks();
         mViewPager.setCurrentItem(getPagePosition(PAGE_STATE));
 
@@ -161,6 +171,30 @@ public class MainActivity extends ActionBarActivity {
                 Intent intent = new Intent(this, CarPreferences.class);
                 intent.putExtra(Names.ID, car_id);
                 startActivityForResult(intent, CAR_SETUP);
+            } else if (!preferences.getBoolean(Names.INIT_POINTER, false)) {
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putBoolean(Names.INIT_POINTER, true);
+                ed.commit();
+                AlertDialog dialog = new AlertDialog.Builder(this)
+                        .setTitle(R.string.pointer_support)
+                        .setMessage(R.string.pointer_support_msg)
+                        .setNegativeButton(R.string.cancel, null)
+                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                for (int i = 1; ; i++) {
+                                    if (!isId(i + "")) {
+                                        Cars.deleteCarKeys(MainActivity.this, i + "");
+                                        Intent intent = new Intent(MainActivity.this, CarPreferences.class);
+                                        intent.putExtra(Names.ID, i + "");
+                                        startActivityForResult(intent, CAR_SETUP);
+                                        break;
+                                    }
+                                }
+                            }
+                        })
+                        .create();
+                dialog.show();
             }
         }
 
@@ -222,11 +256,26 @@ public class MainActivity extends ActionBarActivity {
         outState.putLong(DATE, current.toDate().getTime());
     }
 
+    int menuId() {
+        return R.menu.main;
+    }
+
+    boolean isId(String id) {
+        for (Cars.Car car : cars) {
+            if (car.id.equals(id))
+                return true;
+            for (String p : car.pointers)
+                if (p.equals(id))
+                    return true;
+        }
+        return false;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         topSubMenu = menu;
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
+        inflater.inflate(menuId(), menu);
         MenuItem item = menu.findItem(R.id.date);
         if (show_date) {
             item.setTitle(current.toString("d MMMM"));
@@ -402,9 +451,13 @@ public class MainActivity extends ActionBarActivity {
         ed.commit();
     }
 
+    Cars.Car[] getCars() {
+        return Cars.getCars(this);
+    }
+
     void setActionBar() {
         ActionBar actionBar = getSupportActionBar();
-        cars = Cars.getCars(this);
+        cars = getCars();
         setCar(car_id);
         if (cars.length > 1) {
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
@@ -496,6 +549,12 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    void update(String id) {
+        Intent intent = new Intent(this, FetchService.class);
+        intent.putExtra(Names.ID, id);
+        startService(intent);
+    }
+
     void update() {
         int cur = mViewPager.getCurrentItem();
         setShowTracks();
@@ -578,8 +637,6 @@ public class MainActivity extends ActionBarActivity {
             }
             return super.getPageTitle(position);
         }
-
-
     }
 
     class CarsAdapter extends BaseAdapter {

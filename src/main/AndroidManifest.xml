@@ -53,6 +53,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".CarActivity" />
+
         <activity
             android:name=".CarPreferences"
             android:label="@string/app_name"

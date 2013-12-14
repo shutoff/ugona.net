@@ -82,6 +82,11 @@ public class StateFragment extends Fragment
     CarDrawable drawable;
     BroadcastReceiver br;
 
+    View vPointer1;
+    View vPointer2;
+    TextView tvPointer1;
+    TextView tvPointer2;
+
     ActionFragment.ActionAdapter adapter;
 
     boolean pointer;
@@ -178,6 +183,25 @@ public class StateFragment extends Fragment
 
         drawable = new CarDrawable();
 
+        vPointer1 = v.findViewById(R.id.pointers1);
+        vPointer2 = v.findViewById(R.id.pointers2);
+        if (vPointer1 != null) {
+            tvPointer1 = (TextView) v.findViewById(R.id.pointer1);
+            tvPointer1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    openPointer(0);
+                }
+            });
+            tvPointer2 = (TextView) v.findViewById(R.id.pointer2);
+            tvPointer2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    openPointer(1);
+                }
+            });
+        }
+
         update(context);
 
         br = new BroadcastReceiver() {
@@ -250,6 +274,7 @@ public class StateFragment extends Fragment
             }
             adapter.attach(getActivity(), lvActions);
         }
+        startUpdate(getActivity());
 
         return v;
     }
@@ -374,11 +399,15 @@ public class StateFragment extends Fragment
         tvTime.setText(time);
 
         int commands = State.getCommands(preferences, car_id);
+        boolean ignition = preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false);
+        boolean az = preferences.getBoolean(Names.AZ + car_id, false);
+        boolean block = !preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false);
+
 
         int n_buttons = 0;
-        if (State.hasTelephony(context) && ((commands & State.CMD_AZ) != 0)) {
+        if (State.hasTelephony(context) && ((commands & State.CMD_AZ) != 0) && (!ignition || az)) {
             vMotor.setVisibility(View.VISIBLE);
-            if (preferences.getBoolean(Names.AZ + car_id, false)) {
+            if (az) {
                 ivMotor.setImageResource(R.drawable.icon_motor_off);
                 pMotor.setVisibility(SmsMonitor.isProcessed(car_id, R.string.motor_off) ? View.VISIBLE : View.GONE);
             } else {
@@ -389,7 +418,7 @@ public class StateFragment extends Fragment
         } else {
             vMotor.setVisibility(View.GONE);
         }
-        if (State.hasTelephony(context) && ((commands & State.CMD_RELE) != 0)) {
+        if (State.hasTelephony(context) && ((commands & State.CMD_RELE) != 0) && !ignition) {
             vRele.setVisibility(View.VISIBLE);
             pRele.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele) ? View.VISIBLE : View.GONE);
             long delta = new Date().getTime() - preferences.getLong(Names.RELE_START + car_id, 0) / 60000;
@@ -402,11 +431,8 @@ public class StateFragment extends Fragment
         } else {
             vRele.setVisibility(View.GONE);
         }
-        if (State.hasTelephony(context) && ((commands & State.CMD_BLOCK) != 0) &&
-                (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false)) &&
-                !preferences.getBoolean(Names.GUARD + car_id, false) &&
-                !preferences.getBoolean(Names.AZ + car_id, false) &&
-                !(!preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false))) {
+        if (State.hasTelephony(context) && ignition && !az && !block &&
+                !preferences.getBoolean(Names.GUARD + car_id, false)) {
             vBlock.setVisibility(View.VISIBLE);
             pBlock.setVisibility(SmsMonitor.isProcessed(car_id, R.string.block) ? View.VISIBLE : View.GONE);
             n_buttons++;
@@ -414,7 +440,7 @@ public class StateFragment extends Fragment
             vBlock.setVisibility(View.GONE);
         }
         boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
-        if (State.hasTelephony(context) && (n_buttons < 3) && ((commands & State.CMD_VALET) != 0)) {
+        if (State.hasTelephony(context) && (n_buttons < 3) && (((commands & State.CMD_VALET) != 0) || valet || block)) {
             if (valet) {
                 ivValet.setImageResource(R.drawable.icon_valet_off);
                 pValet.setVisibility(SmsMonitor.isProcessed(car_id, R.string.valet_off) ? View.VISIBLE : View.GONE);
@@ -450,6 +476,10 @@ public class StateFragment extends Fragment
         }
 
         mValet.setVisibility(valet ? View.VISIBLE : View.GONE);
+
+        setPointer(vPointer1, tvPointer1, 0);
+        setPointer(vPointer2, tvPointer2, 1);
+
     }
 
     void updateNetStatus(Context context) {
@@ -467,6 +497,14 @@ public class StateFragment extends Fragment
         vError.setVisibility(View.GONE);
         imgRefresh.setVisibility(View.GONE);
         prgUpdate.setVisibility(View.VISIBLE);
+        String pointers = preferences.getString(Names.POINTERS + car_id, "");
+        if (pointers.equals(""))
+            return;
+        for (String p : pointers.split(",")) {
+            Intent i = new Intent(context, FetchService.class);
+            i.putExtra(Names.ID, p);
+            context.startService(i);
+        }
     }
 
     void showMap() {
@@ -558,5 +596,37 @@ public class StateFragment extends Fragment
             return;
         AnimationDrawable animation = (AnimationDrawable) imgEngine.getDrawable();
         animation.start();
+    }
+
+    void openPointer(int n) {
+        Intent i = new Intent(getActivity(), CarActivity.class);
+        i.putExtra(Names.ID, preferences.getString(Names.POINTERS + car_id, "").split(",")[n]);
+        getActivity().startActivity(i);
+    }
+
+    void setPointer(View v, TextView tv, int n) {
+        if (v == null)
+            return;
+        String p = preferences.getString(Names.POINTERS + car_id, "");
+        if (p.equals("")) {
+            v.setVisibility(View.GONE);
+            return;
+        }
+        String[] pid = p.split(",");
+        if (n >= pid.length) {
+            v.setVisibility(View.GONE);
+            return;
+        }
+        long p_last = preferences.getLong(Names.EVENT_TIME + pid[n], 0);
+        if (p_last != 0) {
+            DateFormat df = android.text.format.DateFormat.getDateFormat(getActivity());
+            DateFormat tf = android.text.format.DateFormat.getTimeFormat(getActivity());
+            tv.setText(df.format(p_last) + " " + tf.format(p_last));
+        } else {
+            tv.setText(getString(R.string.unknown));
+        }
+        int color = preferences.getBoolean(Names.TIMEOUT + car_id, false) ? R.color.error : android.R.color.secondary_text_dark;
+        tv.setTextColor(getResources().getColor(color));
+        v.setVisibility(View.VISIBLE);
     }
 }

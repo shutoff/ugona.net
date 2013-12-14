@@ -593,11 +593,12 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
         seek.setProgress(preferences.getInt(Names.RELE_TIME, 30) - 10);
+        tvTime.setText((seek.getProgress() + 10) + " " + getString(R.string.minutes));
         dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 SharedPreferences.Editor ed = preferences.edit();
-                ed.putString(Names.CAR_RELE + car_id, (rele.getSelectedItemPosition() == 1) ? "1" : "2");
+                ed.putString(Names.CAR_RELE + car_id, (rele.getSelectedItemPosition() == 1) ? "2" : "1");
                 ed.putInt(Names.RELE_TIME + car_id, seek.getProgress() + 10);
                 ed.commit();
                 dialog.dismiss();
@@ -608,7 +609,6 @@ public class CarPreferences extends PreferenceActivity {
     final static int[] Command = {
             R.string.call,
             R.string.valet_cmd,
-            R.string.block,
             R.string.autostart,
             R.string.rele
     };
@@ -633,6 +633,8 @@ public class CarPreferences extends PreferenceActivity {
                 .setView(inflater.inflate(R.layout.checklist, null))
                 .create();
         dialog.show();
+        TextView tv = (TextView) dialog.findViewById(R.id.msg);
+        tv.setText(getString(R.string.cmd_msg));
         commands = State.getCommands(preferences, car_id);
         ListView lv = (ListView) dialog.findViewById(R.id.list);
         lv.setAdapter(new BaseAdapter() {
@@ -828,14 +830,120 @@ public class CarPreferences extends PreferenceActivity {
                     String ver = device.get("versionSoftPGSM").asString();
                     versionPref.setSummary(ver);
                     SharedPreferences.Editor ed = preferences.edit();
+                    boolean new_pointer = !preferences.getBoolean(Names.POINTER + car_id, false);
                     if (ver.toUpperCase().substring(0, 5).equals("MS-TR")) {
                         ed.putBoolean(Names.POINTER + car_id, true);
                         setupPointer();
                     } else {
                         ed.remove(Names.POINTER + car_id);
+                        new_pointer = false;
                     }
                     ed.putString(Names.VERSION + car_id, ver);
                     ed.commit();
+                    if (preferences.getString(Names.CARS, "").split(",").length < 2)
+                        new_pointer = false;
+                    if (new_pointer) {
+                        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+                        final AlertDialog dialog = new AlertDialog.Builder(CarPreferences.this)
+                                .setTitle(R.string.pointer)
+                                .setMessage(R.string.pointer_msg)
+                                .setPositiveButton(R.string.ok, null)
+                                .setNegativeButton(R.string.cancel, null)
+                                .setView(inflater.inflate(R.layout.cars, null))
+                                .create();
+                        dialog.show();
+                        Cars.Car[] full_cars = Cars.getCars(CarPreferences.this);
+                        Cars.Car[] tmp_cars = new Cars.Car[full_cars.length - 1];
+                        int n = 0;
+                        for (Cars.Car c : full_cars) {
+                            if (c.id.equals(car_id))
+                                continue;
+                            tmp_cars[n++] = c;
+                        }
+                        final Cars.Car[] cars = tmp_cars;
+                        final Spinner spinner = (Spinner) dialog.findViewById(R.id.cars);
+                        spinner.setAdapter(new BaseAdapter() {
+                            @Override
+                            public int getCount() {
+                                return cars.length;
+                            }
+
+                            @Override
+                            public Object getItem(int position) {
+                                return cars[position];
+                            }
+
+                            @Override
+                            public long getItemId(int position) {
+                                return position;
+                            }
+
+                            @Override
+                            public View getView(int position, View convertView, ViewGroup parent) {
+                                View v = convertView;
+                                if (v == null) {
+                                    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                                    v = inflater.inflate(R.layout.car_list_item, null);
+                                }
+                                TextView tv = (TextView) v.findViewById(R.id.name);
+                                tv.setText(cars[position].name);
+                                return v;
+                            }
+
+                            @Override
+                            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                                View v = convertView;
+                                if (v == null) {
+                                    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                                    v = inflater.inflate(R.layout.car_list_dropdown_item, null);
+                                }
+                                TextView tv = (TextView) v.findViewById(R.id.name);
+                                tv.setText(cars[position].name);
+                                return v;
+                            }
+                        });
+                        if (cars.length < 2)
+                            spinner.setVisibility(View.GONE);
+                        dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                SharedPreferences.Editor ed = preferences.edit();
+                                String id = cars[spinner.getSelectedItemPosition()].id;
+                                String new_cars = null;
+                                for (Cars.Car car : cars) {
+                                    if (new_cars == null) {
+                                        new_cars = car.id;
+                                        continue;
+                                    }
+                                    new_cars += "," + car.id;
+                                }
+                                ed.putString(Names.CARS, new_cars);
+                                ed.putString(Names.CAR_NAME + car_id, "Pointer " + car_id);
+                                String pointers = preferences.getString(Names.POINTERS + id, "");
+                                if (!pointers.equals(""))
+                                    pointers += ",";
+                                pointers += car_id;
+                                ed.putString(Names.POINTERS + id, pointers);
+                                ed.commit();
+                                Intent i = new Intent(CarPreferences.this, FetchService.class);
+                                i.putExtra(Names.ID, car_id);
+                                startService(i);
+                                i.putExtra(Names.ID, id);
+                                startService(i);
+                                sendUpdate();
+                                sendUpdate(id);
+                                State.appendLog("join pointer");
+                                State.appendLog(Names.POINTERS + id + "=" + pointers);
+                                dialog.dismiss();
+                            }
+                        });
+                        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                            @Override
+                            public void onDismiss(DialogInterface dialog) {
+                                finish();
+                            }
+                        });
+                    }
                 } catch (Exception ex) {
                     // ignore
                 }
@@ -876,9 +984,13 @@ public class CarPreferences extends PreferenceActivity {
     }
 
     void sendUpdate() {
+        sendUpdate(car_id);
+    }
+
+    void sendUpdate(String id) {
         try {
             Intent intent = new Intent(FetchService.ACTION_UPDATE_FORCE);
-            intent.putExtra(Names.ID, car_id);
+            intent.putExtra(Names.ID, id);
             sendBroadcast(intent);
         } catch (Exception e) {
             // ignore

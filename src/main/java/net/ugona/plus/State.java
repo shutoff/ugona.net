@@ -93,15 +93,14 @@ public class State {
 
     static final int CMD_CALL = 1;
     static final int CMD_VALET = 2;
-    static final int CMD_BLOCK = 4;
-    static final int CMD_AZ = 8;
-    static final int CMD_RELE = 16;
+    static final int CMD_AZ = 4;
+    static final int CMD_RELE = 8;
 
     static int getCommands(SharedPreferences preferences, String car_id) {
         int res = preferences.getInt(Names.COMMANDS + car_id, -1);
         if (res != -1)
             return res;
-        res = CMD_VALET | CMD_BLOCK;
+        res = CMD_VALET;
         if (preferences.getBoolean("autostart_" + car_id, false))
             res |= CMD_AZ;
         if (!preferences.getString(Names.CAR_RELE + car_id, "").equals(""))

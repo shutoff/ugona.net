@@ -13,7 +13,15 @@ public class Preferences {
                     car_ok = true;
                     break;
                 }
-
+                String pointers = preferences.getString(Names.POINTERS + car, "");
+                if (pointers.equals(""))
+                    continue;
+                for (String p : pointers.split(",")) {
+                    if (p.equals(car_id)) {
+                        car_ok = true;
+                        break;
+                    }
+                }
             }
             if (!car_ok)
                 car_id = null;

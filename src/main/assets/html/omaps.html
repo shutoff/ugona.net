@@ -86,6 +86,18 @@ function initialize() {
         iconAnchor: [ 8, 0 ]
     });
 
+    icon_nocourse = L.icon({
+        iconUrl: '../img/circle.png',
+        iconSize: [ 20, 20 ],
+        iconAnchor: [ 10, 0 ]
+    });
+
+    icon_small_nocourse = L.icon({
+        iconUrl: '../img/circle2.png',
+        iconSize: [ 16, 16 ],
+        iconAnchor: [ 8, 0 ]
+    });
+
     my_icon = L.icon({
         iconUrl: '../img/i.png',
         iconSize: [ 10, 10 ],
@@ -133,10 +145,16 @@ function initialize() {
                 return;
             }
 
-            var marker = new L.Marker([ lat, lng ], {
-                icon: (i == 0) ? icon : icon_small,
-                iconAngle: course
-            });
+            if (course == ''){
+                var marker = new L.Marker([ lat, lng ], {
+                    icon: (i == 0) ? icon_nocourse : icon_small_nocourse,
+                });
+            }else{
+                var marker = new L.Marker([ lat, lng ], {
+                    icon: (i == 0) ? icon : icon_small,
+                    iconAngle: course
+                });
+            }
             map.addLayer(marker);
 
             var info = L.popup()
@@ -313,10 +331,16 @@ function update() {
                     map.removeLayer(zones[i]);
                     zones[i] = null;
                 }
-                var marker = new L.Marker([ lat, lng ], {
-                    icon: (i == 0) ? icon : icon_small,
-                    iconAngle: course
-                });
+                if (course == ''){
+                    var marker = new L.Marker([ lat, lng ], {
+                        icon: (i == 0) ? icon_nocourse : icon_small_nocourse,
+                    });
+                }else{
+                    var marker = new L.Marker([ lat, lng ], {
+                        icon: (i == 0) ? icon : icon_small,
+                        iconAngle: course
+                    });
+                }
                 map.addLayer(marker);
                 var info = L.popup()
                     .setLatLng([lat, lng])
@@ -379,6 +403,7 @@ function center() {
     var pos = markers[0].getLatLng();
     map.setView([ pos.lat, pos.lng ], map.getZoom(), { animate: true });
 }
+
 
 
 

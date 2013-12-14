@@ -70,130 +70,118 @@ public class MapView extends WebViewActivity {
             return res;
         }
 
-        @JavascriptInterface
-        public String getData() {
-            Cars.Car[] cars = Cars.getCars(getBaseContext());
-            String[] car_data = new String[cars.length];
-            for (int i = 0; i < cars.length; i++) {
-                String id = cars[i].id;
-                String lat = preferences.getString(Names.LATITUDE + id, "");
-                String lon = preferences.getString(Names.LONGITUDE + id, "");
-                String zone = "";
-                if (lat.equals("") || lon.equals("")) {
-                    zone = preferences.getString(Names.GSM_ZONE + id, "");
-                    String points[] = zone.split("_");
-                    double min_lat = 180;
-                    double max_lat = -180;
-                    double min_lon = 180;
-                    double max_lon = -180;
-                    for (String point : points) {
-                        try {
-                            String[] p = point.split(",");
-                            double p_lat = Double.parseDouble(p[0]);
-                            double p_lon = Double.parseDouble(p[1]);
-                            if (p_lat > max_lat)
-                                max_lat = p_lat;
-                            if (p_lat < min_lat)
-                                min_lat = p_lat;
-                            if (p_lon > max_lon)
-                                max_lon = p_lon;
-                            if (p_lon < min_lon)
-                                min_lon = p_lon;
-                        } catch (Exception ex) {
-                            // ignore
-                        }
-                    }
-                    lat = ((min_lat + max_lat) / 2) + "";
-                    lon = ((min_lon + max_lon) / 2) + "";
-                }
-                String data = id + ";" +
-                        lat + ";" +
-                        lon + ";" +
-                        preferences.getString(Names.COURSE + id, "0") + ";";
-                if (cars.length > 1) {
-                    String name = preferences.getString(Names.CAR_NAME + id, "");
-                    if (name.length() == 0) {
-                        name = getString(R.string.car);
-                        if (id.length() > 0)
-                            name += " " + id;
-                    }
-                    data += name + "<br/>";
-                }
-                long last_stand = preferences.getLong(Names.LAST_STAND + id, 0);
-                if (last_stand > 0) {
-                    LocalDateTime stand = new LocalDateTime(last_stand);
-                    LocalDateTime now = new LocalDateTime();
-                    data += "<b>";
-                    if (stand.toLocalDate().equals(now.toLocalDate())) {
-                        data += tf.format(last_stand);
-                    } else {
-                        data += df.format(last_stand) + " " + tf.format(last_stand);
-                    }
-                    data += "</b> ";
-                } else if (last_stand < 0) {
-                    String speed = preferences.getString(Names.SPEED + id, "");
+        String createData(String id) {
+            String lat = preferences.getString(Names.LATITUDE + id, "");
+            String lon = preferences.getString(Names.LONGITUDE + id, "");
+            String zone = "";
+            if (lat.equals("") || lon.equals("")) {
+                zone = preferences.getString(Names.GSM_ZONE + id, "");
+                String points[] = zone.split("_");
+                double min_lat = 180;
+                double max_lat = -180;
+                double min_lon = 180;
+                double max_lon = -180;
+                for (String point : points) {
                     try {
-                        double s = Double.parseDouble(speed);
-                        if (s > 0) {
-                            data += String.format(getString(R.string.speed, speed));
-                            data += "<br/>";
-                        }
+                        String[] p = point.split(",");
+                        double p_lat = Double.parseDouble(p[0]);
+                        double p_lon = Double.parseDouble(p[1]);
+                        if (p_lat > max_lat)
+                            max_lat = p_lat;
+                        if (p_lat < min_lat)
+                            min_lat = p_lat;
+                        if (p_lon > max_lon)
+                            max_lon = p_lon;
+                        if (p_lon < min_lon)
+                            min_lon = p_lon;
                     } catch (Exception ex) {
                         // ignore
                     }
                 }
-                if (zone.equals("")) {
-                    data += lat + "," + lon + "<br/>";
-                    String address = Address.getAddress(getBaseContext(), id);
-                    String[] parts = address.split(", ");
-                    if (parts.length >= 3) {
-                        address = parts[0] + ", " + parts[1];
-                        for (int n = 2; n < parts.length; n++)
-                            address += "<br/>" + parts[n];
-                    }
-                    data += address;
-                    data += ";";
-                } else {
-                    String address = preferences.getString(Names.ADDRESS + id, "");
-                    String[] parts = address.split(", ");
-                    if (parts.length >= 3) {
-                        address = parts[0] + ", " + parts[1];
-                        for (int n = 2; n < parts.length; n++)
-                            address += "<br/>" + parts[n];
-                    }
-                    data += address;
-                    data += ";" + zone;
+                lat = ((min_lat + max_lat) / 2) + "";
+                lon = ((min_lon + max_lon) / 2) + "";
+            }
+            String data = id + ";" +
+                    lat + ";" +
+                    lon + ";" +
+                    preferences.getString(Names.COURSE + id, "") + ";";
+            if (cars.length > 1) {
+                String name = preferences.getString(Names.CAR_NAME + id, "");
+                if (name.length() == 0) {
+                    name = getString(R.string.car);
+                    if (id.length() > 0)
+                        name += " " + id;
                 }
-                car_data[i] = data;
+                data += name + "<br/>";
+            }
+            long last_stand = preferences.getLong(Names.LAST_STAND + id, 0);
+            if (last_stand > 0) {
+                LocalDateTime stand = new LocalDateTime(last_stand);
+                LocalDateTime now = new LocalDateTime();
+                data += "<b>";
+                if (stand.toLocalDate().equals(now.toLocalDate())) {
+                    data += tf.format(last_stand);
+                } else {
+                    data += df.format(last_stand) + " " + tf.format(last_stand);
+                }
+                data += "</b> ";
+            } else if (last_stand < 0) {
+                String speed = preferences.getString(Names.SPEED + id, "");
+                try {
+                    double s = Double.parseDouble(speed);
+                    if (s > 0) {
+                        data += String.format(getString(R.string.speed, speed));
+                        data += "<br/>";
+                    }
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+            if (zone.equals("")) {
+                data += lat + "," + lon + "<br/>";
+                String address = Address.getAddress(getBaseContext(), id);
+                String[] parts = address.split(", ");
+                if (parts.length >= 3) {
+                    address = parts[0] + ", " + parts[1];
+                    for (int n = 2; n < parts.length; n++)
+                        address += "<br/>" + parts[n];
+                }
+                data += address;
+                data += ";";
+            } else {
+                String address = preferences.getString(Names.ADDRESS + id, "");
+                String[] parts = address.split(", ");
+                if (parts.length >= 3) {
+                    address = parts[0] + ", " + parts[1];
+                    for (int n = 2; n < parts.length; n++)
+                        address += "<br/>" + parts[n];
+                }
+                data += address;
+                data += ";" + zone;
+            }
+            if (times.containsKey(id))
+                data += ";" + times.get(id);
+            return data;
+        }
+
+        @JavascriptInterface
+        public String getData() {
+            Cars.Car[] cars = Cars.getCars(getBaseContext());
+
+            String id = null;
+
+            String data = point_data;
+            if (data == null) {
+                data = createData(car_id);
+                id = car_id;
             }
 
-            if (point_data != null) {
-                String res = point_data;
-                for (String data : car_data) {
-                    res += "|" + data;
-                }
-                return res;
+            for (Cars.Car car : cars) {
+                if ((id != null) && id.equals(car.id))
+                    continue;
+                data += "|" + createData(car.id);
             }
-
-            String first = null;
-            String last = null;
-            for (String data : car_data) {
-                String[] p = data.split(";");
-                if (times.containsKey(p[0]))
-                    data += ";" + times.get(p[0]);
-                if (p[0].equals(car_id)) {
-                    first = data;
-                } else {
-                    if (last == null) {
-                        last = data;
-                    } else {
-                        last += "|" + data;
-                    }
-                }
-            }
-            if (last != null)
-                first += "|" + last;
-            return first;
+            return data;
         }
     }
 
@@ -343,6 +331,15 @@ public class MapView extends WebViewActivity {
     void setActionBar() {
         ActionBar actionBar = getSupportActionBar();
         cars = Cars.getCars(this);
+        boolean found = false;
+        for (Cars.Car car : cars) {
+            if (car.id.equals(car_id)) {
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+            cars = new Cars.Car[0];
         if (cars.length > 1) {
             String save_point_data = point_data;
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);

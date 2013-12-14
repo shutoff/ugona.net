@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.Vector;
 
 public class Cars extends ActionBarActivity {
 
@@ -31,9 +32,17 @@ public class Cars extends ActionBarActivity {
     static class Car {
         String id;
         String name;
+        String[] pointers;
     }
 
     Car[] cars;
+
+    static class CarId {
+        Car car;
+        boolean pointer;
+    }
+
+    Vector<CarId> carsId;
 
     ListView lvCars;
 
@@ -45,16 +54,17 @@ public class Cars extends ActionBarActivity {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         setupCars();
 
+        fillCarsId();
         lvCars = (ListView) findViewById(R.id.list);
         lvCars.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
-                return cars.length;
+                return carsId.size();
             }
 
             @Override
             public Object getItem(int position) {
-                return cars[position];
+                return carsId.get(position);
             }
 
             @Override
@@ -71,8 +81,9 @@ public class Cars extends ActionBarActivity {
                     v = inflater.inflate(R.layout.car_item, null);
                 }
                 TextView tvName = (TextView) v.findViewById(R.id.name);
-                tvName.setText(cars[position].name);
-                tvName.setTag(cars[position].id);
+                CarId id = carsId.get(position);
+                tvName.setText(id.car.name);
+                tvName.setTag(id.car.id);
                 tvName.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -80,20 +91,13 @@ public class Cars extends ActionBarActivity {
                     }
                 });
                 ImageView ivDelete = (ImageView) v.findViewById(R.id.del);
-                if (cars.length > 1) {
-                    ivDelete.setTag(cars[position].id);
+                if (id.pointer || cars.length > 1) {
+                    ivDelete.setTag(id.car.id);
                     ivDelete.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(final View v) {
                             String id = v.getTag().toString();
-                            String message = getString(R.string.delete);
-                            Car[] cars = getCars(Cars.this);
-                            for (Car car : cars) {
-                                if (car.id.equals(id)) {
-                                    message += " " + car.name;
-                                }
-                            }
-                            message += "?";
+                            String message = getString(R.string.delete) + " " + preferences.getString(Names.CAR_NAME + id, "") + "?";
                             AlertDialog dialog = new AlertDialog.Builder(Cars.this)
                                     .setTitle(R.string.delete)
                                     .setMessage(message)
@@ -112,6 +116,7 @@ public class Cars extends ActionBarActivity {
                 } else {
                     ivDelete.setVisibility(View.GONE);
                 }
+                v.findViewById(R.id.pointer).setVisibility(id.pointer ? View.VISIBLE : View.GONE);
                 return v;
             }
         });
@@ -129,6 +134,7 @@ public class Cars extends ActionBarActivity {
             case R.id.add:
                 for (int i = 1; ; i++) {
                     if (!isId(i + "")) {
+                        deleteCarKeys(this, i + "");
                         setupCar(i + "");
                         break;
                     }
@@ -142,7 +148,26 @@ public class Cars extends ActionBarActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAR_SETUP) {
             setupCars();
+            fillCarsId();
             ((BaseAdapter) lvCars.getAdapter()).notifyDataSetChanged();
+        }
+    }
+
+    void fillCarsId() {
+        carsId = new Vector<CarId>();
+        for (Car car : cars) {
+            CarId id = new CarId();
+            id.car = car;
+            id.pointer = false;
+            carsId.add(id);
+            for (String p : car.pointers) {
+                CarId pid = new CarId();
+                pid.car = new Car();
+                pid.car.id = p;
+                pid.car.name = preferences.getString(Names.CAR_NAME + p, "");
+                pid.pointer = true;
+                carsId.add(pid);
+            }
         }
     }
 
@@ -162,6 +187,10 @@ public class Cars extends ActionBarActivity {
             Car car = new Car();
             car.id = id;
             car.name = name;
+            car.pointers = new String[0];
+            String pointers = preferences.getString(Names.POINTERS + id, "");
+            if (!pointers.equals(""))
+                car.pointers = pointers.split(",");
             cars[i] = car;
         }
         return cars;
@@ -175,6 +204,9 @@ public class Cars extends ActionBarActivity {
         for (Car car : cars) {
             if (car.id.equals(id))
                 return true;
+            for (String p : car.pointers)
+                if (p.equals(id))
+                    return true;
         }
         return false;
     }
@@ -198,6 +230,7 @@ public class Cars extends ActionBarActivity {
         ed.remove(Names.BALANCE + id);
         ed.remove(Names.LATITUDE + id);
         ed.remove(Names.LONGITUDE + id);
+        ed.remove(Names.COURSE + id);
         ed.remove(Names.SPEED + id);
         ed.remove(Names.GUARD + id);
         ed.remove(Names.GUARD0 + id);
@@ -218,6 +251,8 @@ public class Cars extends ActionBarActivity {
         ed.remove(Names.GSM + id);
         ed.remove(Names.GSM_ZONE + id);
         ed.remove(Names.LOGIN + id);
+        ed.remove(Names.POINTER + id);
+        ed.remove(Names.POINTERS + id);
         ed.commit();
         File cache = context.getCacheDir();
         final String prefix = "p" + id + "_";
@@ -237,6 +272,7 @@ public class Cars extends ActionBarActivity {
     void deleteCar(String id) {
         deleteCarKeys(this, id);
         String[] cars = preferences.getString(Names.CARS, "").split(",");
+        SharedPreferences.Editor ed = preferences.edit();
         String res = null;
         for (String car : cars) {
             if (car.equals(id))
@@ -246,11 +282,25 @@ public class Cars extends ActionBarActivity {
             } else {
                 res += "," + car;
             }
+            String pointer = preferences.getString(Names.POINTERS + car, "");
+            if (pointer.equals(""))
+                continue;
+            String pointers = "";
+            for (String p : pointer.split(",")) {
+                if (p.equals(id))
+                    continue;
+                if (pointers.equals("")) {
+                    pointers = p;
+                } else {
+                    pointers += "," + p;
+                }
+            }
+            ed.putString(Names.POINTERS + car, "");
         }
-        SharedPreferences.Editor ed = preferences.edit();
         ed.putString(Names.CARS, res);
         ed.commit();
         setupCars();
+        fillCarsId();
         ((BaseAdapter) lvCars.getAdapter()).notifyDataSetChanged();
         try {
             Intent intent = new Intent(FetchService.ACTION_UPDATE_FORCE);

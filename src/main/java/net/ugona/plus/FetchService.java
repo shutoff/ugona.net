@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
@@ -32,11 +33,11 @@ public class FetchService extends Service {
 
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;
-    private static final long SAFEMODE_TIMEOUT = 300 * 1000;
-    private static final long LONG_TIMEOUT = 8 * 60 * 60 * 1000;
+    private static final long LONG_TIMEOUT = 5 * 60 * 60 * 1000;
 
     private BroadcastReceiver mReceiver;
-    private PendingIntent pi;
+    private PendingIntent piTimer;
+    private PendingIntent piUpdate;
 
     private SharedPreferences preferences;
     private ConnectivityManager conMgr;
@@ -72,7 +73,8 @@ public class FetchService extends Service {
         conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         powerMgr = (PowerManager) getSystemService(Context.POWER_SERVICE);
         alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        pi = PendingIntent.getService(this, 0, new Intent(this, FetchService.class), 0);
+        Intent iTimer = new Intent(this, FetchService.class);
+        piTimer = PendingIntent.getService(this, 0, iTimer, 0);
         mReceiver = new ScreenReceiver();
         requests = new HashMap<String, ServerRequest>();
     }
@@ -85,6 +87,16 @@ public class FetchService extends Service {
             if (action != null) {
                 if (action.equals(ACTION_CLEAR))
                     clearNotification(car_id, intent.getIntExtra(Names.NOTIFY, 0));
+                if (action.equals(ACTION_UPDATE)) {
+                    State.appendLog("update all");
+                    Cars.Car[] cars = Cars.getCars(this);
+                    for (Cars.Car car : cars) {
+                        new StatusRequest(Preferences.getCar(preferences, car.id));
+                        for (String p : car.pointers) {
+                            new StatusRequest(p);
+                        }
+                    }
+                }
             }
             if (car_id != null)
                 new StatusRequest(Preferences.getCar(preferences, car_id));
@@ -102,6 +114,14 @@ public class FetchService extends Service {
         for (Map.Entry<String, ServerRequest> entry : requests.entrySet()) {
             entry.getValue().start();
             return true;
+        }
+        if (piUpdate == null) {
+            Intent iUpdate = new Intent(this, FetchService.class);
+            iUpdate.setAction(ACTION_UPDATE);
+            iUpdate.setData(Uri.parse("http://fetch/"));
+            piUpdate = PendingIntent.getService(this, 0, iUpdate, 0);
+            alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + LONG_TIMEOUT, LONG_TIMEOUT, piUpdate);
+            State.appendLog("create updater");
         }
         stopSelf();
         return false;
@@ -140,8 +160,7 @@ public class FetchService extends Service {
             requests.remove(key);
             new StatusRequest(car_id);
             long timeout = (error_text != null) ? REPEAT_AFTER_500 : REPEAT_AFTER_ERROR;
-            alarmMgr.setInexactRepeating(preferences.getBoolean(Names.NOSLEEP_MODE + car_id, false) ? AlarmManager.RTC_WAKEUP : AlarmManager.RTC,
-                    System.currentTimeMillis() + timeout, timeout, pi);
+            alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + timeout, timeout, piTimer);
             sendError(error_text, car_id);
         }
 
@@ -159,7 +178,7 @@ public class FetchService extends Service {
                 registerReceiver(mReceiver, filter);
                 return;
             }
-            if (!preferences.getBoolean(Names.NOSLEEP_MODE + car_id, false) && !powerMgr.isScreenOn()) {
+            if (!powerMgr.isScreenOn()) {
                 IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
                 registerReceiver(mReceiver, filter);
                 return;
@@ -169,7 +188,7 @@ public class FetchService extends Service {
             } catch (Exception e) {
                 // ignore
             }
-            alarmMgr.cancel(pi);
+            alarmMgr.cancel(piTimer);
             started = true;
             exec(api_key);
         }
@@ -194,11 +213,6 @@ public class FetchService extends Service {
 
             if (eventId == preferences.getLong(Names.EVENT_ID + car_id, 0)) {
                 sendUpdate(ACTION_NOUPDATE, car_id);
-                if (preferences.getBoolean(Names.NOSLEEP_MODE + car_id, false)) {
-                    alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, SAFEMODE_TIMEOUT, SAFEMODE_TIMEOUT, pi);
-                } else {
-                    alarmMgr.setRepeating(AlarmManager.RTC, LONG_TIMEOUT, LONG_TIMEOUT, pi);
-                }
                 return;
             }
 
@@ -299,6 +313,7 @@ public class FetchService extends Service {
             ed.commit();
             sendUpdate(ACTION_UPDATE, car_id);
 
+/*
             if (preferences.getBoolean(Names.NOSLEEP_MODE + car_id, false)) {
                 if (!sms_alarm && (msg_id > 0) && guard) {
                     Intent alarmIntent = new Intent(FetchService.this, Alarm.class);
@@ -310,9 +325,8 @@ public class FetchService extends Service {
                     FetchService.this.startActivity(alarmIntent);
                 }
                 alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, SAFEMODE_TIMEOUT, SAFEMODE_TIMEOUT, pi);
-            } else {
-                alarmMgr.setRepeating(AlarmManager.RTC, LONG_TIMEOUT, LONG_TIMEOUT, pi);
             }
+*/
 
             new EventsRequest(car_id, voltage_request, gsm_req);
 
@@ -424,8 +438,6 @@ public class FetchService extends Service {
                 for (int i = events.size() - 1; i >= 0; i--) {
                     JsonObject event = events.get(i).asObject();
                     int type = event.get("eventType").asInt();
-                    if ((type != 94) && (type != 98) && (type != 41) && (type != 33) && (type != 39) && (type != 127))
-                        State.appendLog("Event " + type);
                     switch (type) {
                         case 37:
                             last_stand = -event.get("eventTime").asLong();

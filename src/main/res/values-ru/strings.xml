@@ -306,4 +306,9 @@
     <string name="show_map">Карта</string>
     <string name="data_transfer">Передача данных</string>
     <string name="timeout">Долгое время не было сообщений от маяка</string>
+    <string name="pointer">Маяк</string>
+    <string name="pointer_msg">Связать с автомобилем?</string>
+    <string name="pointer_support">Поддержка маяка</string>
+    <string name="pointer_support_msg">Приложение поддерживает получение данных с маяка.\nВы можете добавить маяк сейчас или сделать это позже командой Список автомобилей</string>
+    <string name="cmd_msg">На основном экране будут показаны только 3 кнопки</string>
 </resources>

@@ -326,4 +326,9 @@
     <string name="show_map">Show map</string>
     <string name="data_transfer">Data transfer</string>
     <string name="timeout">Long time no events from pointer</string>
+    <string name="pointer">Device is pointer</string>
+    <string name="pointer_msg">Connect pointer with car?</string>
+    <string name="pointer_support">Pointer support</string>
+    <string name="pointer_support_msg">Application is supported pointers.\nYou can add pointer now or do it later</string>
+    <string name="cmd_msg">Only 3 buttons can show on main screen</string>
 </resources>

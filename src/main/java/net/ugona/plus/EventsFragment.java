@@ -496,14 +496,17 @@ public class EventsFragment extends Fragment
             events.clear();
             JsonArray res = data.get("events").asArray();
             firstEvent = null;
-            if (res.size() > 0) {
+            LocalDate today = new LocalDate();
+            int i = 0;
+            if ((res.size() > 0) && today.equals(current)) {
                 JsonObject event = res.get(0).asObject();
                 firstEvent = new Event();
                 firstEvent.type = event.get("eventType").asInt();
                 firstEvent.time = event.get("eventTime").asLong();
                 firstEvent.id = event.get("eventId").asLong();
+                i++;
             }
-            for (int i = 1; i < res.size(); i++) {
+            for (; i < res.size(); i++) {
                 JsonObject event = res.get(i).asObject();
                 int type = event.get("eventType").asInt();
                 if (!pointer && ((type == 94) || (type == 98) || (type == 41) || (type == 33) || (type == 39) || (type == 127)))
