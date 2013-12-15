@@ -397,6 +397,20 @@ public class CarPreferences extends PreferenceActivity {
         setupPointer();
     }
 
+    void getApiKey() {
+        getApiKey(this, car_id, new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(CarPreferences.this, FetchService.class);
+                intent.putExtra(Names.ID, car_id);
+                startService(intent);
+                String key = preferences.getString(Names.CAR_KEY + car_id, "");
+                getVersion(key);
+                getPhotos(key);
+            }
+        });
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
@@ -679,9 +693,14 @@ public class CarPreferences extends PreferenceActivity {
         });
     }
 
-    void getApiKey() {
-        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        final AlertDialog dialog = new AlertDialog.Builder(this)
+    static boolean apiKeyShow = false;
+
+    static void getApiKey(final Context context, final String car_id, final Runnable onDone) {
+        if (apiKeyShow)
+            return;
+        apiKeyShow = true;
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
+        final AlertDialog dialog = new AlertDialog.Builder(context)
                 .setTitle(R.string.auth)
                 .setMessage(R.string.auth_summary)
                 .setNegativeButton(R.string.cancel, null)
@@ -691,6 +710,12 @@ public class CarPreferences extends PreferenceActivity {
         dialog.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         dialog.show();
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                apiKeyShow = false;
+            }
+        });
 
         final EditText edLogin = (EditText) dialog.findViewById(R.id.login);
         final EditText edPasswd = (EditText) dialog.findViewById(R.id.passwd);
@@ -718,13 +743,15 @@ public class CarPreferences extends PreferenceActivity {
         edLogin.addTextChangedListener(watcher);
         edPasswd.addTextChangedListener(watcher);
         btnSave.setEnabled(false);
+
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         edLogin.setText(preferences.getString(Names.LOGIN + car_id, ""));
 
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final ProgressDialog dlgCheck = new ProgressDialog(CarPreferences.this);
-                dlgCheck.setMessage(getString(R.string.check_auth));
+                final ProgressDialog dlgCheck = new ProgressDialog(context);
+                dlgCheck.setMessage(context.getString(R.string.check_auth));
                 dlgCheck.show();
 
                 final String login = edLogin.getText().toString();
@@ -747,16 +774,12 @@ public class CarPreferences extends PreferenceActivity {
                             ed.putString(Names.CARS, preferences.getString(Names.CARS, "") + "," + car_id);
                         ed.commit();
                         dialog.dismiss();
-                        Intent intent = new Intent(CarPreferences.this, FetchService.class);
-                        intent.putExtra(Names.ID, car_id);
-                        startService(intent);
-                        getVersion(key);
-                        getPhotos(key);
+                        onDone.run();
                     }
 
                     @Override
                     void error() {
-                        Toast toast = Toast.makeText(CarPreferences.this, getString(R.string.auth_error), Toast.LENGTH_LONG);
+                        Toast toast = Toast.makeText(context, context.getString(R.string.auth_error), Toast.LENGTH_LONG);
                         toast.show();
                         tvError.setText(R.string.auth_error);
                         tvError.setVisibility(View.VISIBLE);

@@ -16,6 +16,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URLEncoder;
 
 public abstract class HttpTask extends AsyncTask<String, Void, JsonObject> {
 
@@ -33,12 +34,12 @@ public abstract class HttpTask extends AsyncTask<String, Void, JsonObject> {
     protected JsonObject doInBackground(String... params) {
         HttpClient httpclient = new DefaultHttpClient();
         String url = params[0];
-        for (int i = 1; i < params.length; i++) {
-            url = url.replace("$" + i, params[i]);
-        }
-        Log.v("url", url);
         Reader reader = null;
         try {
+            for (int i = 1; i < params.length; i++) {
+                url = url.replace("$" + i, URLEncoder.encode(params[i], "UTF-8"));
+            }
+            Log.v("url", url);
             if (pause > 0)
                 Thread.sleep(pause);
             HttpResponse response = httpclient.execute(new HttpGet(url));

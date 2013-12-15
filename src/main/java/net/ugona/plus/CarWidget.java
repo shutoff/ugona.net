@@ -98,7 +98,7 @@ public class CarWidget extends AppWidgetProvider {
         updateWidget(context, appWidgetManager, appWidgetId);
     }
 
-    void updateWidgets(Context context, String car_id, boolean sendtUpdate) {
+    void updateWidgets(Context context, String car_id, boolean sendUpdate) {
         ComponentName thisAppWidget = new ComponentName(
                 context.getPackageName(), getClass().getName());
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
@@ -112,7 +112,7 @@ public class CarWidget extends AppWidgetProvider {
                     update = true;
                 }
             }
-            if (sendtUpdate && update) {
+            if (sendUpdate && update) {
                 Intent i = new Intent(context, WidgetService.class);
                 i.setAction(WidgetService.ACTION_UPDATE);
                 context.startService(i);
@@ -148,7 +148,7 @@ public class CarWidget extends AppWidgetProvider {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             Bundle options = appWidgetManager.getAppWidgetOptions(widgetID);
             int maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
-            if (maxHeight < 62)
+            if (maxHeight < 56)
                 rows = 2;
             if (maxHeight > 100)
                 rows = 4;
@@ -160,7 +160,13 @@ public class CarWidget extends AppWidgetProvider {
             theme = 0;
         RemoteViews widgetView = new RemoteViews(context.getPackageName(), progress ? id_layout[theme] : id_layout_22[theme]);
 
-        String car_id = Preferences.getCar(preferences, preferences.getString(Names.WIDGET + widgetID, ""));
+        String id = preferences.getString(Names.WIDGET + widgetID, "");
+        String car_id = Preferences.getCar(preferences, id);
+        if (!id.equals(car_id)) {
+            SharedPreferences.Editor ed = preferences.edit();
+            ed.putString(Names.WIDGET + widgetID, car_id);
+            ed.commit();
+        }
         int transparency = preferences.getInt(Names.TRANSPARENCY + widgetID, 0);
         widgetView.setInt(R.id.bg, "setAlpha", transparency);
         if (transparency > 0)

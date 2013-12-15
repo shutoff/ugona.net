@@ -355,12 +355,6 @@ public class ActionFragment extends Fragment
                     Actions.balance(context, car_id);
                 }
             },
-            new Action(R.drawable.icon_internet_on, R.string.map_req) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.map_query(context, car_id);
-                }
-            },
             new Action(R.drawable.icon_reset, R.string.reset) {
                 @Override
                 void action(Context context, String car_id) {

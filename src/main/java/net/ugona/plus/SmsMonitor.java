@@ -180,6 +180,32 @@ public class SmsMonitor extends BroadcastReceiver {
             "ALARM Ignition Lock"
     };
 
+    static String[] msg = {
+            "MOTOR ON OK",
+            "Remote Engine Start OK",
+            "MOTOR OFF OK",
+    };
+
+    static void processMessageFromApi(Context context, String car_id, int id) {
+        if (processed == null)
+            return;
+        SmsQueues queues = processed.get(car_id);
+        SmsQueue wait = queues.wait;
+        if (wait == null)
+            return;
+        if (!wait.containsKey(id))
+            return;
+        Sms sms = wait.get(id);
+        if (!sms.process_answer(context, car_id, null))
+            return;
+        wait.remove(id);
+        Intent i = new Intent(SMS_ANSWER);
+        i.putExtra(Names.ANSWER, Activity.RESULT_OK);
+        i.putExtra(Names.SMS_TEXT, sms.answer);
+        i.putExtra(Names.ID, car_id);
+        context.sendBroadcast(i);
+    }
+
     boolean processCarMessage(Context context, String body, String car_id) {
         State.appendLog("Process SMS " + body);
         SmsQueues queues = null;
@@ -229,6 +255,10 @@ public class SmsMonitor extends BroadcastReceiver {
                 showAlarm(context, msg[i], car_id);
                 return true;
             }
+        }
+        for (int i = 0; i < msg.length; i++) {
+            if (compare(body, msg[i]))
+                return true;
         }
         return false;
     }

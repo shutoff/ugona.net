@@ -278,9 +278,9 @@
     <string name="balance_notification">Предупреждать о пороге отключения</string>
     <string-array name="balance_limit">
         <item>не предупреждать</item>
-        <item>50</item>
-        <item>100</item>
-        <item>300</item>
+        <item>если меньше 50</item>
+        <item>если меньше 100</item>
+        <item>если меньше 300</item>
     </string-array>
     <string name="low_balance">Вы приблизились к порогу отключения</string>
     <string name="call">Позвонить на автомобиль</string>

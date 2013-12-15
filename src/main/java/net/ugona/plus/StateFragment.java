@@ -244,6 +244,15 @@ public class StateFragment extends Fragment
                     String error_text = intent.getStringExtra(Names.ERROR);
                     if (error_text == null)
                         error_text = getString(R.string.data_error);
+                    if (error_text.substring(0, 7).equals("Ты кто ")) {
+                        CarPreferences.getApiKey(getActivity(), car_id, new Runnable() {
+                            @Override
+                            public void run() {
+                                startUpdate(getActivity());
+                            }
+                        });
+                        return;
+                    }
                     tvError.setText(error_text);
                     vError.setVisibility(View.VISIBLE);
                     imgRefresh.setVisibility(View.VISIBLE);

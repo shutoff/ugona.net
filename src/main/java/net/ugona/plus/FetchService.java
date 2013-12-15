@@ -268,6 +268,7 @@ public class FetchService extends Service {
 
             JsonObject contact = res.get("contact").asObject();
             boolean guard = contact.get("guard").asBoolean();
+            boolean prev_valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD0 + car_id, false);
             ed.putBoolean(Names.GUARD + car_id, guard);
             ed.putBoolean(Names.INPUT1 + car_id, contact.get("input1").asBoolean());
             ed.putBoolean(Names.INPUT2 + car_id, contact.get("input2").asBoolean());
@@ -283,6 +284,7 @@ public class FetchService extends Service {
             boolean engine = contact.get("engine").asBoolean();
             if (engine && (msg_id == 4))
                 msg_id = 0;
+            boolean send_engine = false;
             if (engine != preferences.getBoolean(Names.ENGINE + car_id, false)) {
                 State.appendLog("Set AZ state " + engine);
                 ed.putBoolean(Names.ENGINE + car_id, engine);
@@ -312,6 +314,12 @@ public class FetchService extends Service {
 
             ed.commit();
             sendUpdate(ACTION_UPDATE, car_id);
+
+            if (send_engine)
+                SmsMonitor.processMessageFromApi(FetchService.this, car_id, engine ? R.string.motor_on : R.string.motor_off);
+            boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD0 + car_id, false);
+            if (valet != prev_valet)
+                SmsMonitor.processMessageFromApi(FetchService.this, car_id, valet ? R.string.valet_on : R.string.valet_off);
 
 /*
             if (preferences.getBoolean(Names.NOSLEEP_MODE + car_id, false)) {
