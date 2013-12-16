@@ -331,4 +331,6 @@
     <string name="pointer_support">Pointer support</string>
     <string name="pointer_support_msg">Application is supported pointers.\nYou can add pointer now or do it later</string>
     <string name="cmd_msg">Only 3 buttons can show on main screen</string>
+    <string name="temp_change">Temperature change</string>
+    <string name="brk_data">BRK data</string>
 </resources>

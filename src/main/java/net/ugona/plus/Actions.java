@@ -35,7 +35,6 @@ public class Actions {
         requestPassword(context, R.string.motor_on, R.string.motor_on_sum, new Runnable() {
             @Override
             public void run() {
-                State.appendLog("send motor on");
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putBoolean(Names.ENGINE + car_id, false);
@@ -46,7 +45,6 @@ public class Actions {
                         if ((text == null) ||
                                 SmsMonitor.compare(text, "MOTOR ON OK") ||
                                 SmsMonitor.compare(text, "Remote Engine Start OK")) {
-                            State.appendLog("motor on ok");
                             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                             SharedPreferences.Editor ed = preferences.edit();
                             ed.putBoolean(Names.AZ + car_id, true);
@@ -73,11 +71,9 @@ public class Actions {
         requestPassword(context, R.string.motor_off, R.string.motor_off_sum, new Runnable() {
             @Override
             public void run() {
-                State.appendLog("send motor off");
                 SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_off, "MOTOR OFF", "MOTOR OFF OK") {
                     @Override
                     boolean process_answer(Context context, String car_id, String text) {
-                        State.appendLog("motor off ok");
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                         SharedPreferences.Editor ed = preferences.edit();
                         ed.putBoolean(Names.AZ + car_id, false);
@@ -370,8 +366,10 @@ public class Actions {
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                         SharedPreferences.Editor ed = preferences.edit();
                         ed.putBoolean(Names.GUARD0 + car_id, true);
-                        ed.putBoolean(Names.GUARD1 + car_id, true);
+                        ed.putBoolean(Names.GUARD1 + car_id, false);
                         ed.putBoolean(Names.GUARD + car_id, false);
+                        ed.putLong(Names.VALET_TIME + car_id, new Date().getTime());
+                        ed.remove(Names.INIT_TIME + car_id);
                         ed.commit();
                         try {
                             Intent intent = new Intent(FetchService.ACTION_UPDATE);
@@ -399,6 +397,8 @@ public class Actions {
                         SharedPreferences.Editor ed = preferences.edit();
                         ed.putBoolean(Names.GUARD0 + car_id, false);
                         ed.putBoolean(Names.GUARD1 + car_id, false);
+                        ed.putLong(Names.INIT_TIME + car_id, new Date().getTime());
+                        ed.remove(Names.VALET_TIME + car_id);
                         ed.commit();
                         try {
                             Intent intent = new Intent(FetchService.ACTION_UPDATE);
@@ -445,7 +445,7 @@ public class Actions {
         requestCCode(context, R.string.init_phone, 0, new Actions.Answer() {
             @Override
             void answer(String ccode) {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_off, ccode + " INIT", null, INCORRECT_MESSAGE, R.string.invalid_ccode) {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_off, ccode, null, INCORRECT_MESSAGE, R.string.invalid_ccode) {
                     @Override
                     boolean process_answer(Context context, String car_id, String body) {
                         if (answer == null) {

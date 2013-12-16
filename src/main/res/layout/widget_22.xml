@@ -12,7 +12,7 @@
         android:cropToPadding="true"
         android:scaleType="fitXY" />
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:id="@+id/widget"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

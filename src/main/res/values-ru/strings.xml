@@ -311,4 +311,6 @@
     <string name="pointer_support">Поддержка маяка</string>
     <string name="pointer_support_msg">Приложение поддерживает получение данных с маяка.\nВы можете добавить маяк сейчас или сделать это позже командой Список автомобилей</string>
     <string name="cmd_msg">На основном экране будут показаны только 3 кнопки</string>
+    <string name="temp_change">Изменение температуры</string>
+    <string name="brk_data">Данные с БРК</string>
 </resources>

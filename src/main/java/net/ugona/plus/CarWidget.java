@@ -12,7 +12,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.RemoteViews;
 
 import java.text.DateFormat;
@@ -28,6 +30,7 @@ public class CarWidget extends AppWidgetProvider {
     static final int STATE_ERROR = 2;
 
     static Map<String, Integer> states;
+    static Map<Integer, Integer> height_rows;
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -140,6 +143,17 @@ public class CarWidget extends AppWidgetProvider {
             R.color.caldroid_black
     };
 
+    int getLayoutHeight(Context context, int maxWidth, int id) {
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View v = inflater.inflate(id, null);
+        v.setLayoutParams(new ViewGroup.LayoutParams(0, 0));
+        int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(maxWidth, View.MeasureSpec.AT_MOST);
+        int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        v.measure(widthMeasureSpec, heightMeasureSpec);
+        v.layout(0, 0, v.getMeasuredWidth(), v.getMeasuredHeight());
+        return v.getHeight();
+    }
+
     void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetID) {
 
         boolean progress = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD);
@@ -148,10 +162,23 @@ public class CarWidget extends AppWidgetProvider {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             Bundle options = appWidgetManager.getAppWidgetOptions(widgetID);
             int maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
-            if (maxHeight < 56)
-                rows = 2;
-            if (maxHeight > 100)
-                rows = 4;
+            if (maxHeight > 0) {
+                if (height_rows == null)
+                    height_rows = new HashMap<Integer, Integer>();
+                if (!height_rows.containsKey(maxHeight)) {
+                    float density = context.getResources().getDisplayMetrics().density;
+                    int maxWidth = (int) (options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT) * density + 0.5);
+                    int h = (int) (maxHeight * density + 0.5);
+                    int h3 = getLayoutHeight(context, maxWidth, R.layout.widget3);
+                    int h4 = getLayoutHeight(context, maxWidth, R.layout.widget4);
+                    if (h < h3)
+                        rows = 2;
+                    if (h > h4)
+                        rows = 4;
+                    height_rows.put(maxHeight, rows);
+                }
+                rows = height_rows.get(maxHeight);
+            }
         }
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);

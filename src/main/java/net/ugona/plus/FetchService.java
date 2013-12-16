@@ -88,7 +88,6 @@ public class FetchService extends Service {
                 if (action.equals(ACTION_CLEAR))
                     clearNotification(car_id, intent.getIntExtra(Names.NOTIFY, 0));
                 if (action.equals(ACTION_UPDATE)) {
-                    State.appendLog("update all");
                     Cars.Car[] cars = Cars.getCars(this);
                     for (Cars.Car car : cars) {
                         new StatusRequest(Preferences.getCar(preferences, car.id));
@@ -121,7 +120,6 @@ public class FetchService extends Service {
             iUpdate.setData(Uri.parse("http://fetch/"));
             piUpdate = PendingIntent.getService(this, 0, iUpdate, 0);
             alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + LONG_TIMEOUT, LONG_TIMEOUT, piUpdate);
-            State.appendLog("create updater");
         }
         stopSelf();
         return false;
@@ -281,17 +279,40 @@ public class FetchService extends Service {
             setState(Names.ZONE_TRUNK, contact, "trunk", 1);
             setState(Names.ZONE_ACCESSORY, contact, "accessory", 7);
             setState(Names.ZONE_IGNITION, contact, "realIgnition", 4);
+
+            long valet_time = preferences.getLong(Names.VALET_TIME + car_id, 0);
+            if (valet_time > 0) {
+                if (valet_time + 30000 > new Date().getTime()) {
+                    valet_time = 0;
+                    ed.remove(Names.VALET_TIME + car_id);
+                }
+            }
+            long init_time = preferences.getLong(Names.INIT_TIME + car_id, 0);
+            if (init_time > 0) {
+                if (init_time + 30000 > new Date().getTime()) {
+                    init_time = 0;
+                    ed.remove(Names.INIT_TIME + car_id);
+                }
+            }
+            if (valet_time > 0) {
+                guard = false;
+                ed.putBoolean(Names.GUARD + car_id, guard);
+                ed.putBoolean(Names.GUARD0 + car_id, true);
+                ed.putBoolean(Names.GUARD1 + car_id, false);
+            } else if (init_time > 0) {
+                ed.putBoolean(Names.GUARD0 + car_id, false);
+                ed.putBoolean(Names.GUARD1 + car_id, false);
+            }
+
             boolean engine = contact.get("engine").asBoolean();
             if (engine && (msg_id == 4))
                 msg_id = 0;
             boolean send_engine = false;
             if (engine != preferences.getBoolean(Names.ENGINE + car_id, false)) {
-                State.appendLog("Set AZ state " + engine);
                 ed.putBoolean(Names.ENGINE + car_id, engine);
                 ed.putBoolean(Names.AZ + car_id, engine);
             }
             if (preferences.getBoolean(Names.AZ + car_id, false) && !guard) {
-                State.appendLog("Reset AZ state");
                 ed.putBoolean(Names.AZ + car_id, false);
             }
 

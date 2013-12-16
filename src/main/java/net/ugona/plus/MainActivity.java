@@ -34,8 +34,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.ParseException;
 import com.romorama.caldroid.CaldroidFragment;
 import com.romorama.caldroid.CaldroidListener;
 import com.viewpagerindicator.TitlePageIndicator;
@@ -311,6 +309,7 @@ public class MainActivity extends ActionBarActivity {
                 setPassword();
                 return true;
 
+/*
             case R.id.log: {
                 HttpTask task = new HttpTask() {
                     @Override
@@ -327,7 +326,7 @@ public class MainActivity extends ActionBarActivity {
                 task.execute(FetchService.STATUS_URL, api_key);
                 return true;
             }
-
+*/
             case R.id.about: {
                 Intent intent = new Intent(this, About.class);
                 startActivity(intent);

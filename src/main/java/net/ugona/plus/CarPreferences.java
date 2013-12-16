@@ -955,8 +955,6 @@ public class CarPreferences extends PreferenceActivity {
                                 startService(i);
                                 sendUpdate();
                                 sendUpdate(id);
-                                State.appendLog("join pointer");
-                                State.appendLog(Names.POINTERS + id + "=" + pointers);
                                 dialog.dismiss();
                             }
                         });

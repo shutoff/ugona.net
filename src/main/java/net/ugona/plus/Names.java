@@ -100,4 +100,7 @@ public final class Names {
 
     static final String INIT_POINTER = "init_pointer";
 
+    static final String VALET_TIME = "valet_time";
+    static final String INIT_TIME = "init_time";
+
 }
