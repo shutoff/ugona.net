@@ -1046,7 +1046,9 @@ public class CarPreferences extends PreferenceActivity {
 
             }
         });
-        seekBar.setProgress((timeout > 0) ? timeout - 1 : 9);
+        int progress = (timeout > 0) ? timeout - 1 : 9;
+        seekBar.setProgress(progress);
+        tvLabel.setText((progress + 1) + " " + getString(R.string.minutes));
         final CheckBox checkBox = (CheckBox) dialog.findViewById(R.id.timer_on);
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override

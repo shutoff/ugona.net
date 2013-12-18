@@ -138,6 +138,7 @@ public class FetchService extends Service {
         final String key;
         final String car_id;
         boolean started;
+        NetworkInfo m_activeNetwork;
 
         ServerRequest(String type, String id) {
             key = type + id;
@@ -155,6 +156,22 @@ public class FetchService extends Service {
 
         @Override
         void error() {
+            NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
+            State.appendLog("error");
+            if ((m_activeNetwork == null) || !m_activeNetwork.isConnected()) {
+                State.appendLog("network disconnected");
+                started = false;
+                IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+                registerReceiver(mReceiver, filter);
+                return;
+            }
+            if ((m_activeNetwork.getType() != activeNetwork.getType()) || (m_activeNetwork.getSubtype() != activeNetwork.getSubtype())) {
+                State.appendLog("network changed");
+                m_activeNetwork = activeNetwork;
+                State.appendLog("retry");
+                exec(preferences.getString(Names.CAR_KEY + car_id, ""));
+                return;
+            }
             requests.remove(key);
             new StatusRequest(car_id);
             long timeout = (error_text != null) ? REPEAT_AFTER_500 : REPEAT_AFTER_ERROR;
@@ -170,8 +187,8 @@ public class FetchService extends Service {
                 requests.remove(key);
                 return;
             }
-            final NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
-            if ((activeNetwork == null) || !activeNetwork.isConnected()) {
+            m_activeNetwork = conMgr.getActiveNetworkInfo();
+            if ((m_activeNetwork == null) || !m_activeNetwork.isConnected()) {
                 IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
                 registerReceiver(mReceiver, filter);
                 return;

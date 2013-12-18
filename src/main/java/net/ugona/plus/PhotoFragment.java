@@ -327,6 +327,8 @@ public class PhotoFragment extends Fragment
                                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                             v = inflater.inflate(R.layout.photo_item, null);
                         }
+                        if (photos == null)
+                            return v;
                         Photo photo = photos.get(position);
                         TextView tvTime = (TextView) v.findViewById(R.id.time);
                         tvTime.setText(State.formatTime(getActivity(), photo.time));
