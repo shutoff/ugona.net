@@ -93,6 +93,7 @@ public class SmsMonitor extends BroadcastReceiver {
                 return;
             queues.send.remove(id);
             if (result_code != Activity.RESULT_OK) {
+                State.appendLog("sms error " + result_code);
                 showNotification(context, context.getString(R.string.sms_error), car_id);
                 Intent i = new Intent(SMS_ANSWER);
                 i.putExtra(Names.ANSWER, result_code);

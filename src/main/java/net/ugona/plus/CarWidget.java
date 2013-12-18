@@ -226,7 +226,7 @@ public class CarWidget extends AppWidgetProvider {
         int show_count = 1;
         widgetView.setTextViewText(R.id.voltage, preferences.getString(Names.VOLTAGE_MAIN + car_id, "--") + " V");
 
-        String temperature = Preferences.getTemperature(preferences, car_id);
+        String temperature = Preferences.getTemperature(preferences, car_id, 1);
         if (temperature == null) {
             widgetView.setViewVisibility(R.id.temperature_block, View.GONE);
         } else {

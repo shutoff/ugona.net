@@ -60,6 +60,7 @@ public class FetchService extends Service {
     private static final String GPS_URL = "http://dev.car-online.ru/api/v2?get=gps&skey=$1&id=$2&time=$3&content=json";
     private static final String SECTOR_URL = "http://dev.car-online.ru/api/v2?get=gsmsector&skey=$1&cc=$2&nc=$3&lac=$4&cid=$5&content=json";
     private static final String BALANCE_URL = "http://dev.car-online.ru/api/v2?get=balancelist&skey=$1&begin=$2&content=json";
+    private static final String TEMP_URL = "http://dev.car-online.ru/api/v2?get=temperaturelist&skey=$1&begin=$2&content=json";
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -247,7 +248,13 @@ public class FetchService extends Service {
             JsonValue temp_value = res.get("temperature");
             if (temp_value != null) {
                 JsonObject temp = temp_value.asObject();
-                ed.putString(Names.TEMPERATURE + car_id, temp.get("value").asInt() + "");
+                int sensor = temp.get("sensorNumber").asInt();
+                if (sensor == 1)
+                    ed.putString(Names.TEMPERATURE + car_id, temp.get("value").asInt() + "");
+                if (sensor == 2)
+                    ed.putString(Names.TEMPERATURE2 + car_id, temp.get("value").asInt() + "");
+                if (sensor == 3)
+                    ed.putString(Names.TEMPERATURE3 + car_id, temp.get("value").asInt() + "");
             }
 
             if (preferences.getLong(Names.BALANCE_TIME + car_id, 0) == 0) {
@@ -464,6 +471,7 @@ public class FetchService extends Service {
 
         boolean voltage;
         boolean gsm;
+        long begin;
 
         EventsRequest(String id, boolean voltage_request, boolean gsm_request) {
             super("E", id);
@@ -481,6 +489,7 @@ public class FetchService extends Service {
                 long last_stand = preferences.getLong(Names.LAST_STAND, 0);
                 long stand = last_stand;
                 long event_id = 0;
+                boolean temp = false;
                 for (int i = events.size() - 1; i >= 0; i--) {
                     JsonObject event = events.get(i).asObject();
                     int type = event.get("eventType").asInt();
@@ -491,6 +500,9 @@ public class FetchService extends Service {
                         case 38:
                             last_stand = event.get("eventTime").asLong();
                             event_id = event.get("eventId").asLong();
+                            break;
+                        case 94:
+                            temp = true;
                             break;
                     }
                 }
@@ -506,17 +518,19 @@ public class FetchService extends Service {
                 ed.commit();
                 if (changed)
                     sendUpdate(ACTION_UPDATE, car_id);
+                if (voltage)
+                    new VoltageRequest(car_id);
+                if (gsm)
+                    new GsmRequest(car_id);
+                if (temp)
+                    new TemperatureRequest(car_id, begin);
             }
-            if (voltage)
-                new VoltageRequest(car_id);
-            if (gsm)
-                new GsmRequest(car_id);
         }
 
         @Override
         void exec(String api_key) {
             eventTime = preferences.getLong(Names.EVENT_TIME + car_id, 0);
-            long begin = preferences.getLong(Names.LAST_EVENT + car_id, 0);
+            begin = preferences.getLong(Names.LAST_EVENT + car_id, 0);
             long bound = eventTime - 2 * 24 * 60 * 60 * 1000;
             if (begin < bound)
                 begin = bound;
@@ -524,6 +538,71 @@ public class FetchService extends Service {
         }
 
         long eventTime;
+    }
+
+    class TemperatureRequest extends ServerRequest {
+
+        long begin;
+
+        TemperatureRequest(String id, long start) {
+            super("T", id);
+            begin = start;
+        }
+
+        @Override
+        void background(JsonObject res) throws ParseException {
+            if (res == null)
+                return;
+            JsonArray arr = res.get("temperatureList").asArray();
+            if (arr.size() == 0)
+                return;
+            boolean temp1 = false;
+            boolean temp2 = false;
+            boolean temp3 = false;
+            boolean changed = false;
+            for (int i = 0; i < arr.size(); i++) {
+                JsonObject value = arr.get(i).asObject();
+                int sensor = value.get("sensorNumber").asInt();
+                if (sensor == 1) {
+                    if (temp1)
+                        continue;
+                    temp1 = true;
+                    changed |= setTemp(Names.TEMPERATURE, value.get("value").asInt());
+                }
+                if (sensor == 2) {
+                    if (temp2)
+                        continue;
+                    temp2 = true;
+                    changed |= setTemp(Names.TEMPERATURE2, value.get("value").asInt());
+                }
+                if (sensor == 3) {
+                    if (temp3)
+                        continue;
+                    temp3 = true;
+                    changed |= setTemp(Names.TEMPERATURE3, value.get("value").asInt());
+                }
+            }
+            if (changed)
+                sendUpdate(ACTION_UPDATE, car_id);
+        }
+
+        boolean setTemp(String name, int value) {
+            if (preferences.getString(name + car_id, "").equals(value))
+                return false;
+            SharedPreferences.Editor ed = preferences.edit();
+            ed.putString(name + car_id, value + "");
+            ed.commit();
+            return true;
+        }
+
+
+        @Override
+        void exec(String api_key) {
+            long eventTime = preferences.getLong(Names.LAST_EVENT + car_id, 0);
+            execute(TEMP_URL, api_key,
+                    begin + "",
+                    eventTime + "");
+        }
     }
 
     class VoltageRequest extends ServerRequest {

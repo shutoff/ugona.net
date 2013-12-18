@@ -92,10 +92,6 @@ public class CarPreferences extends PreferenceActivity {
             if (!car_id.equals(""))
                 name += " " + car_id;
         }
-        if (preferences.getString(Names.CAR_KEY + car_id, "").equals("")) {
-            Cars.deleteCarKeys(this, car_id);
-            getApiKey();
-        }
 
         setTitle(title);
         SharedPreferences.Editor ed = preferences.edit();
@@ -395,6 +391,16 @@ public class CarPreferences extends PreferenceActivity {
 
         setupCommands();
         setupPointer();
+
+        if (preferences.getString(Names.CAR_KEY + car_id, "").equals("")) {
+            Cars.deleteCarKeys(this, car_id);
+            getApiKey();
+        } else if (preferences.getString(Names.CAR_PHONE + car_id, "").equals("")) {
+            Intent i = new Intent(CarPreferences.this, PhoneNumberDialog.class);
+            i.putExtra(Names.CAR_PHONE, preferences.getString(Names.CAR_PHONE + car_id, ""));
+            startActivityForResult(i, REQUEST_PHONE);
+        }
+
     }
 
     void getApiKey() {

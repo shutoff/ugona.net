@@ -280,6 +280,7 @@
         <item>не предупреждать</item>
         <item>если меньше 50</item>
         <item>если меньше 100</item>
+        <item>если меньше 200</item>
         <item>если меньше 300</item>
     </string-array>
     <string name="low_balance">Вы приблизились к порогу отключения</string>

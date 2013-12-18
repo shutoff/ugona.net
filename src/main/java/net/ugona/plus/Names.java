@@ -67,6 +67,8 @@ public final class Names {
     static final String SMS_ALARM = "sms_alarm";
 
     static final String TEMPERATURE = "Temperature";
+    static final String TEMPERATURE2 = "Temperature2_";
+    static final String TEMPERATURE3 = "Temperature3_";
     static final String TEMP_SIFT = "TempShift";
     static final String MAP_TYPE = "map_type";
 

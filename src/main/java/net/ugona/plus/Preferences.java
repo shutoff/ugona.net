@@ -31,9 +31,14 @@ public class Preferences {
         return car_id;
     }
 
-    static String getTemperature(SharedPreferences preferences, String car_id) {
+    static String getTemperature(SharedPreferences preferences, String car_id, int sensor) {
         try {
-            String s = preferences.getString(Names.TEMPERATURE + car_id, "");
+            String key = Names.TEMPERATURE;
+            if (sensor == 2)
+                key = Names.TEMPERATURE2;
+            if (sensor == 3)
+                key = Names.TEMPERATURE3;
+            String s = preferences.getString(key + car_id, "");
             if (s.length() == 0)
                 return null;
             double v = Double.parseDouble(s);

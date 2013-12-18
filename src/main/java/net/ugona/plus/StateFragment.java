@@ -52,8 +52,12 @@ public class StateFragment extends Fragment
     TextView tvReserve;
     TextView tvBalance;
     TextView tvTemperature;
+    TextView tvTemperature2;
+    TextView tvTemperature3;
     TextView tvError;
     View vTemperature;
+    View vTemperature2;
+    View vTemperature3;
     View vError;
     ImageView imgRefresh;
     ProgressBar prgUpdate;
@@ -121,6 +125,10 @@ public class StateFragment extends Fragment
         tvBalance = (TextView) v.findViewById(R.id.balance);
         tvTemperature = (TextView) v.findViewById(R.id.temperature);
         vTemperature = v.findViewById(R.id.temperature_block);
+        tvTemperature2 = (TextView) v.findViewById(R.id.temperature2);
+        vTemperature2 = v.findViewById(R.id.temperature2_block);
+        tvTemperature3 = (TextView) v.findViewById(R.id.temperature3);
+        vTemperature3 = v.findViewById(R.id.temperature3_block);
 
         vMotor = v.findViewById(R.id.motor);
         vRele = v.findViewById(R.id.rele);
@@ -187,14 +195,14 @@ public class StateFragment extends Fragment
         vPointer2 = v.findViewById(R.id.pointers2);
         if (vPointer1 != null) {
             tvPointer1 = (TextView) v.findViewById(R.id.pointer1);
-            tvPointer1.setOnClickListener(new View.OnClickListener() {
+            vPointer1.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     openPointer(0);
                 }
             });
             tvPointer2 = (TextView) v.findViewById(R.id.pointer2);
-            tvPointer2.setOnClickListener(new View.OnClickListener() {
+            vPointer2.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     openPointer(1);
@@ -370,12 +378,26 @@ public class StateFragment extends Fragment
             }
         }
 
-        String temperature = Preferences.getTemperature(preferences, car_id);
+        String temperature = Preferences.getTemperature(preferences, car_id, 1);
         if (temperature == null) {
             vTemperature.setVisibility(View.GONE);
         } else {
             tvTemperature.setText(temperature);
             vTemperature.setVisibility(View.VISIBLE);
+        }
+        temperature = Preferences.getTemperature(preferences, car_id, 2);
+        if (temperature == null) {
+            vTemperature2.setVisibility(View.GONE);
+        } else {
+            tvTemperature2.setText(temperature);
+            vTemperature2.setVisibility(View.VISIBLE);
+        }
+        temperature = Preferences.getTemperature(preferences, car_id, 3);
+        if (temperature == null) {
+            vTemperature3.setVisibility(View.GONE);
+        } else {
+            tvTemperature3.setText(temperature);
+            vTemperature3.setVisibility(View.VISIBLE);
         }
 
         Drawable d = drawable.getDrawable(context, car_id);

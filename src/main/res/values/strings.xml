@@ -294,12 +294,14 @@
         <item>no notify</item>
         <item>less 50</item>
         <item>less 100</item>
+        <item>less 200</item>
         <item>less 300</item>
     </string-array>
     <string-array name="balance_values">
         <item>-1</item>
         <item>50</item>
         <item>100</item>
+        <item>200</item>
         <item>300</item>
     </string-array>
     <string name="low_balance">Low balance</string>
