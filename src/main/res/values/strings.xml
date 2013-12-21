@@ -210,11 +210,11 @@
     <string name="shock_sens">Shock sensitivity</string>
     <string name="shock_sens_msg">Setup shock sensitivity level. Wroks only for SuperAgent</string>
     <string-array name="levels">
-        <item>Minimal</item>
-        <item>Low</item>
-        <item>Medium</item>
-        <item>High</item>
         <item>Maximal</item>
+        <item>High</item>
+        <item>Medium</item>
+        <item>Low</item>
+        <item>Minimal</item>
     </string-array>
     <string name="google">Google</string>
     <string name="osm">OSM</string>
@@ -335,4 +335,6 @@
     <string name="cmd_msg">Only 3 buttons can show on main screen</string>
     <string name="temp_change">Temperature change</string>
     <string name="brk_data">BRK data</string>
+    <string name="show_name">Show name</string>
+    <string name="impulse">Control by impulse</string>
 </resources>

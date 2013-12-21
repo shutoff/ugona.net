@@ -50,6 +50,7 @@ public class FetchService extends Service {
     static final String ACTION_START = "net.ugona.plus.START";
     static final String ACTION_UPDATE_FORCE = "net.ugona.plus.UPDATE_FORCE";
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR";
+    static final String ACTION_RELE = "net.ugona.plus.RELE";
 
     static final Pattern balancePattern = Pattern.compile("-?[0-9]+[\\.,][0-9][0-9]");
 
@@ -69,6 +70,13 @@ public class FetchService extends Service {
 
     @Override
     public void onCreate() {
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread thread, Throwable ex) {
+                State.print(ex);
+            }
+        });
+
         super.onCreate();
         preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -96,6 +104,9 @@ public class FetchService extends Service {
                             new StatusRequest(p);
                         }
                     }
+                }
+                if (action.equals(ACTION_RELE)) {
+                    Actions.rele_timeout(this);
                 }
             }
             if (car_id != null)
@@ -158,18 +169,14 @@ public class FetchService extends Service {
         @Override
         void error() {
             NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
-            State.appendLog("error");
-            if ((m_activeNetwork == null) || !m_activeNetwork.isConnected()) {
-                State.appendLog("network disconnected");
+            if ((activeNetwork == null) || !activeNetwork.isConnected()) {
                 started = false;
                 IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
                 registerReceiver(mReceiver, filter);
                 return;
             }
             if ((m_activeNetwork.getType() != activeNetwork.getType()) || (m_activeNetwork.getSubtype() != activeNetwork.getSubtype())) {
-                State.appendLog("network changed");
                 m_activeNetwork = activeNetwork;
-                State.appendLog("retry");
                 exec(preferences.getString(Names.CAR_KEY + car_id, ""));
                 return;
             }
@@ -333,10 +340,12 @@ public class FetchService extends Service {
                 msg_id = 0;
             boolean send_engine = false;
             if (engine != preferences.getBoolean(Names.ENGINE + car_id, false)) {
+                State.appendLog("Engine state changed: " + engine);
                 ed.putBoolean(Names.ENGINE + car_id, engine);
                 ed.putBoolean(Names.AZ + car_id, engine);
             }
             if (preferences.getBoolean(Names.AZ + car_id, false) && !guard) {
+                State.appendLog("Guard OFF - reset AZ");
                 ed.putBoolean(Names.AZ + car_id, false);
             }
 

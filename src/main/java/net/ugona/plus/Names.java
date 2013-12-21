@@ -95,6 +95,7 @@ public final class Names {
     static final String COMMANDS = "commands_";
     static final String RELE_TIME = "rele_time";
     static final String RELE_START = "rele_start";
+    static final String RELE_IMPULSE = "rele_impulse";
 
     static final String TIMEOUT = "timeout";
     static final String TIMEOUT_NOTIFICATION = "timeout_id";
@@ -104,5 +105,7 @@ public final class Names {
 
     static final String VALET_TIME = "valet_time";
     static final String INIT_TIME = "init_time";
+
+    static final String SHOW_NAME = "show_name";
 
 }

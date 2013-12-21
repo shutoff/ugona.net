@@ -225,6 +225,7 @@ public class EventsFragment extends Fragment
                     ByteArrayInputStream bis = new ByteArrayInputStream(track_data);
                     ObjectInput in = new ObjectInputStream(bis);
                     events = (Vector<Event>) in.readObject();
+                    firstEvent = (Event) in.readObject();
                     in.close();
                     bis.close();
                     loaded = true;
@@ -386,6 +387,7 @@ public class EventsFragment extends Fragment
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 ObjectOutput out = new ObjectOutputStream(bos);
                 out.writeObject(events);
+                out.writeObject(firstEvent);
                 data = bos.toByteArray();
                 out.close();
                 bos.close();
@@ -452,6 +454,8 @@ public class EventsFragment extends Fragment
     }
 
     void filterEvents(boolean no_reload) {
+        if (!loaded)
+            return;
         filtered.clear();
         if (firstEvent != null)
             filtered.add(firstEvent);
@@ -459,8 +463,6 @@ public class EventsFragment extends Fragment
             if (isShow(e.type))
                 filtered.add(e);
         }
-        if (!loaded)
-            return;
         if (filtered.size() > 0) {
             if (no_events || !no_reload) {
                 current_item = -1;
@@ -506,15 +508,15 @@ public class EventsFragment extends Fragment
                 return;
             events.clear();
             JsonArray res = data.get("events").asArray();
-            firstEvent = null;
+            Event first = null;
             LocalDate today = new LocalDate();
             int i = 0;
             if ((res.size() > 0) && today.equals(current)) {
                 JsonObject event = res.get(0).asObject();
-                firstEvent = new Event();
-                firstEvent.type = event.get("eventType").asInt();
-                firstEvent.time = event.get("eventTime").asLong();
-                firstEvent.id = event.get("eventId").asLong();
+                first = new Event();
+                first.type = event.get("eventType").asInt();
+                first.time = event.get("eventTime").asLong();
+                first.id = event.get("eventId").asLong();
                 i++;
             }
             for (; i < res.size(); i++) {
@@ -532,6 +534,7 @@ public class EventsFragment extends Fragment
             }
             error = false;
             loaded = true;
+            firstEvent = first;
             filterEvents(no_reload);
             vProgress.setVisibility(View.GONE);
         }

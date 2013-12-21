@@ -69,7 +69,7 @@ public abstract class HttpTask {
                     background(result);
                     return result;
                 } catch (Exception ex) {
-                    error_text = "Parse data error";
+                    error_text = ex.getMessage();
                     ex.printStackTrace();
                 } finally {
                     if (reader != null) {

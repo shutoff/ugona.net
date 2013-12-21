@@ -50,4 +50,10 @@
         android:layout_height="wrap_content"
         android:max="30" />
 
+    <CheckBox
+        android:id="@+id/impulse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/impulse" />
+
 </LinearLayout>

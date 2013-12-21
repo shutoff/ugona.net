@@ -139,6 +139,21 @@
                 android:resource="@xml/widget_metadata" />
         </receiver>
 
+        <receiver android:name=".LockWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="net.ugona.plus.UPDATE_FORCE" />
+                <action android:name="net.ugona.plus.UPDATE" />
+                <action android:name="net.ugona.plus.NO_UPDATE" />
+                <action android:name="net.ugona.plus.ERROR" />
+                <action android:name="net.ugona.plus.START" />
+                <action android:name="net.ugona.plus.WIDGET_SCREEN_ON" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/lock_metadata" />
+        </receiver>
+
     </application>
 
 </manifest>

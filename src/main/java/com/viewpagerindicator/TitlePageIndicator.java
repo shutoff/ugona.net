@@ -573,7 +573,7 @@ public class TitlePageIndicator extends View implements PageIndicator {
 
                 if (mIsDragging) {
                     mLastMotionX = x;
-                    if (mViewPager.isFakeDragging() || mViewPager.beginFakeDrag()) {
+                    if ((mViewPager != null) && (mViewPager.isFakeDragging() || mViewPager.beginFakeDrag())) {
                         mViewPager.fakeDragBy(deltaX);
                     }
                 }

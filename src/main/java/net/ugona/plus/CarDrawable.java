@@ -74,6 +74,9 @@ public class CarDrawable {
             upd |= setLayer(1, 0);
             upd |= setLayer(2, 0);
             upd |= setLayer(3, 0);
+            upd |= setLayer(4, 0);
+            upd |= setLayer(5, 0);
+            upd |= setLayer(6, 0);
         } else {
 
             boolean guard = preferences.getBoolean(Names.GUARD + car_id, false);

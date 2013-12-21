@@ -483,8 +483,6 @@ public class StateFragment extends Fragment
             n_buttons++;
         } else {
             vValet.setVisibility(View.GONE);
-            AnimationDrawable animation = (AnimationDrawable) imgEngine.getDrawable();
-            animation.stop();
         }
         if (State.hasTelephony(context) && (n_buttons < 3) && ((commands & State.CMD_CALL) != 0)) {
             vPhone.setVisibility(View.VISIBLE);
@@ -494,7 +492,7 @@ public class StateFragment extends Fragment
 
         balanceBlock.setVisibility(preferences.getBoolean(Names.SHOW_BALANCE + car_id, true) ? View.VISIBLE : View.GONE);
 
-        if (preferences.getBoolean(Names.AZ + car_id, false) && preferences.getBoolean(Names.GUARD + car_id, false)) {
+        if (az && preferences.getBoolean(Names.GUARD + car_id, false)) {
             if (preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false)) {
                 imgEngine.setImageResource(R.drawable.engine_blue);
             } else {
@@ -504,6 +502,8 @@ public class StateFragment extends Fragment
             startAnimation();
         } else {
             imgEngine.setVisibility(View.GONE);
+            AnimationDrawable animation = (AnimationDrawable) imgEngine.getDrawable();
+            animation.stop();
         }
 
         mValet.setVisibility(valet ? View.VISIBLE : View.GONE);

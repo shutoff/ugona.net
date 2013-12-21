@@ -203,11 +203,11 @@
     <string name="shock_sens">Чувствительность датчика удара</string>
     <string name="shock_sens_msg">Установка уровня учвствительности датчика удара. Работает только для СуперАгент</string>
     <string-array name="levels">
-        <item>Минимальная</item>
-        <item>Низкая</item>
-        <item>Средняя</item>
-        <item>Высокая</item>
         <item>Максимальная</item>
+        <item>Высокая</item>
+        <item>Средняя</item>
+        <item>Низкая</item>
+        <item>Минимальная</item>
     </string-array>
     <string name="show_balance">Отображать баланс</string>
     <string name="safe_mode">Безопасный режим</string>
@@ -297,7 +297,7 @@
     <string name="mode_c">Режим C</string>
     <string name="mode_c_sum">Передача GPS координат каждые 24 часа</string>
     <string name="mode_d">Режим D</string>
-    <string name="mode_d_sum">Одидание команды каждые 12 часов</string>
+    <string name="mode_d_sum">Ожидание команды каждые 12 часов</string>
     <string name="commands">Команды управления</string>
     <string name="commands_sum">Выбор команд на главном экране</string>
     <string name="valet_cmd">Режим АВТОСЕРВИС</string>
@@ -314,4 +314,6 @@
     <string name="cmd_msg">На основном экране будут показаны только 3 кнопки</string>
     <string name="temp_change">Изменение температуры</string>
     <string name="brk_data">Данные с БРК</string>
+    <string name="show_name">Показать название</string>
+    <string name="impulse">Управление импульсом</string>
 </resources>

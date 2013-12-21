@@ -22,6 +22,7 @@ public class WidgetService extends Service {
     static final String ACTION_UPDATE = "net.ugona.plus.WIDGET_UPDATE";
     static final String ACTION_SHOW = "net.ugona.plus.WIDGET_SHOW";
     static final String ACTION_START = "net.ugona.plus.WIDGET_START_UPDATE";
+    static final String ACTION_SCREEN = "net.ugona.plus.WIDGET_SCREEN_ON";
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -46,6 +47,8 @@ public class WidgetService extends Service {
                 if (intent.getAction().equalsIgnoreCase(Intent.ACTION_SCREEN_ON)) {
                     stopTimer();
                     startTimer(true);
+                    Intent i = new Intent(ACTION_SCREEN);
+                    sendBroadcast(i);
                 }
                 if (intent.getAction().equalsIgnoreCase(Intent.ACTION_SCREEN_OFF)) {
                     stopTimer();

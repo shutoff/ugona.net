@@ -612,14 +612,17 @@ public class CarPreferences extends PreferenceActivity {
 
             }
         });
-        seek.setProgress(preferences.getInt(Names.RELE_TIME, 30) - 10);
+        seek.setProgress(preferences.getInt(Names.RELE_TIME + car_id, 30) - 10);
         tvTime.setText((seek.getProgress() + 10) + " " + getString(R.string.minutes));
+        final CheckBox impulse = (CheckBox) dialog.findViewById(R.id.impulse);
+        impulse.setChecked(preferences.getBoolean(Names.RELE_IMPULSE + car_id, true));
         dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putString(Names.CAR_RELE + car_id, (rele.getSelectedItemPosition() == 1) ? "2" : "1");
                 ed.putInt(Names.RELE_TIME + car_id, seek.getProgress() + 10);
+                ed.putBoolean(Names.RELE_IMPULSE + car_id, impulse.isChecked());
                 ed.commit();
                 dialog.dismiss();
             }

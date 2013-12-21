@@ -154,10 +154,16 @@ public class CarWidget extends AppWidgetProvider {
         return v.getHeight();
     }
 
-    void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetID) {
-
+    int getLayoutId(int theme) {
         boolean progress = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD);
+        return progress ? id_layout[theme] : id_layout_22[theme];
+    }
 
+    void update(Context context, RemoteViews widgetView) {
+
+    }
+
+    void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetID) {
         int rows = 3;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             Bundle options = appWidgetManager.getAppWidgetOptions(widgetID);
@@ -185,7 +191,7 @@ public class CarWidget extends AppWidgetProvider {
         int theme = preferences.getInt(Names.THEME + widgetID, 0);
         if ((theme < 0) || (theme >= id_layout.length))
             theme = 0;
-        RemoteViews widgetView = new RemoteViews(context.getPackageName(), progress ? id_layout[theme] : id_layout_22[theme]);
+        RemoteViews widgetView = new RemoteViews(context.getPackageName(), getLayoutId(theme));
 
         String id = preferences.getString(Names.WIDGET + widgetID, "");
         String car_id = Preferences.getCar(preferences, id);
@@ -254,6 +260,7 @@ public class CarWidget extends AppWidgetProvider {
             show_count++;
         }
         widgetView.setViewVisibility(R.id.balance_block, show_balance ? View.VISIBLE : View.GONE);
+        widgetView.setViewVisibility(R.id.name, preferences.getBoolean(Names.SHOW_NAME + widgetID, true) ? View.VISIBLE : View.GONE);
 
         boolean show_reserve = (show_count < rows);
         if (show_reserve)
@@ -269,6 +276,7 @@ public class CarWidget extends AppWidgetProvider {
             }
         }
 
+        boolean progress = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD);
         if ((states == null) || !states.containsKey(car_id)) {
             if (progress)
                 widgetView.setViewVisibility(R.id.update, View.GONE);
@@ -298,6 +306,8 @@ public class CarWidget extends AppWidgetProvider {
         Bitmap bmp = drawable.getBitmap(context, car_id);
         if (bmp != null)
             widgetView.setImageViewBitmap(R.id.car, bmp);
+
+        update(context, widgetView);
 
         appWidgetManager.updateAppWidget(widgetID, widgetView);
     }

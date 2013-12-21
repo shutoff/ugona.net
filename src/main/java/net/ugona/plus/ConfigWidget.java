@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -27,6 +28,7 @@ public class ConfigWidget extends Activity {
     Intent resultValue;
     int transparency;
     int theme;
+    boolean show_name;
 
     static final int CAR_CONFIG = 1000;
 
@@ -54,6 +56,7 @@ public class ConfigWidget extends Activity {
 
         final Cars.Car[] cars = Cars.getCars(this);
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        show_name = true;
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         final AlertDialog dialog = new AlertDialog.Builder(this)
@@ -173,6 +176,8 @@ public class ConfigWidget extends Activity {
                 car_id = cars[lv.getSelectedItemPosition()].id;
                 transparency = sbTransparency.getProgress();
                 theme = lvTheme.getSelectedItemPosition();
+                CheckBox checkBoxName = (CheckBox) dialog.findViewById(R.id.show_name);
+                show_name = checkBoxName.isChecked();
                 saveWidget();
                 dialog.dismiss();
             }
@@ -198,6 +203,7 @@ public class ConfigWidget extends Activity {
         ed.putString(Names.WIDGET + widgetID, car_id);
         ed.putInt(Names.TRANSPARENCY + widgetID, transparency);
         ed.putInt(Names.THEME + widgetID, theme);
+        ed.putBoolean(Names.SHOW_NAME + widgetID, show_name);
         ed.commit();
         setResult(RESULT_OK, resultValue);
     }
