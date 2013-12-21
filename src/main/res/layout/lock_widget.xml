@@ -58,7 +58,7 @@
 
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:gravity="left"
                 android:orientation="vertical">
 
@@ -79,6 +79,19 @@
                     android:textSize="16dp"
                     android:text="01.01.2014"
                     android:paddingLeft="10dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <ImageView
+                    android:id="@+id/traffic"
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
+                    android:src="@drawable/gray"
+                    android:padding="5dp"
+                    android:visibility="gone" />
 
             </LinearLayout>
 

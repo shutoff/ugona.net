@@ -107,5 +107,7 @@ public final class Names {
     static final String INIT_TIME = "init_time";
 
     static final String SHOW_NAME = "show_name";
+    static final String TRAFIC_TIME = "trafic_time";
+    static final String TRAFIC_LEVEL = "trefic_level";
 
 }

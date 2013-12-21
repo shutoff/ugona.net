@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.ugona.plus"
     android:versionCode="2"
-    android:versionName="1.2 RC2">
+    android:versionName="1.2 RC3">
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -148,6 +148,7 @@
                 <action android:name="net.ugona.plus.ERROR" />
                 <action android:name="net.ugona.plus.START" />
                 <action android:name="net.ugona.plus.WIDGET_SCREEN_ON" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"

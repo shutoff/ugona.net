@@ -54,7 +54,6 @@ public class Actions {
                             ed.putBoolean(Names.AZ + car_id, true);
                             ed.putBoolean(Names.ENGINE + car_id, true);
                             ed.commit();
-                            State.appendLog("Set AZ motor_on answer");
                             try {
                                 Intent intent = new Intent(FetchService.ACTION_UPDATE);
                                 intent.putExtra(Names.ID, car_id);
@@ -83,7 +82,6 @@ public class Actions {
                         SharedPreferences.Editor ed = preferences.edit();
                         ed.putBoolean(Names.AZ + car_id, false);
                         ed.commit();
-                        State.appendLog("Set AZ=false motor_off answer");
                         try {
                             Intent intent = new Intent(FetchService.ACTION_UPDATE);
                             intent.putExtra(Names.ID, car_id);

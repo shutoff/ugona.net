@@ -101,9 +101,13 @@ public class CarWidget extends AppWidgetProvider {
         updateWidget(context, appWidgetManager, appWidgetId);
     }
 
+    String widgetClass() {
+        return getClass().getName();
+    }
+
     void updateWidgets(Context context, String car_id, boolean sendUpdate) {
         ComponentName thisAppWidget = new ComponentName(
-                context.getPackageName(), getClass().getName());
+                context.getPackageName(), widgetClass());
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         if (appWidgetManager != null) {
             int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
@@ -159,7 +163,7 @@ public class CarWidget extends AppWidgetProvider {
         return progress ? id_layout[theme] : id_layout_22[theme];
     }
 
-    void update(Context context, RemoteViews widgetView) {
+    void postUpdate(Context context, RemoteViews widgetView, int widgetID) {
 
     }
 
@@ -307,7 +311,7 @@ public class CarWidget extends AppWidgetProvider {
         if (bmp != null)
             widgetView.setImageViewBitmap(R.id.car, bmp);
 
-        update(context, widgetView);
+        postUpdate(context, widgetView, widgetID);
 
         appWidgetManager.updateAppWidget(widgetID, widgetView);
     }

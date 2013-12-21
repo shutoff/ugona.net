@@ -70,12 +70,15 @@ public class FetchService extends Service {
 
     @Override
     public void onCreate() {
+
+/*
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
                 State.print(ex);
             }
         });
+*/
 
         super.onCreate();
         preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -340,12 +343,10 @@ public class FetchService extends Service {
                 msg_id = 0;
             boolean send_engine = false;
             if (engine != preferences.getBoolean(Names.ENGINE + car_id, false)) {
-                State.appendLog("Engine state changed: " + engine);
                 ed.putBoolean(Names.ENGINE + car_id, engine);
                 ed.putBoolean(Names.AZ + car_id, engine);
             }
             if (preferences.getBoolean(Names.AZ + car_id, false) && !guard) {
-                State.appendLog("Guard OFF - reset AZ");
                 ed.putBoolean(Names.AZ + car_id, false);
             }
 
