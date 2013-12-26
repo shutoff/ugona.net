@@ -110,4 +110,7 @@ public final class Names {
     static final String TRAFIC_TIME = "trafic_time";
     static final String TRAFIC_LEVEL = "trefic_level";
 
+    static final String RELAY1 = "relay1_";
+    static final String RELAY2 = "relay2_";
+
 }

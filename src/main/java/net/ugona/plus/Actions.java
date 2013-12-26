@@ -408,7 +408,11 @@ public class Actions {
                 ed.commit();
                 if (!impulse) {
                     if (rele_on) {
-                        ed.remove(Names.RELE_START);
+                        ed.remove(Names.RELE_START + car_id);
+                        ed.putBoolean((rele2 ? Names.RELAY2 : Names.RELAY1) + car_id, false);
+                        ed.commit();
+                    } else {
+                        ed.putBoolean((rele2 ? Names.RELAY2 : Names.RELAY1) + car_id, true);
                         ed.commit();
                     }
                     rele_set_timer(context);

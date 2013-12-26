@@ -2,6 +2,8 @@ package net.ugona.plus;
 
 import android.content.SharedPreferences;
 
+import java.util.Date;
+
 public class Preferences {
 
     static String getCar(SharedPreferences preferences, String car_id) {
@@ -47,6 +49,17 @@ public class Preferences {
         } catch (Exception ex) {
         }
         return null;
+    }
+
+    static boolean getRele(SharedPreferences preferences, String car_id) {
+        final boolean rele2 = preferences.getString(Names.CAR_RELE + car_id, "").equals("2");
+        if (preferences.getBoolean(Names.RELE_IMPULSE + car_id, false)) {
+            if (rele2)
+                return preferences.getBoolean(Names.RELAY2 + car_id, false);
+            return preferences.getBoolean(Names.RELAY1 + car_id, false);
+        }
+        long delta = new Date().getTime() - preferences.getLong(Names.RELE_START + car_id, 0) / 60000;
+        return delta < preferences.getInt(Names.RELE_TIME, 30);
     }
 
     static String getAlarm(SharedPreferences preferences, String car_id) {

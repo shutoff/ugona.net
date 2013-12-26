@@ -26,7 +26,6 @@ import android.widget.Toast;
 import org.joda.time.LocalDateTime;
 
 import java.text.DateFormat;
-import java.util.Date;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -452,8 +451,7 @@ public class StateFragment extends Fragment
         if (State.hasTelephony(context) && ((commands & State.CMD_RELE) != 0) && !ignition) {
             vRele.setVisibility(View.VISIBLE);
             pRele.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele) ? View.VISIBLE : View.GONE);
-            long delta = new Date().getTime() - preferences.getLong(Names.RELE_START + car_id, 0) / 60000;
-            if (delta < preferences.getInt(Names.RELE_TIME, 30)) {
+            if (Preferences.getRele(preferences, car_id)) {
                 ivRele.setImageResource(R.drawable.icon_heater_on);
             } else {
                 ivRele.setImageResource(R.drawable.icon_heater);

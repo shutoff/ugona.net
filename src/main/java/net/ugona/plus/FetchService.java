@@ -308,6 +308,8 @@ public class FetchService extends Service {
             ed.putBoolean(Names.INPUT4 + car_id, contact.get("input4").asBoolean());
             ed.putBoolean(Names.GUARD0 + car_id, contact.get("guardMode0").asBoolean());
             ed.putBoolean(Names.GUARD1 + car_id, contact.get("guardMode1").asBoolean());
+            ed.putBoolean(Names.RELAY1 + car_id, contact.get("relay1").asBoolean());
+            ed.putBoolean(Names.RELAY2 + car_id, contact.get("relay2").asBoolean());
             setState(Names.ZONE_DOOR, contact, "door", 3);
             setState(Names.ZONE_HOOD, contact, "hood", 2);
             setState(Names.ZONE_TRUNK, contact, "trunk", 1);

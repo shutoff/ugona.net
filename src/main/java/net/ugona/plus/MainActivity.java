@@ -29,8 +29,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -409,16 +407,17 @@ public class MainActivity extends ActionBarActivity {
         removeNotifications();
     }
 
+/*
     @Override
     public void onAttachedToWindow() {
         //make the activity show even the screen is locked.
         Window window = getWindow();
-
         window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
                 + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 + WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 + WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
     }
+*/
 
     void setCar(String id) {
         id = Preferences.getCar(preferences, id);

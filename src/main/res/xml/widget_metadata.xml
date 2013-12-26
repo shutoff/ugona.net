@@ -2,8 +2,10 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:configure="net.ugona.plus.ConfigWidget"
     android:initialLayout="@layout/widget_22"
-    android:widgetCategory="home_screen"
+    android:initialKeyguardLayout="@layout/lock_widget"
+    android:widgetCategory="home_screen|keyguard"
     android:resizeMode="horizontal|vertical"
     android:minHeight="40dp"
     android:minWidth="110dp"
+    android:minResizeHeight="220dp"
     android:updatePeriodMillis="0" />
