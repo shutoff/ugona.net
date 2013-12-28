@@ -34,6 +34,7 @@ public class FetchService extends Service {
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;
     private static final long LONG_TIMEOUT = 5 * 60 * 60 * 1000;
+    private static final long SCAN_TIMEOUT = 10 * 1000;
 
     private BroadcastReceiver mReceiver;
     private PendingIntent piTimer;
@@ -132,7 +133,6 @@ public class FetchService extends Service {
         if (piUpdate == null) {
             Intent iUpdate = new Intent(this, FetchService.class);
             iUpdate.setAction(ACTION_UPDATE);
-            iUpdate.setData(Uri.parse("http://fetch/"));
             piUpdate = PendingIntent.getService(this, 0, iUpdate, 0);
             alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + LONG_TIMEOUT, LONG_TIMEOUT, piUpdate);
         }
@@ -300,7 +300,8 @@ public class FetchService extends Service {
 
             JsonObject contact = res.get("contact").asObject();
             boolean guard = contact.get("guard").asBoolean();
-            boolean prev_valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD0 + car_id, false);
+            boolean prev_az = Preferences.getAZ(preferences, car_id);
+            boolean prev_valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
             ed.putBoolean(Names.GUARD + car_id, guard);
             ed.putBoolean(Names.INPUT1 + car_id, contact.get("input1").asBoolean());
             ed.putBoolean(Names.INPUT2 + car_id, contact.get("input2").asBoolean());
@@ -310,6 +311,9 @@ public class FetchService extends Service {
             ed.putBoolean(Names.GUARD1 + car_id, contact.get("guardMode1").asBoolean());
             ed.putBoolean(Names.RELAY1 + car_id, contact.get("relay1").asBoolean());
             ed.putBoolean(Names.RELAY2 + car_id, contact.get("relay2").asBoolean());
+            ed.putBoolean(Names.RELAY3 + car_id, contact.get("relay3").asBoolean());
+            ed.putBoolean(Names.RELAY4 + car_id, contact.get("relay4").asBoolean());
+            ed.putBoolean(Names.ENGINE + car_id, contact.get("engine").asBoolean());
             setState(Names.ZONE_DOOR, contact, "door", 3);
             setState(Names.ZONE_HOOD, contact, "hood", 2);
             setState(Names.ZONE_TRUNK, contact, "trunk", 1);
@@ -340,18 +344,6 @@ public class FetchService extends Service {
                 ed.putBoolean(Names.GUARD1 + car_id, false);
             }
 
-            boolean engine = contact.get("engine").asBoolean();
-            if (engine && (msg_id == 4))
-                msg_id = 0;
-            boolean send_engine = false;
-            if (engine != preferences.getBoolean(Names.ENGINE + car_id, false)) {
-                ed.putBoolean(Names.ENGINE + car_id, engine);
-                ed.putBoolean(Names.AZ + car_id, engine);
-            }
-            if (preferences.getBoolean(Names.AZ + car_id, false) && !guard) {
-                ed.putBoolean(Names.AZ + car_id, false);
-            }
-
             boolean gsm_req = true;
             JsonValue gps_value = res.get("gps");
             if (gps_value != null) {
@@ -372,13 +364,16 @@ public class FetchService extends Service {
             ed.commit();
             sendUpdate(ACTION_UPDATE, car_id);
 
-            if (send_engine)
-                SmsMonitor.processMessageFromApi(FetchService.this, car_id, engine ? R.string.motor_on : R.string.motor_off);
-            boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD0 + car_id, false);
+            boolean az = Preferences.getAZ(preferences, car_id);
+            if (az != prev_az)
+                SmsMonitor.processMessageFromApi(FetchService.this, car_id, az ? R.string.motor_on : R.string.motor_off);
+            boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
             if (valet != prev_valet)
                 SmsMonitor.processMessageFromApi(FetchService.this, car_id, valet ? R.string.valet_on : R.string.valet_off);
 
 /*
+            if (az && (msg_id == 4))
+                msg_id = 0;
             if (preferences.getBoolean(Names.NOSLEEP_MODE + car_id, false)) {
                 if (!sms_alarm && (msg_id > 0) && guard) {
                     Intent alarmIntent = new Intent(FetchService.this, Alarm.class);
@@ -392,6 +387,15 @@ public class FetchService extends Service {
                 alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, SAFEMODE_TIMEOUT, SAFEMODE_TIMEOUT, pi);
             }
 */
+            if (SmsMonitor.haveProcessed(car_id)) {
+                Intent iUpdate = new Intent(FetchService.this, FetchService.class);
+                iUpdate.setAction(ACTION_UPDATE);
+                iUpdate.putExtra(Names.ID, car_id);
+                Uri data = Uri.withAppendedPath(Uri.parse("http://service/update/"), car_id);
+                iUpdate.setData(data);
+                PendingIntent pi = PendingIntent.getService(FetchService.this, 0, iUpdate, 0);
+                alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + SCAN_TIMEOUT, pi);
+            }
 
             new EventsRequest(car_id, voltage_request, gsm_req);
 

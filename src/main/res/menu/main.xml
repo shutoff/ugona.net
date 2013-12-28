@@ -22,6 +22,11 @@
         car:showAsAction="never" />
 
     <item
+        android:id="@+id/log"
+        android:title="Debug"
+        car:showAsAction="never" />
+
+    <item
         android:id="@+id/about"
         android:title="@string/about"
         car:showAsAction="never" />

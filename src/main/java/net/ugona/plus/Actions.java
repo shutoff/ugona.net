@@ -24,6 +24,7 @@ import android.widget.EditText;
 
 import java.util.Date;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Actions {
 
@@ -43,7 +44,7 @@ public class Actions {
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putBoolean(Names.ENGINE + car_id, false);
                 ed.commit();
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_on, "MOTOR ON", "", "ERROR;Engine", R.string.motor_start_error) {
+                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_on, "MOTOR ON", "", "MOTOR ON FAIL", R.string.motor_start_error) {
                     @Override
                     boolean process_answer(Context context, String car_id, String text) {
                         if ((text == null) ||
@@ -51,7 +52,7 @@ public class Actions {
                                 SmsMonitor.compare(text, "Remote Engine Start OK")) {
                             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                             SharedPreferences.Editor ed = preferences.edit();
-                            ed.putBoolean(Names.AZ + car_id, true);
+                            ed.putBoolean(Names.ZONE_IGNITION + car_id, true);
                             ed.putBoolean(Names.ENGINE + car_id, true);
                             ed.commit();
                             try {
@@ -65,6 +66,13 @@ public class Actions {
                             return true;
                         }
                         return false;
+                    }
+
+                    @Override
+                    Uri process_error(String text) {
+                        if (SmsMonitor.compare(text, "ERROR;Engine") || SmsMonitor.compare(text, error))
+                            return Uri.parse("android.resource://net.ugona.plus/raw/engine_fail");
+                        return null;
                     }
                 });
             }
@@ -80,7 +88,8 @@ public class Actions {
                     boolean process_answer(Context context, String car_id, String text) {
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                         SharedPreferences.Editor ed = preferences.edit();
-                        ed.putBoolean(Names.AZ + car_id, false);
+                        ed.putBoolean(Names.ZONE_IGNITION + car_id, false);
+                        ed.putBoolean(Names.ENGINE + car_id, false);
                         ed.commit();
                         try {
                             Intent intent = new Intent(FetchService.ACTION_UPDATE);
@@ -551,8 +560,13 @@ public class Actions {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         final String password = preferences.getString(Names.PASSWORD, "");
         if (password.length() > 0) {
+            int id = R.layout.password;
+            Pattern pattern = Pattern.compile("[0-9]+");
+            Matcher matcher = pattern.matcher(password);
+            if (matcher.matches())
+                id = R.layout.password_number;
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-            builder.setView(inflater.inflate(R.layout.password, null));
+            builder.setView(inflater.inflate(id, null));
         } else if (id_message == 0) {
             action.run();
             return;
@@ -562,6 +576,7 @@ public class Actions {
         dialog.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         dialog.show();
+
         dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -598,6 +613,7 @@ public class Actions {
         final Button ok = dialog.getButton(Dialog.BUTTON_POSITIVE);
         ok.setEnabled(false);
         final EditText ccode = (EditText) dialog.findViewById(R.id.ccode);
+        int input_type = ccode.getInputType();
         ccode.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

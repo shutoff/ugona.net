@@ -111,15 +111,14 @@ public class CarDrawable {
             }
             upd |= setModeOpen(2, !white, trunk_open, trunk_alarm);
 
-            boolean engine = preferences.getBoolean(Names.AZ + car_id, false);
-            upd |= setLayer(4, (engine && small) ? 23 : 0);
+            boolean ignition = preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false);
+            boolean az = preferences.getBoolean(Names.ENGINE + car_id, false) && (ignition || preferences.getBoolean(Names.RELAY4 + car_id, false));
+            upd |= setLayer(4, (az && small) ? 23 : 0);
 
-            int ignition = 0;
-            if (preferences.getBoolean(Names.INPUT3 + car_id, false))
-                ignition = 24;
-            if (!engine && preferences.getBoolean(Names.ZONE_IGNITION + car_id, false))
-                ignition = guard ? 25 : 24;
-            upd |= setLayer(5, ignition);
+            int ignition_id = 0;
+            if (!az && (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false)))
+                ignition_id = guard ? 25 : 24;
+            upd |= setLayer(5, ignition_id);
 
             int state = 0;
             if (guard) {

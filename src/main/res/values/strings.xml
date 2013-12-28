@@ -337,4 +337,6 @@
     <string name="brk_data">BRK data</string>
     <string name="show_name">Show name</string>
     <string name="impulse">Control by impulse</string>
+    <string name="brake_on">Hand brake on</string>
+    <string name="brake_off">Hand brake off</string>
 </resources>

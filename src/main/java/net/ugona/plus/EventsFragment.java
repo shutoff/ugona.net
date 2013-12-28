@@ -207,6 +207,8 @@ public class EventsFragment extends Fragment
             new EventType(140, R.string.lan_change, R.drawable.system, 0),
             new EventType(141, R.string.command, R.drawable.system, 1),
             new EventType(142, R.string.brake, R.drawable.brake, 2),
+            new EventType(145, R.string.brake_on, R.drawable.brake, 2),
+            new EventType(146, R.string.brake_off, R.drawable.brake, 2),
             new EventType(293, R.string.sos, R.drawable.sos, 0),
     };
 
@@ -522,6 +524,8 @@ public class EventsFragment extends Fragment
             for (; i < res.size(); i++) {
                 JsonObject event = res.get(i).asObject();
                 int type = event.get("eventType").asInt();
+                if ((type > 150) && (type < 165))
+                    continue;
                 if (!pointer && ((type == 94) || (type == 98) || (type == 41) || (type == 33) || (type == 39) || (type == 127)))
                     continue;
                 long time = event.get("eventTime").asLong();

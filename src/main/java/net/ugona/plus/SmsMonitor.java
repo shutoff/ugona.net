@@ -54,6 +54,11 @@ public class SmsMonitor extends BroadcastReceiver {
             return true;
         }
 
+        Uri process_error(String text) {
+            if ((error != null) && compare(text, error))
+                return Uri.parse("android.resource://net.ugona.plus/raw/fail");
+            return null;
+        }
     }
 
     static class SmsQueue extends HashMap<Integer, Sms> {
@@ -111,6 +116,9 @@ public class SmsMonitor extends BroadcastReceiver {
             if (queues.wait == null)
                 queues.wait = new SmsQueue();
             queues.wait.put(sms.id, sms);
+            Intent i = new Intent(context, FetchService.class);
+            i.putExtra(Names.ID, car_id);
+            context.startService(i);
             return;
         }
         if (action.equals(ACTION)) {
@@ -148,7 +156,6 @@ public class SmsMonitor extends BroadcastReceiver {
         }
         if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-
             String[] cars = preferences.getString(Names.CARS, "").split(",");
             for (String id : cars) {
                 Intent i = new Intent(context, FetchService.class);
@@ -228,15 +235,15 @@ public class SmsMonitor extends BroadcastReceiver {
                         return true;
                     }
                 }
-                answer = entry.getValue().error;
-                if ((answer != null) && compare(body, answer)) {
+                Uri uri = entry.getValue().process_error(body);
+                if (uri != null) {
                     wait.remove(entry.getKey());
                     entry.getValue().process_answer(context, car_id, null);
                     Intent i = new Intent(SMS_ANSWER);
                     i.putExtra(Names.ANSWER, Activity.RESULT_CANCELED);
                     i.putExtra(Names.ID, car_id);
                     context.sendBroadcast(i);
-                    showNotification(context, context.getString(entry.getValue().error_msg), car_id);
+                    showNotification(context, context.getString(entry.getValue().error_msg), R.drawable.warning, car_id, uri);
                     return true;
                 }
             }
@@ -356,6 +363,20 @@ public class SmsMonitor extends BroadcastReceiver {
         if ((queues.wait != null) && queues.wait.containsKey(id))
             return true;
         return false;
+    }
+
+    static boolean haveProcessed(String car_id) {
+        if (processed == null)
+            return false;
+        SmsQueues queues = processed.get(car_id);
+        if (queues == null)
+            return false;
+        if ((queues.send != null) && !queues.send.isEmpty())
+            return true;
+        if ((queues.wait != null) && !queues.wait.isEmpty())
+            return true;
+        return false;
+
     }
 
 }

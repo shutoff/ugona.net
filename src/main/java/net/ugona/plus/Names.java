@@ -49,7 +49,6 @@ public final class Names {
     static final String GSM_ZONE = "gsmzone";
 
     static final String ENGINE = "Engine";
-    static final String AZ = "AZ";
     static final String LAST_EVENT = "LastEvent";
     static final String LAST_STAND = "LastStand";
     static final String GUARD = "Guard_";
@@ -112,5 +111,7 @@ public final class Names {
 
     static final String RELAY1 = "relay1_";
     static final String RELAY2 = "relay2_";
+    static final String RELAY3 = "relay3_";
+    static final String RELAY4 = "relay4_";
 
 }

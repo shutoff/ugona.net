@@ -76,4 +76,11 @@ public class Preferences {
         return preferences.getString(Names.NOTIFY, "");
     }
 
+    static boolean getAZ(SharedPreferences preferences, String car_id) {
+        if (!preferences.getBoolean(Names.GUARD + car_id, false))
+            return false;
+        return (preferences.getBoolean(Names.ENGINE + car_id, false) || preferences.getBoolean(Names.RELAY4 + car_id, false)) &&
+                (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false));
+    }
+
 }

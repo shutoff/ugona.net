@@ -430,13 +430,15 @@ public class StateFragment extends Fragment
 
         int commands = State.getCommands(preferences, car_id);
         boolean ignition = preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false);
-        boolean az = preferences.getBoolean(Names.AZ + car_id, false);
+        boolean az = preferences.getBoolean(Names.ENGINE + car_id, false) && (ignition || preferences.getBoolean(Names.RELAY4 + car_id, false));
+        if (az)
+            ignition = false;
         boolean block = !preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false);
-
 
         int n_buttons = 0;
         if (State.hasTelephony(context) && ((commands & State.CMD_AZ) != 0) && (!ignition || az)) {
             vMotor.setVisibility(View.VISIBLE);
+            vMotor.setTag(az);
             if (az) {
                 ivMotor.setImageResource(R.drawable.icon_motor_off);
                 pMotor.setVisibility(SmsMonitor.isProcessed(car_id, R.string.motor_off) ? View.VISIBLE : View.GONE);
@@ -557,7 +559,8 @@ public class StateFragment extends Fragment
                 return true;
             case MotionEvent.ACTION_UP:
                 if (v == vMotor) {
-                    if (preferences.getBoolean(Names.AZ + car_id, false)) {
+                    boolean az = (Boolean) vMotor.getTag();
+                    if (az) {
                         if (SmsMonitor.isProcessed(car_id, R.string.motor_off)) {
                             SmsMonitor.cancelSMS(getActivity(), car_id, R.string.motor_off);
                             update(getActivity());
