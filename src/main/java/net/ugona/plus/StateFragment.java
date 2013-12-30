@@ -429,10 +429,8 @@ public class StateFragment extends Fragment
         tvTime.setText(time);
 
         int commands = State.getCommands(preferences, car_id);
-        boolean ignition = preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false);
-        boolean az = preferences.getBoolean(Names.ENGINE + car_id, false) && (ignition || preferences.getBoolean(Names.RELAY4 + car_id, false));
-        if (az)
-            ignition = false;
+        boolean az = preferences.getBoolean(Names.AZ + car_id, false);
+        boolean ignition = !az && (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false));
         boolean block = !preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false);
 
         int n_buttons = 0;
@@ -492,7 +490,7 @@ public class StateFragment extends Fragment
 
         balanceBlock.setVisibility(preferences.getBoolean(Names.SHOW_BALANCE + car_id, true) ? View.VISIBLE : View.GONE);
 
-        if (az && preferences.getBoolean(Names.GUARD + car_id, false)) {
+        if (az) {
             if (preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false)) {
                 imgEngine.setImageResource(R.drawable.engine_blue);
             } else {

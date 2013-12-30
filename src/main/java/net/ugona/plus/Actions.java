@@ -52,8 +52,7 @@ public class Actions {
                                 SmsMonitor.compare(text, "Remote Engine Start OK")) {
                             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                             SharedPreferences.Editor ed = preferences.edit();
-                            ed.putBoolean(Names.ZONE_IGNITION + car_id, true);
-                            ed.putBoolean(Names.ENGINE + car_id, true);
+                            ed.putBoolean(Names.AZ + car_id, true);
                             ed.commit();
                             try {
                                 Intent intent = new Intent(FetchService.ACTION_UPDATE);
@@ -88,8 +87,7 @@ public class Actions {
                     boolean process_answer(Context context, String car_id, String text) {
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                         SharedPreferences.Editor ed = preferences.edit();
-                        ed.putBoolean(Names.ZONE_IGNITION + car_id, false);
-                        ed.putBoolean(Names.ENGINE + car_id, false);
+                        ed.putBoolean(Names.AZ + car_id, false);
                         ed.commit();
                         try {
                             Intent intent = new Intent(FetchService.ACTION_UPDATE);
@@ -577,11 +575,33 @@ public class Actions {
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         dialog.show();
 
+        final EditText etPassword = (EditText) dialog.findViewById(R.id.passwd);
+        if (password.length() > 0) {
+            etPassword.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    if (s.toString().equals(password)) {
+                        dialog.dismiss();
+                        action.run();
+                    }
+                }
+            });
+        }
+
         dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (password.length() > 0) {
-                    EditText etPassword = (EditText) dialog.findViewById(R.id.passwd);
                     if (!password.equals(etPassword.getText().toString())) {
                         showMessage(context, id_title, R.string.invalid_password);
                         return;

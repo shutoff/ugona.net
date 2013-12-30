@@ -137,6 +137,7 @@ public class EventsFragment extends Fragment
             new EventType(42, R.string.user_call, R.drawable.user_call, 1),
             new EventType(43, R.string.rogue, R.drawable.rogue, 0),
             new EventType(44, R.string.rogue_off, R.drawable.rogue, 0),
+            new EventType(45, R.string.motor_start_azd, R.drawable.motor_start, 1),
             new EventType(46, R.string.motor_start, R.drawable.motor_start, 1),
             new EventType(47, R.string.motor_stop, R.drawable.motor_stop, 1),
             new EventType(48, R.string.motor_start_error, R.drawable.motor_start_error, 1),
@@ -350,9 +351,12 @@ public class EventsFragment extends Fragment
                     fetcher.no_reload = true;
                     fetcher.update();
                 }
+                if (intent.getAction().equals(FetchService.ACTION_UPDATE))
+                    api_key = preferences.getString(Names.CAR_KEY + car_id, "");
             }
         };
         IntentFilter intFilter = new IntentFilter(FetchService.ACTION_UPDATE);
+        intFilter.addAction(FetchService.ACTION_UPDATE_FORCE);
         getActivity().registerReceiver(br, intFilter);
 
         return v;
@@ -521,6 +525,7 @@ public class EventsFragment extends Fragment
                 first.id = event.get("eventId").asLong();
                 i++;
             }
+            int prev_type = 0;
             for (; i < res.size(); i++) {
                 JsonObject event = res.get(i).asObject();
                 int type = event.get("eventType").asInt();
@@ -528,7 +533,46 @@ public class EventsFragment extends Fragment
                     continue;
                 if (!pointer && ((type == 94) || (type == 98) || (type == 41) || (type == 33) || (type == 39) || (type == 127)))
                     continue;
+                boolean skip = false;
+                if ((type == 5) && ((prev_type == 5) || (prev_type == 6)))
+                    skip = true;
+                if ((type == 6) && (prev_type == 6))
+                    skip = true;
+                if ((type == 7) && (prev_type == 7))
+                    skip = true;
+                if ((type == 9) && (prev_type == 9))
+                    skip = true;
+                if ((type == 15) && ((prev_type == 15) || (prev_type == 16)))
+                    skip = true;
+                if ((type == 16) && (prev_type == 16))
+                    skip = true;
+                if ((type == 17) && (prev_type == 17))
+                    skip = true;
+                if ((type == 18) && (prev_type == 18))
+                    skip = true;
                 long time = event.get("eventTime").asLong();
+                if (skip) {
+                    int n = events.size() - 1;
+                    skip = false;
+                    for (; n >= 0; n--) {
+                        Event e = events.get(n);
+                        if (time + 3000 <= e.time)
+                            break;
+                        if (e.type == prev_type) {
+                            e.time = time;
+                            e.id = event.get("eventId").asLong();
+                            e.type = type;
+                            skip = true;
+                            break;
+                        }
+                    }
+                    if (skip) {
+                        prev_type = 0;
+                        continue;
+                    }
+                }
+                if (((type >= 5) && (type < 10)) || ((type >= 15) && (type < 20)))
+                    prev_type = type;
                 long id = event.get("eventId").asLong();
                 Event e = new Event();
                 e.type = type;

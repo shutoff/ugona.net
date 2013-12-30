@@ -2,10 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.ugona.plus"
     android:versionCode="2"
-    android:versionName="1.2 RC4">
+    android:versionName="1.2 RC5">
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="7"
         android:targetSdkVersion="16" />
 
     <uses-permission android:name="android.permission.READ_CONTACTS" />

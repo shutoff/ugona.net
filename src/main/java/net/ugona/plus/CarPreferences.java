@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -55,6 +56,7 @@ public class CarPreferences extends PreferenceActivity {
     Preference alarmPref;
     Preference mainPref;
     Preference limitPref;
+    Preference scanPref;
     SeekBarPreference sensPref;
     CheckBoxPreference photoPref;
     Preference relePref;
@@ -371,6 +373,85 @@ public class CarPreferences extends PreferenceActivity {
                 return true;
             }
         });
+
+        scanPref = findPreference("scan");
+        scanPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                final LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+                final AlertDialog dialog = new AlertDialog.Builder(CarPreferences.this)
+                        .setTitle(R.string.scan_mode)
+                        .setView(inflater.inflate(R.layout.scan_mode, null))
+                        .setNegativeButton(R.string.cancel, null)
+                        .setPositiveButton(R.string.ok, null)
+                        .create();
+                dialog.show();
+                final TextView tv = (TextView) dialog.findViewById(R.id.summary);
+                final Spinner spinner = (Spinner) dialog.findViewById(R.id.mode);
+                final String[] modes = getResources().getStringArray(R.array.scan_modes);
+                final String[] summary = getResources().getStringArray(R.array.scan_modes_mode);
+                spinner.setAdapter(new BaseAdapter() {
+                    @Override
+                    public int getCount() {
+                        return modes.length;
+                    }
+
+                    @Override
+                    public Object getItem(int position) {
+                        return modes[position];
+                    }
+
+                    @Override
+                    public long getItemId(int position) {
+                        return position;
+                    }
+
+                    @Override
+                    public View getView(int position, View convertView, ViewGroup parent) {
+                        View v = convertView;
+                        if (v == null)
+                            v = inflater.inflate(R.layout.car_list_item, null);
+                        TextView tv = (TextView) v.findViewById(R.id.name);
+                        tv.setText(modes[position]);
+                        return v;
+                    }
+
+                    @Override
+                    public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                        View v = convertView;
+                        if (v == null)
+                            v = inflater.inflate(R.layout.car_list_dropdown_item, null);
+                        TextView tv = (TextView) v.findViewById(R.id.name);
+                        tv.setText(modes[position]);
+                        return v;
+                    }
+                });
+                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        tv.setText(summary[position]);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+                spinner.setSelection(preferences.getInt(Names.SCAN_MODE + car_id, 0));
+                tv.setText(summary[spinner.getSelectedItemPosition()]);
+                dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putInt(Names.SCAN_MODE + car_id, spinner.getSelectedItemPosition());
+                        ed.commit();
+                        dialog.dismiss();
+                    }
+                });
+                return false;
+            }
+        });
+        setScanMode();
 
         if (State.hasTelephony(this)) {
             String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
@@ -843,6 +924,7 @@ public class CarPreferences extends PreferenceActivity {
         removePreference("notify");
         removePreference("tmp_shift");
         removePreference("cmd");
+        removePreference("scan");
     }
 
     void removePreference(String key) {
@@ -1092,5 +1174,11 @@ public class CarPreferences extends PreferenceActivity {
                         });
             }
         });
+    }
+
+    void setScanMode() {
+        int mode = preferences.getInt(Names.SCAN_MODE + car_id, 0);
+        String[] modes = getResources().getStringArray(R.array.scan_modes);
+        scanPref.setSummary(modes[mode]);
     }
 }

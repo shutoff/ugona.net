@@ -64,7 +64,7 @@ public class CarDrawable {
             R.drawable.block,               // 31
     };
 
-    private boolean update(Context ctx, String car_id, boolean small) {
+    private boolean update(Context ctx, String car_id, boolean engine, boolean big) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
         long last = preferences.getLong(Names.EVENT_TIME + car_id, 0);
         Date now = new Date();
@@ -111,9 +111,8 @@ public class CarDrawable {
             }
             upd |= setModeOpen(2, !white, trunk_open, trunk_alarm);
 
-            boolean ignition = preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false);
-            boolean az = preferences.getBoolean(Names.ENGINE + car_id, false) && (ignition || preferences.getBoolean(Names.RELAY4 + car_id, false));
-            upd |= setLayer(4, (az && small) ? 23 : 0);
+            boolean az = preferences.getBoolean(Names.AZ + car_id, false);
+            upd |= setLayer(4, (az && engine) ? 23 : 0);
 
             int ignition_id = 0;
             if (!az && (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false)))
@@ -123,7 +122,7 @@ public class CarDrawable {
             int state = 0;
             if (guard) {
                 state = white ? 28 : 26;
-                if (small)
+                if (!big)
                     state++;
             }
             if (guard0 && !guard1)
@@ -136,7 +135,7 @@ public class CarDrawable {
     }
 
     Drawable getDrawable(Context ctx, String car_id) {
-        if (!update(ctx, car_id, false))
+        if (!update(ctx, car_id, false, true))
             return null;
 
         int count = 0;
@@ -153,8 +152,8 @@ public class CarDrawable {
         return new LayerDrawable(parts);
     }
 
-    Bitmap getBitmap(Context ctx, String car_id) {
-        if (!update(ctx, car_id, true) && (bitmap != null))
+    Bitmap getBitmap(Context ctx, String car_id, boolean bigPict) {
+        if (!update(ctx, car_id, true, bigPict) && (bitmap != null))
             return bitmap;
 
         if (bitmap == null) {

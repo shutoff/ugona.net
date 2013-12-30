@@ -112,6 +112,7 @@
     <string name="user_call">Request via call</string>
     <string name="user_sms">Request via SMS</string>
     <string name="motor_start">Engine start request</string>
+    <string name="motor_start_azd">Engine start request AZD</string>
     <string name="request_photo">Photo request</string>
     <string name="trunk_open">Trunk open</string>
     <string name="hood_open">Hood open</string>
@@ -339,4 +340,17 @@
     <string name="impulse">Control by impulse</string>
     <string name="brake_on">Hand brake on</string>
     <string name="brake_off">Hand brake off</string>
+    <string name="scan_mode">Scan mode</string>
+    <string-array name="scan_modes">
+        <item>Economy</item>
+        <item>Notification about guard</item>
+        <item>All notifications</item>
+    </string-array>
+    <string-array name="scan_modes_mode">
+        <item></item>
+        <item></item>
+        <item></item>
+    </string-array>
+    <string name="ps_guard">Guard with passengers is ON</string>
+    <string name="time_warning">Long time no events from car</string>
 </resources>

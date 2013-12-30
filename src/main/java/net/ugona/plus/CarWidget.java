@@ -218,6 +218,7 @@ public class CarWidget extends AppWidgetProvider {
 
     void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetID) {
         int rows = 3;
+        boolean bigPict = false;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             Bundle options = appWidgetManager.getAppWidgetOptions(widgetID);
             int maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
@@ -232,11 +233,13 @@ public class CarWidget extends AppWidgetProvider {
                     int h4 = getLayoutHeight(context, maxWidth, R.layout.widget4);
                     if (h < h3)
                         rows = 2;
-                    if (h > h4)
+                    if (h > h4) {
                         rows = 4;
+                    }
                     height_rows.put(maxHeight, rows);
                 }
                 rows = height_rows.get(maxHeight);
+                bigPict = (rows > 3);
             }
         }
 
@@ -349,7 +352,7 @@ public class CarWidget extends AppWidgetProvider {
         if (drawable == null)
             drawable = new CarDrawable();
 
-        Bitmap bmp = drawable.getBitmap(context, car_id);
+        Bitmap bmp = drawable.getBitmap(context, car_id, bigPict);
         if (bmp != null)
             widgetView.setImageViewBitmap(R.id.car, bmp);
 

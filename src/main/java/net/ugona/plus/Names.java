@@ -114,4 +114,10 @@ public final class Names {
     static final String RELAY3 = "relay3_";
     static final String RELAY4 = "relay4_";
 
+    static final String SCAN_MODE = "scan_";
+    static final String PS_NOTIFY = "ps_notify_";
+    static final String TIME_NOTIFY = "time_notify_";
+
+    static final String AZ = "az_";
+
 }

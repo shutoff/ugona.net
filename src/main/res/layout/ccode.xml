@@ -17,7 +17,7 @@
         android:inputType="textPassword|number"
         android:password="true"
         android:maxEms="6"
-        android:maxLength="6"
+        android:maxLength="12"
         android:minEms="6">
 
         <requestFocus />

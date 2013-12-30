@@ -1,8 +1,10 @@
 package net.ugona.plus;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -66,6 +68,8 @@ public class TracksFragment extends Fragment
     ProgressBar prgMain;
     TextView tvLoading;
     ListView lvTracks;
+
+    BroadcastReceiver br;
 
     final static String EVENTS = "http://dev.car-online.ru/api/v2?get=events&skey=$1&begin=$2&end=$3&content=json";
     final static String GPSLIST = "http://dev.car-online.ru/api/v2?get=gpslist&skey=$1&begin=$2&end=$3&content=json";
@@ -142,6 +146,20 @@ public class TracksFragment extends Fragment
             TracksFetcher fetcher = new TracksFetcher();
             fetcher.update();
         }
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent == null)
+                    return;
+                if (!car_id.equals(intent.getStringExtra(Names.ID)))
+                    return;
+                if (intent.getAction().equals(FetchService.ACTION_UPDATE))
+                    api_key = preferences.getString(Names.CAR_KEY + car_id, "");
+            }
+        };
+        IntentFilter intFilter = new IntentFilter(FetchService.ACTION_UPDATE_FORCE);
+        getActivity().registerReceiver(br, intFilter);
+
         return v;
     }
 
@@ -150,6 +168,12 @@ public class TracksFragment extends Fragment
         super.onAttach(activity);
         MainActivity mainActivity = (MainActivity) activity;
         mainActivity.registerDateListener(this);
+    }
+
+    @Override
+    public void onDestroyView() {
+        getActivity().unregisterReceiver(br);
+        super.onDestroyView();
     }
 
     @Override
@@ -344,6 +368,8 @@ public class TracksFragment extends Fragment
                         last_type = type;
                     }
                 }
+                if ((type == 90) || (type == 91))
+                    events.put(e.get("eventId").asLong(), type);
             }
             long time = last_time + 600000;
             if (last_type == 38)
@@ -408,7 +434,7 @@ public class TracksFragment extends Fragment
                 for (int i = list.size() - 1; i >= 0; i--) {
                     JsonObject e = list.get(i).asObject();
                     int type = e.get("eventType").asInt();
-                    if ((type == 37) || (type == 38) || (type == 39)) {
+                    if ((type == 37) || (type == 38) || (type == 39) || (type == 90) || (type == 91)) {
                         EventInfo event = new EventInfo();
                         event.time = e.get("eventTime").asLong();
                         event.id = e.get("eventId").asLong();
@@ -481,7 +507,7 @@ public class TracksFragment extends Fragment
                 for (int i = list.size() - 1; i >= 0; i--) {
                     JsonObject e = list.get(i).asObject();
                     int type = e.get("eventType").asInt();
-                    if ((type == 37) || (type == 38) || (type == 39)) {
+                    if ((type == 37) || (type == 38) || (type == 39) || (type == 90) || (type == 91)) {
                         EventInfo event = new EventInfo();
                         event.time = e.get("eventTime").asLong();
                         event.id = e.get("eventId").asLong();
@@ -583,10 +609,30 @@ public class TracksFragment extends Fragment
 
             long last_time = 0;
             int last_type = 0;
+            boolean started = false;
             for (PointInfo pi : points) {
                 long prev_time = pi.point.time - 600000;
                 if ((pi.type == 37) || (last_type == 38))
                     prev_time = pi.point.time - 60000;
+                if ((pi.type == 90) && (tracks.size() > 0)) {
+                    Vector<Tracks.Point> track = tracks.get(tracks.size() - 1).track;
+                    if (track.size() > 0) {
+                        Tracks.Point start = track.get(0);
+                        double distance = Address.calc_distance(start.latitude, start.longitude, pi.point.latitude, pi.point.longitude);
+                        if (distance < 100)
+                            tracks.get(tracks.size() - 1).track = new Vector<Tracks.Point>();
+                        started = true;
+                    }
+                }
+                if ((pi.type == 38) && !started && (tracks.size() > 0)) {
+                    Vector<Tracks.Point> track = tracks.get(tracks.size() - 1).track;
+                    if (track.size() > 0) {
+                        Tracks.Point start = track.get(0);
+                        double distance = Address.calc_distance(start.latitude, start.longitude, pi.point.latitude, pi.point.longitude);
+                        if (distance < 100)
+                            tracks.get(tracks.size() - 1).track = new Vector<Tracks.Point>();
+                    }
+                }
                 if (prev_time > last_time) {
                     Tracks.Track track = new Tracks.Track();
                     track.begin = pi.point.time;
@@ -606,6 +652,7 @@ public class TracksFragment extends Fragment
                 track.track.add(pi.point);
                 last_time = pi.point.time;
                 last_type = pi.type;
+                started = false;
             }
 
             for (int i = 0; i < tracks.size(); i++) {

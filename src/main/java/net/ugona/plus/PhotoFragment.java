@@ -146,16 +146,24 @@ public class PhotoFragment extends Fragment
         br = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                int camera = intent.getIntExtra(Names.CAMERA, 0);
-                String id = intent.getStringExtra(Names.ID);
-                if (car_id.equals(id)) {
-                    BaseAdapter adapter = (BaseAdapter) list.getAdapter();
-                    if (adapter != null)
-                        adapter.notifyDataSetChanged();
+                if (intent.getAction().equals(ROTATE)) {
+                    int camera = intent.getIntExtra(Names.CAMERA, 0);
+                    String id = intent.getStringExtra(Names.ID);
+                    if (car_id.equals(id)) {
+                        BaseAdapter adapter = (BaseAdapter) list.getAdapter();
+                        if (adapter != null)
+                            adapter.notifyDataSetChanged();
+                    }
                 }
+                if (!car_id.equals(intent.getStringExtra(Names.ID)))
+                    return;
+                if (intent.getAction().equals(FetchService.ACTION_UPDATE))
+                    api_key = preferences.getString(Names.CAR_KEY + car_id, "");
             }
         };
-        getActivity().registerReceiver(br, new IntentFilter(ROTATE));
+        IntentFilter intFilter = new IntentFilter(FetchService.ACTION_UPDATE_FORCE);
+        intFilter.addAction(ROTATE);
+        getActivity().registerReceiver(br, intFilter);
 
         View.OnTouchListener touchListener = new View.OnTouchListener() {
             @Override

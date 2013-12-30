@@ -34,8 +34,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.ParseException;
 import com.romorama.caldroid.CaldroidFragment;
 import com.romorama.caldroid.CaldroidListener;
 import com.viewpagerindicator.TitlePageIndicator;
@@ -311,6 +309,7 @@ public class MainActivity extends ActionBarActivity {
                 setPassword();
                 return true;
 
+/*
             case R.id.log: {
                 HttpTask task = new HttpTask() {
                     @Override
@@ -324,17 +323,11 @@ public class MainActivity extends ActionBarActivity {
                     }
                 };
 
-                State.appendLog("guard=" + preferences.getBoolean(Names.GUARD + car_id, false));
-                State.appendLog("engine=" + preferences.getBoolean(Names.ENGINE + car_id, false));
-                State.appendLog("relay4=" + preferences.getBoolean(Names.RELAY4 + car_id, false));
-                State.appendLog("input3=" + preferences.getBoolean(Names.INPUT3 + car_id, false));
-                State.appendLog("ignition=" + preferences.getBoolean(Names.ZONE_IGNITION + car_id, false));
-                State.appendLog("az=" + Preferences.getAZ(preferences, car_id));
-
                 String api_key = preferences.getString(Names.CAR_KEY + car_id, "");
                 task.execute(FetchService.STATUS_URL, api_key);
                 return true;
             }
+*/
 
             case R.id.about: {
                 Intent intent = new Intent(this, About.class);
@@ -468,6 +461,7 @@ public class MainActivity extends ActionBarActivity {
         SharedPreferences.Editor ed = preferences.edit();
         ed.remove(Names.N_IDS + car_id);
         ed.remove(Names.BALANCE_NOTIFICATION + car_id);
+        ed.remove(Names.PS_NOTIFY + car_id);
         ed.commit();
     }
 

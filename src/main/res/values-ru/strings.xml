@@ -108,6 +108,7 @@
     <string name="user_call">Запрос по звонку</string>
     <string name="user_sms">Запрос по SMS</string>
     <string name="motor_start">Дистанционный запуск двигателя</string>
+    <string name="motor_start_azd">Автоматический запуск двигателя</string>
     <string name="request_photo">Запрос фото</string>
     <string name="trunk_open">Открыт багажник</string>
     <string name="hood_open">Открыт капот</string>
@@ -318,4 +319,24 @@
     <string name="impulse">Управление импульсом</string>
     <string name="brake_on">Ручник поднят</string>
     <string name="brake_off">Ручник опущен</string>
+    <string name="scan_mode">Режим опроса</string>
+    <string-array name="scan_modes">
+        <item>Экономичный</item>
+        <item>Уведомления о постановке в охрану</item>
+        <item>Постоянный контроль</item>
+    </string-array>
+    <string-array name="scan_modes_mode">
+        <item>Опрос состояния проводится только при включенном экране и установленнои соединении для
+            передачи данных. Минимально расходует батарейку
+        </item>
+        <item>Опрос производится постоянно в состоянии не в охране. Выдаются уведомления о
+            постановку в охрану с пассажирами. Во время опроса может быть более быстрый расход
+            батареи
+        </item>
+        <item>Опрос производится постоянно. Выдаются тревоги полученные с сервера. Может вызвать
+            значительный расход батареи телефона
+        </item>
+    </string-array>
+    <string name="ps_guard">Включен режим охраны с пассажирами</string>
+    <string name="time_warning">Долгое время не было связи с машиной</string>
 </resources>

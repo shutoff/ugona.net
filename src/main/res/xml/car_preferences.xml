@@ -71,6 +71,10 @@
         android:key="show_photo" />
 
     <Preference
+        android:title="@string/scan_mode"
+        android:key="scan" />
+
+    <Preference
         android:title="@string/alarm_sound"
         android:summary="@string/def"
         android:key="alarm" />
