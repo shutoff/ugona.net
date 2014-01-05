@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
@@ -35,7 +36,7 @@ public class FetchService extends Service {
     private static final long REPEAT_AFTER_500 = 600 * 1000;
     private static final long LONG_TIMEOUT = 5 * 60 * 60 * 1000;
     private static final long SCAN_TIMEOUT = 10 * 1000;
-    private static final long REQUEST_TIMEOUT = 2 * 60 * 1000;
+    private static final long REQUEST_TIMEOUT = 3 * 60 * 1000;
 
     private BroadcastReceiver mReceiver;
     private PendingIntent piTimer;
@@ -91,6 +92,8 @@ public class FetchService extends Service {
         piTimer = PendingIntent.getService(this, 0, iTimer, 0);
         mReceiver = new ScreenReceiver();
         requests = new HashMap<String, ServerRequest>();
+        if (Integer.parseInt(Build.VERSION.SDK) < Build.VERSION_CODES.FROYO)
+            System.setProperty("http.keepAlive", "false");
     }
 
     @Override
@@ -480,6 +483,7 @@ public class FetchService extends Service {
                 iUpdate.putExtra(Names.ID, car_id);
                 Uri data = Uri.withAppendedPath(Uri.parse("http://service/update/"), car_id);
                 iUpdate.setData(data);
+                State.appendLog("Scan timeout " + car_id);
                 PendingIntent pi = PendingIntent.getService(FetchService.this, 0, iUpdate, 0);
                 alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + SCAN_TIMEOUT, pi);
             } else {
@@ -492,6 +496,7 @@ public class FetchService extends Service {
                     iUpdate.putExtra(Names.ID, car_id);
                     Uri data = Uri.withAppendedPath(Uri.parse("http://service/update/"), car_id);
                     iUpdate.setData(data);
+                    State.appendLog("Request timeout " + car_id);
                     PendingIntent pi = PendingIntent.getService(FetchService.this, 0, iUpdate, 0);
                     alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + REQUEST_TIMEOUT, pi);
                 }
@@ -608,6 +613,7 @@ public class FetchService extends Service {
                 boolean changed = false;
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putLong(Names.LAST_EVENT + car_id, eventTime);
+                State.appendLog("Set last event " + eventTime);
                 if (last_stand != stand) {
                     ed.putLong(Names.LAST_STAND + car_id, last_stand);
                     changed = true;
@@ -630,7 +636,7 @@ public class FetchService extends Service {
                 if (gsm)
                     new GsmRequest(car_id);
                 if (temp)
-                    new TemperatureRequest(car_id, begin);
+                    new TemperatureRequest(car_id);
             }
         }
 
@@ -641,6 +647,7 @@ public class FetchService extends Service {
             long bound = eventTime - 2 * 24 * 60 * 60 * 1000;
             if (begin < bound)
                 begin = bound;
+            State.appendLog("Events time " + (eventTime - begin) / 1000);
             execute(EVENTS_URL, api_key, begin + "", eventTime + "");
         }
 
@@ -650,10 +657,10 @@ public class FetchService extends Service {
     class TemperatureRequest extends ServerRequest {
 
         long begin;
+        long eventTime;
 
-        TemperatureRequest(String id, long start) {
+        TemperatureRequest(String id) {
             super("T", id);
-            begin = start;
         }
 
         @Override
@@ -691,6 +698,9 @@ public class FetchService extends Service {
             }
             if (changed)
                 sendUpdate(ACTION_UPDATE, car_id);
+            SharedPreferences.Editor ed = preferences.edit();
+            ed.putLong(Names.TEMP_EVENT + car_id, eventTime);
+            ed.commit();
         }
 
         boolean setTemp(String name, int value) {
@@ -705,6 +715,12 @@ public class FetchService extends Service {
 
         @Override
         void exec(String api_key) {
+            eventTime = preferences.getLong(Names.EVENT_TIME + car_id, 0);
+            begin = preferences.getLong(Names.TEMP_EVENT + car_id, 0);
+            long bound = eventTime - 2 * 24 * 60 * 60 * 1000;
+            if (begin < bound)
+                begin = bound;
+
             long eventTime = preferences.getLong(Names.LAST_EVENT + car_id, 0);
             execute(TEMP_URL, api_key,
                     begin + "",
@@ -713,6 +729,9 @@ public class FetchService extends Service {
     }
 
     class VoltageRequest extends ServerRequest {
+
+        long begin;
+        long eventTime;
 
         VoltageRequest(String id) {
             super("V", id);
@@ -728,10 +747,13 @@ public class FetchService extends Service {
             JsonObject value = arr.get(0).asObject();
             String main = value.get("main").asDouble() + "";
             String reserved = value.get("reserved").asDouble() + "";
-            if (main.equals(preferences.getString(Names.VOLTAGE_MAIN + car_id, "")) &&
-                    reserved.equals(preferences.getString(Names.VOLTAGE_RESERVED + car_id, "")))
-                return;
             SharedPreferences.Editor ed = preferences.edit();
+            ed.putLong(Names.VOLTAGE_EVENT + car_id, eventTime);
+            if (main.equals(preferences.getString(Names.VOLTAGE_MAIN + car_id, "")) &&
+                    reserved.equals(preferences.getString(Names.VOLTAGE_RESERVED + car_id, ""))) {
+                ed.commit();
+                return;
+            }
             ed.putString(Names.VOLTAGE_MAIN + car_id, main);
             ed.putString(Names.VOLTAGE_RESERVED + car_id, reserved);
             ed.commit();
@@ -740,9 +762,15 @@ public class FetchService extends Service {
 
         @Override
         void exec(String api_key) {
+            eventTime = preferences.getLong(Names.EVENT_TIME + car_id, 0);
+            begin = preferences.getLong(Names.VOLTAGE_EVENT + car_id, 0);
+            long bound = eventTime - 2 * 24 * 60 * 60 * 1000;
+            if (begin < bound)
+                begin = bound;
+
             long eventTime = preferences.getLong(Names.LAST_EVENT + car_id, 0);
             execute(VOLTAGE_URL, api_key,
-                    (eventTime - 24 * 60 * 60 * 1000) + "",
+                    begin + "",
                     eventTime + "");
         }
     }
@@ -780,6 +808,9 @@ public class FetchService extends Service {
 
     class GsmRequest extends ServerRequest {
 
+        long eventTime;
+        long begin;
+
         GsmRequest(String id) {
             super("M", id);
         }
@@ -797,10 +828,13 @@ public class FetchService extends Service {
             int cid = value.get("cid").asInt();
             int lac = value.get("lac").asInt();
             String gsm = cc + " " + nc + " " + lac + " " + cid;
-            if (gsm.equals(preferences.getString(Names.GSM + car_id, "")) &&
-                    !preferences.getString(Names.GSM_ZONE + car_id, "").equals(""))
-                return;
             SharedPreferences.Editor ed = preferences.edit();
+            if (gsm.equals(preferences.getString(Names.GSM + car_id, "")) &&
+                    !preferences.getString(Names.GSM_ZONE + car_id, "").equals("")) {
+                ed.putLong(Names.GSM_EVENT + car_id, eventTime);
+                ed.commit();
+                return;
+            }
             ed.putString(Names.GSM + car_id, gsm);
             ed.putString(Names.GSM_ZONE + car_id, "");
             ed.putString(Names.ADDRESS + car_id, "");
@@ -811,9 +845,15 @@ public class FetchService extends Service {
 
         @Override
         void exec(String api_key) {
+            eventTime = preferences.getLong(Names.EVENT_TIME + car_id, 0);
+            begin = preferences.getLong(Names.GSM_EVENT + car_id, 0);
+            long bound = eventTime - 2 * 24 * 60 * 60 * 1000;
+            if (begin < bound)
+                begin = bound;
+
             long eventTime = preferences.getLong(Names.LAST_EVENT + car_id, 0);
             execute(GSM_URL, api_key,
-                    (eventTime - 24 * 60 * 60 * 1000) + "",
+                    begin + "",
                     eventTime + "");
         }
     }

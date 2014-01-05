@@ -118,6 +118,10 @@ public final class Names {
     static final String PS_NOTIFY = "ps_notify_";
     static final String TIME_NOTIFY = "time_notify_";
 
+    static final String TEMP_EVENT = "temp_event_";
+    static final String VOLTAGE_EVENT = "voltage_event_";
+    static final String GSM_EVENT = "gsm_event_";
+
     static final String AZ = "az_";
 
 }

@@ -257,7 +257,7 @@ public class StateFragment extends Fragment
                             public void run() {
                                 startUpdate(getActivity());
                             }
-                        });
+                        }, null);
                         return;
                     }
                     tvError.setText(error_text);

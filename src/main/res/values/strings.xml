@@ -353,4 +353,7 @@
     </string-array>
     <string name="ps_guard">Guard with passengers is ON</string>
     <string name="time_warning">Long time no events from car</string>
+    <string name="demo">Demo mode</string>
+    <string name="demo_msg">Application is now running in demo mode</string>
+    <string name="gsm_new">GSM sector changed</string>
 </resources>

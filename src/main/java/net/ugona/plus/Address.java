@@ -98,9 +98,9 @@ public class Address {
                 result = preferences.getString(Names.ADDRESS + car_id, "");
                 if (!preferences.getString(Names.ADDR_LANG + car_id, "").equals(Locale.getDefault().getLanguage()))
                     result = "";
-                if (distance > 200)
+                if (distance > 250)
                     result = "";
-                if ((distance < 20) && (result.length() > 0))
+                if ((distance < 80) && (result.length() > 0))
                     return result;
             } catch (Exception ex) {
                 // ignore

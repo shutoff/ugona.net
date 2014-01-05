@@ -486,16 +486,24 @@ public class CarPreferences extends PreferenceActivity {
 
     void getApiKey() {
         getApiKey(this, car_id, new Runnable() {
-            @Override
-            public void run() {
-                Intent intent = new Intent(CarPreferences.this, FetchService.class);
-                intent.putExtra(Names.ID, car_id);
-                startService(intent);
-                String key = preferences.getString(Names.CAR_KEY + car_id, "");
-                getVersion(key);
-                getPhotos(key);
-            }
-        });
+                    @Override
+                    public void run() {
+                        Intent intent = new Intent(CarPreferences.this, FetchService.class);
+                        intent.putExtra(Names.ID, car_id);
+                        startService(intent);
+                        String key = preferences.getString(Names.CAR_KEY + car_id, "");
+                        getVersion(key);
+                        getPhotos(key);
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        String key = preferences.getString(Names.CAR_KEY + car_id, "");
+                        if (key.length() == 0)
+                            finish();
+                    }
+                }
+        );
     }
 
     @Override
@@ -785,10 +793,11 @@ public class CarPreferences extends PreferenceActivity {
 
     static boolean apiKeyShow = false;
 
-    static void getApiKey(final Context context, final String car_id, final Runnable onDone) {
+    static void getApiKey(final Context context, final String car_id, final Runnable onDone, final Runnable onEnd) {
         if (apiKeyShow)
             return;
         apiKeyShow = true;
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
         final AlertDialog dialog = new AlertDialog.Builder(context)
                 .setTitle(R.string.auth)
@@ -804,6 +813,8 @@ public class CarPreferences extends PreferenceActivity {
             @Override
             public void onDismiss(DialogInterface dialog) {
                 apiKeyShow = false;
+                if (onEnd != null)
+                    onEnd.run();
             }
         });
 
@@ -834,7 +845,6 @@ public class CarPreferences extends PreferenceActivity {
         edPasswd.addTextChangedListener(watcher);
         btnSave.setEnabled(false);
 
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         edLogin.setText(preferences.getString(Names.LOGIN + car_id, ""));
 
         btnSave.setOnClickListener(new View.OnClickListener() {

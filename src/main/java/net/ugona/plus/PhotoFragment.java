@@ -27,18 +27,16 @@ import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -447,17 +445,24 @@ public class PhotoFragment extends Fragment
             String url = PHOTO + api_key;
             url += "&id=" + params[0].id;
             Photo p = params[0];
+            HttpURLConnection connection = null;
             try {
-                HttpClient httpclient = new DefaultHttpClient();
-                HttpResponse response = httpclient.execute(new HttpGet(url));
-                StatusLine statusLine = response.getStatusLine();
-                int status = statusLine.getStatusCode();
+                URL u = new URL(url);
+                connection = (HttpURLConnection) u.openConnection();
+                int status = connection.getResponseCode();
                 if (status != HttpStatus.SC_OK)
                     return null;
                 File file = new File(cacheDir, "t" + car_id + "_" + p.id);
                 file.createNewFile();
                 FileOutputStream out = new FileOutputStream(file);
-                response.getEntity().writeTo(out);
+                InputStream in = connection.getInputStream();
+                byte[] data = new byte[4096];
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, bytesRead);
+                }
+                in.close();
                 out.close();
                 File new_file = new File(cacheDir, "p" + car_id + "_" + p.id);
                 new_file.delete();
@@ -466,6 +471,9 @@ public class PhotoFragment extends Fragment
             } catch (Exception e) {
                 p.loading = -1;
                 e.printStackTrace();
+            } finally {
+                if (connection != null)
+                    connection.disconnect();
             }
             return null;
         }

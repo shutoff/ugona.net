@@ -57,6 +57,8 @@ public class CarWidget extends AppWidgetProvider {
             R.drawable.p10
     };
 
+    static TrafficRequest request;
+
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
@@ -282,6 +284,16 @@ public class CarWidget extends AppWidgetProvider {
         widgetView.setTextViewText(R.id.voltage, preferences.getString(Names.VOLTAGE_MAIN + car_id, "--") + " V");
 
         String temperature = Preferences.getTemperature(preferences, car_id, 1);
+
+        int traffic = HttpTask.total;
+        if (traffic > 1000000) {
+            temperature = String.format("%.2f M", (float) traffic / 1000000);
+        } else if (traffic > 1000) {
+            temperature = String.format("%.2f k", (float) traffic / 1000);
+        } else {
+            temperature = traffic + "";
+        }
+
         if (temperature == null) {
             widgetView.setViewVisibility(R.id.temperature_block, View.GONE);
         } else {
@@ -417,7 +429,9 @@ public class CarWidget extends AppWidgetProvider {
         }
         if ((lat == 0) && (lon == 0))
             return;
-        new TrafficRequest(context, lat, lon, widgetID);
+        if (request != null)
+            return;
+        request = new TrafficRequest(context, lat, lon, widgetID);
     }
 
     class TrafficRequest extends HttpTask {
@@ -437,6 +451,7 @@ public class CarWidget extends AppWidgetProvider {
 
         @Override
         void result(JsonObject result) throws ParseException {
+            request = null;
             result = result.get("GeoObjectCollection").asObject();
             JsonArray data = result.get("features").asArray();
             int length = data.size();
@@ -470,7 +485,7 @@ public class CarWidget extends AppWidgetProvider {
 
         @Override
         void error() {
-
+            request = null;
         }
 
     }

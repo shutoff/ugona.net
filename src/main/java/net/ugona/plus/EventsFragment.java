@@ -129,6 +129,7 @@ public class EventsFragment extends Fragment
             new EventType(30, R.string.reserve_power_off, R.drawable.reserve_power_off, 0),
             new EventType(31, R.string.gsm_recover, R.drawable.gsm_recover),
             new EventType(32, R.string.gsm_fail, R.drawable.gsm_fail),
+            new EventType(33, R.string.gsm_new, R.drawable.gsm_new),
             new EventType(34, R.string.gps_recover, R.drawable.gps_recover),
             new EventType(35, R.string.gps_fail, R.drawable.gps_fail),
             new EventType(37, R.string.trace_start, R.drawable.trace_start),
