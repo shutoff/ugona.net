@@ -228,8 +228,8 @@ public class Cars extends ActionBarActivity {
         ed.remove(Names.VOLTAGE_MAIN + id);
         ed.remove(Names.VOLTAGE_RESERVED + id);
         ed.remove(Names.BALANCE + id);
-        ed.remove(Names.LATITUDE + id);
-        ed.remove(Names.LONGITUDE + id);
+        ed.remove(Names.LAT + id);
+        ed.remove(Names.LNG + id);
         ed.remove(Names.COURSE + id);
         ed.remove(Names.SPEED + id);
         ed.remove(Names.GUARD + id);
@@ -246,9 +246,9 @@ public class Cars extends ActionBarActivity {
         ed.remove(Names.ZONE_IGNITION + id);
         ed.remove(Names.LAST_EVENT + id);
         ed.remove(Names.ENGINE + id);
-        ed.remove(Names.TEMPERATURE + id);
-        ed.remove(Names.TEMPERATURE2 + id);
-        ed.remove(Names.TEMPERATURE3 + id);
+        ed.remove(Names.TEMP + "_" + 1 + id);
+        ed.remove(Names.TEMP + "_" + 2 + id);
+        ed.remove(Names.TEMP + "_" + 3 + id);
         ed.remove(Names.GSM + id);
         ed.remove(Names.GSM_ZONE + id);
         ed.remove(Names.LOGIN + id);

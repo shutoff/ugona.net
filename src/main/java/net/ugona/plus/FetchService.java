@@ -16,19 +16,14 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 
-import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class FetchService extends Service {
 
@@ -55,16 +50,7 @@ public class FetchService extends Service {
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR";
     static final String ACTION_RELE = "net.ugona.plus.RELE";
 
-    static final Pattern balancePattern = Pattern.compile("-?[0-9]+[\\.,][0-9][0-9]");
-
-    static final String STATUS_URL = "http://dev.car-online.ru/api/v2?get=lastinfo&skey=$1&content=json";
-    private static final String EVENTS_URL = "http://dev.car-online.ru/api/v2?get=events&skey=$1&begin=$2&end=$3&content=json";
-    private static final String VOLTAGE_URL = "http://dev.car-online.ru/api/v2?get=voltagelist&skey=$1&begin=$2&end=$3&content=json";
-    private static final String GSM_URL = "http://dev.car-online.ru/api/v2?get=gsmlist&skey=$1&begin=$2&end=$3&content=json";
-    private static final String GPS_URL = "http://dev.car-online.ru/api/v2?get=gps&skey=$1&id=$2&time=$3&content=json";
-    private static final String SECTOR_URL = "http://dev.car-online.ru/api/v2?get=gsmsector&skey=$1&cc=$2&nc=$3&lac=$4&cid=$5&content=json";
-    private static final String BALANCE_URL = "http://dev.car-online.ru/api/v2?get=balancelist&skey=$1&begin=$2&content=json";
-    private static final String TEMP_URL = "http://dev.car-online.ru/api/v2?get=temperaturelist&skey=$1&begin=$2&content=json";
+    static final String URL_STATUS = "https://api.shutoff.ru/?skey=$1&time=$2";
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -254,74 +240,26 @@ public class FetchService extends Service {
 
         @Override
         void background(JsonObject res) throws ParseException {
-            JsonObject event = res.get("event").asObject();
-            long eventId = event.get("eventId").asLong();
+            JsonValue error = res.get("error");
+            if (error != null) {
+                sendError(error.asString(), car_id);
+                return;
+            }
 
-            int scan_mode = preferences.getInt(Names.SCAN_MODE + car_id, 0);
-            if (eventId == preferences.getLong(Names.EVENT_ID + car_id, 0)) {
+            JsonValue time = res.get("time");
+            if (time == null) {
                 sendUpdate(ACTION_NOUPDATE, car_id);
-            } else {
-
-                long eventTime = event.get("eventTime").asLong();
-                ed = preferences.edit();
-                ed.putLong(Names.EVENT_ID + car_id, eventId);
-                ed.putLong(Names.EVENT_TIME + car_id, eventTime);
-
-                boolean voltage_request = true;
-                JsonValue voltage_value = res.get("voltage");
-                if (voltage_value != null) {
-                    voltage_request = false;
-                    JsonObject voltage = voltage_value.asObject();
-                    ed.putString(Names.VOLTAGE_MAIN + car_id, voltage.get("main").asDouble() + "");
-                    ed.putString(Names.VOLTAGE_RESERVED + car_id, voltage.get("reserved").asDouble() + "");
-                }
-                JsonValue temp_value = res.get("temperature");
-                if (temp_value != null) {
-                    JsonObject temp = temp_value.asObject();
-                    int sensor = temp.get("sensorNumber").asInt();
-                    if (sensor == 1)
-                        ed.putString(Names.TEMPERATURE + car_id, temp.get("value").asInt() + "");
-                    if (sensor == 2)
-                        ed.putString(Names.TEMPERATURE2 + car_id, temp.get("value").asInt() + "");
-                    if (sensor == 3)
-                        ed.putString(Names.TEMPERATURE3 + car_id, temp.get("value").asInt() + "");
-                }
-
-                if (preferences.getLong(Names.BALANCE_TIME + car_id, 0) == 0) {
-                    JsonObject balance = res.get("balance").asObject();
-                    Matcher m = balancePattern.matcher(balance.get("source").asString());
-                    if (m.find()) {
-                        String balance_str = m.group(0).replaceAll(",", ".");
-                        if (!balance_str.equals(preferences.getString(Names.BALANCE + car_id, ""))) {
-                            ed.putString(Names.BALANCE + car_id, balance_str);
-                            int limit = preferences.getInt(Names.LIMIT + car_id, 50);
-                            if (limit >= 0) {
-                                int balance_id = preferences.getInt(Names.BALANCE_NOTIFICATION + car_id, 0);
-                                try {
-                                    double value = Double.parseDouble(balance_str);
-                                    if (value <= limit) {
-                                        if (balance_id == 0) {
-                                            balance_id = Alarm.createNotification(FetchService.this, getString(R.string.low_balance), R.drawable.white_balance, car_id, null);
-                                            ed.putInt(Names.BALANCE_NOTIFICATION + car_id, balance_id);
-                                        }
-                                    } else {
-                                        if (balance_id > 0) {
-                                            Alarm.removeNotification(FetchService.this, car_id, balance_id);
-                                            ed.remove(Names.BALANCE_NOTIFICATION + car_id);
-                                        }
-                                    }
-                                } catch (Exception ex) {
-                                    // ignore
-                                }
-                            }
-                        }
-                    }
-                }
-
-                JsonObject contact = res.get("contact").asObject();
+                return;
+            }
+            ed = preferences.edit();
+            ed.putLong(Names.EVENT_TIME + car_id, time.asLong());
+            JsonValue contact_value = res.get("contact");
+            boolean gps_valid = false;
+            boolean prev_valet = false;
+            if (contact_value != null) {
+                JsonObject contact = contact_value.asObject();
                 boolean guard = contact.get("guard").asBoolean();
-                boolean prev_valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
-                boolean prev_ps_guard = preferences.getBoolean(Names.GUARD + car_id, false) && preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false);
+                prev_valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
 
                 ed.putBoolean(Names.GUARD + car_id, guard);
                 ed.putBoolean(Names.INPUT1 + car_id, contact.get("input1").asBoolean());
@@ -364,19 +302,89 @@ public class FetchService extends Service {
                     ed.putBoolean(Names.GUARD0 + car_id, false);
                     ed.putBoolean(Names.GUARD1 + car_id, false);
                 }
+                gps_valid = contact.get("gpsValid").asBoolean();
+            }
+
+            JsonValue voltage_value = res.get("voltage");
+            if (voltage_value != null) {
+                JsonObject voltage = voltage_value.asObject();
+                ed.putString(Names.VOLTAGE_MAIN + car_id, voltage.get("main").asDouble() + "");
+                ed.putString(Names.VOLTAGE_RESERVED + car_id, voltage.get("reserved").asDouble() + "");
+            }
+
+            JsonValue gps_value = res.get("gps");
+            if (gps_value != null) {
+                JsonObject gps = gps_value.asObject();
+                ed.putFloat(Names.LAT + car_id, gps.get("latitude").asFloat());
+                ed.putFloat(Names.LNG + car_id, gps.get("longitude").asFloat());
+                ed.putFloat(Names.SPEED + car_id, gps.get("speed").asFloat());
+                if (gps_valid)
+                    ed.putInt(Names.COURSE + car_id, gps.get("course").asInt());
+            }
+
+            JsonValue temp_value = res.get("temperature");
+            if (temp_value != null) {
+                JsonObject temp = temp_value.asObject();
+                List<String> names = temp.names();
+                for (String name : names) {
+                    ed.putInt(Names.TEMP + name + "_" + car_id, temp.get(name).asInt());
+                }
+            }
+
+            JsonValue balance_value = null;
+            if (preferences.getLong(Names.BALANCE_TIME + car_id, 0) + 60000 < new Date().getTime()) {
+                balance_value = res.get("balance");
+                if (balance_value != null) {
+                    JsonObject balance = balance_value.asObject();
+                    ed.putString(Names.BALANCE + car_id, balance.get("value").asDouble() + "");
+                    ed.remove(Names.BALANCE_TIME + car_id);
+                }
+            }
+
+            JsonValue last_stand = res.get("last_stand");
+            if (last_stand != null)
+                ed.putLong(Names.LAST_STAND + car_id, last_stand.asLong());
+            JsonValue az = res.get("az");
+            if (az != null)
+                ed.putBoolean(Names.AZ + car_id, az.asBoolean());
+
+            ed.commit();
+            sendUpdate(ACTION_UPDATE, car_id);
+
+            if (contact_value != null) {
+                boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
+                if (valet != prev_valet)
+                    SmsMonitor.processMessageFromApi(FetchService.this, car_id, valet ? R.string.valet_on : R.string.valet_off);
+            }
+
+            if (balance_value != null)
+                Preferences.checkBalance(FetchService.this, car_id);
+
+            if (SmsMonitor.haveProcessed(car_id)) {
+                Intent iUpdate = new Intent(FetchService.this, FetchService.class);
+                iUpdate.setAction(ACTION_UPDATE);
+                iUpdate.putExtra(Names.ID, car_id);
+                Uri data = Uri.withAppendedPath(Uri.parse("http://service/update/"), car_id);
+                iUpdate.setData(data);
+                PendingIntent pi = PendingIntent.getService(FetchService.this, 0, iUpdate, 0);
+                alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + SCAN_TIMEOUT, pi);
+            }
+
+            if (az != null) {
+                if (az.asBoolean()) {
+                    SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_on);
+                    SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_off);
+                } else {
+                    SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_off);
+                    SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_on);
+                }
+            }
+
+/*
+            JsonObject event = res.get("event").asObject();
+            long eventId = event.get("eventId").asLong();
 
                 boolean gsm_req = true;
-                JsonValue gps_value = res.get("gps");
-                if (gps_value != null) {
-                    gsm_req = false;
-                    JsonObject gps = gps_value.asObject();
-                    ed.putString(Names.LATITUDE + car_id, gps.get("latitude").asDouble() + "");
-                    ed.putString(Names.LONGITUDE + car_id, gps.get("longitude").asDouble() + "");
-                    ed.putString(Names.SPEED + car_id, gps.get("speed").asDouble() + "");
-                    if (contact.get("gpsValid").asBoolean())
-                        ed.putString(Names.COURSE + car_id, gps.get("course").asInt() + "");
-                }
-
 
                 boolean sms_alarm = preferences.getBoolean(Names.SMS_ALARM, false);
                 if (sms_alarm)
@@ -450,6 +458,7 @@ public class FetchService extends Service {
                     new BalanceRequest(car_id, balance_time);
                 }
 
+/*
                 if (preferences.getBoolean(Names.POINTER + car_id, false)) {
                     long now = new Date().getTime();
                     boolean new_state = ((now - eventTime) > 25 * 60 * 60 * 1000);
@@ -477,36 +486,13 @@ public class FetchService extends Service {
                 }
             }
 
-            if (SmsMonitor.haveProcessed(car_id)) {
-                Intent iUpdate = new Intent(FetchService.this, FetchService.class);
-                iUpdate.setAction(ACTION_UPDATE);
-                iUpdate.putExtra(Names.ID, car_id);
-                Uri data = Uri.withAppendedPath(Uri.parse("http://service/update/"), car_id);
-                iUpdate.setData(data);
-                State.appendLog("Scan timeout " + car_id);
-                PendingIntent pi = PendingIntent.getService(FetchService.this, 0, iUpdate, 0);
-                alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + SCAN_TIMEOUT, pi);
-            } else {
-                boolean setAlarm = (scan_mode == 2);
-                if ((scan_mode == 1) && !preferences.getBoolean(Names.GUARD + car_id, false))
-                    setAlarm = true;
-                if (setAlarm) {
-                    Intent iUpdate = new Intent(FetchService.this, FetchService.class);
-                    iUpdate.setAction(ACTION_UPDATE);
-                    iUpdate.putExtra(Names.ID, car_id);
-                    Uri data = Uri.withAppendedPath(Uri.parse("http://service/update/"), car_id);
-                    iUpdate.setData(data);
-                    State.appendLog("Request timeout " + car_id);
-                    PendingIntent pi = PendingIntent.getService(FetchService.this, 0, iUpdate, 0);
-                    alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + REQUEST_TIMEOUT, pi);
-                }
-            }
+*/
         }
 
         @Override
         void exec(String api_key) {
             sendUpdate(ACTION_START, car_id);
-            execute(STATUS_URL, api_key);
+            execute(URL_STATUS, api_key, preferences.getLong(Names.EVENT_TIME + car_id, 0) + "");
         }
 
         void setState(String id, JsonObject contact, String key, int msg) throws ParseException {
@@ -516,401 +502,6 @@ public class FetchService extends Service {
                     msg_id = msg;
             }
             ed.putBoolean(id + car_id, state);
-        }
-
-    }
-
-    class BalanceRequest extends ServerRequest {
-
-        long begin;
-
-        BalanceRequest(String id, long time) {
-            super("B", id);
-            begin = time;
-        }
-
-        @Override
-        void background(JsonObject res) throws ParseException {
-            if (res == null)
-                return;
-            JsonArray balances = res.get("balanceList").asArray();
-            if (balances.size() == 0)
-                return;
-            JsonObject balance = balances.get(0).asObject();
-            String data = balance.get("value").asString();
-            SharedPreferences.Editor ed = preferences.edit();
-            ed.putString(Names.BALANCE, data);
-            ed.remove(Names.BALANCE_TIME);
-            ed.commit();
-            sendUpdate(ACTION_UPDATE, car_id);
-        }
-
-        @Override
-        void exec(String api_key) {
-            execute(BALANCE_URL, api_key, begin + "");
-        }
-    }
-
-    class EventsRequest extends ServerRequest {
-
-        boolean voltage;
-        boolean gsm;
-        long begin;
-
-        EventsRequest(String id, boolean voltage_request, boolean gsm_request) {
-            super("E", id);
-            voltage = voltage_request;
-            gsm = gsm_request;
-        }
-
-        @Override
-        void background(JsonObject res) throws ParseException {
-            if (res == null)
-                return;
-
-            JsonArray events = res.get("events").asArray();
-            if (events.size() > 0) {
-                long last_stand = preferences.getLong(Names.LAST_STAND + car_id, 0);
-                long stand = last_stand;
-                long event_id = 0;
-                boolean temp = false;
-                boolean az = preferences.getBoolean(Names.AZ + car_id, false);
-                boolean prev_az = az;
-                boolean az_notify = false;
-                for (int i = events.size() - 1; i >= 0; i--) {
-                    JsonObject event = events.get(i).asObject();
-                    int type = event.get("eventType").asInt();
-                    switch (type) {
-                        case 37:
-                            last_stand = -event.get("eventTime").asLong();
-                            break;
-                        case 38:
-                            last_stand = event.get("eventTime").asLong();
-                            event_id = event.get("eventId").asLong();
-                            break;
-                        case 94:
-                            temp = true;
-                            break;
-                        case 45:
-                        case 46:
-                            if (!az) {
-                                az = true;
-                                az_notify = true;
-                            }
-                            break;
-                        case 47:
-                        case 48:
-                        case 25:
-                            if (az) {
-                                az = false;
-                                az_notify = true;
-                            }
-                            break;
-                    }
-                }
-                if ((event_id > 0) && !preferences.getString(Names.LATITUDE + car_id, "").equals(""))
-                    new GPSRequest(car_id, event_id, last_stand);
-                boolean changed = false;
-                SharedPreferences.Editor ed = preferences.edit();
-                ed.putLong(Names.LAST_EVENT + car_id, eventTime);
-                State.appendLog("Set last event " + eventTime);
-                if (last_stand != stand) {
-                    ed.putLong(Names.LAST_STAND + car_id, last_stand);
-                    changed = true;
-                }
-                if (az_notify) {
-                    if (az != prev_az) {
-                        ed.putBoolean(Names.AZ + car_id, az);
-                        changed = true;
-                        SmsMonitor.processMessageFromApi(FetchService.this, car_id, az ? R.string.motor_on : R.string.motor_off);
-                    }
-                    SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_on);
-                    SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_off);
-                }
-
-                ed.commit();
-                if (changed)
-                    sendUpdate(ACTION_UPDATE, car_id);
-                if (voltage)
-                    new VoltageRequest(car_id);
-                if (gsm)
-                    new GsmRequest(car_id);
-                if (temp)
-                    new TemperatureRequest(car_id);
-            }
-        }
-
-        @Override
-        void exec(String api_key) {
-            eventTime = preferences.getLong(Names.EVENT_TIME + car_id, 0);
-            begin = preferences.getLong(Names.LAST_EVENT + car_id, 0);
-            long bound = eventTime - 2 * 24 * 60 * 60 * 1000;
-            if (begin < bound)
-                begin = bound;
-            State.appendLog("Events time " + (eventTime - begin) / 1000);
-            execute(EVENTS_URL, api_key, begin + "", eventTime + "");
-        }
-
-        long eventTime;
-    }
-
-    class TemperatureRequest extends ServerRequest {
-
-        long begin;
-        long eventTime;
-
-        TemperatureRequest(String id) {
-            super("T", id);
-        }
-
-        @Override
-        void background(JsonObject res) throws ParseException {
-            if (res == null)
-                return;
-            JsonArray arr = res.get("temperatureList").asArray();
-            if (arr.size() == 0)
-                return;
-            boolean temp1 = false;
-            boolean temp2 = false;
-            boolean temp3 = false;
-            boolean changed = false;
-            for (int i = 0; i < arr.size(); i++) {
-                JsonObject value = arr.get(i).asObject();
-                int sensor = value.get("sensorNumber").asInt();
-                if (sensor == 1) {
-                    if (temp1)
-                        continue;
-                    temp1 = true;
-                    changed |= setTemp(Names.TEMPERATURE, value.get("value").asInt());
-                }
-                if (sensor == 2) {
-                    if (temp2)
-                        continue;
-                    temp2 = true;
-                    changed |= setTemp(Names.TEMPERATURE2, value.get("value").asInt());
-                }
-                if (sensor == 3) {
-                    if (temp3)
-                        continue;
-                    temp3 = true;
-                    changed |= setTemp(Names.TEMPERATURE3, value.get("value").asInt());
-                }
-            }
-            if (changed)
-                sendUpdate(ACTION_UPDATE, car_id);
-            SharedPreferences.Editor ed = preferences.edit();
-            ed.putLong(Names.TEMP_EVENT + car_id, eventTime);
-            ed.commit();
-        }
-
-        boolean setTemp(String name, int value) {
-            if (preferences.getString(name + car_id, "").equals(value))
-                return false;
-            SharedPreferences.Editor ed = preferences.edit();
-            ed.putString(name + car_id, value + "");
-            ed.commit();
-            return true;
-        }
-
-
-        @Override
-        void exec(String api_key) {
-            eventTime = preferences.getLong(Names.EVENT_TIME + car_id, 0);
-            begin = preferences.getLong(Names.TEMP_EVENT + car_id, 0);
-            long bound = eventTime - 2 * 24 * 60 * 60 * 1000;
-            if (begin < bound)
-                begin = bound;
-
-            long eventTime = preferences.getLong(Names.LAST_EVENT + car_id, 0);
-            execute(TEMP_URL, api_key,
-                    begin + "",
-                    eventTime + "");
-        }
-    }
-
-    class VoltageRequest extends ServerRequest {
-
-        long begin;
-        long eventTime;
-
-        VoltageRequest(String id) {
-            super("V", id);
-        }
-
-        @Override
-        void background(JsonObject res) throws ParseException {
-            if (res == null)
-                return;
-            JsonArray arr = res.get("voltageList").asArray();
-            if (arr.size() == 0)
-                return;
-            JsonObject value = arr.get(0).asObject();
-            String main = value.get("main").asDouble() + "";
-            String reserved = value.get("reserved").asDouble() + "";
-            SharedPreferences.Editor ed = preferences.edit();
-            ed.putLong(Names.VOLTAGE_EVENT + car_id, eventTime);
-            if (main.equals(preferences.getString(Names.VOLTAGE_MAIN + car_id, "")) &&
-                    reserved.equals(preferences.getString(Names.VOLTAGE_RESERVED + car_id, ""))) {
-                ed.commit();
-                return;
-            }
-            ed.putString(Names.VOLTAGE_MAIN + car_id, main);
-            ed.putString(Names.VOLTAGE_RESERVED + car_id, reserved);
-            ed.commit();
-            sendUpdate(ACTION_UPDATE, car_id);
-        }
-
-        @Override
-        void exec(String api_key) {
-            eventTime = preferences.getLong(Names.EVENT_TIME + car_id, 0);
-            begin = preferences.getLong(Names.VOLTAGE_EVENT + car_id, 0);
-            long bound = eventTime - 2 * 24 * 60 * 60 * 1000;
-            if (begin < bound)
-                begin = bound;
-
-            long eventTime = preferences.getLong(Names.LAST_EVENT + car_id, 0);
-            execute(VOLTAGE_URL, api_key,
-                    begin + "",
-                    eventTime + "");
-        }
-    }
-
-    class GPSRequest extends ServerRequest {
-
-        final String event_id;
-        final String event_time;
-
-        GPSRequest(String id, long eventId, long eventTime) {
-            super("G", id);
-            event_id = eventId + "";
-            event_time = eventTime + "";
-        }
-
-        @Override
-        void background(JsonObject res) throws ParseException {
-            if (res == null)
-                return;
-            SharedPreferences.Editor ed = preferences.edit();
-            ed.putString(Names.COURSE + car_id, res.get("course").asInt() + "");
-            ed.commit();
-        }
-
-        @Override
-        void exec(String api_key) {
-            execute(GPS_URL, api_key, event_id, event_time);
-        }
-
-        @Override
-        void error() {
-            requests.remove(key);
-        }
-    }
-
-    class GsmRequest extends ServerRequest {
-
-        long eventTime;
-        long begin;
-
-        GsmRequest(String id) {
-            super("M", id);
-        }
-
-        @Override
-        void background(JsonObject res) throws ParseException {
-            if (res == null)
-                return;
-            JsonArray arr = res.get("gsmlist").asArray();
-            if (arr.size() == 0)
-                return;
-            JsonObject value = arr.get(0).asObject();
-            int cc = value.get("cc").asInt();
-            int nc = value.get("nc").asInt();
-            int cid = value.get("cid").asInt();
-            int lac = value.get("lac").asInt();
-            String gsm = cc + " " + nc + " " + lac + " " + cid;
-            SharedPreferences.Editor ed = preferences.edit();
-            if (gsm.equals(preferences.getString(Names.GSM + car_id, "")) &&
-                    !preferences.getString(Names.GSM_ZONE + car_id, "").equals("")) {
-                ed.putLong(Names.GSM_EVENT + car_id, eventTime);
-                ed.commit();
-                return;
-            }
-            ed.putString(Names.GSM + car_id, gsm);
-            ed.putString(Names.GSM_ZONE + car_id, "");
-            ed.putString(Names.ADDRESS + car_id, "");
-            ed.commit();
-            sendUpdate(ACTION_UPDATE, car_id);
-            new SectorRequest(car_id);
-        }
-
-        @Override
-        void exec(String api_key) {
-            eventTime = preferences.getLong(Names.EVENT_TIME + car_id, 0);
-            begin = preferences.getLong(Names.GSM_EVENT + car_id, 0);
-            long bound = eventTime - 2 * 24 * 60 * 60 * 1000;
-            if (begin < bound)
-                begin = bound;
-
-            long eventTime = preferences.getLong(Names.LAST_EVENT + car_id, 0);
-            execute(GSM_URL, api_key,
-                    begin + "",
-                    eventTime + "");
-        }
-    }
-
-    class SectorRequest extends ServerRequest {
-
-        SectorRequest(String id) {
-            super("Z", id);
-        }
-
-        @Override
-        void background(JsonObject res) throws ParseException {
-            if (res == null)
-                return;
-            JsonArray arr = res.get("gps").asArray();
-            if (arr.size() == 0)
-                return;
-            double max_lat = -180;
-            double min_lat = 180;
-            double max_lon = -180;
-            double min_lon = 180;
-            Vector<Point> P = new Vector<Point>();
-            for (int i = 0; i < arr.size(); i++) {
-                JsonObject point = arr.get(i).asObject();
-                try {
-                    Point p = new Point();
-                    p.x = point.get("latitude").asDouble();
-                    p.y = point.get("longitude").asDouble();
-                    if (p.x > max_lat)
-                        max_lat = p.x;
-                    if (p.x < min_lat)
-                        min_lat = p.x;
-                    if (p.y > max_lon)
-                        max_lon = p.y;
-                    if (p.y < min_lon)
-                        min_lon = p.y;
-                    P.add(p);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    // ignore
-                }
-            }
-            double lat = (min_lat + max_lat) / 2;
-            double lon = (min_lon + max_lon) / 2;
-            new Address.Request(FetchService.this, car_id, lat + "", lon + "");
-            SharedPreferences.Editor ed = preferences.edit();
-            ed.putString(Names.GSM_ZONE + car_id, convexHull(P));
-            ed.commit();
-            sendUpdate(ACTION_UPDATE, car_id);
-        }
-
-        @Override
-        void exec(String api_key) {
-            String[] sector = preferences.getString(Names.GSM + car_id, "").split(" ");
-            if (sector.length < 4)
-                return;
-            execute(SECTOR_URL, api_key, sector[0], sector[1], sector[2], sector[3]);
         }
     }
 
@@ -961,114 +552,6 @@ public class FetchService extends Service {
             ed.putString(Names.N_IDS + car_id, res);
         }
         ed.commit();
-    }
-
-    static class Point {
-        double x;
-        double y;
-    }
-
-    static String convexHull(Vector<Point> P) {
-        Collections.sort(P, new Comparator<Point>() {
-            @Override
-            public int compare(Point lhs, Point rhs) {
-                if (lhs.x < rhs.x)
-                    return -1;
-                if (lhs.x > rhs.x)
-                    return 1;
-                if (lhs.y < rhs.y)
-                    return -1;
-                if (lhs.y > rhs.y)
-                    return 1;
-                return 0;
-            }
-        });
-
-        int bot = 0;
-
-        // Get the indices of points with min x-coord and min|max y-coord
-        int minmin = 0;
-        int minmax;
-
-        double xmin = P.get(0).x;
-        int i;
-        for (i = 1; i < P.size(); i++)
-            if (P.get(i).x != xmin) break;
-        minmax = i - 1;
-
-        Vector<Point> H = new Vector<Point>();
-
-        if (minmax == P.size() - 1) {       // degenerate case: all x-coords == xmin
-            H.add(P.get(minmin));
-            if (P.get(minmax).y != P.get(minmin).y) // a nontrivial segment
-                H.add(P.get(minmax));
-            H.add(P.get(minmin));           // add polygon endpoint
-        } else {
-
-            // Get the indices of points with max x-coord and min|max y-coord
-            int maxmin;
-            int maxmax = P.size() - 1;
-            double xmax = P.get(P.size() - 1).x;
-            for (i = P.size() - 2; i >= 0; i--)
-                if (P.get(i).x != xmax) break;
-            maxmin = i + 1;
-
-            // Compute the lower hull on the stack H
-            H.add(P.get(minmin));      // push minmin point onto stack
-            i = minmax;
-            while (++i <= maxmin) {
-                // the lower line joins P[minmin] with P[maxmin]
-                if (isLeft(P.get(minmin), P.get(maxmin), P.get(i)) >= 0 && i < maxmin)
-                    continue;          // ignore P[i] above or on the lower line
-
-                while (H.size() > 1)        // there are at least 2 points on the stack
-                {
-                    // test if P[i] is left of the line at the stack top
-                    int top = H.size() - 1;
-                    if (isLeft(H.get(top - 1), H.get(top), P.get(i)) > 0)
-                        break;         // P[i] is a new hull vertex
-                    H.remove(top);     // pop top point off stack
-                }
-                H.add(P.get(i));            // push P[i] onto stack
-            }
-
-            // Next, compute the upper hull on the stack H above the bottom hull
-            if (maxmax != maxmin)      // if distinct xmax points
-                H.add(P.get(maxmax));      // push maxmax point onto stack
-            bot = H.size() - 1;        // the bottom point of the upper hull stack
-            i = maxmin;
-            while (--i >= minmax) {
-                // the upper line joins P[maxmax] with P[minmax]
-                if (isLeft(P.get(maxmax), P.get(minmax), P.get(i)) >= 0 && i > minmax)
-                    continue;          // ignore P[i] below or on the upper line
-
-                while (H.size() - 1 > bot)    // at least 2 points on the upper stack
-                {
-                    // test if P[i] is left of the line at the stack top
-                    int top = H.size() - 1;
-                    if (isLeft(H.get(top - 1), H.get(top), P.get(i)) > 0)
-                        break;         // P[i] is a new hull vertex
-                    H.remove(top);
-                }
-                H.add(P.get(i));       // push P[i] onto stack
-            }
-            if (minmax != minmin)
-                H.add(P.get(minmin));  // push joining endpoint onto stack
-        }
-        String res = null;
-        for (Point p : H) {
-            String part = p.x + "," + p.y;
-            if (res == null) {
-                res = part;
-            } else {
-                res += "_" + part;
-            }
-        }
-        return res;
-    }
-
-    static double isLeft(Point P0, Point P1, Point P2) {
-        return (P1.x - P0.x) * (P2.y - P0.y) - (P2.x - P0.x) * (P1.y - P0.y);
     }
 
 }

@@ -12,6 +12,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -34,14 +35,28 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.romorama.caldroid.CaldroidFragment;
 import com.romorama.caldroid.CaldroidListener;
 import com.viewpagerindicator.TitlePageIndicator;
 
+import org.apache.http.HttpStatus;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
+import java.io.BufferedInputStream;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.Field;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -53,6 +68,8 @@ public class MainActivity extends ActionBarActivity {
 
     static final int UPDATE_INTERVAL = 30 * 1000;
 
+    final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+
     static final String DATE = "date";
 
     static final int PAGE_PHOTO = 0;
@@ -60,6 +77,8 @@ public class MainActivity extends ActionBarActivity {
     static final int PAGE_STATE = 2;
     static final int PAGE_EVENT = 3;
     static final int PAGE_TRACK = 4;
+
+    String SENDER_ID = "915289471784";
 
     ViewPager mViewPager;
     SharedPreferences preferences;
@@ -86,6 +105,8 @@ public class MainActivity extends ActionBarActivity {
 
     Set<DateChangeListener> dateChangeListenerSet;
 
+    GoogleCloudMessaging gcm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -102,9 +123,12 @@ public class MainActivity extends ActionBarActivity {
         dateChangeListenerSet = new HashSet<DateChangeListener>();
 
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.main);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        registerGCM();
+
         current = new LocalDate();
 
         show_pages = new boolean[5];
@@ -245,6 +269,7 @@ public class MainActivity extends ActionBarActivity {
     protected void onResume() {
         super.onResume();
         removeNotifications();
+        checkPlayServices();
     }
 
     @Override
@@ -530,7 +555,8 @@ public class MainActivity extends ActionBarActivity {
 
     void setShowTracks() {
         boolean changed = false;
-        boolean show_tracks = !preferences.getString(Names.LATITUDE + car_id, "").equals("");
+        boolean show_tracks = (preferences.getFloat(Names.LAT + car_id, 0) != 0) ||
+                (preferences.getFloat(Names.LNG + car_id, 0) != 0);
         pointer = preferences.getBoolean(Names.POINTER + car_id, false);
         if (pointer)
             show_tracks = false;
@@ -771,6 +797,107 @@ public class MainActivity extends ActionBarActivity {
                 dialog.dismiss();
             }
         });
+    }
+
+    void registerGCM() {
+        if (!checkPlayServices())
+            return;
+        gcm = GoogleCloudMessaging.getInstance(this);
+        String reg_id = preferences.getString(Names.GCM_ID, "");
+        long gcm_time = preferences.getLong(Names.GCM_TIME, 0);
+        if (!reg_id.equals("") && (gcm_time > new Date().getTime() - 86400 * 1000))
+            return;
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                String reg = null;
+                Reader reader = null;
+                HttpURLConnection connection = null;
+                try {
+                    if (gcm == null)
+                        gcm = GoogleCloudMessaging.getInstance(MainActivity.this);
+                    reg = gcm.register(SENDER_ID);
+                    JsonObject data = new JsonObject();
+                    data.add("reg", reg);
+                    JsonArray cars_array = new JsonArray();
+                    Cars.Car[] cars = Cars.getCars(MainActivity.this);
+                    String d = null;
+                    for (Cars.Car car : cars) {
+                        String key = preferences.getString(Names.CAR_KEY + car.id, "");
+                        if (key.equals(""))
+                            continue;
+                        JsonObject c = new JsonObject();
+                        if (d != null) {
+                            d += "|" + key;
+                        } else {
+                            d = key;
+                        }
+                        d += ";" + car_id;
+                    }
+                    data.add("cars", d);
+                    String url = "https://api.shutoff.ru/reg";
+                    URL u = new URL(url);
+                    connection = (HttpURLConnection) u.openConnection();
+                    connection.setDoOutput(true);
+                    connection.setDoInput(true);
+                    connection.setInstanceFollowRedirects(false);
+                    connection.setRequestMethod("POST");
+                    connection.setRequestProperty("Content-Type", "application/json");
+                    connection.setRequestProperty("Charset", "utf-8");
+                    connection.setUseCaches(false);
+
+                    DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+                    wr.writeBytes(data.toString());
+                    wr.flush();
+                    wr.close();
+
+                    InputStream in = new BufferedInputStream(connection.getInputStream());
+                    int status = connection.getResponseCode();
+                    if (status != HttpStatus.SC_OK)
+                        return null;
+                    reader = new InputStreamReader(in);
+                    JsonObject res = JsonValue.readFrom(reader).asObject();
+                    if (res.asObject().get("error") != null)
+                        return null;
+                } catch (Exception ex) {
+                    return null;
+                } finally {
+                    if (connection != null)
+                        connection.disconnect();
+                    if (reader != null) {
+                        try {
+                            reader.close();
+                        } catch (Exception e) {
+                            // ignore
+                        }
+                    }
+                }
+                return reg;
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                if (s == null)
+                    return;
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putString(Names.GCM_ID, s);
+                ed.putLong(Names.GCM_TIME, new Date().getTime());
+                ed.commit();
+            }
+
+        }.execute();
+    }
+
+    boolean checkPlayServices() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
+                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            }
+            return false;
+        }
+        return true;
     }
 
 }

@@ -1,6 +1,8 @@
 package net.ugona.plus;
 
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import java.util.Date;
 
@@ -34,21 +36,11 @@ public class Preferences {
     }
 
     static String getTemperature(SharedPreferences preferences, String car_id, int sensor) {
-        try {
-            String key = Names.TEMPERATURE;
-            if (sensor == 2)
-                key = Names.TEMPERATURE2;
-            if (sensor == 3)
-                key = Names.TEMPERATURE3;
-            String s = preferences.getString(key + car_id, "");
-            if (s.length() == 0)
-                return null;
-            double v = Double.parseDouble(s);
-            v += preferences.getInt(Names.TEMP_SIFT + car_id, 0);
-            return v + " \u00B0C";
-        } catch (Exception ex) {
-        }
-        return null;
+        int v = preferences.getInt(Names.TEMP + sensor + "_" + car_id, -100);
+        if (v <= -100)
+            return null;
+        v += preferences.getInt(Names.TEMP_SIFT + car_id, 0);
+        return v + " \u00B0C";
     }
 
     static boolean getRele(SharedPreferences preferences, String car_id) {
@@ -74,6 +66,35 @@ public class Preferences {
         if (!res.equals(""))
             return res;
         return preferences.getString(Names.NOTIFY, "");
+    }
+
+    static void checkBalance(Context context, String car_id) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        int limit = preferences.getInt(Names.LIMIT + car_id, 50);
+        if (limit >= 0) {
+            int balance_id = preferences.getInt(Names.BALANCE_NOTIFICATION + car_id, 0);
+            try {
+                double value = Double.parseDouble(preferences.getString(Names.BALANCE + car_id, ""));
+                if (value <= limit) {
+                    if (balance_id == 0) {
+                        SharedPreferences.Editor ed = preferences.edit();
+                        balance_id = Alarm.createNotification(context, context.getString(R.string.low_balance), R.drawable.white_balance, car_id, null);
+                        ed.putInt(Names.BALANCE_NOTIFICATION + car_id, balance_id);
+                        ed.commit();
+                    }
+                } else {
+                    if (balance_id > 0) {
+                        SharedPreferences.Editor ed = preferences.edit();
+                        Alarm.removeNotification(context, car_id, balance_id);
+                        ed.remove(Names.BALANCE_NOTIFICATION + car_id);
+                        ed.commit();
+                    }
+                }
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+
     }
 
 }

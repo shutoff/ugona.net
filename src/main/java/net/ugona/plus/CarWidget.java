@@ -20,7 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RemoteViews;
 
-import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
@@ -41,7 +40,7 @@ public class CarWidget extends AppWidgetProvider {
     static Map<String, Integer> states;
     static Map<Integer, Integer> height_rows;
 
-    final static String TRAFFIC_URL = "http://api-maps.yandex.ru/services/traffic-info/1.0/?format=json&lang=ru-RU'";
+    final static String URL_TRAFFIC = "https://api.shutoff.ru/level?lat=$1&lng=$2";
 
     final static int[] trafic_pict = {
             R.drawable.p0,
@@ -284,16 +283,6 @@ public class CarWidget extends AppWidgetProvider {
         widgetView.setTextViewText(R.id.voltage, preferences.getString(Names.VOLTAGE_MAIN + car_id, "--") + " V");
 
         String temperature = Preferences.getTemperature(preferences, car_id, 1);
-
-        int traffic = HttpTask.total;
-        if (traffic > 1000000) {
-            temperature = String.format("%.2f M", (float) traffic / 1000000);
-        } else if (traffic > 1000) {
-            temperature = String.format("%.2f k", (float) traffic / 1000);
-        } else {
-            temperature = traffic + "";
-        }
-
         if (temperature == null) {
             widgetView.setViewVisibility(R.id.temperature_block, View.GONE);
         } else {
@@ -422,8 +411,8 @@ public class CarWidget extends AppWidgetProvider {
         double lat = 0;
         double lon = 0;
         try {
-            lat = Double.parseDouble(preferences.getString(Names.LATITUDE + car_id, ""));
-            lon = Double.parseDouble(preferences.getString(Names.LONGITUDE + car_id, ""));
+            lat = (double) preferences.getFloat(Names.LAT + car_id, 0);
+            lon = (double) preferences.getFloat(Names.LNG + car_id, 0);
         } catch (Exception ex) {
             // ignore
         }
@@ -436,44 +425,22 @@ public class CarWidget extends AppWidgetProvider {
 
     class TrafficRequest extends HttpTask {
 
-        double m_lat;
-        double m_lon;
         int m_id;
         Context m_context;
 
         TrafficRequest(Context context, double lat, double lon, int widgetId) {
             m_context = context;
-            m_lat = lat;
-            m_lon = lon;
             m_id = widgetId;
-            execute(TRAFFIC_URL);
+            execute(URL_TRAFFIC, lat + "", lon + "");
         }
 
         @Override
         void result(JsonObject result) throws ParseException {
             request = null;
-            result = result.get("GeoObjectCollection").asObject();
-            JsonArray data = result.get("features").asArray();
-            int length = data.size();
             int res = 0;
-            for (int i = 0; i < length; i++) {
-                result = data.get(i).asObject();
-                JsonObject jams = result.get("properties").asObject();
-                jams = jams.get("JamsMetaData").asObject();
-                JsonValue lvl = jams.get("level");
-                if (lvl == null)
-                    continue;
-                int level = lvl.asInt();
-                result = result.get("geometry").asObject();
-                JsonArray coord = result.get("coordinates").asArray();
-                double lat = coord.get(1).asDouble();
-                double lon = coord.get(0).asDouble();
-                double d = Address.calc_distance(lat, lon, m_lat, m_lon);
-                if (d < 80000) {
-                    res = level + 1;
-                    break;
-                }
-            }
+            JsonValue level = result.get("lvl");
+            if (level != null)
+                res = level.asInt() + 1;
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(m_context);
             SharedPreferences.Editor ed = preferences.edit();
             ed.putInt(Names.TRAFIC_LEVEL + m_id, res);

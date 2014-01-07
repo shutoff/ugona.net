@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.util.Vector;
@@ -32,10 +33,36 @@ import java.util.Vector;
 public class TrackView extends WebViewActivity {
 
     SharedPreferences preferences;
-    Vector<Tracks.Track> tracks;
+    Vector<Track> tracks;
     Menu topSubMenu;
 
     static String TRAFFIC = "traffic";
+
+    public static class Track implements Serializable {
+        long begin;
+        long end;
+        double mileage;
+        double day_mileage;
+        double avg_speed;
+        double max_speed;
+        double day_max_speed;
+        String start;
+        String finish;
+        String track;
+    }
+
+    public static class Point {
+        Point(String data) {
+            String[] p = data.split(",");
+            latitude = Double.parseDouble(p[0]);
+            longitude = Double.parseDouble(p[1]);
+            time = Long.parseLong(p[3]);
+        }
+
+        double latitude;
+        double longitude;
+        long time;
+    }
 
     class JsInterface {
 
@@ -45,9 +72,10 @@ public class TrackView extends WebViewActivity {
             StringBuilder track_data = new StringBuilder();
             try {
                 for (int i = 0; i < tracks.size(); i++) {
-                    Tracks.Track track = tracks.get(i);
-                    Tracks.Point start = track.track.get(0);
-                    Tracks.Point finish = track.track.get(track.track.size() - 1);
+                    Track track = tracks.get(i);
+                    String[] points = track.track.split("\\|");
+                    Point start = new Point(points[0]);
+                    Point finish = new Point(points[points.length - 1]);
                     int n_start = markers.size();
                     double d_best = 200.;
                     for (int n = 0; n < markers.size(); n++) {
@@ -74,22 +102,14 @@ public class TrackView extends WebViewActivity {
                     marker.times.get(marker.times.size() - 1).end = track.begin;
 
                     if (i > 0) {
-                        Tracks.Track prev = tracks.get(i - 1);
-                        Tracks.Point last = prev.track.get(prev.track.size() - 1);
+                        Track prev = tracks.get(i - 1);
+                        points = prev.track.split("\\|");
+                        Point last = new Point(points[points.length - 1]);
                         double delta = Address.calc_distance(start.latitude, start.longitude, last.latitude, last.longitude);
                         if (delta > 200)
                             track_data.append("|");
                     }
-                    for (Tracks.Point p : track.track) {
-                        track_data.append(p.latitude);
-                        track_data.append(",");
-                        track_data.append(p.longitude);
-                        track_data.append(",");
-                        track_data.append(p.speed);
-                        track_data.append(",");
-                        track_data.append(p.time);
-                        track_data.append("|");
-                    }
+                    track_data.append(track.track);
 
                     int n_finish = markers.size();
                     d_best = 200;
@@ -186,7 +206,7 @@ public class TrackView extends WebViewActivity {
             }
             ByteArrayInputStream bis = new ByteArrayInputStream(track_data);
             ObjectInput in = new ObjectInputStream(bis);
-            tracks = (Vector<Tracks.Track>) in.readObject();
+            tracks = (Vector<Track>) in.readObject();
             in.close();
             bis.close();
         } catch (Exception ex) {
@@ -281,8 +301,10 @@ public class TrackView extends WebViewActivity {
 
             long begin = 0;
             long end = 0;
-            for (Tracks.Track track : tracks) {
-                for (Tracks.Point p : track.track) {
+            for (Track track : tracks) {
+                String[] points = track.track.split("\\|");
+                for (String point : points) {
+                    Point p = new Point(point);
                     if ((p.latitude < min_lat) || (p.latitude > max_lat) || (p.longitude < min_lon) || (p.longitude > max_lon))
                         continue;
                     if (begin == 0)
@@ -315,8 +337,10 @@ public class TrackView extends WebViewActivity {
             writer.append("<trk>\n");
 
             boolean trk = false;
-            for (Tracks.Track track : tracks) {
-                for (Tracks.Point p : track.track) {
+            for (Track track : tracks) {
+                String[] points = track.track.split("\\|");
+                for (String point : points) {
+                    Point p = new Point(point);
                     if ((p.latitude < min_lat) || (p.latitude > max_lat) || (p.longitude < min_lon) || (p.longitude > max_lon)) {
                         if (trk) {
                             trk = false;

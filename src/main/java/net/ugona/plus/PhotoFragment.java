@@ -47,8 +47,8 @@ public class PhotoFragment extends Fragment
 
     final static String ROTATE = "net.ugona.plus.ROTATE";
 
-    final static String PHOTOS = "http://dev.car-online.ru/api/v2?get=photos&skey=$1&begin=$2&end=$3&content=json";
-    final static String PHOTO = "http://dev.car-online.ru/api/v2?get=photo&skey=";
+    final static String URL_PHOTOS = "https://api.shutoff.ru/photos?skey=$1&begin=$2&end=$3";
+    final static String URL_PHOTO = "https://api.shutoff.ru/photo?skey=";
 
     final static String DATE = "date";
 
@@ -377,7 +377,7 @@ public class PhotoFragment extends Fragment
             DateTime start = date.toDateTime(new LocalTime(0, 0));
             LocalDate next = date.plusDays(1);
             DateTime finish = next.toDateTime(new LocalTime(0, 0));
-            execute(PHOTOS,
+            execute(URL_PHOTOS,
                     api_key,
                     start.toDate().getTime() + "",
                     finish.toDate().getTime() + "");
@@ -442,7 +442,7 @@ public class PhotoFragment extends Fragment
 
         @Override
         protected Void doInBackground(Photo... params) {
-            String url = PHOTO + api_key;
+            String url = URL_PHOTO + api_key;
             url += "&id=" + params[0].id;
             Photo p = params[0];
             HttpURLConnection connection = null;

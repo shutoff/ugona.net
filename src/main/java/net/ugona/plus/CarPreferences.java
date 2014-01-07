@@ -73,9 +73,9 @@ public class CarPreferences extends PreferenceActivity {
     private static final int GET_ALARM_SOUND = 3008;
     private static final int GET_NOTIFY_SOUND = 3009;
 
-    final static String KEY_URL = "http://dev.car-online.ru/api/v2?get=securityKey&login=$1&password=$2&content=json";
-    final static String PROFILE_URL = "http://dev.car-online.ru/api/v2?get=profile&skey=$1&content=json";
-    final static String PHOTOS_URL = "http://dev.car-online.ru/api/v2?get=photos&skey=$1&begin=$2&content=json";
+    final static String URL_KEY = "https://api.shutoff.ru/key?login=$1&password=$2";
+    final static String URL_PROFILE = "https://api.shutoff.ru/version?skey=$1";
+    final static String URL_PHOTOS = "https://api.shutoff.ru/photos?skey=$1&begin=$2";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -860,7 +860,7 @@ public class CarPreferences extends PreferenceActivity {
                     @Override
                     void result(JsonObject res) throws ParseException {
                         dlgCheck.dismiss();
-                        String key = res.get("data").asString();
+                        String key = res.get("key").asString();
                         SharedPreferences.Editor ed = preferences.edit();
                         ed.putString(Names.CAR_KEY + car_id, key);
                         ed.putString(Names.LOGIN + car_id, login);
@@ -887,7 +887,7 @@ public class CarPreferences extends PreferenceActivity {
                     }
                 };
 
-                apiTask.execute(KEY_URL, login, edPasswd.getText().toString());
+                apiTask.execute(URL_KEY, login, edPasswd.getText().toString());
             }
         });
     }
@@ -915,7 +915,7 @@ public class CarPreferences extends PreferenceActivity {
             }
         };
         Date now = new Date();
-        verTask.execute(PHOTOS_URL, api_key, (now.getTime() - 3 * 24 * 60 * 60 * 1000) + "");
+        verTask.execute(URL_PHOTOS, api_key, (now.getTime() - 3 * 24 * 60 * 60 * 1000) + "");
     }
 
     void setupPointer() {
@@ -949,9 +949,7 @@ public class CarPreferences extends PreferenceActivity {
             @Override
             void result(JsonObject res) throws ParseException {
                 try {
-                    JsonArray devices = res.get("devices").asArray();
-                    JsonObject device = devices.get(0).asObject();
-                    String ver = device.get("versionSoftPGSM").asString();
+                    String ver = res.get("version").asString();
                     versionPref.setSummary(ver);
                     SharedPreferences.Editor ed = preferences.edit();
                     boolean new_pointer = !preferences.getBoolean(Names.POINTER + car_id, false);
@@ -1076,7 +1074,7 @@ public class CarPreferences extends PreferenceActivity {
 
             }
         };
-        verTask.execute(PROFILE_URL, api_key);
+        verTask.execute(URL_PROFILE, api_key);
     }
 
     void setAlarmTitle() {

@@ -71,10 +71,10 @@ public class MapView extends WebViewActivity {
         }
 
         String createData(String id) {
-            String lat = preferences.getString(Names.LATITUDE + id, "");
-            String lon = preferences.getString(Names.LONGITUDE + id, "");
+            double lat = preferences.getFloat(Names.LAT + id, 0);
+            double lng = preferences.getFloat(Names.LNG + id, 0);
             String zone = "";
-            if (lat.equals("") || lon.equals("")) {
+            if ((lat == 0) && (lng == 0)) {
                 zone = preferences.getString(Names.GSM_ZONE + id, "");
                 String points[] = zone.split("_");
                 double min_lat = 180;
@@ -98,13 +98,13 @@ public class MapView extends WebViewActivity {
                         // ignore
                     }
                 }
-                lat = ((min_lat + max_lat) / 2) + "";
-                lon = ((min_lon + max_lon) / 2) + "";
+                lat = ((min_lat + max_lat) / 2);
+                lng = ((min_lon + max_lon) / 2);
             }
             String data = id + ";" +
                     lat + ";" +
-                    lon + ";" +
-                    preferences.getString(Names.COURSE + id, "") + ";";
+                    lng + ";" +
+                    preferences.getInt(Names.COURSE + id, 0) + ";";
             if (cars.length > 1) {
                 String name = preferences.getString(Names.CAR_NAME + id, "");
                 if (name.length() == 0) {
@@ -126,19 +126,14 @@ public class MapView extends WebViewActivity {
                 }
                 data += "</b> ";
             } else if (last_stand < 0) {
-                String speed = preferences.getString(Names.SPEED + id, "");
-                try {
-                    double s = Double.parseDouble(speed);
-                    if (s > 0) {
-                        data += String.format(getString(R.string.speed, speed));
-                        data += "<br/>";
-                    }
-                } catch (Exception ex) {
-                    // ignore
+                double speed = preferences.getFloat(Names.SPEED + id, 0);
+                if (speed > 0) {
+                    data += String.format(getString(R.string.speed, speed));
+                    data += "<br/>";
                 }
             }
             if (zone.equals("")) {
-                data += lat + "," + lon + "<br/>";
+                data += lat + "," + lng + "<br/>";
                 String address = Address.getAddress(getBaseContext(), id);
                 String[] parts = address.split(", ");
                 if (parts.length >= 3) {
@@ -209,7 +204,7 @@ public class MapView extends WebViewActivity {
         if (savedInstanceState != null) {
             String car_data = savedInstanceState.getString(Names.CARS);
             if (car_data != null) {
-                String[] data = car_data.split("|");
+                String[] data = car_data.split("\\|");
                 for (String d : data) {
                     String[] p = d.split(";");
                     times.put(p[0], p[1]);

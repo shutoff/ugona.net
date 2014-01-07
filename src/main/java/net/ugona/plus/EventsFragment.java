@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 
 import org.joda.time.DateTime;
@@ -40,10 +41,8 @@ import java.util.Vector;
 public class EventsFragment extends Fragment
         implements MainActivity.DateChangeListener {
 
-    final static String EVENTS = "http://dev.car-online.ru/api/v2?get=events&skey=$1&begin=$2&end=$3&content=json";
-    final static String EVENT_GPS = "http://dev.car-online.ru/api/v2?get=gps&skey=$1&id=$2&time=$3&content=json";
-    final static String EVENT_GSM = "http://dev.car-online.ru/api/v2?get=gsm&skey=$1&id=$2&time=$3&content=json";
-    final static String SECTOR_GSM = "http://dev.car-online.ru/api/v2?get=gsmsector&skey=$1&cc=$2&nc=$3&lac=$4&cid=$5&content=json";
+    final static String URL_EVENTS = "https://api.shutoff.ru/events?skey=$1&begin=$2&end=$3&first=$4";
+    final static String URL_EVENT = "https://api.shutoff.ru/event?skey=$1&id=$2&time=$3";
 
     String car_id;
     String api_key;
@@ -275,11 +274,7 @@ public class EventsFragment extends Fragment
                 current_item = position;
                 EventsAdapter adapter = (EventsAdapter) lvEvents.getAdapter();
                 adapter.notifyDataSetChanged();
-                if (preferences.getString(Names.LATITUDE + car_id, "").equals("")) {
-                    new GsmEventRequest(filtered.get(position).id, filtered.get(position).time);
-                } else {
-                    new GpsEventRequest(filtered.get(position).id, filtered.get(position).time);
-                }
+                new EventRequest(filtered.get(position).id, filtered.get(position).time);
             }
         });
 
@@ -478,7 +473,8 @@ public class EventsFragment extends Fragment
                 tvNoEvents.setVisibility(View.GONE);
             } else {
                 EventsAdapter adapter = (EventsAdapter) lvEvents.getAdapter();
-                adapter.notifyDataSetChanged();
+                if (adapter != null)
+                    adapter.notifyDataSetChanged();
             }
             no_events = false;
         } else {
@@ -508,6 +504,7 @@ public class EventsFragment extends Fragment
 
         LocalDate date;
         boolean no_reload;
+        boolean first;
 
         @Override
         void result(JsonObject data) throws ParseException {
@@ -515,75 +512,24 @@ public class EventsFragment extends Fragment
                 return;
             events.clear();
             JsonArray res = data.get("events").asArray();
-            Event first = null;
-            LocalDate today = new LocalDate();
-            int i = 0;
-            if ((res.size() > 0) && today.equals(current)) {
-                JsonObject event = res.get(0).asObject();
-                first = new Event();
-                first.type = event.get("eventType").asInt();
-                first.time = event.get("eventTime").asLong();
-                first.id = event.get("eventId").asLong();
-                i++;
-            }
-            int prev_type = 0;
-            for (; i < res.size(); i++) {
+            if (!first)
+                firstEvent = null;
+            for (int i = 0; i < res.size(); i++) {
                 JsonObject event = res.get(i).asObject();
-                int type = event.get("eventType").asInt();
-                if ((type > 150) && (type < 165))
-                    continue;
-                if (!pointer && ((type == 94) || (type == 98) || (type == 41) || (type == 33) || (type == 39) || (type == 127)))
-                    continue;
-                boolean skip = false;
-                if ((type == 5) && ((prev_type == 5) || (prev_type == 6)))
-                    skip = true;
-                if ((type == 6) && (prev_type == 6))
-                    skip = true;
-                if ((type == 7) && (prev_type == 7))
-                    skip = true;
-                if ((type == 9) && (prev_type == 9))
-                    skip = true;
-                if ((type == 15) && ((prev_type == 15) || (prev_type == 16)))
-                    skip = true;
-                if ((type == 16) && (prev_type == 16))
-                    skip = true;
-                if ((type == 17) && (prev_type == 17))
-                    skip = true;
-                if ((type == 18) && (prev_type == 18))
-                    skip = true;
-                long time = event.get("eventTime").asLong();
-                if (skip) {
-                    int n = events.size() - 1;
-                    skip = false;
-                    for (; n >= 0; n--) {
-                        Event e = events.get(n);
-                        if (time + 3000 <= e.time)
-                            break;
-                        if (e.type == prev_type) {
-                            e.time = time;
-                            e.id = event.get("eventId").asLong();
-                            e.type = type;
-                            skip = true;
-                            break;
-                        }
-                    }
-                    if (skip) {
-                        prev_type = 0;
-                        continue;
-                    }
-                }
-                if (((type >= 5) && (type < 10)) || ((type >= 15) && (type < 20)))
-                    prev_type = type;
-                long id = event.get("eventId").asLong();
+                long id = event.get("id").asLong();
                 Event e = new Event();
-                e.type = type;
-                e.time = time;
+                e.type = event.get("type").asInt();
+                e.time = event.get("time").asLong();
                 e.id = id;
+                if (first) {
+                    firstEvent = e;
+                    first = false;
+                    continue;
+                }
                 events.add(e);
             }
             error = false;
             loaded = true;
-            firstEvent = first;
             filterEvents(no_reload);
             vProgress.setVisibility(View.GONE);
         }
@@ -602,14 +548,17 @@ public class EventsFragment extends Fragment
                 finish = new DateTime();
                 start = finish.minusDays(30);
             }
-            execute(EVENTS,
+            LocalDate today = new LocalDate();
+            first = today.equals(current);
+            execute(URL_EVENTS,
                     api_key,
                     start.toDate().getTime() + "",
-                    finish.toDate().getTime() + "");
+                    finish.toDate().getTime() + "",
+                    first + "");
         }
     }
 
-    abstract class EventRequest extends HttpTask {
+    class EventRequest extends HttpTask {
 
         long event_id;
         long event_time;
@@ -617,6 +566,53 @@ public class EventsFragment extends Fragment
         EventRequest(long id, long time) {
             event_id = id;
             event_time = time;
+            execute(URL_EVENT, api_key, id + "", time + "");
+        }
+
+        @Override
+        void result(JsonObject res) throws ParseException {
+            JsonValue value = res.get("gps");
+            if (value != null) {
+                JsonObject gps = value.asObject();
+                final double lat = gps.get("lat").asDouble();
+                final double lng = gps.get("lng").asDouble();
+                final JsonValue course_value = gps.get("course");
+                Address request = new Address() {
+                    @Override
+                    void result(String res) {
+                        String addr = lat + "," + lng;
+                        if (res != null)
+                            addr += "\n" + res;
+                        String course = null;
+                        if (course_value != null)
+                            course = course_value.asInt() + "";
+                        setAddress(addr, lat + ";" + lng, course);
+                    }
+                };
+                request.get(getActivity(), lat, lng);
+                return;
+            }
+            value = res.get("gsm");
+            if (value != null) {
+                final JsonObject gsm = value.asObject();
+                final double lat = gsm.get("lat").asDouble();
+                final double lng = gsm.get("lng").asDouble();
+                Address request = new Address() {
+                    @Override
+                    void result(String res) {
+                        String addr = "MCC: " + gsm.get("cc").asInt();
+                        addr += " NC: " + gsm.get("nc").asInt();
+                        addr += " LAC: " + gsm.get("lac").asInt();
+                        addr += " CID: " + gsm.get("cid").asInt();
+                        if (res != null)
+                            addr += "\n" + res;
+                        setAddress(addr, lat + ";" + lng + ";" + gsm.get("sector").asString(), null);
+                    }
+                };
+                request.get(getActivity(), lat, lng);
+                return;
+            }
+            setAddress("", "", null);
         }
 
         @Override
@@ -638,39 +634,7 @@ public class EventsFragment extends Fragment
         }
     }
 
-    class GpsEventRequest extends EventRequest {
-
-        GpsEventRequest(long id, long time) {
-            super(id, time);
-            execute(EVENT_GPS, api_key, id + "", time + "");
-        }
-
-        @Override
-        void result(JsonObject res) throws ParseException {
-            final double lat = res.get("latitude").asDouble();
-            final double lng = res.get("longitude").asDouble();
-            final String course = res.get("course").asInt() + "";
-            AddressRequest request = new AddressRequest() {
-                @Override
-                void addressResult(String[] parts) {
-                    String addr = lat + "," + lng;
-                    if (parts != null) {
-                        addr += "\n" + parts[0];
-                        for (int i = 1; i < parts.length - 1; i++) {
-                            addr += ", " + parts[i];
-                        }
-                    }
-                    setAddress(addr, lat + ";" + lng, course);
-                }
-            };
-            request.getAddress(preferences, lat + "", lng + "");
-        }
-
-        void error() {
-            new GsmEventRequest(event_id, event_time);
-        }
-    }
-
+/*
     class GsmEventRequest extends EventRequest {
 
         GsmEventRequest(long id, long time) {
@@ -698,57 +662,29 @@ public class EventsFragment extends Fragment
             super(id, time);
             String[] p = gsm.split(" ");
             addr = "MCC: " + p[0] + " NC: " + p[1] + " LAC: " + p[2] + " CID: " + p[3];
-            execute(SECTOR_GSM, api_key, p[0], p[1], p[2], p[3]);
+            execute(URL_SECTOR, api_key, p[0], p[1], p[2], p[3]);
         }
 
         @Override
         void result(JsonObject res) throws ParseException {
-            JsonArray arr = res.get("gps").asArray();
-            if (arr.size() == 0)
-                return;
-            double max_lat = -180;
-            double min_lat = 180;
-            double max_lon = -180;
-            double min_lon = 180;
-            Vector<FetchService.Point> P = new Vector<FetchService.Point>();
-            for (int i = 0; i < arr.size(); i++) {
-                JsonObject point = arr.get(i).asObject();
-                try {
-                    FetchService.Point p = new FetchService.Point();
-                    p.x = point.get("latitude").asDouble();
-                    p.y = point.get("longitude").asDouble();
-                    if (p.x > max_lat)
-                        max_lat = p.x;
-                    if (p.x < min_lat)
-                        min_lat = p.x;
-                    if (p.y > max_lon)
-                        max_lon = p.y;
-                    if (p.y < min_lon)
-                        min_lon = p.y;
-                    P.add(p);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    // ignore
-                }
-            }
-            final double lat = (min_lat + max_lat) / 2;
-            final double lon = (min_lon + max_lon) / 2;
-            final String sector = FetchService.convexHull(P);
-            AddressRequest request = new AddressRequest() {
+            JsonArray arr = res.get("bounds").asArray();
+            Point p1 = new Point(arr.get(0).asString());
+            Point p2 = new Point(arr.get(1).asString());
+            final double lat = (p1.latitude + p2.latitude) / 2;
+            final double lon = (p1.longitude + p2.longitude) / 2;
+            final String sector = res.get("sector").asString();
+            Address request = new Address() {
                 @Override
-                void addressResult(String[] parts) {
-                    if (parts != null) {
-                        addr += "\n" + parts[0];
-                        for (int i = 1; i < parts.length - 1; i++) {
-                            addr += ", " + parts[i];
-                        }
-                    }
+                void result(String res) {
+                    if (res != null)
+                        addr += "\n" + res;
                     setAddress(addr, lat + ";" + lon + ";" + sector, null);
                 }
             };
-            request.getAddress(preferences, lat + "", lon + "");
+            request.get(getActivity(), lat, lon);
         }
     }
+*/
 
     class EventsAdapter extends BaseAdapter {
 
@@ -824,5 +760,20 @@ public class EventsFragment extends Fragment
         String point;
         String course;
         String address;
+    }
+
+    static class Point {
+        Point(String s) {
+            try {
+                String[] parts = s.split(",");
+                latitude = Double.parseDouble(parts[0]);
+                longitude = Double.parseDouble(parts[1]);
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+
+        double latitude;
+        double longitude;
     }
 }

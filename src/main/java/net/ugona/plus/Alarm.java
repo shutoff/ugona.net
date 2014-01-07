@@ -1,6 +1,7 @@
 package net.ugona.plus;
 
 import android.app.Activity;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
@@ -260,8 +261,12 @@ public class Alarm extends Activity {
             }
         }
 
+        int defs = Notification.DEFAULT_LIGHTS + Notification.DEFAULT_VIBRATE;
+        if (sound == null)
+            defs |= Notification.DEFAULT_SOUND;
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context)
+                        .setDefaults(defs)
                         .setSmallIcon(pictId)
                         .setContentTitle(title)
                         .setContentText(text);

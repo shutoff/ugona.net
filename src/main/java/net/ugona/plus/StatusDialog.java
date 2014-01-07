@@ -3,7 +3,6 @@ package net.ugona.plus;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,23 +20,7 @@ public class StatusDialog extends Activity {
                 .setView(inflater.inflate(R.layout.status, null));
 
         String state = getIntent().getStringExtra(Names.STATE);
-        if (state == null) {
-            final String lat = getIntent().getStringExtra(Names.LATITUDE);
-            final String lon = getIntent().getStringExtra(Names.LONGITUDE);
-            final String car_id = getIntent().getStringExtra(Names.ID);
-            builder.setPositiveButton(R.string.show_map, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent i = new Intent(StatusDialog.this, MapView.class);
-                    String point_data = ";" + lat + ";" + lon + ";;" + lat + "," + lon;
-                    i.putExtra(Names.POINT_DATA, point_data);
-                    i.putExtra(Names.ID, car_id);
-                    startActivity(i);
-                }
-            });
-        } else {
-            builder.setPositiveButton(R.string.ok, null);
-        }
+        builder.setPositiveButton(R.string.ok, null);
 
         AlertDialog dialog = builder.create();
         dialog.show();

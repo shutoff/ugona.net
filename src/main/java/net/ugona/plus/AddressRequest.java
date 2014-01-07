@@ -13,11 +13,11 @@ abstract public class AddressRequest {
     static final String GOOGLE_URL = "https://maps.googleapis.com/maps/api/geocode/json?latlng=$1,$2&sensor=false&language=$3";
     static final String OSM_URL = "http://nominatim.openstreetmap.org/reverse?lat=$1&lon=$2&osm_type=N&format=json&address_details=0&accept-language=$3";
 
-    abstract void addressResult(String[] address);
+    abstract void addressResult(String address);
 
     Request request;
 
-    void getAddress(SharedPreferences preferences, String lat, String lng) {
+    void getAddress(SharedPreferences preferences, double lat, double lng) {
         if (preferences.getString("map_type", "").equals("OSM")) {
             request = new OsmRequest();
             request.exec(lat, lng);
@@ -28,19 +28,19 @@ abstract public class AddressRequest {
     }
 
     abstract class Request extends HttpTask {
-        abstract void exec(String lat, String lng);
+        abstract void exec(double lat, double lng);
     }
 
     class GoogleRequest extends Request {
 
-        void exec(String lat, String lng) {
+        void exec(double lat, double lng) {
             latitude = lat;
             longitude = lng;
-            execute(GOOGLE_URL, latitude, longitude, Locale.getDefault().getLanguage());
+            execute(GOOGLE_URL, latitude + "", longitude + "", Locale.getDefault().getLanguage());
         }
 
-        String latitude;
-        String longitude;
+        double latitude;
+        double longitude;
 
         @Override
         void result(JsonObject data) throws ParseException {
@@ -57,9 +57,7 @@ abstract public class AddressRequest {
             }
 
             if (res.size() == 0) {
-                String[] p = new String[1];
-                p[0] = latitude + "," + longitude;
-                addressResult(p);
+                addressResult(null);
                 return;
             }
 
@@ -97,18 +95,15 @@ abstract public class AddressRequest {
                         parts[n] = null;
                 }
             }
-            int to = 0;
+            String p = null;
             for (i = 0; i < parts.length; i++) {
                 if (parts[i] == null)
                     continue;
-                to++;
-            }
-            String[] p = new String[to];
-            to = 0;
-            for (i = 0; i < parts.length; i++) {
-                if (parts[i] == null)
+                if (p == null) {
+                    p = parts[i];
                     continue;
-                p[to++] = parts[i];
+                }
+                p += ", " + parts[i];
             }
             addressResult(p);
         }
@@ -122,29 +117,33 @@ abstract public class AddressRequest {
     class OsmRequest extends Request {
 
         @Override
-        void exec(String lat, String lon) {
-            execute(OSM_URL, lat, lon, Locale.getDefault().getLanguage());
+        void exec(double lat, double lon) {
+            execute(OSM_URL, lat + "", lon + "", Locale.getDefault().getLanguage());
         }
 
         @Override
         void result(JsonObject res) throws ParseException {
             JsonObject address = res.get("address").asObject();
             String[] parts = res.get("display_name").asString().split(", ");
-            String[] result = new String[parts.length - 2];
-            for (int i = 0; i < result.length; i++) {
-                result[i] = parts[i];
-            }
             try {
                 String house_number = address.get("house_number").asString();
-                for (int i = 0; i < result.length - 1; i++) {
-                    if (result[i].equals(house_number)) {
-                        result[i] = result[i + 1];
-                        result[i + 1] = house_number;
+                for (int i = 0; i < parts.length - 1; i++) {
+                    if (parts[i].equals(house_number)) {
+                        parts[i] = parts[i + 1];
+                        parts[i + 1] = house_number;
                         break;
                     }
                 }
             } catch (Exception ex) {
                 // ignore
+            }
+            String result = null;
+            for (int i = 0; i < parts.length - 2; i++) {
+                if (result == null) {
+                    result = parts[i];
+                    continue;
+                }
+                result += ", " + parts[i];
             }
             addressResult(result);
         }

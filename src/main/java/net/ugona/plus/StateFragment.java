@@ -321,11 +321,11 @@ public class StateFragment extends Fragment
         tvVoltage.setText(preferences.getString(Names.VOLTAGE_MAIN + car_id, "?") + " V");
         updateNetStatus(context);
 
-        String lat = preferences.getString(Names.LATITUDE + car_id, "");
-        String lon = preferences.getString(Names.LONGITUDE + car_id, "");
+        double lat = preferences.getFloat(Names.LAT + car_id, 0);
+        double lon = preferences.getFloat(Names.LNG + car_id, 0);
         String addr = "";
         String location = "";
-        if (lat.equals("") || lon.equals("")) {
+        if ((lat == 0) || (lon == 0)) {
             String gsm = preferences.getString(Names.GSM + car_id, "");
             if (!gsm.equals("")) {
                 String[] parts = gsm.split(" ");
@@ -333,8 +333,8 @@ public class StateFragment extends Fragment
                 addr = preferences.getString(Names.ADDRESS + car_id, "");
             }
         } else {
-            location = preferences.getString(Names.LATITUDE + car_id, "") + " ";
-            location += preferences.getString(Names.LONGITUDE + car_id, "");
+            location = preferences.getFloat(Names.LAT + car_id, 0) + " ";
+            location += preferences.getFloat(Names.LNG + car_id, 0);
             addr = Address.getAddress(context, car_id);
         }
         tvLocation.setText(location);
@@ -417,14 +417,9 @@ public class StateFragment extends Fragment
             }
             time += " ";
         } else if (last_stand < 0) {
-            String speed = preferences.getString(Names.SPEED + car_id, "");
-            try {
-                double s = Double.parseDouble(speed);
-                if (s > 0)
-                    time += " " + speed + " " + getString(R.string.kmh) + " ";
-            } catch (Exception ex) {
-                // ignore
-            }
+            double speed = preferences.getFloat(Names.SPEED + car_id, 0);
+            if (speed > 0)
+                time += " " + speed + " " + getString(R.string.kmh) + " ";
         }
         tvTime.setText(time);
 
@@ -537,8 +532,7 @@ public class StateFragment extends Fragment
     }
 
     void showMap() {
-        if ((preferences.getString(Names.LATITUDE + car_id, "").equals("") ||
-                preferences.getString(Names.LONGITUDE + car_id, "").equals("")) &&
+        if ((preferences.getFloat(Names.LAT + car_id, 0) == 0) && (preferences.getFloat(Names.LNG + car_id, 0) == 0) &&
                 preferences.getString(Names.GSM_ZONE + car_id, "").equals("")) {
             Toast toast = Toast.makeText(getActivity(), R.string.no_location, Toast.LENGTH_SHORT);
             toast.show();

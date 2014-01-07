@@ -31,20 +31,20 @@ public final class Names {
     static final String WIDGET = "Widget";
 
     static final String EVENT_ID = "EventId_";
-    static final String EVENT_TIME = "EventTime_";
+    static final String EVENT_TIME = "Event_time_";
 
     static final String VOLTAGE_MAIN = "VoltageMain";
     static final String VOLTAGE_RESERVED = "VoltageReserved";
 
-    static final String BALANCE = "Balance";
-    static final String BALANCE_TIME = "balance_time";
+    static final String BALANCE = "balance_";
+    static final String BALANCE_TIME = "balance_time_";
     static final String SHOW_BALANCE = "show_balance_";
     static final String SHOCK_SENS = "shock_sens_";
 
-    static final String LATITUDE = "Latitude";
-    static final String LONGITUDE = "Longitude";
-    static final String SPEED = "Speed";
-    static final String COURSE = "Course";
+    static final String LAT = "lat_";
+    static final String LNG = "lng_";
+    static final String SPEED = "speed_";
+    static final String COURSE = "course_";
     static final String GSM = "gsm";
     static final String GSM_ZONE = "gsmzone";
 
@@ -65,16 +65,14 @@ public final class Names {
     static final String ZONE_IGNITION = "ZoneIgnition";
     static final String SMS_ALARM = "sms_alarm";
 
-    static final String TEMPERATURE = "Temperature";
-    static final String TEMPERATURE2 = "Temperature2_";
-    static final String TEMPERATURE3 = "Temperature3_";
+    static final String TEMP = "temp_";
     static final String TEMP_SIFT = "TempShift";
     static final String MAP_TYPE = "map_type";
 
     static final String ADDRESS = "Address";
-    static final String ADDR_LANG = "AddressLanguage";
-    static final String ADDR_LAT = "AddrLatitude";
-    static final String ADDR_LNG = "AddrLongitude";
+    static final String ADDR_PARAM = "addr_param";
+    static final String ADDR_LAT = "addr_lat";
+    static final String ADDR_LNG = "addr_lng";
 
     static final String SMS_TEXT = "sms_text";
     static final String STATE = "state";
@@ -118,10 +116,8 @@ public final class Names {
     static final String PS_NOTIFY = "ps_notify_";
     static final String TIME_NOTIFY = "time_notify_";
 
-    static final String TEMP_EVENT = "temp_event_";
-    static final String VOLTAGE_EVENT = "voltage_event_";
-    static final String GSM_EVENT = "gsm_event_";
-
     static final String AZ = "az_";
+    static final String GCM_ID = "gcm_id";
+    static final String GCM_TIME = "gcm_time";
 
 }

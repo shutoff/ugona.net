@@ -314,13 +314,14 @@ public class Actions {
                 SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.balance, "BALANCE?", "") {
                     @Override
                     boolean process_answer(Context context, String car_id, String text) {
-                        Matcher matcher = FetchService.balancePattern.matcher(text);
+                        Pattern balancePattern = Pattern.compile("-?[0-9]+[.,][0-9][0-9]");
+                        Matcher matcher = balancePattern.matcher(text);
                         if (!matcher.find())
                             return false;
                         String balance = matcher.group(0).replaceAll(",", ".");
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                         SharedPreferences.Editor ed = preferences.edit();
-                        ed.putLong(Names.BALANCE_TIME + car_id, preferences.getLong(Names.EVENT_TIME + car_id, 0));
+                        ed.putLong(Names.BALANCE_TIME, new Date().getTime());
                         ed.putString(Names.BALANCE + car_id, balance);
                         ed.commit();
                         Intent intent = new Intent(context, StatusDialog.class);
@@ -332,6 +333,7 @@ public class Actions {
                         Intent i = new Intent(FetchService.ACTION_UPDATE);
                         i.putExtra(Names.ID, car_id);
                         context.sendBroadcast(i);
+                        Preferences.checkBalance(context, car_id);
                         return true;
                     }
                 });
