@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
@@ -24,7 +25,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -56,9 +56,9 @@ public class CarPreferences extends PreferenceActivity {
     Preference alarmPref;
     Preference mainPref;
     Preference limitPref;
-    Preference scanPref;
     SeekBarPreference sensPref;
     CheckBoxPreference photoPref;
+    ListPreference shockPref;
     Preference relePref;
 
     String alarmUri;
@@ -73,9 +73,9 @@ public class CarPreferences extends PreferenceActivity {
     private static final int GET_ALARM_SOUND = 3008;
     private static final int GET_NOTIFY_SOUND = 3009;
 
-    final static String URL_KEY = "https://api.shutoff.ru/key?login=$1&password=$2";
-    final static String URL_PROFILE = "https://api.shutoff.ru/version?skey=$1";
-    final static String URL_PHOTOS = "https://api.shutoff.ru/photos?skey=$1&begin=$2";
+    final static String URL_KEY = "http://car-online.ugona.net/key?login=$1&password=$2";
+    final static String URL_PROFILE = "http://car-online.ugona.net/version?skey=$1";
+    final static String URL_PHOTOS = "http://car-online.ugona.net/photos?skey=$1&begin=$2";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +104,7 @@ public class CarPreferences extends PreferenceActivity {
         ed.putString("name_", name);
         ed.putString("call_mode", preferences.getString(Names.ALARM_MODE + car_id, ""));
         ed.putString("balance_limit", preferences.getInt(Names.LIMIT + car_id, 50) + "");
+        ed.putString("shock", preferences.getString(Names.SHOCK + car_id, "1"));
         ed.commit();
 
         addPreferencesFromResource(R.xml.car_preferences);
@@ -211,6 +212,36 @@ public class CarPreferences extends PreferenceActivity {
                 return false;
             }
         });
+
+        shockPref = (ListPreference) findPreference("shock");
+        shockPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, final Object newValue) {
+                final String v = newValue.toString();
+                CharSequence msg = null;
+                CharSequence[] values = shockPref.getEntryValues();
+                for (int i = 0; i < values.length; i++) {
+                    if (v.equals(values[i])) {
+                        msg = shockPref.getEntries()[i];
+                        break;
+                    }
+                }
+                final CharSequence message = msg;
+                Actions.requestPassword(CarPreferences.this, R.string.shock_sensor, msg, new Runnable() {
+                    @Override
+                    public void run() {
+                        SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.shock_sensor, "ALRM PRIOR " + newValue, "ALRM PRIOR OK");
+                        Actions.send_sms(CarPreferences.this, car_id, R.string.shock_sensor, sms, null);
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putString(Names.SHOCK + car_id, v);
+                        ed.commit();
+                        shockPref.setSummary(message);
+                    }
+                });
+                return true;
+            }
+        });
+        shockPref.setSummary(shockPref.getEntry());
 
         CheckBoxPreference balancePref = (CheckBoxPreference) findPreference("show_balance");
         balancePref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -374,85 +405,6 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
 
-        scanPref = findPreference("scan");
-        scanPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                final LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-                final AlertDialog dialog = new AlertDialog.Builder(CarPreferences.this)
-                        .setTitle(R.string.scan_mode)
-                        .setView(inflater.inflate(R.layout.scan_mode, null))
-                        .setNegativeButton(R.string.cancel, null)
-                        .setPositiveButton(R.string.ok, null)
-                        .create();
-                dialog.show();
-                final TextView tv = (TextView) dialog.findViewById(R.id.summary);
-                final Spinner spinner = (Spinner) dialog.findViewById(R.id.mode);
-                final String[] modes = getResources().getStringArray(R.array.scan_modes);
-                final String[] summary = getResources().getStringArray(R.array.scan_modes_mode);
-                spinner.setAdapter(new BaseAdapter() {
-                    @Override
-                    public int getCount() {
-                        return modes.length;
-                    }
-
-                    @Override
-                    public Object getItem(int position) {
-                        return modes[position];
-                    }
-
-                    @Override
-                    public long getItemId(int position) {
-                        return position;
-                    }
-
-                    @Override
-                    public View getView(int position, View convertView, ViewGroup parent) {
-                        View v = convertView;
-                        if (v == null)
-                            v = inflater.inflate(R.layout.car_list_item, null);
-                        TextView tv = (TextView) v.findViewById(R.id.name);
-                        tv.setText(modes[position]);
-                        return v;
-                    }
-
-                    @Override
-                    public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                        View v = convertView;
-                        if (v == null)
-                            v = inflater.inflate(R.layout.car_list_dropdown_item, null);
-                        TextView tv = (TextView) v.findViewById(R.id.name);
-                        tv.setText(modes[position]);
-                        return v;
-                    }
-                });
-                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        tv.setText(summary[position]);
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-
-                    }
-                });
-                spinner.setSelection(preferences.getInt(Names.SCAN_MODE + car_id, 0));
-                tv.setText(summary[spinner.getSelectedItemPosition()]);
-                dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        SharedPreferences.Editor ed = preferences.edit();
-                        ed.putInt(Names.SCAN_MODE + car_id, spinner.getSelectedItemPosition());
-                        ed.commit();
-                        dialog.dismiss();
-                    }
-                });
-                return false;
-            }
-        });
-        setScanMode();
-
         if (State.hasTelephony(this)) {
             String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
             setPhone(phoneNumber);
@@ -461,6 +413,7 @@ public class CarPreferences extends PreferenceActivity {
             ps.removePreference(smsPref);
             ps.removePreference(phonePref);
             ps.removePreference(sensPref);
+            ps.removePreference(shockPref);
             ps.removePreference(relePref);
             ps.removePreference(mainPref);
             ps.removePreference(phonesPref);
@@ -546,21 +499,14 @@ public class CarPreferences extends PreferenceActivity {
     }
 
     void setPhone(String phoneNumber) {
-        if (phoneNumber.length() > 0) {
-            phonePref.setSummary(Phones.formatPhoneNumber(phoneNumber));
-            smsPref.setEnabled(true);
-            phonesPref.setEnabled(true);
-            timerPref.setEnabled(true);
-            sensPref.setEnabled(true);
-            mainPref.setEnabled(true);
-        } else {
-            phonePref.setSummary(getString(R.string.phone_number_summary));
-            smsPref.setEnabled(false);
-            phonesPref.setEnabled(false);
-            timerPref.setEnabled(false);
-            sensPref.setEnabled(false);
-            mainPref.setEnabled(false);
-        }
+        boolean ok = phoneNumber.length() > 0;
+        phonePref.setSummary(ok ? Phones.formatPhoneNumber(phoneNumber) : getString(R.string.phone_number_summary));
+        smsPref.setEnabled(ok);
+        phonesPref.setEnabled(ok);
+        timerPref.setEnabled(ok);
+        sensPref.setEnabled(ok);
+        shockPref.setEnabled(ok);
+        mainPref.setEnabled(ok);
     }
 
     void setBalance() {
@@ -864,6 +810,7 @@ public class CarPreferences extends PreferenceActivity {
                         SharedPreferences.Editor ed = preferences.edit();
                         ed.putString(Names.CAR_KEY + car_id, key);
                         ed.putString(Names.LOGIN + car_id, login);
+                        ed.remove(Names.GCM_TIME);
                         String[] cars = preferences.getString(Names.CARS, "").split(",");
                         boolean is_new = true;
                         for (String car : cars) {
@@ -1184,9 +1131,4 @@ public class CarPreferences extends PreferenceActivity {
         });
     }
 
-    void setScanMode() {
-        int mode = preferences.getInt(Names.SCAN_MODE + car_id, 0);
-        String[] modes = getResources().getStringArray(R.array.scan_modes);
-        scanPref.setSummary(modes[mode]);
-    }
 }

@@ -31,7 +31,7 @@ public final class Names {
     static final String WIDGET = "Widget";
 
     static final String EVENT_ID = "EventId_";
-    static final String EVENT_TIME = "Event_time_";
+    static final String EVENT_TIME = "Event_Time_";
 
     static final String VOLTAGE_MAIN = "VoltageMain";
     static final String VOLTAGE_RESERVED = "VoltageReserved";
@@ -65,7 +65,7 @@ public final class Names {
     static final String ZONE_IGNITION = "ZoneIgnition";
     static final String SMS_ALARM = "sms_alarm";
 
-    static final String TEMP = "temp_";
+    static final String TEMPERATURE = "temperature_";
     static final String TEMP_SIFT = "TempShift";
     static final String MAP_TYPE = "map_type";
 
@@ -112,12 +112,21 @@ public final class Names {
     static final String RELAY3 = "relay3_";
     static final String RELAY4 = "relay4_";
 
-    static final String SCAN_MODE = "scan_";
     static final String PS_NOTIFY = "ps_notify_";
     static final String TIME_NOTIFY = "time_notify_";
 
     static final String AZ = "az_";
+    static final String AZ_START = "az_start";
+    static final String AZ_STOP = "az_stop";
+    static final String GCM_VERSION = "gcm_version";
     static final String GCM_ID = "gcm_id";
     static final String GCM_TIME = "gcm_time";
+    static final String SHOCK = "shock_";
+
+    static final String MOTOR_ON_NOTIFY = "motor_on_notify_";
+    static final String MOTOR_OFF_NOTIFY = "motor_off_notify_";
+
+    static final String VALET_ON_NOTIFY = "valet_on_notify_";
+    static final String VALET_OFF_NOTIFY = "valet_off_notify_";
 
 }

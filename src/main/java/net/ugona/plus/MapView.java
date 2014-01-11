@@ -133,7 +133,7 @@ public class MapView extends WebViewActivity {
                 }
             }
             if (zone.equals("")) {
-                data += lat + "," + lng + "<br/>";
+                data += Math.round(lat * 10000) / 10000. + "," + Math.round(lng * 10000) / 10000. + "<br/>";
                 String address = Address.getAddress(getBaseContext(), id);
                 String[] parts = address.split(", ");
                 if (parts.length >= 3) {

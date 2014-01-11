@@ -13,13 +13,14 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.preference.PreferenceManager;
 
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +32,6 @@ public class FetchService extends Service {
     private static final long REPEAT_AFTER_500 = 600 * 1000;
     private static final long LONG_TIMEOUT = 5 * 60 * 60 * 1000;
     private static final long SCAN_TIMEOUT = 10 * 1000;
-    private static final long REQUEST_TIMEOUT = 3 * 60 * 1000;
 
     private BroadcastReceiver mReceiver;
     private PendingIntent piTimer;
@@ -39,7 +39,6 @@ public class FetchService extends Service {
 
     private SharedPreferences preferences;
     private ConnectivityManager conMgr;
-    private PowerManager powerMgr;
     private AlarmManager alarmMgr;
 
     static final String ACTION_UPDATE = "net.ugona.plus.UPDATE";
@@ -50,7 +49,7 @@ public class FetchService extends Service {
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR";
     static final String ACTION_RELE = "net.ugona.plus.RELE";
 
-    static final String URL_STATUS = "https://api.shutoff.ru/?skey=$1&time=$2";
+    static final String URL_STATUS = "http://car-online.ugona.net/?skey=$1&time=$2";
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -72,7 +71,6 @@ public class FetchService extends Service {
         super.onCreate();
         preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        powerMgr = (PowerManager) getSystemService(Context.POWER_SERVICE);
         alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent iTimer = new Intent(this, FetchService.class);
         piTimer = PendingIntent.getService(this, 0, iTimer, 0);
@@ -256,10 +254,12 @@ public class FetchService extends Service {
             JsonValue contact_value = res.get("contact");
             boolean gps_valid = false;
             boolean prev_valet = false;
+            boolean prev_ps = false;
             if (contact_value != null) {
                 JsonObject contact = contact_value.asObject();
                 boolean guard = contact.get("guard").asBoolean();
                 prev_valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
+                prev_ps = preferences.getBoolean(Names.GUARD + car_id, false) && preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false);
 
                 ed.putBoolean(Names.GUARD + car_id, guard);
                 ed.putBoolean(Names.INPUT1 + car_id, contact.get("input1").asBoolean());
@@ -324,11 +324,37 @@ public class FetchService extends Service {
 
             JsonValue temp_value = res.get("temperature");
             if (temp_value != null) {
+                Map<Integer, Integer> values = new HashMap<Integer, Integer>();
+                String[] old = preferences.getString(Names.TEMPERATURE + car_id, "").split(";");
+                for (String v : old) {
+                    try {
+                        String[] d = v.split(":");
+                        values.put(Integer.parseInt(d[0]), Integer.parseInt(d[1]));
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                }
                 JsonObject temp = temp_value.asObject();
                 List<String> names = temp.names();
                 for (String name : names) {
-                    ed.putInt(Names.TEMP + name + "_" + car_id, temp.get(name).asInt());
+                    try {
+                        values.put(Integer.parseInt(name), temp.get(name).asInt());
+                    } catch (Exception ex) {
+                        // ignore
+                    }
                 }
+                ArrayList<Integer> sensors = new ArrayList<Integer>(values.keySet());
+                Collections.sort(sensors);
+                String val = null;
+                for (int i : sensors) {
+                    String p = i + ":" + values.get(i);
+                    if (val == null) {
+                        val = p;
+                        continue;
+                    }
+                    val += ";" + p;
+                }
+                ed.putString(Names.TEMPERATURE + car_id, val);
             }
 
             JsonValue balance_value = null;
@@ -347,6 +373,12 @@ public class FetchService extends Service {
             JsonValue az = res.get("az");
             if (az != null)
                 ed.putBoolean(Names.AZ + car_id, az.asBoolean());
+            az = res.get("az_start");
+            if (az != null)
+                ed.putLong(Names.AZ_START + car_id, az.asLong());
+            az = res.get("az_stop");
+            if (az != null)
+                ed.putLong(Names.AZ_STOP + car_id, az.asLong());
 
             ed.commit();
             sendUpdate(ACTION_UPDATE, car_id);
@@ -355,6 +387,23 @@ public class FetchService extends Service {
                 boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
                 if (valet != prev_valet)
                     SmsMonitor.processMessageFromApi(FetchService.this, car_id, valet ? R.string.valet_on : R.string.valet_off);
+                boolean ps = preferences.getBoolean(Names.GUARD + car_id, false) && preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false);
+                if (ps != prev_ps) {
+                    int notify_id = preferences.getInt(Names.PS_NOTIFY + car_id, 0);
+                    if (ps) {
+                        if (notify_id == 0) {
+                            notify_id = Alarm.createNotification(FetchService.this, getString(R.string.ps_guard), R.drawable.warning, car_id, Uri.parse("android.resource://net.ugona.plus/raw/warning"));
+                            ed.putInt(Names.PS_NOTIFY + car_id, notify_id);
+                            ed.commit();
+                        }
+                    } else {
+                        if (notify_id > 0) {
+                            Alarm.removeNotification(FetchService.this, car_id, notify_id);
+                            ed.remove(Names.PS_NOTIFY + car_id);
+                            ed.commit();
+                        }
+                    }
+                }
             }
 
             if (balance_value != null)
@@ -380,9 +429,49 @@ public class FetchService extends Service {
                 }
             }
 
+            if (!preferences.getBoolean(Names.GUARD, false)) {
+                int id = preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0);
+                if (id != 0) {
+                    Alarm.removeNotification(FetchService.this, car_id, id);
+                    ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
+                    ed.commit();
+                }
+                id = preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0);
+                if (id != 0) {
+                    Alarm.removeNotification(FetchService.this, car_id, id);
+                    ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
+                    ed.commit();
+                }
+            }
+
+            if (preferences.getBoolean(Names.POINTER + car_id, false)) {
+                long now = new Date().getTime();
+                boolean new_state = ((now - time.asLong()) > 25 * 60 * 60 * 1000);
+                if (new_state != preferences.getBoolean(Names.TIMEOUT + car_id, false)) {
+                    SharedPreferences.Editor ed = preferences.edit();
+                    ed.putBoolean(Names.TIMEOUT + car_id, new_state);
+                    int timeout_id = preferences.getInt(Names.TIMEOUT_NOTIFICATION + car_id, 0);
+                    try {
+                        if (new_state) {
+                            if (timeout_id == 0) {
+                                timeout_id = Alarm.createNotification(FetchService.this, getString(R.string.timeout), R.drawable.warning, car_id, null);
+                                ed.putInt(Names.TIMEOUT_NOTIFICATION + car_id, timeout_id);
+                            }
+                        } else {
+                            if (timeout_id > 0) {
+                                Alarm.removeNotification(FetchService.this, car_id, timeout_id);
+                                ed.remove(Names.TIMEOUT_NOTIFICATION + car_id);
+                            }
+                        }
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                    ed.commit();
+                }
+            }
+        }
+
 /*
-            JsonObject event = res.get("event").asObject();
-            long eventId = event.get("eventId").asLong();
 
                 boolean gsm_req = true;
 
@@ -390,29 +479,7 @@ public class FetchService extends Service {
                 if (sms_alarm)
                     ed.remove(Names.SMS_ALARM);
 
-                ed.commit();
-                sendUpdate(ACTION_UPDATE, car_id);
 
-                boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
-                if (valet != prev_valet)
-                    SmsMonitor.processMessageFromApi(FetchService.this, car_id, valet ? R.string.valet_on : R.string.valet_off);
-                boolean ps_guard = preferences.getBoolean(Names.GUARD + car_id, false) && preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false);
-                if ((ps_guard != prev_ps_guard) && (preferences.getInt(Names.SCAN_MODE + car_id, 0) != 0)) {
-                    int notify_id = preferences.getInt(Names.PS_NOTIFY + car_id, 0);
-                    if (ps_guard) {
-                        if (notify_id == 0) {
-                            notify_id = Alarm.createNotification(FetchService.this, getString(R.string.ps_guard), R.drawable.warning, car_id, Uri.parse("android.resource://net.ugona.plus/raw/warning"));
-                            ed.putInt(Names.PS_NOTIFY + car_id, notify_id);
-                            ed.commit();
-                        }
-                    } else {
-                        if (notify_id > 0) {
-                            Alarm.removeNotification(FetchService.this, car_id, notify_id);
-                            ed.remove(Names.PS_NOTIFY + car_id);
-                            ed.commit();
-                        }
-                    }
-                }
 
                 if (scan_mode == 2) {
                     if (!sms_alarm && (msg_id > 0) && guard) {
@@ -448,46 +515,7 @@ public class FetchService extends Service {
                     }
                 }
 
-                new EventsRequest(car_id, voltage_request, gsm_req);
-
-                long balance_time = preferences.getLong(Names.BALANCE_TIME + car_id, 0);
-                if (balance_time > 0) {
-                    long now = new Date().getTime() - 6 * 3600 * 1000;
-                    if (balance_time < now)
-                        balance_time = now;
-                    new BalanceRequest(car_id, balance_time);
-                }
-
-/*
-                if (preferences.getBoolean(Names.POINTER + car_id, false)) {
-                    long now = new Date().getTime();
-                    boolean new_state = ((now - eventTime) > 25 * 60 * 60 * 1000);
-                    if (new_state != preferences.getBoolean(Names.TIMEOUT + car_id, false)) {
-                        SharedPreferences.Editor ed = preferences.edit();
-                        ed.putBoolean(Names.TIMEOUT + car_id, new_state);
-                        int timeout_id = preferences.getInt(Names.TIMEOUT_NOTIFICATION + car_id, 0);
-                        try {
-                            if (new_state) {
-                                if (timeout_id == 0) {
-                                    timeout_id = Alarm.createNotification(FetchService.this, getString(R.string.timeout), R.drawable.warning, car_id, null);
-                                    ed.putInt(Names.TIMEOUT_NOTIFICATION + car_id, timeout_id);
-                                }
-                            } else {
-                                if (timeout_id > 0) {
-                                    Alarm.removeNotification(FetchService.this, car_id, timeout_id);
-                                    ed.remove(Names.TIMEOUT_NOTIFICATION + car_id);
-                                }
-                            }
-                        } catch (Exception ex) {
-                            // ignore
-                        }
-                        ed.commit();
-                    }
-                }
-            }
-
 */
-        }
 
         @Override
         void exec(String api_key) {
@@ -546,6 +574,14 @@ public class FetchService extends Service {
             ed.remove(Names.BALANCE_NOTIFICATION + car_id);
         if (id == preferences.getInt(Names.PS_NOTIFY + car_id, 0))
             ed.remove(Names.PS_NOTIFY + car_id);
+        if (id == preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0))
+            ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
+        if (id == preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0))
+            ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
+        if (id == preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0))
+            ed.remove(Names.VALET_ON_NOTIFY + car_id);
+        if (id == preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0))
+            ed.remove(Names.VALET_OFF_NOTIFY + car_id);
         if (res == null) {
             ed.remove(Names.N_IDS + car_id);
         } else {

@@ -319,25 +319,16 @@
     <string name="impulse">Управление импульсом</string>
     <string name="brake_on">Ручник поднят</string>
     <string name="brake_off">Ручник опущен</string>
-    <string name="scan_mode">Режим опроса</string>
-    <string-array name="scan_modes">
-        <item>Экономичный</item>
-        <item>Уведомления о постановке в охрану</item>
-        <item>Постоянный контроль</item>
-    </string-array>
-    <string-array name="scan_modes_mode">
-        <item>Опрос состояния проводится только при включенном экране и установленнои соединении для
-            передачи данных. Минимально расходует батарейку
-        </item>
-        <item>Опрос производится постоянно в состоянии не в охране. Выдаются уведомления о
-            постановку в охрану с пассажирами. Во время опроса может быть более быстрый расход
-            батареи
-        </item>
-        <item>Опрос производится постоянно. Выдаются тревоги полученные с сервера. Может вызвать
-            значительный расход батареи телефона
-        </item>
-    </string-array>
     <string name="ps_guard">Включен режим охраны с пассажирами</string>
     <string name="time_warning">Долгое время не было связи с машиной</string>
     <string name="gsm_new">Изменился GSM-сектор</string>
+    <string name="trace_point">Точка маршрута</string>
+    <string name="nondigits">Код содержит не только цифры</string>
+    <string name="shock_sensor">Датчик удара</string>
+    <string-array name="shock_entries">
+        <item>Включены все тревоги</item>
+        <item>Отключен слабый удар</item>
+        <item>Отключение датчика удара</item>
+    </string-array>
+    <string name="motor_time">после $1 мин</string>
 </resources>

@@ -15,6 +15,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,8 +33,70 @@ public class Actions {
 
     static PendingIntent piRele;
 
-    static void done(final Context context, int id, int pictId, String car_id, Uri sound) {
-        SmsMonitor.showNotification(context, context.getString(id), pictId, car_id, sound);
+    static void done_motor_on(Context context, String car_id) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        int id = preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0);
+        if (id != 0)
+            return;
+        id = preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0);
+        if (id != 0)
+            Alarm.removeNotification(context, car_id, id);
+        id = Alarm.createNotification(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, Uri.parse("android.resource://net.ugona.plus/raw/start"));
+        SharedPreferences.Editor ed = preferences.edit();
+        ed.putInt(Names.MOTOR_ON_NOTIFY + car_id, id);
+        ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
+        ed.commit();
+    }
+
+    static void done_motor_off(Context context, String car_id) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        int id = preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0);
+        if (id != 0)
+            return;
+        id = preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0);
+        if (id != 0)
+            Alarm.removeNotification(context, car_id, id);
+        String msg = context.getString(R.string.motor_off_ok);
+        long az_stop = preferences.getLong(Names.AZ_STOP + car_id, 0);
+        long az_start = preferences.getLong(Names.AZ_START + car_id, 0);
+        long time = (az_stop - az_start) / 60000;
+        if ((time > 0) && (time <= 20))
+            msg += " " + context.getString(R.string.motor_time).replace("$1", time + "");
+        id = Alarm.createNotification(context, msg, R.drawable.white_motor_off, car_id, null);
+        SharedPreferences.Editor ed = preferences.edit();
+        ed.putInt(Names.MOTOR_OFF_NOTIFY + car_id, id);
+        ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
+        ed.commit();
+    }
+
+    static void done_valet_on(Context context, String car_id) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        int id = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
+        if (id != 0)
+            return;
+        id = preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0);
+        if (id != 0)
+            Alarm.removeNotification(context, car_id, id);
+        id = Alarm.createNotification(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet_on, car_id, null);
+        SharedPreferences.Editor ed = preferences.edit();
+        ed.putInt(Names.VALET_ON_NOTIFY + car_id, id);
+        ed.remove(Names.VALET_OFF_NOTIFY + car_id);
+        ed.commit();
+    }
+
+    static void done_valet_off(Context context, String car_id) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        int id = preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0);
+        if (id != 0)
+            return;
+        id = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
+        if (id != 0)
+            Alarm.removeNotification(context, car_id, id);
+        id = Alarm.createNotification(context, context.getString(R.string.valet_off_ok), R.drawable.white_valet_off, car_id, null);
+        SharedPreferences.Editor ed = preferences.edit();
+        ed.putInt(Names.VALET_OFF_NOTIFY + car_id, id);
+        ed.remove(Names.VALET_ON_NOTIFY + car_id);
+        ed.commit();
     }
 
     static void motor_on(final Context context, final String car_id) {
@@ -53,6 +116,9 @@ public class Actions {
                             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                             SharedPreferences.Editor ed = preferences.edit();
                             ed.putBoolean(Names.AZ + car_id, true);
+                            long now = new Date().getTime();
+                            if (now > preferences.getLong(Names.AZ_START + car_id, 0) + 60000)
+                                ed.putLong(Names.AZ_START + car_id, now);
                             ed.commit();
                             try {
                                 Intent intent = new Intent(FetchService.ACTION_UPDATE);
@@ -61,7 +127,7 @@ public class Actions {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                            done(context, R.string.motor_on_ok, R.drawable.white_motor_on, car_id, Uri.parse("android.resource://net.ugona.plus/raw/start"));
+                            done_motor_on(context, car_id);
                             return true;
                         }
                         return false;
@@ -88,6 +154,9 @@ public class Actions {
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                         SharedPreferences.Editor ed = preferences.edit();
                         ed.putBoolean(Names.AZ + car_id, false);
+                        long now = new Date().getTime();
+                        if (now > preferences.getLong(Names.AZ_STOP + car_id, 0) + 60000)
+                            ed.putLong(Names.AZ_STOP + car_id, now);
                         ed.commit();
                         try {
                             Intent intent = new Intent(FetchService.ACTION_UPDATE);
@@ -96,7 +165,7 @@ public class Actions {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        done(context, R.string.motor_off_ok, R.drawable.white_motor_off, car_id, null);
+                        done_motor_off(context, car_id);
                         return true;
                     }
                 });
@@ -459,7 +528,7 @@ public class Actions {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        done(context, R.string.valet_on_ok, R.drawable.white_valet_on, car_id, null);
+                        done_valet_on(context, car_id);
                         return true;
                     }
                 });
@@ -488,7 +557,7 @@ public class Actions {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        done(context, R.string.valet_off_ok, R.drawable.white_valet_off, car_id, null);
+                        done_valet_off(context, car_id);
                         return true;
                     }
                 });
@@ -551,9 +620,13 @@ public class Actions {
     }
 
     static void requestPassword(final Context context, final int id_title, int id_message, final Runnable action) {
+        requestPassword(context, id_title, (id_message == 0) ? null : context.getString(id_message), action);
+    }
+
+    static void requestPassword(final Context context, final int id_title, CharSequence message, final Runnable action) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setTitle(id_title)
-                .setMessage((id_message == 0) ? R.string.input_password : id_message)
+                .setMessage((message == null) ? context.getString(R.string.input_password) : message)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.ok, null);
 
@@ -567,7 +640,7 @@ public class Actions {
                 id = R.layout.password_number;
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
             builder.setView(inflater.inflate(id, null));
-        } else if (id_message == 0) {
+        } else if (message == null) {
             action.run();
             return;
         }
@@ -635,7 +708,6 @@ public class Actions {
         final Button ok = dialog.getButton(Dialog.BUTTON_POSITIVE);
         ok.setEnabled(false);
         final EditText ccode = (EditText) dialog.findViewById(R.id.ccode);
-        int input_type = ccode.getInputType();
         ccode.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -649,9 +721,13 @@ public class Actions {
 
             @Override
             public void afterTextChanged(Editable s) {
-                ok.setEnabled(s.length() == 6);
+                ok.setEnabled(s.length() >= 6);
             }
         });
+        int inputType = ccode.getInputType() & ~InputType.TYPE_CLASS_NUMBER;
+        inputType += InputType.TYPE_CLASS_TEXT;
+        ccode.setInputType(inputType);
+
         dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

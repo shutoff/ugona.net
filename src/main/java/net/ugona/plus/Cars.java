@@ -246,14 +246,13 @@ public class Cars extends ActionBarActivity {
         ed.remove(Names.ZONE_IGNITION + id);
         ed.remove(Names.LAST_EVENT + id);
         ed.remove(Names.ENGINE + id);
-        ed.remove(Names.TEMP + "_" + 1 + id);
-        ed.remove(Names.TEMP + "_" + 2 + id);
-        ed.remove(Names.TEMP + "_" + 3 + id);
+        ed.remove(Names.TEMPERATURE + id);
         ed.remove(Names.GSM + id);
         ed.remove(Names.GSM_ZONE + id);
         ed.remove(Names.LOGIN + id);
         ed.remove(Names.POINTER + id);
         ed.remove(Names.POINTERS + id);
+        ed.remove(Names.GCM_TIME);
         ed.commit();
         File cache = context.getCacheDir();
         final String prefix = "p" + id + "_";

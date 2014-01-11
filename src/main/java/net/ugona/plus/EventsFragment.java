@@ -41,8 +41,8 @@ import java.util.Vector;
 public class EventsFragment extends Fragment
         implements MainActivity.DateChangeListener {
 
-    final static String URL_EVENTS = "https://api.shutoff.ru/events?skey=$1&begin=$2&end=$3&first=$4";
-    final static String URL_EVENT = "https://api.shutoff.ru/event?skey=$1&id=$2&time=$3";
+    final static String URL_EVENTS = "http://car-online.ugona.net/events?skey=$1&begin=$2&end=$3&first=$4&pointer=$5";
+    final static String URL_EVENT = "http://car-online.ugona.net/event?skey=$1&id=$2&time=$3";
 
     String car_id;
     String api_key;
@@ -133,6 +133,7 @@ public class EventsFragment extends Fragment
             new EventType(35, R.string.gps_fail, R.drawable.gps_fail),
             new EventType(37, R.string.trace_start, R.drawable.trace_start),
             new EventType(38, R.string.trace_stop, R.drawable.trace_stop),
+            new EventType(39, R.string.trace_point, R.drawable.trace),
             new EventType(41, R.string.timer_event, R.drawable.timer),
             new EventType(42, R.string.user_call, R.drawable.user_call, 1),
             new EventType(43, R.string.rogue, R.drawable.rogue, 0),
@@ -554,7 +555,8 @@ public class EventsFragment extends Fragment
                     api_key,
                     start.toDate().getTime() + "",
                     finish.toDate().getTime() + "",
-                    first + "");
+                    first + "",
+                    pointer + "");
         }
     }
 
@@ -634,58 +636,6 @@ public class EventsFragment extends Fragment
         }
     }
 
-/*
-    class GsmEventRequest extends EventRequest {
-
-        GsmEventRequest(long id, long time) {
-            super(id, time);
-            execute(EVENT_GSM, api_key, id + "", time + "");
-        }
-
-        @Override
-        void result(JsonObject res) throws ParseException {
-            int cc = res.get("cc").asInt();
-            int nc = res.get("nc").asInt();
-            int cid = res.get("cid").asInt();
-            int lac = res.get("lac").asInt();
-            String gsm = cc + " " + nc + " " + lac + " " + cid;
-            new GsmSectorRequest(event_id, event_time, gsm);
-        }
-
-    }
-
-    class GsmSectorRequest extends EventRequest {
-
-        String addr;
-
-        GsmSectorRequest(long id, long time, String gsm) {
-            super(id, time);
-            String[] p = gsm.split(" ");
-            addr = "MCC: " + p[0] + " NC: " + p[1] + " LAC: " + p[2] + " CID: " + p[3];
-            execute(URL_SECTOR, api_key, p[0], p[1], p[2], p[3]);
-        }
-
-        @Override
-        void result(JsonObject res) throws ParseException {
-            JsonArray arr = res.get("bounds").asArray();
-            Point p1 = new Point(arr.get(0).asString());
-            Point p2 = new Point(arr.get(1).asString());
-            final double lat = (p1.latitude + p2.latitude) / 2;
-            final double lon = (p1.longitude + p2.longitude) / 2;
-            final String sector = res.get("sector").asString();
-            Address request = new Address() {
-                @Override
-                void result(String res) {
-                    if (res != null)
-                        addr += "\n" + res;
-                    setAddress(addr, lat + ";" + lon + ";" + sector, null);
-                }
-            };
-            request.get(getActivity(), lat, lon);
-        }
-    }
-*/
-
     class EventsAdapter extends BaseAdapter {
 
         @Override
@@ -762,18 +712,4 @@ public class EventsFragment extends Fragment
         String address;
     }
 
-    static class Point {
-        Point(String s) {
-            try {
-                String[] parts = s.split(",");
-                latitude = Double.parseDouble(parts[0]);
-                longitude = Double.parseDouble(parts[1]);
-            } catch (Exception ex) {
-                // ignore
-            }
-        }
-
-        double latitude;
-        double longitude;
-    }
 }

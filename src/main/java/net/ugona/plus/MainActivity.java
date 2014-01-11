@@ -35,7 +35,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.google.android.gms.common.ConnectionResult;
@@ -78,7 +77,8 @@ public class MainActivity extends ActionBarActivity {
     static final int PAGE_EVENT = 3;
     static final int PAGE_TRACK = 4;
 
-    String SENDER_ID = "915289471784";
+    static final int VERSION = 1;
+    static final String SENDER_ID = "915289471784";
 
     ViewPager mViewPager;
     SharedPreferences preferences;
@@ -127,7 +127,6 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.main);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        registerGCM();
 
         current = new LocalDate();
 
@@ -268,8 +267,8 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        registerGCM();
         removeNotifications();
-        checkPlayServices();
     }
 
     @Override
@@ -805,6 +804,8 @@ public class MainActivity extends ActionBarActivity {
         gcm = GoogleCloudMessaging.getInstance(this);
         String reg_id = preferences.getString(Names.GCM_ID, "");
         long gcm_time = preferences.getLong(Names.GCM_TIME, 0);
+        if (preferences.getInt(Names.GCM_VERSION, 0) != VERSION)
+            reg_id = "";
         if (!reg_id.equals("") && (gcm_time > new Date().getTime() - 86400 * 1000))
             return;
         new AsyncTask<Void, Void, String>() {
@@ -819,7 +820,6 @@ public class MainActivity extends ActionBarActivity {
                     reg = gcm.register(SENDER_ID);
                     JsonObject data = new JsonObject();
                     data.add("reg", reg);
-                    JsonArray cars_array = new JsonArray();
                     Cars.Car[] cars = Cars.getCars(MainActivity.this);
                     String d = null;
                     for (Cars.Car car : cars) {
@@ -832,10 +832,10 @@ public class MainActivity extends ActionBarActivity {
                         } else {
                             d = key;
                         }
-                        d += ";" + car_id;
+                        d += ";" + car.id;
                     }
                     data.add("cars", d);
-                    String url = "https://api.shutoff.ru/reg";
+                    String url = "http://car-online.ugona.net/reg";
                     URL u = new URL(url);
                     connection = (HttpURLConnection) u.openConnection();
                     connection.setDoOutput(true);
@@ -882,6 +882,7 @@ public class MainActivity extends ActionBarActivity {
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putString(Names.GCM_ID, s);
                 ed.putLong(Names.GCM_TIME, new Date().getTime());
+                ed.putInt(Names.GCM_VERSION, VERSION);
                 ed.commit();
             }
 

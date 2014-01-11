@@ -340,20 +340,23 @@
     <string name="impulse">Control by impulse</string>
     <string name="brake_on">Hand brake on</string>
     <string name="brake_off">Hand brake off</string>
-    <string name="scan_mode">Scan mode</string>
-    <string-array name="scan_modes">
-        <item>Economy</item>
-        <item>Notification about guard</item>
-        <item>All notifications</item>
-    </string-array>
-    <string-array name="scan_modes_mode">
-        <item></item>
-        <item></item>
-        <item></item>
-    </string-array>
     <string name="ps_guard">Guard with passengers is ON</string>
     <string name="time_warning">Long time no events from car</string>
     <string name="demo">Demo mode</string>
     <string name="demo_msg">Application is now running in demo mode</string>
     <string name="gsm_new">GSM sector changed</string>
+    <string name="trace_point">Trace point</string>
+    <string name="nondigits">Code is non digits</string>
+    <string name="shock_sensor">Shock sensor</string>
+    <string-array name="shock_entries">
+        <item>Enable all shocks</item>
+        <item>Disable light shock</item>
+        <item>Disable all shocks</item>
+    </string-array>
+    <string-array name="shock_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string name="motor_time">after $1 min</string>
 </resources>

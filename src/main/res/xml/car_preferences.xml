@@ -40,6 +40,12 @@
         android:max="5"
         android:defaultValue="5" />
 
+    <ListPreference
+        android:title="@string/shock_sensor"
+        android:key="shock"
+        android:entries="@array/shock_entries"
+        android:entryValues="@array/shock_values" />
+
     <Preference
         android:title="@string/timer"
         android:summary="@string/timer_sum"
@@ -69,10 +75,6 @@
     <CheckBoxPreference
         android:title="@string/show_photo"
         android:key="show_photo" />
-
-    <Preference
-        android:title="@string/scan_mode"
-        android:key="scan" />
 
     <Preference
         android:title="@string/alarm_sound"

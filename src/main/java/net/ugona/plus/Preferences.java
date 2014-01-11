@@ -36,11 +36,17 @@ public class Preferences {
     }
 
     static String getTemperature(SharedPreferences preferences, String car_id, int sensor) {
-        int v = preferences.getInt(Names.TEMP + sensor + "_" + car_id, -100);
-        if (v <= -100)
+        String[] data = preferences.getString(Names.TEMPERATURE + car_id, "").split(";");
+        if (sensor > data.length)
             return null;
-        v += preferences.getInt(Names.TEMP_SIFT + car_id, 0);
-        return v + " \u00B0C";
+        try {
+            String[] d = data[sensor - 1].split(":");
+            int v = Integer.parseInt(d[1]) + preferences.getInt(Names.TEMP_SIFT + car_id, 0);
+            return v + " \u00B0C";
+        } catch (Exception ex) {
+            // ignore
+        }
+        return null;
     }
 
     static boolean getRele(SharedPreferences preferences, String car_id) {
