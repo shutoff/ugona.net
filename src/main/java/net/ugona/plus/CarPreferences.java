@@ -55,7 +55,7 @@ public class CarPreferences extends PreferenceActivity {
     Preference notifyPref;
     Preference alarmPref;
     Preference mainPref;
-    Preference limitPref;
+    ListPreference limitPref;
     SeekBarPreference sensPref;
     CheckBoxPreference photoPref;
     ListPreference shockPref;
@@ -73,9 +73,9 @@ public class CarPreferences extends PreferenceActivity {
     private static final int GET_ALARM_SOUND = 3008;
     private static final int GET_NOTIFY_SOUND = 3009;
 
-    final static String URL_KEY = "http://car-online.ugona.net/key?login=$1&password=$2";
-    final static String URL_PROFILE = "http://car-online.ugona.net/version?skey=$1";
-    final static String URL_PHOTOS = "http://car-online.ugona.net/photos?skey=$1&begin=$2";
+    final static String URL_KEY = "https://car-online.ugona.net/key?login=$1&password=$2";
+    final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
+    final static String URL_PHOTOS = "https://car-online.ugona.net/photos?skey=$1&begin=$2";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -309,15 +309,22 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
 
-        limitPref = findPreference("balance_limit");
+        limitPref = (ListPreference) findPreference("balance_limit");
         limitPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
+                final String v = newValue.toString();
+                CharSequence[] values = limitPref.getEntryValues();
+                for (int i = 0; i < values.length; i++) {
+                    if (v.equals(values[i])) {
+                        limitPref.setSummary(limitPref.getEntries()[i]);
+                        break;
+                    }
+                }
                 try {
                     SharedPreferences.Editor ed = preferences.edit();
-                    ed.putInt(Names.LIMIT + car_id, Integer.parseInt(newValue.toString()));
+                    ed.putInt(Names.LIMIT + car_id, Integer.parseInt(v));
                     ed.commit();
-                    setBalance();
                     sendUpdate();
                 } catch (Exception ex) {
                     // ignore
@@ -325,7 +332,7 @@ public class CarPreferences extends PreferenceActivity {
                 return true;
             }
         });
-        setBalance();
+        limitPref.setSummary(limitPref.getEntry());
 
         Preference testPref = findPreference("alarm_test");
         testPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -507,19 +514,6 @@ public class CarPreferences extends PreferenceActivity {
         sensPref.setEnabled(ok);
         shockPref.setEnabled(ok);
         mainPref.setEnabled(ok);
-    }
-
-    void setBalance() {
-        try {
-            int v = preferences.getInt(Names.LIMIT + car_id, 50);
-            if (v < 0) {
-                limitPref.setSummary(getResources().getStringArray(R.array.balance_limit)[0]);
-            } else {
-                limitPref.setSummary(v + "");
-            }
-        } catch (Exception ex) {
-            // ignore
-        }
     }
 
     void smsMode() {

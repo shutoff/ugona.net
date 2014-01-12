@@ -41,8 +41,8 @@ import java.util.Vector;
 public class EventsFragment extends Fragment
         implements MainActivity.DateChangeListener {
 
-    final static String URL_EVENTS = "http://car-online.ugona.net/events?skey=$1&begin=$2&end=$3&first=$4&pointer=$5";
-    final static String URL_EVENT = "http://car-online.ugona.net/event?skey=$1&id=$2&time=$3";
+    final static String URL_EVENTS = "https://car-online.ugona.net/events?skey=$1&begin=$2&end=$3&first=$4&pointer=$5";
+    final static String URL_EVENT = "https://car-online.ugona.net/event?skey=$1&id=$2&time=$3";
 
     String car_id;
     String api_key;

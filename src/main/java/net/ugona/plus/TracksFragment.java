@@ -67,7 +67,7 @@ public class TracksFragment extends Fragment
 
     BroadcastReceiver br;
 
-    final static String URL_TRACKS = "http://car-online.ugona.net/tracks?skey=$1&begin=$2&end=$3";
+    final static String URL_TRACKS = "https://car-online.ugona.net/tracks?skey=$1&begin=$2&end=$3";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

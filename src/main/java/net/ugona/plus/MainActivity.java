@@ -835,7 +835,7 @@ public class MainActivity extends ActionBarActivity {
                         d += ";" + car.id;
                     }
                     data.add("cars", d);
-                    String url = "http://car-online.ugona.net/reg";
+                    String url = "https://car-online.ugona.net/reg";
                     URL u = new URL(url);
                     connection = (HttpURLConnection) u.openConnection();
                     connection.setDoOutput(true);

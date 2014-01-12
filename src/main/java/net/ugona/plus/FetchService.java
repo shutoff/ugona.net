@@ -49,7 +49,7 @@ public class FetchService extends Service {
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR";
     static final String ACTION_RELE = "net.ugona.plus.RELE";
 
-    static final String URL_STATUS = "http://car-online.ugona.net/?skey=$1&time=$2";
+    static final String URL_STATUS = "https://car-online.ugona.net/?skey=$1&time=$2";
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -382,18 +382,34 @@ public class FetchService extends Service {
             JsonValue az = res.get("az");
             if (az != null)
                 ed.putBoolean(Names.AZ + car_id, az.asBoolean());
-            az = res.get("az_start");
-            if (az != null)
-                ed.putLong(Names.AZ_START + car_id, az.asLong());
-            az = res.get("az_stop");
-            if (az != null)
-                ed.putLong(Names.AZ_STOP + car_id, az.asLong());
-
-            ed.putBoolean(Names.GUARD0 + car_id, true);
-            ed.putBoolean(Names.GUARD1 + car_id, true);
-            ed.putBoolean(Names.AZ + car_id, true);
+            JsonValue azStart = res.get("az_start");
+            if (azStart != null)
+                ed.putLong(Names.AZ_START + car_id, azStart.asLong());
+            JsonValue azStop = res.get("az_stop");
+            if (azStop != null)
+                ed.putLong(Names.AZ_STOP + car_id, azStop.asLong());
 
             ed.commit();
+
+            if (preferences.getLong(Names.RELE_START + car_id, 0) != 0) {
+                boolean ignition = preferences.getBoolean(Names.ZONE_IGNITION + car_id, false);
+                if (preferences.getBoolean(Names.INPUT3 + car_id, false))
+                    ignition = true;
+                if (az != null)
+                    ignition = true;
+                if (ignition) {
+                    ed.remove(Names.RELE_START + car_id);
+                    ed.commit();
+                }
+            }
+            if (preferences.getBoolean(Names.AZ + car_id, false)) {
+                long start = preferences.getLong(Names.AZ_START + car_id, 0);
+                if (start < time.asLong() - 30 * 60 * 1000) {
+                    ed.putBoolean(Names.AZ + car_id, false);
+                    ed.commit();
+                }
+            }
+
             sendUpdate(ACTION_UPDATE, car_id);
 
             if (contact_value != null) {
@@ -433,12 +449,21 @@ public class FetchService extends Service {
             }
 
             if (az != null) {
+                boolean processed = false;
                 if (az.asBoolean()) {
-                    SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_on);
+                    processed = SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_on);
                     SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_off);
                 } else {
-                    SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_off);
+                    processed = SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_off);
                     SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_on);
+                }
+                if (!processed &&
+                        ((preferences.getInt(Names.MOTOR_ON_NOTIFY, 0) != 0) || (preferences.getInt(Names.MOTOR_OFF_NOTIFY, 0) != 0))) {
+                    if (az.asBoolean()) {
+                        Actions.done_motor_on(FetchService.this, car_id);
+                    } else {
+                        Actions.done_motor_off(FetchService.this, car_id);
+                    }
                 }
             }
 
@@ -455,6 +480,8 @@ public class FetchService extends Service {
                     ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
                     ed.commit();
                 }
+                SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_on);
+                SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_off);
             }
 
             if (preferences.getBoolean(Names.POINTER + car_id, false)) {

@@ -47,8 +47,8 @@ public class PhotoFragment extends Fragment
 
     final static String ROTATE = "net.ugona.plus.ROTATE";
 
-    final static String URL_PHOTOS = "http://car-online.ugona.net/photos?skey=$1&begin=$2&end=$3";
-    final static String URL_PHOTO = "http://car-online.ugona.net/photo?skey=";
+    final static String URL_PHOTOS = "https://car-online.ugona.net/photos?skey=$1&begin=$2&end=$3";
+    final static String URL_PHOTO = "https://car-online.ugona.net/photo?skey=";
 
     final static String DATE = "date";
 
