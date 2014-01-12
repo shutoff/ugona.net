@@ -54,14 +54,15 @@ public class CarDrawable {
             R.drawable.trunk_blue_open,     // 21
             R.drawable.trunk_red_open,      // 22
             R.drawable.engine1,             // 23
-            R.drawable.ignition,            // 24
-            R.drawable.ignition_red,        // 25
-            R.drawable.lock_white,          // 26
-            R.drawable.lock_white_widget,   // 27
-            R.drawable.lock_blue,           // 28
-            R.drawable.lock_blue_widget,    // 29
-            R.drawable.valet,               // 30
-            R.drawable.block,               // 31
+            R.drawable.engine1_blue,        // 24
+            R.drawable.ignition,            // 25
+            R.drawable.ignition_red,        // 26
+            R.drawable.lock_white,          // 27
+            R.drawable.lock_white_widget,   // 28
+            R.drawable.lock_blue,           // 29
+            R.drawable.lock_blue_widget,    // 30
+            R.drawable.valet,               // 31
+            R.drawable.block,               // 32
     };
 
     private boolean update(Context ctx, String car_id, boolean engine, boolean big) {
@@ -112,23 +113,27 @@ public class CarDrawable {
             upd |= setModeOpen(2, !white, trunk_open, trunk_alarm);
 
             boolean az = preferences.getBoolean(Names.AZ + car_id, false);
-            upd |= setLayer(4, (az && engine) ? 23 : 0);
+            if (az && engine) {
+                upd |= setLayer(4, white ? 24 : 23);
+            } else {
+                upd |= setLayer(4, 0);
+            }
 
             int ignition_id = 0;
             if (!az && (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false)))
-                ignition_id = guard ? 25 : 24;
+                ignition_id = guard ? 26 : 26;
             upd |= setLayer(5, ignition_id);
 
             int state = 0;
             if (guard) {
-                state = white ? 28 : 26;
+                state = white ? 29 : 27;
                 if (!big)
                     state++;
             }
             if (guard0 && !guard1)
-                state = 30;
-            if (!guard0 && guard1)
                 state = 31;
+            if (!guard0 && guard1)
+                state = 32;
             upd |= setLayer(6, state);
         }
         return upd;

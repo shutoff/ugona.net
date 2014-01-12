@@ -890,11 +890,16 @@ public class MainActivity extends ActionBarActivity {
     }
 
     boolean checkPlayServices() {
+        if (preferences.getBoolean(Names.NO_GOOGLE, false))
+            return false;
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
         if (resultCode != ConnectionResult.SUCCESS) {
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
                 GooglePlayServicesUtil.getErrorDialog(resultCode, this,
                         PLAY_SERVICES_RESOLUTION_REQUEST).show();
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putBoolean(Names.NO_GOOGLE, true);
+                ed.commit();
             }
             return false;
         }

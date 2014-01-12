@@ -246,6 +246,15 @@ public class FetchService extends Service {
 
             JsonValue time = res.get("time");
             if (time == null) {
+                if (SmsMonitor.haveProcessed(car_id)) {
+                    Intent iUpdate = new Intent(FetchService.this, FetchService.class);
+                    iUpdate.setAction(ACTION_UPDATE);
+                    iUpdate.putExtra(Names.ID, car_id);
+                    Uri data = Uri.withAppendedPath(Uri.parse("http://service/update/"), car_id);
+                    iUpdate.setData(data);
+                    PendingIntent pi = PendingIntent.getService(FetchService.this, 0, iUpdate, 0);
+                    alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + SCAN_TIMEOUT, pi);
+                }
                 sendUpdate(ACTION_NOUPDATE, car_id);
                 return;
             }
@@ -379,6 +388,10 @@ public class FetchService extends Service {
             az = res.get("az_stop");
             if (az != null)
                 ed.putLong(Names.AZ_STOP + car_id, az.asLong());
+
+            ed.putBoolean(Names.GUARD0 + car_id, true);
+            ed.putBoolean(Names.GUARD1 + car_id, true);
+            ed.putBoolean(Names.AZ + car_id, true);
 
             ed.commit();
             sendUpdate(ACTION_UPDATE, car_id);
