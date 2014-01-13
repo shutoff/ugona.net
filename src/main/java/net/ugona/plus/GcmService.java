@@ -22,7 +22,7 @@ public class GcmService extends IntentService {
         if ((extras != null) && GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             String car_id = Preferences.getCar(preferences, extras.getString(Names.ID));
-            State.appendLog("GCM: " + car_id);
+//            State.appendLog("GCM: " + car_id);
             Intent i = new Intent(this, FetchService.class);
             i.putExtra(Names.ID, car_id);
             startService(i);

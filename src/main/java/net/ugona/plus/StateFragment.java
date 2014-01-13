@@ -359,23 +359,29 @@ public class StateFragment extends Fragment
         }
         tvAddress3.setText(addr);
 
+        String balance = preferences.getString(Names.BALANCE + car_id, "");
+        if (!balance.equals("") && preferences.getBoolean(Names.SHOW_BALANCE + car_id, true)) {
+            tvBalance.setText(balance);
+            int balance_limit = preferences.getInt(Names.LIMIT + car_id, 50);
+            tvBalance.setTextColor(getResources().getColor(android.R.color.secondary_text_dark));
+            if (balance_limit >= 0) {
+                try {
+                    double b = Double.parseDouble(balance);
+                    if (b <= balance_limit)
+                        tvBalance.setTextColor(getResources().getColor(R.color.error));
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+            balanceBlock.setVisibility(View.VISIBLE);
+        } else {
+            balanceBlock.setVisibility(View.GONE);
+        }
+
         if (pointer)
             return;
 
         tvReserve.setText(preferences.getString(Names.VOLTAGE_RESERVED + car_id, "?") + " V");
-        tvBalance.setText(preferences.getString(Names.BALANCE + car_id, "?"));
-
-        int balance_limit = preferences.getInt(Names.LIMIT + car_id, 50);
-        tvBalance.setTextColor(getResources().getColor(android.R.color.secondary_text_dark));
-        if (balance_limit >= 0) {
-            try {
-                double balance = Double.parseDouble(preferences.getString(Names.BALANCE + car_id, "?"));
-                if (balance <= balance_limit)
-                    tvBalance.setTextColor(getResources().getColor(R.color.error));
-            } catch (Exception ex) {
-                // ignore
-            }
-        }
 
         String temperature = Preferences.getTemperature(preferences, car_id, 1);
         if (temperature == null) {
@@ -482,8 +488,6 @@ public class StateFragment extends Fragment
         } else {
             vPhone.setVisibility(View.GONE);
         }
-
-        balanceBlock.setVisibility(preferences.getBoolean(Names.SHOW_BALANCE + car_id, true) ? View.VISIBLE : View.GONE);
 
         if (az) {
             if (preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false)) {
