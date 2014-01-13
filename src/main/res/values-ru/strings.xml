@@ -337,4 +337,5 @@
         <item>уведомлять об охране с пассажирами</item>
     </string-array>
     <string name="guard_notify">Уведомления об охране</string>
+    <string name="pointer_voltage">Низкий уровень заряда батарейки в маяке</string>
 </resources>

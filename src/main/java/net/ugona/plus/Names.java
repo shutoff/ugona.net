@@ -128,6 +128,7 @@ public final class Names {
 
     static final String VALET_ON_NOTIFY = "valet_on_notify_";
     static final String VALET_OFF_NOTIFY = "valet_off_notify_";
+    static final String VOLTAGE_NOTIFY = "voltage_notify_";
 
     static final String NO_GOOGLE = "no_google";
     static final String GUARD_MODE = "guard_mode_";

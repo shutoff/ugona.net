@@ -303,15 +303,17 @@ public class EventsFragment extends Fragment
             v.findViewById(R.id.contacts).setVisibility(View.GONE);
             v.findViewById(R.id.system).setVisibility(View.GONE);
             View vLogo = v.findViewById(R.id.logo);
-            vLogo.setVisibility(View.VISIBLE);
-            vLogo.setClickable(true);
-            vLogo.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(getActivity(), About.class);
-                    startActivity(intent);
-                }
-            });
+            if (vLogo != null) {
+                vLogo.setVisibility(View.VISIBLE);
+                vLogo.setClickable(true);
+                vLogo.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getActivity(), About.class);
+                        startActivity(intent);
+                    }
+                });
+            }
         } else {
             filter = preferences.getInt(FILTER, 3);
             setupButton(v, R.id.actions, 1);

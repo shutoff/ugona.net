@@ -71,6 +71,7 @@ public abstract class HttpTask {
                 } catch (Exception ex) {
                     error_text = ex.getMessage();
                     ex.printStackTrace();
+                    State.print(ex);
                 } finally {
                     if (connection != null)
                         connection.disconnect();

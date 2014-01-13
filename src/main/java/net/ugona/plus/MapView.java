@@ -114,7 +114,10 @@ public class MapView extends WebViewActivity {
                 }
                 data += name + "<br/>";
             }
+
             long last_stand = preferences.getLong(Names.LAST_STAND + id, 0);
+            if (preferences.getBoolean(Names.POINTER + car_id, false))
+                last_stand = preferences.getLong(Names.EVENT_TIME + id, 0);
             if (last_stand > 0) {
                 LocalDateTime stand = new LocalDateTime(last_stand);
                 LocalDateTime now = new LocalDateTime();

@@ -331,6 +331,18 @@ public class FetchService extends Service {
                 ed.putFloat(Names.SPEED + car_id, gps.get("speed").asFloat());
                 if (gps_valid)
                     ed.putInt(Names.COURSE + car_id, gps.get("course").asInt());
+            } else {
+                JsonValue gsm_value = res.get("gsm");
+                if (gsm_value != null) {
+                    JsonObject gsm = gsm_value.asObject();
+                    String gsm_str = gsm.get("cc").asInt() + " ";
+                    gsm_str += gsm.get("nc").asInt() + " ";
+                    gsm_str += gsm.get("lac").asInt() + " ";
+                    gsm_str += gsm.get("cid").asInt();
+                    ed.putString(Names.GSM + car_id, gsm_str);
+                    ed.remove(Names.LAT + car_id);
+                    ed.remove(Names.LNG + car_id);
+                }
             }
 
             JsonValue temp_value = res.get("temperature");
@@ -513,7 +525,6 @@ public class FetchService extends Service {
                 long now = new Date().getTime();
                 boolean new_state = ((now - time.asLong()) > 25 * 60 * 60 * 1000);
                 if (new_state != preferences.getBoolean(Names.TIMEOUT + car_id, false)) {
-                    SharedPreferences.Editor ed = preferences.edit();
                     ed.putBoolean(Names.TIMEOUT + car_id, new_state);
                     int timeout_id = preferences.getInt(Names.TIMEOUT_NOTIFICATION + car_id, 0);
                     try {
@@ -521,11 +532,13 @@ public class FetchService extends Service {
                             if (timeout_id == 0) {
                                 timeout_id = Alarm.createNotification(FetchService.this, getString(R.string.timeout), R.drawable.warning, car_id, null);
                                 ed.putInt(Names.TIMEOUT_NOTIFICATION + car_id, timeout_id);
+                                ed.commit();
                             }
                         } else {
                             if (timeout_id > 0) {
                                 Alarm.removeNotification(FetchService.this, car_id, timeout_id);
                                 ed.remove(Names.TIMEOUT_NOTIFICATION + car_id);
+                                ed.commit();
                             }
                         }
                     } catch (Exception ex) {
@@ -533,12 +546,26 @@ public class FetchService extends Service {
                     }
                     ed.commit();
                 }
+                double voltage = Double.parseDouble(preferences.getString(Names.VOLTAGE_MAIN + car_id, ""));
+                int voltage_id = preferences.getInt(Names.VOLTAGE_NOTIFY + car_id, 0);
+                if (voltage_id != 0) {
+                    Alarm.removeNotification(FetchService.this, car_id, voltage_id);
+                    ed.remove(Names.VOLTAGE_NOTIFY + car_id);
+                    ed.commit();
+                }
+                try {
+                    if (voltage < 2.5) {
+                        voltage_id = Alarm.createNotification(FetchService.this, getString(R.string.timeout), R.drawable.warning, car_id, null);
+                        ed.putInt(Names.VOLTAGE_NOTIFY + car_id, voltage_id);
+                        ed.commit();
+                    }
+                } catch (Exception ex) {
+                    // ignore
+                }
             }
         }
 
 /*
-
-                boolean gsm_req = true;
 
                 boolean sms_alarm = preferences.getBoolean(Names.SMS_ALARM, false);
                 if (sms_alarm)

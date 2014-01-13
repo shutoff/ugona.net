@@ -898,6 +898,8 @@ public class CarPreferences extends PreferenceActivity {
         removePreference("tmp_shift");
         removePreference("cmd");
         removePreference("scan");
+        removePreference("shock");
+        removePreference("guard_mode");
     }
 
     void removePreference(String key) {

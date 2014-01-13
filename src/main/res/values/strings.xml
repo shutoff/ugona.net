@@ -370,4 +370,5 @@
         <item>About guard with passengers</item>
     </string-array>
     <string name="guard_notify">Guard notify</string>
+    <string name="pointer_voltage">Low pointer voltage</string>
 </resources>
