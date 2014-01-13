@@ -193,24 +193,25 @@ public class SmsMonitor extends BroadcastReceiver {
             "MOTOR OFF OK",
     };
 
-    static void processMessageFromApi(Context context, String car_id, int id) {
+    static boolean processMessageFromApi(Context context, String car_id, int id) {
         if (processed == null)
-            return;
+            return false;
         SmsQueues queues = processed.get(car_id);
         SmsQueue wait = queues.wait;
         if (wait == null)
-            return;
+            return false;
         if (!wait.containsKey(id))
-            return;
+            return false;
         Sms sms = wait.get(id);
         if (!sms.process_answer(context, car_id, null))
-            return;
+            return false;
         wait.remove(id);
         Intent i = new Intent(SMS_ANSWER);
         i.putExtra(Names.ANSWER, Activity.RESULT_OK);
         i.putExtra(Names.SMS_TEXT, sms.answer);
         i.putExtra(Names.ID, car_id);
         context.sendBroadcast(i);
+        return true;
     }
 
     boolean processCarMessage(Context context, String body, String car_id) {
@@ -336,20 +337,24 @@ public class SmsMonitor extends BroadcastReceiver {
         return true;
     }
 
-    static void cancelSMS(Context context, String car_id, int id) {
+    static boolean cancelSMS(Context context, String car_id, int id) {
         if (processed == null)
-            return;
+            return false;
         SmsQueues queues = processed.get(car_id);
         if (queues == null)
-            return;
+            return false;
+        boolean result = false;
         if (queues.send != null)
-            queues.send.remove(id);
+            result = (queues.send.remove(id) != null);
         if (queues.wait != null)
-            queues.wait.remove(id);
+            result |= (queues.wait.remove(id) != null);
+        if (!result)
+            return false;
         Intent i = new Intent(SMS_ANSWER);
         i.putExtra(Names.ANSWER, Activity.RESULT_CANCELED);
         i.putExtra(Names.ID, car_id);
         context.sendBroadcast(i);
+        return true;
     }
 
     static boolean isProcessed(String car_id, int id) {

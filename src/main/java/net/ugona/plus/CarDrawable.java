@@ -63,6 +63,8 @@ public class CarDrawable {
             R.drawable.lock_blue_widget,    // 30
             R.drawable.valet,               // 31
             R.drawable.block,               // 32
+            R.drawable.heater,              // 33
+            R.drawable.heater_blue,         // 34
     };
 
     private boolean update(Context ctx, String car_id, boolean engine, boolean big) {
@@ -115,13 +117,15 @@ public class CarDrawable {
             boolean az = preferences.getBoolean(Names.AZ + car_id, false);
             if (az && engine) {
                 upd |= setLayer(4, white ? 24 : 23);
+            } else if (Preferences.getRele(preferences, car_id)) {
+                upd |= setLayer(4, white ? 34 : 33);
             } else {
                 upd |= setLayer(4, 0);
             }
 
             int ignition_id = 0;
             if (!az && (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false)))
-                ignition_id = guard ? 26 : 26;
+                ignition_id = guard ? 26 : 25;
             upd |= setLayer(5, ignition_id);
 
             int state = 0;

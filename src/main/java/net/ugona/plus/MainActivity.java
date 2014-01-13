@@ -485,7 +485,11 @@ public class MainActivity extends ActionBarActivity {
         SharedPreferences.Editor ed = preferences.edit();
         ed.remove(Names.N_IDS + car_id);
         ed.remove(Names.BALANCE_NOTIFICATION + car_id);
-        ed.remove(Names.PS_NOTIFY + car_id);
+        ed.remove(Names.GUARD_NOTIFY + car_id);
+        ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
+        ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
+        ed.remove(Names.VALET_ON_NOTIFY + car_id);
+        ed.remove(Names.VALET_OFF_NOTIFY + car_id);
         ed.commit();
     }
 
@@ -835,7 +839,7 @@ public class MainActivity extends ActionBarActivity {
                         d += ";" + car.id;
                     }
                     data.add("cars", d);
-                    String url = "http://car-online.ugona.net/reg";
+                    String url = "https://car-online.ugona.net/reg";
                     URL u = new URL(url);
                     connection = (HttpURLConnection) u.openConnection();
                     connection.setDoOutput(true);
@@ -890,10 +894,10 @@ public class MainActivity extends ActionBarActivity {
     }
 
     boolean checkPlayServices() {
-        if (preferences.getBoolean(Names.NO_GOOGLE, false))
-            return false;
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
         if (resultCode != ConnectionResult.SUCCESS) {
+            if (preferences.getBoolean(Names.NO_GOOGLE, false))
+                return false;
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
                 GooglePlayServicesUtil.getErrorDialog(resultCode, this,
                         PLAY_SERVICES_RESOLUTION_REQUEST).show();

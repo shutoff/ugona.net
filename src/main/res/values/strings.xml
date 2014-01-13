@@ -293,10 +293,10 @@
     <string name="balance_notification">Balance notification</string>
     <string-array name="balance_limit">
         <item>no notify</item>
-        <item>less 50</item>
-        <item>less 100</item>
-        <item>less 200</item>
-        <item>less 300</item>
+        <item>less 50 rub</item>
+        <item>less 100 rub</item>
+        <item>less 200 rub</item>
+        <item>less 300 rub</item>
     </string-array>
     <string-array name="balance_values">
         <item>-1</item>
@@ -359,4 +359,15 @@
         <item>3</item>
     </string-array>
     <string name="motor_time">after $1 min</string>
+    <string-array name="guard_entries">
+        <item>none</item>
+        <item>all</item>
+        <item></item>
+    </string-array>
+    <string-array name="guard_values">
+        <item>No notify</item>
+        <item>All guard notification</item>
+        <item>About guard with passengers</item>
+    </string-array>
+    <string name="guard_notify">Guard notify</string>
 </resources>

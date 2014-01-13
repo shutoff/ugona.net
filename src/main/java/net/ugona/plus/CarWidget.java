@@ -40,7 +40,7 @@ public class CarWidget extends AppWidgetProvider {
     static Map<String, Integer> states;
     static Map<Integer, Integer> height_rows;
 
-    final static String URL_TRAFFIC = "http://car-online.ugona.net/level?lat=$1&lng=$2";
+    final static String URL_TRAFFIC = "https://car-online.ugona.net/level?lat=$1&lng=$2";
 
     final static int[] trafic_pict = {
             R.drawable.p0,
