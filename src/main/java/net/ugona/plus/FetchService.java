@@ -263,12 +263,14 @@ public class FetchService extends Service {
             JsonValue contact_value = res.get("contact");
             boolean gps_valid = false;
             boolean prev_valet = false;
-            boolean prev_ps = false;
+            int prev_guard_mode = 0;
             if (contact_value != null) {
                 JsonObject contact = contact_value.asObject();
                 boolean guard = contact.get("guard").asBoolean();
+                prev_guard_mode = guard ? 0 : 1;
                 prev_valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
-                prev_ps = preferences.getBoolean(Names.GUARD + car_id, false) && preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false);
+                if (guard && preferences.getBoolean(Names.GUARD + car_id, false) && preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false))
+                    prev_guard_mode = 2;
 
                 ed.putBoolean(Names.GUARD + car_id, guard);
                 ed.putBoolean(Names.INPUT1 + car_id, contact.get("input1").asBoolean());
@@ -416,21 +418,39 @@ public class FetchService extends Service {
                 boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
                 if (valet != prev_valet)
                     SmsMonitor.processMessageFromApi(FetchService.this, car_id, valet ? R.string.valet_on : R.string.valet_off);
-                boolean ps = preferences.getBoolean(Names.GUARD + car_id, false) && preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false);
-                if (ps != prev_ps) {
-                    int notify_id = preferences.getInt(Names.PS_NOTIFY + car_id, 0);
-                    if (ps) {
-                        if (notify_id == 0) {
-                            notify_id = Alarm.createNotification(FetchService.this, getString(R.string.ps_guard), R.drawable.warning, car_id, Uri.parse("android.resource://net.ugona.plus/raw/warning"));
-                            ed.putInt(Names.PS_NOTIFY + car_id, notify_id);
-                            ed.commit();
+
+                int guard_mode = preferences.getBoolean(Names.GUARD + car_id, false) ? 0 : 1;
+                if ((guard_mode == 0) && preferences.getBoolean(Names.GUARD + car_id, false) && preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false))
+                    guard_mode = 2;
+                if (guard_mode != prev_guard_mode) {
+                    State.appendLog("Change guard " + car_id + ", " + guard_mode + " " + prev_guard_mode);
+                    int notify_id = preferences.getInt(Names.GUARD_NOTIFY + car_id, 0);
+                    if (notify_id != 0) {
+                        Alarm.removeNotification(FetchService.this, car_id, notify_id);
+                        ed.remove(Names.GUARD_NOTIFY + car_id);
+                        ed.commit();
+                    }
+                    String guard_pref = preferences.getString(Names.GUARD_MODE + car_id, "");
+                    boolean notify = false;
+                    if (guard_pref.equals("")) {
+                        notify = (guard_mode == 2);
+                    } else if (guard_pref.equals("all")) {
+                        notify = true;
+                    }
+                    if (notify) {
+                        State.appendLog("Notify");
+                        int id = R.string.ps_guard;
+                        switch (guard_mode) {
+                            case 0:
+                                id = R.string.guard_on;
+                                break;
+                            case 1:
+                                id = R.string.guard_off;
+                                break;
                         }
-                    } else {
-                        if (notify_id > 0) {
-                            Alarm.removeNotification(FetchService.this, car_id, notify_id);
-                            ed.remove(Names.PS_NOTIFY + car_id);
-                            ed.commit();
-                        }
+                        notify_id = Alarm.createNotification(FetchService.this, getString(id), R.drawable.warning, car_id, Uri.parse("android.resource://net.ugona.plus/raw/warning"));
+                        ed.putInt(Names.GUARD_NOTIFY + car_id, notify_id);
+                        ed.commit();
                     }
                 }
             }
@@ -449,16 +469,20 @@ public class FetchService extends Service {
             }
 
             if (az != null) {
+                State.appendLog("AZ");
                 boolean processed = false;
                 if (az.asBoolean()) {
+                    State.appendLog("AZ on");
                     processed = SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_on);
                     SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_off);
                 } else {
+                    State.appendLog("AZ off");
                     processed = SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_off);
                     SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_on);
                 }
                 if (!processed &&
-                        ((preferences.getInt(Names.MOTOR_ON_NOTIFY, 0) != 0) || (preferences.getInt(Names.MOTOR_OFF_NOTIFY, 0) != 0))) {
+                        ((preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0) != 0) || (preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0) != 0))) {
+                    State.appendLog("AZ changed");
                     if (az.asBoolean()) {
                         Actions.done_motor_on(FetchService.this, car_id);
                     } else {
@@ -467,7 +491,7 @@ public class FetchService extends Service {
                 }
             }
 
-            if (!preferences.getBoolean(Names.GUARD, false)) {
+            if (!preferences.getBoolean(Names.GUARD + car_id, false)) {
                 int id = preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0);
                 if (id != 0) {
                     Alarm.removeNotification(FetchService.this, car_id, id);
@@ -612,8 +636,8 @@ public class FetchService extends Service {
         SharedPreferences.Editor ed = preferences.edit();
         if (id == preferences.getInt(Names.BALANCE_NOTIFICATION + car_id, 0))
             ed.remove(Names.BALANCE_NOTIFICATION + car_id);
-        if (id == preferences.getInt(Names.PS_NOTIFY + car_id, 0))
-            ed.remove(Names.PS_NOTIFY + car_id);
+        if (id == preferences.getInt(Names.GUARD_NOTIFY + car_id, 0))
+            ed.remove(Names.GUARD_NOTIFY + car_id);
         if (id == preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0))
             ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
         if (id == preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0))

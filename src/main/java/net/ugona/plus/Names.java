@@ -112,7 +112,7 @@ public final class Names {
     static final String RELAY3 = "relay3_";
     static final String RELAY4 = "relay4_";
 
-    static final String PS_NOTIFY = "ps_notify_";
+    static final String GUARD_NOTIFY = "ps_notify_";
     static final String TIME_NOTIFY = "time_notify_";
 
     static final String AZ = "az_";
@@ -130,5 +130,6 @@ public final class Names {
     static final String VALET_OFF_NOTIFY = "valet_off_notify_";
 
     static final String NO_GOOGLE = "no_google";
+    static final String GUARD_MODE = "guard_mode_";
 
 }

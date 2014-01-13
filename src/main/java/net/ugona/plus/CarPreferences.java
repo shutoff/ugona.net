@@ -59,6 +59,7 @@ public class CarPreferences extends PreferenceActivity {
     SeekBarPreference sensPref;
     CheckBoxPreference photoPref;
     ListPreference shockPref;
+    ListPreference guardPref;
     Preference relePref;
 
     String alarmUri;
@@ -105,6 +106,7 @@ public class CarPreferences extends PreferenceActivity {
         ed.putString("call_mode", preferences.getString(Names.ALARM_MODE + car_id, ""));
         ed.putString("balance_limit", preferences.getInt(Names.LIMIT + car_id, 50) + "");
         ed.putString("shock", preferences.getString(Names.SHOCK + car_id, "1"));
+        ed.putString("guard_mode", preferences.getString(Names.GUARD_MODE + car_id, ""));
         ed.commit();
 
         addPreferencesFromResource(R.xml.car_preferences);
@@ -333,6 +335,26 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
         limitPref.setSummary(limitPref.getEntry());
+
+        guardPref = (ListPreference) findPreference("guard_mode");
+        guardPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                final String v = newValue.toString();
+                CharSequence[] values = guardPref.getEntryValues();
+                for (int i = 0; i < values.length; i++) {
+                    if (v.equals(values[i])) {
+                        guardPref.setSummary(guardPref.getEntries()[i]);
+                        break;
+                    }
+                }
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putString(Names.GUARD_MODE + car_id, v);
+                ed.commit();
+                return true;
+            }
+        });
+        guardPref.setSummary(guardPref.getEntry());
 
         Preference testPref = findPreference("alarm_test");
         testPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {

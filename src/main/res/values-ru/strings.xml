@@ -331,4 +331,10 @@
         <item>Отключение датчика удара</item>
     </string-array>
     <string name="motor_time">после $1 мин</string>
+    <string-array name="guard_values">
+        <item>не уведомлять</item>
+        <item>уведомлять о постановке и снятии</item>
+        <item>уведомлять об охране с пассажирами</item>
+    </string-array>
+    <string name="guard_notify">Уведомления об охране</string>
 </resources>

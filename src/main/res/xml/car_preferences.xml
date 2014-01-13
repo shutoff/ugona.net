@@ -72,6 +72,12 @@
         android:entries="@array/balance_limit"
         android:entryValues="@array/balance_values" />
 
+    <ListPreference
+        android:title="@string/guard_notify"
+        android:key="guard_mode"
+        android:entries="@array/guard_values"
+        android:entryValues="@array/guard_entries" />
+
     <CheckBoxPreference
         android:title="@string/show_photo"
         android:key="show_photo" />

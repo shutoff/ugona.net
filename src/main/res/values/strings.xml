@@ -359,4 +359,15 @@
         <item>3</item>
     </string-array>
     <string name="motor_time">after $1 min</string>
+    <string-array name="guard_entries">
+        <item>none</item>
+        <item>all</item>
+        <item></item>
+    </string-array>
+    <string-array name="guard_values">
+        <item>No notify</item>
+        <item>All guard notification</item>
+        <item>About guard with passengers</item>
+    </string-array>
+    <string name="guard_notify">Guard notify</string>
 </resources>
