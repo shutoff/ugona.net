@@ -80,7 +80,7 @@ public class State {
         }
     }
 
-/*
+  /*
     static public void print(Throwable ex) {
         ex.printStackTrace();
         appendLog("Error: " + ex.toString());

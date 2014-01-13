@@ -292,14 +292,14 @@ public class FetchService extends Service {
 
                 long valet_time = preferences.getLong(Names.VALET_TIME + car_id, 0);
                 if (valet_time > 0) {
-                    if (valet_time + 30000 > new Date().getTime()) {
+                    if (valet_time + 30000 < new Date().getTime()) {
                         valet_time = 0;
                         ed.remove(Names.VALET_TIME + car_id);
                     }
                 }
                 long init_time = preferences.getLong(Names.INIT_TIME + car_id, 0);
                 if (init_time > 0) {
-                    if (init_time + 30000 > new Date().getTime()) {
+                    if (init_time + 30000 < new Date().getTime()) {
                         init_time = 0;
                         ed.remove(Names.INIT_TIME + car_id);
                     }
@@ -422,6 +422,7 @@ public class FetchService extends Service {
                 int guard_mode = preferences.getBoolean(Names.GUARD + car_id, false) ? 0 : 1;
                 if ((guard_mode == 0) && preferences.getBoolean(Names.GUARD + car_id, false) && preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false))
                     guard_mode = 2;
+                State.appendLog(car_id + ": = " + guard_mode + "," + prev_guard_mode);
                 if (guard_mode != prev_guard_mode) {
                     State.appendLog("Change guard " + car_id + ", " + guard_mode + " " + prev_guard_mode);
                     int notify_id = preferences.getInt(Names.GUARD_NOTIFY + car_id, 0);
