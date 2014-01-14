@@ -115,24 +115,31 @@ public class MapView extends WebViewActivity {
                 data += name + "<br/>";
             }
 
-            long last_stand = preferences.getLong(Names.LAST_STAND + id, 0);
-            if (preferences.getBoolean(Names.POINTER + car_id, false))
-                last_stand = preferences.getLong(Names.EVENT_TIME + id, 0);
-            if (last_stand > 0) {
-                LocalDateTime stand = new LocalDateTime(last_stand);
-                LocalDateTime now = new LocalDateTime();
-                data += "<b>";
-                if (stand.toLocalDate().equals(now.toLocalDate())) {
-                    data += tf.format(last_stand);
-                } else {
+            if (preferences.getBoolean(Names.POINTER + car_id, false)) {
+                long last_stand = preferences.getLong(Names.EVENT_TIME + id, 0);
+                if (last_stand > 0) {
+                    data += "<b>";
                     data += df.format(last_stand) + " " + tf.format(last_stand);
+                    data += "</b> ";
                 }
-                data += "</b> ";
-            } else if (last_stand < 0) {
-                double speed = preferences.getFloat(Names.SPEED + id, 0);
-                if (speed > 0) {
-                    data += String.format(getString(R.string.speed, speed));
-                    data += "<br/>";
+            } else {
+                long last_stand = preferences.getLong(Names.LAST_STAND + id, 0);
+                if (last_stand > 0) {
+                    LocalDateTime stand = new LocalDateTime(last_stand);
+                    LocalDateTime now = new LocalDateTime();
+                    data += "<b>";
+                    if (stand.toLocalDate().equals(now.toLocalDate())) {
+                        data += tf.format(last_stand);
+                    } else {
+                        data += df.format(last_stand) + " " + tf.format(last_stand);
+                    }
+                    data += "</b> ";
+                } else if (last_stand < 0) {
+                    double speed = preferences.getFloat(Names.SPEED + id, 0);
+                    if (speed > 0) {
+                        data += String.format(getString(R.string.speed, speed));
+                        data += "<br/>";
+                    }
                 }
             }
             if (zone.equals("")) {

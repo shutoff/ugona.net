@@ -10,9 +10,11 @@
     padding: 0;
     height: 100%;
     }
+    .infobox{
+    padding-bottom: 30px;
+    }
 </style>
 <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true"></script>
-<script src="../../../../../android.js"></script>
 <script>
 
 var map;
@@ -314,7 +316,7 @@ function update() {
                     map: map
                 });
                 var info = new google.maps.InfoWindow({
-                    content: text
+                    content: '<div style="height: 200px">' + text + '</div>'
                 });
                 google.maps.event.addListener(marker, 'click', function(){
                     info.open(map, marker);
@@ -382,6 +384,7 @@ function center() {
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
+
 
 
 

@@ -267,9 +267,9 @@ public class FetchService extends Service {
             if (contact_value != null) {
                 JsonObject contact = contact_value.asObject();
                 boolean guard = contact.get("guard").asBoolean();
-                prev_guard_mode = guard ? 0 : 1;
+                prev_guard_mode = preferences.getBoolean(Names.GUARD + car_id, false) ? 0 : 1;
                 prev_valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
-                if (guard && preferences.getBoolean(Names.GUARD + car_id, false) && preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false))
+                if (guard && preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false))
                     prev_guard_mode = 2;
 
                 ed.putBoolean(Names.GUARD + car_id, guard);
@@ -284,6 +284,7 @@ public class FetchService extends Service {
                 ed.putBoolean(Names.RELAY3 + car_id, contact.get("relay3").asBoolean());
                 ed.putBoolean(Names.RELAY4 + car_id, contact.get("relay4").asBoolean());
                 ed.putBoolean(Names.ENGINE + car_id, contact.get("engine").asBoolean());
+
                 setState(Names.ZONE_DOOR, contact, "door", 3);
                 setState(Names.ZONE_HOOD, contact, "hood", 2);
                 setState(Names.ZONE_TRUNK, contact, "trunk", 1);
@@ -427,16 +428,10 @@ public class FetchService extends Service {
             sendUpdate(ACTION_UPDATE, car_id);
 
             if (contact_value != null) {
-                boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
-                if (valet != prev_valet)
-                    SmsMonitor.processMessageFromApi(FetchService.this, car_id, valet ? R.string.valet_on : R.string.valet_off);
-
                 int guard_mode = preferences.getBoolean(Names.GUARD + car_id, false) ? 0 : 1;
                 if ((guard_mode == 0) && preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false))
                     guard_mode = 2;
-                State.appendLog(car_id + ": = " + guard_mode + "," + prev_guard_mode);
                 if (guard_mode != prev_guard_mode) {
-                    State.appendLog("Change guard " + car_id + ", " + guard_mode + " " + prev_guard_mode);
                     int notify_id = preferences.getInt(Names.GUARD_NOTIFY + car_id, 0);
                     if (notify_id != 0) {
                         Alarm.removeNotification(FetchService.this, car_id, notify_id);
@@ -451,7 +446,6 @@ public class FetchService extends Service {
                         notify = true;
                     }
                     if (notify) {
-                        State.appendLog("Notify");
                         int id = R.string.ps_guard;
                         switch (guard_mode) {
                             case 0:
@@ -466,6 +460,9 @@ public class FetchService extends Service {
                         ed.commit();
                     }
                 }
+                boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
+                if (valet != prev_valet)
+                    SmsMonitor.processMessageFromApi(FetchService.this, car_id, valet ? R.string.valet_on : R.string.valet_off);
             }
 
             if (balance_value != null)
@@ -482,20 +479,16 @@ public class FetchService extends Service {
             }
 
             if (az != null) {
-                State.appendLog("AZ");
                 boolean processed = false;
                 if (az.asBoolean()) {
-                    State.appendLog("AZ on");
                     processed = SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_on);
                     SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_off);
                 } else {
-                    State.appendLog("AZ off");
                     processed = SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_off);
                     SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_on);
                 }
                 if (!processed &&
                         ((preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0) != 0) || (preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0) != 0))) {
-                    State.appendLog("AZ changed");
                     if (az.asBoolean()) {
                         Actions.done_motor_on(FetchService.this, car_id);
                     } else {
