@@ -1,6 +1,8 @@
 package net.ugona.plus;
 
 import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -14,6 +16,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
@@ -48,6 +51,7 @@ public class FetchService extends Service {
     static final String ACTION_UPDATE_FORCE = "net.ugona.plus.UPDATE_FORCE";
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR";
     static final String ACTION_RELE = "net.ugona.plus.RELE";
+    static final String ACTION_NOTIFICATION = "net.ugona.plus.NOTIFICATION";
 
     static final String URL_STATUS = "https://car-online.ugona.net/?skey=$1&time=$2";
 
@@ -99,6 +103,58 @@ public class FetchService extends Service {
                 }
                 if (action.equals(ACTION_RELE)) {
                     Actions.rele_timeout(this);
+                }
+                if (action.equals(ACTION_NOTIFICATION)) {
+                    String title = getString(R.string.app_name);
+                    String[] cars = preferences.getString(Names.CARS, "").split(",");
+                    if (cars.length > 1) {
+                        title = preferences.getString(Names.CAR_NAME + car_id, "");
+                        if (title.length() == 0) {
+                            title = getString(R.string.car);
+                            if (car_id.length() > 0)
+                                title += " " + car_id;
+                        }
+                    }
+
+                    String sound = intent.getStringExtra(Names.NOTIFY);
+                    String text = intent.getStringExtra(Names.TITLE);
+                    int pictId = intent.getIntExtra(Names.ALARM, 0);
+                    int max_id = intent.getIntExtra(Names.EVENT_ID, 0);
+
+                    int defs = Notification.DEFAULT_LIGHTS + Notification.DEFAULT_VIBRATE;
+                    if (sound == null)
+                        defs |= Notification.DEFAULT_SOUND;
+                    NotificationCompat.Builder builder =
+                            new NotificationCompat.Builder(this)
+                                    .setDefaults(defs)
+                                    .setSmallIcon(pictId)
+                                    .setContentTitle(title)
+                                    .setContentText(text);
+                    if (sound != null)
+                        builder.setSound(Uri.parse("android.resource://net.ugona.plus/raw/" + sound));
+
+                    Intent notificationIntent = new Intent(this, MainActivity.class);
+                    notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    notificationIntent.putExtra(Names.ID, car_id);
+                    Uri data = Uri.withAppendedPath(Uri.parse("http://notification/id/"), car_id);
+                    notificationIntent.setData(data);
+                    PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+                            PendingIntent.FLAG_UPDATE_CURRENT);
+                    builder.setContentIntent(contentIntent);
+
+                    Intent clearIntent = new Intent(this, FetchService.class);
+                    clearIntent.setAction(FetchService.ACTION_CLEAR);
+                    clearIntent.putExtra(Names.ID, car_id);
+                    clearIntent.putExtra(Names.NOTIFY, max_id);
+                    data = Uri.withAppendedPath(Uri.parse("http://notification_clear/id/"), max_id + "");
+                    clearIntent.setData(data);
+                    PendingIntent deleteIntent = PendingIntent.getService(this, 0, clearIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    builder.setDeleteIntent(deleteIntent);
+
+                    // Add as notification
+                    NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    manager.notify(max_id, builder.build());
                 }
             }
             if (car_id != null)
@@ -447,15 +503,18 @@ public class FetchService extends Service {
                     }
                     if (notify) {
                         int id = R.string.ps_guard;
+                        String sound = "warning";
                         switch (guard_mode) {
                             case 0:
                                 id = R.string.guard_on;
+                                sound = "guard_on";
                                 break;
                             case 1:
                                 id = R.string.guard_off;
+                                sound = "guard_off";
                                 break;
                         }
-                        notify_id = Alarm.createNotification(FetchService.this, getString(id), R.drawable.warning, car_id, Uri.parse("android.resource://net.ugona.plus/raw/warning"));
+                        notify_id = Alarm.createNotification(FetchService.this, getString(id), R.drawable.warning, car_id, sound);
                         ed.putInt(Names.GUARD_NOTIFY + car_id, notify_id);
                         ed.commit();
                     }

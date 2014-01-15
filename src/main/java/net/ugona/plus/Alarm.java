@@ -1,7 +1,7 @@
 package net.ugona.plus;
 
 import android.app.Activity;
-import android.app.Notification;
+import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
@@ -22,7 +22,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
-import android.support.v4.app.NotificationCompat;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -246,43 +245,11 @@ public class Alarm extends Activity {
         createNotification(context, text, R.drawable.warning, car_id, null);
     }
 
-    static int createNotification(Context context, String text, int pictId, String car_id, Uri sound) {
+    static int createNotification(Context context, String text, int pictId, String car_id, String sound) {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String title = context.getString(R.string.app_name);
-        String[] cars = preferences.getString(Names.CARS, "").split(",");
-        if (cars.length > 1) {
-            title = preferences.getString(Names.CAR_NAME + car_id, "");
-            if (title.length() == 0) {
-                title = context.getString(R.string.car);
-                if (car_id.length() > 0)
-                    title += " " + car_id;
-            }
-        }
-
-        int defs = Notification.DEFAULT_LIGHTS + Notification.DEFAULT_VIBRATE;
-        if (sound == null)
-            defs |= Notification.DEFAULT_SOUND;
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(context)
-                        .setDefaults(defs)
-                        .setSmallIcon(pictId)
-                        .setContentTitle(title)
-                        .setContentText(text);
-        if (sound != null)
-            builder.setSound(sound);
-
-        Intent notificationIntent = new Intent(context, MainActivity.class);
-        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        notificationIntent.putExtra(Names.ID, car_id);
-        Uri data = Uri.withAppendedPath(Uri.parse("http://notification/id/"), car_id);
-        notificationIntent.setData(data);
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(contentIntent);
-
         int max_id = 0;
+        String[] cars = preferences.getString(Names.CARS, "").split(",");
         for (String id : cars) {
             String[] ids = preferences.getString(Names.N_IDS + id, "").split(",");
             for (String n_ids : ids) {
@@ -296,7 +263,6 @@ public class Alarm extends Activity {
             }
         }
         max_id++;
-
         SharedPreferences.Editor ed = preferences.edit();
         String s = preferences.getString(Names.N_IDS + car_id, "");
         if (!s.equals(""))
@@ -305,18 +271,20 @@ public class Alarm extends Activity {
         ed.putString(Names.N_IDS + car_id, s);
         ed.commit();
 
-        Intent clearIntent = new Intent(context, FetchService.class);
-        clearIntent.setAction(FetchService.ACTION_CLEAR);
-        clearIntent.putExtra(Names.ID, car_id);
-        clearIntent.putExtra(Names.NOTIFY, max_id);
-        data = Uri.withAppendedPath(Uri.parse("http://notification_clear/id/"), max_id + "");
-        clearIntent.setData(data);
-        PendingIntent deleteIntent = PendingIntent.getService(context, 0, clearIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setDeleteIntent(deleteIntent);
+        Intent iNotification = new Intent(context, FetchService.class);
+        iNotification.setAction(FetchService.ACTION_NOTIFICATION);
+        iNotification.putExtra(Names.ID, car_id);
+        if (sound != null)
+            iNotification.putExtra(Names.NOTIFY, sound);
+        iNotification.putExtra(Names.TITLE, text);
+        iNotification.putExtra(Names.ALARM, pictId);
+        iNotification.putExtra(Names.EVENT_ID, max_id);
+        Uri data = Uri.withAppendedPath(Uri.parse("http://service/notification/"), car_id);
+        iNotification.setData(data);
+        PendingIntent pi = PendingIntent.getService(context, 0, iNotification, 0);
+        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+        alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 500, pi);
 
-        // Add as notification
-        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        manager.notify(max_id, builder.build());
         return max_id;
     }
 

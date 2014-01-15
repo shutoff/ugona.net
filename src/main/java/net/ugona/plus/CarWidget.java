@@ -228,7 +228,7 @@ public class CarWidget extends AppWidgetProvider {
                     height_rows = new HashMap<Integer, Integer>();
                 if (!height_rows.containsKey(maxHeight)) {
                     float density = context.getResources().getDisplayMetrics().density;
-                    int maxWidth = (int) (options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT) * density + 0.5);
+                    int maxWidth = (int) (options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH) * density + 0.5);
                     int h = (int) (maxHeight * density + 0.5);
                     int h3 = getLayoutHeight(context, maxWidth, R.layout.widget3);
                     int h4 = getLayoutHeight(context, maxWidth, R.layout.widget4);
@@ -237,6 +237,7 @@ public class CarWidget extends AppWidgetProvider {
                     if (h > h4) {
                         rows = 4;
                     }
+                    State.appendLog("W=" + maxWidth + ", H=" + maxHeight + ", h3=" + h3 + ", h4=" + h4 + " rows=" + rows);
                     height_rows.put(maxHeight, rows);
                 }
                 rows = height_rows.get(maxHeight);

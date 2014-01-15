@@ -12,7 +12,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.InputType;
@@ -41,7 +40,7 @@ public class Actions {
         id = preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
-        id = Alarm.createNotification(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, Uri.parse("android.resource://net.ugona.plus/raw/start"));
+        id = Alarm.createNotification(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "start");
         SharedPreferences.Editor ed = preferences.edit();
         ed.putInt(Names.MOTOR_ON_NOTIFY + car_id, id);
         ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
@@ -134,9 +133,9 @@ public class Actions {
                     }
 
                     @Override
-                    Uri process_error(String text) {
+                    String process_error(String text) {
                         if (SmsMonitor.compare(text, "ERROR;Engine") || SmsMonitor.compare(text, error))
-                            return Uri.parse("android.resource://net.ugona.plus/raw/engine_fail");
+                            return "engine_fail";
                         return null;
                     }
                 });

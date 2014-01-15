@@ -19,7 +19,7 @@
             android:id="@+id/ccode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="textPassword|number"
+            android:inputType="textPassword|numberDecimal"
             android:password="true"
             android:maxEms="6"
             android:maxLength="12"
@@ -29,11 +29,5 @@
         </EditText>
 
     </LinearLayout>
-
-    <CheckBox
-        android:id="@+id/nondigits"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/nondigits" />
 
 </LinearLayout>

@@ -6,9 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
@@ -54,9 +51,9 @@ public class SmsMonitor extends BroadcastReceiver {
             return true;
         }
 
-        Uri process_error(String text) {
+        String process_error(String text) {
             if ((error != null) && compare(text, error))
-                return Uri.parse("android.resource://net.ugona.plus/raw/fail");
+                return "fail";
             return null;
         }
     }
@@ -236,15 +233,15 @@ public class SmsMonitor extends BroadcastReceiver {
                         return true;
                     }
                 }
-                Uri uri = entry.getValue().process_error(body);
-                if (uri != null) {
+                String sound = entry.getValue().process_error(body);
+                if (sound != null) {
                     wait.remove(entry.getKey());
                     entry.getValue().process_answer(context, car_id, null);
                     Intent i = new Intent(SMS_ANSWER);
                     i.putExtra(Names.ANSWER, Activity.RESULT_CANCELED);
                     i.putExtra(Names.ID, car_id);
                     context.sendBroadcast(i);
-                    showNotification(context, context.getString(entry.getValue().error_msg), R.drawable.warning, car_id, uri);
+                    showNotification(context, context.getString(entry.getValue().error_msg), R.drawable.warning, car_id, sound);
                     return true;
                 }
             }
@@ -280,16 +277,8 @@ public class SmsMonitor extends BroadcastReceiver {
         showNotification(context, text, R.drawable.warning, car_id, null);
     }
 
-    static void showNotification(Context context, String text, int picId, String car_id, Uri uri) {
-        if (uri == null) {
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-            String sound = Preferences.getNotify(preferences, car_id);
-            uri = Uri.parse(sound);
-            Ringtone ringtone = RingtoneManager.getRingtone(context, uri);
-            if (ringtone == null)
-                uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        }
-        Alarm.createNotification(context, text, picId, car_id, uri);
+    static void showNotification(Context context, String text, int picId, String car_id, String sound) {
+        Alarm.createNotification(context, text, picId, car_id, sound);
     }
 
     private void showAlarm(Context context, String text, String car_id) {
