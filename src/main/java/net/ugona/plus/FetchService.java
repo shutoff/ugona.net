@@ -433,6 +433,7 @@ public class FetchService extends Service {
                     guard_mode = 2;
                 if (guard_mode != prev_guard_mode) {
                     int notify_id = preferences.getInt(Names.GUARD_NOTIFY + car_id, 0);
+                    State.appendLog("old " + notify_id);
                     if (notify_id != 0) {
                         Alarm.removeNotification(FetchService.this, car_id, notify_id);
                         ed.remove(Names.GUARD_NOTIFY + car_id);
@@ -456,6 +457,7 @@ public class FetchService extends Service {
                                 break;
                         }
                         notify_id = Alarm.createNotification(FetchService.this, getString(id), R.drawable.warning, car_id, Uri.parse("android.resource://net.ugona.plus/raw/warning"));
+                        State.appendLog("new " + notify_id);
                         ed.putInt(Names.GUARD_NOTIFY + car_id, notify_id);
                         ed.commit();
                     }

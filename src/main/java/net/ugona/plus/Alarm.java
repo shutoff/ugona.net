@@ -19,7 +19,6 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
@@ -285,7 +284,7 @@ public class Alarm extends Activity {
 
         int max_id = 0;
         for (String id : cars) {
-            String[] ids = preferences.getString(Names.N_IDS, "").split(",");
+            String[] ids = preferences.getString(Names.N_IDS + id, "").split(",");
             for (String n_ids : ids) {
                 try {
                     int n = Integer.parseInt(n_ids);
@@ -318,17 +317,12 @@ public class Alarm extends Activity {
         // Add as notification
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         manager.notify(max_id, builder.build());
-
-        try {
-            Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-            vibrator.vibrate(500);
-        } catch (Exception ex) {
-            // ignore
-        }
+        State.appendLog("create " + car_id + "," + max_id);
         return max_id;
     }
 
     static void removeNotification(Context context, String car_id, int n_id) {
+        State.appendLog("remove " + car_id + "," + n_id);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         String n_ids = preferences.getString(Names.N_IDS + car_id, "");
@@ -336,11 +330,8 @@ public class Alarm extends Activity {
         String res = null;
         for (String id : ids) {
             if (id.equals(n_id)) {
-                try {
-                    manager.cancel(Integer.parseInt(id));
-                } catch (NumberFormatException e) {
-                    // ignore
-                }
+                State.appendLog("cancel " + n_id);
+                manager.cancel(n_id);
                 continue;
             }
             if (res == null) {
