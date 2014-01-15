@@ -223,6 +223,8 @@ public class CarWidget extends AppWidgetProvider {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             Bundle options = appWidgetManager.getAppWidgetOptions(widgetID);
             int maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
+            int minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT);
+            State.appendLog("H=" + minHeight + "-" + maxHeight);
             if (maxHeight > 0) {
                 if (height_rows == null)
                     height_rows = new HashMap<Integer, Integer>();
@@ -237,7 +239,7 @@ public class CarWidget extends AppWidgetProvider {
                     if (h > h4) {
                         rows = 4;
                     }
-                    State.appendLog("W=" + maxWidth + ", H=" + maxHeight + ", h3=" + h3 + ", h4=" + h4 + " rows=" + rows);
+                    State.appendLog("W=" + maxWidth + ", H=" + h + "," + maxHeight + ", h3=" + h3 + ", h4=" + h4 + " rows=" + rows);
                     height_rows.put(maxHeight, rows);
                 }
                 rows = height_rows.get(maxHeight);

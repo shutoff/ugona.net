@@ -52,6 +52,7 @@ public class FetchService extends Service {
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR";
     static final String ACTION_RELE = "net.ugona.plus.RELE";
     static final String ACTION_NOTIFICATION = "net.ugona.plus.NOTIFICATION";
+    static final String ACTION_UPDATE_WIDGET = "net.ugona.plus.UPDATE_WIDGET";
 
     static final String URL_STATUS = "https://car-online.ugona.net/?skey=$1&time=$2";
 
