@@ -317,20 +317,17 @@ public class Alarm extends Activity {
         // Add as notification
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         manager.notify(max_id, builder.build());
-        State.appendLog("create " + car_id + "," + max_id);
         return max_id;
     }
 
     static void removeNotification(Context context, String car_id, int n_id) {
-        State.appendLog("remove " + car_id + "," + n_id);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         String n_ids = preferences.getString(Names.N_IDS + car_id, "");
         String[] ids = n_ids.split(",");
         String res = null;
         for (String id : ids) {
-            if (id.equals(n_id)) {
-                State.appendLog("cancel " + n_id);
+            if (id.equals(n_id + "")) {
                 manager.cancel(n_id);
                 continue;
             }
