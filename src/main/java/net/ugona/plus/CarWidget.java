@@ -218,36 +218,40 @@ public class CarWidget extends AppWidgetProvider {
     }
 
     void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetID) {
-        int rows = 3;
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        int rows = preferences.getInt(Names.ROWS + widgetID, 0);
         boolean bigPict = false;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            Bundle options = appWidgetManager.getAppWidgetOptions(widgetID);
-            int maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
-            int minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT);
-            State.appendLog("H=" + minHeight + "-" + maxHeight);
-            if (maxHeight > 0) {
-                if (height_rows == null)
-                    height_rows = new HashMap<Integer, Integer>();
-                if (!height_rows.containsKey(maxHeight)) {
-                    float density = context.getResources().getDisplayMetrics().density;
-                    int maxWidth = (int) (options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH) * density + 0.5);
-                    int h = (int) (maxHeight * density + 0.5);
-                    int h3 = getLayoutHeight(context, maxWidth, R.layout.widget3);
-                    int h4 = getLayoutHeight(context, maxWidth, R.layout.widget4);
-                    if (h < h3)
-                        rows = 2;
-                    if (h > h4) {
-                        rows = 4;
+        if (rows == 0) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                Bundle options = appWidgetManager.getAppWidgetOptions(widgetID);
+                int maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
+                if (maxHeight > 0) {
+                    if (height_rows == null)
+                        height_rows = new HashMap<Integer, Integer>();
+                    if (!height_rows.containsKey(maxHeight)) {
+                        Intent intent = new Intent(Intent.ACTION_MAIN);
+                        intent.addCategory(Intent.CATEGORY_HOME);
+                        float density = context.getResources().getDisplayMetrics().density;
+                        int maxWidth = (int) (options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH) * density + 0.5);
+                        int h = (int) (maxHeight * density - 0.5);
+                        int h3 = getLayoutHeight(context, maxWidth, R.layout.widget3);
+                        int h4 = getLayoutHeight(context, maxWidth, R.layout.widget4);
+                        rows = 3;
+                        if (h < h3)
+                            rows = 2;
+                        if (h > h4) {
+                            rows = 4;
+                        }
+                        height_rows.put(maxHeight, rows);
                     }
-                    State.appendLog("W=" + maxWidth + ", H=" + h + "," + maxHeight + ", h3=" + h3 + ", h4=" + h4 + " rows=" + rows);
-                    height_rows.put(maxHeight, rows);
+                    rows = height_rows.get(maxHeight);
+                    bigPict = (rows > 3);
                 }
-                rows = height_rows.get(maxHeight);
-                bigPict = (rows > 3);
+            } else {
+                rows = 3;
             }
         }
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         int theme = preferences.getInt(Names.THEME + widgetID, 0);
         if ((theme < 0) || (theme >= id_layout.length))
             theme = 0;

@@ -133,4 +133,5 @@ public final class Names {
     static final String NO_GOOGLE = "no_google";
     static final String GUARD_MODE = "guard_mode_";
 
+    static final String ROWS = "rows";
 }

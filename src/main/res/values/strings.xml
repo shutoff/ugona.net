@@ -371,4 +371,6 @@
     </string-array>
     <string name="guard_notify">Guard notify</string>
     <string name="pointer_voltage">Low pointer voltage</string>
+    <string name="widget_rows">Show values:</string>
+    <string name="auto">auto</string>
 </resources>

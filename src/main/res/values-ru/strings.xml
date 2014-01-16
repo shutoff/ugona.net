@@ -338,4 +338,6 @@
     </string-array>
     <string name="guard_notify">Уведомления об охране</string>
     <string name="pointer_voltage">Низкий уровень заряда батарейки в маяке</string>
+    <string name="widget_rows">Количество значений:</string>
+    <string name="auto">автоматически</string>
 </resources>
