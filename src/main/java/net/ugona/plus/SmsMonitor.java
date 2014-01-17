@@ -236,7 +236,6 @@ public class SmsMonitor extends BroadcastReceiver {
                 String sound = entry.getValue().process_error(body);
                 if (sound != null) {
                     wait.remove(entry.getKey());
-                    entry.getValue().process_answer(context, car_id, null);
                     Intent i = new Intent(SMS_ANSWER);
                     i.putExtra(Names.ANSWER, Activity.RESULT_CANCELED);
                     i.putExtra(Names.ID, car_id);

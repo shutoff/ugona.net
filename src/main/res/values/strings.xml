@@ -373,4 +373,15 @@
     <string name="pointer_voltage">Low pointer voltage</string>
     <string name="widget_rows">Show values:</string>
     <string name="auto">auto</string>
+    <string-array name="timeouts">
+        <item>no remind</item>
+        <item>remind in 1 hour</item>
+        <item>remind in 2 hours</item>
+        <item>remind in 3 hour</item>
+        <item>remind in 6 hours</item>
+        <item>remind in 12 hour</item>
+        <item>reminf in 24 hours</item>
+    </string-array>
+    <string name="postpone">Postpone</string>
+    <string name="turn_off">Turn OFF</string>
 </resources>

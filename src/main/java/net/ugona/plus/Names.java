@@ -126,6 +126,7 @@ public final class Names {
     static final String MOTOR_ON_NOTIFY = "motor_on_notify_";
     static final String MOTOR_OFF_NOTIFY = "motor_off_notify_";
 
+    static final String VALET_NOTIFY = "valet_notify";
     static final String VALET_ON_NOTIFY = "valet_on_notify_";
     static final String VALET_OFF_NOTIFY = "valet_off_notify_";
     static final String VOLTAGE_NOTIFY = "voltage_notify_";
@@ -134,4 +135,5 @@ public final class Names {
     static final String GUARD_MODE = "guard_mode_";
 
     static final String ROWS = "rows";
+    static final String VALET_TIMEOUT = "valet_timeout";
 }

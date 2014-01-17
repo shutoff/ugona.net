@@ -52,7 +52,7 @@ public class FetchService extends Service {
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR";
     static final String ACTION_RELE = "net.ugona.plus.RELE";
     static final String ACTION_NOTIFICATION = "net.ugona.plus.NOTIFICATION";
-    static final String ACTION_UPDATE_WIDGET = "net.ugona.plus.UPDATE_WIDGET";
+    static final String ACTION_VALET_NOTIFY = "net.ugona.plus.VALET_NOTIFY";
 
     static final String URL_STATUS = "https://car-online.ugona.net/?skey=$1&time=$2";
 
@@ -105,57 +105,58 @@ public class FetchService extends Service {
                 if (action.equals(ACTION_RELE)) {
                     Actions.rele_timeout(this);
                 }
-                if (action.equals(ACTION_NOTIFICATION)) {
-                    String title = getString(R.string.app_name);
-                    String[] cars = preferences.getString(Names.CARS, "").split(",");
-                    if (cars.length > 1) {
-                        title = preferences.getString(Names.CAR_NAME + car_id, "");
-                        if (title.length() == 0) {
-                            title = getString(R.string.car);
-                            if (car_id.length() > 0)
-                                title += " " + car_id;
+                if (action.equals(ACTION_VALET_NOTIFY)) {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+                    boolean guard0 = preferences.getBoolean(Names.GUARD0, false);
+                    boolean guard1 = preferences.getBoolean(Names.GUARD1, false);
+                    if (guard0 && !guard1) {
+                        SharedPreferences.Editor ed = preferences.edit();
+                        int id = preferences.getInt(Names.VALET_NOTIFY + car_id, 0);
+                        if (id != 0) {
+                            Alarm.removeNotification(this, car_id, id);
+                            ed.remove(Names.VALET_NOTIFY + car_id);
                         }
-                    }
+                        id = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
+                        if (id != 0) {
+                            Alarm.removeNotification(this, car_id, id);
+                            ed.remove(Names.VALET_ON_NOTIFY + car_id);
+                        }
+                        id = preferences.getInt(Names.VALET_NOTIFY + car_id, 0);
+                        if (id != 0) {
+                            Alarm.removeNotification(this, car_id, id);
+                            ed.remove(Names.VALET_OFF_NOTIFY + car_id);
+                        }
+                        String text = getString(R.string.valet_warning);
+                        int max_id = 0;
+                        String[] cars = preferences.getString(Names.CARS, "").split(",");
+                        for (String cid : cars) {
+                            String[] ids = preferences.getString(Names.N_IDS + cid, "").split(",");
+                            for (String n_ids : ids) {
+                                try {
+                                    int n = Integer.parseInt(n_ids);
+                                    if (n > max_id)
+                                        max_id = n;
+                                } catch (Exception ex) {
+                                    // ignore
+                                }
+                            }
+                        }
+                        max_id++;
+                        Intent i = new Intent(this, MainActivity.class);
+                        i.putExtra(Names.VALET_TIMEOUT, "1");
+                        showNotification(car_id, text, R.drawable.warning, max_id, null, i);
+                        ed.putInt(Names.VALET_NOTIFY + car_id, max_id);
+                        ed.commit();
 
+                        createValetTimeout(this, car_id, Actions.VALET_TIMEOUT);
+                    }
+                }
+                if (action.equals(ACTION_NOTIFICATION)) {
                     String sound = intent.getStringExtra(Names.NOTIFY);
                     String text = intent.getStringExtra(Names.TITLE);
                     int pictId = intent.getIntExtra(Names.ALARM, 0);
                     int max_id = intent.getIntExtra(Names.EVENT_ID, 0);
-
-                    int defs = Notification.DEFAULT_LIGHTS + Notification.DEFAULT_VIBRATE;
-                    if (sound == null)
-                        defs |= Notification.DEFAULT_SOUND;
-                    NotificationCompat.Builder builder =
-                            new NotificationCompat.Builder(this)
-                                    .setDefaults(defs)
-                                    .setSmallIcon(pictId)
-                                    .setContentTitle(title)
-                                    .setContentText(text);
-                    if (sound != null)
-                        builder.setSound(Uri.parse("android.resource://net.ugona.plus/raw/" + sound));
-
-                    Intent notificationIntent = new Intent(this, MainActivity.class);
-                    notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    notificationIntent.putExtra(Names.ID, car_id);
-                    Uri data = Uri.withAppendedPath(Uri.parse("http://notification/id/"), car_id);
-                    notificationIntent.setData(data);
-                    PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
-                            PendingIntent.FLAG_UPDATE_CURRENT);
-                    builder.setContentIntent(contentIntent);
-
-                    Intent clearIntent = new Intent(this, FetchService.class);
-                    clearIntent.setAction(FetchService.ACTION_CLEAR);
-                    clearIntent.putExtra(Names.ID, car_id);
-                    clearIntent.putExtra(Names.NOTIFY, max_id);
-                    data = Uri.withAppendedPath(Uri.parse("http://notification_clear/id/"), max_id + "");
-                    clearIntent.setData(data);
-                    PendingIntent deleteIntent = PendingIntent.getService(this, 0, clearIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    builder.setDeleteIntent(deleteIntent);
-
-                    // Add as notification
-                    NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                    manager.notify(max_id, builder.build());
+                    showNotification(car_id, text, pictId, max_id, sound, null);
                 }
             }
             if (car_id != null)
@@ -164,6 +165,67 @@ public class FetchService extends Service {
         if (startRequest())
             return START_STICKY;
         return START_NOT_STICKY;
+    }
+
+    static void createValetTimeout(Context context, String car_id, int timeout) {
+        Intent iNotify = new Intent(context, FetchService.class);
+        iNotify.setAction(FetchService.ACTION_VALET_NOTIFY);
+        iNotify.putExtra(Names.ID, car_id);
+        Uri data = Uri.withAppendedPath(Uri.parse("http://service/valet/"), car_id);
+        iNotify.setData(data);
+        PendingIntent piNotify = PendingIntent.getService(context, 0, iNotify, 0);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + timeout, piNotify);
+
+    }
+
+    void showNotification(String car_id, String text, int pictId, int max_id, String sound, Intent notificationIntent) {
+        String title = getString(R.string.app_name);
+        String[] cars = preferences.getString(Names.CARS, "").split(",");
+        if (cars.length > 1) {
+            title = preferences.getString(Names.CAR_NAME + car_id, "");
+            if (title.length() == 0) {
+                title = getString(R.string.car);
+                if (car_id.length() > 0)
+                    title += " " + car_id;
+            }
+        }
+
+        int defs = Notification.DEFAULT_LIGHTS + Notification.DEFAULT_VIBRATE;
+        if (sound == null)
+            defs |= Notification.DEFAULT_SOUND;
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(this)
+                        .setDefaults(defs)
+                        .setSmallIcon(pictId)
+                        .setContentTitle(title)
+                        .setContentText(text);
+        if (sound != null)
+            builder.setSound(Uri.parse("android.resource://net.ugona.plus/raw/" + sound));
+
+        if (notificationIntent == null)
+            notificationIntent = new Intent(this, MainActivity.class);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        notificationIntent.putExtra(Names.ID, car_id);
+        Uri data = Uri.withAppendedPath(Uri.parse("http://notification/id/"), car_id);
+        notificationIntent.setData(data);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(contentIntent);
+
+        Intent clearIntent = new Intent(this, FetchService.class);
+        clearIntent.setAction(FetchService.ACTION_CLEAR);
+        clearIntent.putExtra(Names.ID, car_id);
+        clearIntent.putExtra(Names.NOTIFY, max_id);
+        data = Uri.withAppendedPath(Uri.parse("http://notification_clear/id/"), max_id + "");
+        clearIntent.setData(data);
+        PendingIntent deleteIntent = PendingIntent.getService(this, 0, clearIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setDeleteIntent(deleteIntent);
+
+        // Add as notification
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.notify(max_id, builder.build());
     }
 
     boolean startRequest() {
@@ -727,6 +789,8 @@ public class FetchService extends Service {
             ed.remove(Names.VALET_ON_NOTIFY + car_id);
         if (id == preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0))
             ed.remove(Names.VALET_OFF_NOTIFY + car_id);
+        if (id == preferences.getInt(Names.VALET_NOTIFY + car_id, 0))
+            ed.remove(Names.VALET_NOTIFY + car_id);
         if (res == null) {
             ed.remove(Names.N_IDS + car_id);
         } else {
