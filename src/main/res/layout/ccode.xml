@@ -22,7 +22,7 @@
             android:inputType="textPassword|numberDecimal"
             android:password="true"
             android:maxEms="6"
-            android:maxLength="12"
+            android:maxLength="6"
             android:minEms="6">
 
             <requestFocus />

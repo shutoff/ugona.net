@@ -73,41 +73,28 @@ public class Actions {
     static void done_valet_on(Context context, String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor ed = preferences.edit();
-        int id = preferences.getInt(Names.VALET_NOTIFY + car_id, 0);
-        if (id != 0) {
-            Alarm.removeNotification(context, car_id, id);
-            ed.remove(Names.VALET_NOTIFY + car_id);
-            ed.commit();
-        }
-        id = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
+        int id = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
         if (id != 0)
             return;
         id = preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
-        id = Alarm.createNotification(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet_on, car_id, null);
+        id = Alarm.createNotification(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet_on, car_id, "valet_on");
         ed.putInt(Names.VALET_ON_NOTIFY + car_id, id);
         ed.remove(Names.VALET_OFF_NOTIFY + car_id);
         ed.commit();
-        FetchService.createValetTimeout(context, car_id, VALET_TIMEOUT);
     }
 
     static void done_valet_off(Context context, String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor ed = preferences.edit();
-        int id = preferences.getInt(Names.VALET_NOTIFY + car_id, 0);
-        if (id != 0) {
-            Alarm.removeNotification(context, car_id, id);
-            ed.remove(Names.VALET_NOTIFY + car_id);
-            ed.commit();
-        }
-        id = preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0);
+        int id = preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0);
         if (id != 0)
             return;
         id = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
-        id = Alarm.createNotification(context, context.getString(R.string.valet_off_ok), R.drawable.white_valet_off, car_id, null);
+        id = Alarm.createNotification(context, context.getString(R.string.valet_off_ok), R.drawable.white_valet_off, car_id, "valet_off");
         ed.putInt(Names.VALET_OFF_NOTIFY + car_id, id);
         ed.remove(Names.VALET_ON_NOTIFY + car_id);
         ed.commit();
@@ -448,7 +435,7 @@ public class Actions {
         if (piRele != null) {
             Intent i = new Intent(context, FetchService.class);
             i.setAction(FetchService.ACTION_RELE);
-            piRele = PendingIntent.getService(context, 0, i, 0);
+            piRele = PendingIntent.getService(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
         }
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         long timeout = min_time - new Date().getTime();
@@ -520,29 +507,7 @@ public class Actions {
         });
     }
 
-    static void remove_valet_notification(Context context, String car_id) {
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        final SharedPreferences.Editor ed = preferences.edit();
-        int id = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
-        if (id != 0) {
-            Alarm.removeNotification(context, car_id, id);
-            ed.remove(Names.VALET_ON_NOTIFY + car_id);
-        }
-        id = preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0);
-        if (id != 0) {
-            Alarm.removeNotification(context, car_id, id);
-            ed.remove(Names.VALET_OFF_NOTIFY + car_id);
-        }
-        id = preferences.getInt(Names.VALET_NOTIFY + car_id, 0);
-        if (id != 0) {
-            Alarm.removeNotification(context, car_id, id);
-            ed.remove(Names.VALET_NOTIFY + car_id);
-        }
-        ed.commit();
-    }
-
     static void valet_on(final Context context, final String car_id) {
-        remove_valet_notification(context, car_id);
         requestCCode(context, R.string.valet_on, R.string.valet_on_msg, new Actions.Answer() {
             @Override
             void answer(String ccode) {
@@ -573,7 +538,6 @@ public class Actions {
     }
 
     static void valet_off(final Context context, final String car_id) {
-        remove_valet_notification(context, car_id);
         requestCCode(context, R.string.valet_off, R.string.valet_off_msg, new Actions.Answer() {
             @Override
             void answer(String ccode) {

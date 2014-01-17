@@ -52,7 +52,6 @@ public class FetchService extends Service {
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR";
     static final String ACTION_RELE = "net.ugona.plus.RELE";
     static final String ACTION_NOTIFICATION = "net.ugona.plus.NOTIFICATION";
-    static final String ACTION_VALET_NOTIFY = "net.ugona.plus.VALET_NOTIFY";
 
     static final String URL_STATUS = "https://car-online.ugona.net/?skey=$1&time=$2";
 
@@ -105,58 +104,12 @@ public class FetchService extends Service {
                 if (action.equals(ACTION_RELE)) {
                     Actions.rele_timeout(this);
                 }
-                if (action.equals(ACTION_VALET_NOTIFY)) {
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-                    boolean guard0 = preferences.getBoolean(Names.GUARD0, false);
-                    boolean guard1 = preferences.getBoolean(Names.GUARD1, false);
-                    if (guard0 && !guard1) {
-                        SharedPreferences.Editor ed = preferences.edit();
-                        int id = preferences.getInt(Names.VALET_NOTIFY + car_id, 0);
-                        if (id != 0) {
-                            Alarm.removeNotification(this, car_id, id);
-                            ed.remove(Names.VALET_NOTIFY + car_id);
-                        }
-                        id = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
-                        if (id != 0) {
-                            Alarm.removeNotification(this, car_id, id);
-                            ed.remove(Names.VALET_ON_NOTIFY + car_id);
-                        }
-                        id = preferences.getInt(Names.VALET_NOTIFY + car_id, 0);
-                        if (id != 0) {
-                            Alarm.removeNotification(this, car_id, id);
-                            ed.remove(Names.VALET_OFF_NOTIFY + car_id);
-                        }
-                        String text = getString(R.string.valet_warning);
-                        int max_id = 0;
-                        String[] cars = preferences.getString(Names.CARS, "").split(",");
-                        for (String cid : cars) {
-                            String[] ids = preferences.getString(Names.N_IDS + cid, "").split(",");
-                            for (String n_ids : ids) {
-                                try {
-                                    int n = Integer.parseInt(n_ids);
-                                    if (n > max_id)
-                                        max_id = n;
-                                } catch (Exception ex) {
-                                    // ignore
-                                }
-                            }
-                        }
-                        max_id++;
-                        Intent i = new Intent(this, MainActivity.class);
-                        i.putExtra(Names.VALET_TIMEOUT, "1");
-                        showNotification(car_id, text, R.drawable.warning, max_id, null, i);
-                        ed.putInt(Names.VALET_NOTIFY + car_id, max_id);
-                        ed.commit();
-
-                        createValetTimeout(this, car_id, Actions.VALET_TIMEOUT);
-                    }
-                }
                 if (action.equals(ACTION_NOTIFICATION)) {
                     String sound = intent.getStringExtra(Names.NOTIFY);
                     String text = intent.getStringExtra(Names.TITLE);
                     int pictId = intent.getIntExtra(Names.ALARM, 0);
                     int max_id = intent.getIntExtra(Names.EVENT_ID, 0);
-                    showNotification(car_id, text, pictId, max_id, sound, null);
+                    showNotification(car_id, text, pictId, max_id, sound);
                 }
             }
             if (car_id != null)
@@ -167,19 +120,7 @@ public class FetchService extends Service {
         return START_NOT_STICKY;
     }
 
-    static void createValetTimeout(Context context, String car_id, int timeout) {
-        Intent iNotify = new Intent(context, FetchService.class);
-        iNotify.setAction(FetchService.ACTION_VALET_NOTIFY);
-        iNotify.putExtra(Names.ID, car_id);
-        Uri data = Uri.withAppendedPath(Uri.parse("http://service/valet/"), car_id);
-        iNotify.setData(data);
-        PendingIntent piNotify = PendingIntent.getService(context, 0, iNotify, 0);
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + timeout, piNotify);
-
-    }
-
-    void showNotification(String car_id, String text, int pictId, int max_id, String sound, Intent notificationIntent) {
+    void showNotification(String car_id, String text, int pictId, int max_id, String sound) {
         String title = getString(R.string.app_name);
         String[] cars = preferences.getString(Names.CARS, "").split(",");
         if (cars.length > 1) {
@@ -203,8 +144,7 @@ public class FetchService extends Service {
         if (sound != null)
             builder.setSound(Uri.parse("android.resource://net.ugona.plus/raw/" + sound));
 
-        if (notificationIntent == null)
-            notificationIntent = new Intent(this, MainActivity.class);
+        Intent notificationIntent = new Intent(this, MainActivity.class);
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         notificationIntent.putExtra(Names.ID, car_id);
@@ -225,7 +165,10 @@ public class FetchService extends Service {
 
         // Add as notification
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        manager.notify(max_id, builder.build());
+        Notification notification = builder.build();
+        if (pictId == R.drawable.white_valet_on)
+            notification.flags = Notification.FLAG_ONGOING_EVENT;
+        manager.notify(max_id, notification);
     }
 
     boolean startRequest() {
@@ -240,7 +183,7 @@ public class FetchService extends Service {
         if (piUpdate == null) {
             Intent iUpdate = new Intent(this, FetchService.class);
             iUpdate.setAction(ACTION_UPDATE);
-            piUpdate = PendingIntent.getService(this, 0, iUpdate, 0);
+            piUpdate = PendingIntent.getService(this, 0, iUpdate, PendingIntent.FLAG_UPDATE_CURRENT);
             alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + LONG_TIMEOUT, LONG_TIMEOUT, piUpdate);
         }
         stopSelf();
@@ -583,8 +526,18 @@ public class FetchService extends Service {
                     }
                 }
                 boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
-                if (valet != prev_valet)
+                if (valet != prev_valet) {
                     SmsMonitor.processMessageFromApi(FetchService.this, car_id, valet ? R.string.valet_on : R.string.valet_off);
+                    if (valet) {
+                        int id = preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0);
+                        if (id != 0)
+                            Actions.done_valet_on(FetchService.this, car_id);
+                    } else {
+                        int id = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
+                        if (id != 0)
+                            Actions.done_valet_off(FetchService.this, car_id);
+                    }
+                }
             }
 
             if (balance_value != null)
@@ -789,8 +742,6 @@ public class FetchService extends Service {
             ed.remove(Names.VALET_ON_NOTIFY + car_id);
         if (id == preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0))
             ed.remove(Names.VALET_OFF_NOTIFY + car_id);
-        if (id == preferences.getInt(Names.VALET_NOTIFY + car_id, 0))
-            ed.remove(Names.VALET_NOTIFY + car_id);
         if (res == null) {
             ed.remove(Names.N_IDS + car_id);
         } else {

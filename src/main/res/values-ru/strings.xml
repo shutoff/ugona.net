@@ -340,15 +340,4 @@
     <string name="pointer_voltage">Низкий уровень заряда батарейки в маяке</string>
     <string name="widget_rows">Количество значений:</string>
     <string name="auto">автоматически</string>
-    <string-array name="timeouts">
-        <item>не напоминать</item>
-        <item>напомнить через 1 час</item>
-        <item>напомнить через 2 часа</item>
-        <item>напомнить через 3 часа</item>
-        <item>напомнить через 6 часов</item>
-        <item>напомнить через 12 часов</item>
-        <item>напомнить через 24 часа</item>
-    </string-array>
-    <string name="postpone">Отложить</string>
-    <string name="turn_off">Отключить</string>
 </resources>

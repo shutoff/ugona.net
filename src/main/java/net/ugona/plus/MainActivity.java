@@ -33,7 +33,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.eclipsesource.json.JsonObject;
@@ -60,8 +59,6 @@ import java.net.URL;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -219,8 +216,6 @@ public class MainActivity extends ActionBarActivity {
                         })
                         .create();
                 dialog.show();
-            } else if (getIntent().getStringExtra(Names.VALET_TIMEOUT) != null) {
-                showValetReminder();
             }
         }
 
@@ -438,18 +433,6 @@ public class MainActivity extends ActionBarActivity {
         removeNotifications();
     }
 
-/*
-    @Override
-    public void onAttachedToWindow() {
-        //make the activity show even the screen is locked.
-        Window window = getWindow();
-        window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-                + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                + WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                + WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
-    }
-*/
-
     void setCar(String id) {
         id = Preferences.getCar(preferences, id);
         if (id.equals(car_id))
@@ -479,23 +462,28 @@ public class MainActivity extends ActionBarActivity {
         String n_ids = preferences.getString(Names.N_IDS + car_id, "");
         if (n_ids.equals(""))
             return;
+        int id_valet_on = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
         String[] ids = n_ids.split(",");
         for (String id : ids) {
             try {
-                manager.cancel(Integer.parseInt(id));
+                int current_id = Integer.parseInt(id);
+                if (current_id != id_valet_on)
+                    manager.cancel(current_id);
             } catch (NumberFormatException e) {
                 // ignore
             }
         }
         SharedPreferences.Editor ed = preferences.edit();
-        ed.remove(Names.N_IDS + car_id);
+        if (id_valet_on != 0) {
+            ed.putString(Names.N_IDS + car_id, id_valet_on + "");
+        } else {
+            ed.remove(Names.N_IDS + car_id);
+        }
         ed.remove(Names.BALANCE_NOTIFICATION + car_id);
         ed.remove(Names.GUARD_NOTIFY + car_id);
         ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
         ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
-        ed.remove(Names.VALET_ON_NOTIFY + car_id);
         ed.remove(Names.VALET_OFF_NOTIFY + car_id);
-        ed.remove(Names.VALET_NOTIFY + car_id);
         ed.commit();
     }
 
@@ -914,112 +902,6 @@ public class MainActivity extends ActionBarActivity {
             return false;
         }
         return true;
-    }
-
-    void showValetReminder() {
-        boolean guard0 = preferences.getBoolean(Names.GUARD0, false);
-        boolean guard1 = preferences.getBoolean(Names.GUARD1, false);
-        if (!guard0 || guard1)
-            return;
-
-        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setTitle(R.string.valet_on_ok)
-                .setView(inflater.inflate(R.layout.valet_notify, null));
-
-        builder.setPositiveButton(R.string.turn_off, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Actions.valet_off(MainActivity.this, car_id);
-            }
-        });
-        builder.setNegativeButton(R.string.postpone, null);
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-
-        final Spinner spinner = (Spinner) dialog.findViewById(R.id.time);
-        final String[] values = getResources().getStringArray(R.array.timeouts);
-
-        spinner.setAdapter(new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return values.length;
-            }
-
-            @Override
-            public Object getItem(int position) {
-                return values[position];
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = (LayoutInflater) getBaseContext()
-                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = inflater.inflate(R.layout.car_key_item, null);
-                }
-                TextView tvName = (TextView) v.findViewById(R.id.name);
-                tvName.setText(values[position]);
-                return v;
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = (LayoutInflater) getBaseContext()
-                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = inflater.inflate(R.layout.car_key_item, null);
-                }
-                TextView tvName = (TextView) v.findViewById(R.id.name);
-                tvName.setText(values[position]);
-                return v;
-            }
-        });
-
-        int timeout = preferences.getInt(Names.VALET_TIMEOUT, 1);
-        final Pattern pattern = Pattern.compile("[0-9]+");
-        for (int i = 0; i < values.length; i++) {
-            Matcher matcher = pattern.matcher(values[i]);
-            if (!matcher.find())
-                continue;
-            int t = 0;
-            try {
-                t = Integer.parseInt(matcher.group());
-            } catch (Exception ex) {
-                // ignore
-            }
-            if (t == timeout) {
-                spinner.setSelection(i);
-                break;
-            }
-        }
-
-        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                SharedPreferences.Editor ed = preferences.edit();
-                int t = 24 * 10;
-                try {
-                    Matcher matcher = pattern.matcher(values[spinner.getSelectedItemPosition()]);
-                    if (matcher.find())
-                        t = Integer.parseInt(matcher.group());
-                } catch (Exception ex) {
-                    // ignore
-                }
-                ed.putInt(Names.VALET_TIMEOUT + car_id, t);
-                ed.commit();
-                FetchService.createValetTimeout(MainActivity.this, car_id, t * 3600000);
-                finish();
-            }
-        });
     }
 
 }

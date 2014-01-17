@@ -281,10 +281,9 @@ public class Alarm extends Activity {
         iNotification.putExtra(Names.EVENT_ID, max_id);
         Uri data = Uri.withAppendedPath(Uri.parse("http://service/notification/"), car_id);
         iNotification.setData(data);
-        PendingIntent pi = PendingIntent.getService(context, 0, iNotification, 0);
+        PendingIntent pi = PendingIntent.getService(context, 0, iNotification, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(ALARM_SERVICE);
         alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 500, pi);
-
         return max_id;
     }
 
