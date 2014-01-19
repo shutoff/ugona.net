@@ -14,6 +14,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -865,7 +866,7 @@ public class Actions {
         dialog.show();
     }
 
-    static final String COMMAND_URL = "https://car-online.ugona.net/command?auth=$1&code=$2&command=$3";
+    static final String COMMAND_URL = "https://car-online.ugona.net/command?auth=$1&ccode=$2&command=$3";
 
     static Map<String, Set<InetRequest>> inet_requests;
 
@@ -944,6 +945,24 @@ public class Actions {
                     TextView tv = (TextView) dialog.findViewById(R.id.msg);
                     String msg = context.getString(R.string.wait_msg).replace("$1", wait_time + "");
                     tv.setText(msg);
+                    Button btnCall = (Button) dialog.findViewById(R.id.call);
+                    btnCall.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                            Intent intent = new Intent(Intent.ACTION_CALL);
+                            intent.setData(Uri.parse("tel:" + preferences.getString(Names.CAR_PHONE + car_id, "")));
+                            context.startActivity(intent);
+                        }
+                    });
+                    Button btnSms = (Button) dialog.findViewById(R.id.sms);
+                    btnSms.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            InetRequest.this.dismiss();
+                            InetRequest.this.error();
+                        }
+                    });
                     Intent i = new Intent(SmsMonitor.SMS_SEND);
                     i.putExtra(Names.ID, car_id);
                     context.sendBroadcast(i);
