@@ -23,7 +23,7 @@ public abstract class HttpTask {
 
     abstract void error();
 
-    AsyncTask<String, Void, JsonObject> bgTask;
+    AsyncTask<Object, Void, JsonObject> bgTask;
 
     void background(JsonObject res) throws ParseException {
     }
@@ -31,18 +31,18 @@ public abstract class HttpTask {
     int pause = 0;
     String error_text;
 
-    void execute(String... params) {
+    void execute(Object... params) {
         if (bgTask != null)
             return;
-        bgTask = new AsyncTask<String, Void, JsonObject>() {
+        bgTask = new AsyncTask<Object, Void, JsonObject>() {
             @Override
-            protected JsonObject doInBackground(String... params) {
-                String url = params[0];
+            protected JsonObject doInBackground(Object... params) {
+                String url = params[0].toString();
                 Reader reader = null;
                 HttpURLConnection connection = null;
                 try {
                     for (int i = 1; i < params.length; i++) {
-                        url = url.replace("$" + i, URLEncoder.encode(params[i], "UTF-8"));
+                        url = url.replace("$" + i, URLEncoder.encode(params[i].toString(), "UTF-8"));
                     }
                     if (pause > 0)
                         Thread.sleep(pause);
@@ -69,7 +69,12 @@ public abstract class HttpTask {
                     background(result);
                     return result;
                 } catch (Exception ex) {
-                    error_text = ex.getMessage();
+                    error_text = ex.toString();
+                    if (error_text != null) {
+                        int pos = error_text.indexOf(":");
+                        if (pos > 0)
+                            error_text = error_text.substring(0, pos);
+                    }
                     ex.printStackTrace();
                 } finally {
                     if (connection != null)

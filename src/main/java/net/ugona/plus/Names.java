@@ -134,4 +134,5 @@ public final class Names {
     static final String GUARD_MODE = "guard_mode_";
 
     static final String ROWS = "rows";
+    static final String AUTH = "auth";
 }

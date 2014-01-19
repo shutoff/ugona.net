@@ -438,7 +438,7 @@ public class CarWidget extends AppWidgetProvider {
         TrafficRequest(Context context, double lat, double lon, int widgetId) {
             m_context = context;
             m_id = widgetId;
-            execute(URL_TRAFFIC, lat + "", lon + "");
+            execute(URL_TRAFFIC, lat, lon);
         }
 
         @Override

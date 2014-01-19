@@ -36,7 +36,7 @@ abstract public class AddressRequest {
         void exec(double lat, double lng) {
             latitude = lat;
             longitude = lng;
-            execute(GOOGLE_URL, latitude + "", longitude + "", Locale.getDefault().getLanguage());
+            execute(GOOGLE_URL, latitude, longitude, Locale.getDefault().getLanguage());
         }
 
         double latitude;
@@ -118,7 +118,7 @@ abstract public class AddressRequest {
 
         @Override
         void exec(double lat, double lon) {
-            execute(OSM_URL, lat + "", lon + "", Locale.getDefault().getLanguage());
+            execute(OSM_URL, lat, lon, Locale.getDefault().getLanguage());
         }
 
         @Override

@@ -21,6 +21,7 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +41,12 @@ import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Date;
+
+import javax.crypto.Cipher;
 
 public class CarPreferences extends PreferenceActivity {
 
@@ -74,7 +80,7 @@ public class CarPreferences extends PreferenceActivity {
     private static final int GET_ALARM_SOUND = 3008;
     private static final int GET_NOTIFY_SOUND = 3009;
 
-    final static String URL_KEY = "https://car-online.ugona.net/key?login=$1&password=$2";
+    final static String URL_KEY = "https://car-online.ugona.net/key?auth=$1";
     final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
     final static String URL_PHOTOS = "https://car-online.ugona.net/photos?skey=$1&begin=$2";
 
@@ -755,10 +761,29 @@ public class CarPreferences extends PreferenceActivity {
 
     static boolean apiKeyShow = false;
 
+    static String crypt(String data) {
+        try {
+            String key = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApZ3oK9Ia0HdUFQ3iP6/OP94MrlnYhnV5RadTkHJsS+KxJshy81psMcFgI0/FYPpV3B6arQk9wJ7+NMj4kpnToxyVALwYNpT4/2+CN7igN48dZ62DflP7h6lDsLS0Mksly+LEKCrZiT4tkHLyAVI5HQekxfi9b+oVI9Rkp7CkKqXwVruRykaRczV/mZKT5IulPe4gIy8yDf6z6IJt84qfKMq47fbHRfiQdV0WlBP023fTBaLDqQO9FBmL8uNC9AkQAdjZo30j3mpcpCb4X9RiB7Hf1hczBLmCL9kQLZBkSdGLiwbeamDVhthuAvn4K2CFoXUGwmwSja6DZJSfU69+awIDAQAB";
+            byte[] sigBytes = Base64.decode(key, Base64.DEFAULT);
+            KeyFactory factory = KeyFactory.getInstance("RSA");
+            PublicKey publicKey = factory.generatePublic(new X509EncodedKeySpec(sigBytes));
+            byte[] byteData = data.getBytes();
+            Cipher cipher = Cipher.getInstance("RSA/None/PKCS1Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            byte[] encryptedByteData = cipher.doFinal(byteData);
+            String s = Base64.encodeToString(encryptedByteData, Base64.NO_PADDING);
+            return s;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
     static void getApiKey(final Context context, final String car_id, final Runnable onDone, final Runnable onEnd) {
         if (apiKeyShow)
             return;
         apiKeyShow = true;
+
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
         final AlertDialog dialog = new AlertDialog.Builder(context)
@@ -817,6 +842,8 @@ public class CarPreferences extends PreferenceActivity {
                 dlgCheck.show();
 
                 final String login = edLogin.getText().toString();
+                final String pass = edPasswd.getText().toString();
+                final String auth = crypt(login + "\0" + pass);
 
                 HttpTask apiTask = new HttpTask() {
                     @Override
@@ -826,6 +853,7 @@ public class CarPreferences extends PreferenceActivity {
                         SharedPreferences.Editor ed = preferences.edit();
                         ed.putString(Names.CAR_KEY + car_id, key);
                         ed.putString(Names.LOGIN + car_id, login);
+                        ed.putString(Names.AUTH + car_id, auth);
                         ed.remove(Names.GCM_TIME);
                         String[] cars = preferences.getString(Names.CARS, "").split(",");
                         boolean is_new = true;
@@ -850,7 +878,7 @@ public class CarPreferences extends PreferenceActivity {
                     }
                 };
 
-                apiTask.execute(URL_KEY, login, edPasswd.getText().toString());
+                apiTask.execute(URL_KEY, auth);
             }
         });
     }
@@ -878,7 +906,7 @@ public class CarPreferences extends PreferenceActivity {
             }
         };
         Date now = new Date();
-        verTask.execute(URL_PHOTOS, api_key, (now.getTime() - 3 * 24 * 60 * 60 * 1000) + "");
+        verTask.execute(URL_PHOTOS, api_key, now.getTime() - 3 * 24 * 60 * 60 * 1000);
     }
 
     void setupPointer() {

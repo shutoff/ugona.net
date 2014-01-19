@@ -191,6 +191,13 @@ public class SmsMonitor extends BroadcastReceiver {
     };
 
     static boolean processMessageFromApi(Context context, String car_id, int id) {
+        if (Actions.inet_requests != null) {
+            Set<Actions.InetRequest> requests = Actions.inet_requests.get(car_id);
+            for (Actions.InetRequest request : requests) {
+                if (request.msg == id)
+                    request.done(context);
+            }
+        }
         if (processed == null)
             return false;
         SmsQueues queues = processed.get(car_id);
@@ -326,6 +333,8 @@ public class SmsMonitor extends BroadcastReceiver {
     }
 
     static boolean cancelSMS(Context context, String car_id, int id) {
+        if (Actions.cancelRequest(context, car_id, id))
+            return true;
         if (processed == null)
             return false;
         SmsQueues queues = processed.get(car_id);
@@ -346,6 +355,21 @@ public class SmsMonitor extends BroadcastReceiver {
     }
 
     static boolean isProcessed(String car_id, int id) {
+        if (isSmsProcessed(car_id, id))
+            return true;
+        if (Actions.inet_requests == null)
+            return false;
+        Set<Actions.InetRequest> requests = Actions.inet_requests.get(car_id);
+        if (requests == null)
+            return false;
+        for (Actions.InetRequest request : requests) {
+            if (request.msg == id)
+                return true;
+        }
+        return false;
+    }
+
+    static boolean isSmsProcessed(String car_id, int id) {
         if (processed == null)
             return false;
         SmsQueues queues = processed.get(car_id);
@@ -359,6 +383,8 @@ public class SmsMonitor extends BroadcastReceiver {
     }
 
     static boolean haveProcessed(String car_id) {
+        if ((Actions.inet_requests != null) && (Actions.inet_requests.get(car_id) != null))
+            return true;
         if (processed == null)
             return false;
         SmsQueues queues = processed.get(car_id);

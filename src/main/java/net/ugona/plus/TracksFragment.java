@@ -380,7 +380,7 @@ public class TracksFragment extends Fragment
             DateTime finish = next.toDateTime(new LocalTime(0, 0));
             start_time = start.toDate().getTime();
             end_time = finish.toDate().getTime();
-            execute(URL_TRACKS, api_key, start_time + "", end_time + "");
+            execute(URL_TRACKS, api_key, start_time, end_time);
         }
 
         long start_time;

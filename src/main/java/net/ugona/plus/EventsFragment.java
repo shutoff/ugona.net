@@ -555,10 +555,10 @@ public class EventsFragment extends Fragment
             first = today.equals(current);
             execute(URL_EVENTS,
                     api_key,
-                    start.toDate().getTime() + "",
-                    finish.toDate().getTime() + "",
-                    first + "",
-                    pointer + "");
+                    start.toDate().getTime(),
+                    finish.toDate().getTime(),
+                    first,
+                    pointer);
         }
     }
 
@@ -570,7 +570,7 @@ public class EventsFragment extends Fragment
         EventRequest(long id, long time) {
             event_id = id;
             event_time = time;
-            execute(URL_EVENT, api_key, id + "", time + "");
+            execute(URL_EVENT, api_key, id, time);
         }
 
         @Override

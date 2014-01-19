@@ -188,7 +188,10 @@ public class MainActivity extends ActionBarActivity {
         if (savedInstanceState == null) {
             String phone = preferences.getString(Names.CAR_PHONE + car_id, "");
             String key = preferences.getString(Names.CAR_KEY + car_id, "");
-            if ((State.hasTelephony(this) && (phone.length() == 0)) || (key.length() == 0)) {
+            String auth = preferences.getString(Names.AUTH + car_id, "");
+            if (auth.equals("") && !preferences.getBoolean(Names.POINTER, false)) {
+                CarPreferences.getApiKey(this, car_id, null, null);
+            } else if ((State.hasTelephony(this) && (phone.length() == 0)) || (key.length() == 0)) {
                 Intent intent = new Intent(this, CarPreferences.class);
                 intent.putExtra(Names.ID, car_id);
                 startActivityForResult(intent, CAR_SETUP);

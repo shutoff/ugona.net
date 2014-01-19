@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class FetchService extends Service {
 
@@ -553,6 +554,13 @@ public class FetchService extends Service {
                 alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + SCAN_TIMEOUT, pi);
             }
 
+            if (Actions.inet_requests != null) {
+                Set<Actions.InetRequest> requests = Actions.inet_requests.get(car_id);
+                for (Actions.InetRequest request : requests) {
+                    request.check(FetchService.this);
+                }
+            }
+
             if (az != null) {
                 boolean processed = false;
                 if (az.asBoolean()) {
@@ -680,7 +688,7 @@ public class FetchService extends Service {
         @Override
         void exec(String api_key) {
             sendUpdate(ACTION_START, car_id);
-            execute(URL_STATUS, api_key, preferences.getLong(Names.EVENT_TIME + car_id, 0) + "");
+            execute(URL_STATUS, api_key, preferences.getLong(Names.EVENT_TIME + car_id, 0));
         }
 
         void setState(String id, JsonObject contact, String key, int msg) throws ParseException {
