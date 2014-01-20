@@ -1,6 +1,8 @@
 package net.ugona.plus;
 
 import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -14,6 +16,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
@@ -25,6 +28,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class FetchService extends Service {
 
@@ -47,7 +51,7 @@ public class FetchService extends Service {
     static final String ACTION_START = "net.ugona.plus.START";
     static final String ACTION_UPDATE_FORCE = "net.ugona.plus.UPDATE_FORCE";
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR";
-    static final String ACTION_RELE = "net.ugona.plus.RELE";
+    static final String ACTION_NOTIFICATION = "net.ugona.plus.NOTIFICATION";
 
     static final String URL_STATUS = "https://car-online.ugona.net/?skey=$1&time=$2";
 
@@ -97,8 +101,12 @@ public class FetchService extends Service {
                         }
                     }
                 }
-                if (action.equals(ACTION_RELE)) {
-                    Actions.rele_timeout(this);
+                if (action.equals(ACTION_NOTIFICATION)) {
+                    String sound = intent.getStringExtra(Names.NOTIFY);
+                    String text = intent.getStringExtra(Names.TITLE);
+                    int pictId = intent.getIntExtra(Names.ALARM, 0);
+                    int max_id = intent.getIntExtra(Names.EVENT_ID, 0);
+                    showNotification(car_id, text, pictId, max_id, sound);
                 }
             }
             if (car_id != null)
@@ -107,6 +115,57 @@ public class FetchService extends Service {
         if (startRequest())
             return START_STICKY;
         return START_NOT_STICKY;
+    }
+
+    void showNotification(String car_id, String text, int pictId, int max_id, String sound) {
+        String title = getString(R.string.app_name);
+        String[] cars = preferences.getString(Names.CARS, "").split(",");
+        if (cars.length > 1) {
+            title = preferences.getString(Names.CAR_NAME + car_id, "");
+            if (title.length() == 0) {
+                title = getString(R.string.car);
+                if (car_id.length() > 0)
+                    title += " " + car_id;
+            }
+        }
+
+        int defs = Notification.DEFAULT_LIGHTS + Notification.DEFAULT_VIBRATE;
+        if (sound == null)
+            defs |= Notification.DEFAULT_SOUND;
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(this)
+                        .setDefaults(defs)
+                        .setSmallIcon(pictId)
+                        .setContentTitle(title)
+                        .setContentText(text);
+        if (sound != null)
+            builder.setSound(Uri.parse("android.resource://net.ugona.plus/raw/" + sound));
+
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        notificationIntent.putExtra(Names.ID, car_id);
+        Uri data = Uri.withAppendedPath(Uri.parse("http://notification/id/"), car_id);
+        notificationIntent.setData(data);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(contentIntent);
+
+        Intent clearIntent = new Intent(this, FetchService.class);
+        clearIntent.setAction(FetchService.ACTION_CLEAR);
+        clearIntent.putExtra(Names.ID, car_id);
+        clearIntent.putExtra(Names.NOTIFY, max_id);
+        data = Uri.withAppendedPath(Uri.parse("http://notification_clear/id/"), max_id + "");
+        clearIntent.setData(data);
+        PendingIntent deleteIntent = PendingIntent.getService(this, 0, clearIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setDeleteIntent(deleteIntent);
+
+        // Add as notification
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        Notification notification = builder.build();
+        if (pictId == R.drawable.white_valet_on)
+            notification.flags = Notification.FLAG_ONGOING_EVENT;
+        manager.notify(max_id, notification);
     }
 
     boolean startRequest() {
@@ -121,7 +180,7 @@ public class FetchService extends Service {
         if (piUpdate == null) {
             Intent iUpdate = new Intent(this, FetchService.class);
             iUpdate.setAction(ACTION_UPDATE);
-            piUpdate = PendingIntent.getService(this, 0, iUpdate, 0);
+            piUpdate = PendingIntent.getService(this, 0, iUpdate, PendingIntent.FLAG_UPDATE_CURRENT);
             alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + LONG_TIMEOUT, LONG_TIMEOUT, piUpdate);
         }
         stopSelf();
@@ -447,22 +506,35 @@ public class FetchService extends Service {
                     }
                     if (notify) {
                         int id = R.string.ps_guard;
+                        String sound = "warning";
                         switch (guard_mode) {
                             case 0:
                                 id = R.string.guard_on;
+                                sound = "guard_on";
                                 break;
                             case 1:
                                 id = R.string.guard_off;
+                                sound = "guard_off";
                                 break;
                         }
-                        notify_id = Alarm.createNotification(FetchService.this, getString(id), R.drawable.warning, car_id, Uri.parse("android.resource://net.ugona.plus/raw/warning"));
+                        notify_id = Alarm.createNotification(FetchService.this, getString(id), R.drawable.warning, car_id, sound);
                         ed.putInt(Names.GUARD_NOTIFY + car_id, notify_id);
                         ed.commit();
                     }
                 }
                 boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
-                if (valet != prev_valet)
+                if (valet != prev_valet) {
                     SmsMonitor.processMessageFromApi(FetchService.this, car_id, valet ? R.string.valet_on : R.string.valet_off);
+                    if (valet) {
+                        int id = preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0);
+                        if (id != 0)
+                            Actions.done_valet_on(FetchService.this, car_id);
+                    } else {
+                        int id = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
+                        if (id != 0)
+                            Actions.done_valet_off(FetchService.this, car_id);
+                    }
+                }
             }
 
             if (balance_value != null)
@@ -476,6 +548,13 @@ public class FetchService extends Service {
                 iUpdate.setData(data);
                 PendingIntent pi = PendingIntent.getService(FetchService.this, 0, iUpdate, 0);
                 alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + SCAN_TIMEOUT, pi);
+            }
+
+            if (Actions.inet_requests != null) {
+                Set<Actions.InetRequest> requests = Actions.inet_requests.get(car_id);
+                for (Actions.InetRequest request : requests) {
+                    request.check(FetchService.this);
+                }
             }
 
             if (az != null) {
@@ -605,7 +684,7 @@ public class FetchService extends Service {
         @Override
         void exec(String api_key) {
             sendUpdate(ACTION_START, car_id);
-            execute(URL_STATUS, api_key, preferences.getLong(Names.EVENT_TIME + car_id, 0) + "");
+            execute(URL_STATUS, api_key, preferences.getLong(Names.EVENT_TIME + car_id, 0));
         }
 
         void setState(String id, JsonObject contact, String key, int msg) throws ParseException {

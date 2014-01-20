@@ -188,7 +188,10 @@ public class MainActivity extends ActionBarActivity {
         if (savedInstanceState == null) {
             String phone = preferences.getString(Names.CAR_PHONE + car_id, "");
             String key = preferences.getString(Names.CAR_KEY + car_id, "");
-            if ((State.hasTelephony(this) && (phone.length() == 0)) || (key.length() == 0)) {
+            String auth = preferences.getString(Names.AUTH + car_id, "");
+            if (auth.equals("") && !preferences.getBoolean(Names.POINTER, false)) {
+                CarPreferences.getApiKey(this, car_id, null, null);
+            } else if ((State.hasTelephony(this) && (phone.length() == 0)) || (key.length() == 0)) {
                 Intent intent = new Intent(this, CarPreferences.class);
                 intent.putExtra(Names.ID, car_id);
                 startActivityForResult(intent, CAR_SETUP);
@@ -433,18 +436,6 @@ public class MainActivity extends ActionBarActivity {
         removeNotifications();
     }
 
-/*
-    @Override
-    public void onAttachedToWindow() {
-        //make the activity show even the screen is locked.
-        Window window = getWindow();
-        window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-                + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                + WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                + WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
-    }
-*/
-
     void setCar(String id) {
         id = Preferences.getCar(preferences, id);
         if (id.equals(car_id))
@@ -474,21 +465,27 @@ public class MainActivity extends ActionBarActivity {
         String n_ids = preferences.getString(Names.N_IDS + car_id, "");
         if (n_ids.equals(""))
             return;
+        int id_valet_on = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
         String[] ids = n_ids.split(",");
         for (String id : ids) {
             try {
-                manager.cancel(Integer.parseInt(id));
+                int current_id = Integer.parseInt(id);
+                if (current_id != id_valet_on)
+                    manager.cancel(current_id);
             } catch (NumberFormatException e) {
                 // ignore
             }
         }
         SharedPreferences.Editor ed = preferences.edit();
-        ed.remove(Names.N_IDS + car_id);
+        if (id_valet_on != 0) {
+            ed.putString(Names.N_IDS + car_id, id_valet_on + "");
+        } else {
+            ed.remove(Names.N_IDS + car_id);
+        }
         ed.remove(Names.BALANCE_NOTIFICATION + car_id);
         ed.remove(Names.GUARD_NOTIFY + car_id);
         ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
         ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
-        ed.remove(Names.VALET_ON_NOTIFY + car_id);
         ed.remove(Names.VALET_OFF_NOTIFY + car_id);
         ed.commit();
     }
@@ -911,3 +908,4 @@ public class MainActivity extends ActionBarActivity {
     }
 
 }
+

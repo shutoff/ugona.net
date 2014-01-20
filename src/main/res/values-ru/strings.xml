@@ -338,4 +338,17 @@
     </string-array>
     <string name="guard_notify">Уведомления об охране</string>
     <string name="pointer_voltage">Низкий уровень заряда батарейки в маяке</string>
+    <string name="widget_rows">Количество значений:</string>
+    <string name="auto">автоматически</string>
+    <string name="send_sms">Отправить СМС</string>
+    <string name="send_sms_message">Сеть передачи данных недоступна.\nОтправить команду с помощью СМС?</string>
+    <string name="send_command">Отправка комманды</string>
+    <string name="send_sms_on_fail">Ошибка отправки команды по сети.\nОтправить команду с помощью СМС?</string>
+    <string name="wait_msg">Команда поставлена в очередь и будет передана в течении $1 мин.</string>
+    <string name="you_can">Вы можете:</string>
+    <string name="call_car">Позвонить</string>
+    <string name="send_via_sms">Отправить команду как СМС</string>
+    <string name="or_wait">или подождать</string>
+    <string name="motor_on_ccode">Для запуска двигателя надо ввести C-код</string>
+    <string name="motor_off_ccode">Для остановки двигателя надо ввести C-код</string>
 </resources>

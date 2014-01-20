@@ -371,4 +371,17 @@
     </string-array>
     <string name="guard_notify">Guard notify</string>
     <string name="pointer_voltage">Low pointer voltage</string>
+    <string name="widget_rows">Show values:</string>
+    <string name="auto">auto</string>
+    <string name="send_sms">Send SMS</string>
+    <string name="send_sms_message">Network is not available.\nSend command as SMS?</string>
+    <string name="send_command">Send command</string>
+    <string name="send_sms_on_fail">Send command fail.\nSend command as SMS?</string>
+    <string name="wait_msg">Command store to queue and will be send in $1 мин.</string>
+    <string name="you_can">You can:</string>
+    <string name="call_car">Call car</string>
+    <string name="send_via_sms">Send command via SMS</string>
+    <string name="or_wait">or wait</string>
+    <string name="motor_on_ccode">Start engine require C-Code</string>
+    <string name="motor_off_ccode">Stop engine require C-Code</string>
 </resources>

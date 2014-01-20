@@ -1,7 +1,6 @@
 package net.ugona.plus;
 
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
@@ -12,18 +11,27 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +41,8 @@ public class Actions {
 
     static PendingIntent piRele;
 
+    static final int VALET_TIMEOUT = 3600000;
+
     static void done_motor_on(Context context, String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         int id = preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0);
@@ -41,7 +51,7 @@ public class Actions {
         id = preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
-        id = Alarm.createNotification(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, Uri.parse("android.resource://net.ugona.plus/raw/start"));
+        id = Alarm.createNotification(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "start");
         SharedPreferences.Editor ed = preferences.edit();
         ed.putInt(Names.MOTOR_ON_NOTIFY + car_id, id);
         ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
@@ -71,14 +81,14 @@ public class Actions {
 
     static void done_valet_on(Context context, String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor ed = preferences.edit();
         int id = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
         if (id != 0)
             return;
         id = preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
-        id = Alarm.createNotification(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet_on, car_id, null);
-        SharedPreferences.Editor ed = preferences.edit();
+        id = Alarm.createNotification(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet_on, car_id, "valet_on");
         ed.putInt(Names.VALET_ON_NOTIFY + car_id, id);
         ed.remove(Names.VALET_OFF_NOTIFY + car_id);
         ed.commit();
@@ -86,21 +96,53 @@ public class Actions {
 
     static void done_valet_off(Context context, String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor ed = preferences.edit();
         int id = preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0);
         if (id != 0)
             return;
         id = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
-        id = Alarm.createNotification(context, context.getString(R.string.valet_off_ok), R.drawable.white_valet_off, car_id, null);
-        SharedPreferences.Editor ed = preferences.edit();
+        id = Alarm.createNotification(context, context.getString(R.string.valet_off_ok), R.drawable.white_valet_off, car_id, "valet_off");
         ed.putInt(Names.VALET_OFF_NOTIFY + car_id, id);
         ed.remove(Names.VALET_ON_NOTIFY + car_id);
         ed.commit();
     }
 
     static void motor_on(final Context context, final String car_id) {
-        requestPassword(context, R.string.motor_on, R.string.motor_on_sum, new Runnable() {
+        selectRoute(context,
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        requestCCode(context, car_id, R.string.motor_on, R.string.motor_on_ccode, new Answer() {
+                            @Override
+                            void answer(String ccode) {
+                                new InetRequest(context, car_id, ccode, 768, R.string.motor_on) {
+
+                                    @Override
+                                    void error() {
+                                        motor_on_sms(context, car_id);
+                                    }
+
+                                    @Override
+                                    void ok(Context context) {
+                                        done_motor_on(context, car_id);
+                                    }
+                                };
+                            }
+                        });
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        motor_on_sms(context, car_id);
+                    }
+                }
+        );
+    }
+
+    static void motor_on_sms(final Context context, final String car_id) {
+        requestPassword(context, R.string.motor_on, null, new Runnable() {
             @Override
             public void run() {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -134,9 +176,9 @@ public class Actions {
                     }
 
                     @Override
-                    Uri process_error(String text) {
+                    String process_error(String text) {
                         if (SmsMonitor.compare(text, "ERROR;Engine") || SmsMonitor.compare(text, error))
-                            return Uri.parse("android.resource://net.ugona.plus/raw/engine_fail");
+                            return "engine_fail";
                         return null;
                     }
                 });
@@ -145,7 +187,39 @@ public class Actions {
     }
 
     static void motor_off(final Context context, final String car_id) {
-        requestPassword(context, R.string.motor_off, R.string.motor_off_sum, new Runnable() {
+        selectRoute(context,
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        requestCCode(context, car_id, R.string.motor_off, R.string.motor_off_ccode, new Answer() {
+                            @Override
+                            void answer(String ccode) {
+                                new InetRequest(context, car_id, ccode, 769, R.string.motor_off) {
+
+                                    @Override
+                                    void error() {
+                                        motor_off_sms(context, car_id);
+                                    }
+
+                                    @Override
+                                    void ok(Context context) {
+                                        done_motor_off(context, car_id);
+                                    }
+                                };
+                            }
+                        });
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        motor_off_sms(context, car_id);
+                    }
+                }
+        );
+    }
+
+    static void motor_off_sms(final Context context, final String car_id) {
+        requestPassword(context, R.string.motor_off, null, new Runnable() {
             @Override
             public void run() {
                 SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_off, "MOTOR OFF", "MOTOR OFF OK") {
@@ -410,57 +484,62 @@ public class Actions {
         });
     }
 
-    static void rele_set_timer(final Context context) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        Cars.Car[] cars = Cars.getCars(context);
-        long min_time = 0;
-        for (Cars.Car car : cars) {
-            String car_id = car.id;
-            if (!preferences.getBoolean(Names.RELE_IMPULSE + car_id, true))
-                continue;
-            long time = preferences.getLong(Names.RELE_START + car_id, 0);
-            if (time == 0)
-                continue;
-            time += (long) preferences.getInt(Names.RELE_TIME + car_id, 20) * 60 * 1000;
-            if (min_time == 0) {
-                min_time = time;
-                continue;
-            }
-            if (time < min_time)
-                continue;
-        }
-        if (min_time == 0)
-            return;
-        if (piRele != null) {
-            Intent i = new Intent(context, FetchService.class);
-            i.setAction(FetchService.ACTION_RELE);
-            piRele = PendingIntent.getService(context, 0, i, 0);
-        }
-        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        long timeout = min_time - new Date().getTime();
-        alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + timeout, piRele);
-    }
-
-    static void rele_timeout(final Context context) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        Cars.Car[] cars = Cars.getCars(context);
-        long now = new Date().getTime();
-        for (Cars.Car car : cars) {
-            String car_id = car.id;
-            if (!preferences.getBoolean(Names.RELE_IMPULSE + car_id, true))
-                continue;
-            long time = preferences.getLong(Names.RELE_START + car_id, 0);
-            if (time == 0)
-                continue;
-            time += (long) preferences.getInt(Names.RELE_TIME + car_id, 20) * 60 * 1000 - 2000;
-            if (time > now)
-                continue;
-            rele1(context, car_id);
-        }
-        rele_set_timer(context);
-    }
-
     static void rele1(final Context context, final String car_id) {
+        selectRoute(context,
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        requestCCode(context, car_id, R.string.motor_on, R.string.motor_on_ccode, new Answer() {
+                            @Override
+                            void answer(String ccode) {
+                                final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+                                final boolean impulse = preferences.getBoolean(Names.RELE_IMPULSE + car_id, true);
+                                final boolean rele_on = preferences.getLong(Names.RELE_START + car_id, 0) > 0;
+                                final boolean rele2 = preferences.getString(Names.CAR_RELE + car_id, "").equals("2");
+
+                                int cmd = rele2 ? 514 : 258;
+                                if (!impulse) {
+                                    cmd--;
+                                    if (!rele_on)
+                                        cmd--;
+                                }
+
+                                new InetRequest(context, car_id, ccode, cmd, R.string.rele) {
+
+                                    @Override
+                                    void error() {
+                                        rele1_sms(context, car_id);
+                                    }
+
+                                    @Override
+                                    void ok(Context context) {
+                                        SharedPreferences.Editor ed = preferences.edit();
+                                        ed.putLong(Names.RELE_START + car_id, new Date().getTime());
+                                        ed.commit();
+                                        Intent i = new Intent(FetchService.ACTION_UPDATE);
+                                        i.putExtra(Names.ID, car_id);
+                                        context.sendBroadcast(i);
+                                    }
+
+                                    @Override
+                                    void user(Context context) {
+                                        ok(context);
+                                    }
+                                };
+                            }
+                        });
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        rele1_sms(context, car_id);
+                    }
+                }
+        );
+    }
+
+    static void rele1_sms(final Context context, final String car_id) {
         int id = R.string.rele1_action;
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
@@ -493,12 +572,11 @@ public class Actions {
                         ed.putBoolean((rele2 ? Names.RELAY2 : Names.RELAY1) + car_id, true);
                         ed.commit();
                     }
-                    rele_set_timer(context);
                 }
                 return true;
             }
         };
-        requestPassword(context, R.string.rele, id, new Runnable() {
+        requestPassword(context, R.string.rele, null, new Runnable() {
             @Override
             public void run() {
                 SmsMonitor.sendSMS(context, car_id, sms);
@@ -507,60 +585,114 @@ public class Actions {
     }
 
     static void valet_on(final Context context, final String car_id) {
-        requestCCode(context, R.string.valet_on, R.string.valet_on_msg, new Actions.Answer() {
+        requestCCode(context, car_id, R.string.valet_on, R.string.valet_on_msg, new Actions.Answer() {
+
             @Override
-            void answer(String ccode) {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_on, ccode + " VALET", "Valet OK", INCORRECT_MESSAGE, R.string.invalid_ccode) {
-                    @Override
-                    boolean process_answer(Context context, String car_id, String text) {
-                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-                        SharedPreferences.Editor ed = preferences.edit();
-                        ed.putBoolean(Names.GUARD0 + car_id, true);
-                        ed.putBoolean(Names.GUARD1 + car_id, false);
-                        ed.putBoolean(Names.GUARD + car_id, false);
-                        ed.putLong(Names.VALET_TIME + car_id, new Date().getTime());
-                        ed.remove(Names.INIT_TIME + car_id);
-                        ed.commit();
-                        try {
-                            Intent intent = new Intent(FetchService.ACTION_UPDATE);
-                            intent.putExtra(Names.ID, car_id);
-                            context.sendBroadcast(intent);
-                        } catch (Exception e) {
-                            e.printStackTrace();
+            void answer(final String ccode) {
+                selectRoute(context,
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                new InetRequest(context, car_id, ccode, 1793, R.string.valet_on) {
+                                    @Override
+                                    void error() {
+                                        valet_on_sms(context, car_id, ccode);
+                                    }
+
+                                    @Override
+                                    void ok(Context context) {
+                                        done_valet_on(context, car_id);
+                                    }
+                                };
+                            }
+                        }, new Runnable() {
+                            @Override
+                            public void run() {
+                                valet_on_sms(context, car_id, ccode);
+                            }
                         }
-                        done_valet_on(context, car_id);
-                        return true;
-                    }
-                });
+                );
+            }
+        });
+    }
+
+    static void valet_on_sms(final Context context, final String car_id, String ccode) {
+        SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_on, ccode + " VALET", "Valet OK", INCORRECT_MESSAGE, R.string.invalid_ccode) {
+            @Override
+            boolean process_answer(Context context, String car_id, String text) {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putBoolean(Names.GUARD0 + car_id, true);
+                ed.putBoolean(Names.GUARD1 + car_id, false);
+                ed.putBoolean(Names.GUARD + car_id, false);
+                ed.putLong(Names.VALET_TIME + car_id, new Date().getTime());
+                ed.remove(Names.INIT_TIME + car_id);
+                ed.commit();
+                try {
+                    Intent intent = new Intent(FetchService.ACTION_UPDATE);
+                    intent.putExtra(Names.ID, car_id);
+                    context.sendBroadcast(intent);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                done_valet_on(context, car_id);
+                return true;
             }
         });
     }
 
     static void valet_off(final Context context, final String car_id) {
-        requestCCode(context, R.string.valet_off, R.string.valet_off_msg, new Actions.Answer() {
+        requestCCode(context, car_id, R.string.valet_on, R.string.valet_off_msg, new Actions.Answer() {
+
             @Override
-            void answer(String ccode) {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_off, ccode + " INIT", "Main user OK", INCORRECT_MESSAGE, R.string.invalid_ccode) {
-                    @Override
-                    boolean process_answer(Context context, String car_id, String text) {
-                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-                        SharedPreferences.Editor ed = preferences.edit();
-                        ed.putBoolean(Names.GUARD0 + car_id, false);
-                        ed.putBoolean(Names.GUARD1 + car_id, false);
-                        ed.putLong(Names.INIT_TIME + car_id, new Date().getTime());
-                        ed.remove(Names.VALET_TIME + car_id);
-                        ed.commit();
-                        try {
-                            Intent intent = new Intent(FetchService.ACTION_UPDATE);
-                            intent.putExtra(Names.ID, car_id);
-                            context.sendBroadcast(intent);
-                        } catch (Exception e) {
-                            e.printStackTrace();
+            void answer(final String ccode) {
+                selectRoute(context,
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                new InetRequest(context, car_id, ccode, 1794, R.string.valet_off) {
+                                    @Override
+                                    void error() {
+                                        valet_off_sms(context, car_id, ccode);
+                                    }
+
+                                    @Override
+                                    void ok(Context context) {
+                                        done_valet_on(context, car_id);
+                                    }
+                                };
+                            }
+                        }, new Runnable() {
+                            @Override
+                            public void run() {
+                                valet_off_sms(context, car_id, ccode);
+                            }
                         }
-                        done_valet_off(context, car_id);
-                        return true;
-                    }
-                });
+                );
+            }
+        });
+    }
+
+    static void valet_off_sms(final Context context, final String car_id, String ccode) {
+        SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_off, ccode + " INIT", "Main user OK", INCORRECT_MESSAGE, R.string.invalid_ccode) {
+            @Override
+            boolean process_answer(Context context, String car_id, String text) {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putBoolean(Names.GUARD0 + car_id, false);
+                ed.putBoolean(Names.GUARD1 + car_id, false);
+                ed.putLong(Names.INIT_TIME + car_id, new Date().getTime());
+                ed.remove(Names.VALET_TIME + car_id);
+                ed.commit();
+                try {
+                    Intent intent = new Intent(FetchService.ACTION_UPDATE);
+                    intent.putExtra(Names.ID, car_id);
+                    context.sendBroadcast(intent);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                done_valet_off(context, car_id);
+                return true;
             }
         });
     }
@@ -592,7 +724,7 @@ public class Actions {
     }
 
     static void init_phone(final Context context, final String car_id) {
-        requestCCode(context, R.string.init_phone, 0, new Actions.Answer() {
+        requestCCode(context, car_id, R.string.init_phone, 0, new Actions.Answer() {
             @Override
             void answer(String ccode) {
                 SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_off, ccode, null, INCORRECT_MESSAGE, R.string.invalid_ccode) {
@@ -692,7 +824,7 @@ public class Actions {
         abstract void answer(String text);
     }
 
-    static void requestCCode(final Context context, final int id_title, int id_message, final Answer after) {
+    static void requestCCode(final Context context, String car_id, final int id_title, int id_message, final Answer after) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setTitle(id_title)
@@ -707,7 +839,19 @@ public class Actions {
         dialog.show();
         final Button ok = dialog.getButton(Dialog.BUTTON_POSITIVE);
         ok.setEnabled(false);
-        final EditText ccode = (EditText) dialog.findViewById(R.id.ccode);
+        EditText ccode_num = (EditText) dialog.findViewById(R.id.ccode_num);
+        EditText ccode_text = (EditText) dialog.findViewById(R.id.ccode_text);
+        EditText c = ccode_text;
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String version = preferences.getString(Names.VERSION + car_id, "").toLowerCase();
+        if (version.contains("super")) {
+            c = ccode_num;
+            ccode_num.setVisibility(View.VISIBLE);
+            ccode_text.setVisibility(View.GONE);
+        }
+        final EditText ccode = c;
+        ccode.requestFocus();
+
         ccode.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -724,9 +868,6 @@ public class Actions {
                 ok.setEnabled(s.length() >= 6);
             }
         });
-        int inputType = ccode.getInputType() & ~InputType.TYPE_CLASS_NUMBER;
-        inputType += InputType.TYPE_CLASS_TEXT;
-        ccode.setInputType(inputType);
 
         dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -764,4 +905,204 @@ public class Actions {
         if (!SmsMonitor.sendSMS(context, car_id, sms))
             smsProgress.dismiss();
     }
+
+    static boolean isNetwork(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+        if (info == null)
+            return false;
+        return info.isConnected();
+    }
+
+    static void selectRoute(Context context, Runnable asNetwork, final Runnable asSms) {
+        if (isNetwork(context)) {
+            asNetwork.run();
+            return;
+        }
+        AlertDialog dialog = new AlertDialog.Builder(context)
+                .setTitle(R.string.send_sms)
+                .setMessage(R.string.send_sms_message)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        asSms.run();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .create();
+        dialog.show();
+    }
+
+    static final String COMMAND_URL = "https://car-online.ugona.net/command?auth=$1&ccode=$2&command=$3";
+
+    static Map<String, Set<InetRequest>> inet_requests;
+
+    static boolean cancelRequest(Context context, String car_id, int id) {
+        if (inet_requests == null)
+            return false;
+        Set<InetRequest> requests = inet_requests.get(car_id);
+        if (requests == null)
+            return false;
+        for (InetRequest request : requests) {
+            if (request.msg != id)
+                continue;
+            requests.remove(request);
+            if (requests.size() == 0)
+                inet_requests.remove(car_id);
+            Intent i = new Intent(SmsMonitor.SMS_ANSWER);
+            i.putExtra(Names.ANSWER, Activity.RESULT_CANCELED);
+            i.putExtra(Names.ID, car_id);
+            context.sendBroadcast(i);
+            return true;
+        }
+        return false;
+    }
+
+    static abstract class InetRequest {
+
+        InetRequest(Context context_, final String id, String ccode, int type, int message) {
+
+            context = context_;
+            msg = message;
+            car_id = id;
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+            final int wait_time = preferences.getInt(Names.CAR_TIMER + car_id, 10);
+
+            final ProgressDialog progressDialog = new ProgressDialog(context);
+            progressDialog.setMessage(context.getString(R.string.send_command));
+            progressDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    context = null;
+                }
+            });
+            progressDialog.show();
+
+            HttpTask task = new HttpTask() {
+                @Override
+                void result(JsonObject res) throws ParseException {
+                    if (context == null)
+                        return;
+                    if (res != null) {
+                        if (res.get("error") != null) {
+                            error();
+                            return;
+                        }
+                    }
+                    if (inet_requests == null)
+                        inet_requests = new HashMap<String, Set<InetRequest>>();
+                    Set<InetRequest> requests = inet_requests.get(car_id);
+                    if (requests == null) {
+                        requests = new HashSet<InetRequest>();
+                        inet_requests.put(car_id, requests);
+                    }
+                    time = new Date().getTime() + wait_time * 60000;
+                    requests.add(InetRequest.this);
+
+                    Context c = context;
+                    progressDialog.dismiss();
+                    LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+                    dialog = new AlertDialog.Builder(c)
+                            .setTitle(msg)
+                            .setView(inflater.inflate(R.layout.wait, null))
+                            .setNegativeButton(R.string.ok, null)
+                            .create();
+                    dialog.show();
+                    TextView tv = (TextView) dialog.findViewById(R.id.msg);
+                    String msg = context.getString(R.string.wait_msg).replace("$1", wait_time + "");
+                    tv.setText(msg);
+                    Button btnCall = (Button) dialog.findViewById(R.id.call);
+                    btnCall.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                            Intent intent = new Intent(Intent.ACTION_CALL);
+                            intent.setData(Uri.parse("tel:" + preferences.getString(Names.CAR_PHONE + car_id, "")));
+                            context.startActivity(intent);
+                        }
+                    });
+                    Button btnSms = (Button) dialog.findViewById(R.id.sms);
+                    btnSms.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            InetRequest.this.dismiss();
+                            InetRequest.this.error();
+                        }
+                    });
+                    Intent i = new Intent(SmsMonitor.SMS_SEND);
+                    i.putExtra(Names.ID, car_id);
+                    context.sendBroadcast(i);
+                    i = new Intent(context, FetchService.class);
+                    i.putExtra(Names.ID, car_id);
+                    context.startService(i);
+                }
+
+                @Override
+                void error() {
+                    if (context == null)
+                        return;
+                    Context c = context;
+                    progressDialog.dismiss();
+                    dialog = new AlertDialog.Builder(c)
+                            .setTitle(R.string.send_sms)
+                            .setMessage(R.string.send_sms_on_fail)
+                            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    InetRequest.this.error();
+                                }
+                            })
+                            .setNegativeButton(R.string.cancel, null)
+                            .create();
+                    dialog.show();
+                    dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dlg) {
+                            dialog = null;
+                            user(context);
+                        }
+                    });
+                }
+            };
+            task.execute(COMMAND_URL, preferences.getString(Names.AUTH + car_id, ""), ccode, type);
+        }
+
+        abstract void error();
+
+        abstract void ok(Context context);
+
+        void user(Context context) {
+        }
+
+        void done(Context context) {
+            dismiss();
+            ok(context);
+        }
+
+        void check(Context context) {
+            if (time > new Date().getTime())
+                return;
+            dismiss();
+        }
+
+        void dismiss() {
+            if (dialog != null)
+                dialog.dismiss();
+            if (inet_requests == null)
+                return;
+            Set<InetRequest> requests = inet_requests.get(car_id);
+            if (requests == null)
+                return;
+            requests.remove(this);
+        }
+
+        AlertDialog dialog;
+
+        String car_id;
+        Context context;
+        long time;
+        int msg;
+    }
+
 }

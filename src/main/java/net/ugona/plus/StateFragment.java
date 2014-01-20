@@ -251,7 +251,7 @@ public class StateFragment extends Fragment
                     String error_text = intent.getStringExtra(Names.ERROR);
                     if (error_text == null)
                         error_text = getString(R.string.data_error);
-                    if (error_text.substring(0, 7).equals("Ты кто ")) {
+                    if (error_text.equals("Auth error")) {
                         CarPreferences.getApiKey(getActivity(), car_id, new Runnable() {
                             @Override
                             public void run() {

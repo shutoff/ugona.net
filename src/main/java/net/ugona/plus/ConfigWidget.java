@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -20,6 +21,8 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import java.util.Vector;
+
 public class ConfigWidget extends Activity {
 
     SharedPreferences preferences;
@@ -28,6 +31,7 @@ public class ConfigWidget extends Activity {
     Intent resultValue;
     int transparency;
     int theme;
+    int row;
     boolean show_name;
 
     static final int CAR_CONFIG = 1000;
@@ -66,6 +70,69 @@ public class ConfigWidget extends Activity {
                 .setView(inflater.inflate(R.layout.config_widget, null))
                 .create();
         dialog.show();
+
+        int current = 2;
+        final Vector<Integer> rows = new Vector<Integer>();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            rows.add(0);
+            current = 0;
+        }
+        rows.add(2);
+        rows.add(3);
+        rows.add(4);
+
+        final Spinner lvRows = (Spinner) dialog.findViewById(R.id.rows);
+        lvRows.setAdapter(new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return rows.size();
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return rows.get(position);
+            }
+
+            @Override
+            public long getItemId(int position) {
+                return position;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View v = convertView;
+                if (v == null) {
+                    LayoutInflater inflater = (LayoutInflater) getBaseContext()
+                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = inflater.inflate(R.layout.car_key_item, null);
+                }
+                TextView tvName = (TextView) v.findViewById(R.id.name);
+                int value = rows.get(position);
+                String str = value + "";
+                if (value == 0)
+                    str = getString(R.string.auto);
+                tvName.setText(str);
+                return v;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View v = convertView;
+                if (v == null) {
+                    LayoutInflater inflater = (LayoutInflater) getBaseContext()
+                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = inflater.inflate(R.layout.car_key_item, null);
+                }
+                TextView tvName = (TextView) v.findViewById(R.id.name);
+                int value = rows.get(position);
+                String str = value + "";
+                if (value == 0)
+                    str = getString(R.string.auto);
+                tvName.setText(str);
+                return v;
+            }
+        });
+        lvRows.setSelection(current);
 
         final Spinner lv = (Spinner) dialog.findViewById(R.id.list);
         lv.setAdapter(new BaseAdapter() {
@@ -176,6 +243,7 @@ public class ConfigWidget extends Activity {
                 car_id = cars[lv.getSelectedItemPosition()].id;
                 transparency = sbTransparency.getProgress();
                 theme = lvTheme.getSelectedItemPosition();
+                row = rows.get(lvRows.getSelectedItemPosition());
                 CheckBox checkBoxName = (CheckBox) dialog.findViewById(R.id.show_name);
                 show_name = checkBoxName.isChecked();
                 saveWidget();
@@ -203,6 +271,7 @@ public class ConfigWidget extends Activity {
         ed.putString(Names.WIDGET + widgetID, car_id);
         ed.putInt(Names.TRANSPARENCY + widgetID, transparency);
         ed.putInt(Names.THEME + widgetID, theme);
+        ed.putInt(Names.ROWS + widgetID, row);
         ed.putBoolean(Names.SHOW_NAME + widgetID, show_name);
         ed.commit();
         setResult(RESULT_OK, resultValue);

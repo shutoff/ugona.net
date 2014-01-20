@@ -16,24 +16,26 @@
             android:layout_height="wrap_content" />
 
         <EditText
-            android:id="@+id/ccode"
+            android:id="@+id/ccode_num"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="textPassword|number"
+            android:inputType="textPassword|numberDecimal"
             android:password="true"
             android:maxEms="6"
-            android:maxLength="12"
-            android:minEms="6">
+            android:maxLength="6"
+            android:minEms="6"
+            android:visibility="gone" />
 
-            <requestFocus />
-        </EditText>
+        <EditText
+            android:id="@+id/ccode_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:password="true"
+            android:maxEms="6"
+            android:maxLength="6"
+            android:minEms="6" />
 
     </LinearLayout>
-
-    <CheckBox
-        android:id="@+id/nondigits"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/nondigits" />
 
 </LinearLayout>

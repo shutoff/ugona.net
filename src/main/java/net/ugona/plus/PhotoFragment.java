@@ -379,8 +379,8 @@ public class PhotoFragment extends Fragment
             DateTime finish = next.toDateTime(new LocalTime(0, 0));
             execute(URL_PHOTOS,
                     api_key,
-                    start.toDate().getTime() + "",
-                    finish.toDate().getTime() + "");
+                    start.toDate().getTime(),
+                    finish.toDate().getTime());
         }
     }
 
