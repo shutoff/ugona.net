@@ -349,4 +349,6 @@
     <string name="call_car">Позвонить</string>
     <string name="send_via_sms">Отправить команду как СМС</string>
     <string name="or_wait">или подождать</string>
+    <string name="motor_on_ccode">Для запуска двигателя надо ввести C-код</string>
+    <string name="motor_off_ccode">Для остановки двигателя надо ввести C-код</string>
 </resources>

@@ -51,7 +51,6 @@ public class FetchService extends Service {
     static final String ACTION_START = "net.ugona.plus.START";
     static final String ACTION_UPDATE_FORCE = "net.ugona.plus.UPDATE_FORCE";
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR";
-    static final String ACTION_RELE = "net.ugona.plus.RELE";
     static final String ACTION_NOTIFICATION = "net.ugona.plus.NOTIFICATION";
 
     static final String URL_STATUS = "https://car-online.ugona.net/?skey=$1&time=$2";
@@ -101,9 +100,6 @@ public class FetchService extends Service {
                             new StatusRequest(p);
                         }
                     }
-                }
-                if (action.equals(ACTION_RELE)) {
-                    Actions.rele_timeout(this);
                 }
                 if (action.equals(ACTION_NOTIFICATION)) {
                     String sound = intent.getStringExtra(Names.NOTIFY);

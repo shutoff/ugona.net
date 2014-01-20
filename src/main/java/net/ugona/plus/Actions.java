@@ -1,7 +1,6 @@
 package net.ugona.plus;
 
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
@@ -111,7 +110,39 @@ public class Actions {
     }
 
     static void motor_on(final Context context, final String car_id) {
-        requestPassword(context, R.string.motor_on, R.string.motor_on_sum, new Runnable() {
+        selectRoute(context,
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        requestCCode(context, car_id, R.string.motor_on, R.string.motor_on_ccode, new Answer() {
+                            @Override
+                            void answer(String ccode) {
+                                new InetRequest(context, car_id, ccode, 768, R.string.motor_on) {
+
+                                    @Override
+                                    void error() {
+                                        motor_on_sms(context, car_id);
+                                    }
+
+                                    @Override
+                                    void ok(Context context) {
+                                        done_motor_on(context, car_id);
+                                    }
+                                };
+                            }
+                        });
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        motor_on_sms(context, car_id);
+                    }
+                }
+        );
+    }
+
+    static void motor_on_sms(final Context context, final String car_id) {
+        requestPassword(context, R.string.motor_on, null, new Runnable() {
             @Override
             public void run() {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -156,7 +187,39 @@ public class Actions {
     }
 
     static void motor_off(final Context context, final String car_id) {
-        requestPassword(context, R.string.motor_off, R.string.motor_off_sum, new Runnable() {
+        selectRoute(context,
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        requestCCode(context, car_id, R.string.motor_off, R.string.motor_off_ccode, new Answer() {
+                            @Override
+                            void answer(String ccode) {
+                                new InetRequest(context, car_id, ccode, 769, R.string.motor_off) {
+
+                                    @Override
+                                    void error() {
+                                        motor_off_sms(context, car_id);
+                                    }
+
+                                    @Override
+                                    void ok(Context context) {
+                                        done_motor_off(context, car_id);
+                                    }
+                                };
+                            }
+                        });
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        motor_off_sms(context, car_id);
+                    }
+                }
+        );
+    }
+
+    static void motor_off_sms(final Context context, final String car_id) {
+        requestPassword(context, R.string.motor_off, null, new Runnable() {
             @Override
             public void run() {
                 SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_off, "MOTOR OFF", "MOTOR OFF OK") {
@@ -421,57 +484,62 @@ public class Actions {
         });
     }
 
-    static void rele_set_timer(final Context context) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        Cars.Car[] cars = Cars.getCars(context);
-        long min_time = 0;
-        for (Cars.Car car : cars) {
-            String car_id = car.id;
-            if (!preferences.getBoolean(Names.RELE_IMPULSE + car_id, true))
-                continue;
-            long time = preferences.getLong(Names.RELE_START + car_id, 0);
-            if (time == 0)
-                continue;
-            time += (long) preferences.getInt(Names.RELE_TIME + car_id, 20) * 60 * 1000;
-            if (min_time == 0) {
-                min_time = time;
-                continue;
-            }
-            if (time < min_time)
-                continue;
-        }
-        if (min_time == 0)
-            return;
-        if (piRele != null) {
-            Intent i = new Intent(context, FetchService.class);
-            i.setAction(FetchService.ACTION_RELE);
-            piRele = PendingIntent.getService(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
-        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        long timeout = min_time - new Date().getTime();
-        alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + timeout, piRele);
-    }
-
-    static void rele_timeout(final Context context) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        Cars.Car[] cars = Cars.getCars(context);
-        long now = new Date().getTime();
-        for (Cars.Car car : cars) {
-            String car_id = car.id;
-            if (!preferences.getBoolean(Names.RELE_IMPULSE + car_id, true))
-                continue;
-            long time = preferences.getLong(Names.RELE_START + car_id, 0);
-            if (time == 0)
-                continue;
-            time += (long) preferences.getInt(Names.RELE_TIME + car_id, 20) * 60 * 1000 - 2000;
-            if (time > now)
-                continue;
-            rele1(context, car_id);
-        }
-        rele_set_timer(context);
-    }
-
     static void rele1(final Context context, final String car_id) {
+        selectRoute(context,
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        requestCCode(context, car_id, R.string.motor_on, R.string.motor_on_ccode, new Answer() {
+                            @Override
+                            void answer(String ccode) {
+                                final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+                                final boolean impulse = preferences.getBoolean(Names.RELE_IMPULSE + car_id, true);
+                                final boolean rele_on = preferences.getLong(Names.RELE_START + car_id, 0) > 0;
+                                final boolean rele2 = preferences.getString(Names.CAR_RELE + car_id, "").equals("2");
+
+                                int cmd = rele2 ? 514 : 258;
+                                if (!impulse) {
+                                    cmd--;
+                                    if (!rele_on)
+                                        cmd--;
+                                }
+
+                                new InetRequest(context, car_id, ccode, cmd, R.string.rele) {
+
+                                    @Override
+                                    void error() {
+                                        rele1_sms(context, car_id);
+                                    }
+
+                                    @Override
+                                    void ok(Context context) {
+                                        SharedPreferences.Editor ed = preferences.edit();
+                                        ed.putLong(Names.RELE_START + car_id, new Date().getTime());
+                                        ed.commit();
+                                        Intent i = new Intent(FetchService.ACTION_UPDATE);
+                                        i.putExtra(Names.ID, car_id);
+                                        context.sendBroadcast(i);
+                                    }
+
+                                    @Override
+                                    void user(Context context) {
+                                        ok(context);
+                                    }
+                                };
+                            }
+                        });
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        rele1_sms(context, car_id);
+                    }
+                }
+        );
+    }
+
+    static void rele1_sms(final Context context, final String car_id) {
         int id = R.string.rele1_action;
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
@@ -504,12 +572,11 @@ public class Actions {
                         ed.putBoolean((rele2 ? Names.RELAY2 : Names.RELAY1) + car_id, true);
                         ed.commit();
                     }
-                    rele_set_timer(context);
                 }
                 return true;
             }
         };
-        requestPassword(context, R.string.rele, id, new Runnable() {
+        requestPassword(context, R.string.rele, null, new Runnable() {
             @Override
             public void run() {
                 SmsMonitor.sendSMS(context, car_id, sms);
@@ -991,8 +1058,9 @@ public class Actions {
                     dialog.show();
                     dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                         @Override
-                        public void onDismiss(DialogInterface dialog) {
+                        public void onDismiss(DialogInterface dlg) {
                             dialog = null;
+                            user(context);
                         }
                     });
                 }
@@ -1003,6 +1071,9 @@ public class Actions {
         abstract void error();
 
         abstract void ok(Context context);
+
+        void user(Context context) {
+        }
 
         void done(Context context) {
             dismiss();
