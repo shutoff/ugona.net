@@ -192,10 +192,18 @@ public class SmsMonitor extends BroadcastReceiver {
 
     static boolean processMessageFromApi(Context context, String car_id, int id) {
         if (Actions.inet_requests != null) {
+            State.appendLog("!= null " + car_id);
             Set<Actions.InetRequest> requests = Actions.inet_requests.get(car_id);
-            for (Actions.InetRequest request : requests) {
-                if (request.msg == id)
-                    request.done(context);
+            if (requests != null) {
+                State.appendLog("! null");
+                for (Actions.InetRequest request : requests) {
+                    State.appendLog("> " + request.msg + ", " + id);
+                    if (request.msg == id) {
+                        State.appendLog("done....");
+                        request.done(context);
+                        return true;
+                    }
+                }
             }
         }
         if (processed == null)

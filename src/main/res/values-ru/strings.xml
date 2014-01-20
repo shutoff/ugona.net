@@ -351,4 +351,5 @@
     <string name="or_wait">или подождать</string>
     <string name="motor_on_ccode">Для запуска двигателя надо ввести C-код</string>
     <string name="motor_off_ccode">Для остановки двигателя надо ввести C-код</string>
+    <string name="rele_ccode">Требуется C-код</string>
 </resources>

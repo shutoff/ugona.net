@@ -489,7 +489,7 @@ public class Actions {
                 new Runnable() {
                     @Override
                     public void run() {
-                        requestCCode(context, car_id, R.string.motor_on, R.string.motor_on_ccode, new Answer() {
+                        requestCCode(context, car_id, R.string.rele, R.string.rele_ccode, new Answer() {
                             @Override
                             void answer(String ccode) {
                                 final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -938,6 +938,7 @@ public class Actions {
     static Map<String, Set<InetRequest>> inet_requests;
 
     static boolean cancelRequest(Context context, String car_id, int id) {
+        State.appendLog("cancel...");
         if (inet_requests == null)
             return false;
         Set<InetRequest> requests = inet_requests.get(car_id);
@@ -946,6 +947,7 @@ public class Actions {
         for (InetRequest request : requests) {
             if (request.msg != id)
                 continue;
+            State.appendLog("cancel found");
             requests.remove(request);
             if (requests.size() == 0)
                 inet_requests.remove(car_id);
@@ -960,9 +962,9 @@ public class Actions {
 
     static abstract class InetRequest {
 
-        InetRequest(Context context_, final String id, String ccode, int type, int message) {
+        InetRequest(Context context, final String id, String ccode, int type, int message) {
 
-            context = context_;
+            ctx = context;
             msg = message;
             car_id = id;
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -974,7 +976,7 @@ public class Actions {
             progressDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {
-                    context = null;
+                    ctx = null;
                 }
             });
             progressDialog.show();
@@ -982,7 +984,7 @@ public class Actions {
             HttpTask task = new HttpTask() {
                 @Override
                 void result(JsonObject res) throws ParseException {
-                    if (context == null)
+                    if (ctx == null)
                         return;
                     if (res != null) {
                         if (res.get("error") != null) {
@@ -1000,10 +1002,10 @@ public class Actions {
                     time = new Date().getTime() + wait_time * 60000;
                     requests.add(InetRequest.this);
 
-                    Context c = context;
+                    final Context context = ctx;
                     progressDialog.dismiss();
                     LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-                    dialog = new AlertDialog.Builder(c)
+                    dialog = new AlertDialog.Builder(context)
                             .setTitle(msg)
                             .setView(inflater.inflate(R.layout.wait, null))
                             .setNegativeButton(R.string.ok, null)
@@ -1016,6 +1018,7 @@ public class Actions {
                     btnCall.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            dialog.dismiss();
                             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                             Intent intent = new Intent(Intent.ACTION_CALL);
                             intent.setData(Uri.parse("tel:" + preferences.getString(Names.CAR_PHONE + car_id, "")));
@@ -1040,11 +1043,11 @@ public class Actions {
 
                 @Override
                 void error() {
-                    if (context == null)
+                    if (ctx == null)
                         return;
-                    Context c = context;
+                    final Context context = ctx;
                     progressDialog.dismiss();
-                    dialog = new AlertDialog.Builder(c)
+                    dialog = new AlertDialog.Builder(context)
                             .setTitle(R.string.send_sms)
                             .setMessage(R.string.send_sms_on_fail)
                             .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
@@ -1100,7 +1103,7 @@ public class Actions {
         AlertDialog dialog;
 
         String car_id;
-        Context context;
+        Context ctx;
         long time;
         int msg;
     }

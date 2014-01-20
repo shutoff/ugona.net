@@ -558,14 +558,18 @@ public class FetchService extends Service {
             }
 
             if (az != null) {
+                State.appendLog("az");
                 boolean processed = false;
                 if (az.asBoolean()) {
+                    State.appendLog("az=true " + car_id);
                     processed = SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_on);
                     SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_off);
                 } else {
+                    State.appendLog("az=false");
                     processed = SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_off);
                     SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_on);
                 }
+                State.appendLog("processed=" + processed);
                 if (!processed &&
                         ((preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0) != 0) || (preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0) != 0))) {
                     if (az.asBoolean()) {
