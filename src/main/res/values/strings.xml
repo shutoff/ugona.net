@@ -384,4 +384,5 @@
     <string name="or_wait">or wait</string>
     <string name="motor_on_ccode">Start engine require C-Code</string>
     <string name="motor_off_ccode">Stop engine require C-Code</string>
+    <string name="rele_ccode">Require C-Code</string>
 </resources>
