@@ -577,8 +577,10 @@ public class FetchService extends Service {
 
             if (Actions.inet_requests != null) {
                 Set<Actions.InetRequest> requests = Actions.inet_requests.get(car_id);
-                for (Actions.InetRequest request : requests) {
-                    request.check(FetchService.this);
+                if (requests != null) {
+                    for (Actions.InetRequest request : requests) {
+                        request.check(FetchService.this);
+                    }
                 }
             }
 

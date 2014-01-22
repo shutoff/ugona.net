@@ -1021,7 +1021,7 @@ public class Actions {
             car_id = id;
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-            final int wait_time = preferences.getInt(Names.CAR_TIMER + car_id, 10) + 1;
+            final int wait_time = preferences.getInt(Names.CAR_TIMER + car_id, 10);
 
             final ProgressDialog progressDialog = new ProgressDialog(context);
             progressDialog.setMessage(context.getString(R.string.send_command));
@@ -1051,7 +1051,7 @@ public class Actions {
                         requests = new HashSet<InetRequest>();
                         inet_requests.put(car_id, requests);
                     }
-                    time = new Date().getTime() + wait_time * 60000;
+                    time = new Date().getTime() + (wait_time + 1) * 60000;
                     requests.add(InetRequest.this);
 
                     final Context context = ctx;
