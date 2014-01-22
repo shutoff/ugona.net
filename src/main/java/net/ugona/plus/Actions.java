@@ -21,6 +21,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -110,7 +112,7 @@ public class Actions {
     }
 
     static void motor_on(final Context context, final String car_id) {
-        selectRoute(context,
+        selectRoute(context, car_id,
                 new Runnable() {
                     @Override
                     public void run() {
@@ -121,7 +123,7 @@ public class Actions {
 
                                     @Override
                                     void error() {
-                                        motor_on_sms(context, car_id);
+                                        motor_on_sms(context, car_id, true);
                                     }
 
                                     @Override
@@ -135,14 +137,20 @@ public class Actions {
                 }, new Runnable() {
                     @Override
                     public void run() {
-                        motor_on_sms(context, car_id);
+                        motor_on_sms(context, car_id, true);
+
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        motor_on_sms(context, car_id, false);
                     }
                 }
         );
     }
 
-    static void motor_on_sms(final Context context, final String car_id) {
-        requestPassword(context, R.string.motor_on, null, new Runnable() {
+    static void motor_on_sms(final Context context, final String car_id, boolean silent) {
+        requestPassword(context, R.string.motor_on, silent ? null : R.string.motor_on_sum, new Runnable() {
             @Override
             public void run() {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -187,7 +195,7 @@ public class Actions {
     }
 
     static void motor_off(final Context context, final String car_id) {
-        selectRoute(context,
+        selectRoute(context, car_id,
                 new Runnable() {
                     @Override
                     public void run() {
@@ -198,7 +206,7 @@ public class Actions {
 
                                     @Override
                                     void error() {
-                                        motor_off_sms(context, car_id);
+                                        motor_off_sms(context, car_id, true);
                                     }
 
                                     @Override
@@ -212,14 +220,20 @@ public class Actions {
                 }, new Runnable() {
                     @Override
                     public void run() {
-                        motor_off_sms(context, car_id);
+                        motor_off_sms(context, car_id, true);
+
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        motor_off_sms(context, car_id, false);
                     }
                 }
         );
     }
 
-    static void motor_off_sms(final Context context, final String car_id) {
-        requestPassword(context, R.string.motor_off, null, new Runnable() {
+    static void motor_off_sms(final Context context, final String car_id, boolean silent) {
+        requestPassword(context, R.string.motor_off, silent ? null : R.string.motor_off_sum, new Runnable() {
             @Override
             public void run() {
                 SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_off, "MOTOR OFF", "MOTOR OFF OK") {
@@ -485,7 +499,7 @@ public class Actions {
     }
 
     static void rele1(final Context context, final String car_id) {
-        selectRoute(context,
+        selectRoute(context, car_id,
                 new Runnable() {
                     @Override
                     public void run() {
@@ -509,7 +523,7 @@ public class Actions {
 
                                     @Override
                                     void error() {
-                                        rele1_sms(context, car_id);
+                                        rele1_sms(context, car_id, true);
                                     }
 
                                     @Override
@@ -533,13 +547,19 @@ public class Actions {
                 }, new Runnable() {
                     @Override
                     public void run() {
-                        rele1_sms(context, car_id);
+                        rele1_sms(context, car_id, true);
+
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        rele1_sms(context, car_id, false);
                     }
                 }
         );
     }
 
-    static void rele1_sms(final Context context, final String car_id) {
+    static void rele1_sms(final Context context, final String car_id, boolean silent) {
         int id = R.string.rele1_action;
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
@@ -573,10 +593,17 @@ public class Actions {
                         ed.commit();
                     }
                 }
+                try {
+                    Intent intent = new Intent(FetchService.ACTION_UPDATE);
+                    intent.putExtra(Names.ID, car_id);
+                    context.sendBroadcast(intent);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return true;
             }
         };
-        requestPassword(context, R.string.rele, null, new Runnable() {
+        requestPassword(context, R.string.rele, silent ? null : R.string.rele, new Runnable() {
             @Override
             public void run() {
                 SmsMonitor.sendSMS(context, car_id, sms);
@@ -589,7 +616,7 @@ public class Actions {
 
             @Override
             void answer(final String ccode) {
-                selectRoute(context,
+                selectRoute(context, car_id,
                         new Runnable() {
                             @Override
                             public void run() {
@@ -610,7 +637,7 @@ public class Actions {
                             public void run() {
                                 valet_on_sms(context, car_id, ccode);
                             }
-                        }
+                        }, null
                 );
             }
         });
@@ -646,7 +673,7 @@ public class Actions {
 
             @Override
             void answer(final String ccode) {
-                selectRoute(context,
+                selectRoute(context, car_id,
                         new Runnable() {
                             @Override
                             public void run() {
@@ -667,7 +694,7 @@ public class Actions {
                             public void run() {
                                 valet_off_sms(context, car_id, ccode);
                             }
-                        }
+                        }, null
                 );
             }
         });
@@ -839,20 +866,35 @@ public class Actions {
         dialog.show();
         final Button ok = dialog.getButton(Dialog.BUTTON_POSITIVE);
         ok.setEnabled(false);
-        EditText ccode_num = (EditText) dialog.findViewById(R.id.ccode_num);
-        EditText ccode_text = (EditText) dialog.findViewById(R.id.ccode_text);
-        EditText c = ccode_text;
+
+        final EditText ccode_num = (EditText) dialog.findViewById(R.id.ccode_num);
+        final EditText ccode_text = (EditText) dialog.findViewById(R.id.ccode_text);
+
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String version = preferences.getString(Names.VERSION + car_id, "").toLowerCase();
-        if (version.contains("super")) {
-            c = ccode_num;
-            ccode_num.setVisibility(View.VISIBLE);
-            ccode_text.setVisibility(View.GONE);
-        }
-        final EditText ccode = c;
-        ccode.requestFocus();
 
-        ccode.addTextChangedListener(new TextWatcher() {
+        final CheckBox checkBox = (CheckBox) dialog.findViewById(R.id.number);
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    ccode_text.setText(ccode_num.getText());
+                    ccode_num.setVisibility(View.GONE);
+                    ccode_text.setVisibility(View.VISIBLE);
+                    ccode_text.requestFocus();
+                } else {
+                    ccode_num.setText(ccode_text.getText());
+                    ccode_text.setVisibility(View.GONE);
+                    ccode_num.setVisibility(View.VISIBLE);
+                    ccode_num.requestFocus();
+                }
+            }
+        });
+
+        if (version.contains("super"))
+            checkBox.setVisibility(View.GONE);
+
+        TextWatcher watcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -867,13 +909,16 @@ public class Actions {
             public void afterTextChanged(Editable s) {
                 ok.setEnabled(s.length() >= 6);
             }
-        });
+        };
+        ccode_num.addTextChangedListener(watcher);
+        ccode_text.addTextChangedListener(watcher);
 
         dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
-                after.answer(ccode.getText().toString());
+                EditText et = checkBox.isChecked() ? ccode_text : ccode_num;
+                after.answer(et.getText().toString());
             }
         });
     }
@@ -914,7 +959,16 @@ public class Actions {
         return info.isConnected();
     }
 
-    static void selectRoute(Context context, Runnable asNetwork, final Runnable asSms) {
+    static void selectRoute(Context context, String car_id, Runnable asNetwork, final Runnable asSms, final Runnable asSmsFirst) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (preferences.getString(Names.CONTROL + car_id, "").equals("")) {
+            if (asSmsFirst != null) {
+                asSmsFirst.run();
+                return;
+            }
+            asSms.run();
+            return;
+        }
         if (isNetwork(context)) {
             asNetwork.run();
             return;
@@ -938,7 +992,6 @@ public class Actions {
     static Map<String, Set<InetRequest>> inet_requests;
 
     static boolean cancelRequest(Context context, String car_id, int id) {
-        State.appendLog("cancel...");
         if (inet_requests == null)
             return false;
         Set<InetRequest> requests = inet_requests.get(car_id);
@@ -947,7 +1000,6 @@ public class Actions {
         for (InetRequest request : requests) {
             if (request.msg != id)
                 continue;
-            State.appendLog("cancel found");
             requests.remove(request);
             if (requests.size() == 0)
                 inet_requests.remove(car_id);
@@ -969,7 +1021,7 @@ public class Actions {
             car_id = id;
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-            final int wait_time = preferences.getInt(Names.CAR_TIMER + car_id, 10);
+            final int wait_time = preferences.getInt(Names.CAR_TIMER + car_id, 10) + 1;
 
             final ProgressDialog progressDialog = new ProgressDialog(context);
             progressDialog.setMessage(context.getString(R.string.send_command));
@@ -1098,6 +1150,8 @@ public class Actions {
             if (requests == null)
                 return;
             requests.remove(this);
+            if (requests.size() == 0)
+                inet_requests.remove(car_id);
         }
 
         AlertDialog dialog;

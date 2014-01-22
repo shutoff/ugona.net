@@ -462,6 +462,12 @@ public class FetchService extends Service {
             JsonValue azStop = res.get("az_stop");
             if (azStop != null)
                 ed.putLong(Names.AZ_STOP + car_id, azStop.asLong());
+            JsonValue timer = res.get("timer");
+            if (timer != null) {
+                int timerValue = timer.asInt();
+                if ((timerValue >= 1) && (timerValue <= 30))
+                    ed.putInt(Names.CAR_TIMER + car_id, timerValue);
+            }
 
             ed.commit();
 
@@ -469,7 +475,7 @@ public class FetchService extends Service {
                 boolean ignition = preferences.getBoolean(Names.ZONE_IGNITION + car_id, false);
                 if (preferences.getBoolean(Names.INPUT3 + car_id, false))
                     ignition = true;
-                if (az != null)
+                if ((az != null) && az.asBoolean())
                     ignition = true;
                 if (ignition) {
                     ed.remove(Names.RELE_START + car_id);
@@ -550,26 +556,15 @@ public class FetchService extends Service {
                 alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + SCAN_TIMEOUT, pi);
             }
 
-            if (Actions.inet_requests != null) {
-                Set<Actions.InetRequest> requests = Actions.inet_requests.get(car_id);
-                for (Actions.InetRequest request : requests) {
-                    request.check(FetchService.this);
-                }
-            }
-
             if (az != null) {
-                State.appendLog("az");
                 boolean processed = false;
                 if (az.asBoolean()) {
-                    State.appendLog("az=true " + car_id);
                     processed = SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_on);
                     SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_off);
                 } else {
-                    State.appendLog("az=false");
                     processed = SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_off);
                     SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_on);
                 }
-                State.appendLog("processed=" + processed);
                 if (!processed &&
                         ((preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0) != 0) || (preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0) != 0))) {
                     if (az.asBoolean()) {
@@ -577,6 +572,13 @@ public class FetchService extends Service {
                     } else {
                         Actions.done_motor_off(FetchService.this, car_id);
                     }
+                }
+            }
+
+            if (Actions.inet_requests != null) {
+                Set<Actions.InetRequest> requests = Actions.inet_requests.get(car_id);
+                for (Actions.InetRequest request : requests) {
+                    request.check(FetchService.this);
                 }
             }
 

@@ -66,6 +66,7 @@ public class CarPreferences extends PreferenceActivity {
     CheckBoxPreference photoPref;
     ListPreference shockPref;
     ListPreference guardPref;
+    ListPreference ctrlPref;
     Preference relePref;
 
     String alarmUri;
@@ -113,6 +114,7 @@ public class CarPreferences extends PreferenceActivity {
         ed.putString("balance_limit", preferences.getInt(Names.LIMIT + car_id, 50) + "");
         ed.putString("shock", preferences.getString(Names.SHOCK + car_id, "1"));
         ed.putString("guard_mode", preferences.getString(Names.GUARD_MODE + car_id, ""));
+        ed.putString("method", preferences.getString(Names.CONTROL + car_id, ""));
         ed.commit();
 
         addPreferencesFromResource(R.xml.car_preferences);
@@ -250,6 +252,28 @@ public class CarPreferences extends PreferenceActivity {
             }
         });
         shockPref.setSummary(shockPref.getEntry());
+
+        ctrlPref = (ListPreference) findPreference("method");
+        ctrlPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, final Object newValue) {
+                final String v = newValue.toString();
+                CharSequence msg = null;
+                CharSequence[] values = ctrlPref.getEntryValues();
+                for (int i = 0; i < values.length; i++) {
+                    if (v.equals(values[i])) {
+                        msg = ctrlPref.getEntries()[i];
+                        break;
+                    }
+                }
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putString(Names.CONTROL + car_id, v);
+                ed.commit();
+                ctrlPref.setSummary(msg);
+                return true;
+            }
+        });
+        ctrlPref.setSummary(ctrlPref.getEntry());
 
         CheckBoxPreference balancePref = (CheckBoxPreference) findPreference("show_balance");
         balancePref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {

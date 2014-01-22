@@ -352,4 +352,10 @@
     <string name="motor_on_ccode">Для запуска двигателя надо ввести C-код</string>
     <string name="motor_off_ccode">Для остановки двигателя надо ввести C-код</string>
     <string name="rele_ccode">Требуется C-код</string>
+    <string-array name="ctrl_entries">
+        <item>SMS</item>
+        <item>Интернет</item>
+    </string-array>
+    <string name="control_method">Отправка команд</string>
+    <string name="number">С-код содержит не только цифры</string>
 </resources>

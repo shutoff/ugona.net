@@ -56,6 +56,12 @@
         android:summary="@string/commands_sum"
         android:key="cmd" />
 
+    <ListPreference
+        android:title="@string/control_method"
+        android:entries="@array/ctrl_entries"
+        android:entryValues="@array/ctrl_values"
+        android:key="method" />
+
     <Preference
         android:title="@string/rele"
         android:summary="@string/rele_sum"

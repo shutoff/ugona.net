@@ -23,8 +23,7 @@
             android:password="true"
             android:maxEms="6"
             android:maxLength="6"
-            android:minEms="6"
-            android:visibility="gone" />
+            android:minEms="6" />
 
         <EditText
             android:id="@+id/ccode_text"
@@ -34,8 +33,15 @@
             android:password="true"
             android:maxEms="6"
             android:maxLength="6"
-            android:minEms="6" />
+            android:minEms="6"
+            android:visibility="gone" />
 
     </LinearLayout>
+
+    <CheckBox
+        android:id="@+id/number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/number" />
 
 </LinearLayout>
