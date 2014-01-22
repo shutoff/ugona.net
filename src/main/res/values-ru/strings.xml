@@ -357,4 +357,5 @@
         <item>Интернет</item>
     </string-array>
     <string name="control_method">Отправка команд</string>
+    <string name="number">С-код содержит не только цифры</string>
 </resources>

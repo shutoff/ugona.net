@@ -21,6 +21,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -591,6 +593,13 @@ public class Actions {
                         ed.commit();
                     }
                 }
+                try {
+                    Intent intent = new Intent(FetchService.ACTION_UPDATE);
+                    intent.putExtra(Names.ID, car_id);
+                    context.sendBroadcast(intent);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return true;
             }
         };
@@ -857,20 +866,35 @@ public class Actions {
         dialog.show();
         final Button ok = dialog.getButton(Dialog.BUTTON_POSITIVE);
         ok.setEnabled(false);
-        EditText ccode_num = (EditText) dialog.findViewById(R.id.ccode_num);
-        EditText ccode_text = (EditText) dialog.findViewById(R.id.ccode_text);
-        EditText c = ccode_text;
+
+        final EditText ccode_num = (EditText) dialog.findViewById(R.id.ccode_num);
+        final EditText ccode_text = (EditText) dialog.findViewById(R.id.ccode_text);
+
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String version = preferences.getString(Names.VERSION + car_id, "").toLowerCase();
-        if (version.contains("super")) {
-            c = ccode_num;
-            ccode_num.setVisibility(View.VISIBLE);
-            ccode_text.setVisibility(View.GONE);
-        }
-        final EditText ccode = c;
-        ccode.requestFocus();
 
-        ccode.addTextChangedListener(new TextWatcher() {
+        final CheckBox checkBox = (CheckBox) dialog.findViewById(R.id.number);
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    ccode_text.setText(ccode_num.getText());
+                    ccode_num.setVisibility(View.GONE);
+                    ccode_text.setVisibility(View.VISIBLE);
+                    ccode_text.requestFocus();
+                } else {
+                    ccode_num.setText(ccode_text.getText());
+                    ccode_text.setVisibility(View.GONE);
+                    ccode_num.setVisibility(View.VISIBLE);
+                    ccode_num.requestFocus();
+                }
+            }
+        });
+
+        if (version.contains("super"))
+            checkBox.setVisibility(View.GONE);
+
+        TextWatcher watcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -885,13 +909,16 @@ public class Actions {
             public void afterTextChanged(Editable s) {
                 ok.setEnabled(s.length() >= 6);
             }
-        });
+        };
+        ccode_num.addTextChangedListener(watcher);
+        ccode_text.addTextChangedListener(watcher);
 
         dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
-                after.answer(ccode.getText().toString());
+                EditText et = checkBox.isChecked() ? ccode_text : ccode_num;
+                after.answer(et.getText().toString());
             }
         });
     }

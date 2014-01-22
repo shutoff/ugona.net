@@ -69,6 +69,7 @@ public abstract class HttpTask {
                     background(result);
                     return result;
                 } catch (Exception ex) {
+                    State.print(ex);
                     error_text = ex.toString();
                     if (error_text != null) {
                         int pos = error_text.indexOf(":");
@@ -99,6 +100,7 @@ public abstract class HttpTask {
                         return;
                     } catch (Exception ex) {
                         // ignore
+                        State.print(ex);
                         ex.printStackTrace();
                     }
                 }

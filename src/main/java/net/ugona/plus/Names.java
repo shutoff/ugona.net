@@ -136,4 +136,5 @@ public final class Names {
     static final String ROWS = "rows";
     static final String AUTH = "auth";
     static final String CONTROL = "control_";
+    static final String NUMBER = "ccode_number_";
 }

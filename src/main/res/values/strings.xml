@@ -394,4 +394,5 @@
         <item>Internet</item>
     </string-array>
     <string name="control_method">Control method</string>
+    <string name="number">C-code contains letters</string>
 </resources>

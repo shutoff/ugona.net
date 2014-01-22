@@ -475,7 +475,7 @@ public class FetchService extends Service {
                 boolean ignition = preferences.getBoolean(Names.ZONE_IGNITION + car_id, false);
                 if (preferences.getBoolean(Names.INPUT3 + car_id, false))
                     ignition = true;
-                if (az != null)
+                if ((az != null) && az.asBoolean())
                     ignition = true;
                 if (ignition) {
                     ed.remove(Names.RELE_START + car_id);
