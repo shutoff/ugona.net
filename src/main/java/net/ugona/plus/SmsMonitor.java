@@ -192,14 +192,10 @@ public class SmsMonitor extends BroadcastReceiver {
 
     static boolean processMessageFromApi(Context context, String car_id, int id) {
         if (Actions.inet_requests != null) {
-            State.appendLog("!= null " + car_id);
             Set<Actions.InetRequest> requests = Actions.inet_requests.get(car_id);
             if (requests != null) {
-                State.appendLog("! null");
                 for (Actions.InetRequest request : requests) {
-                    State.appendLog("> " + request.msg + ", " + id);
                     if (request.msg == id) {
-                        State.appendLog("done....");
                         request.done(context);
                         return true;
                     }
@@ -311,9 +307,11 @@ public class SmsMonitor extends BroadcastReceiver {
     static boolean sendSMS(Context context, String car_id, Sms sms) {
         if (processed == null)
             processed = new HashMap<String, SmsQueues>();
-        if (!processed.containsKey(car_id))
-            processed.put(car_id, new SmsQueues());
         SmsQueues queues = processed.get(car_id);
+        if (queues == null) {
+            queues = new SmsQueues();
+            processed.put(car_id, queues);
+        }
         if (queues.send == null)
             queues.send = new SmsQueue();
         SmsQueue send = queues.send;

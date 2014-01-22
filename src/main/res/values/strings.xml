@@ -385,4 +385,13 @@
     <string name="motor_on_ccode">Start engine require C-Code</string>
     <string name="motor_off_ccode">Stop engine require C-Code</string>
     <string name="rele_ccode">Require C-Code</string>
+    <string-array name="ctrl_values">
+        <item></item>
+        <item>inet</item>
+    </string-array>
+    <string-array name="ctrl_entries">
+        <item>SMS</item>
+        <item>Internet</item>
+    </string-array>
+    <string name="control_method">Control method</string>
 </resources>
