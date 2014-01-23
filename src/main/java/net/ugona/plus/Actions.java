@@ -851,7 +851,7 @@ public class Actions {
         abstract void answer(String text);
     }
 
-    static void requestCCode(final Context context, String car_id, final int id_title, int id_message, final Answer after) {
+    static void requestCCode(final Context context, final String car_id, final int id_title, int id_message, final Answer after) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setTitle(id_title)
@@ -870,7 +870,7 @@ public class Actions {
         final EditText ccode_num = (EditText) dialog.findViewById(R.id.ccode_num);
         final EditText ccode_text = (EditText) dialog.findViewById(R.id.ccode_text);
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String version = preferences.getString(Names.VERSION + car_id, "").toLowerCase();
 
         final CheckBox checkBox = (CheckBox) dialog.findViewById(R.id.number);
@@ -891,8 +891,11 @@ public class Actions {
             }
         });
 
-        if (version.contains("super"))
+        if (version.contains("super")) {
             checkBox.setVisibility(View.GONE);
+        } else {
+            checkBox.setChecked(preferences.getBoolean(Names.NUMBER + car_id, false));
+        }
 
         TextWatcher watcher = new TextWatcher() {
             @Override
@@ -919,6 +922,9 @@ public class Actions {
                 dialog.dismiss();
                 EditText et = checkBox.isChecked() ? ccode_text : ccode_num;
                 after.answer(et.getText().toString());
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putBoolean(Names.NUMBER + car_id, checkBox.isChecked());
+                ed.commit();
             }
         });
     }
