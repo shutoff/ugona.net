@@ -150,7 +150,7 @@ public class Actions {
     }
 
     static void motor_on_sms(final Context context, final String car_id, boolean silent) {
-        requestPassword(context, R.string.motor_on, silent ? null : R.string.motor_on_sum, new Runnable() {
+        requestPassword(context, R.string.motor_on, silent ? 0 : R.string.motor_on_sum, new Runnable() {
             @Override
             public void run() {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -233,7 +233,7 @@ public class Actions {
     }
 
     static void motor_off_sms(final Context context, final String car_id, boolean silent) {
-        requestPassword(context, R.string.motor_off, silent ? null : R.string.motor_off_sum, new Runnable() {
+        requestPassword(context, R.string.motor_off, silent ? 0 : R.string.motor_off_sum, new Runnable() {
             @Override
             public void run() {
                 SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_off, "MOTOR OFF", "MOTOR OFF OK") {
@@ -603,7 +603,7 @@ public class Actions {
                 return true;
             }
         };
-        requestPassword(context, R.string.rele, silent ? null : R.string.rele, new Runnable() {
+        requestPassword(context, R.string.rele, silent ? 0 : R.string.rele, new Runnable() {
             @Override
             public void run() {
                 SmsMonitor.sendSMS(context, car_id, sms);

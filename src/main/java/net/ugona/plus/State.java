@@ -49,7 +49,7 @@ public class State {
         return sf.format(time);
     }
 
-    /*
+/*
     static void appendLog(String text) {
         File logFile = Environment.getExternalStorageDirectory();
         logFile = new File(logFile, "car.log");
@@ -83,7 +83,7 @@ public class State {
         String s = sw.toString();
         appendLog(s);
     }
-    */
+*/
 
     static final int CMD_CALL = 1;
     static final int CMD_VALET = 2;
