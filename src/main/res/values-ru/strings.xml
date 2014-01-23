@@ -202,7 +202,7 @@
     <string name="net_gps_message">Местоположение определено по сети.\nДля более точного определения положения надо включить GPS в настройках</string>
     <string name="no_location">Неизвестное местоположение</string>
     <string name="shock_sens">Чувствительность датчика удара</string>
-    <string name="shock_sens_msg">Установка уровня учвствительности датчика удара. Работает только для СуперАгент</string>
+    <string name="shock_sens_msg">Установка уровня чувствительности датчика удара. Работает только для СуперАгент</string>
     <string-array name="levels">
         <item>Максимальная</item>
         <item>Высокая</item>
