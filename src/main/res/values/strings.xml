@@ -355,8 +355,8 @@
     </string-array>
     <string-array name="shock_values">
         <item>1</item>
-        <item>2</item>
         <item>3</item>
+        <item>4</item>
     </string-array>
     <string name="motor_time">after $1 min</string>
     <string-array name="guard_entries">
@@ -395,4 +395,5 @@
     </string-array>
     <string name="control_method">Control method</string>
     <string name="number">C-code contains letters</string>
+    <string name="stat">Statistics</string>
 </resources>

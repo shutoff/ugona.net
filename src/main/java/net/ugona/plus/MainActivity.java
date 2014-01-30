@@ -56,9 +56,11 @@ import java.io.Reader;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TimeZone;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -76,8 +78,9 @@ public class MainActivity extends ActionBarActivity {
     static final int PAGE_STATE = 2;
     static final int PAGE_EVENT = 3;
     static final int PAGE_TRACK = 4;
+    static final int PAGE_STAT = 5;
 
-    static final int VERSION = 1;
+    static final int VERSION = 2;
     static final String SENDER_ID = "915289471784";
 
     ViewPager mViewPager;
@@ -130,12 +133,13 @@ public class MainActivity extends ActionBarActivity {
 
         current = new LocalDate();
 
-        show_pages = new boolean[5];
+        show_pages = new boolean[6];
         show_pages[PAGE_PHOTO] = preferences.getBoolean(Names.SHOW_PHOTO + car_id, false);
         show_pages[PAGE_ACTIONS] = State.hasTelephony(this);
         show_pages[PAGE_STATE] = true;
         show_pages[PAGE_EVENT] = true;
         show_pages[PAGE_TRACK] = false;
+        show_pages[PAGE_STAT] = false;
 
         if (savedInstanceState != null) {
             car_id = savedInstanceState.getString(Names.ID);
@@ -533,7 +537,7 @@ public class MainActivity extends ActionBarActivity {
 
     int getPageId(int n) {
         int last = 0;
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 6; i++) {
             if (!show_pages[i])
                 continue;
             last = i;
@@ -567,6 +571,7 @@ public class MainActivity extends ActionBarActivity {
         }
         if (show_pages[PAGE_TRACK] != show_tracks) {
             show_pages[PAGE_TRACK] = show_tracks;
+            show_pages[PAGE_STAT] = show_tracks;
             changed = true;
         }
         boolean show_photo = preferences.getBoolean(Names.SHOW_PHOTO + car_id, false);
@@ -580,8 +585,8 @@ public class MainActivity extends ActionBarActivity {
 
     void setShowDate(int i) {
         int id = getPageId(i);
-        boolean new_show_date = ((id >= 3) || (id == 0));
-        if (pointer && (id == 3))
+        boolean new_show_date = (id == PAGE_PHOTO) || (id == PAGE_EVENT) || (id == PAGE_TRACK);
+        if (pointer && (id == PAGE_EVENT))
             new_show_date = false;
         if (new_show_date != show_date) {
             show_date = new_show_date;
@@ -651,13 +656,18 @@ public class MainActivity extends ActionBarActivity {
                     fragment.current = current;
                     return fragment;
                 }
+                case PAGE_STAT: {
+                    StatFragment fragment = new StatFragment();
+                    fragment.car_id = car_id;
+                    return fragment;
+                }
             }
             return null;
         }
 
         @Override
         public int getCount() {
-            return getPagePosition(5);
+            return getPagePosition(6);
         }
 
         @Override
@@ -673,7 +683,8 @@ public class MainActivity extends ActionBarActivity {
                     return getString(R.string.events);
                 case PAGE_TRACK:
                     return getString(R.string.tracks);
-
+                case PAGE_STAT:
+                    return getString(R.string.stat);
             }
             return super.getPageTitle(position);
         }
@@ -836,6 +847,9 @@ public class MainActivity extends ActionBarActivity {
                         d += ";" + car.id;
                     }
                     data.add("cars", d);
+                    Calendar cal = Calendar.getInstance();
+                    TimeZone tz = cal.getTimeZone();
+                    data.add("tz", tz.getID());
                     String url = "https://car-online.ugona.net/reg";
                     URL u = new URL(url);
                     connection = (HttpURLConnection) u.openConnection();

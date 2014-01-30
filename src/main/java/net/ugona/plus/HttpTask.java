@@ -47,6 +47,7 @@ public abstract class HttpTask {
                     if (pause > 0)
                         Thread.sleep(pause);
                     Log.v("url", url);
+                    State.appendLog(url);
                     URL u = new URL(url);
                     connection = (HttpURLConnection) u.openConnection();
                     InputStream in = new BufferedInputStream(connection.getInputStream());
@@ -76,6 +77,7 @@ public abstract class HttpTask {
                             error_text = error_text.substring(0, pos);
                     }
                     ex.printStackTrace();
+                    State.print(ex);
                 } finally {
                     if (connection != null)
                         connection.disconnect();
