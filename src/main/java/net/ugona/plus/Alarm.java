@@ -246,7 +246,6 @@ public class Alarm extends Activity {
     }
 
     static int createNotification(Context context, String text, int pictId, String car_id, String sound) {
-
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         int max_id = 0;
         String[] cars = preferences.getString(Names.CARS, "").split(",");
@@ -284,10 +283,12 @@ public class Alarm extends Activity {
         PendingIntent pi = PendingIntent.getService(context, 0, iNotification, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(ALARM_SERVICE);
         alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 500, pi);
+        State.appendLog("add " + car_id + ", " + max_id);
         return max_id;
     }
 
     static void removeNotification(Context context, String car_id, int n_id) {
+        State.appendLog("remove " + car_id + ", " + n_id);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         String n_ids = preferences.getString(Names.N_IDS + car_id, "");

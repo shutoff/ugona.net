@@ -318,7 +318,8 @@ public class StateFragment extends Fragment
         } else {
             tvLast.setText(getString(R.string.unknown));
         }
-        tvVoltage.setText(preferences.getString(Names.VOLTAGE_MAIN + car_id, "?") + " V");
+
+        updateVoltage(tvVoltage, Names.VOLTAGE_MAIN, pointer ? 3. : 12.2);
         updateNetStatus(context);
 
         double lat = preferences.getFloat(Names.LAT + car_id, 0);
@@ -381,7 +382,7 @@ public class StateFragment extends Fragment
         if (pointer)
             return;
 
-        tvReserve.setText(preferences.getString(Names.VOLTAGE_RESERVED + car_id, "?") + " V");
+        updateVoltage(tvReserve, Names.VOLTAGE_RESERVED, preferences.getBoolean(Names.RESERVE_NORMAL + car_id, true));
 
         String temperature = Preferences.getTemperature(preferences, car_id, 1);
         if (temperature == null) {
@@ -508,6 +509,25 @@ public class StateFragment extends Fragment
         setPointer(vPointer1, tvPointer1, 0);
         setPointer(vPointer2, tvPointer2, 1);
 
+    }
+
+    void updateVoltage(TextView tv, String key, boolean normal) {
+        String val = preferences.getString(key + car_id, "?");
+        tv.setText(val + " V");
+        tv.setTextColor(normal ? getResources().getColor(android.R.color.secondary_text_dark) : getResources().getColor(R.color.error));
+    }
+
+    void updateVoltage(TextView tv, String key, double limit) {
+        String val = preferences.getString(Names.VOLTAGE_MAIN + car_id, "?");
+        tv.setText(val + " V");
+        boolean normal = false;
+        try {
+            if (Double.parseDouble(val) > limit)
+                normal = true;
+        } catch (Exception ex) {
+            // ignore
+        }
+        tv.setTextColor(normal ? getResources().getColor(android.R.color.secondary_text_dark) : getResources().getColor(R.color.error));
     }
 
     void updateNetStatus(Context context) {

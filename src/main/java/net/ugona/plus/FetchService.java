@@ -343,6 +343,7 @@ public class FetchService extends Service {
                 ed.putBoolean(Names.RELAY3 + car_id, contact.get("relay3").asBoolean());
                 ed.putBoolean(Names.RELAY4 + car_id, contact.get("relay4").asBoolean());
                 ed.putBoolean(Names.ENGINE + car_id, contact.get("engine").asBoolean());
+                ed.putBoolean(Names.RESERVE_NORMAL + car_id, contact.get("reservePowerNormal").asBoolean());
 
                 setState(Names.ZONE_DOOR, contact, "door", 3);
                 setState(Names.ZONE_HOOD, contact, "hood", 2);
@@ -587,12 +588,14 @@ public class FetchService extends Service {
             if (!preferences.getBoolean(Names.GUARD + car_id, false)) {
                 int id = preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0);
                 if (id != 0) {
+                    State.appendLog("Remove motor off notification " + id);
                     Alarm.removeNotification(FetchService.this, car_id, id);
                     ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
                     ed.commit();
                 }
                 id = preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0);
                 if (id != 0) {
+                    State.appendLog("Remove motor on notification " + id);
                     Alarm.removeNotification(FetchService.this, car_id, id);
                     ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
                     ed.commit();

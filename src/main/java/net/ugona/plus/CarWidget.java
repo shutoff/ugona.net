@@ -287,7 +287,18 @@ public class CarWidget extends AppWidgetProvider {
         }
 
         int show_count = 1;
-        widgetView.setTextViewText(R.id.voltage, preferences.getString(Names.VOLTAGE_MAIN + car_id, "--") + " V");
+
+        String voltage = preferences.getString(Names.VOLTAGE_MAIN + car_id, "?");
+        widgetView.setTextViewText(R.id.voltage, voltage + " V");
+        boolean normal = false;
+        try {
+            if (Double.parseDouble(voltage) > 12.2)
+                normal = true;
+        } catch (Exception ex) {
+            // ignore
+        }
+        int v_color = normal ? context.getResources().getColor(id_color[theme]) : context.getResources().getColor(R.color.error);
+        widgetView.setInt(R.id.voltage, "setTextColor", v_color);
 
         String temperature = Preferences.getTemperature(preferences, car_id, 1);
         if (temperature == null) {
@@ -320,8 +331,13 @@ public class CarWidget extends AppWidgetProvider {
         widgetView.setViewVisibility(R.id.name, preferences.getBoolean(Names.SHOW_NAME + widgetID, true) ? View.VISIBLE : View.GONE);
 
         boolean show_reserve = (show_count < rows);
-        if (show_reserve)
-            widgetView.setTextViewText(R.id.reserve, preferences.getString(Names.VOLTAGE_RESERVED + car_id, "--") + " V");
+        if (show_reserve) {
+            String rv = preferences.getString(Names.VOLTAGE_RESERVED + car_id, "?");
+            widgetView.setTextViewText(R.id.reserve, rv + " V");
+            int r_color = preferences.getBoolean(Names.RESERVE_NORMAL + car_id, true) ? context.getResources().getColor(id_color[theme]) : context.getResources().getColor(R.color.error);
+            widgetView.setInt(R.id.reserve, "setTextColor", r_color);
+
+        }
         widgetView.setViewVisibility(R.id.reserve_block, show_reserve ? View.VISIBLE : View.GONE);
 
         Cars.Car[] cars = Cars.getCars(context);

@@ -12,8 +12,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -82,6 +80,7 @@ public class State {
         }
     }
 
+    /*
     static public void print(Throwable ex) {
         ex.printStackTrace();
         appendLog("Error: " + ex.toString());
@@ -90,6 +89,7 @@ public class State {
         String s = sw.toString();
         appendLog(s);
     }
+   */
 
     static final int CMD_CALL = 1;
     static final int CMD_VALET = 2;
