@@ -269,6 +269,7 @@ public class Alarm extends Activity {
         s += max_id;
         ed.putString(Names.N_IDS + car_id, s);
         ed.commit();
+        State.appendLog("set ids=" + s);
 
         Intent iNotification = new Intent(context, FetchService.class);
         iNotification.setAction(FetchService.ACTION_NOTIFICATION);
@@ -292,10 +293,12 @@ public class Alarm extends Activity {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         String n_ids = preferences.getString(Names.N_IDS + car_id, "");
+        State.appendLog("ids=" + n_ids);
         String[] ids = n_ids.split(",");
         String res = null;
         for (String id : ids) {
             if (id.equals(n_id + "")) {
+                State.appendLog("cancel " + n_id);
                 manager.cancel(n_id);
                 continue;
             }
