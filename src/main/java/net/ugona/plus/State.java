@@ -4,16 +4,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.os.Environment;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class State {
 
@@ -55,6 +49,7 @@ public class State {
         return sf.format(time);
     }
 
+    /*
     static void appendLog(String text) {
         File logFile = Environment.getExternalStorageDirectory();
         logFile = new File(logFile, "car.log");
@@ -80,7 +75,6 @@ public class State {
         }
     }
 
-    /*
     static public void print(Throwable ex) {
         ex.printStackTrace();
         appendLog("Error: " + ex.toString());

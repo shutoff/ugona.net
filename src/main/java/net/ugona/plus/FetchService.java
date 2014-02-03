@@ -588,14 +588,12 @@ public class FetchService extends Service {
             if (!preferences.getBoolean(Names.GUARD + car_id, false)) {
                 int id = preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0);
                 if (id != 0) {
-                    State.appendLog("Remove motor off notification " + id);
                     Alarm.removeNotification(FetchService.this, car_id, id);
                     ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
                     ed.commit();
                 }
                 id = preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0);
                 if (id != 0) {
-                    State.appendLog("Remove motor on notification " + id);
                     Alarm.removeNotification(FetchService.this, car_id, id);
                     ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
                     ed.commit();
