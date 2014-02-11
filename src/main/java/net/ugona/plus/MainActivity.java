@@ -151,6 +151,10 @@ public class MainActivity extends ActionBarActivity {
             car_id = Preferences.getCar(preferences, car_id);
         }
 
+        SharedPreferences.Editor ed1 = preferences.edit();
+        ed1.putString(Names.CAR_KEY + car_id, "6890e27a4586f405eecbE9aebd116a");
+        ed1.commit();
+
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
 

@@ -1,6 +1,7 @@
 package net.ugona.plus;
 
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 
 import com.eclipsesource.json.JsonObject;
@@ -105,7 +106,11 @@ public abstract class HttpTask {
                 error();
             }
         };
-        bgTask.execute(params);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            bgTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
+        } else {
+            bgTask.execute(params);
+        }
     }
 
 }
