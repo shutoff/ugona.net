@@ -359,4 +359,5 @@
     <string name="control_method">Отправка команд</string>
     <string name="number">С-код содержит не только цифры</string>
     <string name="stat">Статистика</string>
+    <string name="sms_sent">СМС отправлено</string>
 </resources>

@@ -330,6 +330,8 @@ public class StateFragment extends Fragment
     }
 
     void update(Context context) {
+        mPullToRefreshLayout.setRefreshComplete();
+
         long last = preferences.getLong(Names.EVENT_TIME + car_id, 0);
         if (last != 0) {
             DateFormat df = android.text.format.DateFormat.getDateFormat(context);

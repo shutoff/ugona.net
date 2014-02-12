@@ -396,4 +396,5 @@
     <string name="control_method">Control method</string>
     <string name="number">C-code contains letters</string>
     <string name="stat">Statistics</string>
+    <string name="sms_sent">SMS sent</string>
 </resources>
