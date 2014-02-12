@@ -330,7 +330,8 @@ public class StateFragment extends Fragment
     }
 
     void update(Context context) {
-        mPullToRefreshLayout.setRefreshComplete();
+        if (mPullToRefreshLayout != null)
+            mPullToRefreshLayout.setRefreshComplete();
 
         long last = preferences.getLong(Names.EVENT_TIME + car_id, 0);
         if (last != 0) {
