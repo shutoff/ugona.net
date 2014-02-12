@@ -30,8 +30,12 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
+
 public class StateFragment extends Fragment
-        implements View.OnTouchListener {
+        implements View.OnTouchListener, OnRefreshListener {
 
     String car_id;
 
@@ -91,6 +95,7 @@ public class StateFragment extends Fragment
     TextView tvPointer2;
 
     ActionFragment.ActionAdapter adapter;
+    PullToRefreshLayout mPullToRefreshLayout;
 
     boolean pointer;
 
@@ -246,6 +251,7 @@ public class StateFragment extends Fragment
                     vError.setVisibility(View.GONE);
                     imgRefresh.setVisibility(View.VISIBLE);
                     prgUpdate.setVisibility(View.GONE);
+                    mPullToRefreshLayout.setRefreshComplete();
                 }
                 if (intent.getAction().equals(FetchService.ACTION_ERROR)) {
                     String error_text = intent.getStringExtra(Names.ERROR);
@@ -307,6 +313,20 @@ public class StateFragment extends Fragment
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(Names.ID, car_id);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        ViewGroup viewGroup = (ViewGroup) view;
+        mPullToRefreshLayout = new PullToRefreshLayout(viewGroup.getContext());
+        ActionBarPullToRefresh.from(getActivity())
+                .insertLayoutInto(viewGroup)
+                .allChildrenArePullable()
+                .listener(this)
+                .setup(mPullToRefreshLayout);
+        mPullToRefreshLayout.setPullEnabled(true);
     }
 
     void update(Context context) {
@@ -676,5 +696,12 @@ public class StateFragment extends Fragment
         int color = preferences.getBoolean(Names.TIMEOUT + car_id, false) ? R.color.error : android.R.color.secondary_text_dark;
         tv.setTextColor(getResources().getColor(color));
         v.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onRefreshStarted(View view) {
+        if (prgUpdate.getVisibility() == View.VISIBLE)
+            return;
+        startUpdate(getActivity());
     }
 }

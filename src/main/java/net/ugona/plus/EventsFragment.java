@@ -38,8 +38,12 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.Vector;
 
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
+
 public class EventsFragment extends Fragment
-        implements MainActivity.DateChangeListener {
+        implements MainActivity.DateChangeListener, OnRefreshListener {
 
     final static String URL_EVENTS = "https://car-online.ugona.net/events?skey=$1&begin=$2&end=$3&first=$4&pointer=$5";
     final static String URL_EVENT = "https://car-online.ugona.net/event?skey=$1&id=$2&time=$3";
@@ -69,6 +73,8 @@ public class EventsFragment extends Fragment
 
     LocalDate current;
     BroadcastReceiver br;
+
+    DataFetcher fetcher;
 
     static final String FILTER = "filter";
     static final String DATE = "events_date";
@@ -214,6 +220,8 @@ public class EventsFragment extends Fragment
             new EventType(293, R.string.sos, R.drawable.sos, 0),
     };
 
+    PullToRefreshLayout mPullToRefreshLayout;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.events, container, false);
@@ -325,7 +333,7 @@ public class EventsFragment extends Fragment
             filterEvents(false);
             vProgress.setVisibility(View.GONE);
         } else {
-            DataFetcher fetcher = new DataFetcher();
+            fetcher = new DataFetcher();
             error = false;
             loaded = false;
             fetcher.update();
@@ -342,11 +350,9 @@ public class EventsFragment extends Fragment
                     LocalDate today = new LocalDate();
                     if (!today.equals(current))
                         return;
-                    DataFetcher fetcher = new DataFetcher() {
-                        @Override
-                        void error() {
-                        }
-                    };
+                    if (fetcher != null)
+                        return;
+                    fetcher = new DataFetcher();
                     fetcher.no_reload = true;
                     fetcher.update();
                 }
@@ -359,6 +365,20 @@ public class EventsFragment extends Fragment
         getActivity().registerReceiver(br, intFilter);
 
         return v;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        ViewGroup viewGroup = (ViewGroup) view;
+        mPullToRefreshLayout = new PullToRefreshLayout(viewGroup.getContext());
+        ActionBarPullToRefresh.from(getActivity())
+                .insertLayoutInto(viewGroup)
+                .allChildrenArePullable()
+                .listener(this)
+                .setup(mPullToRefreshLayout);
+        mPullToRefreshLayout.setPullEnabled(current.equals(new LocalDate()));
     }
 
     @Override
@@ -411,10 +431,11 @@ public class EventsFragment extends Fragment
         lvEvents.setVisibility(View.GONE);
         tvNoEvents.setVisibility(View.GONE);
         vError.setVisibility(View.GONE);
-        DataFetcher fetcher = new DataFetcher();
+        fetcher = new DataFetcher();
         error = false;
         loaded = false;
         fetcher.update();
+        mPullToRefreshLayout.setPullEnabled(current.equals(new LocalDate()));
     }
 
     void setupButton(View v, int id, int mask) {
@@ -511,6 +532,7 @@ public class EventsFragment extends Fragment
 
         @Override
         void result(JsonObject data) throws ParseException {
+            done();
             if (!current.equals(date))
                 return;
             events.clear();
@@ -539,7 +561,16 @@ public class EventsFragment extends Fragment
 
         @Override
         void error() {
-            showError();
+            if (!no_reload)
+                showError();
+            done();
+        }
+
+        void done() {
+            if (fetcher != this)
+                return;
+            mPullToRefreshLayout.setRefreshComplete();
+            fetcher = null;
         }
 
         void update() {
@@ -703,6 +734,15 @@ public class EventsFragment extends Fragment
             }
             return v;
         }
+    }
+
+    @Override
+    public void onRefreshStarted(View view) {
+        if (fetcher != null)
+            return;
+        fetcher = new DataFetcher();
+        fetcher.no_reload = true;
+        fetcher.update();
     }
 
     static class Event implements Serializable {
