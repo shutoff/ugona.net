@@ -310,7 +310,6 @@ public class Actions {
         });
     }
 
-/*
     static Pattern location;
 
     static void map_query(final Context context, final String car_id) {
@@ -326,22 +325,24 @@ public class Actions {
                         if (!matcher.find())
                             return false;
                         try {
-                            double lon = Double.parseDouble(matcher.group(1));
-                            double lat = Double.parseDouble(matcher.group(2));
-                            double[] coord = utm2geo(lon, lat, 35, 1);
+                            double lat = toWGS(Double.parseDouble(matcher.group(1)));
+                            double lng = toWGS(Double.parseDouble(matcher.group(2)));
 
-                            Intent intent = new Intent(context, StatusDialog.class);
+                            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                            SharedPreferences.Editor ed = preferences.edit();
+                            ed.putFloat(Names.LAT + car_id, (float) lat);
+                            ed.putFloat(Names.LNG + car_id, (float) lng);
+                            ed.remove(Names.COURSE + car_id);
+                            ed.commit();
+                            Intent i = new Intent(FetchService.ACTION_UPDATE);
+                            i.putExtra(Names.ID, car_id);
+                            context.sendBroadcast(i);
+
+                            Intent intent = new Intent(context, MapDialog.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             intent.putExtra(Names.TITLE, context.getString(R.string.map_req));
-                            intent.putExtra(Names.SMS_TEXT, text);
-                            String s = coord[0] + "";
-                            if (s.length() > 7)
-                                s = s.substring(0, 7);
-                            intent.putExtra(Names.LATITUDE, s);
-                            s = coord[1] + "";
-                            if (s.length() > 7)
-                                s = s.substring(0, 7);
-                            intent.putExtra(Names.LONGITUDE, lon + "");
+                            intent.putExtra(Names.LAT, lat);
+                            intent.putExtra(Names.LNG, lng);
                             intent.putExtra(Names.ID, car_id);
                             context.startActivity(intent);
                             return true;
@@ -355,48 +356,18 @@ public class Actions {
         });
     }
 
-    static double[] utm2geo(double x, double y, double huso, int hemisfery){
-
-        double a = 6378137.0;
-        double f = 1/298.257223563;
-
-        double b = a*(1-f);
-        double se = Math.sqrt(((Math.pow(a,2))-(Math.pow(b,2)))/((Math.pow(b,2))));
-        double se2 = Math.pow(se,2);
-        double c = (Math.pow(a,2))/b;
-
-        x = x - 500000;
-        if(hemisfery == -1){y = y - 10000000.0;}
-        double lonmedia = (huso*6)-183.0;
-        double fip = (y/(6366197.724*0.9996));
-        double v = (c*0.9996)/Math.sqrt((1+se2*Math.pow(Math.cos(fip),2)));
-        double aa = (x/v);
-        double A1 = Math.sin(2*fip);
-        double A2 = A1*Math.pow(Math.cos(fip),2);
-        double J2 = fip + (A1/2);
-        double J4 = (3*J2 + A2)/4;
-        double J6 = (5*J4+A2*Math.pow(Math.cos(fip),2))/3.0;
-        double alfa = (3.0/4)*se2;
-        double beta = (5.0/3)*Math.pow(alfa,2);
-        double gamma = (35.0/27)*Math.pow(alfa,3);
-        double B = 0.9996*c*(fip-(alfa*J2)+(beta*J4)-(gamma*J6));
-        double bb = (y-B)/v;
-        double S = (se2*Math.pow(aa,2)*Math.pow(Math.cos(fip),2))/2;
-        double CC = aa*(1-(S/3.0));
-        double n = (bb*(1.0-S))+fip;
-        double sinh = (Math.pow(Math.E,CC)-Math.pow(Math.E,-(CC)))/2.0;
-        double ilam = Math.atan(sinh/Math.cos(n));
-        double tau = Math.atan(Math.cos(ilam)*Math.tan(n));
-        double gilam = (ilam*180)/Math.PI;
-        double lon = gilam + lonmedia;
-        double lat = fip + (1 + se2*(Math.pow(Math.cos(fip),2))-(3.0/2)*se2*Math.sin(fip)*Math.cos(fip)*(tau-fip))*(tau-fip);
-        double glat = (lat*180)/Math.PI;
-        double lonlat[] = new double[2];
-        lonlat[0] = lon;
-        lonlat[1] = glat;
-        return lonlat;
+    static double toWGS(double pos) {
+        boolean sign = false;
+        if (pos < 0) {
+            pos = -pos;
+            sign = true;
+        }
+        double res = Math.floor(pos / 100);
+        res += (pos - res * 100) / 60;
+        if (sign)
+            res = -res;
+        return res;
     }
-*/
 
     static String[] alarms = {
             "Heavy shock",

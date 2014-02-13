@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.FrameLayout;
+import android.widget.ScrollView;
 
 import net.ugona.plus.R;
 
@@ -179,7 +180,7 @@ public class PullToRefreshLayout extends FrameLayout {
     }
 
     void addRefreshableViewRecursive(View v) {
-        if (!AbsListView.class.isInstance(v)) {
+        if (!AbsListView.class.isInstance(v) && !ScrollView.class.isInstance(v)) {
             if (ViewGroup.class.isInstance(v)) {
                 ViewGroup group = (ViewGroup) v;
                 for (int i = 0, z = group.getChildCount(); i < z; i++) {
