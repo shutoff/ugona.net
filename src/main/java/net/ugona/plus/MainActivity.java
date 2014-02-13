@@ -14,6 +14,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -109,6 +110,7 @@ public class MainActivity extends ActionBarActivity {
     Set<DateChangeListener> dateChangeListenerSet;
 
     GoogleCloudMessaging gcm;
+    PowerManager powerMgr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,6 +128,8 @@ public class MainActivity extends ActionBarActivity {
         dateChangeListenerSet = new HashSet<DateChangeListener>();
 
         super.onCreate(savedInstanceState);
+
+        powerMgr = (PowerManager) getSystemService(Context.POWER_SERVICE);
 
         setContentView(R.layout.main);
 
@@ -150,6 +154,10 @@ public class MainActivity extends ActionBarActivity {
                 car_id = preferences.getString(Names.LAST, "");
             car_id = Preferences.getCar(preferences, car_id);
         }
+
+        SharedPreferences.Editor ed1 = preferences.edit();
+        ed1.putString(Names.CAR_KEY + car_id, "6890e27a4586f405eecbE9aebd116a");
+        ed1.commit();
 
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
@@ -424,6 +432,8 @@ public class MainActivity extends ActionBarActivity {
                 finish();
         }
         if (requestCode == REQUEST_ALARM) {
+            if (!powerMgr.isScreenOn())
+                return;
             Intent intent = new Intent(this, FetchService.class);
             intent.putExtra(Names.ID, car_id);
             startService(intent);

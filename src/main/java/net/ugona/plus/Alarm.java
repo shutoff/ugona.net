@@ -269,7 +269,6 @@ public class Alarm extends Activity {
         s += max_id;
         ed.putString(Names.N_IDS + car_id, s);
         ed.commit();
-
         Intent iNotification = new Intent(context, FetchService.class);
         iNotification.setAction(FetchService.ACTION_NOTIFICATION);
         iNotification.putExtra(Names.ID, car_id);

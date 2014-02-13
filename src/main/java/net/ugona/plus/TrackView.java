@@ -165,6 +165,7 @@ public class TrackView extends WebViewActivity {
                 ex.printStackTrace();
             }
             String res = track_data.toString();
+            log("get track: " + res);
             return res;
         }
 
@@ -228,6 +229,7 @@ public class TrackView extends WebViewActivity {
         } catch (Exception ex) {
             // Ignore
         }
+        log("tracks view");
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         super.onCreate(savedInstanceState);
         setTitle(getIntent().getStringExtra(Names.TITLE));

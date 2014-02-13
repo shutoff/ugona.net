@@ -106,6 +106,8 @@ public class WidgetService extends Service {
                 }
             }
         }
+        if (!powerMgr.isScreenOn())
+            return START_STICKY;
         ComponentName thisAppWidget = new ComponentName(getPackageName(), CarWidget.class.getName());
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
         if (appWidgetManager == null)

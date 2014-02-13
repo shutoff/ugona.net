@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
+import android.widget.Toast;
 
 import org.joda.time.DateTimeZone;
 
@@ -116,6 +117,8 @@ public class SmsMonitor extends BroadcastReceiver {
             Intent i = new Intent(context, FetchService.class);
             i.putExtra(Names.ID, car_id);
             context.startService(i);
+            Toast toast = Toast.makeText(context, context.getString(R.string.sms_sent), Toast.LENGTH_SHORT);
+            toast.show();
             return;
         }
         if (action.equals(ACTION)) {

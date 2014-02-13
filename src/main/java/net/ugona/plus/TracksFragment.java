@@ -39,8 +39,12 @@ import java.text.DateFormat;
 import java.util.Map;
 import java.util.Vector;
 
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
+
 public class TracksFragment extends Fragment
-        implements MainActivity.DateChangeListener {
+        implements MainActivity.DateChangeListener, OnRefreshListener {
 
     final String DATE = "tracks_date";
     final String TRACK = "track";
@@ -66,6 +70,9 @@ public class TracksFragment extends Fragment
     ListView lvTracks;
 
     BroadcastReceiver br;
+
+    PullToRefreshLayout mPullToRefreshLayout;
+    TracksFetcher fetcher;
 
     final static String URL_TRACKS = "https://car-online.ugona.net/tracks?skey=$1&begin=$2&end=$3";
 
@@ -138,7 +145,7 @@ public class TracksFragment extends Fragment
             tracks_done();
             all_done();
         } else {
-            TracksFetcher fetcher = new TracksFetcher();
+            fetcher = new TracksFetcher();
             fetcher.update();
         }
         br = new BroadcastReceiver() {
@@ -156,6 +163,20 @@ public class TracksFragment extends Fragment
         getActivity().registerReceiver(br, intFilter);
 
         return v;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        ViewGroup viewGroup = (ViewGroup) view;
+        mPullToRefreshLayout = new PullToRefreshLayout(viewGroup.getContext());
+        ActionBarPullToRefresh.from(getActivity())
+                .insertLayoutInto(viewGroup)
+                .allChildrenArePullable()
+                .listener(this)
+                .setup(mPullToRefreshLayout);
+        mPullToRefreshLayout.setPullEnabled(current.equals(new LocalDate()));
     }
 
     @Override
@@ -211,8 +232,9 @@ public class TracksFragment extends Fragment
         prgFirst.setVisibility(View.VISIBLE);
         prgMain.setVisibility(View.VISIBLE);
         prgMain.setProgress(0);
-        TracksFetcher fetcher = new TracksFetcher();
+        fetcher = new TracksFetcher();
         fetcher.update();
+        mPullToRefreshLayout.setPullEnabled(current.equals(new LocalDate()));
     }
 
     void showError() {
@@ -331,11 +353,21 @@ public class TracksFragment extends Fragment
         loaded = true;
     }
 
+    @Override
+    public void onRefreshStarted(View view) {
+        if (fetcher != null)
+            return;
+        fetcher = new TracksFetcher();
+        fetcher.no_reload = true;
+        fetcher.update();
+    }
+
     class TracksFetcher extends HttpTask {
         LocalDate date;
 
         @Override
         void result(JsonObject res) throws ParseException {
+            done();
             if (date != current)
                 return;
             tracks = new Vector<TrackView.Track>();
@@ -370,7 +402,16 @@ public class TracksFragment extends Fragment
 
         @Override
         void error() {
-            showError();
+            if (!no_reload)
+                showError();
+            done();
+        }
+
+        void done() {
+            if (fetcher != this)
+                return;
+            fetcher = null;
+            mPullToRefreshLayout.setRefreshComplete();
         }
 
         void update() {
@@ -383,6 +424,7 @@ public class TracksFragment extends Fragment
             execute(URL_TRACKS, api_key, start_time, end_time);
         }
 
+        boolean no_reload;
         long start_time;
         long end_time;
     }

@@ -186,6 +186,7 @@ public class MapView extends WebViewActivity {
                     continue;
                 data += "|" + createData(car.id);
             }
+            log("get data: " + data);
             return data;
         }
     }
@@ -296,6 +297,7 @@ public class MapView extends WebViewActivity {
             netListener = null;
         }
 
+        log("map view");
     }
 
     @Override
