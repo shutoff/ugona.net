@@ -1,7 +1,6 @@
 package net.ugona.plus;
 
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
@@ -9,11 +8,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 
 abstract public class WebViewActivity extends ActionBarActivity {
 
@@ -69,6 +63,7 @@ abstract public class WebViewActivity extends ActionBarActivity {
     }
 
     void log(String text) {
+/*
         File logFile = Environment.getExternalStorageDirectory();
         logFile = new File(logFile, "car.log");
         if (!logFile.exists()) {
@@ -88,5 +83,6 @@ abstract public class WebViewActivity extends ActionBarActivity {
         } catch (IOException e) {
             // ignore
         }
+*/
     }
 }

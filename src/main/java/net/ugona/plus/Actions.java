@@ -47,6 +47,8 @@ public class Actions {
 
     static void done_motor_on(Context context, String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (!preferences.getBoolean(Names.GUARD + car_id, false))
+            return;
         int id = preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0);
         if (id != 0)
             return;
@@ -58,11 +60,12 @@ public class Actions {
         ed.putInt(Names.MOTOR_ON_NOTIFY + car_id, id);
         ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
         ed.commit();
-        State.appendLog("motor on " + id);
     }
 
     static void done_motor_off(Context context, String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (!preferences.getBoolean(Names.GUARD + car_id, false))
+            return;
         int id = preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0);
         if (id != 0)
             return;
@@ -80,7 +83,6 @@ public class Actions {
         ed.putInt(Names.MOTOR_OFF_NOTIFY + car_id, id);
         ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
         ed.commit();
-        State.appendLog("motor off " + id);
     }
 
     static void done_valet_on(Context context, String car_id) {
