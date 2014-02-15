@@ -23,6 +23,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
+
 import org.joda.time.LocalDateTime;
 
 import java.text.DateFormat;
@@ -100,6 +103,8 @@ public class StateFragment extends Fragment
     boolean pointer;
 
     static Pattern number_pattern = Pattern.compile("^[0-9]+ ?");
+
+    final String GSM_URL = "https://car-online.ugona.net/gsm?skey=%1&cc=%2&nc=%2&cid=%3&lac=%4";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -347,41 +352,47 @@ public class StateFragment extends Fragment
 
         double lat = preferences.getFloat(Names.LAT + car_id, 0);
         double lon = preferences.getFloat(Names.LNG + car_id, 0);
-        String addr = "";
         String location = "";
-        if ((lat == 0) || (lon == 0)) {
-            String gsm = preferences.getString(Names.GSM + car_id, "");
+        if ((lat == 0) && (lon == 0)) {
+            String gsm = preferences.getString(Names.GSM_SECTOR + car_id, "");
             if (!gsm.equals("")) {
                 String[] parts = gsm.split(" ");
                 location = parts[0] + "-" + parts[1] + " LAC:" + parts[2] + " CID:" + parts[3];
-                addr = preferences.getString(Names.ADDRESS + car_id, "");
+                String gsm_zone = preferences.getString(Names.GSM_ZONE + car_id, "");
+                if (gsm_zone.equals("")) {
+                    HttpTask task = new HttpTask() {
+                        @Override
+                        void result(JsonObject res) throws ParseException {
+                            String sector = res.get("sector").asString();
+                            SharedPreferences.Editor ed = preferences.edit();
+                            ed.putString(Names.GSM_ZONE + car_id, sector);
+                            ed.commit();
+                            updateZone(sector);
+                        }
+
+                        @Override
+                        void error() {
+                        }
+                    };
+                    String skey = preferences.getString(Names.CAR_KEY + car_id, "");
+                    String[] gsm_parts = gsm.split(" ");
+                    task.execute(GSM_URL, skey, gsm_parts[0], gsm_parts[1], gsm_parts[2], gsm_parts[3]);
+                } else {
+                    updateZone(gsm_zone);
+                }
             }
         } else {
             location = preferences.getFloat(Names.LAT + car_id, 0) + " ";
             location += preferences.getFloat(Names.LNG + car_id, 0);
-            addr = Address.getAddress(context, car_id);
+            Address req = new Address() {
+                @Override
+                void result(String addr) {
+                    updateAddress(addr);
+                }
+            };
+            req.get(getActivity(), lat, lon);
         }
         tvLocation.setText(location);
-        String parts[] = addr.split(", ");
-        addr = parts[0];
-        int start = 2;
-        if (parts.length > 1)
-            addr += ", " + parts[1];
-        if (parts.length > 2) {
-            Matcher matcher = number_pattern.matcher(parts[2]);
-            if (matcher.matches()) {
-                addr += ", " + parts[2];
-                start++;
-            }
-        }
-        tvAddress2.setText(addr);
-        addr = "";
-        for (int i = start; i < parts.length; i++) {
-            if (!addr.equals(""))
-                addr += ", ";
-            addr += parts[i];
-        }
-        tvAddress3.setText(addr);
 
         String balance = preferences.getString(Names.BALANCE + car_id, "");
         if (!balance.equals("") && preferences.getBoolean(Names.SHOW_BALANCE + car_id, true)) {
@@ -534,6 +545,63 @@ public class StateFragment extends Fragment
 
     }
 
+    void updateAddress(String addr) {
+        if (addr == null)
+            return;
+        String parts[] = addr.split(", ");
+        addr = parts[0];
+        int start = 2;
+        if (parts.length > 1)
+            addr += ", " + parts[1];
+        if (parts.length > 2) {
+            Matcher matcher = number_pattern.matcher(parts[2]);
+            if (matcher.matches()) {
+                addr += ", " + parts[2];
+                start++;
+            }
+        }
+        tvAddress2.setText(addr);
+        addr = "";
+        for (int i = start; i < parts.length; i++) {
+            if (!addr.equals(""))
+                addr += ", ";
+            addr += parts[i];
+        }
+        tvAddress3.setText(addr);
+    }
+
+    void updateZone(String zone) {
+        String points[] = zone.split("_");
+        double min_lat = 180;
+        double max_lat = -180;
+        double min_lon = 180;
+        double max_lon = -180;
+        for (String point : points) {
+            try {
+                String[] p = point.split(",");
+                double p_lat = Double.parseDouble(p[0]);
+                double p_lon = Double.parseDouble(p[1]);
+                if (p_lat > max_lat)
+                    max_lat = p_lat;
+                if (p_lat < min_lat)
+                    min_lat = p_lat;
+                if (p_lon > max_lon)
+                    max_lon = p_lon;
+                if (p_lon < min_lon)
+                    min_lon = p_lon;
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+        Address req = new Address() {
+            @Override
+            void result(String addr) {
+                updateAddress(addr);
+            }
+        };
+        req.get(getActivity(), (min_lat + max_lat) / 2, (min_lon + max_lon) / 2);
+    }
+
     void updateVoltage(TextView tv, String key, boolean normal) {
         String val = preferences.getString(key + car_id, "?");
         tv.setText(val + " V");
@@ -580,7 +648,7 @@ public class StateFragment extends Fragment
 
     void showMap() {
         if ((preferences.getFloat(Names.LAT + car_id, 0) == 0) && (preferences.getFloat(Names.LNG + car_id, 0) == 0) &&
-                preferences.getString(Names.GSM_ZONE + car_id, "").equals("")) {
+                preferences.getString(Names.GSM + car_id, "").equals("")) {
             Toast toast = Toast.makeText(getActivity(), R.string.no_location, Toast.LENGTH_SHORT);
             toast.show();
             return;

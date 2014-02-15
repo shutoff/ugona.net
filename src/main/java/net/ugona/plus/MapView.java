@@ -144,17 +144,19 @@ public class MapView extends WebViewActivity {
             }
             if (zone.equals("")) {
                 data += Math.round(lat * 10000) / 10000. + "," + Math.round(lng * 10000) / 10000. + "<br/>";
-                String address = Address.getAddress(getBaseContext(), id);
-                String[] parts = address.split(", ");
-                if (parts.length >= 3) {
-                    address = parts[0] + ", " + parts[1];
-                    for (int n = 2; n < parts.length; n++)
-                        address += "<br/>" + parts[n];
+                String address = Address.getAddress(getBaseContext(), lat, lng);
+                if (address != null) {
+                    String[] parts = address.split(", ");
+                    if (parts.length >= 3) {
+                        address = parts[0] + ", " + parts[1];
+                        for (int n = 2; n < parts.length; n++)
+                            address += "<br/>" + parts[n];
+                    }
+                    data += address;
                 }
-                data += address;
                 data += ";";
             } else {
-                String address = preferences.getString(Names.ADDRESS + id, "");
+                String address = Address.getAddress(MapView.this, lat, lng);
                 String[] parts = address.split(", ");
                 if (parts.length >= 3) {
                     address = parts[0] + ", " + parts[1];

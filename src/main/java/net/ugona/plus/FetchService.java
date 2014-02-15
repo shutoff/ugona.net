@@ -400,9 +400,12 @@ public class FetchService extends Service {
                     gsm_str += gsm.get("nc").asInt() + " ";
                     gsm_str += gsm.get("lac").asInt() + " ";
                     gsm_str += gsm.get("cid").asInt();
-                    ed.putString(Names.GSM + car_id, gsm_str);
-                    ed.remove(Names.LAT + car_id);
-                    ed.remove(Names.LNG + car_id);
+                    if (!preferences.getString(Names.GSM_SECTOR + car_id, "").equals(gsm_str)) {
+                        ed.putString(Names.GSM_SECTOR + car_id, gsm_str);
+                        ed.remove(Names.GSM_ZONE + car_id);
+                        ed.remove(Names.LAT + car_id);
+                        ed.remove(Names.LNG + car_id);
+                    }
                 }
             }
 
@@ -446,8 +449,13 @@ public class FetchService extends Service {
                 balance_value = res.get("balance");
                 if (balance_value != null) {
                     JsonObject balance = balance_value.asObject();
-                    ed.putString(Names.BALANCE + car_id, balance.get("value").asDouble() + "");
-                    ed.remove(Names.BALANCE_TIME + car_id);
+                    double value = balance.get("value").asDouble();
+                    if (preferences.getString(Names.BALANCE + car_id, "").equals(value)) {
+                        balance_value = null;
+                    } else {
+                        ed.putString(Names.BALANCE + car_id, value + "");
+                        ed.remove(Names.BALANCE_TIME + car_id);
+                    }
                 }
             }
 

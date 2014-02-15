@@ -45,8 +45,8 @@ public final class Names {
     static final String LNG = "lng_";
     static final String SPEED = "speed_";
     static final String COURSE = "course_";
-    static final String GSM = "gsm";
-    static final String GSM_ZONE = "gsmzone";
+    static final String GSM_SECTOR = "gsm";
+    static final String GSM_ZONE = "gsm_zone";
 
     static final String ENGINE = "Engine";
     static final String LAST_EVENT = "LastEvent";
@@ -68,11 +68,6 @@ public final class Names {
     static final String TEMPERATURE = "temperature_";
     static final String TEMP_SIFT = "TempShift";
     static final String MAP_TYPE = "map_type";
-
-    static final String ADDRESS = "Address";
-    static final String ADDR_PARAM = "addr_param";
-    static final String ADDR_LAT = "addr_lat";
-    static final String ADDR_LNG = "addr_lng";
 
     static final String SMS_TEXT = "sms_text";
     static final String STATE = "state";
