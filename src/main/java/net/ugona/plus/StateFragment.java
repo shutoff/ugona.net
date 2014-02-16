@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -88,6 +89,7 @@ public class StateFragment extends Fragment
 
     View balanceBlock;
     View vTime;
+    ScrollView svAddress;
 
     CarDrawable drawable;
     BroadcastReceiver br;
@@ -104,7 +106,7 @@ public class StateFragment extends Fragment
 
     static Pattern number_pattern = Pattern.compile("^[0-9]+ ?");
 
-    final String GSM_URL = "https://car-online.ugona.net/gsm?skey=%1&cc=%2&nc=%2&cid=%3&lac=%4";
+    final String GSM_URL = "https://car-online.ugona.net/gsm?skey=$1&cc=$2&nc=$3&lac=$4&cid=$5";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -126,6 +128,7 @@ public class StateFragment extends Fragment
         tvTime = (TextView) v.findViewById(R.id.addr_time);
         tvLocation = (TextView) v.findViewById(R.id.location);
         tvAddress2 = (TextView) v.findViewById(R.id.address2);
+        svAddress = (ScrollView) v.findViewById(R.id.addr_block);
 
         tvAddress3 = (TextView) v.findViewById(R.id.address3);
         tvLast = (TextView) v.findViewById(R.id.last);
@@ -568,6 +571,7 @@ public class StateFragment extends Fragment
             addr += parts[i];
         }
         tvAddress3.setText(addr);
+        svAddress.scrollTo(0, 0);
     }
 
     void updateZone(String zone) {
@@ -648,7 +652,7 @@ public class StateFragment extends Fragment
 
     void showMap() {
         if ((preferences.getFloat(Names.LAT + car_id, 0) == 0) && (preferences.getFloat(Names.LNG + car_id, 0) == 0) &&
-                preferences.getString(Names.GSM + car_id, "").equals("")) {
+                preferences.getString(Names.GSM_ZONE + car_id, "").equals("")) {
             Toast toast = Toast.makeText(getActivity(), R.string.no_location, Toast.LENGTH_SHORT);
             toast.show();
             return;

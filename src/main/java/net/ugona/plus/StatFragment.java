@@ -23,6 +23,8 @@ import org.joda.time.LocalDate;
 
 import java.text.DateFormat;
 import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
 
@@ -120,6 +122,20 @@ public class StatFragment extends Fragment implements OnRefreshListener {
                     // ignore
                 }
             }
+            Set<Integer> opened = new HashSet<Integer>();
+            if (stat != null) {
+                for (int i = 1; i < stat.size(); i++) {
+                    Day d = stat.get(i);
+                    if (d.level == 0)
+                        continue;
+                    Day prev = stat.get(i - 1);
+                    if ((d.level == 1) && (prev.level == 0))
+                        opened.add(prev.id());
+                    if ((d.level == 2) && (prev.level == 1))
+                        opened.add(prev.id());
+                }
+            }
+
             stat = new Vector<Day>();
             Day cur = null;
             double dist = 0;
@@ -146,6 +162,17 @@ public class StatFragment extends Fragment implements OnRefreshListener {
             }
             if (cur != null)
                 stat.insertElementAt(cur, 0);
+
+            for (int i = 0; i < stat.size(); i++) {
+                Day d = stat.get(i);
+                if ((d.level < 2) && opened.contains(d.id())) {
+                    if (d.level == 0)
+                        openMonth(d, i + 1);
+                    if (d.level == 1)
+                        openWeek(d, i + 1);
+                }
+            }
+
             double v = dist * 3.6 / time;
             String status = getString(R.string.status);
             tvSummary.setText(String.format(status, dist / 1000, timeFormat((int) (time / 60)), v, (double) speed));
@@ -222,50 +249,7 @@ public class StatFragment extends Fragment implements OnRefreshListener {
                             adapter.notifyDataSetChanged();
                             return;
                         }
-
-                        LocalDate begin = new LocalDate(d.year, d.month + 1, 1);
-                        LocalDate end = begin.plusMonths(1);
-                        while (begin.getDayOfWeek() != 1) {
-                            begin = begin.minusDays(1);
-                        }
-                        while (end.getDayOfWeek() != 7) {
-                            end = end.plusDays(1);
-                        }
-                        LocalDate end_week = begin.plusDays(6);
-                        Day cur = null;
-                        boolean week = false;
-                        for (Day dd : days) {
-                            if (dd.compare(begin) < 0)
-                                continue;
-                            if (dd.compare(end) > 0)
-                                break;
-                            if (dd.compare(end_week) > 0) {
-                                if ((cur != null) && week)
-                                    stat.insertElementAt(cur, position);
-                                cur = null;
-                            }
-                            if (cur == null) {
-                                begin = new LocalDate(dd.year, dd.month + 1, dd.day);
-                                while (begin.getDayOfWeek() != 1) {
-                                    begin = begin.minusDays(1);
-                                }
-                                end_week = begin.plusDays(6);
-                                cur = new Day();
-                                cur.year = begin.getYear();
-                                cur.month = begin.getMonthOfYear() - 1;
-                                cur.day = begin.getDayOfMonth();
-                                cur.level = 1;
-                                week = false;
-                            }
-                            cur.dist += dd.dist;
-                            cur.time += dd.time;
-                            if (dd.speed > cur.speed)
-                                cur.speed = dd.speed;
-                            if (d.month == dd.month)
-                                week = true;
-                        }
-                        if ((cur != null) && week)
-                            stat.insertElementAt(cur, position);
+                        openMonth(d, position);
                         BaseAdapter adapter = (BaseAdapter) lvStat.getAdapter();
                         adapter.notifyDataSetChanged();
                     }
@@ -280,32 +264,7 @@ public class StatFragment extends Fragment implements OnRefreshListener {
                             adapter.notifyDataSetChanged();
                             return;
                         }
-                        Day dm = null;
-                        for (int p = position - 2; p >= 0; p--) {
-                            dm = stat.get(p);
-                            if (dm.level == 0)
-                                break;
-                        }
-                        Day dw = stat.get(position - 1);
-                        LocalDate begin = new LocalDate(dw.year, dw.month + 1, dw.day);
-                        LocalDate end = begin.plusDays(6);
-                        for (Day dd : days) {
-                            if (dd.compare(begin) < 0)
-                                continue;
-                            if (dd.compare(end) > 0)
-                                break;
-                            if (dd.month != dm.month)
-                                continue;
-                            Day cur = new Day();
-                            cur.year = dd.year;
-                            cur.month = dd.month;
-                            cur.day = dd.day;
-                            cur.level = 2;
-                            cur.dist = dd.dist;
-                            cur.time = dd.time;
-                            cur.speed = dd.speed;
-                            stat.insertElementAt(cur, position);
-                        }
+                        openWeek(d, position);
                         BaseAdapter adapter = (BaseAdapter) lvStat.getAdapter();
                         adapter.notifyDataSetChanged();
                     }
@@ -331,7 +290,80 @@ public class StatFragment extends Fragment implements OnRefreshListener {
 
     }
 
-    ;
+    void openMonth(Day d, int position) {
+        LocalDate begin = new LocalDate(d.year, d.month + 1, 1);
+        LocalDate end = begin.plusMonths(1);
+        while (begin.getDayOfWeek() != 1) {
+            begin = begin.minusDays(1);
+        }
+        while (end.getDayOfWeek() != 7) {
+            end = end.plusDays(1);
+        }
+        LocalDate end_week = begin.plusDays(6);
+        Day cur = null;
+        boolean week = false;
+        for (Day dd : days) {
+            if (dd.compare(begin) < 0)
+                continue;
+            if (dd.compare(end) > 0)
+                break;
+            if (dd.compare(end_week) > 0) {
+                if ((cur != null) && week)
+                    stat.insertElementAt(cur, position);
+                cur = null;
+            }
+            if (cur == null) {
+                begin = new LocalDate(dd.year, dd.month + 1, dd.day);
+                while (begin.getDayOfWeek() != 1) {
+                    begin = begin.minusDays(1);
+                }
+                end_week = begin.plusDays(6);
+                cur = new Day();
+                cur.year = begin.getYear();
+                cur.month = begin.getMonthOfYear() - 1;
+                cur.day = begin.getDayOfMonth();
+                cur.level = 1;
+                week = false;
+            }
+            cur.dist += dd.dist;
+            cur.time += dd.time;
+            if (dd.speed > cur.speed)
+                cur.speed = dd.speed;
+            if (d.month == dd.month)
+                week = true;
+        }
+        if ((cur != null) && week)
+            stat.insertElementAt(cur, position);
+    }
+
+    void openWeek(Day d, int position) {
+        Day dm = null;
+        for (int p = position - 2; p >= 0; p--) {
+            dm = stat.get(p);
+            if (dm.level == 0)
+                break;
+        }
+        Day dw = stat.get(position - 1);
+        LocalDate begin = new LocalDate(dw.year, dw.month + 1, dw.day);
+        LocalDate end = begin.plusDays(6);
+        for (Day dd : days) {
+            if (dd.compare(begin) < 0)
+                continue;
+            if (dd.compare(end) > 0)
+                break;
+            if (dd.month != dm.month)
+                continue;
+            Day cur = new Day();
+            cur.year = dd.year;
+            cur.month = dd.month;
+            cur.day = dd.day;
+            cur.level = 2;
+            cur.dist = dd.dist;
+            cur.time = dd.time;
+            cur.speed = dd.speed;
+            stat.insertElementAt(cur, position);
+        }
+    }
 
     void getData() {
         fetcher = new DataFetcher();
@@ -406,6 +438,14 @@ public class StatFragment extends Fragment implements OnRefreshListener {
             if (day > d.getDayOfMonth())
                 return 1;
             return 0;
+        }
+
+        int id() {
+            int res = year * 12 + month;
+            if (level == 0)
+                return res;
+            res = res * 31 + day;
+            return res;
         }
 
     }

@@ -1,53 +1,129 @@
 package net.ugona.plus;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 
-import java.util.List;
 import java.util.Locale;
 
 public abstract class Address {
 
     abstract void result(String address);
 
-    void get(final Context context, final double lat, final double lng) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+    static SQLiteDatabase address_db;
+    final static String TABLE_NAME = "address";
+
+    class OpenHelper extends SQLiteOpenHelper {
+
+        final static String DB_NAME = "address.db";
+
+        final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " ("
+                + "ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+                + "Lat REAL NOT NULL, "
+                + "Lng REAL NOT NULL, "
+                + "Address TEXT NOT NULL, "
+                + "Param TEXT NOT NULL)";
+
+        public OpenHelper(Context context) {
+            super(context, DB_NAME, null, 2);
+        }
+
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            db.execSQL(CREATE_TABLE);
+            db.execSQL("CREATE INDEX \"index_lng\" on address (Lng ASC)");
+            db.execSQL("CREATE INDEX \"index_lat\" on address (Lat ASC)");
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            db.execSQL("DROP TABLE IF EXISTS address");
+            onCreate(db);
+        }
+    }
+
+    void get(final Context context, final double v_lat, final double v_lng) {
+
+        if (address_db == null) {
+            OpenHelper helper = new OpenHelper(context);
+            address_db = helper.getWritableDatabase();
+        }
+
+        final double lat = Math.round(v_lat * 100000.) / 100000.;
+        final double lng = Math.round(v_lng * 100000.) / 100000.;
+
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String p = Locale.getDefault().getLanguage();
         if (preferences.getString(Names.MAP_TYPE, "").equals("OSM"))
             p += "_";
         final String param = p;
-        String[] conditions = {
-                param,
-                (lat - 0.001) + "",
-                (lat + 0.001) + "",
-                (lng - 0.001) + "",
-                (lng + 0.001) + ""
+        final String[] columns = {
+                "Lat",
+                "Lng",
+                "Address",
+                "Param",
         };
-        List<AddressRecord> res = AddressRecord.find(AddressRecord.class, "(Param = ?) AND (Lat BETWEEN ? AND ?) AND (Lng BETWEEN ? AND ?)", conditions);
 
-        for (AddressRecord addr : res) {
-            double distance = calc_distance(lat, lng, addr.lat, addr.lng);
-            if (distance < 80) {
-                result(addr.addr);
-                return;
-            }
-        }
-        AddressRequest request = new AddressRequest() {
+        AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
             @Override
-            void addressResult(String address) {
-                if (address != null) {
-                    AddressRecord addr = new AddressRecord();
-                    addr.lat = lat;
-                    addr.lng = lng;
-                    addr.addr = address;
-                    addr.param = param;
-                    addr.save();
+            protected String doInBackground(Void... params) {
+
+                String[] conditions = {
+                        param,
+                        (lat - 0.001) + "",
+                        (lat + 0.001) + "",
+                        (lng - 0.001) + "",
+                        (lng + 0.001) + ""
+                };
+
+                Cursor cursor = address_db.query(TABLE_NAME, columns, "(Param = ?) AND (Lat BETWEEN ? AND ?) AND (Lng BETWEEN ? AND ?)", conditions, null, null, null, null);
+                if (cursor.moveToFirst()) {
+                    for (; ; ) {
+                        double db_lat = cursor.getDouble(0);
+                        double db_lon = cursor.getDouble(1);
+                        double distance = calc_distance(lat, lng, db_lat, db_lon);
+                        if (distance < 80) {
+                            String address = cursor.getString(2);
+                            return address;
+                        }
+                        if (!cursor.moveToNext())
+                            break;
+                    }
                 }
-                result(address);
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                if (s != null) {
+                    result(s);
+                    return;
+                }
+                AddressRequest request = new AddressRequest() {
+                    @Override
+                    void addressResult(String address) {
+                        if (address != null) {
+                            ContentValues values = new ContentValues();
+                            values.put(columns[0], lat);
+                            values.put(columns[1], lng);
+                            values.put(columns[2], address);
+                            values.put(columns[3], param);
+                            address_db.insert(TABLE_NAME, null, values);
+                        }
+                        result(address);
+                    }
+                };
+                request.getAddress(preferences, lat, lng);
             }
         };
-        request.getAddress(preferences, lat, lng);
+        task.execute();
+
     }
 
     static String getAddress(Context context, final double lat, final double lng) {
@@ -56,6 +132,13 @@ public abstract class Address {
         if (preferences.getString(Names.MAP_TYPE, "").equals("OSM"))
             p += "_";
         final String param = p;
+        final String[] columns = {
+                "Lat",
+                "Lng",
+                "Address",
+                "Param",
+        };
+
         String[] conditions = {
                 param,
                 (lat - 0.001) + "",
@@ -63,11 +146,19 @@ public abstract class Address {
                 (lng - 0.001) + "",
                 (lng + 0.001) + ""
         };
-        List<AddressRecord> res = AddressRecord.find(AddressRecord.class, "(Param = ?) AND (Lat BETWEEN ? AND ?) AND (Lng BETWEEN ? AND ?)", conditions);
-        for (AddressRecord addr : res) {
-            double distance = calc_distance(lat, lng, addr.lat, addr.lng);
-            if (distance < 80)
-                return addr.addr;
+        Cursor cursor = address_db.query(TABLE_NAME, columns, "(Param = ?) AND (Lat BETWEEN ? AND ?) AND (Lng BETWEEN ? AND ?)", conditions, null, null, null, null);
+        if (cursor.moveToFirst()) {
+            for (; ; ) {
+                double db_lat = cursor.getDouble(0);
+                double db_lon = cursor.getDouble(1);
+                double distance = calc_distance(lat, lng, db_lat, db_lon);
+                if (distance < 80) {
+                    String address = cursor.getString(2);
+                    return address;
+                }
+                if (!cursor.moveToNext())
+                    break;
+            }
         }
         return null;
     }
