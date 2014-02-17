@@ -49,6 +49,7 @@ public class EventsFragment extends Fragment
 
     final static String URL_EVENTS = "https://car-online.ugona.net/events?skey=$1&begin=$2&end=$3&first=$4&pointer=$5";
     final static String URL_EVENT = "https://car-online.ugona.net/event?skey=$1&id=$2&time=$3";
+    final static String URL_TEXT = "https://car-online.ugona.net/text?auth=$1&id=$2&time=$3&type=$4";
 
     String car_id;
     String api_key;
@@ -285,7 +286,7 @@ public class EventsFragment extends Fragment
                 current_id = e.id;
                 EventsAdapter adapter = (EventsAdapter) lvEvents.getAdapter();
                 adapter.notifyDataSetChanged();
-                new EventRequest(filtered.get(position).id, filtered.get(position).time);
+                new EventRequest(e.id, e.time, e.type);
             }
         });
 
@@ -615,14 +616,24 @@ public class EventsFragment extends Fragment
         long event_id;
         long event_time;
 
-        EventRequest(long id, long time) {
+        EventRequest(long id, long time, int type) {
             event_id = id;
             event_time = time;
+            if (type == 88) {
+                String auth = preferences.getString(Names.AUTH + car_id, "");
+                execute(URL_TEXT, auth, id, time, type);
+                return;
+            }
             execute(URL_EVENT, api_key, id, time);
         }
 
         @Override
         void result(JsonObject res) throws ParseException {
+            JsonValue text = res.get("text");
+            if (text != null) {
+                setAddress(text.asString(), "", null);
+                return;
+            }
             JsonValue value = res.get("gps");
             if (value != null) {
                 JsonObject gps = value.asObject();
