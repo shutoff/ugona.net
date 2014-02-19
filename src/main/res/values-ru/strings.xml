@@ -360,4 +360,29 @@
     <string name="number">С-код содержит не только цифры</string>
     <string name="stat">Статистика</string>
     <string name="sms_sent">СМС отправлено</string>
+    <string name="device_settings">Настройки устройства</string>
+    <string name="notifications">Уведомления</string>
+    <string name="guard_sound">Cопровождать звуком постановку/снятие с охраны</string>
+    <string name="tilt_low">Загрубление датчика наклона</string>
+    <string name="guard_partial">Постоянный режим охраны с пассажирами</string>
+    <string name="comfort_enable">Разрешение функции комфорт-поднятие стекол</string>
+    <string name="tilt_level">Уровень срабатывания датчика наклона</string>
+    <string name="unit">ед</string>
+    <string name="guard_time">Время постановки в охрану при потере метки</string>
+    <string name="sec">сек.</string>
+    <string name="robbery_time">Время задержки старта противоразбойной функции</string>
+    <string name="heater_start">Производить автозапуск после отработки предпускового обогревателя</string>
+    <string name="no_sound">Охрана без звука</string>
+    <string name="heater_time">Время работы отопителя</string>
+    <string name="close_time">Задержка между выключением зажигания и закрытием ЦЗ через CAN</string>
+    <string name="voltage_limit">Напряжение аккумулятора при котором производить автозапуск</string>
+    <string name="v">В</string>
+    <string name="no_start">не запускать</string>
+    <string name="setup">Применить</string>
+    <string name="start_time">Время прогрева</string>
+    <string-array name="start_timer">
+        <item>10 минут</item>
+        <item>20 минут</item>
+    </string-array>
+    <string name="soft_start">Режим "мягкой посадки"</string>
 </resources>

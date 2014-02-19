@@ -97,6 +97,8 @@ public class StatFragment extends Fragment implements OnRefreshListener {
     class DataFetcher extends HttpTask {
         @Override
         void result(JsonObject res) throws ParseException {
+            if (getActivity() == null)
+                return;
             done();
             days = new Vector<Day>();
             for (JsonObject.Member member : res) {

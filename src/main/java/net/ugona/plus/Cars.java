@@ -212,7 +212,7 @@ public class Cars extends ActionBarActivity {
     }
 
     void setupCar(String car_id) {
-        Intent intent = new Intent(this, CarPreferences.class);
+        Intent intent = new Intent(this, SettingActivity.class);
         intent.putExtra(Names.ID, car_id);
         startActivityForResult(intent, CAR_SETUP);
     }

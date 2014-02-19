@@ -266,7 +266,7 @@ public class StateFragment extends Fragment
                     if (error_text == null)
                         error_text = getString(R.string.data_error);
                     if (error_text.equals("Auth error")) {
-                        CarPreferences.getApiKey(getActivity(), car_id, new Runnable() {
+                        SettingActivity.getApiKey(getActivity(), car_id, new Runnable() {
                             @Override
                             public void run() {
                                 startUpdate(getActivity());
@@ -400,7 +400,12 @@ public class StateFragment extends Fragment
         String balance = preferences.getString(Names.BALANCE + car_id, "");
         if (!balance.equals("") && preferences.getBoolean(Names.SHOW_BALANCE + car_id, true)) {
             tvBalance.setText(balance);
-            int balance_limit = preferences.getInt(Names.LIMIT + car_id, 50);
+            int balance_limit = 50;
+            try {
+                balance_limit = preferences.getInt(Names.LIMIT + car_id, 50);
+            } catch (Exception ex) {
+                // ignore
+            }
             tvBalance.setTextColor(getResources().getColor(android.R.color.secondary_text_dark));
             if (balance_limit >= 0) {
                 try {
