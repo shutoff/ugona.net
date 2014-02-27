@@ -332,10 +332,10 @@ public class FetchService extends Service {
                     prev_guard_mode = 2;
 
                 ed.putBoolean(Names.GUARD + car_id, guard);
-                ed.putBoolean(Names.INPUT1 + car_id, contact.get("input1").asBoolean());
-                ed.putBoolean(Names.INPUT2 + car_id, contact.get("input2").asBoolean());
+                setState(Names.INPUT1, contact, "input1", 3);
+                setState(Names.INPUT2, contact, "input2", 1);
                 ed.putBoolean(Names.INPUT3 + car_id, contact.get("input3").asBoolean());
-                ed.putBoolean(Names.INPUT4 + car_id, contact.get("input4").asBoolean());
+                setState(Names.INPUT4, contact, "input4", 2);
                 ed.putBoolean(Names.GUARD0 + car_id, contact.get("guardMode0").asBoolean());
                 ed.putBoolean(Names.GUARD1 + car_id, contact.get("guardMode1").asBoolean());
                 ed.putBoolean(Names.RELAY1 + car_id, contact.get("relay1").asBoolean());
@@ -412,15 +412,6 @@ public class FetchService extends Service {
             JsonValue temp_value = res.get("temperature");
             if (temp_value != null) {
                 Map<Integer, Integer> values = new HashMap<Integer, Integer>();
-                String[] old = preferences.getString(Names.TEMPERATURE + car_id, "").split(";");
-                for (String v : old) {
-                    try {
-                        String[] d = v.split(":");
-                        values.put(Integer.parseInt(d[0]), Integer.parseInt(d[1]));
-                    } catch (Exception ex) {
-                        // ignore
-                    }
-                }
                 JsonObject temp = temp_value.asObject();
                 List<String> names = temp.names();
                 for (String name : names) {
@@ -450,7 +441,7 @@ public class FetchService extends Service {
                 if (balance_value != null) {
                     JsonObject balance = balance_value.asObject();
                     double value = balance.get("value").asDouble();
-                    if (preferences.getString(Names.BALANCE + car_id, "").equals(value)) {
+                    if (preferences.getString(Names.BALANCE + car_id, "").equals(value + "")) {
                         balance_value = null;
                     } else {
                         ed.putString(Names.BALANCE + car_id, value + "");
@@ -533,6 +524,11 @@ public class FetchService extends Service {
                                 break;
                         }
                         notify_id = Alarm.createNotification(FetchService.this, getString(id), R.drawable.warning, car_id, sound);
+                        ed.putInt(Names.GUARD_NOTIFY + car_id, notify_id);
+                        ed.commit();
+                    } else if ((guard_mode == 0) && (msg_id != 0)) {
+                        String[] msg = getString(R.string.alarm).split("\\|");
+                        notify_id = Alarm.createNotification(FetchService.this, msg[msg_id], R.drawable.warning, car_id, null);
                         ed.putInt(Names.GUARD_NOTIFY + car_id, notify_id);
                         ed.commit();
                     }
@@ -706,10 +702,8 @@ public class FetchService extends Service {
 
         void setState(String id, JsonObject contact, String key, int msg) throws ParseException {
             boolean state = contact.get(key).asBoolean();
-            if (state) {
-                if (!preferences.getBoolean(id + car_id, false))
-                    msg_id = msg;
-            }
+            if (state)
+                msg_id = msg;
             ed.putBoolean(id + car_id, state);
         }
     }

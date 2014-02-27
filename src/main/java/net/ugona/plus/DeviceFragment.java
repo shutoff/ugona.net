@@ -194,6 +194,7 @@ public class DeviceFragment extends SettingsFragment {
         });
         items.add(new CheckBitItem(R.string.soft_start, 19, 1));
         items.add(new SeekBarPrefItem(R.string.temp_correct, Names.TEMP_SIFT, -10, 10));
+        items.add(new Item(R.string.version, preferences.getString(Names.VERSION + car_id, "")));
 
         v.findViewById(R.id.control_block).setVisibility(View.VISIBLE);
 
