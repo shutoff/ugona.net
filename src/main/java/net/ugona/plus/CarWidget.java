@@ -297,6 +297,13 @@ public class CarWidget extends AppWidgetProvider {
         } catch (Exception ex) {
             // ignore
         }
+        if (!normal) {
+            boolean az = preferences.getBoolean(Names.AZ + car_id, false);
+            boolean ignition = !az && (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false));
+            if (az || ignition)
+                normal = true;
+        }
+
         int v_color = normal ? context.getResources().getColor(id_color[theme]) : context.getResources().getColor(R.color.error);
         widgetView.setInt(R.id.voltage, "setTextColor", v_color);
 
