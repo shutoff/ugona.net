@@ -212,7 +212,7 @@ public class Cars extends ActionBarActivity {
     }
 
     void setupCar(String car_id) {
-        Intent intent = new Intent(this, CarPreferences.class);
+        Intent intent = new Intent(this, SettingActivity.class);
         intent.putExtra(Names.ID, car_id);
         startActivityForResult(intent, CAR_SETUP);
     }
@@ -247,7 +247,7 @@ public class Cars extends ActionBarActivity {
         ed.remove(Names.LAST_EVENT + id);
         ed.remove(Names.ENGINE + id);
         ed.remove(Names.TEMPERATURE + id);
-        ed.remove(Names.GSM + id);
+        ed.remove(Names.GSM_SECTOR + id);
         ed.remove(Names.GSM_ZONE + id);
         ed.remove(Names.LOGIN + id);
         ed.remove(Names.POINTER + id);

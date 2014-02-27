@@ -36,7 +36,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.text.DateFormat;
-import java.util.Map;
 import java.util.Vector;
 
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
@@ -48,6 +47,7 @@ public class TracksFragment extends Fragment
 
     final String DATE = "tracks_date";
     final String TRACK = "track";
+    final String SELECTED = "selected";
 
     SharedPreferences preferences;
     String api_key;
@@ -56,10 +56,10 @@ public class TracksFragment extends Fragment
     String car_id;
 
     Vector<TrackView.Track> tracks;
-    Map<Long, Integer> events;
 
     boolean loaded;
     int progress;
+    long selected;
 
     TextView tvSummary;
     View vError;
@@ -81,9 +81,11 @@ public class TracksFragment extends Fragment
         View v = inflater.inflate(R.layout.tracks, container, false);
         if (current == null)
             current = new LocalDate();
+        selected = -1;
         if (savedInstanceState != null) {
             car_id = savedInstanceState.getString(Names.ID);
             current = new LocalDate(savedInstanceState.getLong(DATE));
+            selected = savedInstanceState.getLong(SELECTED);
             byte[] track_data = savedInstanceState.getByteArray(TRACK);
             if (track_data != null) {
                 try {
@@ -132,11 +134,11 @@ public class TracksFragment extends Fragment
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 TracksAdapter adapter = (TracksAdapter) lvTracks.getAdapter();
-                if (adapter.selected == position) {
+                if (selected == position) {
                     showTrack(position);
                     return;
                 }
-                adapter.selected = position;
+                selected = position;
                 adapter.notifyDataSetChanged();
             }
         });
@@ -203,6 +205,7 @@ public class TracksFragment extends Fragment
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(Names.ID, car_id);
+        outState.putLong(SELECTED, selected);
         outState.putLong(DATE, current.toDate().getTime());
         if (loaded) {
             byte[] data = null;
@@ -234,6 +237,7 @@ public class TracksFragment extends Fragment
         prgMain.setProgress(0);
         fetcher = new TracksFetcher();
         fetcher.update();
+        selected = -1;
         mPullToRefreshLayout.setPullEnabled(current.equals(new LocalDate()));
     }
 
@@ -551,10 +555,7 @@ public class TracksFragment extends Fragment
 
     class TracksAdapter extends BaseAdapter {
 
-        int selected;
-
         TracksAdapter() {
-            selected = -1;
         }
 
         @Override

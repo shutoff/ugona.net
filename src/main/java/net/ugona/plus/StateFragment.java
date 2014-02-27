@@ -20,8 +20,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
 
 import org.joda.time.LocalDateTime;
 
@@ -85,6 +89,7 @@ public class StateFragment extends Fragment
 
     View balanceBlock;
     View vTime;
+    ScrollView svAddress;
 
     CarDrawable drawable;
     BroadcastReceiver br;
@@ -100,6 +105,8 @@ public class StateFragment extends Fragment
     boolean pointer;
 
     static Pattern number_pattern = Pattern.compile("^[0-9]+ ?");
+
+    final String GSM_URL = "https://car-online.ugona.net/gsm?skey=$1&cc=$2&nc=$3&lac=$4&cid=$5";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -121,6 +128,7 @@ public class StateFragment extends Fragment
         tvTime = (TextView) v.findViewById(R.id.addr_time);
         tvLocation = (TextView) v.findViewById(R.id.location);
         tvAddress2 = (TextView) v.findViewById(R.id.address2);
+        svAddress = (ScrollView) v.findViewById(R.id.addr_block);
 
         tvAddress3 = (TextView) v.findViewById(R.id.address3);
         tvLast = (TextView) v.findViewById(R.id.last);
@@ -258,7 +266,7 @@ public class StateFragment extends Fragment
                     if (error_text == null)
                         error_text = getString(R.string.data_error);
                     if (error_text.equals("Auth error")) {
-                        CarPreferences.getApiKey(getActivity(), car_id, new Runnable() {
+                        SettingActivity.getApiKey(getActivity(), car_id, new Runnable() {
                             @Override
                             public void run() {
                                 startUpdate(getActivity());
@@ -350,46 +358,57 @@ public class StateFragment extends Fragment
 
         double lat = preferences.getFloat(Names.LAT + car_id, 0);
         double lon = preferences.getFloat(Names.LNG + car_id, 0);
-        String addr = "";
         String location = "";
-        if ((lat == 0) || (lon == 0)) {
-            String gsm = preferences.getString(Names.GSM + car_id, "");
+        if ((lat == 0) && (lon == 0)) {
+            String gsm = preferences.getString(Names.GSM_SECTOR + car_id, "");
             if (!gsm.equals("")) {
                 String[] parts = gsm.split(" ");
                 location = parts[0] + "-" + parts[1] + " LAC:" + parts[2] + " CID:" + parts[3];
-                addr = preferences.getString(Names.ADDRESS + car_id, "");
+                String gsm_zone = preferences.getString(Names.GSM_ZONE + car_id, "");
+                if (gsm_zone.equals("")) {
+                    HttpTask task = new HttpTask() {
+                        @Override
+                        void result(JsonObject res) throws ParseException {
+                            String sector = res.get("sector").asString();
+                            SharedPreferences.Editor ed = preferences.edit();
+                            ed.putString(Names.GSM_ZONE + car_id, sector);
+                            ed.commit();
+                            updateZone(sector);
+                        }
+
+                        @Override
+                        void error() {
+                        }
+                    };
+                    String skey = preferences.getString(Names.CAR_KEY + car_id, "");
+                    String[] gsm_parts = gsm.split(" ");
+                    task.execute(GSM_URL, skey, gsm_parts[0], gsm_parts[1], gsm_parts[2], gsm_parts[3]);
+                } else {
+                    updateZone(gsm_zone);
+                }
             }
         } else {
             location = preferences.getFloat(Names.LAT + car_id, 0) + " ";
             location += preferences.getFloat(Names.LNG + car_id, 0);
-            addr = Address.getAddress(context, car_id);
+            Address req = new Address() {
+                @Override
+                void result(String addr) {
+                    updateAddress(addr);
+                }
+            };
+            req.get(getActivity(), lat, lon);
         }
         tvLocation.setText(location);
-        String parts[] = addr.split(", ");
-        addr = parts[0];
-        int start = 2;
-        if (parts.length > 1)
-            addr += ", " + parts[1];
-        if (parts.length > 2) {
-            Matcher matcher = number_pattern.matcher(parts[2]);
-            if (matcher.matches()) {
-                addr += ", " + parts[2];
-                start++;
-            }
-        }
-        tvAddress2.setText(addr);
-        addr = "";
-        for (int i = start; i < parts.length; i++) {
-            if (!addr.equals(""))
-                addr += ", ";
-            addr += parts[i];
-        }
-        tvAddress3.setText(addr);
 
         String balance = preferences.getString(Names.BALANCE + car_id, "");
         if (!balance.equals("") && preferences.getBoolean(Names.SHOW_BALANCE + car_id, true)) {
             tvBalance.setText(balance);
-            int balance_limit = preferences.getInt(Names.LIMIT + car_id, 50);
+            int balance_limit = 50;
+            try {
+                balance_limit = preferences.getInt(Names.LIMIT + car_id, 50);
+            } catch (Exception ex) {
+                // ignore
+            }
             tvBalance.setTextColor(getResources().getColor(android.R.color.secondary_text_dark));
             if (balance_limit >= 0) {
                 try {
@@ -533,6 +552,64 @@ public class StateFragment extends Fragment
         setPointer(vPointer1, tvPointer1, 0);
         setPointer(vPointer2, tvPointer2, 1);
 
+    }
+
+    void updateAddress(String addr) {
+        if (addr == null)
+            return;
+        String parts[] = addr.split(", ");
+        addr = parts[0];
+        int start = 2;
+        if (parts.length > 1)
+            addr += ", " + parts[1];
+        if (parts.length > 2) {
+            Matcher matcher = number_pattern.matcher(parts[2]);
+            if (matcher.matches()) {
+                addr += ", " + parts[2];
+                start++;
+            }
+        }
+        tvAddress2.setText(addr);
+        addr = "";
+        for (int i = start; i < parts.length; i++) {
+            if (!addr.equals(""))
+                addr += ", ";
+            addr += parts[i];
+        }
+        tvAddress3.setText(addr);
+        svAddress.scrollTo(0, 0);
+    }
+
+    void updateZone(String zone) {
+        String points[] = zone.split("_");
+        double min_lat = 180;
+        double max_lat = -180;
+        double min_lon = 180;
+        double max_lon = -180;
+        for (String point : points) {
+            try {
+                String[] p = point.split(",");
+                double p_lat = Double.parseDouble(p[0]);
+                double p_lon = Double.parseDouble(p[1]);
+                if (p_lat > max_lat)
+                    max_lat = p_lat;
+                if (p_lat < min_lat)
+                    min_lat = p_lat;
+                if (p_lon > max_lon)
+                    max_lon = p_lon;
+                if (p_lon < min_lon)
+                    min_lon = p_lon;
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+        Address req = new Address() {
+            @Override
+            void result(String addr) {
+                updateAddress(addr);
+            }
+        };
+        req.get(getActivity(), (min_lat + max_lat) / 2, (min_lon + max_lon) / 2);
     }
 
     void updateVoltage(TextView tv, String key, boolean normal) {

@@ -439,6 +439,7 @@
             android:src="@drawable/marker_map" />
 
         <ScrollView
+            android:id="@+id/addr_block"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -452,14 +453,11 @@
                 android:gravity="center"
                 android:layout_gravity="center">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="10dp" />
-
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
+                    android:paddingTop="10dp"
                     android:gravity="center">
 
                     <TextView

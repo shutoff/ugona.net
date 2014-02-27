@@ -77,6 +77,7 @@ public abstract class HttpTask {
                             error_text = error_text.substring(0, pos);
                     }
                     ex.printStackTrace();
+                    State.print(ex);
                 } finally {
                     if (connection != null)
                         connection.disconnect();

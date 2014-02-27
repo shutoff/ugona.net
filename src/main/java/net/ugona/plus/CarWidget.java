@@ -314,7 +314,12 @@ public class CarWidget extends AppWidgetProvider {
             show_balance = preferences.getBoolean(Names.SHOW_BALANCE + car_id, true);
         if (show_balance) {
             widgetView.setTextViewText(R.id.balance, preferences.getString(Names.BALANCE + car_id, "---.--"));
-            int balance_limit = preferences.getInt(Names.LIMIT + car_id, 50);
+            int balance_limit = 50;
+            try {
+                balance_limit = preferences.getInt(Names.LIMIT + car_id, 50);
+            } catch (Exception ex) {
+                // ignore
+            }
             widgetView.setInt(R.id.balance, "setTextColor", context.getResources().getColor(id_color[theme]));
             if (balance_limit >= 0) {
                 try {

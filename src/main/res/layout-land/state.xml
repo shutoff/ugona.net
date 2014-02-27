@@ -431,6 +431,7 @@
                 android:src="@drawable/marker_map" />
 
             <ScrollView
+                android:id="@+id/addr_block"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"

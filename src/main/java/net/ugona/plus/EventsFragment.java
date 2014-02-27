@@ -36,6 +36,8 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.text.DateFormat;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
@@ -47,6 +49,7 @@ public class EventsFragment extends Fragment
 
     final static String URL_EVENTS = "https://car-online.ugona.net/events?skey=$1&begin=$2&end=$3&first=$4&pointer=$5";
     final static String URL_EVENT = "https://car-online.ugona.net/event?skey=$1&id=$2&time=$3";
+    final static String URL_TEXT = "https://car-online.ugona.net/text?auth=$1&id=$2&time=$3&type=$4";
 
     String car_id;
     String api_key;
@@ -69,7 +72,7 @@ public class EventsFragment extends Fragment
     View vProgress;
     View vError;
 
-    long current_item;
+    long current_id;
 
     LocalDate current;
     BroadcastReceiver br;
@@ -253,8 +256,8 @@ public class EventsFragment extends Fragment
         lvEvents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (current_item == position) {
-                    Event e = filtered.get(position);
+                Event e = filtered.get(position);
+                if (e.id == current_id) {
                     if (e.point == null)
                         return;
                     String info = "<b>" + State.formatTime(getActivity(), e.time) + " ";
@@ -280,10 +283,10 @@ public class EventsFragment extends Fragment
                     startActivity(i);
                     return;
                 }
-                current_item = position;
+                current_id = e.id;
                 EventsAdapter adapter = (EventsAdapter) lvEvents.getAdapter();
                 adapter.notifyDataSetChanged();
-                new EventRequest(filtered.get(position).id, filtered.get(position).time);
+                new EventRequest(e.id, e.time, e.type);
             }
         });
 
@@ -491,7 +494,7 @@ public class EventsFragment extends Fragment
         }
         if (filtered.size() > 0) {
             if (no_events || !no_reload) {
-                current_item = -1;
+                current_id = 0;
                 lvEvents.setAdapter(new EventsAdapter());
                 lvEvents.setVisibility(View.VISIBLE);
                 tvNoEvents.setVisibility(View.GONE);
@@ -535,6 +538,15 @@ public class EventsFragment extends Fragment
             done();
             if (!current.equals(date))
                 return;
+            Map<Long, Event> eventData = new HashMap<Long, Event>();
+            for (Event e : events) {
+                if (e.address == null)
+                    continue;
+                eventData.put(e.id, e);
+            }
+            if ((firstEvent != null) && (firstEvent.address != null)) {
+                eventData.put(firstEvent.id, firstEvent);
+            }
             events.clear();
             JsonArray res = data.get("events").asArray();
             if (!first)
@@ -546,6 +558,12 @@ public class EventsFragment extends Fragment
                 e.type = event.get("type").asInt();
                 e.time = event.get("time").asLong();
                 e.id = id;
+                Event ee = eventData.get(id);
+                if (ee != null) {
+                    e.address = ee.address;
+                    e.point = ee.point;
+                    e.course = ee.course;
+                }
                 if (first) {
                     firstEvent = e;
                     first = false;
@@ -598,14 +616,24 @@ public class EventsFragment extends Fragment
         long event_id;
         long event_time;
 
-        EventRequest(long id, long time) {
+        EventRequest(long id, long time, int type) {
             event_id = id;
             event_time = time;
+            if (type == 88) {
+                String auth = preferences.getString(Names.AUTH + car_id, "");
+                execute(URL_TEXT, auth, id, time, type);
+                return;
+            }
             execute(URL_EVENT, api_key, id, time);
         }
 
         @Override
         void result(JsonObject res) throws ParseException {
+            JsonValue text = res.get("text");
+            if (text != null) {
+                setAddress(text.asString(), "", null);
+                return;
+            }
             JsonValue value = res.get("gps");
             if (value != null) {
                 JsonObject gps = value.asObject();
@@ -656,14 +684,15 @@ public class EventsFragment extends Fragment
         }
 
         void setAddress(String result, String point, String course) {
-            if (current_item < 0)
+            for (Event e : filtered) {
+                if (e.id == event_id) {
+                    e.address = result;
+                    e.point = point;
+                    e.course = course;
+                }
+            }
+            if (event_id != current_id)
                 return;
-            Event e = filtered.get((int) current_item);
-            if ((e.id != event_id) || (e.time != event_time))
-                return;
-            e.address = result;
-            e.point = point;
-            e.course = course;
             EventsAdapter adapter = (EventsAdapter) lvEvents.getAdapter();
             adapter.notifyDataSetChanged();
         }
@@ -719,7 +748,7 @@ public class EventsFragment extends Fragment
             }
             View progress = v.findViewById(R.id.progress);
             TextView tvAddress = (TextView) v.findViewById(R.id.address);
-            if (position == current_item) {
+            if (e.id == current_id) {
                 if (e.address == null) {
                     progress.setVisibility(View.VISIBLE);
                     tvAddress.setVisibility(View.GONE);

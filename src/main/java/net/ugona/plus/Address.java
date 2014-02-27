@@ -2,11 +2,11 @@ package net.ugona.plus;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 
 import java.util.Locale;
@@ -47,11 +47,86 @@ public abstract class Address {
         }
     }
 
-    void get(Context context, final double lat, final double lon) {
+    void get(final Context context, final double v_lat, final double v_lng) {
+
         if (address_db == null) {
             OpenHelper helper = new OpenHelper(context);
             address_db = helper.getWritableDatabase();
         }
+
+        final double lat = Math.round(v_lat * 100000.) / 100000.;
+        final double lng = Math.round(v_lng * 100000.) / 100000.;
+
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String p = Locale.getDefault().getLanguage();
+        if (preferences.getString(Names.MAP_TYPE, "").equals("OSM"))
+            p += "_";
+        final String param = p;
+        final String[] columns = {
+                "Lat",
+                "Lng",
+                "Address",
+                "Param",
+        };
+
+        AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+
+                String[] conditions = {
+                        param,
+                        (lat - 0.001) + "",
+                        (lat + 0.001) + "",
+                        (lng - 0.001) + "",
+                        (lng + 0.001) + ""
+                };
+
+                Cursor cursor = address_db.query(TABLE_NAME, columns, "(Param = ?) AND (Lat BETWEEN ? AND ?) AND (Lng BETWEEN ? AND ?)", conditions, null, null, null, null);
+                if (cursor.moveToFirst()) {
+                    for (; ; ) {
+                        double db_lat = cursor.getDouble(0);
+                        double db_lon = cursor.getDouble(1);
+                        double distance = calc_distance(lat, lng, db_lat, db_lon);
+                        if (distance < 80) {
+                            String address = cursor.getString(2);
+                            return address;
+                        }
+                        if (!cursor.moveToNext())
+                            break;
+                    }
+                }
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                if (s != null) {
+                    result(s);
+                    return;
+                }
+                AddressRequest request = new AddressRequest() {
+                    @Override
+                    void addressResult(String address) {
+                        if (address != null) {
+                            ContentValues values = new ContentValues();
+                            values.put(columns[0], lat);
+                            values.put(columns[1], lng);
+                            values.put(columns[2], address);
+                            values.put(columns[3], param);
+                            address_db.insert(TABLE_NAME, null, values);
+                        }
+                        result(address);
+                    }
+                };
+                request.getAddress(preferences, lat, lng);
+            }
+        };
+        task.execute();
+
+    }
+
+    static String getAddress(Context context, final double lat, final double lng) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String p = Locale.getDefault().getLanguage();
         if (preferences.getString(Names.MAP_TYPE, "").equals("OSM"))
@@ -63,87 +138,29 @@ public abstract class Address {
                 "Address",
                 "Param",
         };
+
         String[] conditions = {
                 param,
                 (lat - 0.001) + "",
                 (lat + 0.001) + "",
-                (lon - 0.001) + "",
-                (lon + 0.001) + ""
+                (lng - 0.001) + "",
+                (lng + 0.001) + ""
         };
         Cursor cursor = address_db.query(TABLE_NAME, columns, "(Param = ?) AND (Lat BETWEEN ? AND ?) AND (Lng BETWEEN ? AND ?)", conditions, null, null, null, null);
         if (cursor.moveToFirst()) {
             for (; ; ) {
                 double db_lat = cursor.getDouble(0);
                 double db_lon = cursor.getDouble(1);
-                double distance = calc_distance(lat, lon, db_lat, db_lon);
+                double distance = calc_distance(lat, lng, db_lat, db_lon);
                 if (distance < 80) {
                     String address = cursor.getString(2);
-                    result(address);
-                    return;
+                    return address;
                 }
                 if (!cursor.moveToNext())
                     break;
             }
         }
-        AddressRequest request = new AddressRequest() {
-            @Override
-            void addressResult(String address) {
-                if (address != null) {
-                    ContentValues values = new ContentValues();
-                    values.put(columns[0], lat);
-                    values.put(columns[1], lon);
-                    values.put(columns[2], address);
-                    values.put(columns[3], param);
-                    address_db.insert(TABLE_NAME, null, values);
-                }
-                result(address);
-            }
-        };
-        request.getAddress(preferences, lat, lon);
-    }
-
-    static String getAddress(final Context context, final String car_id) {
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        final double lat1 = preferences.getFloat(Names.LAT + car_id, 0);
-        final double lng1 = preferences.getFloat(Names.LNG + car_id, 0);
-        if ((lat1 == 0) && (lng1 == 0))
-            return "";
-        double lat2 = preferences.getFloat(Names.ADDR_LAT + car_id, 0);
-        double lng2 = preferences.getFloat(Names.ADDR_LNG + car_id, 0);
-        double distance = calc_distance(lat1, lng1, lat2, lng2);
-        String result = preferences.getString(Names.ADDRESS + car_id, "");
-        String p = Locale.getDefault().getLanguage();
-        if (preferences.getString(Names.MAP_TYPE, "").equals("OSM"))
-            p += "_";
-        final String param = p;
-        if (!preferences.getString(Names.ADDR_PARAM + car_id, "").equals(param))
-            result = "";
-        if (distance > 250)
-            result = "";
-        if ((distance < 80) && (result.length() > 0))
-            return result;
-        Address request = new Address() {
-            @Override
-            void result(String address) {
-                if (address == null)
-                    return;
-                SharedPreferences.Editor ed = preferences.edit();
-                ed.putFloat(Names.ADDR_LAT + car_id, (float) lat1);
-                ed.putFloat(Names.ADDR_LNG + car_id, (float) lng1);
-                ed.putString(Names.ADDRESS + car_id, address);
-                ed.putString(Names.ADDR_PARAM + car_id, param);
-                ed.commit();
-                try {
-                    Intent intent = new Intent(FetchService.ACTION_UPDATE);
-                    intent.putExtra(Names.ID, car_id);
-                    context.sendBroadcast(intent);
-                } catch (Exception e) {
-                    // ignore
-                }
-            }
-        };
-        request.get(context, lat1, lng1);
-        return result;
+        return null;
     }
 
     static final double D2R = 0.017453; // Константа для преобразования градусов в радианы

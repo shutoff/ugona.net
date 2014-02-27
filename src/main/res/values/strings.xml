@@ -229,7 +229,7 @@
     <string name="phone_work">work</string>
     <string name="phone_mobile">mobile</string>
     <string name="pgsm_version">Device software version</string>
-    <string name="copyright">© 2013 Ugona.net, info@ugona.net</string>
+    <string name="copyright">© 2013-2014 Ugona.net, info@ugona.net</string>
     <string name="delete">Delete</string>
     <string name="status_title">Status</string>
     <string name="status_sum">Request car state</string>
@@ -397,4 +397,29 @@
     <string name="number">C-code contains letters</string>
     <string name="stat">Statistics</string>
     <string name="sms_sent">SMS sent</string>
+    <string name="device_settings">Device settings</string>
+    <string name="notifications">Notifications</string>
+    <string name="guard_sound">Sound on guard ON/OFF</string>
+    <string name="tilt_low">Low sensitivy of tilt sensor</string>
+    <string name="guard_partial">Permanent partial guard</string>
+    <string name="comfort_enable">Enable comfort function</string>
+    <string name="tilt_level">Tilt sensor level</string>
+    <string name="unit">units</string>
+    <string name="guard_time">Set time to guard on lost label</string>
+    <string name="sec">sec.</string>
+    <string name="robbery_time">Delay for start robbery functions</string>
+    <string name="heater_start">Start engine after prestarting heater</string>
+    <string name="no_sound">Guard without sounds</string>
+    <string name="heater_time">Prestarting heater time</string>
+    <string name="close_time">Time for close car after ignition off</string>
+    <string name="voltage_limit">Voltage limit for autostart</string>
+    <string name="v">V</string>
+    <string name="no_start">no start</string>
+    <string name="setup">Setup</string>
+    <string name="start_time">Engine autostart time</string>
+    <string-array name="start_timer">
+        <item>10 min</item>
+        <item>20 min</item>
+    </string-array>
+    <string name="soft_start">Soft start</string>
 </resources>
