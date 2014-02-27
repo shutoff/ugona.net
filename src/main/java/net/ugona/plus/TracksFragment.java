@@ -268,6 +268,8 @@ public class TracksFragment extends Fragment
     }
 
     void showDay() {
+        if (tracks.size() == 0)
+            return;
         Intent intent = new Intent(getActivity(), TrackView.class);
         if (!setTrack(tracks, intent))
             return;

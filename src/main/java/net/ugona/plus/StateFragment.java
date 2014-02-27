@@ -342,7 +342,10 @@ public class StateFragment extends Fragment
             tvLast.setText(getString(R.string.unknown));
         }
 
-        updateVoltage(tvVoltage, Names.VOLTAGE_MAIN, pointer ? 3. : 12.2);
+        boolean az = preferences.getBoolean(Names.AZ + car_id, false);
+        boolean ignition = !az && (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false));
+
+        updateVoltage(tvVoltage, Names.VOLTAGE_MAIN, (pointer || az || ignition) ? 3. : 12.2);
         updateNetStatus(context);
 
         double lat = preferences.getFloat(Names.LAT + car_id, 0);
@@ -454,8 +457,6 @@ public class StateFragment extends Fragment
         tvTime.setText(time);
 
         int commands = State.getCommands(preferences, car_id);
-        boolean az = preferences.getBoolean(Names.AZ + car_id, false);
-        boolean ignition = !az && (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false));
         boolean block = !preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false);
 
         int n_buttons = 0;
