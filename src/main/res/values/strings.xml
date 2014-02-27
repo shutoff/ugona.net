@@ -422,4 +422,12 @@
         <item>20 min</item>
     </string-array>
     <string name="soft_start">Soft start</string>
+    <string name="rele1">RELE 1</string>
+    <string name="rele1i">RELE 1 impulse</string>
+    <string name="rele2">RELE 2</string>
+    <string name="rele2i">RELE 2 impulse</string>
+    <string name="rele3">RELE 3</string>
+    <string name="rele3i">RELE 3 impulse</string>
+    <string name="rele4">RELE 4</string>
+    <string name="rele4i">RELE 4 impulse</string>
 </resources>

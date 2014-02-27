@@ -99,6 +99,10 @@ public class StateFragment extends Fragment
     ImageView ivMotor;
     ImageView ivRele;
     ImageView ivValet;
+    ImageView ivRele1;
+    ImageView ivRele2;
+    ImageView ivRele3;
+    ImageView ivRele4;
 
     View mValet;
     View mNet;
@@ -188,6 +192,10 @@ public class StateFragment extends Fragment
         ivMotor = (ImageView) v.findViewById(R.id.motor_img);
         ivValet = (ImageView) v.findViewById(R.id.valet_img);
         ivRele = (ImageView) v.findViewById(R.id.rele_img);
+        ivRele1 = (ImageView) v.findViewById(R.id.rele1_img);
+        ivRele2 = (ImageView) v.findViewById(R.id.rele2_img);
+        ivRele3 = (ImageView) v.findViewById(R.id.rele3_img);
+        ivRele4 = (ImageView) v.findViewById(R.id.rele4_img);
 
         mValet = v.findViewById(R.id.valet_warning);
         mNet = v.findViewById(R.id.net_warning);
@@ -559,14 +567,78 @@ public class StateFragment extends Fragment
         } else {
             vPhone.setVisibility(View.GONE);
         }
-        vRele1.setVisibility(View.GONE);
-        vRele1i.setVisibility(View.GONE);
-        vRele2.setVisibility(View.GONE);
-        vRele2i.setVisibility(View.GONE);
-        vRele3.setVisibility(View.GONE);
-        vRele3i.setVisibility(View.GONE);
-        vRele4.setVisibility(View.GONE);
-        vRele4i.setVisibility(View.GONE);
+
+        if (State.hasTelephony(context) && ((commands & State.CMD_RELE1) != 0)) {
+            vRele1.setVisibility(View.VISIBLE);
+            pRele1.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele1) ? View.VISIBLE : View.GONE);
+            if (preferences.getBoolean(Names.RELAY1 + car_id, false)) {
+                ivRele1.setImageResource(R.drawable.rele_on);
+            } else {
+                ivRele1.setImageResource(R.drawable.rele_off);
+            }
+        } else {
+            vRele1.setVisibility(View.GONE);
+        }
+        if (State.hasTelephony(context) && ((commands & State.CMD_RELE1I) != 0)) {
+            vRele1i.setVisibility(View.VISIBLE);
+            pRele1i.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele1i) ? View.VISIBLE : View.GONE);
+        } else {
+            vRele1i.setVisibility(View.GONE);
+        }
+
+        if (State.hasTelephony(context) && ((commands & State.CMD_RELE2) != 0)) {
+            vRele2.setVisibility(View.VISIBLE);
+            pRele2.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele2) ? View.VISIBLE : View.GONE);
+            if (preferences.getBoolean(Names.RELAY2 + car_id, false)) {
+                ivRele2.setImageResource(R.drawable.rele_on);
+            } else {
+                ivRele2.setImageResource(R.drawable.rele_off);
+            }
+        } else {
+            vRele2.setVisibility(View.GONE);
+        }
+        if (State.hasTelephony(context) && ((commands & State.CMD_RELE2I) != 0)) {
+            vRele2i.setVisibility(View.VISIBLE);
+            pRele2i.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele2i) ? View.VISIBLE : View.GONE);
+        } else {
+            vRele2i.setVisibility(View.GONE);
+        }
+
+        if (State.hasTelephony(context) && ((commands & State.CMD_RELE3) != 0)) {
+            vRele3.setVisibility(View.VISIBLE);
+            pRele3.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele3) ? View.VISIBLE : View.GONE);
+            if (preferences.getBoolean(Names.RELAY3 + car_id, false)) {
+                ivRele3.setImageResource(R.drawable.rele_on);
+            } else {
+                ivRele3.setImageResource(R.drawable.rele_off);
+            }
+        } else {
+            vRele3.setVisibility(View.GONE);
+        }
+        if (State.hasTelephony(context) && ((commands & State.CMD_RELE3I) != 0)) {
+            vRele3i.setVisibility(View.VISIBLE);
+            pRele3i.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele3i) ? View.VISIBLE : View.GONE);
+        } else {
+            vRele3i.setVisibility(View.GONE);
+        }
+
+        if (State.hasTelephony(context) && ((commands & State.CMD_RELE4) != 0)) {
+            vRele4.setVisibility(View.VISIBLE);
+            pRele4.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele4) ? View.VISIBLE : View.GONE);
+            if (preferences.getBoolean(Names.RELAY4 + car_id, false)) {
+                ivRele4.setImageResource(R.drawable.rele_on);
+            } else {
+                ivRele4.setImageResource(R.drawable.rele_off);
+            }
+        } else {
+            vRele4.setVisibility(View.GONE);
+        }
+        if (State.hasTelephony(context) && ((commands & State.CMD_RELE4I) != 0)) {
+            vRele4i.setVisibility(View.VISIBLE);
+            pRele4i.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele4i) ? View.VISIBLE : View.GONE);
+        } else {
+            vRele4i.setVisibility(View.GONE);
+        }
 
         if (az) {
             if (preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false)) {
@@ -588,6 +660,7 @@ public class StateFragment extends Fragment
         setPointer(vPointer2, tvPointer2, 1);
 
     }
+
 
     void updateAddress(String addr) {
         if (addr == null)

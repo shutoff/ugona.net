@@ -134,4 +134,5 @@ public final class Names {
     static final String NUMBER = "ccode_number_";
 
     static final String RESERVE_NORMAL = "reserve_normal_";
+
 }

@@ -385,4 +385,12 @@
         <item>20 минут</item>
     </string-array>
     <string name="soft_start">Режим "мягкой посадки"</string>
+    <string name="rele1">РЕЛЕ 1</string>
+    <string name="rele1i">РЕЛЕ 1 импульс</string>
+    <string name="rele2">РЕЛЕ 2</string>
+    <string name="rele2i">РЕЛЕ 2 импульс</string>
+    <string name="rele3">РЕЛЕ 3</string>
+    <string name="rele3i">РЕЛЕ 3 импульс</string>
+    <string name="rele4">РЕЛЕ 4</string>
+    <string name="rele4i">РЕЛЕ 4 импульс</string>
 </resources>

@@ -127,6 +127,9 @@ public class SettingActivity extends ActionBarActivity {
                     res = new NotificationFragment();
                     break;
                 case 2:
+                    res = new CommandsFragment();
+                    break;
+                case 3:
                     res = new DeviceFragment();
                     break;
             }
@@ -138,7 +141,7 @@ public class SettingActivity extends ActionBarActivity {
 
         @Override
         public int getCount() {
-            return 3;
+            return 4;
         }
 
         @Override
@@ -149,6 +152,8 @@ public class SettingActivity extends ActionBarActivity {
                 case 1:
                     return getString(R.string.notifications);
                 case 2:
+                    return getString(R.string.commands);
+                case 3:
                     return getString(R.string.device_settings);
             }
             return null;
