@@ -74,11 +74,27 @@ public class StateFragment extends Fragment
     View vBlock;
     View vValet;
     View vPhone;
+    View vRele1;
+    View vRele1i;
+    View vRele2;
+    View vRele2i;
+    View vRele3;
+    View vRele3i;
+    View vRele4;
+    View vRele4i;
 
     View pMotor;
     View pRele;
     View pBlock;
     View pValet;
+    View pRele1;
+    View pRele1i;
+    View pRele2;
+    View pRele2i;
+    View pRele3;
+    View pRele3i;
+    View pRele4;
+    View pRele4i;
 
     ImageView ivMotor;
     ImageView ivRele;
@@ -147,11 +163,27 @@ public class StateFragment extends Fragment
         vBlock = v.findViewById(R.id.block);
         vValet = v.findViewById(R.id.valet);
         vPhone = v.findViewById(R.id.phone);
+        vRele1 = v.findViewById(R.id.rele1);
+        vRele1i = v.findViewById(R.id.rele1_impulse);
+        vRele2 = v.findViewById(R.id.rele2);
+        vRele2i = v.findViewById(R.id.rele2_impulse);
+        vRele3 = v.findViewById(R.id.rele3);
+        vRele3i = v.findViewById(R.id.rele3_impulse);
+        vRele4 = v.findViewById(R.id.rele4);
+        vRele4i = v.findViewById(R.id.rele4_impulse);
 
         pMotor = v.findViewById(R.id.motor_prg);
         pRele = v.findViewById(R.id.rele_prg);
         pBlock = v.findViewById(R.id.block_prg);
         pValet = v.findViewById(R.id.valet_prg);
+        pRele1 = v.findViewById(R.id.rele1_prg);
+        pRele1i = v.findViewById(R.id.rele1_impulse_prg);
+        pRele2 = v.findViewById(R.id.rele2_prg);
+        pRele2i = v.findViewById(R.id.rele2_impulse_prg);
+        pRele3 = v.findViewById(R.id.rele3_prg);
+        pRele3i = v.findViewById(R.id.rele3_impulse_prg);
+        pRele4 = v.findViewById(R.id.rele4_prg);
+        pRele4i = v.findViewById(R.id.rele4_impulse_prg);
 
         ivMotor = (ImageView) v.findViewById(R.id.motor_img);
         ivValet = (ImageView) v.findViewById(R.id.valet_img);
@@ -350,7 +382,10 @@ public class StateFragment extends Fragment
             tvLast.setText(getString(R.string.unknown));
         }
 
-        updateVoltage(tvVoltage, Names.VOLTAGE_MAIN, pointer ? 3. : 12.2);
+        boolean az = preferences.getBoolean(Names.AZ + car_id, false);
+        boolean ignition = !az && (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false));
+
+        updateVoltage(tvVoltage, Names.VOLTAGE_MAIN, (pointer || az || ignition) ? 3. : 12.2);
         updateNetStatus(context);
 
         double lat = preferences.getFloat(Names.LAT + car_id, 0);
@@ -473,11 +508,8 @@ public class StateFragment extends Fragment
         tvTime.setText(time);
 
         int commands = State.getCommands(preferences, car_id);
-        boolean az = preferences.getBoolean(Names.AZ + car_id, false);
-        boolean ignition = !az && (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false));
         boolean block = !preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false);
 
-        int n_buttons = 0;
         if (State.hasTelephony(context) && ((commands & State.CMD_AZ) != 0) && (!ignition || az)) {
             vMotor.setVisibility(View.VISIBLE);
             vMotor.setTag(az);
@@ -488,7 +520,6 @@ public class StateFragment extends Fragment
                 ivMotor.setImageResource(R.drawable.icon_motor_on);
                 pMotor.setVisibility(SmsMonitor.isProcessed(car_id, R.string.motor_on) ? View.VISIBLE : View.GONE);
             }
-            n_buttons++;
         } else {
             vMotor.setVisibility(View.GONE);
         }
@@ -500,7 +531,6 @@ public class StateFragment extends Fragment
             } else {
                 ivRele.setImageResource(R.drawable.icon_heater);
             }
-            n_buttons++;
         } else {
             vRele.setVisibility(View.GONE);
         }
@@ -508,12 +538,11 @@ public class StateFragment extends Fragment
                 !preferences.getBoolean(Names.GUARD + car_id, false)) {
             vBlock.setVisibility(View.VISIBLE);
             pBlock.setVisibility(SmsMonitor.isProcessed(car_id, R.string.block) ? View.VISIBLE : View.GONE);
-            n_buttons++;
         } else {
             vBlock.setVisibility(View.GONE);
         }
         boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
-        if (State.hasTelephony(context) && (n_buttons < 3) && (((commands & State.CMD_VALET) != 0) || valet || block)) {
+        if (State.hasTelephony(context) && (((commands & State.CMD_VALET) != 0) || valet || block)) {
             if (valet) {
                 ivValet.setImageResource(R.drawable.icon_valet_off);
                 pValet.setVisibility(SmsMonitor.isProcessed(car_id, R.string.valet_off) ? View.VISIBLE : View.GONE);
@@ -522,15 +551,22 @@ public class StateFragment extends Fragment
                 pValet.setVisibility(SmsMonitor.isProcessed(car_id, R.string.valet_on) ? View.VISIBLE : View.GONE);
             }
             vValet.setVisibility(View.VISIBLE);
-            n_buttons++;
         } else {
             vValet.setVisibility(View.GONE);
         }
-        if (State.hasTelephony(context) && (n_buttons < 3) && ((commands & State.CMD_CALL) != 0)) {
+        if (State.hasTelephony(context) && ((commands & State.CMD_CALL) != 0)) {
             vPhone.setVisibility(View.VISIBLE);
         } else {
             vPhone.setVisibility(View.GONE);
         }
+        vRele1.setVisibility(View.GONE);
+        vRele1i.setVisibility(View.GONE);
+        vRele2.setVisibility(View.GONE);
+        vRele2i.setVisibility(View.GONE);
+        vRele3.setVisibility(View.GONE);
+        vRele3i.setVisibility(View.GONE);
+        vRele4.setVisibility(View.GONE);
+        vRele4i.setVisibility(View.GONE);
 
         if (az) {
             if (preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false)) {
