@@ -78,10 +78,6 @@ public class StateFragment extends Fragment
     View vRele1i;
     View vRele2;
     View vRele2i;
-    View vRele3;
-    View vRele3i;
-    View vRele4;
-    View vRele4i;
 
     View pMotor;
     View pRele;
@@ -91,18 +87,12 @@ public class StateFragment extends Fragment
     View pRele1i;
     View pRele2;
     View pRele2i;
-    View pRele3;
-    View pRele3i;
-    View pRele4;
-    View pRele4i;
 
     ImageView ivMotor;
     ImageView ivRele;
     ImageView ivValet;
     ImageView ivRele1;
     ImageView ivRele2;
-    ImageView ivRele3;
-    ImageView ivRele4;
 
     View mValet;
     View mNet;
@@ -171,10 +161,6 @@ public class StateFragment extends Fragment
         vRele1i = v.findViewById(R.id.rele1_impulse);
         vRele2 = v.findViewById(R.id.rele2);
         vRele2i = v.findViewById(R.id.rele2_impulse);
-        vRele3 = v.findViewById(R.id.rele3);
-        vRele3i = v.findViewById(R.id.rele3_impulse);
-        vRele4 = v.findViewById(R.id.rele4);
-        vRele4i = v.findViewById(R.id.rele4_impulse);
 
         pMotor = v.findViewById(R.id.motor_prg);
         pRele = v.findViewById(R.id.rele_prg);
@@ -184,18 +170,12 @@ public class StateFragment extends Fragment
         pRele1i = v.findViewById(R.id.rele1_impulse_prg);
         pRele2 = v.findViewById(R.id.rele2_prg);
         pRele2i = v.findViewById(R.id.rele2_impulse_prg);
-        pRele3 = v.findViewById(R.id.rele3_prg);
-        pRele3i = v.findViewById(R.id.rele3_impulse_prg);
-        pRele4 = v.findViewById(R.id.rele4_prg);
-        pRele4i = v.findViewById(R.id.rele4_impulse_prg);
 
         ivMotor = (ImageView) v.findViewById(R.id.motor_img);
         ivValet = (ImageView) v.findViewById(R.id.valet_img);
         ivRele = (ImageView) v.findViewById(R.id.rele_img);
         ivRele1 = (ImageView) v.findViewById(R.id.rele1_img);
         ivRele2 = (ImageView) v.findViewById(R.id.rele2_img);
-        ivRele3 = (ImageView) v.findViewById(R.id.rele3_img);
-        ivRele4 = (ImageView) v.findViewById(R.id.rele4_img);
 
         mValet = v.findViewById(R.id.valet_warning);
         mNet = v.findViewById(R.id.net_warning);
@@ -602,42 +582,6 @@ public class StateFragment extends Fragment
             pRele2i.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele2i) ? View.VISIBLE : View.GONE);
         } else {
             vRele2i.setVisibility(View.GONE);
-        }
-
-        if (State.hasTelephony(context) && ((commands & State.CMD_RELE3) != 0)) {
-            vRele3.setVisibility(View.VISIBLE);
-            pRele3.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele3) ? View.VISIBLE : View.GONE);
-            if (preferences.getBoolean(Names.RELAY3 + car_id, false)) {
-                ivRele3.setImageResource(R.drawable.rele_on);
-            } else {
-                ivRele3.setImageResource(R.drawable.rele_off);
-            }
-        } else {
-            vRele3.setVisibility(View.GONE);
-        }
-        if (State.hasTelephony(context) && ((commands & State.CMD_RELE3I) != 0)) {
-            vRele3i.setVisibility(View.VISIBLE);
-            pRele3i.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele3i) ? View.VISIBLE : View.GONE);
-        } else {
-            vRele3i.setVisibility(View.GONE);
-        }
-
-        if (State.hasTelephony(context) && ((commands & State.CMD_RELE4) != 0)) {
-            vRele4.setVisibility(View.VISIBLE);
-            pRele4.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele4) ? View.VISIBLE : View.GONE);
-            if (preferences.getBoolean(Names.RELAY4 + car_id, false)) {
-                ivRele4.setImageResource(R.drawable.rele_on);
-            } else {
-                ivRele4.setImageResource(R.drawable.rele_off);
-            }
-        } else {
-            vRele4.setVisibility(View.GONE);
-        }
-        if (State.hasTelephony(context) && ((commands & State.CMD_RELE4I) != 0)) {
-            vRele4i.setVisibility(View.VISIBLE);
-            pRele4i.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele4i) ? View.VISIBLE : View.GONE);
-        } else {
-            vRele4i.setVisibility(View.GONE);
         }
 
         if (az) {

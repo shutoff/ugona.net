@@ -5,11 +5,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -473,6 +471,98 @@ public class Actions {
         });
     }
 
+    static void rele(final Context context, final String car_id, final int cmd_id) {
+        selectRoute(context, car_id, new Runnable() {
+                    @Override
+                    public void run() {
+                        requestCCode(context, car_id, R.string.rele, R.string.rele_ccode, new Answer() {
+                            @Override
+                            void answer(String ccode) {
+                                int cmd = 0;
+                                switch (cmd_id) {
+                                    case R.string.rele1_on:
+                                        cmd = 514;
+                                        break;
+                                    case R.string.rele1_off:
+                                        cmd = 512;
+                                        break;
+                                    case R.string.rele1i:
+                                        cmd = 513;
+                                        break;
+                                    case R.string.rele2_on:
+                                        cmd = 258;
+                                        break;
+                                    case R.string.rele2_off:
+                                        cmd = 256;
+                                        break;
+                                    case R.string.rele2i:
+                                        cmd = 257;
+                                        break;
+                                }
+
+                                new InetRequest(context, car_id, ccode, cmd, cmd_id) {
+
+                                    @Override
+                                    void error() {
+                                        rele_sms(context, car_id, cmd_id, true);
+                                    }
+
+                                    @Override
+                                    void ok(Context context) {
+
+                                    }
+
+                                };
+                            }
+                        });
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        rele_sms(context, car_id, cmd_id, true);
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        rele_sms(context, car_id, cmd_id, false);
+                    }
+                }
+        );
+    }
+
+    static void rele_sms(final Context context, final String car_id, int cmd_id, boolean silent) {
+        String text = "";
+        switch (cmd_id) {
+            case R.string.rele1_on:
+                text = "REL1 LOCK";
+                break;
+            case R.string.rele1_off:
+                text = "REL1 UNLOCK";
+                break;
+            case R.string.rele1i:
+                text = "REL1 IMPULS";
+                break;
+            case R.string.rele2_on:
+                text = "REL2 LOCK";
+                break;
+            case R.string.rele2_off:
+                text = "REL2 UNLOCK";
+                break;
+            case R.string.rele2i:
+                text = "REL2 IMPULS";
+                break;
+        }
+
+        String answer = text + " OK";
+        final SmsMonitor.Sms sms = new SmsMonitor.Sms(cmd_id, text, answer);
+        requestPassword(context, cmd_id, silent ? 0 : cmd_id, new Runnable() {
+            @Override
+            public void run() {
+                SmsMonitor.sendSMS(context, car_id, sms);
+            }
+        });
+    }
+
     static void rele1(final Context context, final String car_id) {
         selectRoute(context, car_id,
                 new Runnable() {
@@ -902,34 +992,6 @@ public class Actions {
                 ed.commit();
             }
         });
-    }
-
-    static void send_sms(final Context context, final String car_id, final int id_title, final SmsMonitor.Sms sms, final Answer after) {
-        final ProgressDialog smsProgress = new ProgressDialog(context);
-        smsProgress.setMessage(context.getString(id_title));
-        smsProgress.show();
-        final BroadcastReceiver br = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (!intent.getStringExtra(Names.ID).equals(car_id))
-                    return;
-                if (SmsMonitor.isProcessed(car_id, sms.id))
-                    return;
-                smsProgress.dismiss();
-                if ((intent.getIntExtra(Names.ANSWER, 0) == Activity.RESULT_OK) && (after != null))
-                    after.answer(intent.getStringExtra(Names.SMS_TEXT));
-            }
-        };
-        context.registerReceiver(br, new IntentFilter(SmsMonitor.SMS_ANSWER));
-        smsProgress.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                context.unregisterReceiver(br);
-                SmsMonitor.cancelSMS(context, car_id, sms.id);
-            }
-        });
-        if (!SmsMonitor.sendSMS(context, car_id, sms))
-            smsProgress.dismiss();
     }
 
     static boolean isNetwork(Context context) {

@@ -416,6 +416,7 @@
     <string name="v">V</string>
     <string name="no_start">no start</string>
     <string name="setup">Setup</string>
+    <string name="setup_msg">Loading settings to device</string>
     <string name="start_time">Engine autostart time</string>
     <string-array name="start_timer">
         <item>10 min</item>
@@ -426,8 +427,16 @@
     <string name="rele1i">RELE 1 impulse</string>
     <string name="rele2">RELE 2</string>
     <string name="rele2i">RELE 2 impulse</string>
-    <string name="rele3">RELE 3</string>
-    <string name="rele3i">RELE 3 impulse</string>
-    <string name="rele4">RELE 4</string>
-    <string name="rele4i">RELE 4 impulse</string>
+    <string name="rele1_on">RELE 1 ON</string>
+    <string name="rele1_off">RELE 1 OFF</string>
+    <string name="rele2_on">RELE 2 ON</string>
+    <string name="rele2_off">RELE 2 OFF</string>
+    <string-array name="heater">
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="heater_values">
+        <item>RELE 1</item>
+        <item>RELE 2</item>
+    </string-array>
 </resources>

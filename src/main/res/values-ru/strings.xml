@@ -379,6 +379,7 @@
     <string name="v">В</string>
     <string name="no_start">не запускать</string>
     <string name="setup">Применить</string>
+    <string name="setup_msg">Загрузить настройки на устройство</string>
     <string name="start_time">Время прогрева</string>
     <string-array name="start_timer">
         <item>10 минут</item>
@@ -389,8 +390,12 @@
     <string name="rele1i">РЕЛЕ 1 импульс</string>
     <string name="rele2">РЕЛЕ 2</string>
     <string name="rele2i">РЕЛЕ 2 импульс</string>
-    <string name="rele3">РЕЛЕ 3</string>
-    <string name="rele3i">РЕЛЕ 3 импульс</string>
-    <string name="rele4">РЕЛЕ 4</string>
-    <string name="rele4i">РЕЛЕ 4 импульс</string>
+    <string name="rele1_on">РЕЛЕ 1 включить</string>
+    <string name="rele1_off">РЕЛЕ 1 выключить</string>
+    <string name="rele2_on">РЕЛЕ 2 включить</string>
+    <string name="rele2_off">РЕЛЕ 2 выключить</string>
+    <string-array name="heater_values">
+        <item>РЕЛЕ 1</item>
+        <item>РЕЛЕ 2</item>
+    </string-array>
 </resources>

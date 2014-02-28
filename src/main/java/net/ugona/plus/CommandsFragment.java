@@ -3,14 +3,11 @@ package net.ugona.plus;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 public class CommandsFragment extends SettingsFragment {
-
-    SharedPreferences preferences;
 
     class CheckBoxItem extends CheckItem {
 
@@ -44,7 +41,6 @@ public class CommandsFragment extends SettingsFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
-        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         items.add(new CheckBoxItem(R.string.call, State.CMD_CALL));
         items.add(new CheckBoxItem(R.string.valet_cmd, State.CMD_VALET));
         items.add(new CheckBoxItem(R.string.autostart, State.CMD_AZ));
@@ -53,10 +49,6 @@ public class CommandsFragment extends SettingsFragment {
         items.add(new CheckBoxItem(R.string.rele1i, State.CMD_RELE1I));
         items.add(new CheckBoxItem(R.string.rele2, State.CMD_RELE2));
         items.add(new CheckBoxItem(R.string.rele2i, State.CMD_RELE2I));
-        items.add(new CheckBoxItem(R.string.rele3, State.CMD_RELE3));
-        items.add(new CheckBoxItem(R.string.rele3i, State.CMD_RELE3I));
-        items.add(new CheckBoxItem(R.string.rele4, State.CMD_RELE4));
-        items.add(new CheckBoxItem(R.string.rele4i, State.CMD_RELE4I));
         return v;
     }
 }

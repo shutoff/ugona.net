@@ -313,6 +313,42 @@ public class ActionFragment extends Fragment
                     Actions.rele1(context, car_id);
                 }
             },
+            new Action(R.drawable.rele_on, R.string.rele1_on, State.CMD_RELE1) {
+                @Override
+                void action(Context context, String car_id) {
+                    Actions.rele(context, car_id, R.string.rele1_on);
+                }
+            },
+            new Action(R.drawable.rele_off, R.string.rele1_off, State.CMD_RELE1) {
+                @Override
+                void action(Context context, String car_id) {
+                    Actions.rele(context, car_id, R.string.rele1_off);
+                }
+            },
+            new Action(R.drawable.rele_impulse, R.string.rele1i, State.CMD_RELE1I) {
+                @Override
+                void action(Context context, String car_id) {
+                    Actions.rele(context, car_id, R.string.rele1i);
+                }
+            },
+            new Action(R.drawable.rele_on, R.string.rele2_on, State.CMD_RELE2) {
+                @Override
+                void action(Context context, String car_id) {
+                    Actions.rele(context, car_id, R.string.rele2_on);
+                }
+            },
+            new Action(R.drawable.rele_off, R.string.rele2_off, State.CMD_RELE2) {
+                @Override
+                void action(Context context, String car_id) {
+                    Actions.rele(context, car_id, R.string.rele2_off);
+                }
+            },
+            new Action(R.drawable.rele_impulse, R.string.rele2i, State.CMD_RELE2I) {
+                @Override
+                void action(Context context, String car_id) {
+                    Actions.rele(context, car_id, R.string.rele2i);
+                }
+            },
             new Action(R.drawable.icon_status, R.string.status_title) {
                 @Override
                 void action(Context context, String car_id) {

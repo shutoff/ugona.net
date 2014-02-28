@@ -7,14 +7,11 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 public class NotificationFragment extends SettingsFragment {
-
-    SharedPreferences preferences;
 
     class SoundItem extends Item {
 
@@ -73,73 +70,12 @@ public class NotificationFragment extends SettingsFragment {
         String key;
     }
 
-    class CheckBoxItem extends CheckItem {
-        CheckBoxItem(int name, String item_key, boolean def_value) {
-            super(name);
-            key = item_key;
-            setValue(preferences.getBoolean(key + car_id, def_value) ? "1" : "");
-        }
-
-        @Override
-        void click() {
-            SharedPreferences.Editor ed = preferences.edit();
-            ed.putBoolean(key + car_id, !getValue().equals(""));
-            ed.commit();
-            Intent intent = new Intent(FetchService.ACTION_UPDATE_FORCE);
-            intent.putExtra(Names.ID, car_id);
-            getActivity().sendBroadcast(intent);
-        }
-
-        String key;
-    }
-
-    class ListItem extends SpinnerItem {
-        ListItem(int name, int values, int entries, String item_key, String def_value) {
-            super(name, values, entries);
-            key = item_key;
-            setValue(preferences.getString(key + car_id, def_value));
-        }
-
-        @Override
-        void click() {
-            SharedPreferences.Editor ed = preferences.edit();
-            ed.putString(key + car_id, getValue());
-            ed.commit();
-        }
-
-        String key;
-    }
-
-    class ListIntItem extends SpinnerItem {
-        ListIntItem(int name, int values, int entries, String item_key, int def_value) {
-            super(name, values, entries);
-            key = item_key;
-            try {
-                setValue(preferences.getInt(key + car_id, def_value) + "");
-            } catch (Exception ex) {
-                setValue(def_value + "");
-            }
-        }
-
-        @Override
-        void click() {
-            SharedPreferences.Editor ed = preferences.edit();
-            ed.putInt(key + car_id, Integer.parseInt(getValue()));
-            ed.commit();
-        }
-
-        String key;
-    }
-
-
     SoundItem alarm_sound;
     SoundItem notify_sound;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
-
-        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
         alarm_sound = new SoundItem(R.string.alarm_sound, RingtoneManager.TYPE_RINGTONE, Preferences.getAlarm(preferences, car_id), Names.ALARM);
         notify_sound = new SoundItem(R.string.notify_sound, RingtoneManager.TYPE_NOTIFICATION, Preferences.getNotify(preferences, car_id), Names.NOTIFY);

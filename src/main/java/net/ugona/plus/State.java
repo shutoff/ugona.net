@@ -97,12 +97,8 @@ public class State {
     static final int CMD_RELE = 1 << 3;
     static final int CMD_RELE1 = 1 << 4;
     static final int CMD_RELE2 = 1 << 5;
-    static final int CMD_RELE3 = 1 << 6;
-    static final int CMD_RELE4 = 1 << 7;
-    static final int CMD_RELE1I = 1 << 8;
-    static final int CMD_RELE2I = 1 << 9;
-    static final int CMD_RELE3I = 1 << 10;
-    static final int CMD_RELE4I = 1 << 11;
+    static final int CMD_RELE1I = 1 << 6;
+    static final int CMD_RELE2I = 1 << 7;
 
     static int getCommands(SharedPreferences preferences, String car_id) {
         int res = preferences.getInt(Names.COMMANDS + car_id, -1);
