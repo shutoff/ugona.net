@@ -100,7 +100,7 @@
         </activity>
 
         <activity
-            android:name=".PhoneNumberDialog"
+            android:name=".AuthDialog"
             android:theme="@style/Theme.Transparent" />
 
         <activity android:name=".PhotoView" />

@@ -1,6 +1,7 @@
 package net.ugona.plus;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,15 +18,24 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.Date;
 import java.util.Vector;
 
 public class Cars extends ActionBarActivity {
 
     final static int CAR_SETUP = 4000;
+    final static int NEW_CAR = 4001;
+
+    final static String URL_PHOTOS = "https://car-online.ugona.net/photos?skey=$1&begin=$2";
 
     SharedPreferences preferences;
 
@@ -135,7 +145,12 @@ public class Cars extends ActionBarActivity {
                 for (int i = 1; ; i++) {
                     if (!isId(i + "")) {
                         deleteCarKeys(this, i + "");
-                        setupCar(i + "");
+                        Intent intent = new Intent(this, AuthDialog.class);
+                        intent.putExtra(Names.ID, i + "");
+                        intent.putExtra(Names.AUTH, true);
+                        if (State.hasTelephony(this))
+                            intent.putExtra(Names.CAR_PHONE, true);
+                        startActivityForResult(intent, NEW_CAR);
                         break;
                     }
                 }
@@ -151,6 +166,137 @@ public class Cars extends ActionBarActivity {
             fillCarsId();
             ((BaseAdapter) lvCars.getAdapter()).notifyDataSetChanged();
         }
+        if ((requestCode == NEW_CAR) && (resultCode == RESULT_OK)) {
+            final String car_id = data.getStringExtra(Names.ID);
+            if (checkPointer(car_id))
+                return;
+            HttpTask task = new HttpTask() {
+                @Override
+                void result(JsonObject res) throws ParseException {
+                    JsonArray array = res.get("photos").asArray();
+                    if (array.size() > 0) {
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putBoolean(Names.SHOW_PHOTO + car_id, true);
+                        ed.commit();
+                        Intent i = new Intent(FetchService.ACTION_UPDATE_FORCE);
+                        i.putExtra(Names.ID, car_id);
+                        sendBroadcast(i);
+                    }
+                }
+
+                @Override
+                void error() {
+
+                }
+            };
+            task.execute(URL_PHOTOS, preferences.getString(Names.CAR_KEY + car_id, ""), new Date().getTime() - 3 * 24 * 60 * 60 * 1000);
+            setupCar(car_id);
+        }
+    }
+
+    boolean checkPointer(final String car_id) {
+        if (!preferences.getBoolean(Names.POINTER + car_id, false))
+            return false;
+        if (preferences.getString(Names.CARS, "").split(",").length < 2)
+            return false;
+
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.pointer)
+                .setMessage(R.string.pointer_msg)
+                .setPositiveButton(R.string.ok, null)
+                .setNegativeButton(R.string.cancel, null)
+                .setView(inflater.inflate(R.layout.cars, null))
+                .create();
+        dialog.show();
+        Cars.Car[] full_cars = Cars.getCars(this);
+        Cars.Car[] tmp_cars = new Cars.Car[full_cars.length - 1];
+        int n = 0;
+        for (Cars.Car c : full_cars) {
+            if (c.id.equals(car_id))
+                continue;
+            tmp_cars[n++] = c;
+        }
+        final Cars.Car[] cars = tmp_cars;
+        final Spinner spinner = (Spinner) dialog.findViewById(R.id.cars);
+        spinner.setAdapter(new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return cars.length;
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return cars[position];
+            }
+
+            @Override
+            public long getItemId(int position) {
+                return position;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View v = convertView;
+                if (v == null) {
+                    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = inflater.inflate(R.layout.car_list_item, null);
+                }
+                TextView tv = (TextView) v.findViewById(R.id.name);
+                tv.setText(cars[position].name);
+                return v;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View v = convertView;
+                if (v == null) {
+                    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = inflater.inflate(R.layout.car_list_dropdown_item, null);
+                }
+                TextView tv = (TextView) v.findViewById(R.id.name);
+                tv.setText(cars[position].name);
+                return v;
+            }
+        });
+        if (cars.length < 2)
+            spinner.setVisibility(View.GONE);
+        dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences.Editor ed = preferences.edit();
+                String id = cars[spinner.getSelectedItemPosition()].id;
+                String new_cars = null;
+                for (Cars.Car car : cars) {
+                    if (new_cars == null) {
+                        new_cars = car.id;
+                        continue;
+                    }
+                    new_cars += "," + car.id;
+                }
+                ed.putString(Names.CARS, new_cars);
+                ed.putString(Names.CAR_NAME + car_id, "Pointer " + car_id);
+                String pointers = preferences.getString(Names.POINTERS + id, "");
+                if (!pointers.equals(""))
+                    pointers += ",";
+                pointers += car_id;
+                ed.putString(Names.POINTERS + id, pointers);
+                ed.commit();
+                Intent i = new Intent(Cars.this, FetchService.class);
+                i.putExtra(Names.ID, car_id);
+                startService(i);
+                i.putExtra(Names.ID, id);
+                startService(i);
+                dialog.dismiss();
+            }
+        });
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                setupCar(car_id);
+            }
+        });
+        return true;
     }
 
     void fillCarsId() {

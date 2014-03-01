@@ -398,4 +398,8 @@
         <item>РЕЛЕ 1</item>
         <item>РЕЛЕ 2</item>
     </string-array>
+    <string name="error">Ошибка</string>
+    <string name="no_network">Сеть для передачи данных недоступна</string>
+    <string name="retry">Повторить</string>
+    <string name="phone">Телефон:</string>
 </resources>

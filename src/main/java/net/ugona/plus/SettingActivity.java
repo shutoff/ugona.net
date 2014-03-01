@@ -2,11 +2,9 @@ package net.ugona.plus;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -19,14 +17,9 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,11 +28,6 @@ import com.eclipsesource.json.ParseException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.security.spec.X509EncodedKeySpec;
-
-import javax.crypto.Cipher;
 
 public class SettingActivity extends ActionBarActivity {
 
@@ -60,6 +48,7 @@ public class SettingActivity extends ActionBarActivity {
 
     final static String URL_SETTINGS = "https://car-online.ugona.net/settings?auth=$1";
     final static String URL_SET = "https://car-online.ugona.net/set?auth=$1&v=$2";
+    final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -205,6 +194,12 @@ public class SettingActivity extends ActionBarActivity {
 
     void updateSettings() {
         values_error = false;
+        values = null;
+        old_values = null;
+
+        if (preferences.getBoolean(Names.POINTER + car_id, false))
+            return;
+
         HttpTask task = new HttpTask() {
 
             @Override
@@ -229,6 +224,26 @@ public class SettingActivity extends ActionBarActivity {
             }
         };
         task.execute(URL_SETTINGS, preferences.getString(Names.AUTH + car_id, ""));
+
+        HttpTask version = new HttpTask() {
+            @Override
+            void result(JsonObject res) throws ParseException {
+                String ver = res.get("version").asString();
+                if (ver.equals(preferences.getString(Names.VERSION + car_id, "")))
+                    return;
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putString(Names.VERSION + car_id, ver);
+                ed.commit();
+                sendUpdate();
+            }
+
+            @Override
+            void error() {
+
+            }
+        };
+        version.execute(URL_PROFILE, preferences.getString(Names.CAR_KEY + car_id, ""));
+        sendUpdate();
     }
 
     void sendUpdate() {
@@ -346,6 +361,8 @@ public class SettingActivity extends ActionBarActivity {
         @Override
         public int getCount() {
             int count = 4;
+            if (preferences.getBoolean(Names.POINTER + car_id, false))
+                return 1;
             int commands = State.getCommands(preferences, car_id);
             if ((commands & State.CMD_AZ) != 0)
                 count++;
@@ -373,134 +390,6 @@ public class SettingActivity extends ActionBarActivity {
             }
             return null;
         }
-    }
-
-    final static String URL_KEY = "https://car-online.ugona.net/key?auth=$1";
-    final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
-    final static String URL_PHOTOS = "https://car-online.ugona.net/photos?skey=$1&begin=$2";
-
-    static boolean apiKeyShow = false;
-
-    static String crypt(String data) {
-        try {
-            String key = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApZ3oK9Ia0HdUFQ3iP6/OP94MrlnYhnV5RadTkHJsS+KxJshy81psMcFgI0/FYPpV3B6arQk9wJ7+NMj4kpnToxyVALwYNpT4/2+CN7igN48dZ62DflP7h6lDsLS0Mksly+LEKCrZiT4tkHLyAVI5HQekxfi9b+oVI9Rkp7CkKqXwVruRykaRczV/mZKT5IulPe4gIy8yDf6z6IJt84qfKMq47fbHRfiQdV0WlBP023fTBaLDqQO9FBmL8uNC9AkQAdjZo30j3mpcpCb4X9RiB7Hf1hczBLmCL9kQLZBkSdGLiwbeamDVhthuAvn4K2CFoXUGwmwSja6DZJSfU69+awIDAQAB";
-            byte[] sigBytes = Base64.decode(key, Base64.DEFAULT);
-            KeyFactory factory = KeyFactory.getInstance("RSA");
-            PublicKey publicKey = factory.generatePublic(new X509EncodedKeySpec(sigBytes));
-            byte[] byteData = data.getBytes();
-            Cipher cipher = Cipher.getInstance("RSA/None/PKCS1Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-            byte[] encryptedByteData = cipher.doFinal(byteData);
-            String s = Base64.encodeToString(encryptedByteData, Base64.NO_PADDING);
-            return s;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
-
-    static void getApiKey(final Context context, final String car_id, final Runnable onDone, final Runnable onEnd) {
-        if (apiKeyShow)
-            return;
-        apiKeyShow = true;
-
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
-        final AlertDialog dialog = new AlertDialog.Builder(context)
-                .setTitle(R.string.auth)
-                .setMessage(R.string.auth_summary)
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.ok, null)
-                .setView(inflater.inflate(R.layout.apikeydialog, null))
-                .create();
-        dialog.getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-        dialog.show();
-        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                apiKeyShow = false;
-                if (onEnd != null)
-                    onEnd.run();
-            }
-        });
-
-        final EditText edLogin = (EditText) dialog.findViewById(R.id.login);
-        final EditText edPasswd = (EditText) dialog.findViewById(R.id.passwd);
-        final TextView tvError = (TextView) dialog.findViewById(R.id.error);
-
-        final Button btnSave = dialog.getButton(Dialog.BUTTON_POSITIVE);
-
-        TextWatcher watcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                btnSave.setEnabled(!edLogin.getText().toString().equals("") && !edPasswd.getText().toString().equals(""));
-                tvError.setVisibility(View.GONE);
-            }
-        };
-        edLogin.addTextChangedListener(watcher);
-        edPasswd.addTextChangedListener(watcher);
-        btnSave.setEnabled(false);
-
-        edLogin.setText(preferences.getString(Names.LOGIN + car_id, ""));
-
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final ProgressDialog dlgCheck = new ProgressDialog(context);
-                dlgCheck.setMessage(context.getString(R.string.check_auth));
-                dlgCheck.show();
-
-                final String login = edLogin.getText().toString();
-                final String pass = edPasswd.getText().toString();
-                final String auth = crypt(login + "\0" + pass);
-
-                HttpTask apiTask = new HttpTask() {
-                    @Override
-                    void result(JsonObject res) throws ParseException {
-                        dlgCheck.dismiss();
-                        String key = res.get("key").asString();
-                        SharedPreferences.Editor ed = preferences.edit();
-                        ed.putString(Names.CAR_KEY + car_id, key);
-                        ed.putString(Names.LOGIN + car_id, login);
-                        ed.putString(Names.AUTH + car_id, auth);
-                        ed.remove(Names.GCM_TIME);
-                        String[] cars = preferences.getString(Names.CARS, "").split(",");
-                        boolean is_new = true;
-                        for (String car : cars) {
-                            if (car.equals(car_id))
-                                is_new = false;
-                        }
-                        if (is_new)
-                            ed.putString(Names.CARS, preferences.getString(Names.CARS, "") + "," + car_id);
-                        ed.commit();
-                        dialog.dismiss();
-                        onDone.run();
-                    }
-
-                    @Override
-                    void error() {
-                        Toast toast = Toast.makeText(context, context.getString(R.string.auth_error), Toast.LENGTH_LONG);
-                        toast.show();
-                        tvError.setText(R.string.auth_error);
-                        tvError.setVisibility(View.VISIBLE);
-                        dlgCheck.dismiss();
-                    }
-                };
-
-                apiTask.execute(URL_KEY, auth);
-            }
-        });
     }
 
 }

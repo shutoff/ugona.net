@@ -1002,30 +1002,47 @@ public class Actions {
         return info.isConnected();
     }
 
-    static void selectRoute(Context context, String car_id, Runnable asNetwork, final Runnable asSms, final Runnable asSmsFirst) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        if (preferences.getString(Names.CONTROL + car_id, "").equals("")) {
-            if (asSmsFirst != null) {
-                asSmsFirst.run();
+    static void selectRoute(final Context context, final String car_id, final Runnable asNetwork, final Runnable asSms, final Runnable asSmsFirst) {
+        if (State.hasTelephony(context)) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            if (preferences.getString(Names.CONTROL + car_id, "").equals("")) {
+                if (asSmsFirst != null) {
+                    asSmsFirst.run();
+                    return;
+                }
+                asSms.run();
                 return;
             }
-            asSms.run();
-            return;
         }
         if (isNetwork(context)) {
             asNetwork.run();
             return;
         }
+        if (State.hasTelephony(context)) {
+            AlertDialog dialog = new AlertDialog.Builder(context)
+                    .setTitle(R.string.send_sms)
+                    .setMessage(R.string.send_sms_message)
+                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            asSms.run();
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, null)
+                    .create();
+            dialog.show();
+            return;
+        }
         AlertDialog dialog = new AlertDialog.Builder(context)
-                .setTitle(R.string.send_sms)
-                .setMessage(R.string.send_sms_message)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                .setTitle(R.string.error)
+                .setMessage(R.string.no_network)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        asSms.run();
+                        selectRoute(context, car_id, asNetwork, asSms, asSmsFirst);
                     }
                 })
-                .setNegativeButton(R.string.cancel, null)
                 .create();
         dialog.show();
     }

@@ -439,4 +439,8 @@
         <item>RELE 1</item>
         <item>RELE 2</item>
     </string-array>
+    <string name="error">Error</string>
+    <string name="no_network">Netwrok is not available</string>
+    <string name="retry">Retry</string>
+    <string name="phone">Phone:</string>
 </resources>

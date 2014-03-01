@@ -1,5 +1,6 @@
 package net.ugona.plus;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -117,6 +118,8 @@ public class StateFragment extends Fragment
     static Pattern number_pattern = Pattern.compile("^[0-9]+ ?");
 
     final String GSM_URL = "https://car-online.ugona.net/gsm?skey=$1&cc=$2&nc=$3&lac=$4&cid=$5";
+
+    final int AUTH_REQUEST = 1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -286,12 +289,10 @@ public class StateFragment extends Fragment
                     if (error_text == null)
                         error_text = getString(R.string.data_error);
                     if (error_text.equals("Auth error")) {
-                        SettingActivity.getApiKey(getActivity(), car_id, new Runnable() {
-                            @Override
-                            public void run() {
-                                startUpdate(getActivity());
-                            }
-                        }, null);
+                        Intent i = new Intent(getActivity(), AuthDialog.class);
+                        i.putExtra(Names.ID, car_id);
+                        i.putExtra(Names.AUTH, true);
+                        startActivityForResult(i, AUTH_REQUEST);
                         return;
                     }
                     tvError.setText(error_text);
@@ -341,6 +342,12 @@ public class StateFragment extends Fragment
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(Names.ID, car_id);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if ((requestCode == AUTH_REQUEST) && (requestCode == Activity.RESULT_OK))
+            startUpdate(getActivity());
     }
 
     @Override
@@ -498,7 +505,7 @@ public class StateFragment extends Fragment
         int commands = State.getCommands(preferences, car_id);
         boolean block = !preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false);
 
-        if (State.hasTelephony(context) && ((commands & State.CMD_AZ) != 0) && (!ignition || az)) {
+        if (((commands & State.CMD_AZ) != 0) && (!ignition || az)) {
             vMotor.setVisibility(View.VISIBLE);
             vMotor.setTag(az);
             if (az) {
@@ -511,7 +518,7 @@ public class StateFragment extends Fragment
         } else {
             vMotor.setVisibility(View.GONE);
         }
-        if (State.hasTelephony(context) && ((commands & State.CMD_RELE) != 0) && !ignition) {
+        if (((commands & State.CMD_RELE) != 0) && !ignition) {
             vRele.setVisibility(View.VISIBLE);
             pRele.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele) ? View.VISIBLE : View.GONE);
             if (Preferences.getRele(preferences, car_id)) {
@@ -522,15 +529,14 @@ public class StateFragment extends Fragment
         } else {
             vRele.setVisibility(View.GONE);
         }
-        if (State.hasTelephony(context) && ignition && !az && !block &&
-                !preferences.getBoolean(Names.GUARD + car_id, false)) {
+        if (ignition && !az && !block && !preferences.getBoolean(Names.GUARD + car_id, false)) {
             vBlock.setVisibility(View.VISIBLE);
             pBlock.setVisibility(SmsMonitor.isProcessed(car_id, R.string.block) ? View.VISIBLE : View.GONE);
         } else {
             vBlock.setVisibility(View.GONE);
         }
         boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
-        if (State.hasTelephony(context) && (((commands & State.CMD_VALET) != 0) || valet || block)) {
+        if ((((commands & State.CMD_VALET) != 0) || valet || block)) {
             if (valet) {
                 ivValet.setImageResource(R.drawable.icon_valet_off);
                 pValet.setVisibility(SmsMonitor.isProcessed(car_id, R.string.valet_off) ? View.VISIBLE : View.GONE);
@@ -548,7 +554,7 @@ public class StateFragment extends Fragment
             vPhone.setVisibility(View.GONE);
         }
 
-        if (State.hasTelephony(context) && ((commands & State.CMD_RELE1) != 0)) {
+        if ((commands & State.CMD_RELE1) != 0) {
             vRele1.setVisibility(View.VISIBLE);
             pRele1.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele1) ? View.VISIBLE : View.GONE);
             if (preferences.getBoolean(Names.RELAY1 + car_id, false)) {
@@ -559,14 +565,14 @@ public class StateFragment extends Fragment
         } else {
             vRele1.setVisibility(View.GONE);
         }
-        if (State.hasTelephony(context) && ((commands & State.CMD_RELE1I) != 0)) {
+        if ((commands & State.CMD_RELE1I) != 0) {
             vRele1i.setVisibility(View.VISIBLE);
             pRele1i.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele1i) ? View.VISIBLE : View.GONE);
         } else {
             vRele1i.setVisibility(View.GONE);
         }
 
-        if (State.hasTelephony(context) && ((commands & State.CMD_RELE2) != 0)) {
+        if ((commands & State.CMD_RELE2) != 0) {
             vRele2.setVisibility(View.VISIBLE);
             pRele2.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele2) ? View.VISIBLE : View.GONE);
             if (preferences.getBoolean(Names.RELAY2 + car_id, false)) {
@@ -577,7 +583,7 @@ public class StateFragment extends Fragment
         } else {
             vRele2.setVisibility(View.GONE);
         }
-        if (State.hasTelephony(context) && ((commands & State.CMD_RELE2I) != 0)) {
+        if ((commands & State.CMD_RELE2I) != 0) {
             vRele2i.setVisibility(View.VISIBLE);
             pRele2i.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele2i) ? View.VISIBLE : View.GONE);
         } else {

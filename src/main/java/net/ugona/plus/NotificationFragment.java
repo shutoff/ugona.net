@@ -94,7 +94,6 @@ public class NotificationFragment extends SettingsFragment {
         items.add(new ListItem(R.string.guard_notify, R.array.guard_values, R.array.guard_entries, Names.GUARD_NOTIFY, ""));
         items.add(new CheckBoxItem(R.string.show_balance, Names.SHOW_BALANCE, true));
         items.add(new ListIntItem(R.string.balance_notification, R.array.balance_limit, R.array.balance_values, Names.LIMIT, 50));
-        items.add(new CheckBoxItem(R.string.show_photo, Names.SHOW_PHOTO, false));
 
         update();
         return v;

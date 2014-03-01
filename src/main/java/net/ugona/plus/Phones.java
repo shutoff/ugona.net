@@ -205,7 +205,7 @@ public class Phones extends ActionBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.add: {
-                Intent i = new Intent(Phones.this, PhoneNumberDialog.class);
+                Intent i = new Intent(Phones.this, AuthDialog.class);
                 startActivityForResult(i, ADD_PHONE);
                 return true;
             }

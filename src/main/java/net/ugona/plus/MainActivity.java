@@ -8,6 +8,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -146,7 +147,7 @@ public class MainActivity extends ActionBarActivity {
 
         show_pages = new boolean[6];
         show_pages[PAGE_PHOTO] = preferences.getBoolean(Names.SHOW_PHOTO + car_id, false);
-        show_pages[PAGE_ACTIONS] = State.hasTelephony(this);
+        show_pages[PAGE_ACTIONS] = true;
         show_pages[PAGE_STATE] = true;
         show_pages[PAGE_EVENT] = true;
         show_pages[PAGE_TRACK] = false;
@@ -157,8 +158,11 @@ public class MainActivity extends ActionBarActivity {
             current = new LocalDate(savedInstanceState.getLong(DATE));
         } else {
             car_id = getIntent().getStringExtra(Names.ID);
-            if (car_id == null)
+            if (car_id == null) {
                 car_id = preferences.getString(Names.LAST, "");
+                if (preferences.getBoolean(Names.POINTER + car_id, false))
+                    car_id = "";
+            }
             car_id = Preferences.getCar(preferences, car_id);
         }
 
@@ -204,13 +208,19 @@ public class MainActivity extends ActionBarActivity {
             String phone = preferences.getString(Names.CAR_PHONE + car_id, "");
             String key = preferences.getString(Names.CAR_KEY + car_id, "");
             String auth = preferences.getString(Names.AUTH + car_id, "");
-/*
+
             if (auth.equals("") && !preferences.getBoolean(Names.POINTER, false)) {
-                CarPreferences.getApiKey(this, car_id, null, null);
-            } else if ((State.hasTelephony(this) && (phone.length() == 0)) || (key.length() == 0)) {
-                Intent intent = new Intent(this, CarPreferences.class);
-                intent.putExtra(Names.ID, car_id);
-                startActivityForResult(intent, CAR_SETUP);
+                Intent i = new Intent(this, AuthDialog.class);
+                i.putExtra(Names.ID, car_id);
+                i.putExtra(Names.AUTH, true);
+                if (State.hasTelephony(this) && (phone.length() == 0))
+                    i.putExtra(Names.CAR_PHONE, true);
+                startActivityForResult(i, CAR_SETUP);
+            } else if (State.hasTelephony(this) && (phone.length() == 0)) {
+                Intent i = new Intent(this, AuthDialog.class);
+                i.putExtra(Names.ID, car_id);
+                i.putExtra(Names.CAR_PHONE, true);
+                startActivityForResult(i, CAR_SETUP);
             } else if (!preferences.getBoolean(Names.INIT_POINTER, false)) {
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putBoolean(Names.INIT_POINTER, true);
@@ -225,8 +235,11 @@ public class MainActivity extends ActionBarActivity {
                                 for (int i = 1; ; i++) {
                                     if (!isId(i + "")) {
                                         Cars.deleteCarKeys(MainActivity.this, i + "");
-                                        Intent intent = new Intent(MainActivity.this, CarPreferences.class);
+                                        Intent intent = new Intent(MainActivity.this, AuthDialog.class);
                                         intent.putExtra(Names.ID, i + "");
+                                        intent.putExtra(Names.AUTH, true);
+                                        if (State.hasTelephony(MainActivity.this))
+                                            intent.putExtra(Names.CAR_PHONE, true);
                                         startActivityForResult(intent, CAR_SETUP);
                                         break;
                                     }
@@ -236,7 +249,6 @@ public class MainActivity extends ActionBarActivity {
                         .create();
                 dialog.show();
             }
-*/
         }
 
         br = new BroadcastReceiver() {
@@ -579,7 +591,7 @@ public class MainActivity extends ActionBarActivity {
         pointer = preferences.getBoolean(Names.POINTER + car_id, false);
         if (pointer)
             show_tracks = false;
-        boolean show_actions = !pointer && State.hasTelephony(this);
+        boolean show_actions = !pointer;
         if (show_pages[PAGE_ACTIONS] != show_actions) {
             show_pages[PAGE_ACTIONS] = show_actions;
             changed = true;

@@ -11,6 +11,7 @@
         android:layout_height="wrap_content">
 
         <TableRow
+            android:id="@+id/login_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -30,7 +31,7 @@
             </EditText>
         </TableRow>
 
-        <TableRow>
+        <TableRow android:id="@+id/passwd_row">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -43,6 +44,31 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:inputType="textNoSuggestions|textPassword" />
+
+        </TableRow>
+
+        <TableRow android:id="@+id/phone_row">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/phone" />
+
+            <EditText
+                android:id="@+id/number"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="phone">
+
+                <requestFocus />
+            </EditText>
+
+            <ImageView
+                android:id="@+id/contacts"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_menu_more" />
 
         </TableRow>
 

@@ -86,6 +86,8 @@ public class ActionFragment extends Fragment
         for (Action action : def_actions) {
             if ((action.flags > 0) && ((action.flags & flags) == 0))
                 continue;
+            if (!State.hasTelephony(getActivity()) && !action.internet)
+                continue;
             adapter.actions.add(action);
         }
     }
@@ -188,12 +190,21 @@ public class ActionFragment extends Fragment
             text = text_;
             icon = icon_;
             flags = 0;
+            internet = false;
+        }
+
+        Action(int icon_, int text_, boolean internet_) {
+            text = text_;
+            icon = icon_;
+            flags = 0;
+            internet = internet_;
         }
 
         Action(int icon_, int text_, int flags_) {
             text = text_;
             icon = icon_;
             flags = flags_;
+            internet = true;
         }
 
 
@@ -202,6 +213,7 @@ public class ActionFragment extends Fragment
         int icon;
         int text;
         int flags;
+        boolean internet;
     }
 
     static Action[] pointer_actions = {
@@ -283,13 +295,13 @@ public class ActionFragment extends Fragment
                     context.startActivity(intent);
                 }
             },
-            new Action(R.drawable.icon_valet_on, R.string.valet_on) {
+            new Action(R.drawable.icon_valet_on, R.string.valet_on, true) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.valet_on(context, car_id);
                 }
             },
-            new Action(R.drawable.icon_valet_off, R.string.valet_off) {
+            new Action(R.drawable.icon_valet_off, R.string.valet_off, true) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.valet_off(context, car_id);
@@ -355,7 +367,7 @@ public class ActionFragment extends Fragment
                     Actions.status(context, car_id);
                 }
             },
-            new Action(R.drawable.icon_block, R.string.block) {
+            new Action(R.drawable.icon_block, R.string.block, true) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.block_motor(context, car_id);

@@ -22,13 +22,13 @@ public class DeviceSettingsFragment extends DeviceFragment {
         @Override
         String getValue() {
             int v = Integer.parseInt(super.getValue());
-            return (values.length - v + 1) + "";
+            return (values.length - v) + "";
         }
 
         @Override
         void setValue(String value) {
-            int v = Integer.parseInt(value);
-            super.setValue((values.length - v + 1) + "");
+            int v = values.length - Integer.parseInt(value);
+            super.setValue(v + "");
         }
 
         String[] values;
