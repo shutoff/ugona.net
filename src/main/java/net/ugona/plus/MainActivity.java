@@ -123,6 +123,7 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 */
+
         try {
             ViewConfiguration config = ViewConfiguration.get(this);
             Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");

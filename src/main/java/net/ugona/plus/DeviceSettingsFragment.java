@@ -16,18 +16,27 @@ public class DeviceSettingsFragment extends DeviceFragment {
 
         @Override
         String textValue(int progress) {
-            return values[values.length - progress - 1];
+            int i = values.length - progress - 1;
+            if (i < 0)
+                i = 0;
+            if (i >= values.length)
+                i = values.length - 1;
+            State.appendLog(">> " + progress + " " + i);
+            return values[i];
         }
 
         @Override
         String getValue() {
             int v = Integer.parseInt(super.getValue());
-            return (values.length - v) + "";
+            String res = (values.length - v + 1) + "";
+            State.appendLog("get value " + v + " " + res);
+            return res;
         }
 
         @Override
         void setValue(String value) {
-            int v = values.length - Integer.parseInt(value);
+            int v = values.length - Integer.parseInt(value) + 1;
+            State.appendLog("set value " + value + " " + v);
             super.setValue(v + "");
         }
 
