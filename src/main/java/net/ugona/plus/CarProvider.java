@@ -29,6 +29,7 @@ public class CarProvider extends ContentProvider {
             + AUTHORITY + "." + CAR_PATH;
 
     static final int TYPE_STRING = 0;
+    static final int TYPE_ID = 1;
 
     static Map<String, Integer> field_types;
 
@@ -43,7 +44,7 @@ public class CarProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         field_types = new HashMap<String, Integer>();
-        field_types.put(Names.ID, TYPE_STRING);
+        field_types.put(Names.ID, TYPE_ID);
         field_types.put(Names.CAR_NAME, TYPE_STRING);
         return true;
     }
@@ -84,6 +85,9 @@ public class CarProvider extends ContentProvider {
             if (type == null)
                 type = TYPE_STRING;
             switch (type) {
+                case TYPE_ID:
+                    row[i] = car_id;
+                    break;
                 default:
                     row[i] = preferences.getString(name + car_id, "");
             }

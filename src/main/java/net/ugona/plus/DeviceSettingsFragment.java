@@ -21,7 +21,6 @@ public class DeviceSettingsFragment extends DeviceFragment {
                 i = 0;
             if (i >= values.length)
                 i = values.length - 1;
-            State.appendLog(">> " + progress + " " + i);
             return values[i];
         }
 
@@ -29,14 +28,12 @@ public class DeviceSettingsFragment extends DeviceFragment {
         String getValue() {
             int v = Integer.parseInt(super.getValue());
             String res = (values.length - v + 1) + "";
-            State.appendLog("get value " + v + " " + res);
             return res;
         }
 
         @Override
         void setValue(String value) {
             int v = values.length - Integer.parseInt(value) + 1;
-            State.appendLog("set value " + value + " " + v);
             super.setValue(v + "");
         }
 
