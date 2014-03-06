@@ -318,7 +318,7 @@ public class StateFragment extends Fragment
 
         if (pointer) {
             ListView lvActions = (ListView) v.findViewById(R.id.actions);
-            adapter = new ActionFragment.ActionAdapter(car_id);
+            adapter = new ActionFragment.ActionAdapter(getActivity(), car_id);
             adapter.actions = new Vector<ActionFragment.Action>();
             for (ActionFragment.Action action : ActionFragment.pointer_actions) {
                 adapter.actions.add(action);

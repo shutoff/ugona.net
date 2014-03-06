@@ -443,4 +443,9 @@
     <string name="no_network">Netwrok is not available</string>
     <string name="retry">Retry</string>
     <string name="phone">Phone:</string>
+    <string name="changed">Settings changed</string>
+    <string name="changed_msg">You have unsaved settings.\nYou are sure leave settings?</string>
+    <string name="exit">Exit</string>
+    <string name="notify_msg">Notifications come with some delay depend on device timer settings and phone data connection</string>
+    <string name="command_name">Command name:</string>
 </resources>

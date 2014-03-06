@@ -135,4 +135,11 @@ public final class Names {
 
     static final String RESERVE_NORMAL = "reserve_normal_";
 
+    static final String RELE1_NAME = "rele1_name";
+    static final String RELE1I_NAME = "rele1i_name";
+    static final String RELE2_NAME = "rele2_name";
+    static final String RELE2I_NAME = "rele2i_name";
+
+    static final String SETTINGS_TIME = "settings_time";
+
 }

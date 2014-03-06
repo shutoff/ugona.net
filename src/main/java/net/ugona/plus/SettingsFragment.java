@@ -48,6 +48,8 @@ public class SettingsFragment extends Fragment {
             tvTitle.setVisibility(View.VISIBLE);
             tvTitle.setText(name);
             tvTitle.setTypeface(null, Typeface.BOLD);
+            vChanged = tvTitle;
+            setChanged();
             TextView tvValue = (TextView) v.findViewById(R.id.value);
             tvValue.setVisibility(View.VISIBLE);
             tvValue.setText(getValue());
@@ -56,6 +58,7 @@ public class SettingsFragment extends Fragment {
             v.findViewById(R.id.seekbar).setVisibility(View.GONE);
             v.findViewById(R.id.v).setVisibility(View.GONE);
             v.findViewById(R.id.title1).setVisibility(View.GONE);
+            v.findViewById(R.id.check_edit).setVisibility(View.GONE);
         }
 
         String getValue() {
@@ -65,6 +68,16 @@ public class SettingsFragment extends Fragment {
         void setValue(String value) {
             value_ = value;
         }
+
+        boolean changed() {
+            return false;
+        }
+
+        void setChanged() {
+            vChanged.setTextColor(getResources().getColor(changed() ? R.color.changed : android.R.color.secondary_text_dark));
+        }
+
+        TextView vChanged;
 
         String name;
         String value_;
@@ -83,6 +96,8 @@ public class SettingsFragment extends Fragment {
             CheckBox checkBox = (CheckBox) v.findViewById(R.id.check);
             checkBox.setVisibility(View.VISIBLE);
             checkBox.setText(name);
+            vChanged = checkBox;
+            setChanged();
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -130,7 +145,15 @@ public class SettingsFragment extends Fragment {
             TextView tvTitle = (TextView) v.findViewById(R.id.title1);
             tvTitle.setText(name);
             tvTitle.setVisibility(View.VISIBLE);
-            v.findViewById(R.id.value).setVisibility(View.GONE);
+            vChanged = tvTitle;
+            setChanged();
+            TextView tvValue = (TextView) v.findViewById(R.id.value);
+            if (msg_id == 0) {
+                tvValue.setVisibility(View.GONE);
+            } else {
+                tvValue.setText(msg_id);
+                tvValue.setVisibility(View.VISIBLE);
+            }
             v.findViewById(R.id.title).setVisibility(View.GONE);
             Spinner spinner = (Spinner) v.findViewById(R.id.spinner);
             spinner.setVisibility(View.VISIBLE);
@@ -198,6 +221,7 @@ public class SettingsFragment extends Fragment {
 
         }
 
+        int msg_id;
         String[] entries;
         String[] values;
     }
@@ -207,6 +231,13 @@ public class SettingsFragment extends Fragment {
             super(name, values, entries);
             key = item_key;
             setValue(preferences.getString(key + car_id, def_value));
+        }
+
+        ListItem(int name, int values, int entries, String item_key, String def_value, int msg) {
+            super(name, values, entries);
+            key = item_key;
+            setValue(preferences.getString(key + car_id, def_value));
+            msg_id = msg;
         }
 
         @Override
@@ -263,6 +294,8 @@ public class SettingsFragment extends Fragment {
             TextView tvTitle = (TextView) v.findViewById(R.id.title1);
             tvTitle.setText(name);
             tvTitle.setVisibility(View.VISIBLE);
+            vChanged = tvTitle;
+            setChanged();
             v.findViewById(R.id.value).setVisibility(View.GONE);
             v.findViewById(R.id.title).setVisibility(View.GONE);
             final TextView tvVal = (TextView) v.findViewById(R.id.v);

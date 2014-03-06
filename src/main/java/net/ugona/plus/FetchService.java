@@ -468,6 +468,9 @@ public class FetchService extends Service {
                 if ((timerValue >= 1) && (timerValue <= 30))
                     ed.putInt(Names.CAR_TIMER + car_id, timerValue);
             }
+            JsonValue settings = res.get("settings");
+            if (settings != null)
+                ed.remove(Names.SETTINGS_TIME + car_id);
 
             ed.commit();
 

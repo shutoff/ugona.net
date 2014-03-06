@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -192,6 +193,33 @@ public class SettingActivity extends ActionBarActivity {
         }
     }
 
+    @Override
+    public void finish() {
+        if (values != null) {
+            int i;
+            for (i = 0; i < 22; i++) {
+                if (values[i] != old_values[i])
+                    break;
+            }
+            if (i < 22) {
+                AlertDialog dialog = new AlertDialog.Builder(this)
+                        .setTitle(R.string.changed)
+                        .setMessage(R.string.changed_msg)
+                        .setNegativeButton(R.string.cancel, null)
+                        .setPositiveButton(R.string.exit, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SettingActivity.super.finish();
+                            }
+                        })
+                        .create();
+                dialog.show();
+                return;
+            }
+        }
+        super.finish();
+    }
+
     void updateSettings() {
         values_error = false;
         values = null;
@@ -199,6 +227,18 @@ public class SettingActivity extends ActionBarActivity {
 
         if (preferences.getBoolean(Names.POINTER + car_id, false))
             return;
+
+        if (preferences.getLong(Names.EVENT_TIME + car_id, 0) <= preferences.getLong(Names.SETTINGS_TIME + car_id, 0)) {
+            values = new int[22];
+            old_values = new int[22];
+            for (int i = 0; i < 22; i++) {
+                int v = preferences.getInt("V_" + i + "_" + car_id, 0);
+                values[i] = v;
+                old_values[i] = v;
+            }
+            sendUpdate();
+            return;
+        }
 
         HttpTask task = new HttpTask() {
 
@@ -262,13 +302,16 @@ public class SettingActivity extends ActionBarActivity {
             return;
         }
         String val = "";
+        SharedPreferences.Editor ed = preferences.edit();
         for (int i = 0; i < values.length; i++) {
             if (values[i] == old_values[i])
                 continue;
             if (!val.equals(""))
                 val += ",";
             val += i + "." + values[i];
+            ed.putInt("V_" + i + "_" + car_id, values[i]);
         }
+        ed.commit();
         if (val.equals(""))
             return;
         final String value = val;
@@ -307,6 +350,11 @@ public class SettingActivity extends ActionBarActivity {
                         });
                         Button btnSms = (Button) dialog.findViewById(R.id.sms);
                         btnSms.setVisibility(View.GONE);
+                        SharedPreferences.Editor ed = preferences.edit();
+                        long time = preferences.getLong(Names.EVENT_TIME + car_id, 0);
+                        time += wait_time * 90000;
+                        ed.putLong(Names.SETTINGS_TIME + car_id, time);
+                        ed.commit();
                     }
 
                     @Override

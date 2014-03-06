@@ -58,6 +58,14 @@ public class DeviceFragment extends SettingsFragment {
             if (!value.equals(""))
                 v |= mask;
             setVal(word, v);
+            setChanged();
+        }
+
+        @Override
+        boolean changed() {
+            int v = getVal(word);
+            int ov = getOldVal(word);
+            return (v & mask) != (ov & mask);
         }
 
         int word;
@@ -85,6 +93,12 @@ public class DeviceFragment extends SettingsFragment {
         @Override
         void setValue(String value) {
             setVal(word, Integer.parseInt(value));
+            setChanged();
+        }
+
+        @Override
+        boolean changed() {
+            return getVal(word) != getOldVal(word);
         }
 
         int word;
@@ -108,9 +122,15 @@ public class DeviceFragment extends SettingsFragment {
             for (int i = 0; i < values.length; i++) {
                 if (values[i].equals(value)) {
                     setVal(word, i);
+                    setChanged();
                     break;
                 }
             }
+        }
+
+        @Override
+        boolean changed() {
+            return getVal(word) != getOldVal(word);
         }
 
         String[] values;
@@ -181,6 +201,13 @@ public class DeviceFragment extends SettingsFragment {
         SettingActivity activity = (SettingActivity) getActivity();
         if ((activity != null) && (activity.values != null))
             return activity.values[index];
+        return preferences.getInt("V_" + index + "_" + car_id, 0);
+    }
+
+    int getOldVal(int index) {
+        SettingActivity activity = (SettingActivity) getActivity();
+        if ((activity != null) && (activity.old_values != null))
+            return activity.old_values[index];
         return preferences.getInt("V_" + index + "_" + car_id, 0);
     }
 

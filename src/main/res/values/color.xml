@@ -17,5 +17,6 @@
     <color name="error">#FF4040</color>
     <color name="hour">#20FFFFFF</color>
     <color name="hour_active">#FFFFFFFF</color>
+    <color name="changed">#FFFFFF80</color>
 
 </resources>

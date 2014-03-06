@@ -37,7 +37,7 @@ public class ActionFragment extends Fragment
             car_id = savedInstanceState.getString(Names.ID);
 
         ListView list = (ListView) v.findViewById(R.id.actions);
-        adapter = new ActionAdapter(car_id);
+        adapter = new ActionAdapter(getActivity(), car_id);
         fill_actions();
         adapter.attach(getActivity(), list);
 
@@ -104,9 +104,11 @@ public class ActionFragment extends Fragment
         String car_id;
         BroadcastReceiver br;
         LayoutInflater inflater;
+        SharedPreferences preferences;
 
-        ActionAdapter(String id) {
+        ActionAdapter(Context context, String id) {
             car_id = id;
+            preferences = PreferenceManager.getDefaultSharedPreferences(context);
         }
 
         void attach(final Context context, ListView list) {
@@ -135,6 +137,7 @@ public class ActionFragment extends Fragment
             };
             IntentFilter filter = new IntentFilter(SmsMonitor.SMS_SEND);
             filter.addAction(SmsMonitor.SMS_ANSWER);
+            filter.addAction(FetchService.ACTION_UPDATE_FORCE);
             context.registerReceiver(br, filter);
         }
 
@@ -161,10 +164,8 @@ public class ActionFragment extends Fragment
         public View getView(int position, View convertView, ViewGroup parent) {
             View v = convertView;
             Action action = actions.get(position);
-            if (v == null) {
-
+            if (v == null)
                 v = inflater.inflate(R.layout.action_item, null);
-            }
             TextView tv = (TextView) v.findViewById(R.id.name);
             tv.setText(action.text);
             if (action.icon > 0) {
@@ -177,6 +178,19 @@ public class ActionFragment extends Fragment
                 TextView ts = (TextView) v.findViewById(R.id.sum);
                 ts.setVisibility(View.VISIBLE);
                 ts.setText(action.flags);
+            }
+            TextView tvSum = (TextView) v.findViewById(R.id.sum);
+            if (action.name_key == null) {
+                tvSum.setVisibility(View.GONE);
+            } else {
+                String n = preferences.getString(action.name_key + car_id, "");
+                if (n.equals("")) {
+                    tvSum.setVisibility(View.GONE);
+                } else {
+                    tvSum.setVisibility(View.VISIBLE);
+                    tvSum.setText(action.text);
+                    tv.setText(n);
+                }
             }
             View ip = v.findViewById(R.id.progress);
             ip.setVisibility(SmsMonitor.isProcessed(car_id, action.text) ? View.VISIBLE : View.GONE);
@@ -207,6 +221,13 @@ public class ActionFragment extends Fragment
             internet = true;
         }
 
+        Action(int icon_, int text_, int flags_, String key) {
+            text = text_;
+            icon = icon_;
+            flags = flags_;
+            internet = true;
+            name_key = key;
+        }
 
         abstract void action(Context context, String car_id);
 
@@ -214,6 +235,7 @@ public class ActionFragment extends Fragment
         int text;
         int flags;
         boolean internet;
+        String name_key;
     }
 
     static Action[] pointer_actions = {
@@ -325,37 +347,37 @@ public class ActionFragment extends Fragment
                     Actions.rele1(context, car_id);
                 }
             },
-            new Action(R.drawable.rele_on, R.string.rele1_on, State.CMD_RELE1) {
+            new Action(R.drawable.rele_on, R.string.rele1_on, State.CMD_RELE1, Names.RELE1_NAME) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.rele(context, car_id, R.string.rele1_on);
                 }
             },
-            new Action(R.drawable.rele_off, R.string.rele1_off, State.CMD_RELE1) {
+            new Action(R.drawable.rele_off, R.string.rele1_off, State.CMD_RELE1, Names.RELE1_NAME) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.rele(context, car_id, R.string.rele1_off);
                 }
             },
-            new Action(R.drawable.rele_impulse, R.string.rele1i, State.CMD_RELE1I) {
+            new Action(R.drawable.rele_impulse, R.string.rele1i, State.CMD_RELE1I, Names.RELE1I_NAME) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.rele(context, car_id, R.string.rele1i);
                 }
             },
-            new Action(R.drawable.rele_on, R.string.rele2_on, State.CMD_RELE2) {
+            new Action(R.drawable.rele_on, R.string.rele2_on, State.CMD_RELE2, Names.RELE2_NAME) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.rele(context, car_id, R.string.rele2_on);
                 }
             },
-            new Action(R.drawable.rele_off, R.string.rele2_off, State.CMD_RELE2) {
+            new Action(R.drawable.rele_off, R.string.rele2_off, State.CMD_RELE2, Names.RELE2_NAME) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.rele(context, car_id, R.string.rele2_off);
                 }
             },
-            new Action(R.drawable.rele_impulse, R.string.rele2i, State.CMD_RELE2I) {
+            new Action(R.drawable.rele_impulse, R.string.rele2i, State.CMD_RELE2I, Names.RELE2I_NAME) {
                 @Override
                 void action(Context context, String car_id) {
                     Actions.rele(context, car_id, R.string.rele2i);

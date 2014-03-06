@@ -402,4 +402,9 @@
     <string name="no_network">Сеть для передачи данных недоступна</string>
     <string name="retry">Повторить</string>
     <string name="phone">Телефон:</string>
+    <string name="changed">Настройки изменены</string>
+    <string name="changed_msg">У вас есть несохраненные настрйоки.\nВы действительно хотите выйти?</string>
+    <string name="exit">Выход</string>
+    <string name="notify_msg">Уведомления приходят с некоторой задержкой в зависимости от настроек таймаута устройства и соединения телефона с сетью</string>
+    <string name="command_name">Имя комманды:</string>
 </resources>
