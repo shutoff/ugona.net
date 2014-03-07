@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 
 import java.lang.reflect.Field;
@@ -32,24 +33,20 @@ import java.lang.reflect.Method;
 
 public class SettingActivity extends ActionBarActivity {
 
+    final static String UPDATE_SETTINGS = "net.ugona.plus.UPDATE_SETTINGS";
+    final static String URL_SETTINGS = "https://car-online.ugona.net/settings?auth=$1";
+    final static String URL_SET = "https://car-online.ugona.net/set?auth=$1&v=$2";
+    final static String URL_SET_CCODE = "https://car-online.ugona.net/set?auth=$1&v=$2&ccode=$2";
+    final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
     String car_id;
     SharedPreferences preferences;
     BroadcastReceiver br;
-
     int[] values;
     int[] old_values;
-
     boolean values_error;
     boolean az;
     boolean rele;
-
     ActionBar.TabListener tabListener;
-
-    final static String UPDATE_SETTINGS = "net.ugona.plus.UPDATE_SETTINGS";
-
-    final static String URL_SETTINGS = "https://car-online.ugona.net/settings?auth=$1";
-    final static String URL_SET = "https://car-online.ugona.net/set?auth=$1&v=$2";
-    final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,7 +143,7 @@ public class SettingActivity extends ActionBarActivity {
                         return;
                     adapter.notifyDataSetChanged();
                     if (az != new_az) {
-                        int index = 4;
+                        int index = adapter.fromID(5);
                         if (new_az) {
                             actionBar.addTab(
                                     actionBar.newTab()
@@ -158,10 +155,8 @@ public class SettingActivity extends ActionBarActivity {
                         az = new_az;
                     }
                     if (rele != new_rele) {
-                        int index = 4;
-                        if (az)
-                            index++;
-                        if (new_az) {
+                        int index = adapter.fromID(6);
+                        if (new_rele) {
                             actionBar.addTab(
                                     actionBar.newTab()
                                             .setText(adapter.getPageTitle(index))
@@ -233,8 +228,10 @@ public class SettingActivity extends ActionBarActivity {
             old_values = new int[22];
             for (int i = 0; i < 22; i++) {
                 int v = preferences.getInt("V_" + i + "_" + car_id, 0);
-                values[i] = v;
-                old_values[i] = v;
+                if (v != -1) {
+                    values[i] = v;
+                    old_values[i] = v;
+                }
             }
             sendUpdate();
             return;
@@ -248,8 +245,17 @@ public class SettingActivity extends ActionBarActivity {
                 values = new int[22];
                 old_values = new int[22];
                 for (int i = 0; i < 22; i++) {
-                    int v = res.get("v" + i).asInt();
-                    ed.putInt("V_" + i + "_" + car_id, v);
+                    int v = -1;
+                    JsonValue val = res.get("v" + i);
+                    if (val != null)
+                        v = val.asInt();
+                    if (i == 20) {
+                        v = preferences.getInt("V_" + i + "_" + car_id, 0);
+                    } else if (i == 21) {
+                        v = preferences.getInt(Names.CAR_TIMER + car_id, v);
+                    } else {
+                        ed.putInt("V_" + i + "_" + car_id, v);
+                    }
                     values[i] = v;
                     old_values[i] = v;
                 }
@@ -303,82 +309,161 @@ public class SettingActivity extends ActionBarActivity {
         }
         String val = "";
         SharedPreferences.Editor ed = preferences.edit();
+        boolean request_ccode = false;
         for (int i = 0; i < values.length; i++) {
             if (values[i] == old_values[i])
                 continue;
             if (!val.equals(""))
                 val += ",";
             val += i + "." + values[i];
-            ed.putInt("V_" + i + "_" + car_id, values[i]);
+            if (i == 20)
+                request_ccode = true;
         }
         ed.commit();
         if (val.equals(""))
             return;
+        sendUpdate();
+        final int[] set_values = new int[values.length];
+        for (int i = 0; i < values.length; i++) {
+            set_values[i] = values[i];
+        }
         final String value = val;
+        if (request_ccode) {
+            Actions.requestCCode(this, car_id, R.string.setup, R.string.setup_msg, new Actions.Answer() {
+                @Override
+                void answer(String text) {
+                    do_update(value, text, set_values);
+                }
+            });
+            return;
+        }
+
         Actions.requestPassword(this, R.string.setup, R.string.setup_msg, new Runnable() {
             @Override
             public void run() {
-                final ProgressDialog progressDialog = new ProgressDialog(SettingActivity.this);
-                progressDialog.setMessage(getString(R.string.send_command));
-                progressDialog.show();
-
-                HttpTask task = new HttpTask() {
-
-                    @Override
-                    void result(JsonObject res) throws ParseException {
-                        progressDialog.dismiss();
-                        LayoutInflater inflater = (LayoutInflater) getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-                        final AlertDialog dialog = new AlertDialog.Builder(SettingActivity.this)
-                                .setTitle(R.string.setup)
-                                .setView(inflater.inflate(R.layout.wait, null))
-                                .setNegativeButton(R.string.ok, null)
-                                .create();
-                        dialog.show();
-                        TextView tv = (TextView) dialog.findViewById(R.id.msg);
-                        final int wait_time = preferences.getInt(Names.CAR_TIMER + car_id, 10);
-                        String msg = getString(R.string.wait_msg).replace("$1", wait_time + "");
-                        tv.setText(msg);
-                        Button btnCall = (Button) dialog.findViewById(R.id.call);
-                        btnCall.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                dialog.dismiss();
-                                Intent intent = new Intent(Intent.ACTION_CALL);
-                                intent.setData(Uri.parse("tel:" + preferences.getString(Names.CAR_PHONE + car_id, "")));
-                                startActivity(intent);
-                            }
-                        });
-                        Button btnSms = (Button) dialog.findViewById(R.id.sms);
-                        btnSms.setVisibility(View.GONE);
-                        SharedPreferences.Editor ed = preferences.edit();
-                        long time = preferences.getLong(Names.EVENT_TIME + car_id, 0);
-                        time += wait_time * 90000;
-                        ed.putLong(Names.SETTINGS_TIME + car_id, time);
-                        ed.commit();
-                    }
-
-                    @Override
-                    void error() {
-                        progressDialog.dismiss();
-                        Toast toast = Toast.makeText(SettingActivity.this, R.string.data_error, Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                };
-                task.execute(URL_SET, preferences.getString(Names.AUTH + car_id, ""), value);
+                do_update(value, null, set_values);
             }
         });
     }
 
+    void do_update(final String value, final String ccode, final int[] set_values) {
+        final ProgressDialog progressDialog = new ProgressDialog(SettingActivity.this);
+        progressDialog.setMessage(getString(R.string.send_command));
+        progressDialog.show();
+
+        HttpTask task = new HttpTask() {
+
+            @Override
+            void result(JsonObject res) throws ParseException {
+                progressDialog.dismiss();
+                LayoutInflater inflater = (LayoutInflater) getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+                final AlertDialog dialog = new AlertDialog.Builder(SettingActivity.this)
+                        .setTitle(R.string.setup)
+                        .setView(inflater.inflate(R.layout.wait, null))
+                        .setNegativeButton(R.string.ok, null)
+                        .create();
+                dialog.show();
+                TextView tv = (TextView) dialog.findViewById(R.id.msg);
+                final int wait_time = preferences.getInt(Names.CAR_TIMER + car_id, 10);
+                String msg = getString(R.string.wait_msg).replace("$1", wait_time + "");
+                tv.setText(msg);
+                Button btnCall = (Button) dialog.findViewById(R.id.call);
+                btnCall.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                        Intent intent = new Intent(Intent.ACTION_CALL);
+                        intent.setData(Uri.parse("tel:" + preferences.getString(Names.CAR_PHONE + car_id, "")));
+                        startActivity(intent);
+                    }
+                });
+                Button btnSms = (Button) dialog.findViewById(R.id.sms);
+                btnSms.setVisibility(View.GONE);
+                SharedPreferences.Editor ed = preferences.edit();
+                long time = preferences.getLong(Names.EVENT_TIME + car_id, 0);
+                time += wait_time * 90000;
+                ed.putLong(Names.SETTINGS_TIME + car_id, time);
+                for (int i = 0; i < set_values.length; i++) {
+                    if (set_values[i] == old_values[i])
+                        continue;
+                    ed.putInt("V_" + i + "_" + car_id, set_values[i]);
+                    old_values[i] = set_values[i];
+                    if (i == 21)
+                        ed.putInt(Names.CAR_TIMER + car_id, set_values[i]);
+                }
+                ed.commit();
+            }
+
+            @Override
+            void error() {
+                progressDialog.dismiss();
+                Toast toast = Toast.makeText(SettingActivity.this, R.string.data_error, Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        };
+        if (ccode != null) {
+            task.execute(URL_SET_CCODE, preferences.getString(Names.AUTH + car_id, ""), value, ccode);
+            return;
+        }
+        task.execute(URL_SET, preferences.getString(Names.AUTH + car_id, ""), value);
+    }
+
     public class PagerAdapter extends FragmentPagerAdapter {
+
+        boolean[] visible;
 
         public PagerAdapter(FragmentManager fm) {
             super(fm);
+            updateVisible();
+        }
+
+        @Override
+        public void notifyDataSetChanged() {
+            updateVisible();
+            super.notifyDataSetChanged();
+        }
+
+        void updateVisible() {
+            visible = new boolean[7];
+            visible[0] = true;
+            visible[1] = true;
+            visible[2] = true;
+            visible[3] = true;
+            visible[4] = State.hasTelephony(SettingActivity.this);
+            int commands = State.getCommands(preferences, car_id);
+            visible[5] = (commands & State.CMD_AZ) != 0;
+            visible[6] = (commands & State.CMD_RELE) != 0;
+        }
+
+        int toID(int pos) {
+            int i;
+            for (i = 0; i < visible.length; i++) {
+                if (!visible[i])
+                    continue;
+                if (pos-- == 0)
+                    break;
+            }
+            return i;
+        }
+
+        int fromID(int id) {
+            int res = 0;
+            for (int i = 0; i < id; i++) {
+                if (visible[i])
+                    res++;
+            }
+            return res;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return toID(position);
         }
 
         @Override
         public Fragment getItem(int i) {
             SettingsFragment res = null;
-            switch (i) {
+            switch (toID(i)) {
                 case 0:
                     res = new AuthFragment();
                     break;
@@ -392,11 +477,12 @@ public class SettingActivity extends ActionBarActivity {
                     res = new DeviceSettingsFragment();
                     break;
                 case 4:
-                    if ((State.getCommands(preferences, car_id) & State.CMD_AZ) != 0) {
-                        res = new AutoStartFragment();
-                        break;
-                    }
+                    res = new SmsSettingsFragment();
+                    break;
                 case 5:
+                    res = new AutoStartFragment();
+                    break;
+                case 6:
                     res = new HeaterFragment();
                     break;
             }
@@ -408,20 +494,14 @@ public class SettingActivity extends ActionBarActivity {
 
         @Override
         public int getCount() {
-            int count = 4;
             if (preferences.getBoolean(Names.POINTER + car_id, false))
                 return 1;
-            int commands = State.getCommands(preferences, car_id);
-            if ((commands & State.CMD_AZ) != 0)
-                count++;
-            if ((commands & State.CMD_RELE) != 0)
-                count++;
-            return count;
+            return fromID(visible.length);
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (position) {
+            switch (toID(position)) {
                 case 0:
                     return getString(R.string.auth);
                 case 1:
@@ -431,9 +511,10 @@ public class SettingActivity extends ActionBarActivity {
                 case 3:
                     return getString(R.string.device_settings);
                 case 4:
-                    if ((State.getCommands(preferences, car_id) & State.CMD_AZ) != 0)
-                        return getString(R.string.autostart);
+                    return getString(R.string.sms_settings);
                 case 5:
+                    return getString(R.string.autostart);
+                case 6:
                     return getString(R.string.rele);
             }
             return null;

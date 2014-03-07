@@ -407,4 +407,10 @@
     <string name="exit">Выход</string>
     <string name="notify_msg">Уведомления приходят с некоторой задержкой в зависимости от настроек таймаута устройства и соединения телефона с сетью</string>
     <string name="command_name">Имя комманды:</string>
+    <string name="sms_settings">Настройки по СМС</string>
+    <string name="prior4">Отключить датчик удара</string>
+    <string name="prior3">Отключить оповещения о слабом ударе</string>
+    <string name="prior1">Включить датчик удара</string>
+    <string name="inf_sms_yes">Включить отправку информационных СМС</string>
+    <string name="inf_sms_no">Отключить отправку информационных СМС</string>
 </resources>

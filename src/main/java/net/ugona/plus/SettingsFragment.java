@@ -28,8 +28,95 @@ public class SettingsFragment extends Fragment {
     ListView list;
 
     SharedPreferences preferences;
+    Vector<Item> items;
+    Vector<Item> visible_items;
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+
+        if (savedInstanceState != null)
+            car_id = savedInstanceState.getString(Names.ID);
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        car_id = Preferences.getCar(preferences, car_id);
+
+        View v = inflater.inflate(R.layout.list, container, false);
+        list = (ListView) v.findViewById(R.id.list);
+
+        items = new Vector<Item>();
+
+        list.setAdapter(new BaseAdapter() {
+            @Override
+            public int getCount() {
+                if (visible_items == null)
+                    return 0;
+                return visible_items.size();
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return visible_items.get(position);
+            }
+
+            @Override
+            public long getItemId(int position) {
+                return position;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View v = convertView;
+                if (v == null) {
+                    LayoutInflater inflater = (LayoutInflater) getActivity()
+                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = inflater.inflate(R.layout.settings_item, null);
+                }
+                final Item item = visible_items.get(position);
+                item.setView(v);
+                return v;
+            }
+        });
+
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Item item = visible_items.get(position);
+                item.click();
+            }
+        });
+
+        return v;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        update();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(Names.ID, car_id);
+    }
+
+    void update() {
+        visible_items = new Vector<Item>();
+        for (Item item : items) {
+            if (!item.visible())
+                continue;
+            visible_items.add(item);
+        }
+        BaseAdapter adapter = (BaseAdapter) list.getAdapter();
+        adapter.notifyDataSetChanged();
+    }
 
     class Item {
+        TextView vChanged;
+        String name;
+        String value_;
+
         Item(int n, String v) {
             name = getString(n);
             value_ = v;
@@ -59,6 +146,7 @@ public class SettingsFragment extends Fragment {
             v.findViewById(R.id.v).setVisibility(View.GONE);
             v.findViewById(R.id.title1).setVisibility(View.GONE);
             v.findViewById(R.id.check_edit).setVisibility(View.GONE);
+            v.findViewById(R.id.progress).setVisibility(View.GONE);
         }
 
         String getValue() {
@@ -73,14 +161,13 @@ public class SettingsFragment extends Fragment {
             return false;
         }
 
+        boolean visible() {
+            return true;
+        }
+
         void setChanged() {
             vChanged.setTextColor(getResources().getColor(changed() ? R.color.changed : android.R.color.secondary_text_dark));
         }
-
-        TextView vChanged;
-
-        String name;
-        String value_;
     }
 
     class CheckItem extends Item {
@@ -113,6 +200,8 @@ public class SettingsFragment extends Fragment {
     }
 
     class CheckBoxItem extends CheckItem {
+        String key;
+
         CheckBoxItem(int name, String item_key, boolean def_value) {
             super(name);
             key = item_key;
@@ -128,11 +217,13 @@ public class SettingsFragment extends Fragment {
             intent.putExtra(Names.ID, car_id);
             getActivity().sendBroadcast(intent);
         }
-
-        String key;
     }
 
     class SpinnerItem extends Item {
+        int msg_id;
+        String[] entries;
+        String[] values;
+
         SpinnerItem(int n, int values_id, int entries_id) {
             super(n, "");
             entries = getResources().getStringArray(entries_id);
@@ -220,13 +311,11 @@ public class SettingsFragment extends Fragment {
             });
 
         }
-
-        int msg_id;
-        String[] entries;
-        String[] values;
     }
 
     class ListItem extends SpinnerItem {
+        String key;
+
         ListItem(int name, int values, int entries, String item_key, String def_value) {
             super(name, values, entries);
             key = item_key;
@@ -246,11 +335,11 @@ public class SettingsFragment extends Fragment {
             ed.putString(key + car_id, getValue());
             ed.commit();
         }
-
-        String key;
     }
 
     class ListIntItem extends SpinnerItem {
+        String key;
+
         ListIntItem(int name, int values, int entries, String item_key, int def_value) {
             super(name, values, entries);
             key = item_key;
@@ -267,11 +356,14 @@ public class SettingsFragment extends Fragment {
             ed.putInt(key + car_id, Integer.parseInt(getValue()));
             ed.commit();
         }
-
-        String key;
     }
 
     class SeekItem extends Item {
+        int min_value;
+        int max_value;
+        double k;
+        String unit;
+
         SeekItem(int n, int min, int max, String unit_str) {
             super(n, "");
             min_value = min;
@@ -332,83 +424,6 @@ public class SettingsFragment extends Fragment {
             double v = (progress + min_value) * k * 100.;
             return Math.round(v) / 100. + unit;
         }
-
-        int min_value;
-        int max_value;
-
-        double k;
-
-        String unit;
-    }
-
-    Vector<Item> items;
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-
-        if (savedInstanceState != null)
-            car_id = savedInstanceState.getString(Names.ID);
-
-        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        car_id = Preferences.getCar(preferences, car_id);
-
-        View v = inflater.inflate(R.layout.list, container, false);
-        list = (ListView) v.findViewById(R.id.list);
-
-        items = new Vector<Item>();
-
-        list.setAdapter(new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return items.size();
-            }
-
-            @Override
-            public Object getItem(int position) {
-                return items.get(position);
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = (LayoutInflater) getActivity()
-                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = inflater.inflate(R.layout.settings_item, null);
-                }
-                final Item item = items.get(position);
-                item.setView(v);
-                return v;
-            }
-        });
-
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Item item = items.get(position);
-                item.click();
-            }
-        });
-
-        return v;
-    }
-
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString(Names.ID, car_id);
-    }
-
-    void update() {
-        BaseAdapter adapter = (BaseAdapter) list.getAdapter();
-        adapter.notifyDataSetChanged();
     }
 
 }

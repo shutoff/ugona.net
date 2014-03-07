@@ -20,59 +20,187 @@ import java.util.Set;
 
 public class SmsMonitor extends BroadcastReceiver {
 
-    private static final String ACTION = "android.provider.Telephony.SMS_RECEIVED";
-
     static final String SMS_SENT = "net.ugona.plus.SMS_SENT";
     static final String SMS_ANSWER = "net.ugona.plus.SMS_ANSWER";
     static final String SMS_SEND = "net.ugona.plus.SMS_SEND";
-
-    static class Sms {
-        Sms(int id_, String text_, String answer_) {
-            id = id_;
-            text = text_;
-            answer = answer_;
-        }
-
-        Sms(int id_, String text_, String answer_, String error_, int error_msg_) {
-            id = id_;
-            text = text_;
-            answer = answer_;
-            error = error_;
-            error_msg = error_msg_;
-        }
-
-        int id;
-        int error_msg;
-
-        String text;
-        String answer;
-        String error;
-
-        boolean process_answer(Context context, String car_id, String text) {
-            return true;
-        }
-
-        String process_error(String text) {
-            if ((error != null) && compare(text, error))
-                return "fail";
-            return null;
-        }
-    }
-
-    static class SmsQueue extends HashMap<Integer, Sms> {
-    }
-
-    static class SmsQueues {
-        SmsQueue send;
-        SmsQueue wait;
-    }
-
+    private static final String ACTION = "android.provider.Telephony.SMS_RECEIVED";
     static Map<String, SmsQueues> processed;
+    static String[] notifications = {
+            "ALARM Light shock",
+            "Low Card Battery",
+            "Supply reserve",
+            "Supply regular",
+            "ERROR LAN-devices",
+            "Low reserve voltage",
+            "Roaming. Internet OFF"
+    };
+    static String[] alarms = {
+            "ALARM Heavy shock",
+            "ALARM Trunk",
+            "ALARM Hood",
+            "ALARM Doors",
+            "ALARM Lock",
+            "ALARM MovTilt sensor",
+            "ALARM Rogue",
+            "ALARM Ignition Lock"
+    };
+    static String[] msg = {
+            "MOTOR ON OK",
+            "Remote Engine Start OK",
+            "MOTOR OFF OK",
+    };
 
     static boolean compareNumbers(String config, String from) {
         if (config.length() == 4)
             return from.substring(from.length() - 4).equals(config);
         return PhoneNumberUtils.compare(config, from);
+    }
+
+    static boolean processMessageFromApi(Context context, String car_id, int id) {
+        if (Actions.inet_requests != null) {
+            Set<Actions.InetRequest> requests = Actions.inet_requests.get(car_id);
+            if (requests != null) {
+                for (Actions.InetRequest request : requests) {
+                    if (request.msg == id) {
+                        request.done(context);
+                        return true;
+                    }
+                }
+            }
+        }
+        if (processed == null)
+            return false;
+        SmsQueues queues = processed.get(car_id);
+        SmsQueue wait = queues.wait;
+        if (wait == null)
+            return false;
+        if (!wait.containsKey(id))
+            return false;
+        Sms sms = wait.get(id);
+        if (!sms.process_answer(context, car_id, null))
+            return false;
+        wait.remove(id);
+        Intent i = new Intent(SMS_ANSWER);
+        i.putExtra(Names.ANSWER, Activity.RESULT_OK);
+        i.putExtra(Names.SMS_TEXT, sms.answer);
+        i.putExtra(Names.ID, car_id);
+        context.sendBroadcast(i);
+        return true;
+    }
+
+    static boolean compare(String body, String message) {
+        if (body.length() < message.length())
+            return false;
+        return body.substring(0, message.length()).equalsIgnoreCase(message);
+    }
+
+    static void showNotification(Context context, String text, String car_id) {
+        showNotification(context, text, R.drawable.warning, car_id, null);
+    }
+
+    static void showNotification(Context context, String text, int picId, String car_id, String sound) {
+        Alarm.createNotification(context, text, picId, car_id, sound);
+    }
+
+    static boolean sendSMS(Context context, String car_id, Sms sms) {
+        if (processed == null)
+            processed = new HashMap<String, SmsQueues>();
+        SmsQueues queues = processed.get(car_id);
+        if (queues == null) {
+            queues = new SmsQueues();
+            processed.put(car_id, queues);
+        }
+        if (queues.send == null)
+            queues.send = new SmsQueue();
+        SmsQueue send = queues.send;
+        if (send.containsKey(sms.id))
+            return false;
+        if ((queues.wait != null) && queues.wait.containsKey(sms.id))
+            return false;
+        Intent intent = new Intent(SMS_SENT);
+        intent.putExtra(Names.ID, car_id);
+        intent.putExtra(Names.ANSWER, sms.id);
+        PendingIntent sendPI = PendingIntent.getBroadcast(context, sms.id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        SmsManager smsManager = SmsManager.getDefault();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
+        try {
+            smsManager.sendTextMessage(phoneNumber, null, sms.text, sendPI, null);
+            Intent i = new Intent(SMS_SEND);
+            i.putExtra(Names.ID, car_id);
+            context.sendBroadcast(i);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+        send.put(sms.id, sms);
+        return true;
+    }
+
+    static boolean cancelSMS(Context context, String car_id, int id) {
+        if (Actions.cancelRequest(context, car_id, id))
+            return true;
+        if (processed == null)
+            return false;
+        SmsQueues queues = processed.get(car_id);
+        if (queues == null)
+            return false;
+        boolean result = false;
+        if (queues.send != null)
+            result = (queues.send.remove(id) != null);
+        if (queues.wait != null)
+            result |= (queues.wait.remove(id) != null);
+        if (!result)
+            return false;
+        Intent i = new Intent(SMS_ANSWER);
+        i.putExtra(Names.ANSWER, Activity.RESULT_CANCELED);
+        i.putExtra(Names.ID, car_id);
+        context.sendBroadcast(i);
+        return true;
+    }
+
+    static boolean isProcessed(String car_id, int id) {
+        if (isSmsProcessed(car_id, id))
+            return true;
+        if (Actions.inet_requests == null)
+            return false;
+        Set<Actions.InetRequest> requests = Actions.inet_requests.get(car_id);
+        if (requests == null)
+            return false;
+        for (Actions.InetRequest request : requests) {
+            if (request.msg == id)
+                return true;
+        }
+        return false;
+    }
+
+    static boolean isSmsProcessed(String car_id, int id) {
+        if (processed == null)
+            return false;
+        SmsQueues queues = processed.get(car_id);
+        if (queues == null)
+            return false;
+        if ((queues.send != null) && queues.send.containsKey(id))
+            return true;
+        if ((queues.wait != null) && queues.wait.containsKey(id))
+            return true;
+        return false;
+    }
+
+    static boolean haveProcessed(String car_id) {
+        if ((Actions.inet_requests != null) && (Actions.inet_requests.get(car_id) != null))
+            return true;
+        if (processed == null)
+            return false;
+        SmsQueues queues = processed.get(car_id);
+        if (queues == null)
+            return false;
+        if ((queues.send != null) && !queues.send.isEmpty())
+            return true;
+        if ((queues.wait != null) && !queues.wait.isEmpty())
+            return true;
+        return false;
+
     }
 
     @Override
@@ -166,65 +294,6 @@ public class SmsMonitor extends BroadcastReceiver {
         }
     }
 
-    static String[] notifications = {
-            "ALARM Light shock",
-            "Low Card Battery",
-            "Supply reserve",
-            "Supply regular",
-            "ERROR LAN-devices",
-            "Low reserve voltage",
-            "Roaming. Internet OFF"
-    };
-
-    static String[] alarms = {
-            "ALARM Heavy shock",
-            "ALARM Trunk",
-            "ALARM Hood",
-            "ALARM Doors",
-            "ALARM Lock",
-            "ALARM MovTilt sensor",
-            "ALARM Rogue",
-            "ALARM Ignition Lock"
-    };
-
-    static String[] msg = {
-            "MOTOR ON OK",
-            "Remote Engine Start OK",
-            "MOTOR OFF OK",
-    };
-
-    static boolean processMessageFromApi(Context context, String car_id, int id) {
-        if (Actions.inet_requests != null) {
-            Set<Actions.InetRequest> requests = Actions.inet_requests.get(car_id);
-            if (requests != null) {
-                for (Actions.InetRequest request : requests) {
-                    if (request.msg == id) {
-                        request.done(context);
-                        return true;
-                    }
-                }
-            }
-        }
-        if (processed == null)
-            return false;
-        SmsQueues queues = processed.get(car_id);
-        SmsQueue wait = queues.wait;
-        if (wait == null)
-            return false;
-        if (!wait.containsKey(id))
-            return false;
-        Sms sms = wait.get(id);
-        if (!sms.process_answer(context, car_id, null))
-            return false;
-        wait.remove(id);
-        Intent i = new Intent(SMS_ANSWER);
-        i.putExtra(Names.ANSWER, Activity.RESULT_OK);
-        i.putExtra(Names.SMS_TEXT, sms.answer);
-        i.putExtra(Names.ID, car_id);
-        context.sendBroadcast(i);
-        return true;
-    }
-
     boolean processCarMessage(Context context, String body, String car_id) {
         SmsQueues queues = null;
         if (processed != null)
@@ -280,20 +349,6 @@ public class SmsMonitor extends BroadcastReceiver {
         return false;
     }
 
-    static boolean compare(String body, String message) {
-        if (body.length() < message.length())
-            return false;
-        return body.substring(0, message.length()).equalsIgnoreCase(message);
-    }
-
-    static void showNotification(Context context, String text, String car_id) {
-        showNotification(context, text, R.drawable.warning, car_id, null);
-    }
-
-    static void showNotification(Context context, String text, int picId, String car_id, String sound) {
-        Alarm.createNotification(context, text, picId, car_id, sound);
-    }
-
     private void showAlarm(Context context, String text, String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor ed = preferences.edit();
@@ -307,104 +362,44 @@ public class SmsMonitor extends BroadcastReceiver {
         context.startActivity(alarmIntent);
     }
 
-    static boolean sendSMS(Context context, String car_id, Sms sms) {
-        if (processed == null)
-            processed = new HashMap<String, SmsQueues>();
-        SmsQueues queues = processed.get(car_id);
-        if (queues == null) {
-            queues = new SmsQueues();
-            processed.put(car_id, queues);
+    static class Sms {
+        int id;
+        int error_msg;
+        String text;
+        String answer;
+        String error;
+
+        Sms(int id_, String text_, String answer_) {
+            id = id_;
+            text = text_;
+            answer = answer_;
         }
-        if (queues.send == null)
-            queues.send = new SmsQueue();
-        SmsQueue send = queues.send;
-        if (send.containsKey(sms.id))
-            return false;
-        if ((queues.wait != null) && queues.wait.containsKey(sms.id))
-            return false;
-        Intent intent = new Intent(SMS_SENT);
-        intent.putExtra(Names.ID, car_id);
-        intent.putExtra(Names.ANSWER, sms.id);
-        PendingIntent sendPI = PendingIntent.getBroadcast(context, sms.id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        SmsManager smsManager = SmsManager.getDefault();
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
-        try {
-            smsManager.sendTextMessage(phoneNumber, null, sms.text, sendPI, null);
-            Intent i = new Intent(SMS_SEND);
-            i.putExtra(Names.ID, car_id);
-            context.sendBroadcast(i);
-        } catch (Exception ex) {
-            return false;
+
+        Sms(int id_, String text_, String answer_, String error_, int error_msg_) {
+            id = id_;
+            text = text_;
+            answer = answer_;
+            error = error_;
+            error_msg = error_msg_;
         }
-        send.put(sms.id, sms);
-        return true;
-    }
 
-    static boolean cancelSMS(Context context, String car_id, int id) {
-        if (Actions.cancelRequest(context, car_id, id))
+        boolean process_answer(Context context, String car_id, String text) {
             return true;
-        if (processed == null)
-            return false;
-        SmsQueues queues = processed.get(car_id);
-        if (queues == null)
-            return false;
-        boolean result = false;
-        if (queues.send != null)
-            result = (queues.send.remove(id) != null);
-        if (queues.wait != null)
-            result |= (queues.wait.remove(id) != null);
-        if (!result)
-            return false;
-        Intent i = new Intent(SMS_ANSWER);
-        i.putExtra(Names.ANSWER, Activity.RESULT_CANCELED);
-        i.putExtra(Names.ID, car_id);
-        context.sendBroadcast(i);
-        return true;
-    }
-
-    static boolean isProcessed(String car_id, int id) {
-        if (isSmsProcessed(car_id, id))
-            return true;
-        if (Actions.inet_requests == null)
-            return false;
-        Set<Actions.InetRequest> requests = Actions.inet_requests.get(car_id);
-        if (requests == null)
-            return false;
-        for (Actions.InetRequest request : requests) {
-            if (request.msg == id)
-                return true;
         }
-        return false;
+
+        String process_error(String text) {
+            if ((error != null) && compare(text, error))
+                return "fail";
+            return null;
+        }
     }
 
-    static boolean isSmsProcessed(String car_id, int id) {
-        if (processed == null)
-            return false;
-        SmsQueues queues = processed.get(car_id);
-        if (queues == null)
-            return false;
-        if ((queues.send != null) && queues.send.containsKey(id))
-            return true;
-        if ((queues.wait != null) && queues.wait.containsKey(id))
-            return true;
-        return false;
+    static class SmsQueue extends HashMap<Integer, Sms> {
     }
 
-    static boolean haveProcessed(String car_id) {
-        if ((Actions.inet_requests != null) && (Actions.inet_requests.get(car_id) != null))
-            return true;
-        if (processed == null)
-            return false;
-        SmsQueues queues = processed.get(car_id);
-        if (queues == null)
-            return false;
-        if ((queues.send != null) && !queues.send.isEmpty())
-            return true;
-        if ((queues.wait != null) && !queues.wait.isEmpty())
-            return true;
-        return false;
-
+    static class SmsQueues {
+        SmsQueue send;
+        SmsQueue wait;
     }
 
 }

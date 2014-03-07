@@ -2,9 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.ugona.plus"
     android:versionCode="3"
-    android:versionName="1.3 RC2">
+    android:versionName="1.3 RC3">
 
-<uses-sdk
+    <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="16" />
 
@@ -120,9 +120,9 @@
 
         <activity
             android:name=".ConfigWidget"
-            android:theme="@style/Theme.Transparent"
-            android:label="@string/widget_config">
-            <intent-filter android:priority="999">
+            android:label="@string/widget_config"
+            android:theme="@style/Theme.Transparent">
+        <intent-filter android:priority="999">
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
@@ -166,8 +166,8 @@
         </receiver>
 
         <provider
-            android:authorities="net.ugona.plus"
-            android:name=".CarProvider" />
+            android:name=".CarProvider"
+            android:authorities="net.ugona.plus" />
 
     </application>
 

@@ -448,4 +448,10 @@
     <string name="exit">Exit</string>
     <string name="notify_msg">Notifications come with some delay depend on device timer settings and phone data connection</string>
     <string name="command_name">Command name:</string>
+    <string name="sms_settings">Settings by SMS</string>
+    <string name="prior4">Disable shock sensor</string>
+    <string name="prior3">Disable light shock notifications</string>
+    <string name="prior1">Enable shock sensor</string>
+    <string name="inf_sms_yes">Enable send information SMS</string>
+    <string name="inf_sms_no">Disable send information SMS</string>
 </resources>
