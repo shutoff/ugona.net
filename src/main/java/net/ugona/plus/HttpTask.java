@@ -20,17 +20,16 @@ import java.net.URLEncoder;
 
 public abstract class HttpTask {
 
+    AsyncTask<Object, Void, JsonObject> bgTask;
+    int pause = 0;
+    String error_text;
+
     abstract void result(JsonObject res) throws ParseException;
 
     abstract void error();
 
-    AsyncTask<Object, Void, JsonObject> bgTask;
-
     void background(JsonObject res) throws ParseException {
     }
-
-    int pause = 0;
-    String error_text;
 
     void execute(Object... params) {
         if (bgTask != null)
@@ -77,7 +76,6 @@ public abstract class HttpTask {
                             error_text = error_text.substring(0, pos);
                     }
                     ex.printStackTrace();
-                    State.print(ex);
                 } finally {
                     if (connection != null)
                         connection.disconnect();
