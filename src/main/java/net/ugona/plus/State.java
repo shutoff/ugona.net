@@ -15,8 +15,14 @@ public class State {
     static final int CMD_VALET = 1 << 1;
     static final int CMD_AZ = 1 << 2;
     static final int CMD_RELE = 1 << 3;
+    static final int CMD_RELE1 = 1 << 4;
+    static final int CMD_RELE2 = 1 << 5;
+    static final int CMD_RELE1I = 1 << 6;
+    static final int CMD_RELE2I = 1 << 7;
+    static final int CMD_SOUND = 1 << 8;
+    static int telephony_state = 0;
 
-    /*
+        /*
         static void appendLog(String text) {
             File logFile = Environment.getExternalStorageDirectory();
             logFile = new File(logFile, "car.log");
@@ -51,11 +57,6 @@ public class State {
             appendLog(s);
         }
     */
-    static final int CMD_RELE1 = 1 << 4;
-    static final int CMD_RELE2 = 1 << 5;
-    static final int CMD_RELE1I = 1 << 6;
-    static final int CMD_RELE2I = 1 << 7;
-    static int telephony_state = 0;
 
     static boolean isDebug() {
         return Build.FINGERPRINT.startsWith("generic");

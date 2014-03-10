@@ -36,6 +36,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.util.Vector;
 
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
@@ -45,22 +46,18 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 public class TracksFragment extends Fragment
         implements MainActivity.DateChangeListener, OnRefreshListener {
 
+    final static String URL_TRACKS = "https://car-online.ugona.net/tracks?skey=$1&begin=$2&end=$3";
     final String DATE = "tracks_date";
     final String TRACK = "track";
     final String SELECTED = "selected";
-
     SharedPreferences preferences;
     String api_key;
-
     LocalDate current;
     String car_id;
-
     Vector<TrackView.Track> tracks;
-
     boolean loaded;
     int progress;
     long selected;
-
     TextView tvSummary;
     View vError;
     View vSpace;
@@ -68,13 +65,9 @@ public class TracksFragment extends Fragment
     ProgressBar prgMain;
     TextView tvLoading;
     ListView lvTracks;
-
     BroadcastReceiver br;
-
     PullToRefreshLayout mPullToRefreshLayout;
     TracksFetcher fetcher;
-
-    final static String URL_TRACKS = "https://car-online.ugona.net/tracks?skey=$1&begin=$2&end=$3";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -343,7 +336,11 @@ public class TracksFragment extends Fragment
         }
         double avg_speed = mileage * 3600000. / time;
         String status = getString(R.string.status);
-        status = String.format(status, mileage, timeFormat((int) (time / 60000)), avg_speed, max_speed);
+        NumberFormat formatter = NumberFormat.getInstance(getResources().getConfiguration().locale);
+        formatter.setMaximumFractionDigits(2);
+        formatter.setMinimumFractionDigits(2);
+        String s = formatter.format(mileage) + " " + getString(R.string.km);
+        status = String.format(status, s, timeFormat((int) (time / 60000)), avg_speed, max_speed);
         tvSummary.setText(status);
     }
 
@@ -368,8 +365,22 @@ public class TracksFragment extends Fragment
         fetcher.update();
     }
 
+    String timeFormat(int minutes) {
+        if (minutes < 60) {
+            String s = getString(R.string.m_format);
+            return String.format(s, minutes);
+        }
+        int hours = minutes / 60;
+        minutes -= hours * 60;
+        String s = getString(R.string.hm_format);
+        return String.format(s, hours, minutes);
+    }
+
     class TracksFetcher extends HttpTask {
         LocalDate date;
+        boolean no_reload;
+        long start_time;
+        long end_time;
 
         @Override
         void result(JsonObject res) throws ParseException {
@@ -429,10 +440,6 @@ public class TracksFragment extends Fragment
             end_time = finish.toDate().getTime();
             execute(URL_TRACKS, api_key, start_time, end_time);
         }
-
-        boolean no_reload;
-        long start_time;
-        long end_time;
     }
 
     abstract class TrackPositionFetcher extends Address {
@@ -552,7 +559,6 @@ public class TracksFragment extends Fragment
         }
     }
 
-
     class TracksAdapter extends BaseAdapter {
 
         TracksAdapter() {
@@ -607,17 +613,6 @@ public class TracksFragment extends Fragment
             return v;
         }
 
-    }
-
-    String timeFormat(int minutes) {
-        if (minutes < 60) {
-            String s = getString(R.string.m_format);
-            return String.format(s, minutes);
-        }
-        int hours = minutes / 60;
-        minutes -= hours * 60;
-        String s = getString(R.string.hm_format);
-        return String.format(s, hours, minutes);
     }
 
 }

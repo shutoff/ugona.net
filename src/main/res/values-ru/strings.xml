@@ -45,7 +45,7 @@
     <string name="alarm_test_sum">Нажмите для проверки тревоги</string>
     <string name="map">Карта</string>
     <string name="tracks">Маршруты</string>
-    <string name="status" formatted="false">Расстояние: %.2f км\nВремя в пути: %s\nСредняя скорость:
+    <string name="status" formatted="false">Расстояние: %s км\nВремя в пути: %s\nСредняя скорость:
         %.2f км/ч\nМаксимальная скорость: %.2f км/ч
     </string>
     <string name="m_format" formatted="false">%d мин</string>
@@ -353,8 +353,8 @@
     <string name="motor_off_ccode">Для остановки двигателя надо ввести C-код</string>
     <string name="rele_ccode">Требуется C-код</string>
     <string-array name="ctrl_entries">
-        <item>SMS</item>
-        <item>Интернет</item>
+        <item>SMS, долгое нажатие - интернет</item>
+        <item>Интернет, долгое нажатие - SMS</item>
     </string-array>
     <string name="control_method">Отправка команд</string>
     <string name="number">С-код содержит не только цифры</string>
@@ -413,4 +413,9 @@
     <string name="prior1">Включить датчик удара</string>
     <string name="inf_sms_yes">Включить отправку информационных СМС</string>
     <string name="inf_sms_no">Отключить отправку информационных СМС</string>
+    <string name="device_phone_number">Номер телефона устройства</string>
+    <string name="sound_off">Включить режим охраны без звука</string>
+    <string name="sound_on">Отключить режим охраны бех звука</string>
+    <string name="silent_mode">Режим охраны бех звука</string>
+    <string name="km">км</string>
 </resources>

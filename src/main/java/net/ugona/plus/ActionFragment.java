@@ -182,6 +182,18 @@ public class ActionFragment extends Fragment
                     Actions.block_motor(context, car_id);
                 }
             },
+            new Action(R.drawable.sound_off, R.string.sound_off) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.sound_off(context, car_id);
+                }
+            },
+            new Action(R.drawable.sound, R.string.sound_on) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.sound_on(context, car_id);
+                }
+            },
             new Action(R.drawable.icon_turbo_on, R.string.turbo_on) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {

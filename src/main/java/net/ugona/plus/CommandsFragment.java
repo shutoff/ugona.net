@@ -15,7 +15,24 @@ import android.widget.TextView;
 
 public class CommandsFragment extends SettingsFragment {
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = super.onCreateView(inflater, container, savedInstanceState);
+        items.add(new CheckBoxItem(R.string.call, State.CMD_CALL));
+        items.add(new CheckBoxItem(R.string.valet_cmd, State.CMD_VALET));
+        items.add(new CheckBoxItem(R.string.autostart, State.CMD_AZ));
+        items.add(new CheckBoxItem(R.string.rele, State.CMD_RELE));
+        items.add(new CheckBoxItem(R.string.silent_mode, State.CMD_SOUND));
+        items.add(new CheckBoxEditItem(R.string.rele1, State.CMD_RELE1, Names.RELE1_NAME));
+        items.add(new CheckBoxEditItem(R.string.rele1i, State.CMD_RELE1I, Names.RELE1I_NAME));
+        items.add(new CheckBoxEditItem(R.string.rele2, State.CMD_RELE2, Names.RELE2_NAME));
+        items.add(new CheckBoxEditItem(R.string.rele2i, State.CMD_RELE2I, Names.RELE2I_NAME));
+        return v;
+    }
+
     class CheckBoxItem extends CheckItem {
+
+        int mask_;
 
         CheckBoxItem(int n, int mask) {
             super(n);
@@ -40,11 +57,11 @@ public class CommandsFragment extends SettingsFragment {
             i.putExtra(Names.ID, car_id);
             getActivity().sendBroadcast(i);
         }
-
-        int mask_;
     }
 
     class CheckBoxEditItem extends CheckBoxItem {
+
+        String key_;
 
         CheckBoxEditItem(int n, int mask, String key) {
             super(n, mask);
@@ -99,21 +116,5 @@ public class CommandsFragment extends SettingsFragment {
                 tv.setVisibility(View.VISIBLE);
             }
         }
-
-        String key_;
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = super.onCreateView(inflater, container, savedInstanceState);
-        items.add(new CheckBoxItem(R.string.call, State.CMD_CALL));
-        items.add(new CheckBoxItem(R.string.valet_cmd, State.CMD_VALET));
-        items.add(new CheckBoxItem(R.string.autostart, State.CMD_AZ));
-        items.add(new CheckBoxItem(R.string.rele, State.CMD_RELE));
-        items.add(new CheckBoxEditItem(R.string.rele1, State.CMD_RELE1, Names.RELE1_NAME));
-        items.add(new CheckBoxEditItem(R.string.rele1i, State.CMD_RELE1I, Names.RELE1I_NAME));
-        items.add(new CheckBoxEditItem(R.string.rele2, State.CMD_RELE2, Names.RELE2_NAME));
-        items.add(new CheckBoxEditItem(R.string.rele2i, State.CMD_RELE2I, Names.RELE2I_NAME));
-        return v;
     }
 }

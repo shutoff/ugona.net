@@ -25,6 +25,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 
 import java.util.Date;
@@ -40,6 +41,8 @@ public class Actions {
     static final String INCORRECT_MESSAGE = "Incorrect message";
     static final int VALET_TIMEOUT = 3600000;
     static final String COMMAND_URL = "https://car-online.ugona.net/command?auth=$1&ccode=$2&command=$3";
+    final static String URL_SET = "https://car-online.ugona.net/set?auth=$1&v=$2";
+    final static String URL_SETTINGS = "https://car-online.ugona.net/settings?auth=$1";
     static PendingIntent piRele;
     static Pattern location;
     static String[] alarms = {
@@ -832,6 +835,128 @@ public class Actions {
         });
     }
 
+    static void sound_on(Context context, final String car_id) {
+        set_sound(context, car_id, R.string.sound_on);
+    }
+
+    static void sound_off(Context context, final String car_id) {
+        set_sound(context, car_id, R.string.sound_off);
+    }
+
+    static void set_sound(final Context context, final String car_id, final int id) {
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        requestPassword(context, id, null, new Runnable() {
+            @Override
+            public void run() {
+                if (!isNetwork(context)) {
+                    showMessage(context, id, R.string.no_network);
+                    return;
+                }
+                final ProgressDialog progressDialog = new ProgressDialog(context);
+                progressDialog.setMessage(context.getString(R.string.send_command));
+                progressDialog.show();
+
+                if (preferences.getLong(Names.EVENT_TIME + car_id, 0) <= preferences.getLong(Names.SETTINGS_TIME + car_id, 0)) {
+                    int v = preferences.getInt("V_12_" + car_id, 0);
+                    int new_v = v;
+                    if (id == R.string.sound_off) {
+                        new_v |= 8;
+                    } else {
+                        new_v &= ~8;
+                    }
+                    if (v == new_v) {
+                        progressDialog.dismiss();
+                        return;
+                    }
+                    String value = "12." + new_v;
+                    final int val = new_v;
+                    HttpTask setTask = new HttpTask() {
+                        @Override
+                        void result(JsonObject res) throws ParseException {
+                            SharedPreferences.Editor ed = preferences.edit();
+                            long time = preferences.getLong(Names.EVENT_TIME + car_id, 0);
+                            final int wait_time = preferences.getInt(Names.CAR_TIMER + car_id, 10);
+                            time += wait_time * 90000;
+                            ed.putLong(Names.SETTINGS_TIME + car_id, time);
+                            ed.putInt("V_12_" + car_id, val);
+                            ed.commit();
+                            progressDialog.dismiss();
+                            Intent i = new Intent(FetchService.ACTION_UPDATE_FORCE);
+                            i.putExtra(Names.ID, car_id);
+                            context.sendBroadcast(i);
+                        }
+
+                        @Override
+                        void error() {
+                            progressDialog.dismiss();
+                            showMessage(context, id, R.string.error);
+                        }
+                    };
+                    setTask.execute(URL_SET, preferences.getString(Names.AUTH + car_id, ""), value);
+                    return;
+                }
+
+                HttpTask task = new HttpTask() {
+                    @Override
+                    void result(JsonObject res) throws ParseException {
+                        SharedPreferences.Editor ed = preferences.edit();
+                        for (int i = 0; i < 20; i++) {
+                            int v = -1;
+                            JsonValue val = res.get("v" + i);
+                            if (val != null)
+                                v = val.asInt();
+                            ed.putInt("V_" + i + "_" + car_id, v);
+                        }
+                        ed.commit();
+                        int v = preferences.getInt("V_12_" + car_id, 0);
+                        int new_v = v;
+                        if (id == R.string.sound_off) {
+                            new_v |= 8;
+                        } else {
+                            new_v &= ~8;
+                        }
+                        if (v == new_v) {
+                            progressDialog.dismiss();
+                            return;
+                        }
+                        String value = "12." + new_v;
+                        final int val = new_v;
+                        HttpTask setTask = new HttpTask() {
+                            @Override
+                            void result(JsonObject res) throws ParseException {
+                                SharedPreferences.Editor ed = preferences.edit();
+                                long time = preferences.getLong(Names.EVENT_TIME + car_id, 0);
+                                final int wait_time = preferences.getInt(Names.CAR_TIMER + car_id, 10);
+                                time += wait_time * 90000;
+                                ed.putLong(Names.SETTINGS_TIME + car_id, time);
+                                ed.putInt("V_12_" + car_id, val);
+                                ed.commit();
+                                progressDialog.dismiss();
+                                Intent i = new Intent(FetchService.ACTION_UPDATE_FORCE);
+                                i.putExtra(Names.ID, car_id);
+                                context.sendBroadcast(i);
+                            }
+
+                            @Override
+                            void error() {
+                                progressDialog.dismiss();
+                                showMessage(context, id, R.string.error);
+                            }
+                        };
+                        setTask.execute(URL_SET, preferences.getString(Names.AUTH + car_id, ""), value);
+                    }
+
+                    @Override
+                    void error() {
+                        progressDialog.dismiss();
+                        showMessage(context, id, R.string.error);
+                    }
+                };
+                task.execute(URL_SETTINGS, preferences.getString(Names.AUTH + car_id, ""));
+            }
+        });
+    }
+
     static void showMessage(Context context, int id_title, int id_message) {
         AlertDialog dialog = new AlertDialog.Builder(context)
                 .setTitle(id_title)
@@ -999,7 +1124,10 @@ public class Actions {
     static void selectRoute(final Context context, final String car_id, final Runnable asNetwork, final Runnable asSms, final Runnable asSmsFirst, final boolean longTap) {
         if (State.hasTelephony(context)) {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-            if (preferences.getString(Names.CONTROL + car_id, "").equals("")) {
+            boolean route_sms = preferences.getString(Names.CONTROL + car_id, "").equals("");
+            if (longTap)
+                route_sms = !route_sms;
+            if (route_sms) {
                 if (asSmsFirst != null) {
                     asSmsFirst.run();
                     return;

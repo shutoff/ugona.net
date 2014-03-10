@@ -49,7 +49,7 @@
     <string name="alarm_test_sum">Click for test alarm</string>
     <string name="map">Map</string>
     <string name="tracks">Tracks</string>
-    <string name="status" formatted="false">Mileage: %.2f km\nEngine time: %s\nAverage speed: %.2f
+    <string name="status" formatted="false">Mileage: %s km\nEngine time: %s\nAverage speed: %.2f
         kmh\nMax speed: %.2f kmh
     </string>
     <string name="m_format" formatted="false">%d min</string>
@@ -390,8 +390,8 @@
         <item>inet</item>
     </string-array>
     <string-array name="ctrl_entries">
-        <item>SMS</item>
-        <item>Internet</item>
+        <item>SMS, Long tap - internet</item>
+        <item>Internet, Long tap - SMS</item>
     </string-array>
     <string name="control_method">Control method</string>
     <string name="number">C-code contains letters</string>
@@ -454,4 +454,9 @@
     <string name="prior1">Enable shock sensor</string>
     <string name="inf_sms_yes">Enable send information SMS</string>
     <string name="inf_sms_no">Disable send information SMS</string>
+    <string name="device_phone_number">Device phone number</string>
+    <string name="sound_off">Silent guard mode</string>
+    <string name="sound_on">Silent guard mode OFF</string>
+    <string name="silent_mode">Silent guard mode</string>
+    <string name="km">km</string>
 </resources>

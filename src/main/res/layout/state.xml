@@ -9,44 +9,44 @@
         android:id="@+id/error"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center"
+        android:orientation="horizontal"
         android:padding="5dp">
 
         <ImageView
-            android:src="@android:drawable/stat_notify_error"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/stat_notify_error" />
 
         <TextView
             android:id="@+id/error_text"
-            android:text="@string/data_error"
-            android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:textColor="@color/error"
+            android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:text="@string/data_error"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/error" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/valet_warning"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/valet_warning"
         android:gravity="center"
-        android:visibility="gone"
+        android:text="@string/valet_warning"
+        android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/error"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/net_warning"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/net_warning"
         android:gravity="center"
-        android:visibility="gone"
+        android:text="@string/net_warning"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/error"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -58,15 +58,15 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:background="@drawable/car_bg">
+            android:background="@drawable/car_bg"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:id="@+id/time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:padding="5dp">
 
                 <ProgressBar
@@ -76,18 +76,18 @@
 
                 <ImageView
                     android:id="@+id/refresh"
-                    android:src="@drawable/update"
                     android:layout_width="24dp"
-                    android:layout_height="24dp" />
+                    android:layout_height="24dp"
+                    android:src="@drawable/update" />
 
                 <TextView
                     android:id="@+id/last"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="@color/caldroid_holo_blue_light"
+                    android:paddingLeft="15dp"
                     android:singleLine="true"
-                    android:paddingLeft="15dp" />
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/caldroid_holo_blue_light" />
             </LinearLayout>
 
             <FrameLayout
@@ -169,19 +169,19 @@
                     android:layout_height="wrap_content">
 
                     <ImageView
-                        android:src="@drawable/icon_voltage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="2dp" />
+                        android:padding="2dp"
+                        android:src="@drawable/icon_voltage" />
 
                     <TextView
                         android:id="@+id/voltage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textStyle="bold"
                         android:layout_gravity="right"
                         android:padding="2dp"
-                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textStyle="bold" />
                 </TableRow>
 
                 <TableRow
@@ -189,19 +189,19 @@
                     android:layout_height="wrap_content">
 
                     <ImageView
-                        android:src="@drawable/icon_reserve"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="2dp" />
+                        android:padding="2dp"
+                        android:src="@drawable/icon_reserve" />
 
                     <TextView
                         android:id="@+id/reserve"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textStyle="bold"
                         android:layout_gravity="right"
                         android:padding="2dp"
-                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textStyle="bold" />
                 </TableRow>
 
                 <TableRow
@@ -210,19 +210,19 @@
                     android:layout_height="wrap_content">
 
                     <ImageView
-                        android:src="@drawable/icon_balance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="2dp" />
+                        android:padding="2dp"
+                        android:src="@drawable/icon_balance" />
 
                     <TextView
                         android:id="@+id/balance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textStyle="bold"
                         android:layout_gravity="right"
                         android:padding="2dp"
-                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textStyle="bold" />
                 </TableRow>
 
                 <TableRow
@@ -231,19 +231,19 @@
                     android:layout_height="wrap_content">
 
                     <ImageView
-                        android:src="@drawable/icon_temperature"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="2dp" />
+                        android:padding="2dp"
+                        android:src="@drawable/icon_temperature" />
 
                     <TextView
                         android:id="@+id/temperature"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textStyle="bold"
                         android:layout_gravity="right"
                         android:padding="2dp"
-                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textStyle="bold" />
                 </TableRow>
 
                 <TableRow
@@ -252,19 +252,19 @@
                     android:layout_height="wrap_content">
 
                     <ImageView
-                        android:src="@drawable/icon_temperature"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="2dp" />
+                        android:padding="2dp"
+                        android:src="@drawable/icon_temperature" />
 
                     <TextView
                         android:id="@+id/temperature2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textStyle="bold"
                         android:layout_gravity="right"
                         android:padding="2dp"
-                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textStyle="bold" />
                 </TableRow>
 
                 <TableRow
@@ -273,19 +273,19 @@
                     android:layout_height="wrap_content">
 
                     <ImageView
-                        android:src="@drawable/icon_temperature"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="2dp" />
+                        android:padding="2dp"
+                        android:src="@drawable/icon_temperature" />
 
                     <TextView
                         android:id="@+id/temperature3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textStyle="bold"
                         android:layout_gravity="right"
                         android:padding="2dp"
-                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textStyle="bold" />
                 </TableRow>
 
             </TableLayout>
@@ -309,17 +309,17 @@
                             android:id="@+id/motor"
                             android:layout_width="100dp"
                             android:layout_height="50dp"
-                            android:background="@drawable/button_normal"
                             android:layout_margin="5dp"
+                            android:background="@drawable/button_normal"
                             android:gravity="center">
 
                             <ImageView
                                 android:id="@+id/motor_img"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:src="@drawable/icon_motor_on"
                                 android:layout_centerInParent="true"
-                                android:padding="5dp" />
+                                android:padding="5dp"
+                                android:src="@drawable/icon_motor_on" />
 
                             <ProgressBar
                                 android:id="@+id/motor_prg"
@@ -334,17 +334,17 @@
                             android:id="@+id/rele"
                             android:layout_width="100dp"
                             android:layout_height="50dp"
-                            android:background="@drawable/button_normal"
                             android:layout_margin="5dp"
+                            android:background="@drawable/button_normal"
                             android:gravity="center">
 
                             <ImageView
                                 android:id="@+id/rele_img"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:src="@drawable/icon_heater"
                                 android:layout_centerInParent="true"
-                                android:padding="5dp" />
+                                android:padding="5dp"
+                                android:src="@drawable/icon_heater" />
 
                             <ProgressBar
                                 android:id="@+id/rele_prg"
@@ -359,17 +359,17 @@
                             android:id="@+id/block"
                             android:layout_width="100dp"
                             android:layout_height="50dp"
-                            android:background="@drawable/button_normal"
                             android:layout_margin="5dp"
+                            android:background="@drawable/button_normal"
                             android:gravity="center">
 
                             <ImageView
                                 android:id="@+id/block_img"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:src="@drawable/icon_block"
                                 android:layout_centerInParent="true"
-                                android:padding="5dp" />
+                                android:padding="5dp"
+                                android:src="@drawable/icon_block" />
 
                             <ProgressBar
                                 android:id="@+id/block_prg"
@@ -384,17 +384,17 @@
                             android:id="@+id/valet"
                             android:layout_width="100dp"
                             android:layout_height="50dp"
-                            android:background="@drawable/button_normal"
                             android:layout_margin="5dp"
+                            android:background="@drawable/button_normal"
                             android:gravity="center">
 
                             <ImageView
                                 android:id="@+id/valet_img"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:src="@drawable/icon_valet_on"
                                 android:layout_centerInParent="true"
-                                android:padding="5dp" />
+                                android:padding="5dp"
+                                android:src="@drawable/icon_valet_on" />
 
                             <ProgressBar
                                 android:id="@+id/valet_prg"
@@ -409,17 +409,42 @@
                             android:id="@+id/phone"
                             android:layout_width="100dp"
                             android:layout_height="50dp"
-                            android:background="@drawable/button_normal"
                             android:layout_margin="5dp"
+                            android:background="@drawable/button_normal"
                             android:gravity="center">
 
                             <ImageView
                                 android:id="@+id/phone_img"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:src="@drawable/icon_phone"
                                 android:layout_centerInParent="true"
-                                android:padding="5dp" />
+                                android:padding="5dp"
+                                android:src="@drawable/icon_phone" />
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:id="@+id/sound"
+                            android:layout_width="100dp"
+                            android:layout_height="50dp"
+                            android:layout_margin="5dp"
+                            android:background="@drawable/button_normal"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:id="@+id/sound_img"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:padding="5dp"
+                                android:src="@drawable/sound_off" />
+
+                            <ProgressBar
+                                android:id="@+id/sound_prg"
+                                android:layout_width="44dp"
+                                android:layout_height="44dp"
+                                android:layout_centerInParent="true"
+                                android:visibility="gone" />
 
                         </RelativeLayout>
 
@@ -427,17 +452,17 @@
                             android:id="@+id/rele1"
                             android:layout_width="100dp"
                             android:layout_height="50dp"
-                            android:background="@drawable/button_normal"
                             android:layout_margin="5dp"
+                            android:background="@drawable/button_normal"
                             android:gravity="center">
 
                             <ImageView
                                 android:id="@+id/rele1_img"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:src="@drawable/rele_on"
                                 android:layout_centerInParent="true"
-                                android:padding="5dp" />
+                                android:padding="5dp"
+                                android:src="@drawable/rele_on" />
 
                             <ProgressBar
                                 android:id="@+id/rele1_prg"
@@ -452,17 +477,17 @@
                             android:id="@+id/rele1_impulse"
                             android:layout_width="100dp"
                             android:layout_height="50dp"
-                            android:background="@drawable/button_normal"
                             android:layout_margin="5dp"
+                            android:background="@drawable/button_normal"
                             android:gravity="center">
 
                             <ImageView
                                 android:id="@+id/rele1_impulse_img"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:src="@drawable/rele_impulse"
                                 android:layout_centerInParent="true"
-                                android:padding="5dp" />
+                                android:padding="5dp"
+                                android:src="@drawable/rele_impulse" />
 
                             <ProgressBar
                                 android:id="@+id/rele1_impulse_prg"
@@ -477,17 +502,17 @@
                             android:id="@+id/rele2"
                             android:layout_width="100dp"
                             android:layout_height="50dp"
-                            android:background="@drawable/button_normal"
                             android:layout_margin="5dp"
+                            android:background="@drawable/button_normal"
                             android:gravity="center">
 
                             <ImageView
                                 android:id="@+id/rele2_img"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:src="@drawable/rele_on"
                                 android:layout_centerInParent="true"
-                                android:padding="5dp" />
+                                android:padding="5dp"
+                                android:src="@drawable/rele_on" />
 
                             <ProgressBar
                                 android:id="@+id/rele2_prg"
@@ -502,17 +527,17 @@
                             android:id="@+id/rele2_impulse"
                             android:layout_width="100dp"
                             android:layout_height="50dp"
-                            android:background="@drawable/button_normal"
                             android:layout_margin="5dp"
+                            android:background="@drawable/button_normal"
                             android:gravity="center">
 
                             <ImageView
                                 android:id="@+id/rele2_impulse_img"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:src="@drawable/rele_impulse"
                                 android:layout_centerInParent="true"
-                                android:padding="5dp" />
+                                android:padding="5dp"
+                                android:src="@drawable/rele_impulse" />
 
                             <ProgressBar
                                 android:id="@+id/rele2_impulse_prg"
@@ -542,8 +567,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/map_bg"
-        android:orientation="horizontal"
-        android:gravity="center">
+        android:gravity="center"
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="10dp"
@@ -558,30 +583,30 @@
             android:id="@+id/addr_block"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_gravity="center">
+            android:layout_gravity="center"
+            android:layout_weight="1">
 
             <LinearLayout
                 android:id="@+id/addr_data"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:layout_gravity="center"
                 android:gravity="center"
-                android:layout_gravity="center">
+                android:orientation="vertical">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:orientation="horizontal"
-                    android:paddingTop="10dp"
-                    android:gravity="center">
+                    android:paddingTop="10dp">
 
                     <TextView
                         android:id="@+id/addr_time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/caldroid_holo_blue_light"
                         android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@color/caldroid_holo_blue_light"
                         android:textStyle="bold" />
 
                     <TextView

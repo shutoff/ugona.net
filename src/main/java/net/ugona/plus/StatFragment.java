@@ -22,6 +22,7 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
@@ -50,6 +51,14 @@ public class StatFragment extends Fragment implements OnRefreshListener {
 
     PullToRefreshLayout mPullToRefreshLayout;
     DataFetcher fetcher;
+
+    static String monthYear(int year, int month) {
+        String s = new DateTime(year, month + 1, 1, 0, 0, 0, 0)
+                .monthOfYear().getAsText().toUpperCase();
+        s = s.replaceAll("\u0410\u042F$", "\u0410\u0419").replaceAll("\u042F$", "\u042C").replaceAll("\u0410$", "");
+        s = s.substring(0, 1) + s.substring(1).toLowerCase();
+        return s + " " + year;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -92,204 +101,6 @@ public class StatFragment extends Fragment implements OnRefreshListener {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(Names.ID, car_id);
-    }
-
-    class DataFetcher extends HttpTask {
-        @Override
-        void result(JsonObject res) throws ParseException {
-            if (getActivity() == null)
-                return;
-            done();
-            days = new Vector<Day>();
-            for (JsonObject.Member member : res) {
-                try {
-                    int year = Integer.parseInt(member.getName());
-                    JsonObject year_data = member.getValue().asObject();
-                    for (JsonObject.Member m : year_data) {
-                        int month = Integer.parseInt(m.getName());
-                        JsonArray month_data = m.getValue().asArray();
-                        for (int i = 0; i < month_data.size(); i++) {
-                            JsonObject data = month_data.get(i).asObject();
-                            Day d = new Day();
-                            d.year = year;
-                            d.month = month;
-                            d.day = data.get("d").asInt();
-                            d.dist = data.get("s").asLong();
-                            d.time = data.get("t").asLong();
-                            d.speed = data.get("v").asInt();
-                            days.add(d);
-                        }
-                    }
-                } catch (Exception ex) {
-                    // ignore
-                }
-            }
-            Set<Integer> opened = new HashSet<Integer>();
-            if (stat != null) {
-                for (int i = 1; i < stat.size(); i++) {
-                    Day d = stat.get(i);
-                    if (d.level == 0)
-                        continue;
-                    Day prev = stat.get(i - 1);
-                    if ((d.level == 1) && (prev.level == 0))
-                        opened.add(prev.id());
-                    if ((d.level == 2) && (prev.level == 1))
-                        opened.add(prev.id());
-                }
-            }
-
-            stat = new Vector<Day>();
-            Day cur = null;
-            double dist = 0;
-            long time = 0;
-            int speed = 0;
-            for (Day d : days) {
-                if ((cur != null) && ((cur.year != d.year) || (cur.month != d.month))) {
-                    stat.insertElementAt(cur, 0);
-                    cur = null;
-                }
-                if (cur == null) {
-                    cur = new Day();
-                    cur.year = d.year;
-                    cur.month = d.month;
-                }
-                cur.dist += d.dist;
-                cur.time += d.time;
-                if (d.speed > cur.speed)
-                    cur.speed = d.speed;
-                dist += d.dist;
-                time += d.time;
-                if (d.speed > speed)
-                    speed = d.speed;
-            }
-            if (cur != null)
-                stat.insertElementAt(cur, 0);
-
-            for (int i = 0; i < stat.size(); i++) {
-                Day d = stat.get(i);
-                if ((d.level < 2) && opened.contains(d.id())) {
-                    if (d.level == 0)
-                        openMonth(d, i + 1);
-                    if (d.level == 1)
-                        openWeek(d, i + 1);
-                }
-            }
-
-            double v = dist * 3.6 / time;
-            String status = getString(R.string.status);
-            tvSummary.setText(String.format(status, dist / 1000, timeFormat((int) (time / 60)), v, (double) speed));
-            vProgress.setVisibility(View.GONE);
-            vLoading.setVisibility(View.GONE);
-            vError.setVisibility(View.GONE);
-            vSpace.setVisibility(View.GONE);
-            lvStat.setAdapter(new BaseAdapter() {
-                @Override
-                public int getCount() {
-                    return stat.size();
-                }
-
-                @Override
-                public Object getItem(int position) {
-                    return stat.get(position);
-                }
-
-                @Override
-                public long getItemId(int position) {
-                    return position;
-                }
-
-                @Override
-                public View getView(int position, View convertView, ViewGroup parent) {
-                    View v = convertView;
-                    if (v == null) {
-                        LayoutInflater inflater = (LayoutInflater) getActivity()
-                                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                        v = inflater.inflate(R.layout.track_item, null);
-                    }
-                    Day d = stat.get(position);
-                    TextView title = (TextView) v.findViewById(R.id.title);
-                    if (d.level == 0)
-                        title.setText(monthYear(d.year, d.month));
-                    if (d.level == 1) {
-                        LocalDate begin = new LocalDate(d.year, d.month + 1, d.day);
-                        LocalDate end = begin.plusDays(6);
-                        DateFormat df = android.text.format.DateFormat.getDateFormat(getActivity());
-                        title.setText(df.format(begin.toDate()) + " - " + df.format(end.toDate()));
-                    }
-                    if (d.level == 2) {
-                        LocalDate day = new LocalDate(d.year, d.month + 1, d.day);
-                        DateFormat df = android.text.format.DateFormat.getDateFormat(getActivity());
-                        title.setText(df.format(day.toDate()));
-                    }
-                    TextView tvMileage = (TextView) v.findViewById(R.id.mileage);
-                    String s = String.format(getString(R.string.mileage), d.dist / 1000.);
-                    tvMileage.setText(s);
-                    double speed = d.dist * 3.6 / d.time;
-                    String status = getString(R.string.short_status);
-                    TextView text = (TextView) v.findViewById(R.id.address);
-                    text.setText(String.format(status, timeFormat((int) (d.time / 60)), speed, (double) d.speed));
-                    int p = text.getPaddingRight();
-                    text.setPadding(p * (2 * d.level + 1), 0, p, 0);
-                    text = (TextView) v.findViewById(R.id.status);
-                    text.setVisibility(View.GONE);
-                    return v;
-                }
-            });
-            lvStat.setVisibility(View.VISIBLE);
-            lvStat.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Day d = stat.get(position++);
-                    if (d.level == 0) {
-                        if ((position < stat.size()) && (stat.get(position).level == 1)) {
-                            while (position < stat.size()) {
-                                if (stat.get(position).level == 0)
-                                    break;
-                                stat.remove(position);
-                            }
-                            BaseAdapter adapter = (BaseAdapter) lvStat.getAdapter();
-                            adapter.notifyDataSetChanged();
-                            return;
-                        }
-                        openMonth(d, position);
-                        BaseAdapter adapter = (BaseAdapter) lvStat.getAdapter();
-                        adapter.notifyDataSetChanged();
-                    }
-                    if (d.level == 1) {
-                        if ((position < stat.size()) && (stat.get(position).level == 2)) {
-                            while (position < stat.size()) {
-                                if (stat.get(position).level < 2)
-                                    break;
-                                stat.remove(position);
-                            }
-                            BaseAdapter adapter = (BaseAdapter) lvStat.getAdapter();
-                            adapter.notifyDataSetChanged();
-                            return;
-                        }
-                        openWeek(d, position);
-                        BaseAdapter adapter = (BaseAdapter) lvStat.getAdapter();
-                        adapter.notifyDataSetChanged();
-                    }
-                }
-            });
-        }
-
-        @Override
-        void error() {
-            if (!no_reload)
-                showError();
-            done();
-        }
-
-        boolean no_reload;
-
-        void done() {
-            if (fetcher != this)
-                return;
-            fetcher = null;
-            mPullToRefreshLayout.setRefreshComplete();
-        }
-
     }
 
     void openMonth(Day d, int position) {
@@ -452,11 +263,208 @@ public class StatFragment extends Fragment implements OnRefreshListener {
 
     }
 
-    static String monthYear(int year, int month) {
-        String s = new DateTime(year, month + 1, 1, 0, 0, 0, 0)
-                .monthOfYear().getAsText().toUpperCase();
-        s = s.replaceAll("\u0410\u042F$", "\u0410\u0419").replaceAll("\u042F$", "\u042C").replaceAll("\u0410$", "");
-        s = s.substring(0, 1) + s.substring(1).toLowerCase();
-        return s + " " + year;
+    class DataFetcher extends HttpTask {
+        boolean no_reload;
+
+        @Override
+        void result(JsonObject res) throws ParseException {
+            if (getActivity() == null)
+                return;
+            done();
+            days = new Vector<Day>();
+            for (JsonObject.Member member : res) {
+                try {
+                    int year = Integer.parseInt(member.getName());
+                    JsonObject year_data = member.getValue().asObject();
+                    for (JsonObject.Member m : year_data) {
+                        int month = Integer.parseInt(m.getName());
+                        JsonArray month_data = m.getValue().asArray();
+                        for (int i = 0; i < month_data.size(); i++) {
+                            JsonObject data = month_data.get(i).asObject();
+                            Day d = new Day();
+                            d.year = year;
+                            d.month = month;
+                            d.day = data.get("d").asInt();
+                            d.dist = data.get("s").asLong();
+                            d.time = data.get("t").asLong();
+                            d.speed = data.get("v").asInt();
+                            days.add(d);
+                        }
+                    }
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+            Set<Integer> opened = new HashSet<Integer>();
+            if (stat != null) {
+                for (int i = 1; i < stat.size(); i++) {
+                    Day d = stat.get(i);
+                    if (d.level == 0)
+                        continue;
+                    Day prev = stat.get(i - 1);
+                    if ((d.level == 1) && (prev.level == 0))
+                        opened.add(prev.id());
+                    if ((d.level == 2) && (prev.level == 1))
+                        opened.add(prev.id());
+                }
+            }
+
+            stat = new Vector<Day>();
+            Day cur = null;
+            double dist = 0;
+            long time = 0;
+            int speed = 0;
+            for (Day d : days) {
+                if ((cur != null) && ((cur.year != d.year) || (cur.month != d.month))) {
+                    stat.insertElementAt(cur, 0);
+                    cur = null;
+                }
+                if (cur == null) {
+                    cur = new Day();
+                    cur.year = d.year;
+                    cur.month = d.month;
+                }
+                cur.dist += d.dist;
+                cur.time += d.time;
+                if (d.speed > cur.speed)
+                    cur.speed = d.speed;
+                dist += d.dist;
+                time += d.time;
+                if (d.speed > speed)
+                    speed = d.speed;
+            }
+            if (cur != null)
+                stat.insertElementAt(cur, 0);
+
+            for (int i = 0; i < stat.size(); i++) {
+                Day d = stat.get(i);
+                if ((d.level < 2) && opened.contains(d.id())) {
+                    if (d.level == 0)
+                        openMonth(d, i + 1);
+                    if (d.level == 1)
+                        openWeek(d, i + 1);
+                }
+            }
+
+            double v = dist * 3.6 / time;
+            String status = getString(R.string.status);
+            NumberFormat formatter = NumberFormat.getInstance(getResources().getConfiguration().locale);
+            formatter.setMaximumFractionDigits(2);
+            formatter.setMinimumFractionDigits(2);
+            String s = formatter.format(dist / 1000.) + " " + getString(R.string.km);
+            tvSummary.setText(String.format(status, s, timeFormat((int) (time / 60)), v, (double) speed));
+            vProgress.setVisibility(View.GONE);
+            vLoading.setVisibility(View.GONE);
+            vError.setVisibility(View.GONE);
+            vSpace.setVisibility(View.GONE);
+            lvStat.setAdapter(new BaseAdapter() {
+                @Override
+                public int getCount() {
+                    return stat.size();
+                }
+
+                @Override
+                public Object getItem(int position) {
+                    return stat.get(position);
+                }
+
+                @Override
+                public long getItemId(int position) {
+                    return position;
+                }
+
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    View v = convertView;
+                    if (v == null) {
+                        LayoutInflater inflater = (LayoutInflater) getActivity()
+                                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                        v = inflater.inflate(R.layout.track_item, null);
+                    }
+                    Day d = stat.get(position);
+                    TextView title = (TextView) v.findViewById(R.id.title);
+                    if (d.level == 0)
+                        title.setText(monthYear(d.year, d.month));
+                    if (d.level == 1) {
+                        LocalDate begin = new LocalDate(d.year, d.month + 1, d.day);
+                        LocalDate end = begin.plusDays(6);
+                        DateFormat df = android.text.format.DateFormat.getDateFormat(getActivity());
+                        title.setText(df.format(begin.toDate()) + " - " + df.format(end.toDate()));
+                    }
+                    if (d.level == 2) {
+                        LocalDate day = new LocalDate(d.year, d.month + 1, d.day);
+                        DateFormat df = android.text.format.DateFormat.getDateFormat(getActivity());
+                        title.setText(df.format(day.toDate()));
+                    }
+                    TextView tvMileage = (TextView) v.findViewById(R.id.mileage);
+                    NumberFormat formatter = NumberFormat.getInstance(getResources().getConfiguration().locale);
+                    formatter.setMaximumFractionDigits(2);
+                    formatter.setMinimumFractionDigits(2);
+                    String s = formatter.format(d.dist / 1000.) + " " + getString(R.string.km);
+                    tvMileage.setText(s);
+                    double speed = d.dist * 3.6 / d.time;
+                    String status = getString(R.string.short_status);
+                    TextView text = (TextView) v.findViewById(R.id.address);
+                    text.setText(String.format(status, timeFormat((int) (d.time / 60)), speed, (double) d.speed));
+                    int p = text.getPaddingRight();
+                    text.setPadding(p * (2 * d.level + 1), 0, p, 0);
+                    text = (TextView) v.findViewById(R.id.status);
+                    text.setVisibility(View.GONE);
+                    return v;
+                }
+            });
+            lvStat.setVisibility(View.VISIBLE);
+            lvStat.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Day d = stat.get(position++);
+                    if (d.level == 0) {
+                        if ((position < stat.size()) && (stat.get(position).level == 1)) {
+                            while (position < stat.size()) {
+                                if (stat.get(position).level == 0)
+                                    break;
+                                stat.remove(position);
+                            }
+                            BaseAdapter adapter = (BaseAdapter) lvStat.getAdapter();
+                            adapter.notifyDataSetChanged();
+                            return;
+                        }
+                        openMonth(d, position);
+                        BaseAdapter adapter = (BaseAdapter) lvStat.getAdapter();
+                        adapter.notifyDataSetChanged();
+                    }
+                    if (d.level == 1) {
+                        if ((position < stat.size()) && (stat.get(position).level == 2)) {
+                            while (position < stat.size()) {
+                                if (stat.get(position).level < 2)
+                                    break;
+                                stat.remove(position);
+                            }
+                            BaseAdapter adapter = (BaseAdapter) lvStat.getAdapter();
+                            adapter.notifyDataSetChanged();
+                            return;
+                        }
+                        openWeek(d, position);
+                        BaseAdapter adapter = (BaseAdapter) lvStat.getAdapter();
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            });
+        }
+
+        @Override
+        void error() {
+            if (!no_reload)
+                showError();
+            done();
+        }
+
+        void done() {
+            if (fetcher != this)
+                return;
+            fetcher = null;
+            mPullToRefreshLayout.setRefreshComplete();
+        }
+
     }
 }

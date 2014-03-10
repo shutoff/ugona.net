@@ -78,6 +78,7 @@ public class StateFragment extends Fragment
     View vRele1i;
     View vRele2;
     View vRele2i;
+    View vSound;
     View pMotor;
     View pRele;
     View pBlock;
@@ -86,11 +87,13 @@ public class StateFragment extends Fragment
     View pRele1i;
     View pRele2;
     View pRele2i;
+    View pSound;
     ImageView ivMotor;
     ImageView ivRele;
     ImageView ivValet;
     ImageView ivRele1;
     ImageView ivRele2;
+    ImageView ivSound;
     View mValet;
     View mNet;
     View balanceBlock;
@@ -150,6 +153,7 @@ public class StateFragment extends Fragment
         vRele1i = v.findViewById(R.id.rele1_impulse);
         vRele2 = v.findViewById(R.id.rele2);
         vRele2i = v.findViewById(R.id.rele2_impulse);
+        vSound = v.findViewById(R.id.sound);
 
         pMotor = v.findViewById(R.id.motor_prg);
         pRele = v.findViewById(R.id.rele_prg);
@@ -159,12 +163,14 @@ public class StateFragment extends Fragment
         pRele1i = v.findViewById(R.id.rele1_impulse_prg);
         pRele2 = v.findViewById(R.id.rele2_prg);
         pRele2i = v.findViewById(R.id.rele2_impulse_prg);
+        pSound = v.findViewById(R.id.sound_prg);
 
         ivMotor = (ImageView) v.findViewById(R.id.motor_img);
         ivValet = (ImageView) v.findViewById(R.id.valet_img);
         ivRele = (ImageView) v.findViewById(R.id.rele_img);
         ivRele1 = (ImageView) v.findViewById(R.id.rele1_img);
         ivRele2 = (ImageView) v.findViewById(R.id.rele2_img);
+        ivSound = (ImageView) v.findViewById(R.id.sound_img);
 
         mValet = v.findViewById(R.id.valet_warning);
         mNet = v.findViewById(R.id.net_warning);
@@ -175,6 +181,11 @@ public class StateFragment extends Fragment
             vBlock.setOnTouchListener(this);
             vValet.setOnTouchListener(this);
             vPhone.setOnTouchListener(this);
+            vRele1.setOnTouchListener(this);
+            vRele1i.setOnTouchListener(this);
+            vRele2.setOnTouchListener(this);
+            vRele2i.setOnTouchListener(this);
+            vSound.setOnTouchListener(this);
         }
 
         balanceBlock = v.findViewById(R.id.balance_block);
@@ -544,9 +555,9 @@ public class StateFragment extends Fragment
             vRele1.setVisibility(View.VISIBLE);
             pRele1.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele1) ? View.VISIBLE : View.GONE);
             if (preferences.getBoolean(Names.RELAY1 + car_id, false)) {
-                ivRele1.setImageResource(R.drawable.rele_on);
-            } else {
                 ivRele1.setImageResource(R.drawable.rele_off);
+            } else {
+                ivRele1.setImageResource(R.drawable.rele_on);
             }
         } else {
             vRele1.setVisibility(View.GONE);
@@ -562,9 +573,9 @@ public class StateFragment extends Fragment
             vRele2.setVisibility(View.VISIBLE);
             pRele2.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele2) ? View.VISIBLE : View.GONE);
             if (preferences.getBoolean(Names.RELAY2 + car_id, false)) {
-                ivRele2.setImageResource(R.drawable.rele_on);
-            } else {
                 ivRele2.setImageResource(R.drawable.rele_off);
+            } else {
+                ivRele2.setImageResource(R.drawable.rele_on);
             }
         } else {
             vRele2.setVisibility(View.GONE);
@@ -574,6 +585,19 @@ public class StateFragment extends Fragment
             pRele2i.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele2i) ? View.VISIBLE : View.GONE);
         } else {
             vRele2i.setVisibility(View.GONE);
+        }
+
+        if ((commands & State.CMD_SOUND) != 0) {
+            vSound.setVisibility(View.VISIBLE);
+            if ((preferences.getInt("V_12_" + car_id, 0) & 8) != 0) {
+                ivSound.setImageResource(R.drawable.sound);
+                pSound.setVisibility(SmsMonitor.isProcessed(car_id, R.string.sound_off) ? View.VISIBLE : View.GONE);
+            } else {
+                ivSound.setImageResource(R.drawable.sound_off);
+                pSound.setVisibility(SmsMonitor.isProcessed(car_id, R.string.sound_on) ? View.VISIBLE : View.GONE);
+            }
+        } else {
+            vSound.setVisibility(View.GONE);
         }
 
         if (az) {
@@ -787,6 +811,23 @@ public class StateFragment extends Fragment
                             update(getActivity());
                         } else {
                             Actions.valet_on(getActivity(), car_id, longTap);
+                        }
+                    }
+                }
+                if (v == vSound) {
+                    if ((preferences.getInt("V_12_" + car_id, 0) & 8) != 0) {
+                        if (SmsMonitor.isProcessed(car_id, R.string.sound_on)) {
+                            SmsMonitor.cancelSMS(getActivity(), car_id, R.string.sound_on);
+                            update(getActivity());
+                        } else {
+                            Actions.sound_on(getActivity(), car_id);
+                        }
+                    } else {
+                        if (SmsMonitor.isProcessed(car_id, R.string.sound_off)) {
+                            SmsMonitor.cancelSMS(getActivity(), car_id, R.string.sound_off);
+                            update(getActivity());
+                        } else {
+                            Actions.sound_off(getActivity(), car_id);
                         }
                     }
                 }

@@ -14,10 +14,9 @@ import android.widget.EditText;
 
 public class AuthFragment extends SettingsFragment {
 
-    SharedPreferences preferences;
-
     static final int REQUEST_AUTH = 1;
     static final int REQUEST_PHONE = 2;
+    SharedPreferences preferences;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -45,7 +44,7 @@ public class AuthFragment extends SettingsFragment {
             }
         });
         if (State.hasTelephony(getActivity())) {
-            items.add(new Item(R.string.phone_number, phone_number) {
+            items.add(new Item(R.string.device_phone_number, phone_number) {
                 @Override
                 void click() {
                     Intent i = new Intent(getActivity(), AuthDialog.class);
