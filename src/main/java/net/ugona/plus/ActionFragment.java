@@ -26,8 +26,206 @@ import java.util.Vector;
 public class ActionFragment extends Fragment
         implements MainActivity.DateChangeListener {
 
+    static Action[] pointer_actions = {
+            new Action(R.drawable.icon_turbo_on, R.string.find) {
+                @Override
+                void action(final Context context, final String car_id, boolean longTap) {
+                    Actions.requestPassword(context, R.string.find, R.string.find_sum, new Runnable() {
+                        @Override
+                        public void run() {
+                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "FIND", null));
+                        }
+                    });
+                }
+            },
+            new Action(R.drawable.icon_status, R.string.map_req) {
+                @Override
+                void action(final Context context, final String car_id, boolean longTap) {
+                    Actions.requestPassword(context, R.string.map_req, R.string.map_sum, new Runnable() {
+                        @Override
+                        public void run() {
+                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MAP", null));
+                        }
+                    });
+                }
+            },
+            new Action(0, R.string.mode_a, R.string.mode_a_sum) {
+                @Override
+                void action(final Context context, final String car_id, boolean longTap) {
+                    Actions.requestPassword(context, R.string.mode_a, R.string.mode_a_sum, new Runnable() {
+                        @Override
+                        public void run() {
+                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MODE A", null));
+                        }
+                    });
+                }
+            },
+            new Action(0, R.string.mode_b, R.string.mode_b_sum) {
+                @Override
+                void action(final Context context, final String car_id, boolean longTap) {
+                    Actions.requestPassword(context, R.string.mode_b, R.string.mode_b_sum, new Runnable() {
+                        @Override
+                        public void run() {
+                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MODE B", null));
+                        }
+                    });
+                }
+            },
+            new Action(0, R.string.mode_c, R.string.mode_c_sum) {
+                @Override
+                void action(final Context context, final String car_id, boolean longTap) {
+                    Actions.requestPassword(context, R.string.mode_c, R.string.mode_c_sum, new Runnable() {
+                        @Override
+                        public void run() {
+                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MODE C", null));
+                        }
+                    });
+                }
+            },
+            new Action(0, R.string.mode_d, R.string.mode_d_sum) {
+                @Override
+                void action(final Context context, final String car_id, boolean longTap) {
+                    Actions.requestPassword(context, R.string.mode_d, R.string.mode_d_sum, new Runnable() {
+                        @Override
+                        public void run() {
+                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MODE D", null));
+                        }
+                    });
+                }
+            },
+    };
+    static Action[] def_actions = {
+            new Action(R.drawable.icon_phone, R.string.call) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                    Intent intent = new Intent(Intent.ACTION_CALL);
+                    intent.setData(Uri.parse("tel:" + preferences.getString(Names.CAR_PHONE + car_id, "")));
+                    context.startActivity(intent);
+                }
+            },
+            new Action(R.drawable.icon_valet_on, R.string.valet_on, true) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.valet_on(context, car_id, longTap);
+                }
+            },
+            new Action(R.drawable.icon_valet_off, R.string.valet_off, true) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.valet_off(context, car_id, longTap);
+                }
+            },
+            new Action(R.drawable.icon_motor_on, R.string.motor_on, State.CMD_AZ) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.motor_on(context, car_id, longTap);
+                }
+            },
+            new Action(R.drawable.icon_motor_off, R.string.motor_off, State.CMD_AZ) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.motor_off(context, car_id, longTap);
+                }
+            },
+            new Action(R.drawable.icon_heater, R.string.rele, State.CMD_RELE) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.rele1(context, car_id, longTap);
+                }
+            },
+            new Action(R.drawable.rele_on, R.string.rele1_on, State.CMD_RELE1, Names.RELE1_NAME) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.rele(context, car_id, R.string.rele1_on, longTap);
+                }
+            },
+            new Action(R.drawable.rele_off, R.string.rele1_off, State.CMD_RELE1, Names.RELE1_NAME) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.rele(context, car_id, R.string.rele1_off, longTap);
+                }
+            },
+            new Action(R.drawable.rele_impulse, R.string.rele1i, State.CMD_RELE1I, Names.RELE1I_NAME) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.rele(context, car_id, R.string.rele1i, longTap);
+                }
+            },
+            new Action(R.drawable.rele_on, R.string.rele2_on, State.CMD_RELE2, Names.RELE2_NAME) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.rele(context, car_id, R.string.rele2_on, longTap);
+                }
+            },
+            new Action(R.drawable.rele_off, R.string.rele2_off, State.CMD_RELE2, Names.RELE2_NAME) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.rele(context, car_id, R.string.rele2_off, longTap);
+                }
+            },
+            new Action(R.drawable.rele_impulse, R.string.rele2i, State.CMD_RELE2I, Names.RELE2I_NAME) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.rele(context, car_id, R.string.rele2i, longTap);
+                }
+            },
+            new Action(R.drawable.icon_status, R.string.status_title) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.status(context, car_id);
+                }
+            },
+            new Action(R.drawable.icon_block, R.string.block, true) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.block_motor(context, car_id);
+                }
+            },
+            new Action(R.drawable.icon_turbo_on, R.string.turbo_on) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.turbo_on(context, car_id);
+                }
+            },
+            new Action(R.drawable.icon_turbo_off, R.string.turbo_off) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.turbo_off(context, car_id);
+                }
+            },
+            new Action(R.drawable.icon_internet_on, R.string.internet_on) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.internet_on(context, car_id);
+                }
+            },
+            new Action(R.drawable.icon_internet_off, R.string.internet_off) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.internet_off(context, car_id);
+                }
+            },
+            new Action(R.drawable.icon_status, R.string.map_req) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.map_query(context, car_id);
+                }
+            },
+            new Action(R.drawable.balance, R.string.balance) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.balance(context, car_id);
+                }
+            },
+            new Action(R.drawable.icon_reset, R.string.reset) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.reset(context, car_id);
+                }
+            },
+    };
     String car_id;
-
     ActionAdapter adapter;
 
     @Override
@@ -124,7 +322,20 @@ public class ActionFragment extends Fragment
                         notifyDataSetChanged();
                         return;
                     }
-                    action.action(context, car_id);
+                    action.action(context, car_id, false);
+                }
+            });
+            list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                    Action action = actions.get(position);
+                    if (SmsMonitor.isProcessed(car_id, action.text)) {
+                        SmsMonitor.cancelSMS(context, car_id, action.text);
+                        notifyDataSetChanged();
+                        return true;
+                    }
+                    action.action(context, car_id, true);
+                    return true;
                 }
             });
             br = new BroadcastReceiver() {
@@ -200,6 +411,12 @@ public class ActionFragment extends Fragment
 
     static abstract class Action {
 
+        int icon;
+        int text;
+        int flags;
+        boolean internet;
+        String name_key;
+
         Action(int icon_, int text_) {
             text = text_;
             icon = icon_;
@@ -229,214 +446,7 @@ public class ActionFragment extends Fragment
             name_key = key;
         }
 
-        abstract void action(Context context, String car_id);
-
-        int icon;
-        int text;
-        int flags;
-        boolean internet;
-        String name_key;
+        abstract void action(Context context, String car_id, boolean longTap);
     }
-
-    static Action[] pointer_actions = {
-            new Action(R.drawable.icon_turbo_on, R.string.find) {
-                @Override
-                void action(final Context context, final String car_id) {
-                    Actions.requestPassword(context, R.string.find, R.string.find_sum, new Runnable() {
-                        @Override
-                        public void run() {
-                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "FIND", null));
-                        }
-                    });
-                }
-            },
-            new Action(R.drawable.icon_status, R.string.map_req) {
-                @Override
-                void action(final Context context, final String car_id) {
-                    Actions.requestPassword(context, R.string.map_req, R.string.map_sum, new Runnable() {
-                        @Override
-                        public void run() {
-                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MAP", null));
-                        }
-                    });
-                }
-            },
-            new Action(0, R.string.mode_a, R.string.mode_a_sum) {
-                @Override
-                void action(final Context context, final String car_id) {
-                    Actions.requestPassword(context, R.string.mode_a, R.string.mode_a_sum, new Runnable() {
-                        @Override
-                        public void run() {
-                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MODE A", null));
-                        }
-                    });
-                }
-            },
-            new Action(0, R.string.mode_b, R.string.mode_b_sum) {
-                @Override
-                void action(final Context context, final String car_id) {
-                    Actions.requestPassword(context, R.string.mode_b, R.string.mode_b_sum, new Runnable() {
-                        @Override
-                        public void run() {
-                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MODE B", null));
-                        }
-                    });
-                }
-            },
-            new Action(0, R.string.mode_c, R.string.mode_c_sum) {
-                @Override
-                void action(final Context context, final String car_id) {
-                    Actions.requestPassword(context, R.string.mode_c, R.string.mode_c_sum, new Runnable() {
-                        @Override
-                        public void run() {
-                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MODE C", null));
-                        }
-                    });
-                }
-            },
-            new Action(0, R.string.mode_d, R.string.mode_d_sum) {
-                @Override
-                void action(final Context context, final String car_id) {
-                    Actions.requestPassword(context, R.string.mode_d, R.string.mode_d_sum, new Runnable() {
-                        @Override
-                        public void run() {
-                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MODE D", null));
-                        }
-                    });
-                }
-            },
-    };
-
-    static Action[] def_actions = {
-            new Action(R.drawable.icon_phone, R.string.call) {
-                @Override
-                void action(Context context, String car_id) {
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-                    Intent intent = new Intent(Intent.ACTION_CALL);
-                    intent.setData(Uri.parse("tel:" + preferences.getString(Names.CAR_PHONE + car_id, "")));
-                    context.startActivity(intent);
-                }
-            },
-            new Action(R.drawable.icon_valet_on, R.string.valet_on, true) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.valet_on(context, car_id);
-                }
-            },
-            new Action(R.drawable.icon_valet_off, R.string.valet_off, true) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.valet_off(context, car_id);
-                }
-            },
-            new Action(R.drawable.icon_motor_on, R.string.motor_on, State.CMD_AZ) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.motor_on(context, car_id);
-                }
-            },
-            new Action(R.drawable.icon_motor_off, R.string.motor_off, State.CMD_AZ) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.motor_off(context, car_id);
-                }
-            },
-            new Action(R.drawable.icon_heater, R.string.rele, State.CMD_RELE) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.rele1(context, car_id);
-                }
-            },
-            new Action(R.drawable.rele_on, R.string.rele1_on, State.CMD_RELE1, Names.RELE1_NAME) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.rele(context, car_id, R.string.rele1_on);
-                }
-            },
-            new Action(R.drawable.rele_off, R.string.rele1_off, State.CMD_RELE1, Names.RELE1_NAME) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.rele(context, car_id, R.string.rele1_off);
-                }
-            },
-            new Action(R.drawable.rele_impulse, R.string.rele1i, State.CMD_RELE1I, Names.RELE1I_NAME) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.rele(context, car_id, R.string.rele1i);
-                }
-            },
-            new Action(R.drawable.rele_on, R.string.rele2_on, State.CMD_RELE2, Names.RELE2_NAME) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.rele(context, car_id, R.string.rele2_on);
-                }
-            },
-            new Action(R.drawable.rele_off, R.string.rele2_off, State.CMD_RELE2, Names.RELE2_NAME) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.rele(context, car_id, R.string.rele2_off);
-                }
-            },
-            new Action(R.drawable.rele_impulse, R.string.rele2i, State.CMD_RELE2I, Names.RELE2I_NAME) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.rele(context, car_id, R.string.rele2i);
-                }
-            },
-            new Action(R.drawable.icon_status, R.string.status_title) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.status(context, car_id);
-                }
-            },
-            new Action(R.drawable.icon_block, R.string.block, true) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.block_motor(context, car_id);
-                }
-            },
-            new Action(R.drawable.icon_turbo_on, R.string.turbo_on) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.turbo_on(context, car_id);
-                }
-            },
-            new Action(R.drawable.icon_turbo_off, R.string.turbo_off) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.turbo_off(context, car_id);
-                }
-            },
-            new Action(R.drawable.icon_internet_on, R.string.internet_on) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.internet_on(context, car_id);
-                }
-            },
-            new Action(R.drawable.icon_internet_off, R.string.internet_off) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.internet_off(context, car_id);
-                }
-            },
-            new Action(R.drawable.icon_status, R.string.map_req) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.map_query(context, car_id);
-                }
-            },
-            new Action(R.drawable.balance, R.string.balance) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.balance(context, car_id);
-                }
-            },
-            new Action(R.drawable.icon_reset, R.string.reset) {
-                @Override
-                void action(Context context, String car_id) {
-                    Actions.reset(context, car_id);
-                }
-            },
-    };
 
 }

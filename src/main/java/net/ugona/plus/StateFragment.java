@@ -12,6 +12,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -42,19 +43,18 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 public class StateFragment extends Fragment
         implements View.OnTouchListener, OnRefreshListener {
 
+    static Pattern number_pattern = Pattern.compile("^[0-9]+ ?");
+    final String GSM_URL = "https://car-online.ugona.net/gsm?skey=$1&cc=$2&nc=$3&lac=$4&cid=$5";
+    final int AUTH_REQUEST = 1;
     String car_id;
-
     SharedPreferences preferences;
-
     ImageView imgCar;
     ImageView imgEngine;
-
     View vAddress;
     TextView tvTime;
     TextView tvLocation;
     TextView tvAddress2;
     TextView tvAddress3;
-
     TextView tvLast;
     TextView tvVoltage;
     TextView tvReserve;
@@ -69,7 +69,6 @@ public class StateFragment extends Fragment
     View vError;
     ImageView imgRefresh;
     ProgressBar prgUpdate;
-
     View vMotor;
     View vRele;
     View vBlock;
@@ -79,7 +78,6 @@ public class StateFragment extends Fragment
     View vRele1i;
     View vRele2;
     View vRele2i;
-
     View pMotor;
     View pRele;
     View pBlock;
@@ -88,38 +86,26 @@ public class StateFragment extends Fragment
     View pRele1i;
     View pRele2;
     View pRele2i;
-
     ImageView ivMotor;
     ImageView ivRele;
     ImageView ivValet;
     ImageView ivRele1;
     ImageView ivRele2;
-
     View mValet;
     View mNet;
-
     View balanceBlock;
     View vTime;
     ScrollView svAddress;
-
     CarDrawable drawable;
     BroadcastReceiver br;
-
     View vPointer1;
     View vPointer2;
     TextView tvPointer1;
     TextView tvPointer2;
-
     ActionFragment.ActionAdapter adapter;
     PullToRefreshLayout mPullToRefreshLayout;
-
+    CountDownTimer longTapTimer;
     boolean pointer;
-
-    static Pattern number_pattern = Pattern.compile("^[0-9]+ ?");
-
-    final String GSM_URL = "https://car-online.ugona.net/gsm?skey=$1&cc=$2&nc=$3&lac=$4&cid=$5";
-
-    final int AUTH_REQUEST = 1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -529,7 +515,7 @@ public class StateFragment extends Fragment
         } else {
             vRele.setVisibility(View.GONE);
         }
-        if (ignition && !az && !block && !preferences.getBoolean(Names.GUARD + car_id, false)) {
+        if (State.hasTelephony(context) && ignition && !az && !block && !preferences.getBoolean(Names.GUARD + car_id, false)) {
             vBlock.setVisibility(View.VISIBLE);
             pBlock.setVisibility(SmsMonitor.isProcessed(car_id, R.string.block) ? View.VISIBLE : View.GONE);
         } else {
@@ -731,8 +717,28 @@ public class StateFragment extends Fragment
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 v.setBackgroundResource(R.drawable.button_pressed);
+                if (longTapTimer != null)
+                    longTapTimer.cancel();
+                longTapTimer = new CountDownTimer(1000, 1000) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        longTapTimer = null;
+                    }
+                };
+                longTapTimer.start();
                 return true;
+
             case MotionEvent.ACTION_UP:
+                boolean longTap = (longTapTimer == null);
+                if (longTapTimer != null) {
+                    longTapTimer.cancel();
+                    longTapTimer = null;
+                }
                 if (v == vMotor) {
                     boolean az = (Boolean) vMotor.getTag();
                     if (az) {
@@ -740,14 +746,14 @@ public class StateFragment extends Fragment
                             SmsMonitor.cancelSMS(getActivity(), car_id, R.string.motor_off);
                             update(getActivity());
                         } else {
-                            Actions.motor_off(getActivity(), car_id);
+                            Actions.motor_off(getActivity(), car_id, longTap);
                         }
                     } else {
                         if (SmsMonitor.isProcessed(car_id, R.string.motor_on)) {
                             SmsMonitor.cancelSMS(getActivity(), car_id, R.string.motor_on);
                             update(getActivity());
                         } else {
-                            Actions.motor_on(getActivity(), car_id);
+                            Actions.motor_on(getActivity(), car_id, longTap);
                         }
                     }
                 }
@@ -756,7 +762,7 @@ public class StateFragment extends Fragment
                         SmsMonitor.cancelSMS(getActivity(), car_id, R.string.rele);
                         update(getActivity());
                     } else {
-                        Actions.rele1(getActivity(), car_id);
+                        Actions.rele1(getActivity(), car_id, longTap);
                     }
                 }
                 if (v == vBlock) {
@@ -773,14 +779,14 @@ public class StateFragment extends Fragment
                             SmsMonitor.cancelSMS(getActivity(), car_id, R.string.valet_off);
                             update(getActivity());
                         } else {
-                            Actions.valet_off(getActivity(), car_id);
+                            Actions.valet_off(getActivity(), car_id, longTap);
                         }
                     } else {
                         if (SmsMonitor.isProcessed(car_id, R.string.valet_on)) {
                             SmsMonitor.cancelSMS(getActivity(), car_id, R.string.valet_on);
                             update(getActivity());
                         } else {
-                            Actions.valet_on(getActivity(), car_id);
+                            Actions.valet_on(getActivity(), car_id, longTap);
                         }
                     }
                 }
@@ -789,6 +795,15 @@ public class StateFragment extends Fragment
                     intent.setData(Uri.parse("tel:" + preferences.getString(Names.CAR_PHONE + car_id, "")));
                     startActivity(intent);
                 }
+                if (v == vRele1)
+                    Actions.rele(getActivity(), car_id, preferences.getBoolean(Names.RELAY1 + car_id, false) ? R.string.rele1_off : R.string.rele1_on, longTap);
+                if (v == vRele1i)
+                    Actions.rele(getActivity(), car_id, R.string.rele1i, longTap);
+                if (v == vRele2)
+                    Actions.rele(getActivity(), car_id, preferences.getBoolean(Names.RELAY2 + car_id, false) ? R.string.rele2_off : R.string.rele2_on, longTap);
+                if (v == vRele2i)
+                    Actions.rele(getActivity(), car_id, R.string.rele2i, longTap);
+
             case MotionEvent.ACTION_CANCEL:
                 v.setBackgroundResource(R.drawable.button_normal);
                 return true;

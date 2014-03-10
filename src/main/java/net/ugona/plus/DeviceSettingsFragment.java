@@ -12,7 +12,7 @@ public class DeviceSettingsFragment extends DeviceFragment {
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
         items.add(new SeekBarItem(R.string.timer, 21, 1, 30, R.string.minutes));
-        items.add(new CheckBitItem(R.string.guard_sound, 0, 6));
+        items.add(new CheckBitItem(R.string.guard_sound, 0, 7));
         items.add(new CheckBitItem(R.string.no_sound, 12, 3));
         items.add(new CheckBitItem(R.string.guard_partial, 2, 2));
         items.add(new CheckBitItem(R.string.comfort_enable, 9, 5));

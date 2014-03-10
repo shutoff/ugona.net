@@ -38,10 +38,21 @@ import java.util.regex.Pattern;
 public class Actions {
 
     static final String INCORRECT_MESSAGE = "Incorrect message";
-
-    static PendingIntent piRele;
-
     static final int VALET_TIMEOUT = 3600000;
+    static final String COMMAND_URL = "https://car-online.ugona.net/command?auth=$1&ccode=$2&command=$3";
+    static PendingIntent piRele;
+    static Pattern location;
+    static String[] alarms = {
+            "Heavy shock",
+            "Trunk",
+            "Hood",
+            "Doors",
+            "Lock",
+            "MovTilt sensor",
+            "Rogue",
+            "Ignition Lock"
+    };
+    static Map<String, Set<InetRequest>> inet_requests;
 
     static void done_motor_on(Context context, String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -113,7 +124,7 @@ public class Actions {
         ed.commit();
     }
 
-    static void motor_on(final Context context, final String car_id) {
+    static void motor_on(final Context context, final String car_id, final boolean longTap) {
         selectRoute(context, car_id,
                 new Runnable() {
                     @Override
@@ -147,7 +158,7 @@ public class Actions {
                     public void run() {
                         motor_on_sms(context, car_id, false);
                     }
-                }
+                }, longTap
         );
     }
 
@@ -196,7 +207,7 @@ public class Actions {
         });
     }
 
-    static void motor_off(final Context context, final String car_id) {
+    static void motor_off(final Context context, final String car_id, final boolean longTap) {
         selectRoute(context, car_id,
                 new Runnable() {
                     @Override
@@ -230,7 +241,7 @@ public class Actions {
                     public void run() {
                         motor_off_sms(context, car_id, false);
                     }
-                }
+                }, longTap
         );
     }
 
@@ -308,8 +319,6 @@ public class Actions {
         });
     }
 
-    static Pattern location;
-
     static void map_query(final Context context, final String car_id) {
         requestPassword(context, R.string.map_req, R.string.map_req, new Runnable() {
             @Override
@@ -366,17 +375,6 @@ public class Actions {
             res = -res;
         return res;
     }
-
-    static String[] alarms = {
-            "Heavy shock",
-            "Trunk",
-            "Hood",
-            "Doors",
-            "Lock",
-            "MovTilt sensor",
-            "Rogue",
-            "Ignition Lock"
-    };
 
     static void status(final Context context, final String car_id) {
         requestPassword(context, R.string.status_title, R.string.status_sum, new Runnable() {
@@ -471,7 +469,7 @@ public class Actions {
         });
     }
 
-    static void rele(final Context context, final String car_id, final int cmd_id) {
+    static void rele(final Context context, final String car_id, final int cmd_id, final boolean longTap) {
         selectRoute(context, car_id, new Runnable() {
                     @Override
                     public void run() {
@@ -526,7 +524,7 @@ public class Actions {
                     public void run() {
                         rele_sms(context, car_id, cmd_id, false);
                     }
-                }
+                }, longTap
         );
     }
 
@@ -563,7 +561,7 @@ public class Actions {
         });
     }
 
-    static void rele1(final Context context, final String car_id) {
+    static void rele1(final Context context, final String car_id, final boolean longTap) {
         selectRoute(context, car_id,
                 new Runnable() {
                     @Override
@@ -620,7 +618,7 @@ public class Actions {
                     public void run() {
                         rele1_sms(context, car_id, false);
                     }
-                }
+                }, longTap
         );
     }
 
@@ -676,7 +674,7 @@ public class Actions {
         });
     }
 
-    static void valet_on(final Context context, final String car_id) {
+    static void valet_on(final Context context, final String car_id, final boolean longTap) {
         requestCCode(context, car_id, R.string.valet_on, R.string.valet_on_msg, new Actions.Answer() {
 
             @Override
@@ -702,7 +700,7 @@ public class Actions {
                             public void run() {
                                 valet_on_sms(context, car_id, ccode);
                             }
-                        }, null
+                        }, null, longTap
                 );
             }
         });
@@ -733,7 +731,7 @@ public class Actions {
         });
     }
 
-    static void valet_off(final Context context, final String car_id) {
+    static void valet_off(final Context context, final String car_id, final boolean longTap) {
         requestCCode(context, car_id, R.string.valet_on, R.string.valet_off_msg, new Actions.Answer() {
 
             @Override
@@ -759,7 +757,7 @@ public class Actions {
                             public void run() {
                                 valet_off_sms(context, car_id, ccode);
                             }
-                        }, null
+                        }, null, longTap
                 );
             }
         });
@@ -912,10 +910,6 @@ public class Actions {
         });
     }
 
-    static abstract class Answer {
-        abstract void answer(String text);
-    }
-
     static void requestCCode(final Context context, final String car_id, final int id_title, int id_message, final Answer after) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         AlertDialog.Builder builder = new AlertDialog.Builder(context)
@@ -1002,7 +996,7 @@ public class Actions {
         return info.isConnected();
     }
 
-    static void selectRoute(final Context context, final String car_id, final Runnable asNetwork, final Runnable asSms, final Runnable asSmsFirst) {
+    static void selectRoute(final Context context, final String car_id, final Runnable asNetwork, final Runnable asSms, final Runnable asSmsFirst, final boolean longTap) {
         if (State.hasTelephony(context)) {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
             if (preferences.getString(Names.CONTROL + car_id, "").equals("")) {
@@ -1040,16 +1034,12 @@ public class Actions {
                 .setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        selectRoute(context, car_id, asNetwork, asSms, asSmsFirst);
+                        selectRoute(context, car_id, asNetwork, asSms, asSmsFirst, longTap);
                     }
                 })
                 .create();
         dialog.show();
     }
-
-    static final String COMMAND_URL = "https://car-online.ugona.net/command?auth=$1&ccode=$2&command=$3";
-
-    static Map<String, Set<InetRequest>> inet_requests;
 
     static boolean cancelRequest(Context context, String car_id, int id) {
         if (inet_requests == null)
@@ -1072,7 +1062,17 @@ public class Actions {
         return false;
     }
 
+    static abstract class Answer {
+        abstract void answer(String text);
+    }
+
     static abstract class InetRequest {
+
+        AlertDialog dialog;
+        String car_id;
+        Context ctx;
+        long time;
+        int msg;
 
         InetRequest(Context context, final String id, String ccode, int type, int message) {
 
@@ -1213,13 +1213,6 @@ public class Actions {
             if (requests.size() == 0)
                 inet_requests.remove(car_id);
         }
-
-        AlertDialog dialog;
-
-        String car_id;
-        Context ctx;
-        long time;
-        int msg;
     }
 
 }
