@@ -167,6 +167,7 @@ public class EventsFragment extends Fragment
             new EventType(65, R.string.reset, R.drawable.reset),
             new EventType(66, R.string.gsm_register_fail, R.drawable.gsm_fail),
             new EventType(68, R.string.net_error, R.drawable.system),
+            new EventType(71, R.string.sms_err, R.drawable.sms_error),
             new EventType(72, R.string.net_error, R.drawable.system),
             new EventType(74, R.string.error_read, R.drawable.system),
             new EventType(75, R.string.net_error, R.drawable.system),
