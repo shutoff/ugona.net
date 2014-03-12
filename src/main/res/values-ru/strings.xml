@@ -328,6 +328,7 @@
     <string name="shock_sensor">Датчик удара</string>
     <string-array name="shock_entries">
         <item>Включены все тревоги</item>
+        <item>Отключен MKV датчик</item>
         <item>Отключен слабый удар</item>
         <item>Отключение датчика удара</item>
     </string-array>
@@ -408,15 +409,12 @@
     <string name="exit">Выход</string>
     <string name="notify_msg">Уведомления приходят с некоторой задержкой в зависимости от настроек таймаута устройства и соединения телефона с сетью</string>
     <string name="command_name">Имя комманды:</string>
-    <string name="sms_settings">Настройки по СМС</string>
-    <string name="prior4">Отключить датчик удара</string>
-    <string name="prior3">Отключить оповещения о слабом ударе</string>
-    <string name="prior1">Включить датчик удара</string>
-    <string name="inf_sms_yes">Включить отправку информационных СМС</string>
-    <string name="inf_sms_no">Отключить отправку информационных СМС</string>
     <string name="device_phone_number">Номер телефона устройства</string>
     <string name="sound_off">Включить режим охраны без звука</string>
-    <string name="sound_on">Отключить режим охраны бех звука</string>
-    <string name="silent_mode">Режим охраны бех звука</string>
+    <string name="sound_on">Отключить режим охраны без звука</string>
+    <string name="silent_mode">Режим охраны без звука</string>
     <string name="km">км</string>
+    <string name="alarm_shock">Тревоги по дачтику удара</string>
+    <string name="inf_sms">Ответные СМС при удачном запуске даигателя</string>
+    <string name="inf_sms_msg">При отключении отправки информационных СМС не будут приходить уведомления об успешном запуске двигателя и низком уровне заряда батарейки в метке</string>
 </resources>

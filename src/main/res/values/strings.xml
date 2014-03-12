@@ -351,13 +351,9 @@
     <string name="shock_sensor">Shock sensor</string>
     <string-array name="shock_entries">
         <item>Enable all shocks</item>
+        <item>Disable MKV sensor</item>
         <item>Disable light shock</item>
         <item>Disable all shocks</item>
-    </string-array>
-    <string-array name="shock_values">
-        <item>1</item>
-        <item>3</item>
-        <item>4</item>
     </string-array>
     <string name="motor_time">after $1 min</string>
     <string-array name="guard_entries">
@@ -460,4 +456,7 @@
     <string name="sound_on">Silent guard mode OFF</string>
     <string name="silent_mode">Silent guard mode</string>
     <string name="km">km</string>
+    <string name="alarm_shock">Alarm on shock sensor</string>
+    <string name="inf_sms">Send SMS when engine started</string>
+    <string name="inf_sms_msg"></string>
 </resources>

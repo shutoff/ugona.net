@@ -16,6 +16,8 @@ public class DeviceSettingsFragment extends DeviceFragment {
         items.add(new CheckBitItem(R.string.no_sound, 12, 3));
         items.add(new CheckBitItem(R.string.guard_partial, 2, 2));
         items.add(new CheckBitItem(R.string.comfort_enable, 9, 5));
+        if (State.hasTelephony(getActivity()))
+            items.add(new DeviceFragment.ListItem(R.string.alarm_shock, 22, R.array.shock_entries));
         items.add(new SeekBarItem(R.string.guard_time, 4, 15, 60, R.string.sec));
         items.add(new SeekBarItem(R.string.robbery_time, 5, 1, 30, R.string.sec, 20));
         items.add(new SeekBarListItem(R.string.shock_sens, 14, R.array.levels));

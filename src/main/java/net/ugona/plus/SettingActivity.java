@@ -143,7 +143,7 @@ public class SettingActivity extends ActionBarActivity {
                         return;
                     adapter.notifyDataSetChanged();
                     if (az != new_az) {
-                        int index = adapter.fromID(5);
+                        int index = adapter.fromID(4);
                         if (new_az) {
                             actionBar.addTab(
                                     actionBar.newTab()
@@ -155,7 +155,7 @@ public class SettingActivity extends ActionBarActivity {
                         az = new_az;
                     }
                     if (rele != new_rele) {
-                        int index = adapter.fromID(6);
+                        int index = adapter.fromID(5);
                         if (new_rele) {
                             actionBar.addTab(
                                     actionBar.newTab()
@@ -192,11 +192,11 @@ public class SettingActivity extends ActionBarActivity {
     public void finish() {
         if (values != null) {
             int i;
-            for (i = 0; i < 22; i++) {
+            for (i = 0; i < 24; i++) {
                 if (values[i] != old_values[i])
                     break;
             }
-            if (i < 22) {
+            if (i < 24) {
                 AlertDialog dialog = new AlertDialog.Builder(this)
                         .setTitle(R.string.changed)
                         .setMessage(R.string.changed_msg)
@@ -224,14 +224,14 @@ public class SettingActivity extends ActionBarActivity {
             return;
 
         if (preferences.getLong(Names.EVENT_TIME + car_id, 0) <= preferences.getLong(Names.SETTINGS_TIME + car_id, 0)) {
-            values = new int[22];
-            old_values = new int[22];
-            for (int i = 0; i < 22; i++) {
+            values = new int[24];
+            old_values = new int[24];
+            for (int i = 0; i < 24; i++) {
                 int v = preferences.getInt("V_" + i + "_" + car_id, 0);
-                if (v != -1) {
-                    values[i] = v;
-                    old_values[i] = v;
-                }
+                if (i == 21)
+                    v = preferences.getInt(Names.CAR_TIMER + car_id, 10);
+                values[i] = v;
+                old_values[i] = v;
             }
             sendUpdate();
             return;
@@ -242,20 +242,17 @@ public class SettingActivity extends ActionBarActivity {
             @Override
             void result(JsonObject res) throws ParseException {
                 SharedPreferences.Editor ed = preferences.edit();
-                values = new int[22];
-                old_values = new int[22];
-                for (int i = 0; i < 22; i++) {
-                    int v = -1;
+                values = new int[24];
+                old_values = new int[24];
+                for (int i = 0; i < 24; i++) {
+                    int v = preferences.getInt("V_" + i + "_" + car_id, 0);
                     JsonValue val = res.get("v" + i);
-                    if (val != null)
+                    if (val != null) {
                         v = val.asInt();
-                    if (i == 20) {
-                        v = preferences.getInt("V_" + i + "_" + car_id, 0);
-                    } else if (i == 21) {
-                        v = preferences.getInt(Names.CAR_TIMER + car_id, v);
-                    } else {
                         ed.putInt("V_" + i + "_" + car_id, v);
                     }
+                    if (i == 21)
+                        v = preferences.getInt(Names.CAR_TIMER + car_id, 10);
                     values[i] = v;
                     old_values[i] = v;
                 }
@@ -310,17 +307,22 @@ public class SettingActivity extends ActionBarActivity {
         String val = "";
         SharedPreferences.Editor ed = preferences.edit();
         boolean request_ccode = false;
+        boolean need_sms = false;
         for (int i = 0; i < values.length; i++) {
             if (values[i] == old_values[i])
                 continue;
-            if (!val.equals(""))
-                val += ",";
-            val += i + "." + values[i];
-            if (i == 20)
-                request_ccode = true;
+            if (i < 22) {
+                if (!val.equals(""))
+                    val += ",";
+                val += i + "." + values[i];
+                if (i == 20)
+                    request_ccode = true;
+            } else {
+                need_sms = true;
+            }
         }
         ed.commit();
-        if (val.equals(""))
+        if (val.equals("") && !need_sms)
             return;
         sendUpdate();
         final int[] set_values = new int[values.length];
@@ -328,11 +330,12 @@ public class SettingActivity extends ActionBarActivity {
             set_values[i] = values[i];
         }
         final String value = val;
+        final boolean sms = need_sms;
         if (request_ccode) {
             Actions.requestCCode(this, car_id, R.string.setup, R.string.setup_msg, new Actions.Answer() {
                 @Override
                 void answer(String text) {
-                    do_update(value, text, set_values);
+                    do_update(value, text, set_values, sms);
                 }
             });
             return;
@@ -341,20 +344,50 @@ public class SettingActivity extends ActionBarActivity {
         Actions.requestPassword(this, R.string.setup, R.string.setup_msg, new Runnable() {
             @Override
             public void run() {
-                do_update(value, null, set_values);
+                do_update(value, null, set_values, sms);
             }
         });
     }
 
-    void do_update(final String value, final String ccode, final int[] set_values) {
+    void do_update_sms(ProgressDialog progressDialog, int[] set_values) {
+        SharedPreferences.Editor ed = preferences.edit();
+        if (set_values[22] != old_values[22]) {
+            ed.putInt("V_22_" + car_id, set_values[22]);
+            SmsMonitor.sendSMS(progressDialog.getContext(), car_id, new SmsMonitor.Sms(R.string.shock_sens, "ALRM PRIOR " + (set_values[22] + 1), "ALRM PRIOR OK"));
+            old_values[22] = set_values[22];
+        }
+        if (set_values[23] != old_values[23]) {
+            ed.putInt("V_23_" + car_id, set_values[23]);
+            if (set_values[23] != 0) {
+                SmsMonitor.sendSMS(progressDialog.getContext(), car_id, new SmsMonitor.Sms(R.string.inf_sms, "INFSMS=NO", "INFSMS=NOT"));
+            } else {
+                SmsMonitor.sendSMS(progressDialog.getContext(), car_id, new SmsMonitor.Sms(R.string.inf_sms, "INFSMS=YES", "INFSMS YES OK"));
+            }
+            old_values[23] = set_values[23];
+        }
+        ed.commit();
+        progressDialog.dismiss();
+        sendUpdate();
+    }
+
+    void do_update(final String value, final String ccode, final int[] set_values, final boolean need_sms) {
         final ProgressDialog progressDialog = new ProgressDialog(SettingActivity.this);
         progressDialog.setMessage(getString(R.string.send_command));
         progressDialog.show();
+
+        if (values.equals("")) {
+            do_update_sms(progressDialog, set_values);
+            return;
+        }
 
         HttpTask task = new HttpTask() {
 
             @Override
             void result(JsonObject res) throws ParseException {
+                if (need_sms) {
+                    do_update_sms(progressDialog, set_values);
+                    return;
+                }
                 progressDialog.dismiss();
                 LayoutInflater inflater = (LayoutInflater) getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
                 final AlertDialog dialog = new AlertDialog.Builder(SettingActivity.this)
@@ -424,15 +457,14 @@ public class SettingActivity extends ActionBarActivity {
         }
 
         void updateVisible() {
-            visible = new boolean[7];
+            visible = new boolean[6];
             visible[0] = true;
             visible[1] = true;
             visible[2] = true;
             visible[3] = true;
-            visible[4] = State.hasTelephony(SettingActivity.this);
             int commands = State.getCommands(preferences, car_id);
-            visible[5] = (commands & State.CMD_AZ) != 0;
-            visible[6] = (commands & State.CMD_RELE) != 0;
+            visible[4] = (commands & State.CMD_AZ) != 0;
+            visible[5] = (commands & State.CMD_RELE) != 0;
         }
 
         int toID(int pos) {
@@ -477,12 +509,9 @@ public class SettingActivity extends ActionBarActivity {
                     res = new DeviceSettingsFragment();
                     break;
                 case 4:
-                    res = new SmsSettingsFragment();
-                    break;
-                case 5:
                     res = new AutoStartFragment();
                     break;
-                case 6:
+                case 5:
                     res = new HeaterFragment();
                     break;
             }
@@ -511,10 +540,8 @@ public class SettingActivity extends ActionBarActivity {
                 case 3:
                     return getString(R.string.device_settings);
                 case 4:
-                    return getString(R.string.sms_settings);
-                case 5:
                     return getString(R.string.autostart);
-                case 6:
+                case 5:
                     return getString(R.string.rele);
             }
             return null;

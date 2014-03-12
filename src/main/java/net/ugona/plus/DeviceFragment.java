@@ -83,14 +83,14 @@ public class DeviceFragment extends SettingsFragment {
         SettingActivity activity = (SettingActivity) getActivity();
         if ((activity != null) && (activity.values != null))
             return activity.values[index];
-        return preferences.getInt("V_" + index + "_" + car_id, -1);
+        return preferences.getInt("V_" + index + "_" + car_id, 0);
     }
 
     int getOldVal(int index) {
         SettingActivity activity = (SettingActivity) getActivity();
         if ((activity != null) && (activity.old_values != null))
             return activity.old_values[index];
-        return preferences.getInt("V_" + index + "_" + car_id, -1);
+        return preferences.getInt("V_" + index + "_" + car_id, 0);
     }
 
     void setVal(int index, int v) {
@@ -151,11 +151,6 @@ public class DeviceFragment extends SettingsFragment {
             return (v & mask) != (ov & mask);
         }
 
-        @Override
-        boolean visible() {
-            return getVal(word) != -1;
-        }
-
     }
 
     class SeekBarItem extends SeekItem {
@@ -188,10 +183,6 @@ public class DeviceFragment extends SettingsFragment {
             return getVal(word) != getOldVal(word);
         }
 
-        @Override
-        boolean visible() {
-            return getVal(word) != -1;
-        }
     }
 
     class ListItem extends SpinnerItem {
@@ -226,9 +217,5 @@ public class DeviceFragment extends SettingsFragment {
             return getVal(word) != getOldVal(word);
         }
 
-        @Override
-        boolean visible() {
-            return getVal(word) != -1;
-        }
     }
 }

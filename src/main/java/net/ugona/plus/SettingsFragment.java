@@ -104,8 +104,6 @@ public class SettingsFragment extends Fragment {
     void update() {
         visible_items = new Vector<Item>();
         for (Item item : items) {
-            if (!item.visible())
-                continue;
             visible_items.add(item);
         }
         BaseAdapter adapter = (BaseAdapter) list.getAdapter();
@@ -159,10 +157,6 @@ public class SettingsFragment extends Fragment {
 
         boolean changed() {
             return false;
-        }
-
-        boolean visible() {
-            return true;
         }
 
         void setChanged() {
