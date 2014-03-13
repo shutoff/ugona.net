@@ -142,5 +142,6 @@ public final class Names {
     static final String RELE2I_NAME = "rele2i_name";
 
     static final String SETTINGS_TIME = "settings_time";
+    static final String GSM_DB = "gsm_db_";
 
 }
