@@ -32,19 +32,6 @@ import java.util.Set;
 
 public class FetchService extends Service {
 
-    private static final long REPEAT_AFTER_ERROR = 20 * 1000;
-    private static final long REPEAT_AFTER_500 = 600 * 1000;
-    private static final long LONG_TIMEOUT = 5 * 60 * 60 * 1000;
-    private static final long SCAN_TIMEOUT = 10 * 1000;
-
-    private BroadcastReceiver mReceiver;
-    private PendingIntent piTimer;
-    private PendingIntent piUpdate;
-
-    private SharedPreferences preferences;
-    private ConnectivityManager conMgr;
-    private AlarmManager alarmMgr;
-
     static final String ACTION_UPDATE = "net.ugona.plus.UPDATE";
     static final String ACTION_NOUPDATE = "net.ugona.plus.NO_UPDATE";
     static final String ACTION_ERROR = "net.ugona.plus.ERROR";
@@ -52,8 +39,24 @@ public class FetchService extends Service {
     static final String ACTION_UPDATE_FORCE = "net.ugona.plus.UPDATE_FORCE";
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR";
     static final String ACTION_NOTIFICATION = "net.ugona.plus.NOTIFICATION";
-
     static final String URL_STATUS = "https://car-online.ugona.net/?skey=$1&time=$2";
+    private static final long REPEAT_AFTER_ERROR = 20 * 1000;
+    private static final long REPEAT_AFTER_500 = 600 * 1000;
+    private static final long LONG_TIMEOUT = 5 * 60 * 60 * 1000;
+    private static final long SCAN_TIMEOUT = 10 * 1000;
+    static private Map<String, ServerRequest> requests;
+    private BroadcastReceiver mReceiver;
+    private PendingIntent piTimer;
+    private PendingIntent piUpdate;
+    private SharedPreferences preferences;
+    private ConnectivityManager conMgr;
+    private AlarmManager alarmMgr;
+
+    static boolean isProcessed(String id) {
+        if (requests == null)
+            return false;
+        return requests.containsKey("S" + id);
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -187,12 +190,59 @@ public class FetchService extends Service {
         return false;
     }
 
-    static private Map<String, ServerRequest> requests;
+    void sendUpdate(String action, String car_id) {
+        try {
+            Intent intent = new Intent(action);
+            intent.putExtra(Names.ID, car_id);
+            sendBroadcast(intent);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
 
-    static boolean isProcessed(String id) {
-        if (requests == null)
-            return false;
-        return requests.containsKey("S" + id);
+    void sendError(String error, String car_id) {
+        try {
+            Intent intent = new Intent(ACTION_ERROR);
+            intent.putExtra(Names.ERROR, error);
+            intent.putExtra(Names.ID, car_id);
+            sendBroadcast(intent);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
+    void clearNotification(String car_id, int id) {
+        String[] ids = preferences.getString(Names.N_IDS + car_id, "").split(",");
+        String res = null;
+        for (String n_id : ids) {
+            if (n_id.equals(id))
+                continue;
+            if (res == null) {
+                res = n_id;
+                continue;
+            }
+            res += ",";
+            res += n_id;
+        }
+        SharedPreferences.Editor ed = preferences.edit();
+        if (id == preferences.getInt(Names.BALANCE_NOTIFICATION + car_id, 0))
+            ed.remove(Names.BALANCE_NOTIFICATION + car_id);
+        if (id == preferences.getInt(Names.GUARD_NOTIFY + car_id, 0))
+            ed.remove(Names.GUARD_NOTIFY + car_id);
+        if (id == preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0))
+            ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
+        if (id == preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0))
+            ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
+        if (id == preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0))
+            ed.remove(Names.VALET_ON_NOTIFY + car_id);
+        if (id == preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0))
+            ed.remove(Names.VALET_OFF_NOTIFY + car_id);
+        if (res == null) {
+            ed.remove(Names.N_IDS + car_id);
+        } else {
+            ed.putString(Names.N_IDS + car_id, res);
+        }
+        ed.commit();
     }
 
     abstract class ServerRequest extends HttpTask {
@@ -285,7 +335,6 @@ public class FetchService extends Service {
         abstract void exec(String api_key);
     }
 
-
     class StatusRequest extends ServerRequest {
 
         SharedPreferences.Editor ed;
@@ -330,6 +379,14 @@ public class FetchService extends Service {
                 prev_valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
                 if (guard && preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false))
                     prev_guard_mode = 2;
+
+                if (contact.get("gsm").asBoolean()) {
+                    JsonValue gsm_value = res.get("gsm");
+                    if (gsm_value != null)
+                        ed.putInt(Names.GSM_DB + car_id, gsm_value.asObject().get("db").asInt());
+                } else {
+                    ed.putInt(Names.GSM_DB + car_id, 0);
+                }
 
                 ed.putBoolean(Names.GUARD + car_id, guard);
                 setState(Names.INPUT1, contact, "input1", 3);
@@ -715,63 +772,6 @@ public class FetchService extends Service {
                 msg_id = msg;
             ed.putBoolean(id + car_id, state);
         }
-    }
-
-
-    void sendUpdate(String action, String car_id) {
-        try {
-            Intent intent = new Intent(action);
-            intent.putExtra(Names.ID, car_id);
-            sendBroadcast(intent);
-        } catch (Exception e) {
-            // ignore
-        }
-    }
-
-
-    void sendError(String error, String car_id) {
-        try {
-            Intent intent = new Intent(ACTION_ERROR);
-            intent.putExtra(Names.ERROR, error);
-            intent.putExtra(Names.ID, car_id);
-            sendBroadcast(intent);
-        } catch (Exception e) {
-            // ignore
-        }
-    }
-
-    void clearNotification(String car_id, int id) {
-        String[] ids = preferences.getString(Names.N_IDS + car_id, "").split(",");
-        String res = null;
-        for (String n_id : ids) {
-            if (n_id.equals(id))
-                continue;
-            if (res == null) {
-                res = n_id;
-                continue;
-            }
-            res += ",";
-            res += n_id;
-        }
-        SharedPreferences.Editor ed = preferences.edit();
-        if (id == preferences.getInt(Names.BALANCE_NOTIFICATION + car_id, 0))
-            ed.remove(Names.BALANCE_NOTIFICATION + car_id);
-        if (id == preferences.getInt(Names.GUARD_NOTIFY + car_id, 0))
-            ed.remove(Names.GUARD_NOTIFY + car_id);
-        if (id == preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0))
-            ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
-        if (id == preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0))
-            ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
-        if (id == preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0))
-            ed.remove(Names.VALET_ON_NOTIFY + car_id);
-        if (id == preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0))
-            ed.remove(Names.VALET_OFF_NOTIFY + car_id);
-        if (res == null) {
-            ed.remove(Names.N_IDS + car_id);
-        } else {
-            ed.putString(Names.N_IDS + car_id, res);
-        }
-        ed.commit();
     }
 
 }
