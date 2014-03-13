@@ -12,16 +12,18 @@
         android:layout_height="wrap_content">
 
         <RadioButton
-            android:="@+id/sms"
+            android:id="@+id/sms"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sms_mode" />
+            android:text="@string/sms_mode"
+            android:padding="10dp" />
 
         <RadioButton
-            android:="@+id/call"
+            android:id="@+id/call"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/call_mode" />
+            android:text="@string/call_mode"
+            android:padding="10dp" />
 
     </RadioGroup>
 
