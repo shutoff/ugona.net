@@ -32,16 +32,9 @@ import java.util.Map;
 
 public class CarWidget extends AppWidgetProvider {
 
-    static CarDrawable drawable;
-
     static final int STATE_UPDATE = 1;
     static final int STATE_ERROR = 2;
-
-    static Map<String, Integer> states;
-    static Map<Integer, Integer> height_rows;
-
     final static String URL_TRAFFIC = "https://car-online.ugona.net/level?lat=$1&lng=$2";
-
     final static int[] trafic_pict = {
             R.drawable.p0,
             R.drawable.p1,
@@ -55,7 +48,47 @@ public class CarWidget extends AppWidgetProvider {
             R.drawable.p9,
             R.drawable.p10
     };
-
+    static final int id_layout[] = {
+            R.layout.widget,
+            R.layout.widget_light
+    };
+    static final int id_layout_22[] = {
+            R.layout.widget_22,
+            R.layout.widget_light_22
+    };
+    static final int id_bg[] = {
+            R.drawable.widget,
+            R.drawable.widget_light
+    };
+    static final int id_color[] = {
+            android.R.color.secondary_text_dark,
+            R.color.caldroid_black
+    };
+    static final int id_lock_layout[] = {
+            R.layout.lock_widget,
+            R.layout.lock_widget_white
+    };
+    static final int[] id_gsm_level[] = {
+            {
+                    R.drawable.gsm_level0,
+                    R.drawable.gsm_level1,
+                    R.drawable.gsm_level2,
+                    R.drawable.gsm_level3,
+                    R.drawable.gsm_level4,
+                    R.drawable.gsm_level5
+            },
+            {
+                    R.drawable.gsm_level0_white,
+                    R.drawable.gsm_level1_white,
+                    R.drawable.gsm_level2_white,
+                    R.drawable.gsm_level3_white,
+                    R.drawable.gsm_level4_white,
+                    R.drawable.gsm_level5_white
+            }
+    };
+    static CarDrawable drawable;
+    static Map<String, Integer> states;
+    static Map<Integer, Integer> height_rows;
     static TrafficRequest request;
 
     @Override
@@ -174,31 +207,6 @@ public class CarWidget extends AppWidgetProvider {
         }
     }
 
-    static final int id_layout[] = {
-            R.layout.widget,
-            R.layout.widget_light
-    };
-
-    static final int id_layout_22[] = {
-            R.layout.widget_22,
-            R.layout.widget_light_22
-    };
-
-    static final int id_bg[] = {
-            R.drawable.widget,
-            R.drawable.widget_light
-    };
-
-    static final int id_color[] = {
-            android.R.color.secondary_text_dark,
-            R.color.caldroid_black
-    };
-
-    static final int id_lock_layout[] = {
-            R.layout.lock_widget,
-            R.layout.lock_widget_white
-    };
-
     int getLayoutHeight(Context context, int maxWidth, int id) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflater.inflate(id, null);
@@ -289,14 +297,17 @@ public class CarWidget extends AppWidgetProvider {
         int show_count = 1;
 
         String voltage = preferences.getString(Names.VOLTAGE_MAIN + car_id, "?");
-        widgetView.setTextViewText(R.id.voltage, voltage + " V");
         boolean normal = false;
         try {
-            if (Double.parseDouble(voltage) > 12.2)
+            double v = Double.parseDouble(voltage);
+            v += preferences.getInt(Names.VOLTAGE_SHIFT, 0) / 20.;
+            voltage = String.format("%.2f", v);
+            if (v > 12.2)
                 normal = true;
         } catch (Exception ex) {
             // ignore
         }
+        widgetView.setTextViewText(R.id.voltage, voltage + " V");
         if (!normal) {
             boolean az = preferences.getBoolean(Names.AZ + car_id, false);
             boolean ignition = !az && (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false));
@@ -320,7 +331,7 @@ public class CarWidget extends AppWidgetProvider {
         if (show_count < rows)
             show_balance = preferences.getBoolean(Names.SHOW_BALANCE + car_id, true);
         if (show_balance) {
-            widgetView.setTextViewText(R.id.balance, preferences.getString(Names.BALANCE + car_id, "---.--"));
+            String b = preferences.getString(Names.BALANCE + car_id, "---.--");
             int balance_limit = 50;
             try {
                 balance_limit = preferences.getInt(Names.LIMIT + car_id, 50);
@@ -328,23 +339,49 @@ public class CarWidget extends AppWidgetProvider {
                 // ignore
             }
             widgetView.setInt(R.id.balance, "setTextColor", context.getResources().getColor(id_color[theme]));
-            if (balance_limit >= 0) {
-                try {
-                    double value = Double.parseDouble(preferences.getString(Names.BALANCE + car_id, ""));
-                    if (value <= balance_limit)
-                        widgetView.setInt(R.id.balance, "setTextColor", context.getResources().getColor(R.color.error));
-                } catch (Exception ex) {
-                    // ignore
-                }
+            try {
+                double value = Double.parseDouble(preferences.getString(Names.BALANCE + car_id, ""));
+                if ((value <= balance_limit) && (balance_limit >= 0))
+                    widgetView.setInt(R.id.balance, "setTextColor", context.getResources().getColor(R.color.error));
+                b = String.format("%.2f", value);
+            } catch (Exception ex) {
+                // ignore
             }
+            widgetView.setTextViewText(R.id.balance, b);
             show_count++;
         }
         widgetView.setViewVisibility(R.id.balance_block, show_balance ? View.VISIBLE : View.GONE);
         widgetView.setViewVisibility(R.id.name, preferences.getBoolean(Names.SHOW_NAME + widgetID, true) ? View.VISIBLE : View.GONE);
 
+        int level = preferences.getInt(Names.GSM_DB + car_id, 0);
+        if (level == 0) {
+            widgetView.setViewVisibility(R.id.level, View.GONE);
+        } else {
+            widgetView.setViewVisibility(R.id.level, View.VISIBLE);
+            int index = 0;
+            if (level < 51) {
+                index = 5;
+            } else if (level < 65) {
+                index = 4;
+            } else if (level < 77) {
+                index = 3;
+            } else if (level < 91) {
+                index = 2;
+            } else if (level < 105) {
+                index = 1;
+            }
+            widgetView.setImageViewResource(R.id.level, id_gsm_level[theme][index]);
+        }
+
         boolean show_reserve = (show_count < rows);
         if (show_reserve) {
             String rv = preferences.getString(Names.VOLTAGE_RESERVED + car_id, "?");
+            try {
+                double v = Double.parseDouble(rv);
+                rv = String.format("%.2f", v);
+            } catch (Exception ex) {
+                // ignore
+            }
             widgetView.setTextViewText(R.id.reserve, rv + " V");
             int r_color = preferences.getBoolean(Names.RESERVE_NORMAL + car_id, true) ? context.getResources().getColor(id_color[theme]) : context.getResources().getColor(R.color.error);
             widgetView.setInt(R.id.reserve, "setTextColor", r_color);

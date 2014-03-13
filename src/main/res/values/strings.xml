@@ -274,8 +274,7 @@
         <item>SMS</item>
         <item>CALL</item>
     </string-array>
-    <string name="sms_mode_msg">Switch to SMS mode require password</string>
-    <string name="call_mode_msg">Switch to call mode require password</string>
+    <string name="sms_mode_msg">Application will be processed SMS messages from device and show alarm window</string>
     <string name="photo_error">Loading image error</string>
     <string name="motor_on_ok">Engine started</string>
     <string name="motor_off_ok">Engine stopped</string>
@@ -459,4 +458,5 @@
     <string name="alarm_shock">Alarm on shock sensor</string>
     <string name="inf_sms">Send SMS when engine started</string>
     <string name="inf_sms_msg"></string>
+    <string name="voltage_shift">Voltage correction</string>
 </resources>

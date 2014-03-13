@@ -108,6 +108,13 @@
                     android:src="@drawable/engine"
                     android:visibility="gone" />
 
+                <ImageView
+                    android:id="@+id/gsm_level"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_gravity="end"
+                    android:src="@drawable/gsm_level0" />
+
             </FrameLayout>
 
             <LinearLayout

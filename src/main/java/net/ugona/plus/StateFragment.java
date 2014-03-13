@@ -95,6 +95,7 @@ public class StateFragment extends Fragment
     ImageView ivRele1;
     ImageView ivRele2;
     ImageView ivSound;
+    ImageView ivGsm;
     View mValet;
     View mNet;
     View balanceBlock;
@@ -172,6 +173,7 @@ public class StateFragment extends Fragment
         ivRele1 = (ImageView) v.findViewById(R.id.rele1_img);
         ivRele2 = (ImageView) v.findViewById(R.id.rele2_img);
         ivSound = (ImageView) v.findViewById(R.id.sound_img);
+        ivGsm = (ImageView) v.findViewById(R.id.gsm_level);
 
         mValet = v.findViewById(R.id.valet_warning);
         mNet = v.findViewById(R.id.net_warning);
@@ -378,7 +380,7 @@ public class StateFragment extends Fragment
         boolean az = preferences.getBoolean(Names.AZ + car_id, false);
         boolean ignition = !az && (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false));
 
-        updateVoltage(tvVoltage, Names.VOLTAGE_MAIN, (pointer || az || ignition) ? 3. : 12.2);
+        updateMainVoltage(tvVoltage, (pointer || az || ignition) ? 3. : 12.2);
         updateNetStatus(context);
 
         double lat = preferences.getFloat(Names.LAT + car_id, 0);
@@ -427,23 +429,22 @@ public class StateFragment extends Fragment
 
         String balance = preferences.getString(Names.BALANCE + car_id, "");
         if (!balance.equals("") && preferences.getBoolean(Names.SHOW_BALANCE + car_id, true)) {
-            tvBalance.setText(balance);
             int balance_limit = 50;
             try {
                 balance_limit = preferences.getInt(Names.LIMIT + car_id, 50);
             } catch (Exception ex) {
                 // ignore
             }
-            tvBalance.setTextColor(getResources().getColor(android.R.color.secondary_text_dark));
-            if (balance_limit >= 0) {
-                try {
-                    double b = Double.parseDouble(balance);
-                    if (b <= balance_limit)
-                        tvBalance.setTextColor(getResources().getColor(R.color.error));
-                } catch (Exception ex) {
-                    // ignore
-                }
+            try {
+                double b = Double.parseDouble(balance);
+                tvBalance.setTextColor(getResources().getColor(android.R.color.secondary_text_dark));
+                if ((b <= balance_limit) && (balance_limit > 0))
+                    tvBalance.setTextColor(getResources().getColor(R.color.error));
+                balance = String.format("%.2f", b);
+            } catch (Exception ex) {
+                // ignore
             }
+            tvBalance.setText(balance);
             balanceBlock.setVisibility(View.VISIBLE);
         } else {
             balanceBlock.setVisibility(View.GONE);
@@ -452,7 +453,27 @@ public class StateFragment extends Fragment
         if (pointer)
             return;
 
-        updateVoltage(tvReserve, Names.VOLTAGE_RESERVED, preferences.getBoolean(Names.RESERVE_NORMAL + car_id, true));
+        int level = preferences.getInt(Names.GSM_DB + car_id, 0);
+        if (level == 0) {
+            ivGsm.setVisibility(View.GONE);
+        } else {
+            ivGsm.setVisibility(View.VISIBLE);
+            if (level < 51) {
+                ivGsm.setImageResource(R.drawable.gsm_level5);
+            } else if (level < 65) {
+                ivGsm.setImageResource(R.drawable.gsm_level4);
+            } else if (level < 77) {
+                ivGsm.setImageResource(R.drawable.gsm_level3);
+            } else if (level < 91) {
+                ivGsm.setImageResource(R.drawable.gsm_level2);
+            } else if (level < 105) {
+                ivGsm.setImageResource(R.drawable.gsm_level1);
+            } else {
+                ivGsm.setImageResource(R.drawable.gsm_level0);
+            }
+        }
+
+        updateReserveVoltage(tvReserve, preferences.getBoolean(Names.RESERVE_NORMAL + car_id, true));
 
         String temperature = Preferences.getTemperature(preferences, car_id, 1);
         if (temperature == null) {
@@ -681,22 +702,31 @@ public class StateFragment extends Fragment
         req.get(getActivity(), (min_lat + max_lat) / 2, (min_lon + max_lon) / 2);
     }
 
-    void updateVoltage(TextView tv, String key, boolean normal) {
-        String val = preferences.getString(key + car_id, "?");
+    void updateReserveVoltage(TextView tv, boolean normal) {
+        String val = preferences.getString(Names.VOLTAGE_RESERVED + car_id, "?");
+        try {
+            double v = Double.parseDouble(val);
+            val = String.format("%.2f", v);
+        } catch (Exception ex) {
+            // ignore
+        }
         tv.setText(val + " V");
         tv.setTextColor(normal ? getResources().getColor(android.R.color.secondary_text_dark) : getResources().getColor(R.color.error));
     }
 
-    void updateVoltage(TextView tv, String key, double limit) {
+    void updateMainVoltage(TextView tv, double limit) {
         String val = preferences.getString(Names.VOLTAGE_MAIN + car_id, "?");
-        tv.setText(val + " V");
         boolean normal = false;
         try {
-            if (Double.parseDouble(val) > limit)
+            double v = Double.parseDouble(val);
+            v += preferences.getInt(Names.VOLTAGE_SHIFT + car_id, 0) / 20.;
+            val = String.format("%.2f", v);
+            if (v > limit)
                 normal = true;
         } catch (Exception ex) {
             // ignore
         }
+        tv.setText(val + " V");
         tv.setTextColor(normal ? getResources().getColor(android.R.color.secondary_text_dark) : getResources().getColor(R.color.error));
     }
 

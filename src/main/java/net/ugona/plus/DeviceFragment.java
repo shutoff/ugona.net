@@ -102,8 +102,8 @@ public class DeviceFragment extends SettingsFragment {
     class SeekBarPrefItem extends SeekItem {
         String key;
 
-        SeekBarPrefItem(int name, String id_key, int min, int max) {
-            super(name, min, max, " °C");
+        SeekBarPrefItem(int name, String id_key, int min, int max, String unit, double k) {
+            super(name, min, max, unit, k);
             key = id_key;
             setValue(preferences.getInt(key + car_id, 0) + "");
         }

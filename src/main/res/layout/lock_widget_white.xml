@@ -34,27 +34,42 @@
                     android:layout_width="wrap_content"
                     android:layout_height="44dp" />
 
-                <ImageView
-                    android:id="@+id/car"
-                    android:src="@drawable/car_black"
+                <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
+                    android:layout_gravity="right"
                     android:layout_weight="1"
-                    android:paddingTop="2dp"
                     android:paddingBottom="2dp"
                     android:paddingLeft="54dp"
-                    android:layout_gravity="right"
-                    android:scaleType="fitEnd" />
+                    android:paddingTop="2dp">
+
+                    <ImageView
+                        android:id="@+id/car"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="fitEnd"
+                        android:src="@drawable/car_black" />
+
+                    <ImageView
+                        android:id="@+id/level"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="end"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginTop="10dp"
+                        android:src="@drawable/gsm_level0" />
+
+                </FrameLayout>
 
                 <TextView
                     android:id="@+id/name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:singleLine="true"
                     android:text="@string/ugona_net"
                     android:textColor="@color/caldroid_black"
-                    android:singleLine="true"
-                    android:textStyle="bold"
-                    android:textSize="9sp" />
+                    android:textSize="9sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 
@@ -68,21 +83,21 @@
                     android:id="@+id/time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/caldroid_black"
-                    android:textSize="48dp"
-                    android:textStyle="bold"
+                    android:paddingLeft="10dp"
                     android:singleLine="true"
                     android:text="00:00"
-                    android:paddingLeft="10dp" />
+                    android:textColor="@color/caldroid_black"
+                    android:textSize="48dp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/caldroid_black"
-                    android:textSize="16dp"
+                    android:paddingLeft="10dp"
                     android:text="01.01.2014"
-                    android:paddingLeft="10dp" />
+                    android:textColor="@color/caldroid_black"
+                    android:textSize="16dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -93,8 +108,8 @@
                     android:id="@+id/traffic"
                     android:layout_width="54dp"
                     android:layout_height="54dp"
-                    android:src="@drawable/gray"
                     android:padding="5dp"
+                    android:src="@drawable/gray"
                     android:visibility="gone" />
 
             </LinearLayout>
@@ -107,8 +122,8 @@
             android:orientation="vertical">
 
             <TextView
-                android:layout_height="0dp"
                 android:layout_width="wrap_content"
+                android:layout_height="0dp"
                 android:layout_weight="1" />
 
             <LinearLayout
@@ -117,21 +132,21 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:src="@drawable/icon_voltage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="1dp" />
+                    android:layout_margin="1dp"
+                    android:src="@drawable/icon_voltage" />
 
                 <TextView
                     android:id="@+id/voltage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="2dp"
                     android:layout_margin="1dp"
+                    android:paddingLeft="2dp"
                     android:text="@string/empty_voltage"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="@color/caldroid_black"
-                    android:textStyle="bold"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <LinearLayout
@@ -142,21 +157,21 @@
                 android:visibility="gone">
 
                 <ImageView
-                    android:src="@drawable/icon_reserve"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="1dp" />
+                    android:layout_margin="1dp"
+                    android:src="@drawable/icon_reserve" />
 
                 <TextView
                     android:id="@+id/reserve"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="2dp"
                     android:layout_margin="1dp"
+                    android:paddingLeft="2dp"
                     android:text="@string/empty_voltage"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="@color/caldroid_black"
-                    android:textStyle="bold"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <LinearLayout
@@ -166,21 +181,21 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:src="@drawable/icon_balance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="1dp" />
+                    android:layout_margin="1dp"
+                    android:src="@drawable/icon_balance" />
 
                 <TextView
                     android:id="@+id/balance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="2dp"
                     android:layout_margin="1dp"
+                    android:paddingLeft="2dp"
                     android:text="@string/empty_balance"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="@color/caldroid_black"
-                    android:textStyle="bold"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <LinearLayout
@@ -190,21 +205,21 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:src="@drawable/icon_temperature"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="1dp" />
+                    android:layout_margin="1dp"
+                    android:src="@drawable/icon_temperature" />
 
                 <TextView
                     android:id="@+id/temperature"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="2dp"
                     android:layout_margin="1dp"
+                    android:paddingLeft="2dp"
                     android:text="@string/empty_temperature"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="@color/caldroid_black"
-                    android:textStyle="bold"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <TextView
@@ -216,9 +231,9 @@
                 android:id="@+id/update_block"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingBottom="2dp"
                 android:gravity="bottom"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingBottom="2dp">
 
                 <ProgressBar
                     android:id="@+id/update"
@@ -228,25 +243,25 @@
 
                 <ImageView
                     android:id="@+id/refresh"
-                    android:src="@android:drawable/stat_notify_sync"
                     android:layout_width="15dp"
-                    android:layout_height="15dp" />
+                    android:layout_height="15dp"
+                    android:src="@android:drawable/stat_notify_sync" />
 
                 <ImageView
                     android:id="@+id/error"
-                    android:src="@android:drawable/stat_notify_error"
                     android:layout_width="15dp"
                     android:layout_height="15dp"
+                    android:src="@android:drawable/stat_notify_error"
                     android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/last"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="10dp"
-                    android:textColor="@color/caldroid_black"
-                    android:text="\??:??"
                     android:gravity="bottom"
+                    android:paddingLeft="10dp"
+                    android:text="\??:??"
+                    android:textColor="@color/caldroid_black"
                     android:textSize="12sp" />
             </LinearLayout>
 
