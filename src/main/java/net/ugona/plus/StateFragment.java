@@ -784,7 +784,7 @@ public class StateFragment extends Fragment
                     public void onFinish() {
                         longTapTimer = null;
                         Vibrator vibro = (Vibrator) v.getContext().getSystemService(Context.VIBRATOR_SERVICE);
-                        vibro.vibrate(400);
+                        vibro.vibrate(200);
                     }
                 };
                 longTapTimer.start();
@@ -802,6 +802,10 @@ public class StateFragment extends Fragment
 
 
             case MotionEvent.ACTION_CANCEL:
+                if (longTapTimer != null) {
+                    longTapTimer.cancel();
+                    longTapTimer = null;
+                }
                 v.setBackgroundResource(R.drawable.button_normal);
                 return true;
         }
