@@ -500,7 +500,13 @@ public class FetchService extends Service {
                 if ((guard_mode == 0) && preferences.getBoolean(Names.GUARD0 + car_id, false) && preferences.getBoolean(Names.GUARD1 + car_id, false))
                     guard_mode = 2;
                 if (guard_mode != prev_guard_mode) {
-                    int notify_id = preferences.getInt(Names.GUARD_NOTIFY + car_id, 0);
+                    int notify_id = 0;
+                    try {
+                        notify_id = preferences.getInt(Names.GUARD_NOTIFY + car_id, 0);
+                    } catch (Exception ex) {
+                        ed.remove(Names.GUARD_NOTIFY + car_id);
+                        ed.commit();
+                    }
                     if (notify_id != 0) {
                         Alarm.removeNotification(FetchService.this, car_id, notify_id);
                         ed.remove(Names.GUARD_NOTIFY + car_id);

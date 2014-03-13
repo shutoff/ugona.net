@@ -476,7 +476,7 @@ public class Actions {
         selectRoute(context, car_id, new Runnable() {
                     @Override
                     public void run() {
-                        requestCCode(context, car_id, R.string.rele, R.string.rele_ccode, new Answer() {
+                        requestCCode(context, car_id, cmd_id, R.string.rele_ccode, new Answer() {
                             @Override
                             void answer(String ccode) {
                                 int cmd = 0;

@@ -462,7 +462,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_centerInParent="true"
                                 android:padding="5dp"
-                                android:src="@drawable/rele_on" />
+                                android:src="@drawable/rele1_on" />
 
                             <ProgressBar
                                 android:id="@+id/rele1_prg"
@@ -487,7 +487,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_centerInParent="true"
                                 android:padding="5dp"
-                                android:src="@drawable/rele_impulse" />
+                                android:src="@drawable/rele1_impulse" />
 
                             <ProgressBar
                                 android:id="@+id/rele1_impulse_prg"
@@ -512,7 +512,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_centerInParent="true"
                                 android:padding="5dp"
-                                android:src="@drawable/rele_on" />
+                                android:src="@drawable/rele2_on" />
 
                             <ProgressBar
                                 android:id="@+id/rele2_prg"
@@ -537,7 +537,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_centerInParent="true"
                                 android:padding="5dp"
-                                android:src="@drawable/rele_impulse" />
+                                android:src="@drawable/rele2_impulse" />
 
                             <ProgressBar
                                 android:id="@+id/rele2_impulse_prg"

@@ -556,9 +556,9 @@ public class StateFragment extends Fragment
             vRele1.setVisibility(View.VISIBLE);
             pRele1.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele1) ? View.VISIBLE : View.GONE);
             if (preferences.getBoolean(Names.RELAY1 + car_id, false)) {
-                ivRele1.setImageResource(R.drawable.rele_off);
+                ivRele1.setImageResource(R.drawable.rele1_off);
             } else {
-                ivRele1.setImageResource(R.drawable.rele_on);
+                ivRele1.setImageResource(R.drawable.rele1_on);
             }
         } else {
             vRele1.setVisibility(View.GONE);
@@ -574,9 +574,9 @@ public class StateFragment extends Fragment
             vRele2.setVisibility(View.VISIBLE);
             pRele2.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele2) ? View.VISIBLE : View.GONE);
             if (preferences.getBoolean(Names.RELAY2 + car_id, false)) {
-                ivRele2.setImageResource(R.drawable.rele_off);
+                ivRele2.setImageResource(R.drawable.rele2_off);
             } else {
-                ivRele2.setImageResource(R.drawable.rele_on);
+                ivRele2.setImageResource(R.drawable.rele2_on);
             }
         } else {
             vRele2.setVisibility(View.GONE);
@@ -755,18 +755,19 @@ public class StateFragment extends Fragment
                         longTapTimer = null;
                         Vibrator vibro = (Vibrator) v.getContext().getSystemService(Context.VIBRATOR_SERVICE);
                         vibro.vibrate(400);
-                        doCommand(v, true);
                     }
                 };
                 longTapTimer.start();
                 return true;
 
             case MotionEvent.ACTION_UP:
+                boolean longTap = (longTapTimer == null);
                 if (longTapTimer != null) {
                     longTapTimer.cancel();
                     longTapTimer = null;
-                    doCommand(v, false);
                 }
+                v.setBackgroundResource(R.drawable.button_normal);
+                doCommand(v, longTap);
                 return true;
 
 

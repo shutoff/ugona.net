@@ -92,7 +92,7 @@ public class NotificationFragment extends SettingsFragment {
             }
         });
         items.add(notify_sound);
-        items.add(new ListItem(R.string.guard_notify, R.array.guard_values, R.array.guard_entries, Names.GUARD_NOTIFY, "", R.string.notify_msg));
+        items.add(new ListItem(R.string.guard_notify, R.array.guard_values, R.array.guard_entries, Names.GUARD_MODE, "", R.string.notify_msg));
         items.add(new CheckBoxItem(R.string.show_balance, Names.SHOW_BALANCE, true));
         items.add(new ListIntItem(R.string.balance_notification, R.array.balance_limit, R.array.balance_values, Names.LIMIT, 50));
 

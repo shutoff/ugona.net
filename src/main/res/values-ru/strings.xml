@@ -40,7 +40,7 @@
     <string name="turbo_off">Выключить режим слежения</string>
     <string name="turbo_on_sum">Режим преследования, в этом режиме устройство отправляет данные так часто, как это возможно</string>
     <string name="turbo_off_sum">Отменить режим преследования</string>
-    <string name="reset_sum">Выполнить принудительную загрузку устройства</string>
+    <string name="reset_sum">Выполнить принудительную перезагрузку устройства</string>
     <string name="unknown">неизвестно</string>
     <string name="alarm_test">Проверка тревоги</string>
     <string name="alarm_test_sum">Нажмите для проверки тревоги</string>
