@@ -4,10 +4,18 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Environment;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class State {
 
@@ -22,41 +30,39 @@ public class State {
     static final int CMD_SOUND = 1 << 8;
     static int telephony_state = 0;
 
-        /*
-        static void appendLog(String text) {
-            File logFile = Environment.getExternalStorageDirectory();
-            logFile = new File(logFile, "car.log");
-            if (!logFile.exists()) {
-                try {
-                    if (!logFile.createNewFile())
-                        return;
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
+    static void appendLog(String text) {
+        File logFile = Environment.getExternalStorageDirectory();
+        logFile = new File(logFile, "car.log");
+        if (!logFile.exists()) {
             try {
-                //BufferedWriter for performance, true to set append to file flag
-                BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
-                Date d = new Date();
-                buf.append(d.toLocaleString());
-                buf.append(" ");
-                buf.append(text);
-                buf.newLine();
-                buf.close();
+                if (!logFile.createNewFile())
+                    return;
             } catch (IOException e) {
                 // ignore
             }
         }
-
-        static public void print(Throwable ex) {
-            ex.printStackTrace();
-            appendLog("Error: " + ex.toString());
-            StringWriter sw = new StringWriter();
-            ex.printStackTrace(new PrintWriter(sw));
-            String s = sw.toString();
-            appendLog(s);
+        try {
+            //BufferedWriter for performance, true to set append to file flag
+            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            Date d = new Date();
+            buf.append(d.toLocaleString());
+            buf.append(" ");
+            buf.append(text);
+            buf.newLine();
+            buf.close();
+        } catch (IOException e) {
+            // ignore
         }
-    */
+    }
+
+    static public void print(Throwable ex) {
+        ex.printStackTrace();
+        appendLog("Error: " + ex.toString());
+        StringWriter sw = new StringWriter();
+        ex.printStackTrace(new PrintWriter(sw));
+        String s = sw.toString();
+        appendLog(s);
+    }
 
     static boolean isDebug() {
         return Build.FINGERPRINT.startsWith("generic");

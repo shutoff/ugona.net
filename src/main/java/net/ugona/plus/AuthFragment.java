@@ -2,6 +2,7 @@ package net.ugona.plus;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,7 +11,9 @@ import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 
 public class AuthFragment extends SettingsFragment {
 
@@ -102,6 +105,43 @@ public class AuthFragment extends SettingsFragment {
                     }
                 });
                 items.add(new ListItem(R.string.control_method, R.array.ctrl_entries, R.array.ctrl_values, Names.CONTROL + car_id, ""));
+                items.add(new Item(R.string.alarm_mode, R.string.sms_mode_summary) {
+                    @Override
+                    void click() {
+                        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                        final AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                                .setTitle(R.string.alarm_mode)
+                                .setView(inflater.inflate(R.layout.alarm_mode, null))
+                                .setNegativeButton(R.string.cancel, null)
+                                .setPositiveButton(R.string.ok, null)
+                                .create();
+                        dialog.show();
+                        final RadioGroup grp = (RadioGroup) dialog.findViewById(R.id.mode);
+                        final Button ok = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                        ok.setEnabled(false);
+                        grp.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                            @Override
+                            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                                ok.setEnabled(i != -1);
+                            }
+                        });
+                        ok.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(final View view) {
+                                final int mode = grp.getCheckedRadioButtonId();
+                                final int id = (mode == R.id.sms) ? R.string.sms_mode : R.string.call_mode;
+                                final String text = (mode == R.id.sms) ? "ALARM SMS" : "ALARM CALL";
+                                Actions.requestPassword(view.getContext(), R.string.alarm_mode, id, new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        SmsMonitor.sendSMS(view.getContext(), car_id, new SmsMonitor.Sms(id, text, text + " OK"));
+                                    }
+                                });
+                                dialog.dismiss();
+                            }
+                        });
+                    }
+                });
             }
             items.add(new CheckBoxItem(R.string.show_photo, Names.SHOW_PHOTO, false));
         }

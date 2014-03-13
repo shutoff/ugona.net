@@ -13,6 +13,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -737,7 +738,7 @@ public class StateFragment extends Fragment
     }
 
     @Override
-    public boolean onTouch(View v, MotionEvent event) {
+    public boolean onTouch(final View v, MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 v.setBackgroundResource(R.drawable.button_pressed);
@@ -752,104 +753,112 @@ public class StateFragment extends Fragment
                     @Override
                     public void onFinish() {
                         longTapTimer = null;
+                        Vibrator vibro = (Vibrator) v.getContext().getSystemService(Context.VIBRATOR_SERVICE);
+                        vibro.vibrate(400);
+                        doCommand(v, true);
                     }
                 };
                 longTapTimer.start();
                 return true;
 
             case MotionEvent.ACTION_UP:
-                boolean longTap = (longTapTimer == null);
                 if (longTapTimer != null) {
                     longTapTimer.cancel();
                     longTapTimer = null;
+                    doCommand(v, false);
                 }
-                if (v == vMotor) {
-                    boolean az = (Boolean) vMotor.getTag();
-                    if (az) {
-                        if (SmsMonitor.isProcessed(car_id, R.string.motor_off)) {
-                            SmsMonitor.cancelSMS(getActivity(), car_id, R.string.motor_off);
-                            update(getActivity());
-                        } else {
-                            Actions.motor_off(getActivity(), car_id, longTap);
-                        }
-                    } else {
-                        if (SmsMonitor.isProcessed(car_id, R.string.motor_on)) {
-                            SmsMonitor.cancelSMS(getActivity(), car_id, R.string.motor_on);
-                            update(getActivity());
-                        } else {
-                            Actions.motor_on(getActivity(), car_id, longTap);
-                        }
-                    }
-                }
-                if (v == vRele) {
-                    if (SmsMonitor.isProcessed(car_id, R.string.rele)) {
-                        SmsMonitor.cancelSMS(getActivity(), car_id, R.string.rele);
-                        update(getActivity());
-                    } else {
-                        Actions.rele1(getActivity(), car_id, longTap);
-                    }
-                }
-                if (v == vBlock) {
-                    if (SmsMonitor.isProcessed(car_id, R.string.block)) {
-                        SmsMonitor.cancelSMS(getActivity(), car_id, R.string.block);
-                        update(getActivity());
-                    } else {
-                        Actions.block_motor(getActivity(), car_id);
-                    }
-                }
-                if (v == vValet) {
-                    if (preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1, false)) {
-                        if (SmsMonitor.isProcessed(car_id, R.string.valet_off)) {
-                            SmsMonitor.cancelSMS(getActivity(), car_id, R.string.valet_off);
-                            update(getActivity());
-                        } else {
-                            Actions.valet_off(getActivity(), car_id, longTap);
-                        }
-                    } else {
-                        if (SmsMonitor.isProcessed(car_id, R.string.valet_on)) {
-                            SmsMonitor.cancelSMS(getActivity(), car_id, R.string.valet_on);
-                            update(getActivity());
-                        } else {
-                            Actions.valet_on(getActivity(), car_id, longTap);
-                        }
-                    }
-                }
-                if (v == vSound) {
-                    if ((preferences.getInt("V_12_" + car_id, 0) & 8) != 0) {
-                        if (SmsMonitor.isProcessed(car_id, R.string.sound_on)) {
-                            SmsMonitor.cancelSMS(getActivity(), car_id, R.string.sound_on);
-                            update(getActivity());
-                        } else {
-                            Actions.sound_on(getActivity(), car_id);
-                        }
-                    } else {
-                        if (SmsMonitor.isProcessed(car_id, R.string.sound_off)) {
-                            SmsMonitor.cancelSMS(getActivity(), car_id, R.string.sound_off);
-                            update(getActivity());
-                        } else {
-                            Actions.sound_off(getActivity(), car_id);
-                        }
-                    }
-                }
-                if (v == vPhone) {
-                    Intent intent = new Intent(Intent.ACTION_CALL);
-                    intent.setData(Uri.parse("tel:" + preferences.getString(Names.CAR_PHONE + car_id, "")));
-                    startActivity(intent);
-                }
-                if (v == vRele1)
-                    Actions.rele(getActivity(), car_id, preferences.getBoolean(Names.RELAY1 + car_id, false) ? R.string.rele1_off : R.string.rele1_on, longTap);
-                if (v == vRele1i)
-                    Actions.rele(getActivity(), car_id, R.string.rele1i, longTap);
-                if (v == vRele2)
-                    Actions.rele(getActivity(), car_id, preferences.getBoolean(Names.RELAY2 + car_id, false) ? R.string.rele2_off : R.string.rele2_on, longTap);
-                if (v == vRele2i)
-                    Actions.rele(getActivity(), car_id, R.string.rele2i, longTap);
+                return true;
+
 
             case MotionEvent.ACTION_CANCEL:
                 v.setBackgroundResource(R.drawable.button_normal);
                 return true;
         }
         return false;
+    }
+
+    void doCommand(View v, boolean longTap) {
+        if (v == vMotor) {
+            boolean az = (Boolean) vMotor.getTag();
+            if (az) {
+                if (SmsMonitor.isProcessed(car_id, R.string.motor_off)) {
+                    SmsMonitor.cancelSMS(getActivity(), car_id, R.string.motor_off);
+                    update(getActivity());
+                } else {
+                    Actions.motor_off(getActivity(), car_id, longTap);
+                }
+            } else {
+                if (SmsMonitor.isProcessed(car_id, R.string.motor_on)) {
+                    SmsMonitor.cancelSMS(getActivity(), car_id, R.string.motor_on);
+                    update(getActivity());
+                } else {
+                    Actions.motor_on(getActivity(), car_id, longTap);
+                }
+            }
+        }
+        if (v == vRele) {
+            if (SmsMonitor.isProcessed(car_id, R.string.rele)) {
+                SmsMonitor.cancelSMS(getActivity(), car_id, R.string.rele);
+                update(getActivity());
+            } else {
+                Actions.rele1(getActivity(), car_id, longTap);
+            }
+        }
+        if (v == vBlock) {
+            if (SmsMonitor.isProcessed(car_id, R.string.block)) {
+                SmsMonitor.cancelSMS(getActivity(), car_id, R.string.block);
+                update(getActivity());
+            } else {
+                Actions.block_motor(getActivity(), car_id);
+            }
+        }
+        if (v == vValet) {
+            if (preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1, false)) {
+                if (SmsMonitor.isProcessed(car_id, R.string.valet_off)) {
+                    SmsMonitor.cancelSMS(getActivity(), car_id, R.string.valet_off);
+                    update(getActivity());
+                } else {
+                    Actions.valet_off(getActivity(), car_id, longTap);
+                }
+            } else {
+                if (SmsMonitor.isProcessed(car_id, R.string.valet_on)) {
+                    SmsMonitor.cancelSMS(getActivity(), car_id, R.string.valet_on);
+                    update(getActivity());
+                } else {
+                    Actions.valet_on(getActivity(), car_id, longTap);
+                }
+            }
+        }
+        if (v == vSound) {
+            if ((preferences.getInt("V_12_" + car_id, 0) & 8) != 0) {
+                if (SmsMonitor.isProcessed(car_id, R.string.sound_on)) {
+                    SmsMonitor.cancelSMS(getActivity(), car_id, R.string.sound_on);
+                    update(getActivity());
+                } else {
+                    Actions.sound_on(getActivity(), car_id);
+                }
+            } else {
+                if (SmsMonitor.isProcessed(car_id, R.string.sound_off)) {
+                    SmsMonitor.cancelSMS(getActivity(), car_id, R.string.sound_off);
+                    update(getActivity());
+                } else {
+                    Actions.sound_off(getActivity(), car_id);
+                }
+            }
+        }
+        if (v == vPhone) {
+            Intent intent = new Intent(Intent.ACTION_CALL);
+            intent.setData(Uri.parse("tel:" + preferences.getString(Names.CAR_PHONE + car_id, "")));
+            startActivity(intent);
+        }
+        if (v == vRele1)
+            Actions.rele(getActivity(), car_id, preferences.getBoolean(Names.RELAY1 + car_id, false) ? R.string.rele1_off : R.string.rele1_on, longTap);
+        if (v == vRele1i)
+            Actions.rele(getActivity(), car_id, R.string.rele1i, longTap);
+        if (v == vRele2)
+            Actions.rele(getActivity(), car_id, preferences.getBoolean(Names.RELAY2 + car_id, false) ? R.string.rele2_off : R.string.rele2_on, longTap);
+        if (v == vRele2i)
+            Actions.rele(getActivity(), car_id, R.string.rele2i, longTap);
     }
 
     void startAnimation() {

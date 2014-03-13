@@ -246,10 +246,12 @@ public class SettingActivity extends ActionBarActivity {
                 old_values = new int[24];
                 for (int i = 0; i < 24; i++) {
                     int v = preferences.getInt("V_" + i + "_" + car_id, 0);
-                    JsonValue val = res.get("v" + i);
-                    if (val != null) {
-                        v = val.asInt();
-                        ed.putInt("V_" + i + "_" + car_id, v);
+                    if (i < 20) {
+                        JsonValue val = res.get("v" + i);
+                        if (val != null) {
+                            v = val.asInt();
+                            ed.putInt("V_" + i + "_" + car_id, v);
+                        }
                     }
                     if (i == 21)
                         v = preferences.getInt(Names.CAR_TIMER + car_id, 10);
