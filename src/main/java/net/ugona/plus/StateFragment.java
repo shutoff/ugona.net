@@ -95,7 +95,11 @@ public class StateFragment extends Fragment
     ImageView ivRele1;
     ImageView ivRele2;
     ImageView ivSound;
-    ImageView ivGsm;
+
+    View vLevel;
+    TextView tvLevel;
+    ImageView ivLevel;
+
     View mValet;
     View mNet;
     View balanceBlock;
@@ -173,7 +177,10 @@ public class StateFragment extends Fragment
         ivRele1 = (ImageView) v.findViewById(R.id.rele1_img);
         ivRele2 = (ImageView) v.findViewById(R.id.rele2_img);
         ivSound = (ImageView) v.findViewById(R.id.sound_img);
-        ivGsm = (ImageView) v.findViewById(R.id.gsm_level);
+
+        vLevel = v.findViewById(R.id.level_row);
+        ivLevel = (ImageView) v.findViewById(R.id.level_img);
+        tvLevel = (TextView) v.findViewById(R.id.level);
 
         mValet = v.findViewById(R.id.valet_warning);
         mNet = v.findViewById(R.id.net_warning);
@@ -455,22 +462,23 @@ public class StateFragment extends Fragment
 
         int level = preferences.getInt(Names.GSM_DB + car_id, 0);
         if (level == 0) {
-            ivGsm.setVisibility(View.GONE);
+            vLevel.setVisibility(View.GONE);
         } else {
-            ivGsm.setVisibility(View.VISIBLE);
-            if (level < 51) {
-                ivGsm.setImageResource(R.drawable.gsm_level5);
-            } else if (level < 65) {
-                ivGsm.setImageResource(R.drawable.gsm_level4);
-            } else if (level < 77) {
-                ivGsm.setImageResource(R.drawable.gsm_level3);
-            } else if (level < 91) {
-                ivGsm.setImageResource(R.drawable.gsm_level2);
-            } else if (level < 105) {
-                ivGsm.setImageResource(R.drawable.gsm_level1);
+            vLevel.setVisibility(View.VISIBLE);
+            if (level > -51) {
+                ivLevel.setImageResource(R.drawable.gsm_level5);
+            } else if (level > -65) {
+                ivLevel.setImageResource(R.drawable.gsm_level4);
+            } else if (level > -77) {
+                ivLevel.setImageResource(R.drawable.gsm_level3);
+            } else if (level > -91) {
+                ivLevel.setImageResource(R.drawable.gsm_level2);
+            } else if (level > -105) {
+                ivLevel.setImageResource(R.drawable.gsm_level1);
             } else {
-                ivGsm.setImageResource(R.drawable.gsm_level0);
+                ivLevel.setImageResource(R.drawable.gsm_level0);
             }
+            tvLevel.setText(level + " dBm");
         }
 
         updateReserveVoltage(tvReserve, preferences.getBoolean(Names.RESERVE_NORMAL + car_id, true));

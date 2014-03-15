@@ -353,25 +353,29 @@ public class CarWidget extends AppWidgetProvider {
         widgetView.setViewVisibility(R.id.balance_block, show_balance ? View.VISIBLE : View.GONE);
         widgetView.setViewVisibility(R.id.name, preferences.getBoolean(Names.SHOW_NAME + widgetID, true) ? View.VISIBLE : View.GONE);
 
-        int level = preferences.getInt(Names.GSM_DB + car_id, 0);
-        if (level == 0) {
-            widgetView.setViewVisibility(R.id.level, View.GONE);
-        } else {
-            widgetView.setViewVisibility(R.id.level, View.VISIBLE);
-            int index = 0;
-            if (level < 51) {
-                index = 5;
-            } else if (level < 65) {
-                index = 4;
-            } else if (level < 77) {
-                index = 3;
-            } else if (level < 91) {
-                index = 2;
-            } else if (level < 105) {
-                index = 1;
+        boolean show_level = (show_count < rows);
+        if (show_level) {
+            int level = preferences.getInt(Names.GSM_DB + car_id, 0);
+            if (level == 0) {
+                show_level = false;
+            } else {
+                int index = 0;
+                if (level > -51) {
+                    index = 5;
+                } else if (level > -65) {
+                    index = 4;
+                } else if (level > -77) {
+                    index = 3;
+                } else if (level > -91) {
+                    index = 2;
+                } else if (level > -105) {
+                    index = 1;
+                }
+                widgetView.setImageViewResource(R.id.level_img, id_gsm_level[theme][index]);
+                widgetView.setTextViewText(R.id.level, level + " dBm");
             }
-            widgetView.setImageViewResource(R.id.level, id_gsm_level[theme][index]);
         }
+        widgetView.setViewVisibility(R.id.level_block, show_level ? View.VISIBLE : View.GONE);
 
         boolean show_reserve = (show_count < rows);
         if (show_reserve) {

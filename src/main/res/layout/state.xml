@@ -108,13 +108,6 @@
                     android:src="@drawable/engine"
                     android:visibility="gone" />
 
-                <ImageView
-                    android:id="@+id/gsm_level"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:layout_gravity="bottom|right"
-                    android:src="@drawable/gsm_level0" />
-
             </FrameLayout>
 
             <LinearLayout
@@ -287,6 +280,31 @@
 
                     <TextView
                         android:id="@+id/temperature3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:padding="2dp"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/level_row"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/level_img"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center_vertical"
+                        android:padding="2dp"
+                        android:paddingLeft="0dp"
+                        android:paddingRight="5dp"
+                        android:src="@drawable/gsm_level0" />
+
+                    <TextView
+                        android:id="@+id/level"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="right"
