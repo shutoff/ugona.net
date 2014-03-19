@@ -374,6 +374,7 @@ public class CarWidget extends AppWidgetProvider {
                 widgetView.setImageViewResource(R.id.level_img, id_gsm_level[theme][index]);
                 widgetView.setTextViewText(R.id.level, level + " dBm");
             }
+            show_count++;
         }
         widgetView.setViewVisibility(R.id.level_block, show_level ? View.VISIBLE : View.GONE);
 

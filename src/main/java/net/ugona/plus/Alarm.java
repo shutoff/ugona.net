@@ -47,6 +47,77 @@ public class Alarm extends Activity {
     SharedPreferences preferences;
     boolean show_main;
 
+    static void createNotification(Context context, String text, String car_id) {
+        createNotification(context, text, R.drawable.warning, car_id, null);
+    }
+
+    static int createNotification(Context context, String text, int pictId, String car_id, String sound) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        int max_id = 0;
+        String[] cars = preferences.getString(Names.CARS, "").split(",");
+        for (String id : cars) {
+            String[] ids = preferences.getString(Names.N_IDS + id, "").split(",");
+            for (String n_ids : ids) {
+                try {
+                    int n = Integer.parseInt(n_ids);
+                    if (n > max_id)
+                        max_id = n;
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+        }
+        max_id++;
+        SharedPreferences.Editor ed = preferences.edit();
+        String s = preferences.getString(Names.N_IDS + car_id, "");
+        if (!s.equals(""))
+            s += ",";
+        s += max_id;
+        ed.putString(Names.N_IDS + car_id, s);
+        ed.commit();
+        Intent iNotification = new Intent(context, FetchService.class);
+        iNotification.setAction(FetchService.ACTION_NOTIFICATION);
+        iNotification.putExtra(Names.ID, car_id);
+        if (sound != null)
+            iNotification.putExtra(Names.NOTIFY, sound);
+        iNotification.putExtra(Names.TITLE, text);
+        iNotification.putExtra(Names.ALARM, pictId);
+        iNotification.putExtra(Names.EVENT_ID, max_id);
+        Uri data = Uri.withAppendedPath(Uri.parse("http://service/notification/"), car_id);
+        iNotification.setData(data);
+        PendingIntent pi = PendingIntent.getService(context, 0, iNotification, PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+        alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 500, pi);
+        return max_id;
+    }
+
+    static void removeNotification(Context context, String car_id, int n_id) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        String n_ids = preferences.getString(Names.N_IDS + car_id, "");
+        String[] ids = n_ids.split(",");
+        String res = null;
+        for (String id : ids) {
+            if (id.equals(n_id + "")) {
+                manager.cancel(n_id);
+                continue;
+            }
+            if (res == null) {
+                res = id;
+                continue;
+            }
+            res += ",";
+            res += id;
+        }
+        SharedPreferences.Editor ed = preferences.edit();
+        if (res == null) {
+            ed.remove(Names.N_IDS + car_id);
+        } else {
+            ed.putString(Names.N_IDS + car_id, res);
+        }
+        ed.commit();
+    }
+
     /**
      * Called when the activity is first created.
      */
@@ -206,9 +277,13 @@ public class Alarm extends Activity {
             tvAlarm.setText(alarm);
             String sound = Preferences.getAlarm(preferences, car_id);
             Uri uri = Uri.parse(sound);
-            Ringtone ringtone = RingtoneManager.getRingtone(getBaseContext(), uri);
-            if (ringtone == null)
+            if (sound.equals(""))
                 uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+            Ringtone ringtone = RingtoneManager.getRingtone(getBaseContext(), uri);
+            if (ringtone == null) {
+                uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+                ringtone = RingtoneManager.getRingtone(getBaseContext(), uri);
+            }
             if (timer != null)
                 timer.cancel();
             TimerTask timerTask = new TimerTask() {
@@ -239,77 +314,6 @@ public class Alarm extends Activity {
                 // ignore
             }
         }
-    }
-
-    static void createNotification(Context context, String text, String car_id) {
-        createNotification(context, text, R.drawable.warning, car_id, null);
-    }
-
-    static int createNotification(Context context, String text, int pictId, String car_id, String sound) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        int max_id = 0;
-        String[] cars = preferences.getString(Names.CARS, "").split(",");
-        for (String id : cars) {
-            String[] ids = preferences.getString(Names.N_IDS + id, "").split(",");
-            for (String n_ids : ids) {
-                try {
-                    int n = Integer.parseInt(n_ids);
-                    if (n > max_id)
-                        max_id = n;
-                } catch (Exception ex) {
-                    // ignore
-                }
-            }
-        }
-        max_id++;
-        SharedPreferences.Editor ed = preferences.edit();
-        String s = preferences.getString(Names.N_IDS + car_id, "");
-        if (!s.equals(""))
-            s += ",";
-        s += max_id;
-        ed.putString(Names.N_IDS + car_id, s);
-        ed.commit();
-        Intent iNotification = new Intent(context, FetchService.class);
-        iNotification.setAction(FetchService.ACTION_NOTIFICATION);
-        iNotification.putExtra(Names.ID, car_id);
-        if (sound != null)
-            iNotification.putExtra(Names.NOTIFY, sound);
-        iNotification.putExtra(Names.TITLE, text);
-        iNotification.putExtra(Names.ALARM, pictId);
-        iNotification.putExtra(Names.EVENT_ID, max_id);
-        Uri data = Uri.withAppendedPath(Uri.parse("http://service/notification/"), car_id);
-        iNotification.setData(data);
-        PendingIntent pi = PendingIntent.getService(context, 0, iNotification, PendingIntent.FLAG_UPDATE_CURRENT);
-        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(ALARM_SERVICE);
-        alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 500, pi);
-        return max_id;
-    }
-
-    static void removeNotification(Context context, String car_id, int n_id) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        String n_ids = preferences.getString(Names.N_IDS + car_id, "");
-        String[] ids = n_ids.split(",");
-        String res = null;
-        for (String id : ids) {
-            if (id.equals(n_id + "")) {
-                manager.cancel(n_id);
-                continue;
-            }
-            if (res == null) {
-                res = id;
-                continue;
-            }
-            res += ",";
-            res += id;
-        }
-        SharedPreferences.Editor ed = preferences.edit();
-        if (res == null) {
-            ed.remove(Names.N_IDS + car_id);
-        } else {
-            ed.putString(Names.N_IDS + car_id, res);
-        }
-        ed.commit();
     }
 
 }

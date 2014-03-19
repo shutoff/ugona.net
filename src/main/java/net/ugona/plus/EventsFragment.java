@@ -50,60 +50,9 @@ public class EventsFragment extends Fragment
     final static String URL_EVENTS = "https://car-online.ugona.net/events?skey=$1&begin=$2&end=$3&first=$4&pointer=$5";
     final static String URL_EVENT = "https://car-online.ugona.net/event?skey=$1&id=$2&time=$3";
     final static String URL_TEXT = "https://car-online.ugona.net/text?auth=$1&id=$2&time=$3&type=$4";
-
-    String car_id;
-    String api_key;
-
-    Vector<Event> events;
-    Vector<Event> filtered;
-    Event firstEvent;
-
-    SharedPreferences preferences;
-
-    int filter;
-
-    boolean error;
-    boolean loaded;
-    boolean no_events;
-    boolean pointer;
-
-    ListView lvEvents;
-    TextView tvNoEvents;
-    View vProgress;
-    View vError;
-
-    long current_id;
-
-    LocalDate current;
-    BroadcastReceiver br;
-
-    DataFetcher fetcher;
-
     static final String FILTER = "filter";
     static final String DATE = "events_date";
     static final String EVENTS_DATA = "events";
-
-    static class EventType {
-        EventType(int type_, int string_, int icon_) {
-            type = type_;
-            string = string_;
-            icon = icon_;
-            filter = 4;
-        }
-
-        EventType(int type_, int string_, int icon_, int filter_) {
-            type = type_;
-            string = string_;
-            icon = icon_;
-            filter = filter_;
-        }
-
-        int type;
-        int string;
-        int icon;
-        int filter;
-    }
-
     static EventType[] event_types = {
             new EventType(1, R.string.light_shock, R.drawable.light_shock, 0),
             new EventType(2, R.string.ext_zone, R.drawable.ext_zone, 0),
@@ -197,6 +146,7 @@ public class EventsFragment extends Fragment
             new EventType(113, R.string.lock_off3, R.drawable.lockclose03, 1),
             new EventType(114, R.string.lock_off4, R.drawable.lockclose04, 1),
             new EventType(115, R.string.lock_off5, R.drawable.lockclose05, 1),
+            new EventType(-116, R.string.lan_change, R.drawable.system, 0),
             new EventType(120, R.string.valet_on, R.drawable.valet_on, 1),
             new EventType(121, R.string.lock_on1, R.drawable.lockcopen01, 1),
             new EventType(122, R.string.lock_on2, R.drawable.lockcopen02, 1),
@@ -223,7 +173,25 @@ public class EventsFragment extends Fragment
             new EventType(146, R.string.brake_off, R.drawable.brake, 2),
             new EventType(293, R.string.sos, R.drawable.sos, 0),
     };
-
+    String car_id;
+    String api_key;
+    Vector<Event> events;
+    Vector<Event> filtered;
+    Event firstEvent;
+    SharedPreferences preferences;
+    int filter;
+    boolean error;
+    boolean loaded;
+    boolean no_events;
+    boolean pointer;
+    ListView lvEvents;
+    TextView tvNoEvents;
+    View vProgress;
+    View vError;
+    long current_id;
+    LocalDate current;
+    BroadcastReceiver br;
+    DataFetcher fetcher;
     PullToRefreshLayout mPullToRefreshLayout;
 
     @Override
@@ -528,6 +496,45 @@ public class EventsFragment extends Fragment
         }
     }
 
+    @Override
+    public void onRefreshStarted(View view) {
+        if (fetcher != null)
+            return;
+        fetcher = new DataFetcher();
+        fetcher.no_reload = true;
+        fetcher.update();
+    }
+
+    static class EventType {
+        int type;
+        int string;
+        int icon;
+        int filter;
+
+        EventType(int type_, int string_, int icon_) {
+            type = type_;
+            string = string_;
+            icon = icon_;
+            filter = 4;
+        }
+
+        EventType(int type_, int string_, int icon_, int filter_) {
+            type = type_;
+            string = string_;
+            icon = icon_;
+            filter = filter_;
+        }
+    }
+
+    static class Event implements Serializable {
+        int type;
+        long time;
+        long id;
+        String point;
+        String course;
+        String address;
+    }
+
     class DataFetcher extends HttpTask {
 
         LocalDate date;
@@ -620,7 +627,7 @@ public class EventsFragment extends Fragment
         EventRequest(long id, long time, int type) {
             event_id = id;
             event_time = time;
-            if (type == 88) {
+            if ((type == 88) || (type == 140) || (type == -116)) {
                 String auth = preferences.getString(Names.AUTH + car_id, "");
                 execute(URL_TEXT, auth, id, time, type);
                 return;
@@ -764,24 +771,6 @@ public class EventsFragment extends Fragment
             }
             return v;
         }
-    }
-
-    @Override
-    public void onRefreshStarted(View view) {
-        if (fetcher != null)
-            return;
-        fetcher = new DataFetcher();
-        fetcher.no_reload = true;
-        fetcher.update();
-    }
-
-    static class Event implements Serializable {
-        int type;
-        long time;
-        long id;
-        String point;
-        String course;
-        String address;
     }
 
 }

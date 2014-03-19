@@ -395,25 +395,24 @@ public class ActionFragment extends Fragment
                 ImageView iv = (ImageView) v.findViewById(R.id.icon);
                 iv.setImageResource(action.icon);
                 iv.setVisibility(View.VISIBLE);
-                v.findViewById(R.id.sum).setVisibility(View.GONE);
+                TextView tvSum = (TextView) v.findViewById(R.id.sum);
+                if (action.name_key == null) {
+                    tvSum.setVisibility(View.GONE);
+                } else {
+                    String n = preferences.getString(action.name_key + car_id, "");
+                    if (n.equals("")) {
+                        tvSum.setVisibility(View.GONE);
+                    } else {
+                        tvSum.setVisibility(View.VISIBLE);
+                        tvSum.setText(action.text);
+                        tv.setText(n);
+                    }
+                }
             } else {
                 v.findViewById(R.id.icon).setVisibility(View.GONE);
                 TextView ts = (TextView) v.findViewById(R.id.sum);
                 ts.setVisibility(View.VISIBLE);
                 ts.setText(action.flags);
-            }
-            TextView tvSum = (TextView) v.findViewById(R.id.sum);
-            if (action.name_key == null) {
-                tvSum.setVisibility(View.GONE);
-            } else {
-                String n = preferences.getString(action.name_key + car_id, "");
-                if (n.equals("")) {
-                    tvSum.setVisibility(View.GONE);
-                } else {
-                    tvSum.setVisibility(View.VISIBLE);
-                    tvSum.setText(action.text);
-                    tv.setText(n);
-                }
             }
             View ip = v.findViewById(R.id.progress);
             ip.setVisibility(SmsMonitor.isProcessed(car_id, action.text) ? View.VISIBLE : View.GONE);
