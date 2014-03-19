@@ -248,7 +248,7 @@ public class CarWidget extends AppWidgetProvider {
                         if (h < h3)
                             rows = 2;
                         if (h > h4) {
-                            rows = 4;
+                            rows = 5;
                         }
                         height_rows.put(maxHeight, rows);
                     }

@@ -25,6 +25,7 @@ import java.util.Vector;
 
 public class ConfigWidget extends Activity {
 
+    static final int CAR_CONFIG = 1000;
     SharedPreferences preferences;
     String car_id;
     int widgetID;
@@ -33,8 +34,6 @@ public class ConfigWidget extends Activity {
     int theme;
     int row;
     boolean show_name;
-
-    static final int CAR_CONFIG = 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +79,7 @@ public class ConfigWidget extends Activity {
         rows.add(2);
         rows.add(3);
         rows.add(4);
+        rows.add(5);
 
         final Spinner lvRows = (Spinner) dialog.findViewById(R.id.rows);
         lvRows.setAdapter(new BaseAdapter() {
