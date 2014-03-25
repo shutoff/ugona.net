@@ -98,7 +98,7 @@
     <string name="guard_on">Guard on</string>
     <string name="guard_off">Guard off</string>
     <string name="can_on">Guard on via CAN</string>
-    <string name="can_off">Guard off via CAM</string>
+    <string name="can_off">Guard off via CAN</string>
     <string name="end_move">End route by move sensor</string>
     <string name="lock_off1">Card 1 off</string>
     <string name="lock_off2">Card 2 off</string>
