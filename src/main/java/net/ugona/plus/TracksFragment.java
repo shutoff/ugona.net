@@ -477,6 +477,8 @@ public class TracksFragment extends Fragment
             pos = track_pos;
             TrackView.Track track = tracks.get(pos);
             TrackView.Point p = getPoint(track);
+            if (getActivity() == null)
+                return;
             get(getActivity(), p.latitude, p.longitude);
         }
 

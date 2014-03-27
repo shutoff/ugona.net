@@ -8,4 +8,8 @@
         <!-- API 11 theme customizations can go here. -->
     </style>
 
+    <style name="spinnerItemStyle" parent="android:Widget.Holo" />
+
+    <style name="spinnerDropDownItemStyle" parent="android:Widget.Holo" />
+
 </resources>

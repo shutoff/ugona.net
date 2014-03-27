@@ -135,7 +135,7 @@ public class SettingActivity extends ActionBarActivity {
         br = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (car_id.equals(intent.getStringExtra(Names.ID))) {
+                if ((car_id != null) && car_id.equals(intent.getStringExtra(Names.ID))) {
                     int commands = State.getCommands(preferences, car_id);
                     boolean new_az = (commands & State.CMD_AZ) != 0;
                     boolean new_rele = (commands & State.CMD_RELE) != 0;

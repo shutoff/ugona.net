@@ -42,20 +42,47 @@ import javax.crypto.Cipher;
 
 public class AuthDialog extends Activity {
 
+    final static String URL_KEY = "https://car-online.ugona.net/key?auth=$1";
+    final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
     EditText edLogin;
     EditText edPasswd;
     EditText edNumber;
     TextView tvError;
-
     boolean show_auth;
     boolean show_phone;
-
     String car_id;
-
     SharedPreferences preferences;
 
-    final static String URL_KEY = "https://car-online.ugona.net/key?auth=$1";
-    final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
+    static String crypt(String data) {
+        try {
+            String key = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApZ3oK9Ia0HdUFQ3iP6/OP94MrlnYhnV5RadTkHJsS+KxJshy81psMcFgI0/FYPpV3B6arQk9wJ7+NMj4kpnToxyVALwYNpT4/2+CN7igN48dZ62DflP7h6lDsLS0Mksly+LEKCrZiT4tkHLyAVI5HQekxfi9b+oVI9Rkp7CkKqXwVruRykaRczV/mZKT5IulPe4gIy8yDf6z6IJt84qfKMq47fbHRfiQdV0WlBP023fTBaLDqQO9FBmL8uNC9AkQAdjZo30j3mpcpCb4X9RiB7Hf1hczBLmCL9kQLZBkSdGLiwbeamDVhthuAvn4K2CFoXUGwmwSja6DZJSfU69+awIDAQAB";
+            byte[] sigBytes = Base64.decode(key, Base64.DEFAULT);
+            KeyFactory factory = KeyFactory.getInstance("RSA");
+            PublicKey publicKey = factory.generatePublic(new X509EncodedKeySpec(sigBytes));
+            byte[] byteData = data.getBytes();
+            Cipher cipher = Cipher.getInstance("RSA/None/PKCS1Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            byte[] encryptedByteData = cipher.doFinal(byteData);
+            String s = Base64.encodeToString(encryptedByteData, Base64.NO_PADDING);
+            return s;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+    static boolean isValidPhoneNumber(String number) {
+        if (State.isDebug())
+            return true;
+        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+        try {
+            Phonenumber.PhoneNumber n = phoneUtil.parse(number, Locale.getDefault().getCountry());
+            return phoneUtil.isValidNumber(n);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return false;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,11 +187,15 @@ public class AuthDialog extends Activity {
 
                         @Override
                         void error() {
-                            Toast toast = Toast.makeText(AuthDialog.this, getString(R.string.auth_error), Toast.LENGTH_LONG);
-                            toast.show();
-                            tvError.setText(R.string.auth_error);
-                            tvError.setVisibility(View.VISIBLE);
-                            dlgCheck.dismiss();
+                            try {
+                                Toast toast = Toast.makeText(AuthDialog.this, getString(R.string.auth_error), Toast.LENGTH_LONG);
+                                toast.show();
+                                tvError.setText(R.string.auth_error);
+                                tvError.setVisibility(View.VISIBLE);
+                                dlgCheck.dismiss();
+                            } catch (Exception ex) {
+                                // ignore
+                            }
                         }
                     };
 
@@ -336,39 +367,8 @@ public class AuthDialog extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    static String crypt(String data) {
-        try {
-            String key = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApZ3oK9Ia0HdUFQ3iP6/OP94MrlnYhnV5RadTkHJsS+KxJshy81psMcFgI0/FYPpV3B6arQk9wJ7+NMj4kpnToxyVALwYNpT4/2+CN7igN48dZ62DflP7h6lDsLS0Mksly+LEKCrZiT4tkHLyAVI5HQekxfi9b+oVI9Rkp7CkKqXwVruRykaRczV/mZKT5IulPe4gIy8yDf6z6IJt84qfKMq47fbHRfiQdV0WlBP023fTBaLDqQO9FBmL8uNC9AkQAdjZo30j3mpcpCb4X9RiB7Hf1hczBLmCL9kQLZBkSdGLiwbeamDVhthuAvn4K2CFoXUGwmwSja6DZJSfU69+awIDAQAB";
-            byte[] sigBytes = Base64.decode(key, Base64.DEFAULT);
-            KeyFactory factory = KeyFactory.getInstance("RSA");
-            PublicKey publicKey = factory.generatePublic(new X509EncodedKeySpec(sigBytes));
-            byte[] byteData = data.getBytes();
-            Cipher cipher = Cipher.getInstance("RSA/None/PKCS1Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-            byte[] encryptedByteData = cipher.doFinal(byteData);
-            String s = Base64.encodeToString(encryptedByteData, Base64.NO_PADDING);
-            return s;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
-
     static class PhoneWithType {
         String number;
         int type;
-    }
-
-    static boolean isValidPhoneNumber(String number) {
-        if (State.isDebug())
-            return true;
-        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-        try {
-            Phonenumber.PhoneNumber n = phoneUtil.parse(number, Locale.getDefault().getCountry());
-            return phoneUtil.isValidNumber(n);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return false;
     }
 }
