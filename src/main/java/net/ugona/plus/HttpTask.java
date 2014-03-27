@@ -49,7 +49,7 @@ public abstract class HttpTask {
                     Log.v("url", url);
                     URL u = new URL(url);
                     connection = (HttpURLConnection) u.openConnection();
-                    InputStream in = new BufferedInputStream(connection.getInputStream());
+                    InputStream in = new BufferedInputStream(connection.getInputStream(), 8192);
                     int status = connection.getResponseCode();
                     reader = new InputStreamReader(in);
                     JsonValue res = JsonValue.readFrom(reader);
