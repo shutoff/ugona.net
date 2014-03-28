@@ -10,7 +10,7 @@
         style="@style/spinnerDropDownItemStyle"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="15dp"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:padding="10dp"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </LinearLayout>

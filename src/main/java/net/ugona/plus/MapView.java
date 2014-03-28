@@ -36,6 +36,9 @@ import java.util.Map;
 
 public class MapView extends WebViewActivity {
 
+    static final int REQUEST_ALARM = 4000;
+    static final int UPDATE_INTERVAL = 30 * 1000;
+    static final int TWO_MINUTES = 1000 * 60 * 2;
     SharedPreferences preferences;
     BroadcastReceiver br;
     String car_id;
@@ -52,146 +55,6 @@ public class MapView extends WebViewActivity {
     Menu topSubMenu;
     DateFormat df;
     DateFormat tf;
-
-    static final int REQUEST_ALARM = 4000;
-    static final int UPDATE_INTERVAL = 30 * 1000;
-
-    class JsInterface {
-
-        @JavascriptInterface
-        public String getLocation() {
-            if (currentBestLocation == null)
-                return "";
-            String res = currentBestLocation.getLatitude() + ",";
-            res += currentBestLocation.getLongitude() + ",";
-            res += currentBestLocation.getAccuracy();
-            if (currentBestLocation.hasBearing())
-                res += currentBestLocation.getBearing();
-            return res;
-        }
-
-        String createData(String id) {
-            double lat = preferences.getFloat(Names.LAT + id, 0);
-            double lng = preferences.getFloat(Names.LNG + id, 0);
-            String zone = "";
-            if ((lat == 0) && (lng == 0)) {
-                zone = preferences.getString(Names.GSM_ZONE + id, "");
-                String points[] = zone.split("_");
-                double min_lat = 180;
-                double max_lat = -180;
-                double min_lon = 180;
-                double max_lon = -180;
-                for (String point : points) {
-                    try {
-                        String[] p = point.split(",");
-                        double p_lat = Double.parseDouble(p[0]);
-                        double p_lon = Double.parseDouble(p[1]);
-                        if (p_lat > max_lat)
-                            max_lat = p_lat;
-                        if (p_lat < min_lat)
-                            min_lat = p_lat;
-                        if (p_lon > max_lon)
-                            max_lon = p_lon;
-                        if (p_lon < min_lon)
-                            min_lon = p_lon;
-                    } catch (Exception ex) {
-                        // ignore
-                    }
-                }
-                lat = ((min_lat + max_lat) / 2);
-                lng = ((min_lon + max_lon) / 2);
-            }
-            String data = id + ";" +
-                    lat + ";" +
-                    lng + ";" +
-                    preferences.getInt(Names.COURSE + id, 0) + ";";
-            if (cars.length > 1) {
-                String name = preferences.getString(Names.CAR_NAME + id, "");
-                if (name.length() == 0) {
-                    name = getString(R.string.car);
-                    if (id.length() > 0)
-                        name += " " + id;
-                }
-                data += name + "<br/>";
-            }
-
-            if (preferences.getBoolean(Names.POINTER + car_id, false)) {
-                long last_stand = preferences.getLong(Names.EVENT_TIME + id, 0);
-                if (last_stand > 0) {
-                    data += "<b>";
-                    data += df.format(last_stand) + " " + tf.format(last_stand);
-                    data += "</b> ";
-                }
-            } else {
-                long last_stand = preferences.getLong(Names.LAST_STAND + id, 0);
-                if (last_stand > 0) {
-                    LocalDateTime stand = new LocalDateTime(last_stand);
-                    LocalDateTime now = new LocalDateTime();
-                    data += "<b>";
-                    if (stand.toLocalDate().equals(now.toLocalDate())) {
-                        data += tf.format(last_stand);
-                    } else {
-                        data += df.format(last_stand) + " " + tf.format(last_stand);
-                    }
-                    data += "</b> ";
-                } else if (last_stand < 0) {
-                    double speed = preferences.getFloat(Names.SPEED + id, 0);
-                    if (speed > 0) {
-                        data += String.format(getString(R.string.speed, speed));
-                        data += "<br/>";
-                    }
-                }
-            }
-            if (zone.equals("")) {
-                data += Math.round(lat * 10000) / 10000. + "," + Math.round(lng * 10000) / 10000. + "<br/>";
-                String address = Address.getAddress(getBaseContext(), lat, lng);
-                if (address != null) {
-                    String[] parts = address.split(", ");
-                    if (parts.length >= 3) {
-                        address = parts[0] + ", " + parts[1];
-                        for (int n = 2; n < parts.length; n++)
-                            address += "<br/>" + parts[n];
-                    }
-                    data += address;
-                }
-                data += ";";
-            } else {
-                String address = Address.getAddress(MapView.this, lat, lng);
-                String[] parts = address.split(", ");
-                if (parts.length >= 3) {
-                    address = parts[0] + ", " + parts[1];
-                    for (int n = 2; n < parts.length; n++)
-                        address += "<br/>" + parts[n];
-                }
-                data += address;
-                data += ";" + zone;
-            }
-            if (times.containsKey(id))
-                data += ";" + times.get(id);
-            return data;
-        }
-
-        @JavascriptInterface
-        public String getData() {
-            Cars.Car[] cars = Cars.getCars(getBaseContext());
-
-            String id = null;
-
-            String data = point_data;
-            if (data == null) {
-                data = createData(car_id);
-                id = car_id;
-            }
-
-            for (Cars.Car car : cars) {
-                if ((id != null) && id.equals(car.id))
-                    continue;
-                data += "|" + createData(car.id);
-            }
-            log("get data: " + data);
-            return data;
-        }
-    }
 
     @Override
     String loadURL() {
@@ -530,8 +393,6 @@ public class MapView extends WebViewActivity {
         webView.loadUrl("javascript:myLocation()");
     }
 
-    static final int TWO_MINUTES = 1000 * 60 * 2;
-
     protected boolean isBetterLocation(Location location, Location currentBestLocation) {
         if (currentBestLocation == null)
             return true;
@@ -577,6 +438,143 @@ public class MapView extends WebViewActivity {
         return provider1.equals(provider2);
     }
 
+    class JsInterface {
+
+        @JavascriptInterface
+        public String getLocation() {
+            if (currentBestLocation == null)
+                return "";
+            String res = currentBestLocation.getLatitude() + ",";
+            res += currentBestLocation.getLongitude() + ",";
+            res += currentBestLocation.getAccuracy();
+            if (currentBestLocation.hasBearing())
+                res += currentBestLocation.getBearing();
+            return res;
+        }
+
+        String createData(String id) {
+            double lat = preferences.getFloat(Names.LAT + id, 0);
+            double lng = preferences.getFloat(Names.LNG + id, 0);
+            String zone = "";
+            if ((lat == 0) && (lng == 0)) {
+                zone = preferences.getString(Names.GSM_ZONE + id, "");
+                String points[] = zone.split("_");
+                double min_lat = 180;
+                double max_lat = -180;
+                double min_lon = 180;
+                double max_lon = -180;
+                for (String point : points) {
+                    try {
+                        String[] p = point.split(",");
+                        double p_lat = Double.parseDouble(p[0]);
+                        double p_lon = Double.parseDouble(p[1]);
+                        if (p_lat > max_lat)
+                            max_lat = p_lat;
+                        if (p_lat < min_lat)
+                            min_lat = p_lat;
+                        if (p_lon > max_lon)
+                            max_lon = p_lon;
+                        if (p_lon < min_lon)
+                            min_lon = p_lon;
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                }
+                lat = ((min_lat + max_lat) / 2);
+                lng = ((min_lon + max_lon) / 2);
+            }
+            String data = id + ";" +
+                    lat + ";" +
+                    lng + ";" +
+                    preferences.getInt(Names.COURSE + id, 0) + ";";
+            if (cars.length > 1) {
+                String name = preferences.getString(Names.CAR_NAME + id, "");
+                if (name.length() == 0) {
+                    name = getString(R.string.car);
+                    if (id.length() > 0)
+                        name += " " + id;
+                }
+                data += name + "<br/>";
+            }
+
+            if (preferences.getBoolean(Names.POINTER + car_id, false)) {
+                long last_stand = preferences.getLong(Names.EVENT_TIME + id, 0);
+                if (last_stand > 0) {
+                    data += "<b>";
+                    data += df.format(last_stand) + " " + tf.format(last_stand);
+                    data += "</b> ";
+                }
+            } else {
+                long last_stand = preferences.getLong(Names.LAST_STAND + id, 0);
+                if (last_stand > 0) {
+                    LocalDateTime stand = new LocalDateTime(last_stand);
+                    LocalDateTime now = new LocalDateTime();
+                    data += "<b>";
+                    if (stand.toLocalDate().equals(now.toLocalDate())) {
+                        data += tf.format(last_stand);
+                    } else {
+                        data += df.format(last_stand) + " " + tf.format(last_stand);
+                    }
+                    data += "</b> ";
+                } else if (last_stand < 0) {
+                    double speed = preferences.getFloat(Names.SPEED + id, 0);
+                    if (speed > 0) {
+                        data += String.format(getString(R.string.speed, speed));
+                        data += "<br/>";
+                    }
+                }
+            }
+            if (zone.equals("")) {
+                data += Math.round(lat * 10000) / 10000. + "," + Math.round(lng * 10000) / 10000. + "<br/>";
+                String address = Address.getAddress(getBaseContext(), lat, lng);
+                if (address != null) {
+                    String[] parts = address.split(", ");
+                    if (parts.length >= 3) {
+                        address = parts[0] + ", " + parts[1];
+                        for (int n = 2; n < parts.length; n++)
+                            address += "<br/>" + parts[n];
+                    }
+                    data += address;
+                }
+                data += ";";
+            } else {
+                String address = Address.getAddress(MapView.this, lat, lng);
+                String[] parts = address.split(", ");
+                if (parts.length >= 3) {
+                    address = parts[0] + ", " + parts[1];
+                    for (int n = 2; n < parts.length; n++)
+                        address += "<br/>" + parts[n];
+                }
+                data += address;
+                data += ";" + zone;
+            }
+            if (times.containsKey(id))
+                data += ";" + times.get(id);
+            return data;
+        }
+
+        @JavascriptInterface
+        public String getData() {
+            Cars.Car[] cars = Cars.getCars(getBaseContext());
+
+            String id = null;
+
+            String data = point_data;
+            if (data == null) {
+                data = createData(car_id);
+                id = car_id;
+            }
+
+            for (Cars.Car car : cars) {
+                if ((id != null) && id.equals(car.id))
+                    continue;
+                data += "|" + createData(car.id);
+            }
+            log("get data: " + data);
+            return data;
+        }
+    }
+
     class CarsAdapter extends BaseAdapter {
 
         @Override
@@ -600,7 +598,7 @@ public class MapView extends WebViewActivity {
             if (v == null) {
                 LayoutInflater inflater = (LayoutInflater) getBaseContext()
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                v = inflater.inflate(R.layout.car_list_item, null);
+                v = inflater.inflate(R.layout.list_item, null);
             }
             TextView tv = (TextView) v.findViewById(R.id.name);
             tv.setText(cars[position].name);
@@ -613,7 +611,7 @@ public class MapView extends WebViewActivity {
             if (v == null) {
                 LayoutInflater inflater = (LayoutInflater) getBaseContext()
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                v = inflater.inflate(R.layout.car_list_dropdown_item, null);
+                v = inflater.inflate(R.layout.list_dropdown_item, null);
             }
             TextView tv = (TextView) v.findViewById(R.id.name);
             tv.setText(cars[position].name);
