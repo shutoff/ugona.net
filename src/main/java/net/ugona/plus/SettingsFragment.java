@@ -106,6 +106,10 @@ public class SettingsFragment extends Fragment {
         for (Item item : items) {
             visible_items.add(item);
         }
+        listUpdate();
+    }
+
+    void listUpdate() {
         BaseAdapter adapter = (BaseAdapter) list.getAdapter();
         adapter.notifyDataSetChanged();
     }
@@ -123,6 +127,10 @@ public class SettingsFragment extends Fragment {
         Item(int n, int v) {
             name = getString(n);
             value_ = getString(v);
+        }
+
+        Item(String n) {
+            name = n;
         }
 
         void click() {
@@ -167,6 +175,10 @@ public class SettingsFragment extends Fragment {
     class CheckItem extends Item {
         CheckItem(int n) {
             super(n, "");
+        }
+
+        CheckItem(String n) {
+            super(n);
         }
 
         @Override

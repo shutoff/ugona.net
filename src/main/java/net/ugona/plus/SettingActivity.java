@@ -24,12 +24,21 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Vector;
 
 public class SettingActivity extends ActionBarActivity {
 
@@ -38,6 +47,9 @@ public class SettingActivity extends ActionBarActivity {
     final static String URL_SET = "https://car-online.ugona.net/set?auth=$1&v=$2";
     final static String URL_SET_CCODE = "https://car-online.ugona.net/set?auth=$1&v=$2&ccode=$2";
     final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
+
+    final static String ZONES = "zones";
+
     String car_id;
     SharedPreferences preferences;
     BroadcastReceiver br;
@@ -47,6 +59,7 @@ public class SettingActivity extends ActionBarActivity {
     boolean az;
     boolean rele;
     ActionBar.TabListener tabListener;
+    Vector<Zone> zones;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,11 +70,24 @@ public class SettingActivity extends ActionBarActivity {
 
         if (savedInstanceState != null) {
             car_id = savedInstanceState.getString(Names.ID);
+            try {
+                ByteArrayInputStream bis = new ByteArrayInputStream(savedInstanceState.getByteArray(ZONES));
+                ObjectInput in = new ObjectInputStream(bis);
+                zones = (Vector<Zone>) in.readObject();
+            } catch (Exception ex) {
+                // ignore
+            }
         } else {
             car_id = getIntent().getStringExtra(Names.ID);
             if (car_id == null)
                 car_id = preferences.getString(Names.LAST, "");
         }
+        Cars.Car[] cars = Cars.getCars(this);
+        String title = "";
+        if (cars.length > 1)
+            title = preferences.getString(Names.CAR_NAME + car_id, "");
+        if (!title.equals(""))
+            setTitle(title);
 
         final ViewPager pager = (ViewPager) findViewById(R.id.pager);
         final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager());
@@ -120,7 +146,8 @@ public class SettingActivity extends ActionBarActivity {
             actionBar.addTab(
                     actionBar.newTab()
                             .setText(adapter.getPageTitle(i))
-                            .setTabListener(tabListener));
+                            .setTabListener(tabListener)
+            );
         }
         setResult(RESULT_CANCELED);
 
@@ -148,7 +175,8 @@ public class SettingActivity extends ActionBarActivity {
                             actionBar.addTab(
                                     actionBar.newTab()
                                             .setText(adapter.getPageTitle(index))
-                                            .setTabListener(tabListener), index);
+                                            .setTabListener(tabListener), index
+                            );
                         } else {
                             actionBar.removeTabAt(index);
                         }
@@ -160,7 +188,8 @@ public class SettingActivity extends ActionBarActivity {
                             actionBar.addTab(
                                     actionBar.newTab()
                                             .setText(adapter.getPageTitle(index))
-                                            .setTabListener(tabListener), index);
+                                            .setTabListener(tabListener), index
+                            );
                         } else {
                             actionBar.removeTabAt(index);
                         }
@@ -185,6 +214,20 @@ public class SettingActivity extends ActionBarActivity {
         if (values != null) {
             outState.putIntArray("values", values);
             outState.putIntArray("old_values", old_values);
+        }
+        if (zones != null) {
+            try {
+                byte[] data = null;
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                ObjectOutput out = new ObjectOutputStream(bos);
+                out.writeObject(zones);
+                data = bos.toByteArray();
+                out.close();
+                bos.close();
+                outState.putByteArray(ZONES, data);
+            } catch (Exception ex) {
+                // ignore
+            }
         }
     }
 
@@ -259,6 +302,31 @@ public class SettingActivity extends ActionBarActivity {
                     old_values[i] = v;
                 }
                 ed.commit();
+                JsonValue z_value = res.get("zones");
+                if (z_value != null) {
+                    JsonArray z_array = z_value.asArray();
+                    zones = new Vector<Zone>();
+                    for (int i = 0; i < z_array.size(); i++) {
+                        JsonObject z_val = z_array.get(i).asObject();
+                        Zone zone = new Zone();
+                        zone.name = z_val.get("name").asString();
+                        zone.lat1 = z_val.get("lat1").asDouble();
+                        zone.lng1 = z_val.get("lng1").asDouble();
+                        zone.lat2 = z_val.get("lat2").asDouble();
+                        zone.lng2 = z_val.get("lng2").asDouble();
+                        zone.device = z_val.get("device").asBoolean();
+                        zone.sms = z_val.get("sms").asBoolean();
+                        zone._name = zone.name;
+                        zone._lat1 = zone.lat1;
+                        zone._lng1 = zone.lng1;
+                        zone._lat2 = zone.lat2;
+                        zone._lng2 = zone.lng2;
+                        zone._device = zone.device;
+                        zone._sms = zone.sms;
+                        zone.id = i;
+                        zones.add(zone);
+                    }
+                }
                 sendUpdate();
             }
 
@@ -443,6 +511,47 @@ public class SettingActivity extends ActionBarActivity {
         task.execute(URL_SET, preferences.getString(Names.AUTH + car_id, ""), value);
     }
 
+    static class Zone implements Serializable {
+
+        int id;
+
+        String name;
+        double lat1;
+        double lng1;
+        double lat2;
+        double lng2;
+        boolean device;
+        boolean sms;
+
+        String _name;
+        double _lat1;
+        double _lng1;
+        double _lat2;
+        double _lng2;
+        boolean _device;
+        boolean _sms;
+
+        boolean isChanged() {
+            return !name.equals(_name) ||
+                    (lat1 != _lat1) ||
+                    (lng1 != _lng1) ||
+                    (lat2 != _lat2) ||
+                    (lng2 != _lng2) ||
+                    (device != _device) ||
+                    (sms != _sms);
+        }
+
+        void set(Zone z) {
+            name = z.name;
+            lat1 = z.lat1;
+            lng1 = z.lng1;
+            lat2 = z.lat2;
+            lng2 = z.lng2;
+            device = z.device;
+            sms = z.sms;
+        }
+    }
+
     public class PagerAdapter extends FragmentPagerAdapter {
 
         boolean[] visible;
@@ -459,7 +568,7 @@ public class SettingActivity extends ActionBarActivity {
         }
 
         void updateVisible() {
-            visible = new boolean[6];
+            visible = new boolean[7];
             visible[0] = true;
             visible[1] = true;
             visible[2] = true;
@@ -467,6 +576,7 @@ public class SettingActivity extends ActionBarActivity {
             int commands = State.getCommands(preferences, car_id);
             visible[4] = (commands & State.CMD_AZ) != 0;
             visible[5] = (commands & State.CMD_RELE) != 0;
+            visible[6] = true;
         }
 
         int toID(int pos) {
@@ -516,6 +626,9 @@ public class SettingActivity extends ActionBarActivity {
                 case 5:
                     res = new HeaterFragment();
                     break;
+                case 6:
+                    res = new ZonesFragment();
+                    break;
             }
             if (res == null)
                 return null;
@@ -545,6 +658,8 @@ public class SettingActivity extends ActionBarActivity {
                     return getString(R.string.autostart);
                 case 5:
                     return getString(R.string.rele);
+                case 6:
+                    return getString(R.string.zones);
             }
             return null;
         }

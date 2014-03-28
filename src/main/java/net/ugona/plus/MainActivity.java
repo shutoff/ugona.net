@@ -510,6 +510,7 @@ public class MainActivity extends ActionBarActivity {
         ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
         ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
         ed.remove(Names.VALET_OFF_NOTIFY + car_id);
+        ed.remove(Names.ZONE_NOTIFY + car_id);
         ed.commit();
     }
 
@@ -919,7 +920,7 @@ public class MainActivity extends ActionBarActivity {
             if (v == null) {
                 LayoutInflater inflater = (LayoutInflater) getBaseContext()
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                v = inflater.inflate(R.layout.list_item, null);
+                v = inflater.inflate(R.layout.car_list_item, null);
             }
             TextView tv = (TextView) v.findViewById(R.id.name);
             tv.setText(cars[position].name);
@@ -932,7 +933,7 @@ public class MainActivity extends ActionBarActivity {
             if (v == null) {
                 LayoutInflater inflater = (LayoutInflater) getBaseContext()
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                v = inflater.inflate(R.layout.list_dropdown_item, null);
+                v = inflater.inflate(R.layout.car_list_dropdown_item, null);
             }
             TextView tv = (TextView) v.findViewById(R.id.name);
             tv.setText(cars[position].name);

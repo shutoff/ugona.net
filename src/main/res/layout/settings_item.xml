@@ -52,9 +52,17 @@
             android:layout_weight="1" />
 
         <ImageView
+            android:id="@+id/check_sms"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="3dp"
+            android:visibility="gone" />
+
+        <ImageView
             android:id="@+id/check_edit"
             android:layout_width="32dp"
             android:layout_height="32dp"
+            android:padding="3dp"
             android:src="@android:drawable/ic_menu_edit"
             android:visibility="gone" />
 
