@@ -4,9 +4,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
@@ -17,22 +16,33 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 
-public class ZoneEdit extends WebViewActivity {
+public class ZoneEdit extends GpsActivity {
 
     EditText etName;
     CheckBox chkSms;
-    SharedPreferences preferences;
     SettingActivity.Zone zone;
 
     @Override
     String loadURL() {
+        webView.addJavascriptInterface(new JsInterface(), "android");
+        return getURL();
+    }
+
+    String getURL() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (preferences.getString("map_type", "").equals("OSM"))
+            return "file:///android_asset/html/ozone.html";
         return "file:///android_asset/html/zone.html";
+    }
+
+    @Override
+    int menuId() {
+        return R.menu.zone;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         setResult(RESULT_CANCELED);
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
         byte[] data;
         if (savedInstanceState != null) {
             data = savedInstanceState.getByteArray(Names.TRACK);
@@ -46,10 +56,11 @@ public class ZoneEdit extends WebViewActivity {
         } catch (Exception ex) {
             // ignore
         }
+
         super.onCreate(savedInstanceState);
         findViewById(R.id.zone_info).setVisibility(View.VISIBLE);
-        etName = (EditText) findViewById(R.id.name);
-        chkSms = (CheckBox) findViewById(R.id.sms);
+        etName = (EditText) findViewById(R.id.name_edit);
+        chkSms = (CheckBox) findViewById(R.id.sms_check);
         etName.setText(zone.name);
         chkSms.setChecked(zone.sms);
     }
@@ -93,23 +104,30 @@ public class ZoneEdit extends WebViewActivity {
         super.finish();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.zone, menu);
-        boolean isOSM = preferences.getString("map_type", "").equals("OSM");
-        menu.findItem(R.id.google).setTitle(getCheckedText(R.string.google, !isOSM));
-        menu.findItem(R.id.osm).setTitle(getCheckedText(R.string.osm, isOSM));
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    String getCheckedText(int id, boolean check) {
-        String check_mark = check ? "\u2714" : "";
-        return check_mark + getString(id);
-    }
-
     void setZone() {
         zone.name = etName.getText().toString();
         zone.sms = chkSms.isChecked();
     }
+
+    class JsInterface extends GpsActivity.JsInterface {
+
+        @JavascriptInterface
+        public String getZone() {
+            return zone.lat1 + "," + zone.lng1 + "," + zone.lat2 + "," + zone.lng2;
+        }
+
+        @JavascriptInterface
+        public void setZone(String data) {
+            String[] val = data.split(",");
+            try {
+                zone.lat1 = Double.parseDouble(val[0]);
+                zone.lng1 = Double.parseDouble(val[1]);
+                zone.lat2 = Double.parseDouble(val[2]);
+                zone.lng2 = Double.parseDouble(val[3]);
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+    }
+
 }

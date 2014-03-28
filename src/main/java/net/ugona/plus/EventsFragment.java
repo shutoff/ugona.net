@@ -47,7 +47,7 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 public class EventsFragment extends Fragment
         implements MainActivity.DateChangeListener, OnRefreshListener {
 
-    final static String URL_EVENTS = "https://car-online.ugona.net/events?skey=$1&begin=$2&end=$3&first=$4&pointer=$5";
+    final static String URL_EVENTS = "https://car-online.ugona.net/events?skey=$1&begin=$2&end=$3&first=$4&pointer=$5&auth=$6";
     final static String URL_EVENT = "https://car-online.ugona.net/event?skey=$1&id=$2&time=$3";
     final static String URL_TEXT = "https://car-online.ugona.net/text?auth=$1&id=$2&time=$3&type=$4";
     static final String FILTER = "filter";
@@ -530,6 +530,7 @@ public class EventsFragment extends Fragment
         int type;
         long time;
         long id;
+        String zone;
         String point;
         String course;
         String address;
@@ -565,6 +566,9 @@ public class EventsFragment extends Fragment
                 Event e = new Event();
                 e.type = event.get("type").asInt();
                 e.time = event.get("time").asLong();
+                JsonValue vZone = event.get("zone");
+                if (vZone != null)
+                    e.zone = vZone.asString();
                 e.id = id;
                 Event ee = eventData.get(id);
                 if (ee != null) {
@@ -615,7 +619,8 @@ public class EventsFragment extends Fragment
                     start.toDate().getTime(),
                     finish.toDate().getTime(),
                     first,
-                    pointer);
+                    pointer,
+                    preferences.getString(Names.AUTH + car_id, ""));
         }
     }
 
@@ -745,7 +750,10 @@ public class EventsFragment extends Fragment
             for (EventType et : event_types) {
                 if (et.type == e.type) {
                     found = true;
-                    tvName.setText(getString(et.string));
+                    String name = getString(et.string);
+                    if (e.zone != null)
+                        name += " " + e.zone;
+                    tvName.setText(name);
                     icon.setVisibility(View.VISIBLE);
                     icon.setImageResource(et.icon);
                 }

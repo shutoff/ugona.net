@@ -38,23 +38,86 @@ public class Cars extends ActionBarActivity {
     final static String URL_PHOTOS = "https://car-online.ugona.net/photos?skey=$1&begin=$2";
 
     SharedPreferences preferences;
-
-    static class Car {
-        String id;
-        String name;
-        String[] pointers;
-    }
-
     Car[] cars;
+    Vector<CarId> carsId;
+    ListView lvCars;
 
-    static class CarId {
-        Car car;
-        boolean pointer;
+    static Car[] getCars(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String cars_data = preferences.getString(Names.CARS, "");
+        String[] cars_id = cars_data.split(",");
+        Car[] cars = new Car[cars_id.length];
+        for (int i = 0; i < cars_id.length; i++) {
+            String id = cars_id[i];
+            String name = preferences.getString(Names.CAR_NAME + id, "");
+            if (name.equals("")) {
+                name = context.getString(R.string.car);
+                if (!id.equals(""))
+                    name += " " + id;
+            }
+            Car car = new Car();
+            car.id = id;
+            car.name = name;
+            car.pointers = new String[0];
+            String pointers = preferences.getString(Names.POINTERS + id, "");
+            if (!pointers.equals(""))
+                car.pointers = pointers.split(",");
+            cars[i] = car;
+        }
+        return cars;
     }
 
-    Vector<CarId> carsId;
-
-    ListView lvCars;
+    static void deleteCarKeys(Context context, String id) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor ed = preferences.edit();
+        ed.remove(Names.CAR_NAME + id);
+        ed.remove(Names.CAR_KEY + id);
+        ed.remove(Names.CAR_PHONE + id);
+        ed.remove(Names.EVENT_ID + id);
+        ed.remove(Names.EVENT_TIME + id);
+        ed.remove(Names.VOLTAGE_MAIN + id);
+        ed.remove(Names.VOLTAGE_RESERVED + id);
+        ed.remove(Names.BALANCE + id);
+        ed.remove(Names.LAT + id);
+        ed.remove(Names.LNG + id);
+        ed.remove(Names.COURSE + id);
+        ed.remove(Names.SPEED + id);
+        ed.remove(Names.GUARD + id);
+        ed.remove(Names.GUARD0 + id);
+        ed.remove(Names.GUARD1 + id);
+        ed.remove(Names.INPUT1 + id);
+        ed.remove(Names.INPUT2 + id);
+        ed.remove(Names.INPUT3 + id);
+        ed.remove(Names.INPUT4 + id);
+        ed.remove(Names.ZONE_DOOR + id);
+        ed.remove(Names.ZONE_HOOD + id);
+        ed.remove(Names.ZONE_TRUNK + id);
+        ed.remove(Names.ZONE_ACCESSORY + id);
+        ed.remove(Names.ZONE_IGNITION + id);
+        ed.remove(Names.LAST_EVENT + id);
+        ed.remove(Names.ENGINE + id);
+        ed.remove(Names.TEMPERATURE + id);
+        ed.remove(Names.GSM_SECTOR + id);
+        ed.remove(Names.GSM_ZONE + id);
+        ed.remove(Names.LOGIN + id);
+        ed.remove(Names.POINTER + id);
+        ed.remove(Names.POINTERS + id);
+        ed.remove(Names.GCM_TIME);
+        ed.commit();
+        File cache = context.getCacheDir();
+        final String prefix = "p" + id + "_";
+        File[] files = cache.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String filename) {
+                if (filename.length() < prefix.length())
+                    return false;
+                return filename.substring(0, prefix.length()).equals(prefix);
+            }
+        });
+        for (File f : files) {
+            f.delete();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -240,7 +303,7 @@ public class Cars extends ActionBarActivity {
                 View v = convertView;
                 if (v == null) {
                     LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = inflater.inflate(R.layout.car_list_item, null);
+                    v = inflater.inflate(R.layout.list_item, null);
                 }
                 TextView tv = (TextView) v.findViewById(R.id.name);
                 tv.setText(cars[position].name);
@@ -252,7 +315,7 @@ public class Cars extends ActionBarActivity {
                 View v = convertView;
                 if (v == null) {
                     LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = inflater.inflate(R.layout.car_list_dropdown_item, null);
+                    v = inflater.inflate(R.layout.list_dropdown_item, null);
                 }
                 TextView tv = (TextView) v.findViewById(R.id.name);
                 tv.setText(cars[position].name);
@@ -317,31 +380,6 @@ public class Cars extends ActionBarActivity {
         }
     }
 
-    static Car[] getCars(Context context) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String cars_data = preferences.getString(Names.CARS, "");
-        String[] cars_id = cars_data.split(",");
-        Car[] cars = new Car[cars_id.length];
-        for (int i = 0; i < cars_id.length; i++) {
-            String id = cars_id[i];
-            String name = preferences.getString(Names.CAR_NAME + id, "");
-            if (name.equals("")) {
-                name = context.getString(R.string.car);
-                if (!id.equals(""))
-                    name += " " + id;
-            }
-            Car car = new Car();
-            car.id = id;
-            car.name = name;
-            car.pointers = new String[0];
-            String pointers = preferences.getString(Names.POINTERS + id, "");
-            if (!pointers.equals(""))
-                car.pointers = pointers.split(",");
-            cars[i] = car;
-        }
-        return cars;
-    }
-
     void setupCars() {
         cars = getCars(this);
     }
@@ -361,58 +399,6 @@ public class Cars extends ActionBarActivity {
         Intent intent = new Intent(this, SettingActivity.class);
         intent.putExtra(Names.ID, car_id);
         startActivityForResult(intent, CAR_SETUP);
-    }
-
-    static void deleteCarKeys(Context context, String id) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor ed = preferences.edit();
-        ed.remove(Names.CAR_NAME + id);
-        ed.remove(Names.CAR_KEY + id);
-        ed.remove(Names.CAR_PHONE + id);
-        ed.remove(Names.EVENT_ID + id);
-        ed.remove(Names.EVENT_TIME + id);
-        ed.remove(Names.VOLTAGE_MAIN + id);
-        ed.remove(Names.VOLTAGE_RESERVED + id);
-        ed.remove(Names.BALANCE + id);
-        ed.remove(Names.LAT + id);
-        ed.remove(Names.LNG + id);
-        ed.remove(Names.COURSE + id);
-        ed.remove(Names.SPEED + id);
-        ed.remove(Names.GUARD + id);
-        ed.remove(Names.GUARD0 + id);
-        ed.remove(Names.GUARD1 + id);
-        ed.remove(Names.INPUT1 + id);
-        ed.remove(Names.INPUT2 + id);
-        ed.remove(Names.INPUT3 + id);
-        ed.remove(Names.INPUT4 + id);
-        ed.remove(Names.ZONE_DOOR + id);
-        ed.remove(Names.ZONE_HOOD + id);
-        ed.remove(Names.ZONE_TRUNK + id);
-        ed.remove(Names.ZONE_ACCESSORY + id);
-        ed.remove(Names.ZONE_IGNITION + id);
-        ed.remove(Names.LAST_EVENT + id);
-        ed.remove(Names.ENGINE + id);
-        ed.remove(Names.TEMPERATURE + id);
-        ed.remove(Names.GSM_SECTOR + id);
-        ed.remove(Names.GSM_ZONE + id);
-        ed.remove(Names.LOGIN + id);
-        ed.remove(Names.POINTER + id);
-        ed.remove(Names.POINTERS + id);
-        ed.remove(Names.GCM_TIME);
-        ed.commit();
-        File cache = context.getCacheDir();
-        final String prefix = "p" + id + "_";
-        File[] files = cache.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String filename) {
-                if (filename.length() < prefix.length())
-                    return false;
-                return filename.substring(0, prefix.length()).equals(prefix);
-            }
-        });
-        for (File f : files) {
-            f.delete();
-        }
     }
 
     void deleteCar(String id) {
@@ -455,6 +441,17 @@ public class Cars extends ActionBarActivity {
         } catch (Exception e) {
             // ignore
         }
+    }
+
+    static class Car {
+        String id;
+        String name;
+        String[] pointers;
+    }
+
+    static class CarId {
+        Car car;
+        boolean pointer;
     }
 
 }
