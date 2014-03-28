@@ -144,4 +144,6 @@ public final class Names {
     static final String SETTINGS_TIME = "settings_time";
     static final String GSM_DB = "gsm_db_";
 
+    static final String ACTIVE_ZONE = "active_zone_";
+    static final String ZONE_NOTIFY = "zone_notify_";
 }

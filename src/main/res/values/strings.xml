@@ -459,4 +459,6 @@
     <string name="inf_sms">Send SMS when engine started</string>
     <string name="inf_sms_msg"></string>
     <string name="voltage_shift">Voltage correction</string>
+    <string name="zones">Zones</string>
+    <string name="sms_notify">Notify as SMS</string>
 </resources>

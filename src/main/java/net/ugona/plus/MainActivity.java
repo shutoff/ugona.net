@@ -510,6 +510,7 @@ public class MainActivity extends ActionBarActivity {
         ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
         ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
         ed.remove(Names.VALET_OFF_NOTIFY + car_id);
+        ed.remove(Names.ZONE_NOTIFY + car_id);
         ed.commit();
     }
 
@@ -637,132 +638,12 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    class PagerAdapter extends FragmentStatePagerAdapter {
-
-        public PagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int i) {
-            switch (getPageId(i)) {
-                case PAGE_PHOTO: {
-                    PhotoFragment fragment = new PhotoFragment();
-                    fragment.car_id = car_id;
-                    fragment.current = current;
-                    return fragment;
-                }
-                case PAGE_ACTIONS: {
-                    ActionFragment fragment = new ActionFragment();
-                    fragment.car_id = car_id;
-                    return fragment;
-                }
-                case PAGE_STATE: {
-                    StateFragment fragment = new StateFragment();
-                    fragment.car_id = car_id;
-                    state_fragment = fragment;
-                    return fragment;
-                }
-                case PAGE_EVENT: {
-                    EventsFragment fragment = new EventsFragment();
-                    fragment.car_id = car_id;
-                    fragment.current = current;
-                    return fragment;
-                }
-                case PAGE_TRACK: {
-                    TracksFragment fragment = new TracksFragment();
-                    fragment.car_id = car_id;
-                    fragment.current = current;
-                    return fragment;
-                }
-                case PAGE_STAT: {
-                    StatFragment fragment = new StatFragment();
-                    fragment.car_id = car_id;
-                    return fragment;
-                }
-            }
-            return null;
-        }
-
-        @Override
-        public int getCount() {
-            return getPagePosition(6);
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (getPageId(position)) {
-                case PAGE_PHOTO:
-                    return getString(R.string.photo);
-                case PAGE_ACTIONS:
-                    return getString(R.string.control);
-                case PAGE_STATE:
-                    return getString(R.string.state);
-                case PAGE_EVENT:
-                    return getString(R.string.events);
-                case PAGE_TRACK:
-                    return getString(R.string.tracks);
-                case PAGE_STAT:
-                    return getString(R.string.stat);
-            }
-            return super.getPageTitle(position);
-        }
-    }
-
-    class CarsAdapter extends BaseAdapter {
-
-        @Override
-        public int getCount() {
-            return cars.length;
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return cars[position];
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View v = convertView;
-            if (v == null) {
-                LayoutInflater inflater = (LayoutInflater) getBaseContext()
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                v = inflater.inflate(R.layout.car_list_item, null);
-            }
-            TextView tv = (TextView) v.findViewById(R.id.name);
-            tv.setText(cars[position].name);
-            return v;
-        }
-
-        @Override
-        public View getDropDownView(int position, View convertView, ViewGroup parent) {
-            View v = convertView;
-            if (v == null) {
-                LayoutInflater inflater = (LayoutInflater) getBaseContext()
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                v = inflater.inflate(R.layout.car_list_dropdown_item, null);
-            }
-            TextView tv = (TextView) v.findViewById(R.id.name);
-            tv.setText(cars[position].name);
-            return v;
-        }
-    }
-
     void registerDateListener(DateChangeListener listener) {
         dateChangeListenerSet.add(listener);
     }
 
     void unregisterDateListener(DateChangeListener listener) {
         dateChangeListenerSet.remove(listener);
-    }
-
-    static interface DateChangeListener {
-        abstract void dateChanged(LocalDate current);
     }
 
     void setPassword() {
@@ -938,6 +819,126 @@ public class MainActivity extends ActionBarActivity {
             return false;
         }
         return true;
+    }
+
+    static interface DateChangeListener {
+        abstract void dateChanged(LocalDate current);
+    }
+
+    class PagerAdapter extends FragmentStatePagerAdapter {
+
+        public PagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int i) {
+            switch (getPageId(i)) {
+                case PAGE_PHOTO: {
+                    PhotoFragment fragment = new PhotoFragment();
+                    fragment.car_id = car_id;
+                    fragment.current = current;
+                    return fragment;
+                }
+                case PAGE_ACTIONS: {
+                    ActionFragment fragment = new ActionFragment();
+                    fragment.car_id = car_id;
+                    return fragment;
+                }
+                case PAGE_STATE: {
+                    StateFragment fragment = new StateFragment();
+                    fragment.car_id = car_id;
+                    state_fragment = fragment;
+                    return fragment;
+                }
+                case PAGE_EVENT: {
+                    EventsFragment fragment = new EventsFragment();
+                    fragment.car_id = car_id;
+                    fragment.current = current;
+                    return fragment;
+                }
+                case PAGE_TRACK: {
+                    TracksFragment fragment = new TracksFragment();
+                    fragment.car_id = car_id;
+                    fragment.current = current;
+                    return fragment;
+                }
+                case PAGE_STAT: {
+                    StatFragment fragment = new StatFragment();
+                    fragment.car_id = car_id;
+                    return fragment;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public int getCount() {
+            return getPagePosition(6);
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (getPageId(position)) {
+                case PAGE_PHOTO:
+                    return getString(R.string.photo);
+                case PAGE_ACTIONS:
+                    return getString(R.string.control);
+                case PAGE_STATE:
+                    return getString(R.string.state);
+                case PAGE_EVENT:
+                    return getString(R.string.events);
+                case PAGE_TRACK:
+                    return getString(R.string.tracks);
+                case PAGE_STAT:
+                    return getString(R.string.stat);
+            }
+            return super.getPageTitle(position);
+        }
+    }
+
+    class CarsAdapter extends BaseAdapter {
+
+        @Override
+        public int getCount() {
+            return cars.length;
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return cars[position];
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View v = convertView;
+            if (v == null) {
+                LayoutInflater inflater = (LayoutInflater) getBaseContext()
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                v = inflater.inflate(R.layout.car_list_item, null);
+            }
+            TextView tv = (TextView) v.findViewById(R.id.name);
+            tv.setText(cars[position].name);
+            return v;
+        }
+
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            View v = convertView;
+            if (v == null) {
+                LayoutInflater inflater = (LayoutInflater) getBaseContext()
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                v = inflater.inflate(R.layout.car_list_dropdown_item, null);
+            }
+            TextView tv = (TextView) v.findViewById(R.id.name);
+            tv.setText(cars[position].name);
+            return v;
+        }
     }
 
 }

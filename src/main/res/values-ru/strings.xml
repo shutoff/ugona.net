@@ -417,4 +417,6 @@
     <string name="inf_sms">Ответные СМС при удачном запуске двигателя</string>
     <string name="inf_sms_msg">При отключении отправки информационных СМС не будут приходить уведомления об успешном запуске двигателя и низком уровне заряда батарейки в метке</string>
     <string name="voltage_shift">Коррекция напряжения</string>
+    <string name="zones">Зоны</string>
+    <string name="sms_notify">Оповещать о въезде и выезде из зоны по СМС</string>
 </resources>

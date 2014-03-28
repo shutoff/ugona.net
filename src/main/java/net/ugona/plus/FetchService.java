@@ -237,6 +237,8 @@ public class FetchService extends Service {
             ed.remove(Names.VALET_ON_NOTIFY + car_id);
         if (id == preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0))
             ed.remove(Names.VALET_OFF_NOTIFY + car_id);
+        if (id == preferences.getInt(Names.ZONE_NOTIFY + car_id, 0))
+            ed.remove(Names.ZONE_NOTIFY + car_id);
         if (res == null) {
             ed.remove(Names.N_IDS + car_id);
         } else {

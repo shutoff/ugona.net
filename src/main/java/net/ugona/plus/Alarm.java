@@ -118,6 +118,25 @@ public class Alarm extends Activity {
         ed.commit();
     }
 
+    static void zoneNotify(Context context, String car_id, boolean in_zone, String zone) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        int zone_notify = preferences.getInt(Names.ZONE_NOTIFY + car_id, 0);
+        if (zone_notify > 0)
+            removeNotification(context, car_id, zone_notify);
+        String message = context.getString(in_zone ? R.string.zone_in : R.string.zone_out);
+        message += " ";
+        message += zone;
+        zone_notify = createNotification(context, message, R.drawable.warning, car_id, null);
+        SharedPreferences.Editor ed = preferences.edit();
+        ed.putInt(Names.ZONE_NOTIFY + car_id, zone_notify);
+        if (in_zone) {
+            ed.putString(Names.ACTIVE_ZONE + car_id, zone);
+        } else {
+            ed.remove(Names.ACTIVE_ZONE + car_id);
+        }
+        ed.commit();
+    }
+
     /**
      * Called when the activity is first created.
      */
