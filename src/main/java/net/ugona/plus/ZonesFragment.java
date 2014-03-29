@@ -77,6 +77,7 @@ public class ZonesFragment extends DeviceFragment {
                 startActivityForResult(i, ZONE_EDIT);
             }
         });
+        items.add(new Item(R.string.attention, R.string.zone_msg));
     }
 
     @Override

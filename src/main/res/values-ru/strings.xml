@@ -425,4 +425,6 @@
     <string name="remove_zone">Удалить зону</string>
     <string name="device_pswd">Требуется отправка пароля в СМС</string>
     <string name="input_device_pswd">Введите пароль устройства</string>
+    <string name="attention">Внимание</string>
+    <string name="zone_msg">При отключении СМС-уведомлений для зоны, уведомления будут приходить с некоторой задержкой в зависимости от настроек устройства и настроек сети на телефоне</string>
 </resources>

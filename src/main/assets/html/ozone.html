@@ -60,6 +60,14 @@ function initialize() {
         fillOpacity: 0.35,
     });
     map.addLayer(rectangle);
+    rectangle.editing.options.resizeIcon = new L.DivIcon({
+            iconSize: new L.Point(16, 16),
+            className: 'leaflet-div-icon leaflet-editing-icon leaflet-edit-resize'
+    });
+    rectangle.editing.options.moveIcon = new L.DivIcon({
+            iconSize: new L.Point(20, 20),
+            className: 'leaflet-div-icon leaflet-editing-icon leaflet-edit-resize'
+    });
     rectangle.editing.enable();
 
     rectangle.on('edit', function() {
@@ -176,6 +184,7 @@ function center() {
     
     map.fitBounds([ [lat1 - d_lat, lng1 - d_lng], [lat2 + d_lat, lng2 + d_lng]]);
 }
+
 
 
 

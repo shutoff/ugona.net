@@ -467,4 +467,6 @@
     <string name="zone_remove">Remove zone</string>
     <string name="device_pswd">Device require password on SMS</string>
     <string name="input_device_pswd">Input device password</string>
+    <string name="attention">Attention</string>
+    <string name="zone_msg">You should receive notification about zones with some delays if you turn off SMS options</string>
 </resources>

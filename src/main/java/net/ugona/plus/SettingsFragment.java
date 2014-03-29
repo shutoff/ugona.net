@@ -186,6 +186,7 @@ public class SettingsFragment extends Fragment {
             super.setView(v);
             v.findViewById(R.id.block1).setVisibility(View.GONE);
             v.findViewById(R.id.block2).setVisibility(View.GONE);
+            v.findViewById(R.id.value).setVisibility(View.GONE);
             View vAdd = v.findViewById(R.id.block_add);
             vAdd.setVisibility(View.VISIBLE);
             vAdd.setOnClickListener(new View.OnClickListener() {

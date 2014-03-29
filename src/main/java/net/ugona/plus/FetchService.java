@@ -508,7 +508,8 @@ public class FetchService extends Service {
 
             JsonValue zone = res.get("zone");
             if (zone != null) {
-                ed.putLong(Names.ZONE_TIME, zone.asLong());
+                ed.putLong(Names.ZONE_TIME + car_id, zone.asLong());
+                ed.putBoolean(Names.ZONE_IN + car_id, res.get("zone_in").asBoolean());
                 new ZoneRequest(car_id);
             }
 
@@ -749,7 +750,8 @@ public class FetchService extends Service {
         @Override
         void result(JsonObject res) throws ParseException {
             JsonArray events = res.get("events").asArray();
-            for (int i = 0; i < events.size(); i++) {
+            int i;
+            for (i = 0; i < events.size(); i++) {
                 JsonObject e = events.get(i).asObject();
                 int type = e.get("type").asInt();
                 if ((type == 86) || (type == 87)) {
@@ -761,9 +763,13 @@ public class FetchService extends Service {
                     break;
                 }
             }
+            if (i >= events.size())
+                Alarm.zoneNotify(FetchService.this, car_id, preferences.getBoolean(Names.ZONE_IN + car_id, false), null, true);
             SharedPreferences.Editor ed = preferences.edit();
             ed.remove(Names.ZONE_TIME + car_id);
+            ed.remove(Names.ZONE_IN + car_id);
             ed.commit();
+            super.result(res);
         }
 
         @Override
@@ -774,7 +780,7 @@ public class FetchService extends Service {
             long zone_time = preferences.getLong(Names.ZONE_TIME + car_id, 0);
             if (zone_time == 0)
                 return;
-            execute(URL_EVENTS, api_key, auth, zone_time, zone_time);
+            execute(URL_EVENTS, api_key, auth, zone_time - 10, zone_time + 10);
         }
     }
 

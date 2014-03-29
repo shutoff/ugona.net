@@ -290,6 +290,22 @@ public class SettingActivity extends ActionBarActivity {
                 values[i] = v;
                 old_values[i] = v;
             }
+            String[] zone_info = preferences.getString(Names.ZONE_INFO + car_id, "").split("\\|");
+            zones = new Vector<Zone>();
+            for (String info : zone_info) {
+                String[] z = info.split(",");
+                if (z.length != 7)
+                    continue;
+                Zone zone = new Zone();
+                zone.name = z[0];
+                zone.lat1 = Double.parseDouble(z[1]);
+                zone.lng1 = Double.parseDouble(z[2]);
+                zone.lat2 = Double.parseDouble(z[3]);
+                zone.lng2 = Double.parseDouble(z[4]);
+                zone.sms = !z[5].equals("");
+                zone.device = !z[6].equals("");
+                zones.add(zone);
+            }
             sendUpdate();
             return;
         }
@@ -315,11 +331,11 @@ public class SettingActivity extends ActionBarActivity {
                     values[i] = v;
                     old_values[i] = v;
                 }
-                ed.commit();
                 JsonValue z_value = res.get("zones");
                 if (z_value != null) {
                     JsonArray z_array = z_value.asArray();
                     zones = new Vector<Zone>();
+                    String info = "";
                     for (int i = 0; i < z_array.size(); i++) {
                         JsonObject z_val = z_array.get(i).asObject();
                         Zone zone = new Zone();
@@ -339,8 +355,18 @@ public class SettingActivity extends ActionBarActivity {
                         zone._sms = zone.sms;
                         zone.id = i;
                         zones.add(zone);
+                        if (!info.equals(""))
+                            info += "|";
+                        info += zone.name + "," + zone.lat1 + "," + zone.lng1 + "," + zone.lat2 + "," + zone.lng2 + ",";
+                        if (zone.sms)
+                            info += "1";
+                        info += ",";
+                        if (zone.device)
+                            info += "1";
                     }
+                    ed.putString(Names.ZONE_INFO + car_id, info);
                 }
+                ed.commit();
                 sendUpdate();
             }
 
@@ -405,7 +431,6 @@ public class SettingActivity extends ActionBarActivity {
                 need_sms = true;
             }
         }
-        ed.commit();
         String zone_data = null;
         boolean zone_changed = zone_deleted;
         if (!zone_changed && (zones != null)) {
@@ -432,7 +457,9 @@ public class SettingActivity extends ActionBarActivity {
                 if (z.device)
                     zone_data += "1";
             }
+            ed.putString(Names.ZONE_INFO + car_id, zone_data);
         }
+        ed.commit();
         if (val.equals("") && !need_sms && (zone_data == null))
             return;
         sendUpdate();
@@ -486,6 +513,11 @@ public class SettingActivity extends ActionBarActivity {
         final ProgressDialog progressDialog = new ProgressDialog(SettingActivity.this);
         progressDialog.setMessage(getString(R.string.send_command));
         progressDialog.show();
+
+        zone_deleted = false;
+        for (Zone z : zones) {
+            z.clearChanged();
+        }
 
         if (values.equals("")) {
             do_update_sms(progressDialog, set_values, null);
@@ -577,6 +609,16 @@ public class SettingActivity extends ActionBarActivity {
                     (lng2 != _lng2) ||
                     (device != _device) ||
                     (sms != _sms);
+        }
+
+        void clearChanged() {
+            _name = name;
+            _lat1 = lat1;
+            _lng1 = lng1;
+            _lat2 = lat2;
+            _lng2 = lng2;
+            _device = device;
+            _sms = sms;
         }
 
         void set(Zone z) {
