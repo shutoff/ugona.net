@@ -350,11 +350,11 @@ public class SmsMonitor extends BroadcastReceiver {
                 return true;
         }
         if (compare(body, "InGPSZone:")) {
-            Alarm.zoneNotify(context, car_id, true, body.substring(10));
+            Alarm.zoneNotify(context, car_id, true, body.substring(10), true);
             return true;
         }
         if (compare(body, "OutGPSZone:")) {
-            Alarm.zoneNotify(context, car_id, false, body.substring(11));
+            Alarm.zoneNotify(context, car_id, false, body.substring(11), true);
             return true;
         }
         return false;

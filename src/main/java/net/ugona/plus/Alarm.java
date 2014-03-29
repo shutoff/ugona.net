@@ -118,28 +118,41 @@ public class Alarm extends Activity {
         ed.commit();
     }
 
-    static void zoneNotify(Context context, String car_id, boolean in_zone, String zone) {
+    static void zoneNotify(Context context, String car_id, boolean in_zone, String zone, boolean check) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String old = preferences.getString(Names.ACTIVE_ZONE, "");
+        if (check) {
+            if (in_zone) {
+                if ((zone != null) && zone.equals(old))
+                    return;
+                ;
+                if ((zone == null) && !old.equals(""))
+                    return;
+            } else {
+                if (old.equals(""))
+                    return;
+            }
+        }
+
         int zone_notify = preferences.getInt(Names.ZONE_NOTIFY + car_id, 0);
         if (zone_notify > 0)
             removeNotification(context, car_id, zone_notify);
         String message = context.getString(in_zone ? R.string.zone_in : R.string.zone_out);
-        message += " ";
-        message += zone;
+        if (zone != null) {
+            message += " ";
+            message += zone;
+        }
         zone_notify = createNotification(context, message, R.drawable.warning, car_id, null);
         SharedPreferences.Editor ed = preferences.edit();
         ed.putInt(Names.ZONE_NOTIFY + car_id, zone_notify);
         if (in_zone) {
-            ed.putString(Names.ACTIVE_ZONE + car_id, zone);
+            ed.putString(Names.ACTIVE_ZONE + car_id, (zone == null) ? "___" : zone);
         } else {
             ed.remove(Names.ACTIVE_ZONE + car_id);
         }
         ed.commit();
     }
 
-    /**
-     * Called when the activity is first created.
-     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -18,6 +18,7 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
+import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
@@ -39,7 +40,10 @@ public class FetchService extends Service {
     static final String ACTION_UPDATE_FORCE = "net.ugona.plus.UPDATE_FORCE";
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR";
     static final String ACTION_NOTIFICATION = "net.ugona.plus.NOTIFICATION";
+
     static final String URL_STATUS = "https://car-online.ugona.net/?skey=$1&time=$2";
+    static final String URL_EVENTS = "https://car-online.ugona.net/events?skey=$1&auth=$2&begin=$3&end=$4";
+
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;
     private static final long LONG_TIMEOUT = 5 * 60 * 60 * 1000;
@@ -317,13 +321,6 @@ public class FetchService extends Service {
                 }
                 return;
             }
-/*
-            if (!powerMgr.isScreenOn()) {
-                IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
-                registerReceiver(mReceiver, filter);
-                return;
-            }
-*/
             try {
                 unregisterReceiver(mReceiver);
             } catch (Exception e) {
@@ -507,6 +504,12 @@ public class FetchService extends Service {
                         ed.remove(Names.BALANCE_TIME + car_id);
                     }
                 }
+            }
+
+            JsonValue zone = res.get("zone");
+            if (zone != null) {
+                ed.putLong(Names.ZONE_TIME, zone.asLong());
+                new ZoneRequest(car_id);
             }
 
             JsonValue last_stand = res.get("last_stand");
@@ -723,50 +726,6 @@ public class FetchService extends Service {
             }
         }
 
-/*
-
-                boolean sms_alarm = preferences.getBoolean(Names.SMS_ALARM, false);
-                if (sms_alarm)
-                    ed.remove(Names.SMS_ALARM);
-
-
-
-                if (scan_mode == 2) {
-                    if (!sms_alarm && (msg_id > 0) && guard) {
-                        Intent alarmIntent = new Intent(FetchService.this, Alarm.class);
-                        alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        alarmIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        String[] alarms = getString(R.string.alarm).split("\\|");
-                        alarmIntent.putExtra(Names.ALARM, alarms[msg_id]);
-                        alarmIntent.putExtra(Names.ID, car_id);
-                        FetchService.this.startActivity(alarmIntent);
-                    }
-                    long now = new Date().getTime();
-                    boolean new_state = ((now - eventTime) > 12 * 60 * 1000);
-                    int timeout_id = preferences.getInt(Names.TIME_NOTIFY + car_id, 0);
-                    try {
-                        if (new_state) {
-                            if (timeout_id == 0) {
-                                timeout_id = Alarm.createNotification(FetchService.this, getString(R.string.time_warning), R.drawable.warning, car_id, Uri.parse("android.resource://net.ugona.plus/raw/warning"));
-                                SharedPreferences.Editor ed = preferences.edit();
-                                ed.putInt(Names.TIME_NOTIFY + car_id, timeout_id);
-                                ed.commit();
-                            }
-                        } else {
-                            if (timeout_id > 0) {
-                                Alarm.removeNotification(FetchService.this, car_id, timeout_id);
-                                SharedPreferences.Editor ed = preferences.edit();
-                                ed.remove(Names.TIME_NOTIFY + car_id);
-                                ed.commit();
-                            }
-                        }
-                    } catch (Exception ex) {
-                        // ignore
-                    }
-                }
-
-*/
-
         @Override
         void exec(String api_key) {
             sendUpdate(ACTION_START, car_id);
@@ -778,6 +737,44 @@ public class FetchService extends Service {
             if (state)
                 msg_id = msg;
             ed.putBoolean(id + car_id, state);
+        }
+    }
+
+    class ZoneRequest extends ServerRequest {
+
+        ZoneRequest(String id) {
+            super("Z", id);
+        }
+
+        @Override
+        void result(JsonObject res) throws ParseException {
+            JsonArray events = res.get("events").asArray();
+            for (int i = 0; i < events.size(); i++) {
+                JsonObject e = events.get(i).asObject();
+                int type = e.get("type").asInt();
+                if ((type == 86) || (type == 87)) {
+                    String zone = null;
+                    JsonValue vName = e.get("zone");
+                    if (vName != null)
+                        zone = vName.asString();
+                    Alarm.zoneNotify(FetchService.this, car_id, type == 86, zone, true);
+                    break;
+                }
+            }
+            SharedPreferences.Editor ed = preferences.edit();
+            ed.remove(Names.ZONE_TIME + car_id);
+            ed.commit();
+        }
+
+        @Override
+        void exec(String api_key) {
+            String auth = preferences.getString(Names.AUTH + car_id, "");
+            if (auth.equals(""))
+                return;
+            long zone_time = preferences.getLong(Names.ZONE_TIME + car_id, 0);
+            if (zone_time == 0)
+                return;
+            execute(URL_EVENTS, api_key, auth, zone_time, zone_time);
         }
     }
 

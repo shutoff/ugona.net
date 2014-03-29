@@ -148,4 +148,5 @@ public final class Names {
     static final String ZONE_NOTIFY = "zone_notify_";
 
     static final String DEVICE_PSWD = "device_paswd";
+    static final String ZONE_TIME = "zone_time";
 }
