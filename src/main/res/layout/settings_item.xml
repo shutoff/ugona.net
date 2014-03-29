@@ -7,6 +7,7 @@
     android:padding="8dp">
 
     <LinearLayout
+        android:id="@+id/block1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -41,6 +42,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/block2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -53,9 +55,17 @@
 
         <ImageView
             android:id="@+id/check_sms"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:padding="3dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="5dp"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/check_edit_big"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="5dp"
+            android:src="@android:drawable/ic_menu_edit"
             android:visibility="gone" />
 
         <ImageView
@@ -65,6 +75,27 @@
             android:padding="3dp"
             android:src="@android:drawable/ic_menu_edit"
             android:visibility="gone" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/block_add"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="5dp"
+            android:src="@android:drawable/ic_menu_add" />
+
+        <TextView
+            android:id="@+id/text_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
     </LinearLayout>
 

@@ -45,10 +45,10 @@ public class SettingActivity extends ActionBarActivity {
     final static String UPDATE_SETTINGS = "net.ugona.plus.UPDATE_SETTINGS";
     final static String URL_SETTINGS = "https://car-online.ugona.net/settings?auth=$1";
     final static String URL_SET = "https://car-online.ugona.net/set?auth=$1&v=$2";
-    final static String URL_SET_CCODE = "https://car-online.ugona.net/set?auth=$1&v=$2&ccode=$2";
     final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
 
     final static String ZONES = "zones";
+    final static String ZONE_DELETED = "zone_deleted";
 
     String car_id;
     SharedPreferences preferences;
@@ -60,6 +60,7 @@ public class SettingActivity extends ActionBarActivity {
     boolean rele;
     ActionBar.TabListener tabListener;
     Vector<Zone> zones;
+    boolean zone_deleted;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +71,7 @@ public class SettingActivity extends ActionBarActivity {
 
         if (savedInstanceState != null) {
             car_id = savedInstanceState.getString(Names.ID);
+            zone_deleted = savedInstanceState.getBoolean(ZONE_DELETED);
             try {
                 ByteArrayInputStream bis = new ByteArrayInputStream(savedInstanceState.getByteArray(ZONES));
                 ObjectInput in = new ObjectInputStream(bis);
@@ -229,31 +231,43 @@ public class SettingActivity extends ActionBarActivity {
                 // ignore
             }
         }
+        outState.putBoolean(ZONE_DELETED, zone_deleted);
     }
 
     @Override
     public void finish() {
-        if (values != null) {
+        boolean changed = zone_deleted;
+        if (!changed && (values != null)) {
             int i;
             for (i = 0; i < 24; i++) {
                 if (values[i] != old_values[i])
                     break;
             }
-            if (i < 24) {
-                AlertDialog dialog = new AlertDialog.Builder(this)
-                        .setTitle(R.string.changed)
-                        .setMessage(R.string.changed_msg)
-                        .setNegativeButton(R.string.cancel, null)
-                        .setPositiveButton(R.string.exit, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                SettingActivity.super.finish();
-                            }
-                        })
-                        .create();
-                dialog.show();
-                return;
+            if (i < 24)
+                changed = true;
+        }
+        if (!changed && (zones != null)) {
+            for (Zone z : zones) {
+                if (z.isChanged()) {
+                    changed = true;
+                    break;
+                }
             }
+        }
+        if (changed) {
+            AlertDialog dialog = new AlertDialog.Builder(this)
+                    .setTitle(R.string.changed)
+                    .setMessage(R.string.changed_msg)
+                    .setNegativeButton(R.string.cancel, null)
+                    .setPositiveButton(R.string.exit, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            SettingActivity.super.finish();
+                        }
+                    })
+                    .create();
+            dialog.show();
+            return;
         }
         super.finish();
     }
@@ -392,7 +406,34 @@ public class SettingActivity extends ActionBarActivity {
             }
         }
         ed.commit();
-        if (val.equals("") && !need_sms)
+        String zone_data = null;
+        boolean zone_changed = zone_deleted;
+        if (!zone_changed && (zones != null)) {
+            for (Zone z : zones) {
+                if (z.isChanged()) {
+                    zone_changed = true;
+                    break;
+                }
+            }
+        }
+        if (zone_changed) {
+            zone_data = "";
+            for (Zone z : zones) {
+                if (!zone_data.equals(""))
+                    zone_data += "|";
+                zone_data += z.name + ",";
+                zone_data += z.lat1 + ",";
+                zone_data += z.lng1 + ",";
+                zone_data += z.lat2 + ",";
+                zone_data += z.lng2 + ",";
+                if (z.sms)
+                    zone_data += "1";
+                zone_data += ",";
+                if (z.device)
+                    zone_data += "1";
+            }
+        }
+        if (val.equals("") && !need_sms && (zone_data == null))
             return;
         sendUpdate();
         final int[] set_values = new int[values.length];
@@ -400,38 +441,39 @@ public class SettingActivity extends ActionBarActivity {
             set_values[i] = values[i];
         }
         final String value = val;
+        final String zones_data = zone_data;
         final boolean sms = need_sms;
         if (request_ccode) {
             Actions.requestCCode(this, car_id, R.string.setup, R.string.setup_msg, new Actions.Answer() {
                 @Override
                 void answer(String text) {
-                    do_update(value, text, set_values, sms);
+                    do_update(value, text, set_values, sms, zones_data);
                 }
             });
             return;
         }
 
-        Actions.requestPassword(this, R.string.setup, R.string.setup_msg, new Runnable() {
+        Actions.requestPassword(this, car_id, R.string.setup, R.string.setup_msg, new Actions.Answer() {
             @Override
-            public void run() {
-                do_update(value, null, set_values, sms);
+            void answer(String text) {
+                do_update(value, null, set_values, sms, zones_data);
             }
         });
     }
 
-    void do_update_sms(ProgressDialog progressDialog, int[] set_values) {
+    void do_update_sms(ProgressDialog progressDialog, int[] set_values, String pswd) {
         SharedPreferences.Editor ed = preferences.edit();
         if (set_values[22] != old_values[22]) {
             ed.putInt("V_22_" + car_id, set_values[22]);
-            SmsMonitor.sendSMS(progressDialog.getContext(), car_id, new SmsMonitor.Sms(R.string.shock_sens, "ALRM PRIOR " + (set_values[22] + 1), "ALRM PRIOR OK"));
+            SmsMonitor.sendSMS(progressDialog.getContext(), car_id, pswd, new SmsMonitor.Sms(R.string.shock_sens, "ALRM PRIOR " + (set_values[22] + 1), "ALRM PRIOR OK"));
             old_values[22] = set_values[22];
         }
         if (set_values[23] != old_values[23]) {
             ed.putInt("V_23_" + car_id, set_values[23]);
             if (set_values[23] != 0) {
-                SmsMonitor.sendSMS(progressDialog.getContext(), car_id, new SmsMonitor.Sms(R.string.inf_sms, "INFSMS=NO", "INFSMS=NOT"));
+                SmsMonitor.sendSMS(progressDialog.getContext(), car_id, pswd, new SmsMonitor.Sms(R.string.inf_sms, "INFSMS=NO", "INFSMS=NOT"));
             } else {
-                SmsMonitor.sendSMS(progressDialog.getContext(), car_id, new SmsMonitor.Sms(R.string.inf_sms, "INFSMS=YES", "INFSMS YES OK"));
+                SmsMonitor.sendSMS(progressDialog.getContext(), car_id, pswd, new SmsMonitor.Sms(R.string.inf_sms, "INFSMS=YES", "INFSMS YES OK"));
             }
             old_values[23] = set_values[23];
         }
@@ -440,13 +482,13 @@ public class SettingActivity extends ActionBarActivity {
         sendUpdate();
     }
 
-    void do_update(final String value, final String ccode, final int[] set_values, final boolean need_sms) {
+    void do_update(final String value, final String ccode, final int[] set_values, final boolean need_sms, String zones_data) {
         final ProgressDialog progressDialog = new ProgressDialog(SettingActivity.this);
         progressDialog.setMessage(getString(R.string.send_command));
         progressDialog.show();
 
         if (values.equals("")) {
-            do_update_sms(progressDialog, set_values);
+            do_update_sms(progressDialog, set_values, null);
             return;
         }
 
@@ -455,7 +497,7 @@ public class SettingActivity extends ActionBarActivity {
             @Override
             void result(JsonObject res) throws ParseException {
                 if (need_sms) {
-                    do_update_sms(progressDialog, set_values);
+                    do_update_sms(progressDialog, set_values, null);
                     return;
                 }
                 progressDialog.dismiss();
@@ -504,11 +546,7 @@ public class SettingActivity extends ActionBarActivity {
                 toast.show();
             }
         };
-        if (ccode != null) {
-            task.execute(URL_SET_CCODE, preferences.getString(Names.AUTH + car_id, ""), value, ccode);
-            return;
-        }
-        task.execute(URL_SET, preferences.getString(Names.AUTH + car_id, ""), value);
+        task.execute(URL_SET, preferences.getString(Names.AUTH + car_id, ""), value, "ccode", ccode, "zone", zones_data);
     }
 
     static class Zone implements Serializable {
@@ -576,7 +614,7 @@ public class SettingActivity extends ActionBarActivity {
             int commands = State.getCommands(preferences, car_id);
             visible[4] = (commands & State.CMD_AZ) != 0;
             visible[5] = (commands & State.CMD_RELE) != 0;
-            visible[6] = true;
+            visible[6] = (preferences.getFloat(Names.LAT + car_id, 0) != 0) || (preferences.getFloat(Names.LNG + car_id, 0) != 0);
         }
 
         int toID(int pos) {

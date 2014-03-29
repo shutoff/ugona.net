@@ -30,10 +30,10 @@ public class ActionFragment extends Fragment
             new Action(R.drawable.icon_turbo_on, R.string.find) {
                 @Override
                 void action(final Context context, final String car_id, boolean longTap) {
-                    Actions.requestPassword(context, R.string.find, R.string.find_sum, new Runnable() {
+                    Actions.requestPassword(context, car_id, R.string.find, R.string.find_sum, new Actions.Answer() {
                         @Override
-                        public void run() {
-                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "FIND", null));
+                        void answer(String pswd) {
+                            SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.find, "FIND", null));
                         }
                     });
                 }
@@ -41,10 +41,10 @@ public class ActionFragment extends Fragment
             new Action(R.drawable.icon_status, R.string.map_req) {
                 @Override
                 void action(final Context context, final String car_id, boolean longTap) {
-                    Actions.requestPassword(context, R.string.map_req, R.string.map_sum, new Runnable() {
+                    Actions.requestPassword(context, car_id, R.string.map_req, R.string.map_sum, new Actions.Answer() {
                         @Override
-                        public void run() {
-                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MAP", null));
+                        void answer(String pswd) {
+                            SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.find, "MAP", null));
                         }
                     });
                 }
@@ -52,10 +52,10 @@ public class ActionFragment extends Fragment
             new Action(0, R.string.mode_a, R.string.mode_a_sum) {
                 @Override
                 void action(final Context context, final String car_id, boolean longTap) {
-                    Actions.requestPassword(context, R.string.mode_a, R.string.mode_a_sum, new Runnable() {
+                    Actions.requestPassword(context, car_id, R.string.mode_a, R.string.mode_a_sum, new Actions.Answer() {
                         @Override
-                        public void run() {
-                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MODE A", null));
+                        void answer(String pswd) {
+                            SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.find, "MODE A", null));
                         }
                     });
                 }
@@ -63,10 +63,10 @@ public class ActionFragment extends Fragment
             new Action(0, R.string.mode_b, R.string.mode_b_sum) {
                 @Override
                 void action(final Context context, final String car_id, boolean longTap) {
-                    Actions.requestPassword(context, R.string.mode_b, R.string.mode_b_sum, new Runnable() {
+                    Actions.requestPassword(context, car_id, R.string.mode_b, R.string.mode_b_sum, new Actions.Answer() {
                         @Override
-                        public void run() {
-                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MODE B", null));
+                        void answer(String pswd) {
+                            SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.find, "MODE B", null));
                         }
                     });
                 }
@@ -74,10 +74,10 @@ public class ActionFragment extends Fragment
             new Action(0, R.string.mode_c, R.string.mode_c_sum) {
                 @Override
                 void action(final Context context, final String car_id, boolean longTap) {
-                    Actions.requestPassword(context, R.string.mode_c, R.string.mode_c_sum, new Runnable() {
+                    Actions.requestPassword(context, car_id, R.string.mode_c, R.string.mode_c_sum, new Actions.Answer() {
                         @Override
-                        public void run() {
-                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MODE C", null));
+                        void answer(String pswd) {
+                            SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.find, "MODE C", null));
                         }
                     });
                 }
@@ -85,10 +85,10 @@ public class ActionFragment extends Fragment
             new Action(0, R.string.mode_d, R.string.mode_d_sum) {
                 @Override
                 void action(final Context context, final String car_id, boolean longTap) {
-                    Actions.requestPassword(context, R.string.mode_d, R.string.mode_d_sum, new Runnable() {
+                    Actions.requestPassword(context, car_id, R.string.mode_d, R.string.mode_d_sum, new Actions.Answer() {
                         @Override
-                        public void run() {
-                            SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.find, "MODE D", null));
+                        void answer(String pswd) {
+                            SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.find, "MODE D", null));
                         }
                     });
                 }

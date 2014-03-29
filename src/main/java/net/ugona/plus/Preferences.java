@@ -94,7 +94,13 @@ public class Preferences {
                 // ignore
             }
         }
+    }
 
+    static boolean isDevicePasswd(Context context, String car_id) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (preferences.getString(Names.VERSION + car_id, "").toLowerCase().contains("superagent"))
+            return false;
+        return preferences.getBoolean(Names.DEVICE_PSWD + car_id, false);
     }
 
 }

@@ -34,13 +34,49 @@ public class ZonesFragment extends DeviceFragment {
     }
 
     void fill() {
-        SettingActivity activity = (SettingActivity) getActivity();
+        final SettingActivity activity = (SettingActivity) getActivity();
         if ((activity == null) || (activity.zones == null))
             return;
         items = new Vector<Item>();
         for (SettingActivity.Zone zone : activity.zones) {
             items.add(new ZoneItem(zone));
         }
+        items.add(new AddItem(R.string.add_zone) {
+            @Override
+            void click() {
+                SettingActivity.Zone z = new SettingActivity.Zone();
+                for (SettingActivity.Zone zone : activity.zones) {
+                    if (z.id <= zone.id)
+                        z.id = zone.id + 1;
+                }
+                double lat = preferences.getFloat(Names.LAT + car_id, 0);
+                double lng = preferences.getFloat(Names.LNG + car_id, 0);
+                z.lat1 = lat - 0.01;
+                z.lat2 = lat + 0.01;
+                z.lng1 = lng - 0.01;
+                z.lng2 = lng + 0.01;
+                z.name = "";
+                z._name = "";
+                z.device = true;
+                activity.zones.add(z);
+                update();
+
+                Intent i = new Intent(getActivity(), ZoneEdit.class);
+                try {
+                    byte[] data = null;
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    ObjectOutput out = new ObjectOutputStream(bos);
+                    out.writeObject(z);
+                    data = bos.toByteArray();
+                    out.close();
+                    bos.close();
+                    i.putExtra(Names.TRACK, data);
+                } catch (Exception ex) {
+                    // ignore
+                }
+                startActivityForResult(i, ZONE_EDIT);
+            }
+        });
     }
 
     @Override
@@ -54,12 +90,17 @@ public class ZonesFragment extends DeviceFragment {
                 boolean found = false;
                 for (SettingActivity.Zone z : activity.zones) {
                     if (z.id == zone.id) {
+                        if (zone.name.equals("")) {
+                            activity.zones.remove(z);
+                            update();
+                            break;
+                        }
                         z.set(zone);
                         found = true;
                         break;
                     }
                 }
-                if (!found)
+                if (!found && !zone.name.equals(""))
                     activity.zones.add(zone);
                 listUpdate();
             } catch (Exception ex) {
@@ -80,8 +121,9 @@ public class ZonesFragment extends DeviceFragment {
 
         @Override
         void setView(View v) {
+            name = zone.name;
             super.setView(v);
-            View edit = v.findViewById(R.id.check_edit);
+            View edit = v.findViewById(R.id.check_edit_big);
             edit.setVisibility(View.VISIBLE);
             edit.setOnClickListener(new View.OnClickListener() {
                 @Override

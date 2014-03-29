@@ -41,8 +41,19 @@ public abstract class HttpTask {
                 Reader reader = null;
                 HttpURLConnection connection = null;
                 try {
-                    for (int i = 1; i < params.length; i++) {
+                    int last_param = 1;
+                    for (; ; last_param++) {
+                        if (!url.contains("$" + last_param))
+                            break;
+                    }
+                    for (int i = 1; i < last_param; i++) {
                         url = url.replace("$" + i, URLEncoder.encode(params[i].toString(), "UTF-8"));
+                    }
+                    for (; last_param + 1 < params.length; last_param += 2) {
+                        if (params[last_param + 1] == null)
+                            continue;
+                        url += "&" + params[last_param].toString();
+                        url += "=" + URLEncoder.encode(params[last_param + 1].toString(), "UTF-8");
                     }
                     if (pause > 0)
                         Thread.sleep(pause);

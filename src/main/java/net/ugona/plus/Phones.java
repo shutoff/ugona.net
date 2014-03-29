@@ -41,6 +41,7 @@ public class Phones extends ActionBarActivity {
 
     String[] phones;
     String car_id;
+    String passwd;
 
     ListView lvPhones;
     View vMsg;
@@ -50,12 +51,24 @@ public class Phones extends ActionBarActivity {
 
     Menu topSubMenu;
 
+    static String formatPhoneNumber(String number) {
+        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+        try {
+            Phonenumber.PhoneNumber n = phoneUtil.parse(number, Locale.getDefault().getCountry());
+            return phoneUtil.format(n, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return number;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.phones);
 
         car_id = getIntent().getStringExtra(Names.ID);
+        passwd = getIntent().getStringExtra(Names.PASSWORD);
 
         lvPhones = (ListView) findViewById(R.id.list);
         vMsg = findViewById(R.id.msg);
@@ -65,7 +78,7 @@ public class Phones extends ActionBarActivity {
             phones = savedInstanceState.getStringArray(Names.CAR_PHONE);
         if (phones == null) {
             if (!SmsMonitor.isProcessed(car_id, R.string.phones)) {
-                SmsMonitor.sendSMS(this, car_id, new SmsMonitor.Sms(R.string.phones, "USERS?", "USERS? ") {
+                SmsMonitor.sendSMS(this, car_id, passwd, new SmsMonitor.Sms(R.string.phones, "USERS?", "USERS? ") {
                     @Override
                     boolean process_answer(Context context, String car_id, String text) {
                         Intent i = new Intent(USERS);
@@ -259,7 +272,7 @@ public class Phones extends ActionBarActivity {
             };
 
             showProgress();
-            SmsMonitor.sendSMS(this, car_id, sms);
+            SmsMonitor.sendSMS(this, car_id, passwd, sms);
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -284,17 +297,6 @@ public class Phones extends ActionBarActivity {
             return;
         topSubMenu.clear();
         onCreateOptionsMenu(topSubMenu);
-    }
-
-    static String formatPhoneNumber(String number) {
-        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-        try {
-            Phonenumber.PhoneNumber n = phoneUtil.parse(number, Locale.getDefault().getCountry());
-            return phoneUtil.format(n, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return number;
     }
 
 }

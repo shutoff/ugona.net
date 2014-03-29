@@ -102,7 +102,7 @@ public class SmsMonitor extends BroadcastReceiver {
         Alarm.createNotification(context, text, picId, car_id, sound);
     }
 
-    static boolean sendSMS(Context context, String car_id, Sms sms) {
+    static boolean sendSMS(Context context, String car_id, String pswd, Sms sms) {
         if (processed == null)
             processed = new HashMap<String, SmsQueues>();
         SmsQueues queues = processed.get(car_id);
@@ -125,7 +125,10 @@ public class SmsMonitor extends BroadcastReceiver {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
         try {
-            smsManager.sendTextMessage(phoneNumber, null, sms.text, sendPI, null);
+            String text = sms.text;
+            if (pswd != null)
+                text = pswd + " " + text;
+            smsManager.sendTextMessage(phoneNumber, null, text, sendPI, null);
             Intent i = new Intent(SMS_SEND);
             i.putExtra(Names.ID, car_id);
             context.sendBroadcast(i);

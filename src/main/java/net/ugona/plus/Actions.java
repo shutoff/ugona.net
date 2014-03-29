@@ -3,7 +3,6 @@ package net.ugona.plus;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -39,11 +38,9 @@ import java.util.regex.Pattern;
 public class Actions {
 
     static final String INCORRECT_MESSAGE = "Incorrect message";
-    static final int VALET_TIMEOUT = 3600000;
     static final String COMMAND_URL = "https://car-online.ugona.net/command?auth=$1&ccode=$2&command=$3";
     final static String URL_SET = "https://car-online.ugona.net/set?auth=$1&v=$2";
     final static String URL_SETTINGS = "https://car-online.ugona.net/settings?auth=$1";
-    static PendingIntent piRele;
     static Pattern location;
     static String[] alarms = {
             "Heavy shock",
@@ -166,14 +163,14 @@ public class Actions {
     }
 
     static void motor_on_sms(final Context context, final String car_id, boolean silent) {
-        requestPassword(context, R.string.motor_on, silent ? 0 : R.string.motor_on_sum, new Runnable() {
+        requestPassword(context, car_id, R.string.motor_on, silent ? 0 : R.string.motor_on_sum, new Answer() {
             @Override
-            public void run() {
+            void answer(String pswd) {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putBoolean(Names.ENGINE + car_id, false);
                 ed.commit();
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_on, "MOTOR ON", "", "MOTOR ON FAIL", R.string.motor_start_error) {
+                SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.motor_on, "MOTOR ON", "", "MOTOR ON FAIL", R.string.motor_start_error) {
                     @Override
                     boolean process_answer(Context context, String car_id, String text) {
                         if ((text == null) ||
@@ -249,10 +246,10 @@ public class Actions {
     }
 
     static void motor_off_sms(final Context context, final String car_id, boolean silent) {
-        requestPassword(context, R.string.motor_off, silent ? 0 : R.string.motor_off_sum, new Runnable() {
+        requestPassword(context, car_id, R.string.motor_off, silent ? 0 : R.string.motor_off_sum, new Answer() {
             @Override
-            public void run() {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.motor_off, "MOTOR OFF", "MOTOR OFF OK") {
+            void answer(String pswd) {
+                SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.motor_off, "MOTOR OFF", "MOTOR OFF OK") {
                     @Override
                     boolean process_answer(Context context, String car_id, String text) {
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -278,55 +275,55 @@ public class Actions {
     }
 
     static void turbo_on(final Context context, final String car_id) {
-        requestPassword(context, R.string.turbo_on, R.string.turbo_on_sum, new Runnable() {
+        requestPassword(context, car_id, R.string.turbo_on, R.string.turbo_on_sum, new Answer() {
             @Override
-            public void run() {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.turbo_on, "TURBO ON", "TURBO ON OK"));
+            void answer(String pswd) {
+                SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.turbo_on, "TURBO ON", "TURBO ON OK"));
             }
         });
     }
 
     static void turbo_off(final Context context, final String car_id) {
-        requestPassword(context, R.string.turbo_off, R.string.turbo_off_sum, new Runnable() {
+        requestPassword(context, car_id, R.string.turbo_off, R.string.turbo_off_sum, new Answer() {
             @Override
-            public void run() {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.turbo_off, "TURBO OFF", "TURBO OFF OK"));
+            void answer(String pswd) {
+                SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.turbo_off, "TURBO OFF", "TURBO OFF OK"));
             }
         });
     }
 
     static void internet_on(final Context context, final String car_id) {
-        requestPassword(context, R.string.internet_on, R.string.internet_on_sum, new Runnable() {
+        requestPassword(context, car_id, R.string.internet_on, R.string.internet_on_sum, new Answer() {
             @Override
-            public void run() {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.internet_on, "INTERNET ALL", "INTERNET ALL OK"));
+            void answer(String pswd) {
+                SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.internet_on, "INTERNET ALL", "INTERNET ALL OK"));
             }
         });
     }
 
     static void internet_off(final Context context, final String car_id) {
-        requestPassword(context, R.string.internet_off, R.string.internet_off_sum, new Runnable() {
+        requestPassword(context, car_id, R.string.internet_off, R.string.internet_off_sum, new Answer() {
             @Override
-            public void run() {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.internet_off, "INTERNET OFF", "INTERNET OFF OK"));
+            void answer(String pswd) {
+                SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.internet_off, "INTERNET OFF", "INTERNET OFF OK"));
             }
         });
     }
 
     static void reset(final Context context, final String car_id) {
-        requestPassword(context, R.string.reset, R.string.reset_sum, new Runnable() {
+        requestPassword(context, car_id, R.string.reset, R.string.reset_sum, new Answer() {
             @Override
-            public void run() {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.reset, "RESET", null));
+            void answer(String pswd) {
+                SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.reset, "RESET", null));
             }
         });
     }
 
     static void map_query(final Context context, final String car_id) {
-        requestPassword(context, R.string.map_req, R.string.map_req, new Runnable() {
+        requestPassword(context, car_id, R.string.map_req, R.string.map_req, new Answer() {
             @Override
-            public void run() {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.map_req, "MAP", "") {
+            void answer(String pswd) {
+                SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.map_req, "MAP", "") {
                     @Override
                     boolean process_answer(final Context context, final String car_id, String text) {
                         if (location == null)
@@ -380,10 +377,10 @@ public class Actions {
     }
 
     static void status(final Context context, final String car_id) {
-        requestPassword(context, R.string.status_title, R.string.status_sum, new Runnable() {
+        requestPassword(context, car_id, R.string.status_title, R.string.status_sum, new Answer() {
             @Override
-            public void run() {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.status_title, "STATUS?", "STATUS? ") {
+            void answer(String pswd) {
+                SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.status_title, "STATUS?", "STATUS? ") {
                     @Override
                     boolean process_answer(Context context, String car_id, String text) {
 
@@ -439,10 +436,10 @@ public class Actions {
     }
 
     static void balance(final Context context, final String car_id) {
-        requestPassword(context, R.string.balance, R.string.balance_request, new Runnable() {
+        requestPassword(context, car_id, R.string.balance, R.string.balance_request, new Answer() {
             @Override
-            public void run() {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.balance, "BALANCE?", "") {
+            void answer(String pswd) {
+                SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.balance, "BALANCE?", "") {
                     @Override
                     boolean process_answer(Context context, String car_id, String text) {
                         Pattern balancePattern = Pattern.compile("-?[0-9]+[.,][0-9][0-9]");
@@ -556,10 +553,10 @@ public class Actions {
 
         String answer = text + " OK";
         final SmsMonitor.Sms sms = new SmsMonitor.Sms(cmd_id, text, answer);
-        requestPassword(context, cmd_id, silent ? 0 : cmd_id, new Runnable() {
+        requestPassword(context, car_id, cmd_id, silent ? 0 : cmd_id, new Answer() {
             @Override
-            public void run() {
-                SmsMonitor.sendSMS(context, car_id, sms);
+            void answer(String pswd) {
+                SmsMonitor.sendSMS(context, car_id, pswd, sms);
             }
         });
     }
@@ -669,10 +666,10 @@ public class Actions {
                 return true;
             }
         };
-        requestPassword(context, R.string.rele, silent ? 0 : R.string.rele, new Runnable() {
+        requestPassword(context, car_id, R.string.rele, silent ? 0 : R.string.rele, new Answer() {
             @Override
-            public void run() {
-                SmsMonitor.sendSMS(context, car_id, sms);
+            void answer(String pswd) {
+                SmsMonitor.sendSMS(context, car_id, pswd, sms);
             }
         });
     }
@@ -709,8 +706,21 @@ public class Actions {
         });
     }
 
-    static void valet_on_sms(final Context context, final String car_id, String ccode) {
-        SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_on, ccode + " VALET", "Valet OK", INCORRECT_MESSAGE, R.string.invalid_ccode) {
+    static void valet_on_sms(final Context context, final String car_id, final String ccode) {
+        if (Preferences.isDevicePasswd(context, car_id)) {
+            requestPassword(context, car_id, R.string.valet_on, R.string.valet_on, new Answer() {
+                @Override
+                void answer(String pswd) {
+                    valet_on_sms(context, car_id, ccode, pswd);
+                }
+            });
+            return;
+        }
+        valet_on_sms(context, car_id, ccode, null);
+    }
+
+    static void valet_on_sms(final Context context, final String car_id, String ccode, String pswd) {
+        SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.valet_on, ccode + " VALET", "Valet OK", INCORRECT_MESSAGE, R.string.invalid_ccode) {
             @Override
             boolean process_answer(Context context, String car_id, String text) {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -766,8 +776,21 @@ public class Actions {
         });
     }
 
-    static void valet_off_sms(final Context context, final String car_id, String ccode) {
-        SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_off, ccode + " INIT", "Main user OK", INCORRECT_MESSAGE, R.string.invalid_ccode) {
+    static void valet_off_sms(final Context context, final String car_id, final String ccode) {
+        if (Preferences.isDevicePasswd(context, car_id)) {
+            requestPassword(context, car_id, R.string.valet_on, R.string.valet_on, new Answer() {
+                @Override
+                void answer(String pswd) {
+                    valet_off_sms(context, car_id, ccode, pswd);
+                }
+            });
+            return;
+        }
+        valet_off_sms(context, car_id, ccode, null);
+    }
+
+    static void valet_off_sms(final Context context, final String car_id, String ccode, String pswd) {
+        SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.valet_off, ccode + " INIT", "Main user OK", INCORRECT_MESSAGE, R.string.invalid_ccode) {
             @Override
             boolean process_answer(Context context, String car_id, String text) {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -791,10 +814,10 @@ public class Actions {
     }
 
     static void block_motor(final Context context, final String car_id) {
-        requestPassword(context, R.string.block, R.string.block_msg, new Runnable() {
+        requestPassword(context, car_id, R.string.block, R.string.block_msg, new Answer() {
             @Override
-            public void run() {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.block, "BLOCK MTR", "BLOCK MTR OK") {
+            void answer(String pswd) {
+                SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.block, "BLOCK MTR", "BLOCK MTR OK") {
                     @Override
                     boolean process_answer(Context context, String car_id, String text) {
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -820,13 +843,13 @@ public class Actions {
         requestCCode(context, car_id, R.string.init_phone, 0, new Actions.Answer() {
             @Override
             void answer(String ccode) {
-                SmsMonitor.sendSMS(context, car_id, new SmsMonitor.Sms(R.string.valet_off, ccode, null, INCORRECT_MESSAGE, R.string.invalid_ccode) {
+                SmsMonitor.sendSMS(context, car_id, null, new SmsMonitor.Sms(R.string.valet_off, ccode, null, INCORRECT_MESSAGE, R.string.invalid_ccode) {
                     @Override
                     boolean process_answer(Context context, String car_id, String body) {
                         if (answer == null) {
                             text += " INIT";
                             answer = "Main user OK";
-                            SmsMonitor.sendSMS(context, car_id, this);
+                            SmsMonitor.sendSMS(context, car_id, null, this);
                         }
                         return true;
                     }
@@ -845,9 +868,9 @@ public class Actions {
 
     static void set_sound(final Context context, final String car_id, final int id) {
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        requestPassword(context, id, null, new Runnable() {
+        requestPassword(context, car_id, id, null, new Answer() {
             @Override
-            public void run() {
+            void answer(String text) {
                 if (!isNetwork(context)) {
                     showMessage(context, id, R.string.no_network);
                     return;
@@ -966,29 +989,35 @@ public class Actions {
         dialog.show();
     }
 
-    static void requestPassword(final Context context, final int id_title, int id_message, final Runnable action) {
-        requestPassword(context, id_title, (id_message == 0) ? null : context.getString(id_message), action);
+    static void requestPassword(final Context context, String car_id, final int id_title, int id_message, final Answer action) {
+        requestPassword(context, car_id, id_title, (id_message == 0) ? null : context.getString(id_message), action);
     }
 
-    static void requestPassword(final Context context, final int id_title, CharSequence message, final Runnable action) {
+    static void requestPassword(final Context context, String car_id, final int id_title, CharSequence message, final Answer action) {
+        final boolean device_password = Preferences.isDevicePasswd(context, car_id);
+        String msg = (message == null) ? context.getString(R.string.input_password) : message.toString();
+        if (device_password)
+            msg = context.getString(R.string.input_device_pswd);
         AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setTitle(id_title)
-                .setMessage((message == null) ? context.getString(R.string.input_password) : message)
+                .setMessage(msg)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.ok, null);
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         final String password = preferences.getString(Names.PASSWORD, "");
-        if (password.length() > 0) {
+        if (device_password || (password.length() > 0)) {
             int id = R.layout.password;
-            Pattern pattern = Pattern.compile("[0-9]+");
-            Matcher matcher = pattern.matcher(password);
-            if (matcher.matches())
-                id = R.layout.password_number;
+            if (!device_password) {
+                Pattern pattern = Pattern.compile("[0-9]+");
+                Matcher matcher = pattern.matcher(password);
+                if (matcher.matches())
+                    id = R.layout.password_number;
+            }
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
             builder.setView(inflater.inflate(id, null));
         } else if (message == null) {
-            action.run();
+            action.answer(null);
             return;
         }
 
@@ -1012,9 +1041,9 @@ public class Actions {
 
                 @Override
                 public void afterTextChanged(Editable s) {
-                    if (s.toString().equals(password)) {
+                    if (!device_password && s.toString().equals(password)) {
                         dialog.dismiss();
-                        action.run();
+                        action.answer(null);
                     }
                 }
             });
@@ -1023,6 +1052,12 @@ public class Actions {
         dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (device_password) {
+                    String pswd = etPassword.getText().toString();
+                    dialog.dismiss();
+                    action.answer(pswd);
+                    return;
+                }
                 if (password.length() > 0) {
                     if (!password.equals(etPassword.getText().toString())) {
                         showMessage(context, id_title, R.string.invalid_password);
@@ -1030,7 +1065,7 @@ public class Actions {
                     }
                 }
                 dialog.dismiss();
-                action.run();
+                action.answer(null);
             }
         });
     }

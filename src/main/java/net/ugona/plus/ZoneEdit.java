@@ -1,9 +1,14 @@
 package net.ugona.plus;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.InputFilter;
+import android.text.Spanned;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.CheckBox;
@@ -21,6 +26,8 @@ public class ZoneEdit extends GpsActivity {
     EditText etName;
     CheckBox chkSms;
     SettingActivity.Zone zone;
+    boolean clear_zone;
+    boolean confirm;
 
     @Override
     String loadURL() {
@@ -63,6 +70,20 @@ public class ZoneEdit extends GpsActivity {
         chkSms = (CheckBox) findViewById(R.id.sms_check);
         etName.setText(zone.name);
         chkSms.setChecked(zone.sms);
+        InputFilter[] filters = {
+                new InputFilter() {
+                    @Override
+                    public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+                        for (int i = start; i < end; i++) {
+                            if (!Character.isLetterOrDigit(source.charAt(i))) {
+                                return "";
+                            }
+                        }
+                        return null;
+                    }
+                }
+        };
+        etName.setFilters(filters);
     }
 
     @Override
@@ -85,8 +106,51 @@ public class ZoneEdit extends GpsActivity {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.delete) {
+            clear_zone = true;
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void finish() {
-        setZone();
+        if (clear_zone) {
+            if (!confirm && !zone._name.equals("")) {
+                AlertDialog dialog = new AlertDialog.Builder(this)
+                        .setTitle(R.string.zone_remove)
+                        .setNegativeButton(R.string.cancel, null)
+                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                confirm = true;
+                                finish();
+                            }
+                        })
+                        .create();
+                dialog.show();
+                return;
+            }
+            zone.name = "";
+        } else {
+            setZone();
+            if (zone.name.equals("")) {
+                AlertDialog dialog = new AlertDialog.Builder(this)
+                        .setTitle(R.string.zone_name)
+                        .setMessage(R.string.zone_name_msg)
+                        .setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                etName.requestFocus();
+                            }
+                        })
+                        .create();
+                dialog.show();
+                return;
+            }
+        }
         Intent i = getIntent();
         try {
             byte[] data = null;

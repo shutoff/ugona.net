@@ -419,4 +419,10 @@
     <string name="voltage_shift">Коррекция напряжения</string>
     <string name="zones">Зоны</string>
     <string name="sms_notify">Оповещать о въезде и выезде из зоны по СМС</string>
+    <string name="add_zone">Добавить зону</string>
+    <string name="zone_name">Пустое наиеменование</string>
+    <string name="zone_name_msg">Наименование зоны не может быть пустым.\nВвведите наименование зоны</string>
+    <string name="remove_zone">Удалить зону</string>
+    <string name="device_pswd">Требуется отправка пароля в СМС</string>
+    <string name="input_device_pswd">Введите пароль устройства</string>
 </resources>

@@ -146,4 +146,6 @@ public final class Names {
 
     static final String ACTIVE_ZONE = "active_zone_";
     static final String ZONE_NOTIFY = "zone_notify_";
+
+    static final String DEVICE_PSWD = "device_paswd";
 }

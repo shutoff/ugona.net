@@ -130,6 +130,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
 
         powerMgr = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
         setContentView(R.layout.main);
 
@@ -269,7 +270,6 @@ public class MainActivity extends ActionBarActivity {
         intFilter.addAction(FetchService.ACTION_UPDATE_FORCE);
         registerReceiver(br, intFilter);
 
-        alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         pi = createPendingResult(REQUEST_ALARM, new Intent(), 0);
     }
 

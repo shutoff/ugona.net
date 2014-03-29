@@ -461,4 +461,10 @@
     <string name="voltage_shift">Voltage correction</string>
     <string name="zones">Zones</string>
     <string name="sms_notify">Notify as SMS</string>
+    <string name="add_zone">Add zone</string>
+    <string name="zone_name">Zone name is empty</string>
+    <string name="zone_name_msg">Input name of zone</string>
+    <string name="zone_remove">Remove zone</string>
+    <string name="device_pswd">Device require password on SMS</string>
+    <string name="input_device_pswd">Input device password</string>
 </resources>

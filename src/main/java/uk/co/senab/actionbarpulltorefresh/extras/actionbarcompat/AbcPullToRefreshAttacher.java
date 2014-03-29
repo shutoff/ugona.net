@@ -41,6 +41,8 @@ class AbcPullToRefreshAttacher extends uk.co.senab.actionbarpulltorefresh.librar
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             super.addHeaderViewToActivity(headerView);
         } else {
+            if (getAttachedActivity() == null)
+                return;
             // On older devices we need to wrap the HeaderView in a FrameLayout otherwise
             // visibility changes do not take effect
             mHeaderViewWrapper = new FrameLayout(getAttachedActivity());
@@ -54,6 +56,8 @@ class AbcPullToRefreshAttacher extends uk.co.senab.actionbarpulltorefresh.librar
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             super.updateHeaderViewPosition(headerView);
         } else {
+            if (mHeaderViewWrapper == null)
+                return;
             super.updateHeaderViewPosition(mHeaderViewWrapper);
         }
     }
@@ -63,6 +67,8 @@ class AbcPullToRefreshAttacher extends uk.co.senab.actionbarpulltorefresh.librar
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             super.removeHeaderViewFromActivity(headerView);
         } else if (mHeaderViewWrapper != null) {
+            if (mHeaderViewWrapper == null)
+                return;
             super.removeHeaderViewFromActivity(mHeaderViewWrapper);
             mHeaderViewWrapper = null;
         }

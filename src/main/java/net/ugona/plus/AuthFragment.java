@@ -94,11 +94,13 @@ public class AuthFragment extends SettingsFragment {
                 items.add(new Item(R.string.phones, R.string.phones_sum) {
                     @Override
                     void click() {
-                        Actions.requestPassword(getActivity(), R.string.phones, R.string.phones_sum, new Runnable() {
+                        Actions.requestPassword(getActivity(), car_id, R.string.phones, R.string.phones_sum, new Actions.Answer() {
                             @Override
-                            public void run() {
+                            void answer(String pswd) {
                                 Intent i = new Intent(getActivity(), Phones.class);
                                 i.putExtra(Names.ID, car_id);
+                                if (pswd != null)
+                                    i.putExtra(Names.PASSWORD, pswd);
                                 startActivity(i);
                             }
                         });
@@ -131,10 +133,10 @@ public class AuthFragment extends SettingsFragment {
                                 final int mode = grp.getCheckedRadioButtonId();
                                 final int id = (mode == R.id.sms) ? R.string.sms_mode : R.string.call_mode;
                                 final String text = (mode == R.id.sms) ? "ALARM SMS" : "ALARM CALL";
-                                Actions.requestPassword(view.getContext(), R.string.alarm_mode, id, new Runnable() {
+                                Actions.requestPassword(view.getContext(), car_id, R.string.alarm_mode, id, new Actions.Answer() {
                                     @Override
-                                    public void run() {
-                                        SmsMonitor.sendSMS(view.getContext(), car_id, new SmsMonitor.Sms(id, text, text + " OK"));
+                                    void answer(String pswd) {
+                                        SmsMonitor.sendSMS(view.getContext(), car_id, pswd, new SmsMonitor.Sms(id, text, text + " OK"));
                                     }
                                 });
                                 dialog.dismiss();
@@ -144,6 +146,9 @@ public class AuthFragment extends SettingsFragment {
                 });
             }
             items.add(new CheckBoxItem(R.string.show_photo, Names.SHOW_PHOTO, false));
+
+            if (!preferences.getString(Names.VERSION + car_id, "").toLowerCase().contains("superagent"))
+                items.add(new CheckBoxItem(R.string.device_pswd, Names.DEVICE_PSWD, false));
         }
         update();
 

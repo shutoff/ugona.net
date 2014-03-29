@@ -174,8 +174,9 @@ function center() {
     var d_lat = lat2 - lat;
     var d_lng = lng2 - lng;
     
-    map.fitBounds([ [min_lat - d_lat, min_lng - d_lng], [max_lat + d_lat, max_lng + d_lng]]);
+    map.fitBounds([ [lat1 - d_lat, lng1 - d_lng], [lat2 + d_lat, lng2 + d_lng]]);
 }
+
 
 
 

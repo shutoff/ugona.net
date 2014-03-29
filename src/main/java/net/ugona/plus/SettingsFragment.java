@@ -137,6 +137,9 @@ public class SettingsFragment extends Fragment {
         }
 
         void setView(View v) {
+            v.findViewById(R.id.block1).setVisibility(View.VISIBLE);
+            v.findViewById(R.id.block2).setVisibility(View.VISIBLE);
+            v.findViewById(R.id.block_add).setVisibility(View.GONE);
             TextView tvTitle = (TextView) v.findViewById(R.id.title);
             tvTitle.setVisibility(View.VISIBLE);
             tvTitle.setText(name);
@@ -169,6 +172,30 @@ public class SettingsFragment extends Fragment {
 
         void setChanged() {
             vChanged.setTextColor(getResources().getColor(changed() ? R.color.changed : android.R.color.secondary_text_dark));
+        }
+    }
+
+    class AddItem extends Item {
+
+        AddItem(int n) {
+            super(n, "");
+        }
+
+        @Override
+        void setView(View v) {
+            super.setView(v);
+            v.findViewById(R.id.block1).setVisibility(View.GONE);
+            v.findViewById(R.id.block2).setVisibility(View.GONE);
+            View vAdd = v.findViewById(R.id.block_add);
+            vAdd.setVisibility(View.VISIBLE);
+            vAdd.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    click();
+                }
+            });
+            TextView tv = (TextView) v.findViewById(R.id.text_add);
+            tv.setText(name);
         }
     }
 
