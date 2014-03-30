@@ -6,11 +6,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.Vector;
+
 public class AutoStartFragment extends DeviceFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
+        fill();
+        return v;
+    }
+
+    @Override
+    void update() {
+        fill();
+        super.update();
+    }
+
+    void fill() {
+        items = new Vector<Item>();
         items.add(new ListItem(R.string.start_time, 20, R.array.start_timer));
         items.add(new SeekBarItem(R.string.voltage_limit, 18, 60, 93, R.string.v, 0.13) {
             @Override
@@ -63,6 +77,7 @@ public class AutoStartFragment extends DeviceFragment {
                     super.setValue(value.equals("") ? "1" : "");
                 }
             });
-        return v;
+        items.add(new Item(R.string.schedule, ""));
+        items.add(new AddItem(R.string.add_timer));
     }
 }

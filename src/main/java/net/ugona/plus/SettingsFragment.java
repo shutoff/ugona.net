@@ -147,8 +147,9 @@ public class SettingsFragment extends Fragment {
             vChanged = tvTitle;
             setChanged();
             TextView tvValue = (TextView) v.findViewById(R.id.value);
-            tvValue.setVisibility(View.VISIBLE);
-            tvValue.setText(getValue());
+            String val = getValue();
+            tvValue.setVisibility(val.equals("") ? View.GONE : View.VISIBLE);
+            tvValue.setText(val);
             v.findViewById(R.id.check).setVisibility(View.GONE);
             v.findViewById(R.id.spinner).setVisibility(View.GONE);
             v.findViewById(R.id.seekbar).setVisibility(View.GONE);

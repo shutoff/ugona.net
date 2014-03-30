@@ -6,12 +6,15 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -36,8 +39,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
+import com.eclipsesource.json.ParseException;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -62,6 +67,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -83,37 +91,39 @@ public class MainActivity extends ActionBarActivity {
 
     static final int VERSION = 2;
     static final String SENDER_ID = "915289471784";
-
+    final static String URL_KEY = "https://car-online.ugona.net/key?auth=$1";
+    final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
+    final static String URL_PHOTOS = "https://car-online.ugona.net/photos?skey=$1&begin=$2";
     ViewPager mViewPager;
     SharedPreferences preferences;
     BroadcastReceiver br;
     AlarmManager alarmMgr;
     PendingIntent pi;
-
     String car_id;
     Cars.Car[] cars;
-
     boolean show_date;
     boolean pointer;
-
     boolean[] show_pages;
-
     LocalDate current;
     Menu topSubMenu;
-
     boolean active;
-
     StateFragment state_fragment;
-
     CaldroidFragment caldroidFragment;
-
     Set<DateChangeListener> dateChangeListenerSet;
-
     GoogleCloudMessaging gcm;
     PowerManager powerMgr;
+    ProgressDialog auth_progress;
+    Vector<AuthData> auth_data;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread thread, Throwable ex) {
+                State.print(ex);
+            }
+        });
 
         try {
             ViewConfiguration config = ViewConfiguration.get(this);
@@ -202,7 +212,9 @@ public class MainActivity extends ActionBarActivity {
             String key = preferences.getString(Names.CAR_KEY + car_id, "");
             String auth = preferences.getString(Names.AUTH + car_id, "");
 
-            if (auth.equals("") && !preferences.getBoolean(Names.POINTER, false)) {
+            if (preferences.getString(Names.CARS, "").equals("") && (auth.equals(""))) {
+                firstSetup();
+            } else if (auth.equals("")) {
                 Intent i = new Intent(this, AuthDialog.class);
                 i.putExtra(Names.ID, car_id);
                 i.putExtra(Names.AUTH, true);
@@ -821,8 +833,190 @@ public class MainActivity extends ActionBarActivity {
         return true;
     }
 
+    void firstSetup() {
+        auth_progress = new ProgressDialog(this);
+        auth_progress.setMessage(getString(R.string.init));
+        auth_progress.show();
+        auth_progress.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                auth_progress = null;
+                String auth = preferences.getString(Names.AUTH + car_id, "");
+                String phone = preferences.getString(Names.CAR_PHONE + car_id, "");
+                if (auth.equals("")) {
+                    Intent i = new Intent(MainActivity.this, AuthDialog.class);
+                    i.putExtra(Names.ID, car_id);
+                    i.putExtra(Names.AUTH, true);
+                    if (State.hasTelephony(MainActivity.this) && (phone.length() == 0))
+                        i.putExtra(Names.CAR_PHONE, true);
+                    startActivityForResult(i, CAR_SETUP);
+                }
+            }
+        });
+
+        AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                Uri uri = Uri.parse("content://sms/inbox");
+                Cursor cur = getContentResolver().query(uri, new String[]{"_id", "address", "body"}, null, null, null);
+                auth_data = new Vector<AuthData>();
+                if (cur.moveToFirst()) {
+                    Pattern pat = Pattern.compile("www.car-online.ru \\(login:([A-Za-z0-9]+),password:([A-Za-z0-9]+)\\)");
+                    while (cur.moveToNext()) {
+                        String body = cur.getString(2);
+                        Matcher matcher = pat.matcher(body);
+                        if (!matcher.find())
+                            continue;
+                        AuthData auth = new AuthData();
+                        auth.phone = cur.getString(1);
+                        auth.login = matcher.group(1);
+                        auth.pass = matcher.group(2);
+                        auth_data.add(auth);
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                checkAuth();
+            }
+        };
+        task.execute();
+    }
+
+    void checkAuth() {
+        if (auth_progress == null)
+            return;
+        for (final AuthData data : auth_data) {
+            if (data.checked)
+                continue;
+            data.checked = true;
+            HttpTask task = new HttpTask() {
+                @Override
+                void result(JsonObject res) throws ParseException {
+                    data.key = res.get("key").asString();
+                    HttpTask verTask = new HttpTask() {
+                        @Override
+                        void result(JsonObject res) throws ParseException {
+                            data.version = res.get("version").asString();
+                            HttpTask photoTask = new HttpTask() {
+                                @Override
+                                void result(JsonObject res) throws ParseException {
+                                    JsonArray array = res.get("photos").asArray();
+                                    data.photo = array.size() > 0;
+                                    checkAuth();
+                                }
+
+                                @Override
+                                void error() {
+
+                                }
+                            };
+                            long start = new Date().getTime() - 3 * 86400000;
+                            photoTask.execute(URL_PHOTOS, data.key, start);
+                        }
+
+                        @Override
+                        void error() {
+                            data.key = null;
+                            checkAuth();
+                        }
+                    };
+                    verTask.execute(URL_PROFILE, data.key);
+                }
+
+                @Override
+                void error() {
+                    checkAuth();
+                }
+            };
+            String auth = AuthDialog.crypt(data.login + "\0" + data.pass);
+            task.execute(URL_KEY, auth);
+            return;
+        }
+        int id = 0;
+        SharedPreferences.Editor ed = preferences.edit();
+        String cars = "";
+        for (AuthData data : auth_data) {
+            if (data.key == null)
+                continue;
+            if (data.version.toUpperCase().substring(0, 5).equals("MS-TR"))
+                continue;
+            String c_id = id + "";
+            if (id == 0) {
+                c_id = "";
+            } else {
+                cars += ",";
+            }
+            cars += c_id;
+            id++;
+            ed.putString(Names.CAR_PHONE + c_id, data.phone);
+            ed.putString(Names.CAR_KEY + c_id, data.key);
+            ed.putString(Names.LOGIN + c_id, data.login);
+            ed.putString(Names.AUTH + c_id, AuthDialog.crypt(data.login + "\0" + data.pass));
+            if (data.photo)
+                ed.putBoolean(Names.SHOW_PHOTO + c_id, true);
+        }
+        String pointers = "";
+        int p_id = 0;
+        for (AuthData data : auth_data) {
+            if (data.key == null)
+                continue;
+            if (!data.version.toUpperCase().substring(0, 5).equals("MS-TR"))
+                continue;
+            String c_id = id + "";
+            if (id == 0)
+                c_id = "";
+            id++;
+            String name = getString(R.string.pointer);
+            if (p_id++ > 0)
+                name += p_id;
+            ed.putString(Names.CAR_NAME + c_id, name);
+            ed.putString(Names.CAR_PHONE + c_id, data.phone);
+            ed.putString(Names.CAR_KEY + c_id, data.key);
+            ed.putString(Names.LOGIN + c_id, data.login);
+            ed.putString(Names.AUTH + c_id, AuthDialog.crypt(data.login + "\0" + data.pass));
+            ed.putBoolean(Names.POINTER + c_id, true);
+            if (!pointers.equals(""))
+                pointers += ",";
+            pointers += c_id;
+        }
+        if (!pointers.equals("")) {
+            State.appendLog("Set pointers " + pointers);
+            ed.putString(Names.POINTERS, pointers);
+            ed.putBoolean(Names.INIT_POINTER, true);
+        }
+        State.appendLog("Set cars " + cars);
+        ed.putString(Names.CARS, cars);
+        ed.commit();
+        for (int i = 0; i < id; i++) {
+            Intent intent = new Intent(this, FetchService.class);
+            String c_id = i + "";
+            if (i == 0)
+                c_id = "";
+            intent.putExtra(Names.ID, c_id);
+            startService(intent);
+            intent = new Intent(FetchService.ACTION_UPDATE_FORCE);
+            intent.putExtra(Names.ID, c_id);
+            sendBroadcast(intent);
+        }
+        auth_progress.dismiss();
+        registerGCM();
+    }
+
     static interface DateChangeListener {
         abstract void dateChanged(LocalDate current);
+    }
+
+    static class AuthData {
+        String phone;
+        String login;
+        String pass;
+        String key;
+        String version;
+        boolean checked;
+        boolean photo;
     }
 
     class PagerAdapter extends FragmentStatePagerAdapter {

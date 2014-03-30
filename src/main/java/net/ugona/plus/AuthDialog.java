@@ -44,6 +44,7 @@ public class AuthDialog extends Activity {
 
     final static String URL_KEY = "https://car-online.ugona.net/key?auth=$1";
     final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
+
     EditText edLogin;
     EditText edPasswd;
     EditText edNumber;
@@ -172,6 +173,9 @@ public class AuthDialog extends Activity {
                                     setResult(RESULT_OK, getIntent());
                                     dlgCheck.dismiss();
                                     dialog.dismiss();
+                                    Intent intent = new Intent(FetchService.ACTION_UPDATE_FORCE);
+                                    intent.putExtra(Names.ID, car_id);
+                                    sendBroadcast(intent);
                                 }
 
                                 @Override

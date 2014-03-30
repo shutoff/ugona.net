@@ -30,8 +30,10 @@ public class Preferences {
             if (!car_ok)
                 car_id = null;
         }
-        if (car_id == null)
+        if ((car_id == null) && (cars.length > 0))
             car_id = cars[0];
+        if (car_id == null)
+            car_id = "";
         return car_id;
     }
 

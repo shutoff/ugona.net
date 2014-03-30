@@ -349,6 +349,7 @@ public class SmsMonitor extends BroadcastReceiver {
             if (compare(body, msg[i]))
                 return true;
         }
+        State.appendLog("SMS: " + body);
         if (compare(body, "InGPSZone:")) {
             Alarm.zoneNotify(context, car_id, true, body.substring(10), true);
             return true;

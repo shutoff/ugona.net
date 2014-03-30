@@ -510,6 +510,7 @@ public class FetchService extends Service {
             if (zone != null) {
                 ed.putLong(Names.ZONE_TIME + car_id, zone.asLong());
                 ed.putBoolean(Names.ZONE_IN + car_id, res.get("zone_in").asBoolean());
+                State.appendLog("Zone: " + zone.asLong() + "," + res.get("zone_in").asBoolean());
                 new ZoneRequest(car_id);
             }
 
@@ -759,12 +760,15 @@ public class FetchService extends Service {
                     JsonValue vName = e.get("zone");
                     if (vName != null)
                         zone = vName.asString();
+                    State.appendLog("Zone res " + type + " " + zone);
                     Alarm.zoneNotify(FetchService.this, car_id, type == 86, zone, true);
                     break;
                 }
             }
-            if (i >= events.size())
+            if (i >= events.size()) {
+                State.appendLog("Zone no event");
                 Alarm.zoneNotify(FetchService.this, car_id, preferences.getBoolean(Names.ZONE_IN + car_id, false), null, true);
+            }
             SharedPreferences.Editor ed = preferences.edit();
             ed.remove(Names.ZONE_TIME + car_id);
             ed.remove(Names.ZONE_IN + car_id);

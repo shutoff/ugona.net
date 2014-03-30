@@ -427,4 +427,8 @@
     <string name="input_device_pswd">Введите пароль устройства</string>
     <string name="attention">Внимание</string>
     <string name="zone_msg">При отключении СМС-уведомлений для зоны, уведомления будут приходить с некоторой задержкой в зависимости от настроек устройства и настроек сети на телефоне</string>
+    <string name="zone_bad_char">Название зоны может сожержать только латинские буквы и цифры</string>
+    <string name="schedule">Расписание запуска</string>
+    <string name="add_timer">Добавить таймер</string>
+    <string name="init">Инициализация</string>
 </resources>

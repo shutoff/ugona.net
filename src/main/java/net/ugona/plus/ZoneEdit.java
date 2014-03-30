@@ -13,6 +13,7 @@ import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -20,9 +21,12 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ZoneEdit extends GpsActivity {
 
+    static Pattern zonePat = Pattern.compile("[A-Za-z0-9]+");
     EditText etName;
     CheckBox chkSms;
     SettingActivity.Zone zone;
@@ -74,12 +78,13 @@ public class ZoneEdit extends GpsActivity {
                 new InputFilter() {
                     @Override
                     public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-                        for (int i = start; i < end; i++) {
-                            if (!Character.isLetterOrDigit(source.charAt(i))) {
-                                return "";
-                            }
-                        }
-                        return null;
+                        String s = source.subSequence(start, end).toString();
+                        Matcher matcher = zonePat.matcher(s);
+                        if (matcher.matches())
+                            return null;
+                        Toast toast = Toast.makeText(ZoneEdit.this, R.string.zone_bad_char, Toast.LENGTH_LONG);
+                        toast.show();
+                        return "";
                     }
                 }
         };

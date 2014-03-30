@@ -213,6 +213,7 @@ public class SettingActivity extends ActionBarActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putString(Names.ID, car_id);
         if (values != null) {
             outState.putIntArray("values", values);
             outState.putIntArray("old_values", old_values);
@@ -304,6 +305,7 @@ public class SettingActivity extends ActionBarActivity {
                 zone.lng2 = Double.parseDouble(z[4]);
                 zone.sms = !z[5].equals("");
                 zone.device = !z[6].equals("");
+                zone.clearChanged();
                 zones.add(zone);
             }
             sendUpdate();
