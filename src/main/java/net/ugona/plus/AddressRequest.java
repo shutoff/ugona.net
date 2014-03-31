@@ -11,11 +11,10 @@ import java.util.Locale;
 abstract public class AddressRequest {
 
     static final String GOOGLE_URL = "https://maps.googleapis.com/maps/api/geocode/json?latlng=$1,$2&sensor=false&language=$3";
-    static final String OSM_URL = "http://nominatim.openstreetmap.org/reverse?lat=$1&lon=$2&osm_type=N&format=json&address_details=0&accept-language=$3";
+    static final String OSM_URL = "https://nominatim.openstreetmap.org/reverse?lat=$1&lon=$2&osm_type=N&format=json&address_details=0&accept-language=$3";
+    Request request;
 
     abstract void addressResult(String address);
-
-    Request request;
 
     void getAddress(SharedPreferences preferences, double lat, double lng) {
         if (preferences.getString("map_type", "").equals("OSM")) {
@@ -33,14 +32,14 @@ abstract public class AddressRequest {
 
     class GoogleRequest extends Request {
 
+        double latitude;
+        double longitude;
+
         void exec(double lat, double lng) {
             latitude = lat;
             longitude = lng;
             execute(GOOGLE_URL, latitude, longitude, Locale.getDefault().getLanguage());
         }
-
-        double latitude;
-        double longitude;
 
         @Override
         void result(JsonObject data) throws ParseException {

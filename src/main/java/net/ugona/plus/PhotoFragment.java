@@ -78,12 +78,6 @@ public class PhotoFragment extends Fragment
     long loading;
 
     File cacheDir;
-
-    static class BitmapCache {
-        Bitmap bitmap;
-        long counter;
-    }
-
     Map<String, BitmapCache> memCache;
 
     @Override
@@ -284,6 +278,18 @@ public class PhotoFragment extends Fragment
         fetcher.execute(photo);
     }
 
+    static class BitmapCache {
+        Bitmap bitmap;
+        long counter;
+    }
+
+    static class Photo {
+        long time;
+        long id;
+        int camera;
+        long loading;
+    }
+
     class DataFetcher extends HttpTask {
 
         LocalDate date;
@@ -448,7 +454,7 @@ public class PhotoFragment extends Fragment
             HttpURLConnection connection = null;
             try {
                 URL u = new URL(url);
-                connection = (HttpURLConnection) u.openConnection();
+                connection = HttpTask.client.open(u);
                 int status = connection.getResponseCode();
                 if (status != HttpStatus.SC_OK)
                     return null;
@@ -456,7 +462,6 @@ public class PhotoFragment extends Fragment
                 file.createNewFile();
                 FileOutputStream out = new FileOutputStream(file);
                 InputStream in = connection.getInputStream();
-                byte[] data = new byte[4096];
                 byte[] buffer = new byte[4096];
                 int bytesRead;
                 while ((bytesRead = in.read(buffer)) != -1) {
@@ -485,12 +490,5 @@ public class PhotoFragment extends Fragment
             fetcher = null;
             startLoading();
         }
-    }
-
-    static class Photo {
-        long time;
-        long id;
-        int camera;
-        long loading;
     }
 }

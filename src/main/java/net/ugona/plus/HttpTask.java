@@ -7,6 +7,7 @@ import android.util.Log;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
+import com.squareup.okhttp.OkHttpClient;
 
 import org.apache.http.HttpStatus;
 
@@ -20,6 +21,7 @@ import java.net.URLEncoder;
 
 public abstract class HttpTask {
 
+    static OkHttpClient client = new OkHttpClient();
     AsyncTask<Object, Void, JsonObject> bgTask;
     int pause = 0;
     String error_text;
@@ -58,8 +60,7 @@ public abstract class HttpTask {
                     if (pause > 0)
                         Thread.sleep(pause);
                     Log.v("url", url);
-                    URL u = new URL(url);
-                    connection = (HttpURLConnection) u.openConnection();
+                    connection = client.open(new URL(url));
                     InputStream in = new BufferedInputStream(connection.getInputStream(), 8192);
                     int status = connection.getResponseCode();
                     reader = new InputStreamReader(in);
