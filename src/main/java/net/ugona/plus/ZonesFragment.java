@@ -77,6 +77,7 @@ public class ZonesFragment extends DeviceFragment {
                 startActivityForResult(i, ZONE_EDIT);
             }
         });
+        items.add(new CheckBoxItem(R.string.zone_my, Names.ZONE_MY, false));
         items.add(new Item(R.string.attention, R.string.zone_msg));
     }
 
@@ -93,6 +94,7 @@ public class ZonesFragment extends DeviceFragment {
                     if (z.id == zone.id) {
                         if (zone.name.equals("")) {
                             activity.zones.remove(z);
+                            activity.zone_deleted = true;
                             update();
                             break;
                         }

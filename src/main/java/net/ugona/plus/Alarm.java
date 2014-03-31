@@ -118,7 +118,7 @@ public class Alarm extends Activity {
         ed.commit();
     }
 
-    static void zoneNotify(Context context, String car_id, boolean in_zone, String zone, boolean check) {
+    static void zoneNotify(Context context, String car_id, boolean in_zone, String zone, boolean check, boolean silent) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String old = preferences.getString(Names.ACTIVE_ZONE + car_id, "");
         State.appendLog("Zone notify: " + in_zone + ", " + zone + " old=" + old);
@@ -143,9 +143,11 @@ public class Alarm extends Activity {
             message += zone;
         }
         State.appendLog("Zone: " + message);
-        zone_notify = createNotification(context, message, R.drawable.warning, car_id, null);
         SharedPreferences.Editor ed = preferences.edit();
-        ed.putInt(Names.ZONE_NOTIFY + car_id, zone_notify);
+        if (!silent) {
+            zone_notify = createNotification(context, message, R.drawable.warning, car_id, null);
+            ed.putInt(Names.ZONE_NOTIFY + car_id, zone_notify);
+        }
         if (in_zone) {
             ed.putString(Names.ACTIVE_ZONE + car_id, (zone == null) ? "___" : zone);
         } else {

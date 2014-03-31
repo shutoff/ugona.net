@@ -473,4 +473,5 @@
     <string name="schedule">Start schedule</string>
     <string name="add_timer">Add timer</string>
     <string name="init">Initialization</string>
+    <string name="zone_my">No notify if car around from me</string>
 </resources>
