@@ -44,7 +44,7 @@ public class AuthDialog extends Activity {
 
     final static String URL_KEY = "https://car-online.ugona.net/key?auth=$1";
     final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
-
+    static boolean is_show;
     EditText edLogin;
     EditText edPasswd;
     EditText edNumber;
@@ -90,6 +90,8 @@ public class AuthDialog extends Activity {
         super.onCreate(savedInstanceState);
         setResult(RESULT_CANCELED);
 
+        is_show = true;
+
         show_auth = getIntent().getBooleanExtra(Names.AUTH, false);
         show_phone = getIntent().getBooleanExtra(Names.CAR_PHONE, false);
 
@@ -118,6 +120,7 @@ public class AuthDialog extends Activity {
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
+                is_show = false;
                 finish();
             }
         });

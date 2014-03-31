@@ -157,6 +157,7 @@ public class SettingsFragment extends Fragment {
             v.findViewById(R.id.title1).setVisibility(View.GONE);
             v.findViewById(R.id.check_edit).setVisibility(View.GONE);
             v.findViewById(R.id.progress).setVisibility(View.GONE);
+            v.findViewById(R.id.block_timer).setVisibility(View.GONE);
         }
 
         String getValue() {
