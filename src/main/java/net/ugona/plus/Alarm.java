@@ -120,7 +120,7 @@ public class Alarm extends Activity {
 
     static void zoneNotify(Context context, String car_id, boolean in_zone, String zone, boolean check) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String old = preferences.getString(Names.ACTIVE_ZONE, "");
+        String old = preferences.getString(Names.ACTIVE_ZONE + car_id, "");
         State.appendLog("Zone notify: " + in_zone + ", " + zone + " old=" + old);
         if (check) {
             if (in_zone) {

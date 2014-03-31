@@ -296,10 +296,22 @@ public class StateFragment extends Fragment
                     if (error_text == null)
                         error_text = getString(R.string.data_error);
                     if (error_text.equals("Auth error")) {
-                        Intent i = new Intent(getActivity(), AuthDialog.class);
-                        i.putExtra(Names.ID, car_id);
-                        i.putExtra(Names.AUTH, true);
-                        startActivityForResult(i, AUTH_REQUEST);
+                        HttpTask task = new HttpTask() {
+                            @Override
+                            void result(JsonObject res) throws ParseException {
+                                String key = res.get("key").asString();
+                                SharedPreferences.Editor ed = preferences.edit();
+                                ed.putString(Names.CAR_KEY + car_id, key);
+                                ed.commit();
+                                startUpdate(getActivity());
+                            }
+
+                            @Override
+                            void error() {
+                                showAuth();
+                            }
+                        };
+                        task.execute(AuthDialog.URL_KEY, preferences.getString(Names.AUTH + car_id, ""));
                         return;
                     }
                     tvError.setText(error_text);
@@ -369,6 +381,15 @@ public class StateFragment extends Fragment
                 .listener(this)
                 .setup(mPullToRefreshLayout);
         mPullToRefreshLayout.setPullEnabled(true);
+    }
+
+    void showAuth() {
+        if (AuthDialog.is_show || (getActivity() == null))
+            return;
+        Intent i = new Intent(getActivity(), AuthDialog.class);
+        i.putExtra(Names.ID, car_id);
+        i.putExtra(Names.AUTH, true);
+        startActivityForResult(i, AUTH_REQUEST);
     }
 
     void update(Context context) {
