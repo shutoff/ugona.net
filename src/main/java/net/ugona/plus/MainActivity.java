@@ -117,14 +117,6 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread thread, Throwable ex) {
-                State.print(ex);
-            }
-        });
-
         try {
             ViewConfiguration config = ViewConfiguration.get(this);
             Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
@@ -983,11 +975,9 @@ public class MainActivity extends ActionBarActivity {
             pointers += c_id;
         }
         if (!pointers.equals("")) {
-            State.appendLog("Set pointers " + pointers);
             ed.putString(Names.POINTERS, pointers);
             ed.putBoolean(Names.INIT_POINTER, true);
         }
-        State.appendLog("Set cars " + cars);
         ed.putString(Names.CARS, cars);
         ed.commit();
         for (int i = 0; i < id; i++) {

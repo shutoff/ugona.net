@@ -114,7 +114,6 @@ public class FetchService extends Service {
         removeListeners();
         if (zone_pending != null) {
             for (ZonePending z : zone_pending) {
-                State.appendLog("Send " + z.car_id + " " + z.zone);
                 Alarm.zoneNotify(this, z.car_id, z.zone_in, z.zone, true, false);
             }
         }
@@ -129,11 +128,9 @@ public class FetchService extends Service {
             if (action != null) {
                 if (action.equals(ACTION_LOCATION)) {
                     removeListeners();
-                    State.appendLog("Location timeout");
                     if (zone_pending == null)
                         return START_NOT_STICKY;
                     for (ZonePending z : zone_pending) {
-                        State.appendLog("Send " + z.car_id + " " + z.zone);
                         Alarm.zoneNotify(this, z.car_id, z.zone_in, z.zone, true, false);
                     }
                     zone_pending.clear();
@@ -306,7 +303,6 @@ public class FetchService extends Service {
             double lat = preferences.getFloat(Names.LAT + car_id, 0);
             double lng = preferences.getFloat(Names.LNG + car_id, 0);
             double dist = Address.calc_distance(currentBestLocation.getLatitude(), currentBestLocation.getLongitude(), lat, lng);
-            State.appendLog(">>? " + dist + ", " + currentBestLocation.getAccuracy());
             Alarm.zoneNotify(this, car_id, zone_in, zone, true, dist < currentBestLocation.getAccuracy());
             return;
         }
@@ -382,18 +378,14 @@ public class FetchService extends Service {
             piLocation = PendingIntent.getService(this, 0, iUpdate, PendingIntent.FLAG_UPDATE_CURRENT);
             alarmMgr.set(AlarmManager.RTC, System.currentTimeMillis() + LOCATION_TIMEOUT, piLocation);
         }
-
-        State.appendLog("Set listeners");
     }
 
     void removeListeners() {
         if (netListener != null) {
-            State.appendLog("Remove net listener");
             locationManager.removeUpdates(netListener);
             netListener = null;
         }
         if (gpsListener != null) {
-            State.appendLog("Remove gps listener");
             locationManager.removeUpdates(gpsListener);
             gpsListener = null;
         }
@@ -405,7 +397,6 @@ public class FetchService extends Service {
         currentBestLocation = location;
         if ((currentBestLocation == null) || (currentBestLocation.getAccuracy() > MIN_ACCURACY))
             return;
-        State.appendLog("Location changed");
         removeListeners();
         if (zone_pending == null)
             return;
@@ -413,7 +404,6 @@ public class FetchService extends Service {
             double lat = preferences.getFloat(Names.LAT + z.car_id, 0);
             double lng = preferences.getFloat(Names.LNG + z.car_id, 0);
             double dist = Address.calc_distance(currentBestLocation.getLatitude(), currentBestLocation.getLongitude(), lat, lng);
-            State.appendLog("? " + dist + ", " + currentBestLocation.getAccuracy());
             Alarm.zoneNotify(this, z.car_id, z.zone_in, z.zone, true, dist < currentBestLocation.getAccuracy());
         }
         zone_pending.clear();
@@ -768,7 +758,6 @@ public class FetchService extends Service {
             if (zone != null) {
                 ed.putLong(Names.ZONE_TIME + car_id, zone.asLong());
                 ed.putBoolean(Names.ZONE_IN + car_id, res.get("zone_in").asBoolean());
-                State.appendLog("Zone: " + zone.asLong() + "," + res.get("zone_in").asBoolean());
                 new ZoneRequest(car_id);
             }
 
@@ -914,6 +903,13 @@ public class FetchService extends Service {
                         Actions.done_motor_off(FetchService.this, car_id);
                     }
                 }
+            } else if (!preferences.getBoolean(Names.AZ + car_id, false) && preferences.getBoolean(Names.GUARD + car_id, false) &&
+                    (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false)) &&
+                    SmsMonitor.isProcessed(car_id, R.string.motor_on)) {
+                ed.putBoolean(Names.AZ + car_id, true);
+                ed.putLong(Names.AZ_START + car_id, time.asLong());
+                ed.commit();
+                SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_on);
             }
 
             if (Actions.inet_requests != null) {
@@ -1018,13 +1014,11 @@ public class FetchService extends Service {
                     JsonValue vName = e.get("zone");
                     if (vName != null)
                         zone = vName.asString();
-                    State.appendLog("Zone res " + type + " " + zone);
                     zoneNotify(car_id, type == 86, zone);
                     break;
                 }
             }
             if (i >= events.size()) {
-                State.appendLog("Zone no event");
                 zoneNotify(car_id, preferences.getBoolean(Names.ZONE_IN + car_id, false), null);
             }
             SharedPreferences.Editor ed = preferences.edit();
