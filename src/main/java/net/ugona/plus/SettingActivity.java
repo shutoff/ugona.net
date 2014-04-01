@@ -49,6 +49,7 @@ public class SettingActivity extends ActionBarActivity {
 
     final static String ZONES = "zones";
     final static String ZONE_DELETED = "zone_deleted";
+    final static String TIMERS = "timers";
 
     String car_id;
     SharedPreferences preferences;
@@ -60,6 +61,7 @@ public class SettingActivity extends ActionBarActivity {
     boolean rele;
     ActionBar.TabListener tabListener;
     Vector<Zone> zones;
+    Vector<Timer> timers;
     boolean zone_deleted;
 
     @Override
@@ -76,6 +78,13 @@ public class SettingActivity extends ActionBarActivity {
                 ByteArrayInputStream bis = new ByteArrayInputStream(savedInstanceState.getByteArray(ZONES));
                 ObjectInput in = new ObjectInputStream(bis);
                 zones = (Vector<Zone>) in.readObject();
+            } catch (Exception ex) {
+                // ignore
+            }
+            try {
+                ByteArrayInputStream bis = new ByteArrayInputStream(savedInstanceState.getByteArray(TIMERS));
+                ObjectInput in = new ObjectInputStream(bis);
+                timers = (Vector<Timer>) in.readObject();
             } catch (Exception ex) {
                 // ignore
             }
@@ -232,6 +241,20 @@ public class SettingActivity extends ActionBarActivity {
                 // ignore
             }
         }
+        if (timers != null) {
+            try {
+                byte[] data = null;
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                ObjectOutput out = new ObjectOutputStream(bos);
+                out.writeObject(timers);
+                data = bos.toByteArray();
+                out.close();
+                bos.close();
+                outState.putByteArray(TIMERS, data);
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
         outState.putBoolean(ZONE_DELETED, zone_deleted);
     }
 
@@ -308,6 +331,21 @@ public class SettingActivity extends ActionBarActivity {
                 zone.clearChanged();
                 zones.add(zone);
             }
+            String[] timers_info = preferences.getString(Names.TIMERS_INFO + car_id, "").split("\\|");
+            timers = new Vector<Timer>();
+            for (String info : timers_info) {
+                String[] z = info.split(",");
+                if (z.length != 6)
+                    continue;
+                Timer timer = new Timer();
+                timer.days = Integer.parseInt(z[0]);
+                timer.hours = Integer.parseInt(z[1]);
+                timer.minutes = Integer.parseInt(z[2]);
+                timer.period = Integer.parseInt(z[3]);
+                timer.com = Integer.parseInt(z[4]);
+                timer.param = z[5];
+                timers.add(timer);
+            }
             sendUpdate();
             return;
         }
@@ -367,6 +405,35 @@ public class SettingActivity extends ActionBarActivity {
                             info += "1";
                     }
                     ed.putString(Names.ZONE_INFO + car_id, info);
+                }
+                JsonValue t_value = res.get("timers");
+                if (t_value != null) {
+                    JsonArray t_array = t_value.asArray();
+                    timers = new Vector<Timer>();
+                    String info = "";
+                    for (int i = 0; i < t_array.size(); i++) {
+                        JsonObject t_val = t_array.get(i).asObject();
+                        Timer timer = new Timer();
+                        timer.days = 1 << t_val.get("day").asInt();
+                        timer.hours = t_val.get("hour").asInt();
+                        timer.minutes = t_val.get("min").asInt();
+                        timer.period = t_val.get("period").asInt();
+                        timer.com = t_val.get("com").asInt();
+                        timer.param = t_val.get("param").asString();
+                        for (Timer t : timers) {
+                            if (t.eq(timer)) {
+                                t.days |= timer.days;
+                                timer.days = 0;
+                                break;
+                            }
+                        }
+                        if (timer.days != 0)
+                            timers.add(timer);
+                        if (!info.equals(""))
+                            info += "|";
+                        info += timer.days + "," + timer.hours + "," + timer.minutes + "," + timer.period + "," + timer.com + "," + timer.param;
+                    }
+                    ed.putString(Names.TIMERS_INFO + car_id, info);
                 }
                 ed.commit();
                 sendUpdate();
@@ -631,6 +698,19 @@ public class SettingActivity extends ActionBarActivity {
             lng2 = z.lng2;
             device = z.device;
             sms = z.sms;
+        }
+    }
+
+    static class Timer implements Serializable {
+        int days;
+        int hours;
+        int minutes;
+        int period;
+        int com;
+        String param;
+
+        boolean eq(Timer t) {
+            return (hours == t.hours) && (minutes == t.minutes) && (period == t.period) && (com == t.com) && param.equals(t.param);
         }
     }
 

@@ -432,4 +432,15 @@
     <string name="add_timer">Добавить таймер</string>
     <string name="init">Инициализация</string>
     <string name="zone_my">Не уведомлять, если рядом с машиной</string>
+    <string-array name="periods">
+        <item>один раз</item>
+        <item>1 час</item>
+        <item>2 часа</item>
+        <item>3 часа</item>
+        <item>4 часа</item>
+        <item>6 часов</item>
+        <item>ежедневно</item>
+        <item>еженедельно</item>
+    </string-array>
+    <string name="timer_set">Таймер</string>
 </resources>
