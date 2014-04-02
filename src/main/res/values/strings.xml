@@ -485,4 +485,6 @@
         <item>weekly</item>
     </string-array>
     <string name="timer_set">Таймер</string>
+    <string name="timer_empty">Select any weekdays</string>
+    <string name="timer_delete">Delete timer?</string>
 </resources>

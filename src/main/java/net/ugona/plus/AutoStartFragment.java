@@ -1,24 +1,28 @@
 package net.ugona.plus;
 
-import android.app.AlertDialog;
-import android.content.Context;
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.TimePicker;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Vector;
 
 public class AutoStartFragment extends DeviceFragment {
+
+    static final int TIMER_SETUP = 1000;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -96,140 +100,74 @@ public class AutoStartFragment extends DeviceFragment {
                     continue;
                 items.add(new TimerItem(timer));
             }
-            items.add(new AddItem(R.string.add_timer));
+            items.add(new AddItem(R.string.add_timer) {
+                @Override
+                void click() {
+                    SettingActivity.Timer timer = new SettingActivity.Timer();
+                    timer.param = "";
+                    timer.com = 1;
+                    Intent i = new Intent(getActivity(), TimerEdit.class);
+                    try {
+                        byte[] data = null;
+                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                        ObjectOutput out = new ObjectOutputStream(bos);
+                        out.writeObject(timer);
+                        data = bos.toByteArray();
+                        out.close();
+                        bos.close();
+                        i.putExtra(Names.TRACK, data);
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                    startActivityForResult(i, TIMER_SETUP);
+                }
+            });
         }
     }
 
-    void timerEdit(SettingActivity.Timer timer) {
-        final Context context = getActivity();
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        AlertDialog dialog = new AlertDialog.Builder(context)
-                .setTitle(R.string.timer_set)
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.ok, null)
-                .setView(inflater.inflate(R.layout.timer, null))
-                .create();
-        dialog.show();
-        final Days days = new Days();
-        days.days = timer.days;
-        final TimePicker time = (TimePicker) dialog.findViewById(R.id.time);
-        time.setIs24HourView(DateFormat.is24HourFormat(context));
-        time.setCurrentHour(timer.hours);
-        time.setCurrentMinute(timer.minutes);
-        Calendar calendar = Calendar.getInstance();
-        int first = calendar.getFirstDayOfWeek();
-        DateFormatSymbols symbols = new DateFormatSymbols(Locale.getDefault());
-        final String[] dayNames = symbols.getShortWeekdays();
-        View.OnClickListener clickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int d = (Integer) v.getTag();
-                int mask = 1 << d;
-                if ((days.days & mask) == 0) {
-                    days.days |= mask;
-                } else {
-                    days.days &= ~mask;
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if ((requestCode == TIMER_SETUP) && (resultCode == Activity.RESULT_OK)) {
+            try {
+                ByteArrayInputStream bis = new ByteArrayInputStream(data.getByteArrayExtra(Names.TRACK));
+                ObjectInput in = new ObjectInputStream(bis);
+                SettingActivity.Timer timer = (SettingActivity.Timer) in.readObject();
+                SettingActivity activity = (SettingActivity) getActivity();
+                boolean found = false;
+                for (SettingActivity.Timer t : activity.timers) {
+                    if (t.id == timer.id) {
+                        if (timer.days == 0) {
+                            activity.timers.remove(t);
+                            activity.timers_deleted = true;
+                            update();
+                            break;
+                        }
+                        t.set(timer);
+                        found = true;
+                        break;
+                    }
                 }
-                setTextColor((TextView) v, days.days);
-            }
-        };
-        TextView tv1 = (TextView) dialog.findViewById(R.id.d1);
-        tv1.setTag(1);
-        setTextColor(tv1, days.days);
-        tv1.setOnClickListener(clickListener);
-        tv1.setText(dayNames[(first + 6) % 7 + 1]);
-        TextView tv2 = (TextView) dialog.findViewById(R.id.d2);
-        tv2.setTag(2);
-        setTextColor(tv2, days.days);
-        tv2.setOnClickListener(clickListener);
-        tv2.setText(dayNames[first % 7 + 1]);
-        TextView tv3 = (TextView) dialog.findViewById(R.id.d3);
-        tv3.setTag(3);
-        setTextColor(tv3, days.days);
-        tv3.setOnClickListener(clickListener);
-        tv3.setText(dayNames[(first + 1) % 7 + 1]);
-        TextView tv4 = (TextView) dialog.findViewById(R.id.d4);
-        tv4.setTag(4);
-        setTextColor(tv4, days.days);
-        tv4.setOnClickListener(clickListener);
-        tv4.setText(dayNames[(first + 2) % 7 + 1]);
-        TextView tv5 = (TextView) dialog.findViewById(R.id.d5);
-        tv5.setTag(5);
-        setTextColor(tv5, days.days);
-        tv5.setOnClickListener(clickListener);
-        tv5.setText(dayNames[(first + 3) % 7 + 1]);
-        TextView tv6 = (TextView) dialog.findViewById(R.id.d6);
-        tv6.setTag(6);
-        setTextColor(tv6, days.days);
-        tv6.setOnClickListener(clickListener);
-        tv6.setText(dayNames[(first + 4) % 7 + 1]);
-        TextView tv7 = (TextView) dialog.findViewById(R.id.d7);
-        tv7.setTag(7);
-        setTextColor(tv7, days.days);
-        tv7.setOnClickListener(clickListener);
-        tv7.setText(dayNames[(first + 5) % 7 + 1]);
-        Spinner repeat = (Spinner) dialog.findViewById(R.id.repeat);
-        final String[] repeats = getResources().getStringArray(R.array.periods);
-        repeat.setAdapter(new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return repeats.length;
-            }
-
-            @Override
-            public Object getItem(int position) {
-                return repeats[position];
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = (LayoutInflater) getActivity()
-                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = inflater.inflate(R.layout.list_item, null);
+                if (!found && (timer.days != 0)) {
+                    for (SettingActivity.Timer t : activity.timers) {
+                        if (t.id >= timer.id)
+                            timer.id = t.id + 1;
+                    }
+                    activity.timers.add(timer);
+                    update();
                 }
-                TextView tv = (TextView) v.findViewById(R.id.name);
-                tv.setText(repeats[position]);
-                return v;
+                listUpdate();
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = (LayoutInflater) getActivity()
-                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = inflater.inflate(R.layout.list_dropdown_item, null);
-                }
-                TextView tv = (TextView) v.findViewById(R.id.name);
-                tv.setText(repeats[position]);
-                return v;
-            }
-        });
-        repeat.setSelection(timer.period);
-    }
-
-    void setTextColor(TextView tv, int days) {
-        int d = (Integer) tv.getTag();
-        boolean selected = (days & (1 << d)) != 0;
-        int id = selected ? R.color.caldroid_holo_blue_light : R.color.caldroid_gray;
-        tv.setTypeface(null, selected ? Typeface.BOLD : Typeface.NORMAL);
-        tv.setTextColor(getResources().getColor(id));
-    }
-
-    static class Days {
-        int days;
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     class TimerItem extends Item {
 
         SettingActivity.Timer timer;
+        TextView tvTime;
 
         TimerItem(SettingActivity.Timer t) {
             super(R.string.timer, "");
@@ -242,39 +180,40 @@ public class AutoStartFragment extends DeviceFragment {
             v.findViewById(R.id.block1).setVisibility(View.GONE);
             v.findViewById(R.id.block2).setVisibility(View.GONE);
             v.findViewById(R.id.block_timer).setVisibility(View.VISIBLE);
-            TextView time = (TextView) v.findViewById(R.id.time);
-            time.setText(String.format("%02d:%02d", timer.hours, timer.minutes));
+            tvTime = (TextView) v.findViewById(R.id.time);
+            tvTime.setText(String.format("%02d:%02d", timer.hours, timer.minutes));
+            tvTime.setTextColor(getResources().getColor(changed() ? R.color.changed : android.R.color.secondary_text_dark));
             Calendar calendar = Calendar.getInstance();
             int first = calendar.getFirstDayOfWeek();
             DateFormatSymbols symbols = new DateFormatSymbols(Locale.getDefault());
             String[] dayNames = symbols.getShortWeekdays();
             TextView tv1 = (TextView) v.findViewById(R.id.d1);
             tv1.setTag(1);
-            setTextColor(tv1, timer.days);
+            setTextColor(tv1);
             tv1.setText(dayNames[(first + 6) % 7 + 1]);
             TextView tv2 = (TextView) v.findViewById(R.id.d2);
             tv2.setTag(2);
-            setTextColor(tv2, timer.days);
+            setTextColor(tv2);
             tv2.setText(dayNames[first % 7 + 1]);
             TextView tv3 = (TextView) v.findViewById(R.id.d3);
             tv3.setTag(3);
-            setTextColor(tv3, timer.days);
+            setTextColor(tv3);
             tv3.setText(dayNames[(first + 1) % 7 + 1]);
             TextView tv4 = (TextView) v.findViewById(R.id.d4);
             tv4.setTag(4);
-            setTextColor(tv4, timer.days);
+            setTextColor(tv4);
             tv4.setText(dayNames[(first + 2) % 7 + 1]);
             TextView tv5 = (TextView) v.findViewById(R.id.d5);
             tv5.setTag(5);
-            setTextColor(tv5, timer.days);
+            setTextColor(tv5);
             tv5.setText(dayNames[(first + 3) % 7 + 1]);
             TextView tv6 = (TextView) v.findViewById(R.id.d6);
             tv6.setTag(6);
-            setTextColor(tv6, timer.days);
+            setTextColor(tv6);
             tv6.setText(dayNames[(first + 4) % 7 + 1]);
             TextView tv7 = (TextView) v.findViewById(R.id.d7);
             tv7.setTag(7);
-            setTextColor(tv7, timer.days);
+            setTextColor(tv7);
             tv7.setText(dayNames[(first + 5) % 7 + 1]);
             TextView tvRepeat = (TextView) v.findViewById(R.id.repeat);
             String[] repeats = getResources().getStringArray(R.array.periods);
@@ -283,7 +222,32 @@ public class AutoStartFragment extends DeviceFragment {
 
         @Override
         void click() {
-            timerEdit(timer);
+            Intent i = new Intent(getActivity(), TimerEdit.class);
+            try {
+                byte[] data = null;
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                ObjectOutput out = new ObjectOutputStream(bos);
+                out.writeObject(timer);
+                data = bos.toByteArray();
+                out.close();
+                bos.close();
+                i.putExtra(Names.TRACK, data);
+            } catch (Exception ex) {
+                // ignore
+            }
+            startActivityForResult(i, TIMER_SETUP);
+        }
+
+        boolean changed() {
+            return timer.isChanged();
+        }
+
+        void setTextColor(TextView tv) {
+            int d = (Integer) tv.getTag();
+            boolean selected = (timer.days & (1 << d)) != 0;
+            int id = selected ? R.color.caldroid_holo_blue_light : R.color.caldroid_gray;
+            tv.setTypeface(null, selected ? Typeface.BOLD : Typeface.NORMAL);
+            tv.setTextColor(getResources().getColor(id));
         }
     }
 }

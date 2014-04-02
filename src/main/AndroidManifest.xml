@@ -4,7 +4,7 @@
     android:versionCode="5"
     android:versionName="1.4 RC3">
 
-<uses-sdk
+    <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="16" />
 
@@ -103,6 +103,15 @@
 
         <activity
             android:name=".ZoneEdit"
+            android:uiOptions="splitActionBarWhenNarrow">
+            <meta-data
+                android:name="android.support.UI_OPTIONS"
+                android:value="splitActionBarWhenNarrow" />
+        </activity>
+
+        <activity
+            android:name=".TimerEdit"
+            android:title="@string/timer_set"
             android:uiOptions="splitActionBarWhenNarrow">
             <meta-data
                 android:name="android.support.UI_OPTIONS"

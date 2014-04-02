@@ -104,7 +104,7 @@ public class ConfigWidget extends Activity {
                 if (v == null) {
                     LayoutInflater inflater = (LayoutInflater) getBaseContext()
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = inflater.inflate(R.layout.car_key_item, null);
+                    v = inflater.inflate(R.layout.list_item, null);
                 }
                 TextView tvName = (TextView) v.findViewById(R.id.name);
                 int value = rows.get(position);
@@ -121,7 +121,7 @@ public class ConfigWidget extends Activity {
                 if (v == null) {
                     LayoutInflater inflater = (LayoutInflater) getBaseContext()
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = inflater.inflate(R.layout.car_key_item, null);
+                    v = inflater.inflate(R.layout.list_dropdown_item, null);
                 }
                 TextView tvName = (TextView) v.findViewById(R.id.name);
                 int value = rows.get(position);
@@ -157,7 +157,7 @@ public class ConfigWidget extends Activity {
                 if (v == null) {
                     LayoutInflater inflater = (LayoutInflater) getBaseContext()
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = inflater.inflate(R.layout.car_key_item, null);
+                    v = inflater.inflate(R.layout.list_item, null);
                 }
                 TextView tvName = (TextView) v.findViewById(R.id.name);
                 tvName.setText(cars[position].name);
@@ -170,7 +170,7 @@ public class ConfigWidget extends Activity {
                 if (v == null) {
                     LayoutInflater inflater = (LayoutInflater) getBaseContext()
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = inflater.inflate(R.layout.car_key_item, null);
+                    v = inflater.inflate(R.layout.list_dropdown_item, null);
                 }
                 TextView tvName = (TextView) v.findViewById(R.id.name);
                 tvName.setText(cars[position].name);
@@ -207,7 +207,7 @@ public class ConfigWidget extends Activity {
                 if (v == null) {
                     LayoutInflater inflater = (LayoutInflater) getBaseContext()
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = inflater.inflate(R.layout.car_key_item, null);
+                    v = inflater.inflate(R.layout.list_item, null);
                 }
                 TextView tvName = (TextView) v.findViewById(R.id.name);
                 tvName.setText(themes[position]);
@@ -220,7 +220,7 @@ public class ConfigWidget extends Activity {
                 if (v == null) {
                     LayoutInflater inflater = (LayoutInflater) getBaseContext()
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = inflater.inflate(R.layout.car_key_item, null);
+                    v = inflater.inflate(R.layout.list_dropdown_item, null);
                 }
                 TextView tvName = (TextView) v.findViewById(R.id.name);
                 tvName.setText(themes[position]);

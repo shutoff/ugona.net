@@ -443,4 +443,6 @@
         <item>еженедельно</item>
     </string-array>
     <string name="timer_set">Таймер</string>
+    <string name="timer_empty">Выберите дни недели</string>
+    <string name="timer_delete">Удалить таймер?</string>
 </resources>

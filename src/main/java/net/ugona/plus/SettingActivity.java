@@ -50,6 +50,7 @@ public class SettingActivity extends ActionBarActivity {
     final static String ZONES = "zones";
     final static String ZONE_DELETED = "zone_deleted";
     final static String TIMERS = "timers";
+    final static String TIMER_DELETED = "timer_deleted";
 
     String car_id;
     SharedPreferences preferences;
@@ -63,6 +64,7 @@ public class SettingActivity extends ActionBarActivity {
     Vector<Zone> zones;
     Vector<Timer> timers;
     boolean zone_deleted;
+    boolean timers_deleted;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +76,7 @@ public class SettingActivity extends ActionBarActivity {
         if (savedInstanceState != null) {
             car_id = savedInstanceState.getString(Names.ID);
             zone_deleted = savedInstanceState.getBoolean(ZONE_DELETED);
+            timers_deleted = savedInstanceState.getBoolean(TIMER_DELETED);
             try {
                 ByteArrayInputStream bis = new ByteArrayInputStream(savedInstanceState.getByteArray(ZONES));
                 ObjectInput in = new ObjectInputStream(bis);
@@ -256,11 +259,12 @@ public class SettingActivity extends ActionBarActivity {
             }
         }
         outState.putBoolean(ZONE_DELETED, zone_deleted);
+        outState.putBoolean(TIMER_DELETED, timers_deleted);
     }
 
     @Override
     public void finish() {
-        boolean changed = zone_deleted;
+        boolean changed = zone_deleted | timers_deleted;
         if (!changed && (values != null)) {
             int i;
             for (i = 0; i < 24; i++) {
@@ -273,6 +277,14 @@ public class SettingActivity extends ActionBarActivity {
         if (!changed && (zones != null)) {
             for (Zone z : zones) {
                 if (z.isChanged()) {
+                    changed = true;
+                    break;
+                }
+            }
+        }
+        if (!changed && (timers != null)) {
+            for (Timer t : timers) {
+                if (t.isChanged()) {
                     changed = true;
                     break;
                 }
@@ -335,7 +347,7 @@ public class SettingActivity extends ActionBarActivity {
             timers = new Vector<Timer>();
             for (String info : timers_info) {
                 String[] z = info.split(",");
-                if (z.length != 6)
+                if (z.length < 5)
                     continue;
                 Timer timer = new Timer();
                 timer.days = Integer.parseInt(z[0]);
@@ -343,7 +355,9 @@ public class SettingActivity extends ActionBarActivity {
                 timer.minutes = Integer.parseInt(z[2]);
                 timer.period = Integer.parseInt(z[3]);
                 timer.com = Integer.parseInt(z[4]);
-                timer.param = z[5];
+                timer.param = (z.length > 5) ? z[5] : "";
+                timer.id = timers.size();
+                timer.clearChanged();
                 timers.add(timer);
             }
             sendUpdate();
@@ -420,9 +434,12 @@ public class SettingActivity extends ActionBarActivity {
                         timer.period = t_val.get("period").asInt();
                         timer.com = t_val.get("com").asInt();
                         timer.param = t_val.get("param").asString();
+                        timer.id = timers.size();
+                        timer.clearChanged();
                         for (Timer t : timers) {
                             if (t.eq(timer)) {
                                 t.days |= timer.days;
+                                t.clearChanged();
                                 timer.days = 0;
                                 break;
                             }
@@ -528,8 +545,34 @@ public class SettingActivity extends ActionBarActivity {
             }
             ed.putString(Names.ZONE_INFO + car_id, zone_data);
         }
+
+        String timer_data = null;
+        boolean timer_changed = timers_deleted;
+        if (!timer_changed && (timers != null)) {
+            for (Timer t : timers) {
+                if (t.isChanged()) {
+                    timer_changed = true;
+                    break;
+                }
+            }
+        }
+        if (timer_changed) {
+            timer_data = "";
+            for (Timer t : timers) {
+                if (!timer_data.equals(""))
+                    timer_data += "|";
+                timer_data += t.days + ",";
+                timer_data += t.hours + ",";
+                timer_data += t.minutes + ",";
+                timer_data += t.period + ",";
+                timer_data += t.com + ",";
+                timer_data += t.param;
+            }
+            ed.putString(Names.TIMERS_INFO + car_id, timer_data);
+        }
+
         ed.commit();
-        if (val.equals("") && !need_sms && (zone_data == null))
+        if (val.equals("") && !need_sms && (zone_data == null) && (timer_data == null))
             return;
         sendUpdate();
         final int[] set_values = new int[values.length];
@@ -538,12 +581,13 @@ public class SettingActivity extends ActionBarActivity {
         }
         final String value = val;
         final String zones_data = zone_data;
+        final String timers_data = timer_data;
         final boolean sms = need_sms;
         if (request_ccode) {
             Actions.requestCCode(this, car_id, R.string.setup, R.string.setup_msg, new Actions.Answer() {
                 @Override
                 void answer(String text) {
-                    do_update(value, text, set_values, sms, zones_data);
+                    do_update(value, text, set_values, sms, zones_data, timers_data);
                 }
             });
             return;
@@ -552,7 +596,7 @@ public class SettingActivity extends ActionBarActivity {
         Actions.requestPassword(this, car_id, R.string.setup, R.string.setup_msg, new Actions.Answer() {
             @Override
             void answer(String text) {
-                do_update(value, null, set_values, sms, zones_data);
+                do_update(value, null, set_values, sms, zones_data, timers_data);
             }
         });
     }
@@ -578,15 +622,24 @@ public class SettingActivity extends ActionBarActivity {
         sendUpdate();
     }
 
-    void do_update(final String value, final String ccode, final int[] set_values, final boolean need_sms, String zones_data) {
+    void do_update(final String value, final String ccode, final int[] set_values, final boolean need_sms, String zones_data, String timer_data) {
         final ProgressDialog progressDialog = new ProgressDialog(SettingActivity.this);
         progressDialog.setMessage(getString(R.string.send_command));
         progressDialog.show();
 
         zone_deleted = false;
-        for (Zone z : zones) {
-            z.clearChanged();
+        if (zones != null) {
+            for (Zone z : zones) {
+                z.clearChanged();
+            }
         }
+        timers_deleted = false;
+        if (timers != null) {
+            for (Timer t : timers) {
+                t.clearChanged();
+            }
+        }
+        sendUpdate();
 
         if (values.equals("")) {
             do_update_sms(progressDialog, set_values, null);
@@ -647,7 +700,7 @@ public class SettingActivity extends ActionBarActivity {
                 toast.show();
             }
         };
-        task.execute(URL_SET, preferences.getString(Names.AUTH + car_id, ""), value, "ccode", ccode, "zone", zones_data);
+        task.execute(URL_SET, preferences.getString(Names.AUTH + car_id, ""), value, "ccode", ccode, "zone", zones_data, "t", timer_data);
     }
 
     static class Zone implements Serializable {
@@ -702,12 +755,48 @@ public class SettingActivity extends ActionBarActivity {
     }
 
     static class Timer implements Serializable {
+        int id;
+
         int days;
         int hours;
         int minutes;
         int period;
         int com;
         String param;
+
+        int _days;
+        int _hours;
+        int _minutes;
+        int _period;
+        int _com;
+        String _param;
+
+        void clearChanged() {
+            _days = days;
+            _hours = hours;
+            _minutes = minutes;
+            _period = period;
+            _com = com;
+            _param = param;
+        }
+
+        boolean isChanged() {
+            return (days != _days) ||
+                    (hours != _hours) ||
+                    (minutes != _minutes) ||
+                    (period != _period) ||
+                    (com != _com) ||
+                    !param.equals(_param);
+        }
+
+        void set(Timer t) {
+            days = t.days;
+            hours = t.hours;
+            minutes = t.minutes;
+            period = t.period;
+            com = t.com;
+            param = t.param;
+        }
 
         boolean eq(Timer t) {
             return (hours == t.hours) && (minutes == t.minutes) && (period == t.period) && (com == t.com) && param.equals(t.param);
