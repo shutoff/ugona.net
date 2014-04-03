@@ -104,6 +104,12 @@ public class ActionFragment extends Fragment
                     context.startActivity(intent);
                 }
             },
+            new Action(R.drawable.icon_status, R.string.search) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.search(context, car_id);
+                }
+            },
             new Action(R.drawable.icon_valet_on, R.string.valet_on, true) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {

@@ -20,6 +20,7 @@ public class State {
     static final int CMD_RELE1I = 1 << 6;
     static final int CMD_RELE2I = 1 << 7;
     static final int CMD_SOUND = 1 << 8;
+    static final int CMD_SEARCH = 1 << 9;
     static int telephony_state = 0;
 
 /*

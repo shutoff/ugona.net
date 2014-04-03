@@ -106,6 +106,7 @@ public class AutoStartFragment extends DeviceFragment {
                     SettingActivity.Timer timer = new SettingActivity.Timer();
                     timer.param = "";
                     timer.com = 1;
+                    timer.clearChanged();
                     Intent i = new Intent(getActivity(), TimerEdit.class);
                     try {
                         byte[] data = null;

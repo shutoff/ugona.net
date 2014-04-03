@@ -19,6 +19,7 @@ public class CommandsFragment extends SettingsFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
         items.add(new CheckBoxItem(R.string.call, State.CMD_CALL));
+        items.add(new CheckBoxItem(R.string.search, State.CMD_SEARCH));
         items.add(new CheckBoxItem(R.string.valet_cmd, State.CMD_VALET));
         items.add(new CheckBoxItem(R.string.autostart, State.CMD_AZ));
         items.add(new CheckBoxItem(R.string.rele, State.CMD_RELE));

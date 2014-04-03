@@ -208,7 +208,7 @@ public class TimerEdit extends ActionBarActivity {
 
     @Override
     public void finish() {
-        if (!timer_delete && (timer.days == 0)) {
+        if (!timer_delete && (timer.days == 0) && timer.isChanged()) {
             AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle(R.string.error)
                     .setMessage(R.string.timer_empty)

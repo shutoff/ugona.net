@@ -858,6 +858,14 @@ public class Actions {
         });
     }
 
+    static void search(Context context, final String car_id) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String number = preferences.getString(Names.CAR_PHONE + car_id, "");
+        number = "tel://" + number + ",,3";
+        Intent i = new Intent(android.content.Intent.ACTION_CALL, Uri.parse(number));
+        context.startActivity(i);
+    }
+
     static void sound_on(Context context, final String car_id) {
         set_sound(context, car_id, R.string.sound_on);
     }

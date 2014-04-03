@@ -75,6 +75,7 @@ public class StateFragment extends Fragment
     View vBlock;
     View vValet;
     View vPhone;
+    View vSearch;
     View vRele1;
     View vRele1i;
     View vRele2;
@@ -155,6 +156,7 @@ public class StateFragment extends Fragment
         vBlock = v.findViewById(R.id.block);
         vValet = v.findViewById(R.id.valet);
         vPhone = v.findViewById(R.id.phone);
+        vSearch = v.findViewById(R.id.search);
         vRele1 = v.findViewById(R.id.rele1);
         vRele1i = v.findViewById(R.id.rele1_impulse);
         vRele2 = v.findViewById(R.id.rele2);
@@ -191,6 +193,7 @@ public class StateFragment extends Fragment
             vBlock.setOnTouchListener(this);
             vValet.setOnTouchListener(this);
             vPhone.setOnTouchListener(this);
+            vSearch.setOnTouchListener(this);
             vRele1.setOnTouchListener(this);
             vRele1i.setOnTouchListener(this);
             vRele2.setOnTouchListener(this);
@@ -601,6 +604,11 @@ public class StateFragment extends Fragment
         } else {
             vPhone.setVisibility(View.GONE);
         }
+        if (State.hasTelephony(context) && ((commands & State.CMD_SEARCH) != 0)) {
+            vSearch.setVisibility(View.VISIBLE);
+        } else {
+            vSearch.setVisibility(View.GONE);
+        }
 
         if ((commands & State.CMD_RELE1) != 0) {
             vRele1.setVisibility(View.VISIBLE);
@@ -915,6 +923,8 @@ public class StateFragment extends Fragment
             intent.setData(Uri.parse("tel:" + preferences.getString(Names.CAR_PHONE + car_id, "")));
             startActivity(intent);
         }
+        if (v == vSearch)
+            Actions.search(getActivity(), car_id);
         if (v == vRele1)
             Actions.rele(getActivity(), car_id, preferences.getBoolean(Names.RELAY1 + car_id, false) ? R.string.rele1_off : R.string.rele1_on, longTap);
         if (v == vRele1i)
