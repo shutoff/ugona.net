@@ -279,6 +279,7 @@
     <string name="balance_notification">Предупреждать о пороге отключения</string>
     <string-array name="balance_limit">
         <item>не предупреждать</item>
+        <item>если меньше 10 рублей</item>
         <item>если меньше 50 рублей</item>
         <item>если меньше 100 рублей</item>
         <item>если меньше 200 рублей</item>

@@ -293,6 +293,7 @@
     <string name="balance_notification">Balance notification</string>
     <string-array name="balance_limit">
         <item>no notify</item>
+        <item>less 10 rub</item>
         <item>less 50 rub</item>
         <item>less 100 rub</item>
         <item>less 200 rub</item>
@@ -300,6 +301,7 @@
     </string-array>
     <string-array name="balance_values">
         <item>-1</item>
+        <item>10</item>
         <item>50</item>
         <item>100</item>
         <item>200</item>

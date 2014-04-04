@@ -92,7 +92,7 @@ public class AutoStartFragment extends DeviceFragment {
                 }
             });
 
-        SettingActivity activity = (SettingActivity) getActivity();
+        final SettingActivity activity = (SettingActivity) getActivity();
         if ((activity != null) && (activity.timers != null)) {
             items.add(new Item(R.string.schedule, ""));
             for (SettingActivity.Timer timer : activity.timers) {
@@ -107,6 +107,10 @@ public class AutoStartFragment extends DeviceFragment {
                     timer.param = "";
                     timer.com = 1;
                     timer.clearChanged();
+                    for (SettingActivity.Timer t : activity.timers) {
+                        if (t.id >= timer.id)
+                            timer.id = t.id + 1;
+                    }
                     Intent i = new Intent(getActivity(), TimerEdit.class);
                     try {
                         byte[] data = null;
