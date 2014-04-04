@@ -1,8 +1,10 @@
 package net.ugona.plus;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -568,7 +570,7 @@ public class Actions {
                     public void run() {
                         requestCCode(context, car_id, R.string.rele, R.string.rele_ccode, new Answer() {
                             @Override
-                            void answer(String ccode) {
+                            void answer(final String ccode) {
                                 final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
                                 final boolean impulse = preferences.getBoolean(Names.RELE_IMPULSE + car_id, true);
@@ -597,6 +599,16 @@ public class Actions {
                                         Intent i = new Intent(FetchService.ACTION_UPDATE);
                                         i.putExtra(Names.ID, car_id);
                                         context.sendBroadcast(i);
+                                        if (!impulse && !rele_on) {
+                                            i = new Intent(context, FetchService.class);
+                                            i.setAction(FetchService.ACTION_RELE_OFF);
+                                            i.putExtra(Names.ID, car_id);
+                                            i.putExtra(Names.AUTH, ccode);
+                                            PendingIntent pi = PendingIntent.getService(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
+                                            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                                            int timeout = preferences.getInt(Names.RELE_TIME + car_id, 0) * 60000;
+                                            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + timeout, pi);
+                                        }
                                     }
 
                                     @Override
@@ -622,23 +634,42 @@ public class Actions {
         );
     }
 
-    static void rele1_sms(final Context context, final String car_id, boolean silent) {
-        int id = R.string.rele1_action;
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-
-        final boolean impulse = preferences.getBoolean(Names.RELE_IMPULSE + car_id, true);
-        final boolean rele_on = preferences.getLong(Names.RELE_START + car_id, 0) > 0;
+    static void rele_off(final Context context, final String car_id, String ccode, String pswd) {
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (preferences.getLong(Names.RELE_START + car_id, 0) == 0)
+            return;
         final boolean rele2 = preferences.getString(Names.CAR_RELE + car_id, "").equals("2");
+        if (ccode != null) {
+            int cmd = rele2 ? 513 : 257;
+            new InetRequest(context, car_id, ccode, cmd, R.string.rele) {
+
+                @Override
+                void error() {
+                    rele1_sms(context, car_id, true);
+                }
+
+                @Override
+                void ok(Context context) {
+                    SharedPreferences.Editor ed = preferences.edit();
+                    ed.putLong(Names.RELE_START + car_id, new Date().getTime());
+                    ed.commit();
+                    Intent i = new Intent(FetchService.ACTION_UPDATE);
+                    i.putExtra(Names.ID, car_id);
+                    context.sendBroadcast(i);
+                }
+
+                @Override
+                void user(Context context) {
+                    ok(context);
+                }
+            };
+            return;
+        }
 
         String text = rele2 ? "REL2 " : "REL1 ";
-        if (impulse) {
-            text += "IMPULS";
-        } else {
-            text += (rele_on) ? "UNLOCK" : "LOCK";
-        }
-        if (rele2)
-            id = R.string.rele2_action;
+        text += "UNLOCK";
         String answer = text + " OK";
+
         final SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.rele, text, answer) {
             @Override
             boolean process_answer(Context context, String car_id, String text) {
@@ -646,16 +677,9 @@ public class Actions {
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putLong(Names.RELE_START + car_id, new Date().getTime());
                 ed.commit();
-                if (!impulse) {
-                    if (rele_on) {
-                        ed.remove(Names.RELE_START + car_id);
-                        ed.putBoolean((rele2 ? Names.RELAY2 : Names.RELAY1) + car_id, false);
-                        ed.commit();
-                    } else {
-                        ed.putBoolean((rele2 ? Names.RELAY2 : Names.RELAY1) + car_id, true);
-                        ed.commit();
-                    }
-                }
+                ed.remove(Names.RELE_START + car_id);
+                ed.putBoolean((rele2 ? Names.RELAY2 : Names.RELAY1) + car_id, false);
+                ed.commit();
                 try {
                     Intent intent = new Intent(FetchService.ACTION_UPDATE);
                     intent.putExtra(Names.ID, car_id);
@@ -666,9 +690,64 @@ public class Actions {
                 return true;
             }
         };
+        SmsMonitor.sendSMS(context, car_id, pswd, sms);
+
+    }
+
+    static void rele1_sms(final Context context, final String car_id, boolean silent) {
         requestPassword(context, car_id, R.string.rele, silent ? 0 : R.string.rele, new Answer() {
             @Override
-            void answer(String pswd) {
+            void answer(final String pswd) {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+                final boolean impulse = preferences.getBoolean(Names.RELE_IMPULSE + car_id, true);
+                final boolean rele_on = preferences.getLong(Names.RELE_START + car_id, 0) > 0;
+                final boolean rele2 = preferences.getString(Names.CAR_RELE + car_id, "").equals("2");
+
+                String text = rele2 ? "REL2 " : "REL1 ";
+                if (impulse) {
+                    text += "IMPULS";
+                } else {
+                    text += (rele_on) ? "UNLOCK" : "LOCK";
+                }
+                String answer = text + " OK";
+                final SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.rele, text, answer) {
+                    @Override
+                    boolean process_answer(Context context, String car_id, String text) {
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putLong(Names.RELE_START + car_id, new Date().getTime());
+                        ed.commit();
+                        if (!impulse) {
+                            if (rele_on) {
+                                ed.remove(Names.RELE_START + car_id);
+                                ed.putBoolean((rele2 ? Names.RELAY2 : Names.RELAY1) + car_id, false);
+                                ed.commit();
+                            } else {
+                                ed.putBoolean((rele2 ? Names.RELAY2 : Names.RELAY1) + car_id, true);
+                                ed.commit();
+                            }
+                        }
+                        try {
+                            Intent intent = new Intent(FetchService.ACTION_UPDATE);
+                            intent.putExtra(Names.ID, car_id);
+                            context.sendBroadcast(intent);
+                            if (!impulse && !rele_on) {
+                                Intent i = new Intent(context, FetchService.class);
+                                i.setAction(FetchService.ACTION_RELE_OFF);
+                                i.putExtra(Names.ID, car_id);
+                                i.putExtra(Names.PASSWORD, pswd);
+                                PendingIntent pi = PendingIntent.getService(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
+                                AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                                int timeout = preferences.getInt("V_13_" + car_id, 0) * 60000;
+                                alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + timeout, pi);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        return true;
+                    }
+                };
                 SmsMonitor.sendSMS(context, car_id, pswd, sms);
             }
         });

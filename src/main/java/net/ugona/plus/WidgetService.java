@@ -23,17 +23,15 @@ public class WidgetService extends Service {
     static final String ACTION_SHOW = "net.ugona.plus.WIDGET_SHOW";
     static final String ACTION_START = "net.ugona.plus.WIDGET_START_UPDATE";
     static final String ACTION_SCREEN = "net.ugona.plus.WIDGET_SCREEN_ON";
+    PowerManager powerMgr;
+    AlarmManager alarmMgr;
+    PendingIntent pi;
+    BroadcastReceiver br;
 
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
-
-    PowerManager powerMgr;
-    AlarmManager alarmMgr;
-
-    PendingIntent pi;
-    BroadcastReceiver br;
 
     @Override
     public void onCreate() {
@@ -80,7 +78,6 @@ public class WidgetService extends Service {
                     stopTimer();
                     if (powerMgr.isScreenOn())
                         startTimer(false);
-                    return START_STICKY;
                 }
                 if (action.equals(ACTION_SHOW)) {
                     Intent i = new Intent(this, MainActivity.class);

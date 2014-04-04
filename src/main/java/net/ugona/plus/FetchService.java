@@ -46,6 +46,7 @@ public class FetchService extends Service {
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR";
     static final String ACTION_NOTIFICATION = "net.ugona.plus.NOTIFICATION";
     static final String ACTION_LOCATION = "net.ugona.plus.LOCATION";
+    static final String ACTION_RELE_OFF = "net.ugona.plus.RELE_OFF";
 
     static final String URL_STATUS = "https://car-online.ugona.net/?skey=$1&time=$2";
     static final String URL_EVENTS = "https://car-online.ugona.net/events?skey=$1&auth=$2&begin=$3&end=$4";
@@ -154,6 +155,8 @@ public class FetchService extends Service {
                     int max_id = intent.getIntExtra(Names.EVENT_ID, 0);
                     showNotification(car_id, text, pictId, max_id, sound);
                 }
+                if (action.equals(ACTION_RELE_OFF))
+                    Actions.rele_off(this, car_id, intent.getStringExtra(Names.AUTH), intent.getStringExtra(Names.PASSWORD));
             }
             if (car_id != null)
                 new StatusRequest(Preferences.getCar(preferences, car_id));

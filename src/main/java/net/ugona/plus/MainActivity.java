@@ -290,6 +290,13 @@ public class MainActivity extends ActionBarActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(br);
+        try {
+            Intent i = new Intent(this, FetchService.class);
+            stopService(i);
+            System.gc();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Override
