@@ -119,7 +119,8 @@ public class FetchService extends Service {
                     String text = intent.getStringExtra(Names.TITLE);
                     int pictId = intent.getIntExtra(Names.ALARM, 0);
                     int max_id = intent.getIntExtra(Names.EVENT_ID, 0);
-                    showNotification(car_id, text, pictId, max_id, sound);
+                    long when = intent.getLongExtra(Names.EVENT_TIME, 0);
+                    showNotification(car_id, text, pictId, max_id, sound, when);
                 }
                 if (action.equals(ACTION_RELE_OFF))
                     Actions.rele_off(this, car_id, intent.getStringExtra(Names.AUTH), intent.getStringExtra(Names.PASSWORD));
@@ -132,7 +133,7 @@ public class FetchService extends Service {
         return START_NOT_STICKY;
     }
 
-    void showNotification(String car_id, String text, int pictId, int max_id, String sound) {
+    void showNotification(String car_id, String text, int pictId, int max_id, String sound, long when) {
         String title = getString(R.string.app_name);
         String[] cars = preferences.getString(Names.CARS, "").split(",");
         if (cars.length > 1) {
@@ -153,6 +154,8 @@ public class FetchService extends Service {
                         .setSmallIcon(pictId)
                         .setContentTitle(title)
                         .setContentText(text);
+        if (when != 0)
+            builder.setWhen(when);
         if (sound != null)
             builder.setSound(Uri.parse("android.resource://net.ugona.plus/raw/" + sound));
 
@@ -258,11 +261,8 @@ public class FetchService extends Service {
         ed.commit();
     }
 
-    void zoneNotify(String car_id, boolean zone_in, String zone) {
-        State.appendLog("zone: " + zone_in + "," + zone);
-
-            Alarm.zoneNotify(this, car_id, zone_in, zone, true, false);
-            return;
+    void zoneNotify(String car_id, boolean zone_in, String zone, long when) {
+        Alarm.zoneNotify(this, car_id, zone_in, zone, true, false, when);
     }
 
     abstract class ServerRequest extends HttpTask {
@@ -524,7 +524,6 @@ public class FetchService extends Service {
             if (zone != null) {
                 ed.putLong(Names.ZONE_TIME + car_id, zone.asLong());
                 ed.putBoolean(Names.ZONE_IN + car_id, res.get("zone_in").asBoolean());
-                State.appendLog("Zone " + zone.asLong() + ", " + res.get("zone_in").asBoolean());
                 new ZoneRequest(car_id);
             }
 
@@ -615,19 +614,19 @@ public class FetchService extends Service {
                                 sound = "guard_off";
                                 break;
                         }
-                        notify_id = Alarm.createNotification(FetchService.this, getString(id), R.drawable.warning, car_id, sound);
+                        notify_id = Alarm.createNotification(FetchService.this, getString(id), R.drawable.warning, car_id, sound, 0);
                         ed.putInt(Names.GUARD_NOTIFY + car_id, notify_id);
                         ed.commit();
                     } else if ((guard_mode == 0) && (msg_id != 0)) {
                         String[] msg = getString(R.string.alarm).split("\\|");
-                        notify_id = Alarm.createNotification(FetchService.this, msg[msg_id], R.drawable.warning, car_id, null);
+                        notify_id = Alarm.createNotification(FetchService.this, msg[msg_id], R.drawable.warning, car_id, null, 0);
                         ed.putInt(Names.GUARD_NOTIFY + car_id, notify_id);
                         ed.commit();
                     }
                 }
                 boolean valet = preferences.getBoolean(Names.GUARD0 + car_id, false) && !preferences.getBoolean(Names.GUARD1 + car_id, false);
                 if (valet != prev_valet) {
-                    SmsMonitor.processMessageFromApi(FetchService.this, car_id, valet ? R.string.valet_on : R.string.valet_off);
+                    SmsMonitor.processMessageFromApi(FetchService.this, car_id, valet ? R.string.valet_on : R.string.valet_off, 0);
                     if (valet) {
                         int id = preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0);
                         if (id != 0)
@@ -656,27 +655,39 @@ public class FetchService extends Service {
             if (az != null) {
                 boolean processed = false;
                 if (az.asBoolean()) {
-                    processed = SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_on);
+                    long when = 0;
+                    JsonValue v = res.get("az_start");
+                    if (v != null)
+                        when = v.asLong();
+                    processed = SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_on, when);
                     SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_off);
                 } else {
-                    processed = SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_off);
+                    long when = 0;
+                    JsonValue v = res.get("az_stop");
+                    if (v != null)
+                        when = v.asLong();
+                    processed = SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_off, when);
                     SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_on);
                 }
                 if (!processed &&
                         ((preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0) != 0) || (preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0) != 0))) {
                     if (az.asBoolean()) {
-                        Actions.done_motor_on(FetchService.this, car_id);
+                        Actions.done_motor_on(FetchService.this, car_id, 0);
                     } else {
-                        Actions.done_motor_off(FetchService.this, car_id);
+                        Actions.done_motor_off(FetchService.this, car_id, 0);
                     }
                 }
             } else if (!preferences.getBoolean(Names.AZ + car_id, false) && preferences.getBoolean(Names.GUARD + car_id, false) &&
                     (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false)) &&
                     SmsMonitor.isProcessed(car_id, R.string.motor_on)) {
                 ed.putBoolean(Names.AZ + car_id, true);
-                ed.putLong(Names.AZ_START + car_id, time.asLong());
+                long when = time.asLong();
+                JsonValue v = res.get("az_start");
+                if (v != null)
+                    when = v.asLong();
+                ed.putLong(Names.AZ_START + car_id, when);
                 ed.commit();
-                SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_on);
+                SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_on, when);
             }
 
             if (Actions.inet_requests != null) {
@@ -714,7 +725,7 @@ public class FetchService extends Service {
                     try {
                         if (new_state) {
                             if (timeout_id == 0) {
-                                timeout_id = Alarm.createNotification(FetchService.this, getString(R.string.timeout), R.drawable.warning, car_id, null);
+                                timeout_id = Alarm.createNotification(FetchService.this, getString(R.string.timeout), R.drawable.warning, car_id, null, 0);
                                 ed.putInt(Names.TIMEOUT_NOTIFICATION + car_id, timeout_id);
                                 ed.commit();
                             }
@@ -739,7 +750,7 @@ public class FetchService extends Service {
                 }
                 try {
                     if (voltage < 2.5) {
-                        voltage_id = Alarm.createNotification(FetchService.this, getString(R.string.timeout), R.drawable.warning, car_id, null);
+                        voltage_id = Alarm.createNotification(FetchService.this, getString(R.string.timeout), R.drawable.warning, car_id, null, 0);
                         ed.putInt(Names.VOLTAGE_NOTIFY + car_id, voltage_id);
                         ed.commit();
                     }
@@ -771,6 +782,7 @@ public class FetchService extends Service {
 
         @Override
         void result(JsonObject res) throws ParseException {
+            long zone_time = preferences.getLong(Names.ZONE_TIME + car_id, 0);
             JsonArray events = res.get("events").asArray();
             int i;
             for (i = 0; i < events.size(); i++) {
@@ -781,13 +793,12 @@ public class FetchService extends Service {
                     JsonValue vName = e.get("zone");
                     if (vName != null)
                         zone = vName.asString();
-                    State.appendLog("zone req result " + zone);
-                    zoneNotify(car_id, type == 86, zone);
+                    zoneNotify(car_id, type == 86, zone, zone_time);
                     break;
                 }
             }
             if (i >= events.size()) {
-                zoneNotify(car_id, preferences.getBoolean(Names.ZONE_IN + car_id, false), null);
+                zoneNotify(car_id, preferences.getBoolean(Names.ZONE_IN + car_id, false), null, zone_time);
             }
             SharedPreferences.Editor ed = preferences.edit();
             ed.remove(Names.ZONE_TIME + car_id);

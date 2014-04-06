@@ -56,13 +56,13 @@ public class SmsMonitor extends BroadcastReceiver {
         return PhoneNumberUtils.compare(config, from);
     }
 
-    static boolean processMessageFromApi(Context context, String car_id, int id) {
+    static boolean processMessageFromApi(Context context, String car_id, int id, long when) {
         if (Actions.inet_requests != null) {
             Set<Actions.InetRequest> requests = Actions.inet_requests.get(car_id);
             if (requests != null) {
                 for (Actions.InetRequest request : requests) {
                     if (request.msg == id) {
-                        request.done(context);
+                        request.done(context, when);
                         return true;
                     }
                 }
@@ -99,7 +99,7 @@ public class SmsMonitor extends BroadcastReceiver {
     }
 
     static void showNotification(Context context, String text, int picId, String car_id, String sound) {
-        Alarm.createNotification(context, text, picId, car_id, sound);
+        Alarm.createNotification(context, text, picId, car_id, sound, 0);
     }
 
     static boolean sendSMS(Context context, String car_id, String pswd, Sms sms) {
@@ -350,11 +350,11 @@ public class SmsMonitor extends BroadcastReceiver {
                 return true;
         }
         if (compare(body, "InGPSZone:")) {
-            Alarm.zoneNotify(context, car_id, true, body.substring(10), true, false);
+            Alarm.zoneNotify(context, car_id, true, body.substring(10), true, false, 0);
             return true;
         }
         if (compare(body, "OutGPSZone:")) {
-            Alarm.zoneNotify(context, car_id, false, body.substring(11), true, false);
+            Alarm.zoneNotify(context, car_id, false, body.substring(11), true, false, 0);
             return true;
         }
         return false;

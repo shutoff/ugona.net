@@ -80,7 +80,7 @@ public class Preferences {
                 if (value <= limit) {
                     if (balance_id == 0) {
                         SharedPreferences.Editor ed = preferences.edit();
-                        balance_id = Alarm.createNotification(context, context.getString(R.string.low_balance), R.drawable.white_balance, car_id, null);
+                        balance_id = Alarm.createNotification(context, context.getString(R.string.low_balance), R.drawable.white_balance, car_id, null, 0);
                         ed.putInt(Names.BALANCE_NOTIFICATION + car_id, balance_id);
                         ed.commit();
                     }

@@ -48,10 +48,10 @@ public class Alarm extends Activity {
     boolean show_main;
 
     static void createNotification(Context context, String text, String car_id) {
-        createNotification(context, text, R.drawable.warning, car_id, null);
+        createNotification(context, text, R.drawable.warning, car_id, null, 0);
     }
 
-    static int createNotification(Context context, String text, int pictId, String car_id, String sound) {
+    static int createNotification(Context context, String text, int pictId, String car_id, String sound, long when) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         int max_id = 0;
         String[] cars = preferences.getString(Names.CARS, "").split(",");
@@ -83,6 +83,8 @@ public class Alarm extends Activity {
         iNotification.putExtra(Names.TITLE, text);
         iNotification.putExtra(Names.ALARM, pictId);
         iNotification.putExtra(Names.EVENT_ID, max_id);
+        if (when != 0)
+            iNotification.putExtra(Names.EVENT_TIME, when);
         Uri data = Uri.withAppendedPath(Uri.parse("http://service/notification/"), car_id);
         iNotification.setData(data);
         PendingIntent pi = PendingIntent.getService(context, 0, iNotification, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -118,7 +120,7 @@ public class Alarm extends Activity {
         ed.commit();
     }
 
-    static void zoneNotify(Context context, String car_id, boolean in_zone, String zone, boolean check, boolean silent) {
+    static void zoneNotify(Context context, String car_id, boolean in_zone, String zone, boolean check, boolean silent, long when) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String old = preferences.getString(Names.ACTIVE_ZONE + car_id, "");
         if (check) {
@@ -143,7 +145,7 @@ public class Alarm extends Activity {
         }
         SharedPreferences.Editor ed = preferences.edit();
         if (!silent) {
-            zone_notify = createNotification(context, message, R.drawable.warning, car_id, null);
+            zone_notify = createNotification(context, message, R.drawable.warning, car_id, null, when);
             ed.putInt(Names.ZONE_NOTIFY + car_id, zone_notify);
         }
         if (in_zone) {

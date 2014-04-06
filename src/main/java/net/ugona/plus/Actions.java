@@ -56,7 +56,7 @@ public class Actions {
     };
     static Map<String, Set<InetRequest>> inet_requests;
 
-    static void done_motor_on(Context context, String car_id) {
+    static void done_motor_on(Context context, String car_id, long when) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         if (!preferences.getBoolean(Names.GUARD + car_id, false))
             return;
@@ -66,14 +66,14 @@ public class Actions {
         id = preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
-        id = Alarm.createNotification(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "start");
+        id = Alarm.createNotification(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "start", when);
         SharedPreferences.Editor ed = preferences.edit();
         ed.putInt(Names.MOTOR_ON_NOTIFY + car_id, id);
         ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
         ed.commit();
     }
 
-    static void done_motor_off(Context context, String car_id) {
+    static void done_motor_off(Context context, String car_id, long when) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         if (!preferences.getBoolean(Names.GUARD + car_id, false))
             return;
@@ -89,7 +89,7 @@ public class Actions {
         long time = (az_stop - az_start) / 60000;
         if ((time > 0) && (time <= 20))
             msg += " " + context.getString(R.string.motor_time).replace("$1", time + "");
-        id = Alarm.createNotification(context, msg, R.drawable.white_motor_off, car_id, null);
+        id = Alarm.createNotification(context, msg, R.drawable.white_motor_off, car_id, null, when);
         SharedPreferences.Editor ed = preferences.edit();
         ed.putInt(Names.MOTOR_OFF_NOTIFY + car_id, id);
         ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
@@ -105,7 +105,7 @@ public class Actions {
         id = preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
-        id = Alarm.createNotification(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet_on, car_id, "valet_on");
+        id = Alarm.createNotification(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet_on, car_id, "valet_on", 0);
         ed.putInt(Names.VALET_ON_NOTIFY + car_id, id);
         ed.remove(Names.VALET_OFF_NOTIFY + car_id);
         ed.commit();
@@ -120,7 +120,7 @@ public class Actions {
         id = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
-        id = Alarm.createNotification(context, context.getString(R.string.valet_off_ok), R.drawable.white_valet_off, car_id, "valet_off");
+        id = Alarm.createNotification(context, context.getString(R.string.valet_off_ok), R.drawable.white_valet_off, car_id, "valet_off", 0);
         ed.putInt(Names.VALET_OFF_NOTIFY + car_id, id);
         ed.remove(Names.VALET_ON_NOTIFY + car_id);
         ed.commit();
@@ -142,8 +142,8 @@ public class Actions {
                                     }
 
                                     @Override
-                                    void ok(Context context) {
-                                        done_motor_on(context, car_id);
+                                    void ok(Context context, long when) {
+                                        done_motor_on(context, car_id, when);
                                     }
                                 };
                             }
@@ -192,7 +192,7 @@ public class Actions {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                            done_motor_on(context, car_id);
+                            done_motor_on(context, car_id, 0);
                             return true;
                         }
                         return false;
@@ -225,8 +225,8 @@ public class Actions {
                                     }
 
                                     @Override
-                                    void ok(Context context) {
-                                        done_motor_off(context, car_id);
+                                    void ok(Context context, long when) {
+                                        done_motor_off(context, car_id, when);
                                     }
                                 };
                             }
@@ -268,7 +268,7 @@ public class Actions {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        done_motor_off(context, car_id);
+                        done_motor_off(context, car_id, 0);
                         return true;
                     }
                 });
@@ -508,7 +508,7 @@ public class Actions {
                                     }
 
                                     @Override
-                                    void ok(Context context) {
+                                    void ok(Context context, long when) {
 
                                     }
 
@@ -592,7 +592,7 @@ public class Actions {
                                     }
 
                                     @Override
-                                    void ok(Context context) {
+                                    void ok(Context context, long when) {
                                         SharedPreferences.Editor ed = preferences.edit();
                                         ed.putLong(Names.RELE_START + car_id, new Date().getTime());
                                         ed.commit();
@@ -613,7 +613,7 @@ public class Actions {
 
                                     @Override
                                     void user(Context context) {
-                                        ok(context);
+                                        ok(context, 0);
                                     }
                                 };
                             }
@@ -649,7 +649,7 @@ public class Actions {
                 }
 
                 @Override
-                void ok(Context context) {
+                void ok(Context context, long when) {
                     SharedPreferences.Editor ed = preferences.edit();
                     ed.putLong(Names.RELE_START + car_id, new Date().getTime());
                     ed.commit();
@@ -660,7 +660,7 @@ public class Actions {
 
                 @Override
                 void user(Context context) {
-                    ok(context);
+                    ok(context, 0);
                 }
             };
             return;
@@ -769,7 +769,7 @@ public class Actions {
                                     }
 
                                     @Override
-                                    void ok(Context context) {
+                                    void ok(Context context, long when) {
                                         done_valet_on(context, car_id);
                                     }
                                 };
@@ -839,7 +839,7 @@ public class Actions {
                                     }
 
                                     @Override
-                                    void ok(Context context) {
+                                    void ok(Context context, long when) {
                                         done_valet_on(context, car_id);
                                     }
                                 };
@@ -1435,14 +1435,14 @@ public class Actions {
 
         abstract void error();
 
-        abstract void ok(Context context);
+        abstract void ok(Context context, long when);
 
         void user(Context context) {
         }
 
-        void done(Context context) {
+        void done(Context context, long when) {
             dismiss();
-            ok(context);
+            ok(context, when);
         }
 
         void check(Context context) {
