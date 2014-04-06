@@ -190,7 +190,24 @@ public class ZoneEdit extends GpsActivity {
         zone.sms = chkSms.isChecked();
     }
 
-    class JsInterface extends GpsActivity.JsInterface {
+    class JsInterface {
+
+        @JavascriptInterface
+        void done() {
+            loaded = true;
+        }
+
+        @JavascriptInterface
+        public String getLocation() {
+            if (currentBestLocation == null)
+                return "";
+            String res = currentBestLocation.getLatitude() + ",";
+            res += currentBestLocation.getLongitude() + ",";
+            res += currentBestLocation.getAccuracy();
+            if (currentBestLocation.hasBearing())
+                res += currentBestLocation.getBearing();
+            return res;
+        }
 
         @JavascriptInterface
         public String getZone() {

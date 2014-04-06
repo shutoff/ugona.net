@@ -13,7 +13,6 @@ import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
 import java.util.Date;
@@ -280,19 +279,4 @@ abstract public class GpsActivity extends WebViewActivity {
         return provider1.equals(provider2);
     }
 
-    class JsInterface {
-
-        @JavascriptInterface
-        public String getLocation() {
-            if (currentBestLocation == null)
-                return "";
-            String res = currentBestLocation.getLatitude() + ",";
-            res += currentBestLocation.getLongitude() + ",";
-            res += currentBestLocation.getAccuracy();
-            if (currentBestLocation.hasBearing())
-                res += currentBestLocation.getBearing();
-            return res;
-        }
-
-    }
 }

@@ -1,6 +1,7 @@
 package net.ugona.plus;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
@@ -9,12 +10,18 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 
-abstract public class WebViewActivity extends ActionBarActivity {
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
-    abstract String loadURL();
+abstract public class WebViewActivity extends ActionBarActivity {
 
     FrameLayout holder;
     WebView webView;
+    boolean loaded;
+
+    abstract String loadURL();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -24,9 +31,16 @@ abstract public class WebViewActivity extends ActionBarActivity {
         initUI();
     }
 
+    @Override
+    protected void onPause() {
+        webView.freeMemory();
+        super.onPause();
+    }
+
     void initUI() {
         holder = (FrameLayout) findViewById(R.id.webview);
         if (webView == null) {
+            loaded = false;
             webView = new WebView(this);
             webView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
 
@@ -63,7 +77,6 @@ abstract public class WebViewActivity extends ActionBarActivity {
     }
 
     void log(String text) {
-/*
         File logFile = Environment.getExternalStorageDirectory();
         logFile = new File(logFile, "car.log");
         if (!logFile.exists()) {
@@ -83,6 +96,5 @@ abstract public class WebViewActivity extends ActionBarActivity {
         } catch (IOException e) {
             // ignore
         }
-*/
     }
 }

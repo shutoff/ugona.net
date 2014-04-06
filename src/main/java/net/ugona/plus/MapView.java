@@ -83,7 +83,8 @@ public class MapView extends GpsActivity {
         br = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                webView.loadUrl("javascript:update()");
+                if (loaded)
+                    webView.loadUrl("javascript:update()");
                 stopTimer();
                 startTimer(false);
             }
@@ -144,6 +145,8 @@ public class MapView extends GpsActivity {
                 public boolean onNavigationItemSelected(int i, long l) {
                     if (cars[i].id.equals(car_id))
                         return true;
+                    if (!loaded)
+                        return true;
                     point_data = null;
                     car_id = cars[i].id;
                     webView.loadUrl("javascript:update()");
@@ -194,7 +197,24 @@ public class MapView extends GpsActivity {
             outState.putString(Names.CARS, data);
     }
 
-    class JsInterface extends GpsActivity.JsInterface {
+    class JsInterface {
+
+        @JavascriptInterface
+        public void done() {
+            loaded = true;
+        }
+
+        @JavascriptInterface
+        public String getLocation() {
+            if (currentBestLocation == null)
+                return "";
+            String res = currentBestLocation.getLatitude() + ",";
+            res += currentBestLocation.getLongitude() + ",";
+            res += currentBestLocation.getAccuracy();
+            if (currentBestLocation.hasBearing())
+                res += currentBestLocation.getBearing();
+            return res;
+        }
 
         @JavascriptInterface
         String createData(String id) {
@@ -284,13 +304,15 @@ public class MapView extends GpsActivity {
                 data += ";";
             } else {
                 String address = Address.getAddress(MapView.this, lat, lng);
-                String[] parts = address.split(", ");
-                if (parts.length >= 3) {
-                    address = parts[0] + ", " + parts[1];
-                    for (int n = 2; n < parts.length; n++)
-                        address += "<br/>" + parts[n];
+                if (address != null) {
+                    String[] parts = address.split(", ");
+                    if (parts.length >= 3) {
+                        address = parts[0] + ", " + parts[1];
+                        for (int n = 2; n < parts.length; n++)
+                            address += "<br/>" + parts[n];
+                    }
+                    data += address;
                 }
-                data += address;
                 data += ";" + zone;
             }
             if (times.containsKey(id))
@@ -300,11 +322,12 @@ public class MapView extends GpsActivity {
 
         @JavascriptInterface
         public String getData() {
-            Cars.Car[] cars = Cars.getCars(getBaseContext());
+            Cars.Car[] cars = Cars.getCars(MapView.this);
 
             String id = null;
 
             String data = point_data;
+
             if (data == null) {
                 data = createData(car_id);
                 id = car_id;
@@ -315,7 +338,6 @@ public class MapView extends GpsActivity {
                     continue;
                 data += "|" + createData(car.id);
             }
-            log("get data: " + data);
             return data;
         }
     }

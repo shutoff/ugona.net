@@ -32,6 +32,7 @@ var icon_second_nocourse;
 
 function initialize() {
     var data =  android.getData();
+
     var cars = (data+"").split('|');
     var car_data = cars[0].split(';');
 
@@ -96,6 +97,7 @@ function initialize() {
         fillOpacity: 0.5        
     };
 
+    console.log('????');
     for (var i in cars){
         (function(i){
             var car_data = cars[i].split(';');
@@ -151,9 +153,12 @@ function initialize() {
             infos[i] = info;
         })(i);
     }
+    console.log('111');
     if (zones[0] != null)
         center();
     myLocation();
+    console.log('done');
+    android.done();
 }
 
 function myLocation() {
@@ -384,10 +389,6 @@ function center() {
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
-
-
-
-
 
 </script>
 </head>
