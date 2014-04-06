@@ -10,14 +10,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -31,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,7 +40,6 @@ public class FetchService extends Service {
     static final String ACTION_UPDATE_FORCE = "net.ugona.plus.UPDATE_FORCE";
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR";
     static final String ACTION_NOTIFICATION = "net.ugona.plus.NOTIFICATION";
-    static final String ACTION_LOCATION = "net.ugona.plus.LOCATION";
     static final String ACTION_RELE_OFF = "net.ugona.plus.RELE_OFF";
 
     static final String URL_STATUS = "https://car-online.ugona.net/?skey=$1&time=$2";
@@ -58,18 +52,12 @@ public class FetchService extends Service {
     private static final long REPEAT_AFTER_500 = 600 * 1000;
     private static final long LONG_TIMEOUT = 5 * 60 * 60 * 1000;
     private static final long SCAN_TIMEOUT = 10 * 1000;
-    private static final long LOCATION_TIMEOUT = 20 * 1000;
 
     static private Map<String, ServerRequest> requests;
-    LocationManager locationManager;
-    Location currentBestLocation;
-    LocationListener netListener;
-    LocationListener gpsListener;
-    Set<ZonePending> zone_pending;
+
     private BroadcastReceiver mReceiver;
     private PendingIntent piTimer;
     private PendingIntent piUpdate;
-    private PendingIntent piLocation;
     private SharedPreferences preferences;
     private ConnectivityManager conMgr;
     private AlarmManager alarmMgr;
@@ -98,7 +86,6 @@ public class FetchService extends Service {
 */
 
         super.onCreate();
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
@@ -111,32 +98,11 @@ public class FetchService extends Service {
     }
 
     @Override
-    public void onDestroy() {
-        removeListeners();
-        if (zone_pending != null) {
-            for (ZonePending z : zone_pending) {
-                Alarm.zoneNotify(this, z.car_id, z.zone_in, z.zone, true, false);
-            }
-        }
-        super.onDestroy();
-    }
-
-    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             String car_id = intent.getStringExtra(Names.ID);
             String action = intent.getAction();
             if (action != null) {
-                if (action.equals(ACTION_LOCATION)) {
-                    removeListeners();
-                    if (zone_pending == null)
-                        return START_NOT_STICKY;
-                    for (ZonePending z : zone_pending) {
-                        Alarm.zoneNotify(this, z.car_id, z.zone_in, z.zone, true, false);
-                    }
-                    zone_pending.clear();
-                    return START_NOT_STICKY;
-                }
                 if (action.equals(ACTION_CLEAR))
                     clearNotification(car_id, intent.getIntExtra(Names.NOTIFY, 0));
                 if (action.equals(ACTION_UPDATE)) {
@@ -162,8 +128,6 @@ public class FetchService extends Service {
                 new StatusRequest(Preferences.getCar(preferences, car_id));
         }
         if (startRequest())
-            return START_STICKY;
-        if ((gpsListener != null) || (netListener != null))
             return START_STICKY;
         return START_NOT_STICKY;
     }
@@ -234,8 +198,6 @@ public class FetchService extends Service {
             piUpdate = PendingIntent.getService(this, 0, iUpdate, PendingIntent.FLAG_UPDATE_CURRENT);
             alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + LONG_TIMEOUT, LONG_TIMEOUT, piUpdate);
         }
-        if ((gpsListener == null) && (netListener == null))
-            stopSelf();
         return false;
     }
 
@@ -297,209 +259,10 @@ public class FetchService extends Service {
     }
 
     void zoneNotify(String car_id, boolean zone_in, String zone) {
-        if (!preferences.getBoolean(Names.ZONE_MY + car_id, false)) {
+        State.appendLog("zone: " + zone_in + "," + zone);
+
             Alarm.zoneNotify(this, car_id, zone_in, zone, true, false);
             return;
-        }
-        currentBestLocation = getLastBestLocation();
-        if ((currentBestLocation != null) && (currentBestLocation.getAccuracy() < MIN_ACCURACY)) {
-            double lat = preferences.getFloat(Names.LAT + car_id, 0);
-            double lng = preferences.getFloat(Names.LNG + car_id, 0);
-            double dist = Address.calc_distance(currentBestLocation.getLatitude(), currentBestLocation.getLongitude(), lat, lng);
-            Alarm.zoneNotify(this, car_id, zone_in, zone, true, dist < currentBestLocation.getAccuracy());
-            return;
-        }
-
-        ZonePending z = new ZonePending();
-        z.car_id = car_id;
-        z.zone_in = zone_in;
-        z.zone = zone;
-
-        if (zone_pending == null)
-            zone_pending = new HashSet<ZonePending>();
-        zone_pending.add(z);
-
-        netListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                locationChanged(location);
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-
-            }
-        };
-
-        gpsListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                locationChanged(location);
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-
-            }
-        };
-
-        try {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, gpsListener);
-        } catch (Exception ex) {
-            gpsListener = null;
-        }
-
-        try {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 10, netListener);
-        } catch (Exception ex) {
-            netListener = null;
-        }
-
-        if (piLocation == null) {
-            Intent iUpdate = new Intent(this, FetchService.class);
-            iUpdate.setAction(ACTION_LOCATION);
-            piLocation = PendingIntent.getService(this, 0, iUpdate, PendingIntent.FLAG_UPDATE_CURRENT);
-            alarmMgr.set(AlarmManager.RTC, System.currentTimeMillis() + LOCATION_TIMEOUT, piLocation);
-        }
-    }
-
-    void removeListeners() {
-        if (netListener != null) {
-            locationManager.removeUpdates(netListener);
-            netListener = null;
-        }
-        if (gpsListener != null) {
-            locationManager.removeUpdates(gpsListener);
-            gpsListener = null;
-        }
-    }
-
-    public void locationChanged(Location location) {
-        if (!isBetterLocation(location, currentBestLocation))
-            return;
-        currentBestLocation = location;
-        if ((currentBestLocation == null) || (currentBestLocation.getAccuracy() > MIN_ACCURACY))
-            return;
-        removeListeners();
-        if (zone_pending == null)
-            return;
-        for (ZonePending z : zone_pending) {
-            double lat = preferences.getFloat(Names.LAT + z.car_id, 0);
-            double lng = preferences.getFloat(Names.LNG + z.car_id, 0);
-            double dist = Address.calc_distance(currentBestLocation.getLatitude(), currentBestLocation.getLongitude(), lat, lng);
-            Alarm.zoneNotify(this, z.car_id, z.zone_in, z.zone, true, dist < currentBestLocation.getAccuracy());
-        }
-        zone_pending.clear();
-    }
-
-    ;
-
-    Location getLastBestLocation() {
-        Location locationGPS = null;
-        try {
-            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
-                locationGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        } catch (Exception ex) {
-            // ignore
-        }
-        Location locationNet = null;
-        try {
-            if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
-                locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        } catch (Exception ex) {
-            // ignore
-        }
-        long GPSLocationTime = 0;
-        Date now = new Date();
-        if (locationGPS != null) {
-            GPSLocationTime = locationGPS.getTime();
-            if (GPSLocationTime < now.getTime() - TWO_MINUTES) {
-                locationGPS = null;
-                GPSLocationTime = 0;
-            }
-        }
-        long NetLocationTime = 0;
-        if (locationNet != null) {
-            NetLocationTime = locationNet.getTime();
-            if (NetLocationTime < now.getTime() - TWO_MINUTES) {
-                locationNet = null;
-                NetLocationTime = 0;
-            }
-        }
-        if (GPSLocationTime > NetLocationTime)
-            return locationGPS;
-        return locationNet;
-    }
-
-    protected boolean isBetterLocation(Location location, Location currentBestLocation) {
-        if (currentBestLocation == null)
-            return true;
-
-        long timeDelta = location.getTime() - currentBestLocation.getTime();
-        boolean isSignificantlyNewer = timeDelta > TWO_MINUTES;
-        boolean isSignificantlyOlder = timeDelta < -TWO_MINUTES;
-        boolean isNewer = timeDelta > 0;
-
-        // If it's been more than two minutes since the current location, use the new location
-        // because the user has likely moved
-        if (isSignificantlyNewer) {
-            return true;
-            // If the new location is more than two minutes older, it must be worse
-        } else if (isSignificantlyOlder) {
-            return false;
-        }
-
-        // Check whether the new location fix is more or less accurate
-        int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation.getAccuracy());
-        boolean isLessAccurate = accuracyDelta > 0;
-        boolean isMoreAccurate = accuracyDelta < 0;
-        boolean isSignificantlyLessAccurate = accuracyDelta > 200;
-
-        // Check if the old and new location are from the same provider
-        boolean isFromSameProvider = isSameProvider(location.getProvider(),
-                currentBestLocation.getProvider());
-
-        // Determine location quality using a combination of timeliness and accuracy
-        if (isMoreAccurate) {
-            return true;
-        } else if (isNewer && !isLessAccurate) {
-            return true;
-        } else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isSameProvider(String provider1, String provider2) {
-        if (provider1 == null)
-            return provider2 == null;
-        return provider1.equals(provider2);
-    }
-
-    static class ZonePending {
-        String car_id;
-        boolean zone_in;
-        String zone;
     }
 
     abstract class ServerRequest extends HttpTask {
@@ -761,6 +524,7 @@ public class FetchService extends Service {
             if (zone != null) {
                 ed.putLong(Names.ZONE_TIME + car_id, zone.asLong());
                 ed.putBoolean(Names.ZONE_IN + car_id, res.get("zone_in").asBoolean());
+                State.appendLog("Zone " + zone.asLong() + ", " + res.get("zone_in").asBoolean());
                 new ZoneRequest(car_id);
             }
 
@@ -1017,6 +781,7 @@ public class FetchService extends Service {
                     JsonValue vName = e.get("zone");
                     if (vName != null)
                         zone = vName.asString();
+                    State.appendLog("zone req result " + zone);
                     zoneNotify(car_id, type == 86, zone);
                     break;
                 }

@@ -344,7 +344,7 @@
     <string name="auto">автоматически</string>
     <string name="send_sms">Отправить СМС</string>
     <string name="send_sms_message">Сеть передачи данных недоступна.\nОтправить команду с помощью СМС?</string>
-    <string name="send_command">Отправка комманды</string>
+    <string name="send_command">Отправка команды</string>
     <string name="send_sms_on_fail">Ошибка отправки команды по сети.\nОтправить команду с помощью СМС?</string>
     <string name="wait_msg">Команда поставлена в очередь и будет передана в течении $1 мин.</string>
     <string name="you_can">Вы можете:</string>
@@ -408,7 +408,7 @@
     <string name="changed_msg">У вас есть несохраненные настрйоки.\nВы действительно хотите выйти?</string>
     <string name="exit">Выход</string>
     <string name="notify_msg">Уведомления приходят с некоторой задержкой в зависимости от настроек таймаута устройства и соединения телефона с сетью</string>
-    <string name="command_name">Имя комманды:</string>
+    <string name="command_name">Имя команды:</string>
     <string name="device_phone_number">Номер телефона устройства</string>
     <string name="sound_off">Включить режим охраны без звука</string>
     <string name="sound_on">Отключить режим охраны без звука</string>

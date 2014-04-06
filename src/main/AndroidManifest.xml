@@ -4,7 +4,7 @@
     android:versionCode="5"
     android:versionName="1.4 RC5">
 
-<uses-sdk
+    <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="16" />
 
@@ -47,6 +47,14 @@
     <uses-feature
         android:name="android.hardware.telephony"
         android:required="false" />
+
+    <permission
+        android:name="net.ugona.plus.READ_DATABASE"
+        android:protectionLevel="normal" />
+
+    <permission
+        android:name="net.ugona.plus.WRITE_DATABASE"
+        android:protectionLevel="normal" />
 
     <application
         android:allowBackup="true"
@@ -186,7 +194,10 @@
 
         <provider
             android:name=".CarProvider"
-            android:authorities="net.ugona.plus" />
+            android:authorities="net.ugona.plus"
+            android:exported="true"
+            android:readPermission="net.ugona.plus.READ_DATABASE"
+            android:writePermission="net.ugona.plus.WRITE_DATABASE" />
 
     </application>
 

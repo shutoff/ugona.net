@@ -115,7 +115,19 @@ public class CarProvider extends ContentProvider {
                     row[i] = preferences.getLong(name + car_id, 0);
                     break;
                 default:
-                    row[i] = preferences.getString(name + car_id, "");
+                    try {
+                        row[i] = preferences.getString(name + car_id, "");
+                    } catch (Exception ex) {
+                        try {
+                            row[i] = preferences.getBoolean(name + car_id, false);
+                        } catch (Exception ex1) {
+                            try {
+                                row[i] = preferences.getInt(name + car_id, 0);
+                            } catch (Exception ex2) {
+                                // // ignore
+                            }
+                        }
+                    }
             }
         }
         cursor.addRow(row);

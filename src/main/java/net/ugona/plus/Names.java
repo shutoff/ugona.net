@@ -151,7 +151,6 @@ public final class Names {
     static final String ZONE_TIME = "zone_time";
     static final String ZONE_IN = "zone_in";
     static final String ZONE_INFO = "zone_info";
-    static final String ZONE_MY = "zone_my";
 
     static final String TIMERS_INFO = "timers";
 }
