@@ -181,7 +181,7 @@ public class StatFragment extends Fragment implements OnRefreshListener {
     void getData() {
         fetcher = new DataFetcher();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String api_key = preferences.getString(Names.CAR_KEY + car_id, "");
+        String api_key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
         Calendar cal = Calendar.getInstance();
         TimeZone tz = cal.getTimeZone();
         fetcher.execute(STAT_URL, api_key, tz.getID());
@@ -222,7 +222,7 @@ public class StatFragment extends Fragment implements OnRefreshListener {
             return;
         fetcher = new DataFetcher();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String api_key = preferences.getString(Names.CAR_KEY + car_id, "");
+        String api_key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
         Calendar cal = Calendar.getInstance();
         TimeZone tz = cal.getTimeZone();
         fetcher.execute(STAT_URL, api_key, tz.getID());

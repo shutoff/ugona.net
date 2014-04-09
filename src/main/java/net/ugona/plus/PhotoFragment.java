@@ -107,7 +107,7 @@ public class PhotoFragment extends Fragment
                 } else if (file.exists()) {
                     try {
                         Intent intent = new Intent(getActivity(), PhotoView.class);
-                        intent.putExtra(Names.SHOW_PHOTO, photo.id);
+                        intent.putExtra(Names.Car.SHOW_PHOTO, photo.id);
                         intent.putExtra(Names.TITLE, photo.time);
                         intent.putExtra(Names.CAMERA, photo.camera);
                         intent.putExtra(Names.ID, car_id);
@@ -120,7 +120,7 @@ public class PhotoFragment extends Fragment
         });
 
         preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        api_key = preferences.getString(Names.CAR_KEY + car_id, "");
+        api_key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
         photos = new Vector<Photo>();
 
         View vLogo = v.findViewById(R.id.logo);
@@ -150,7 +150,7 @@ public class PhotoFragment extends Fragment
                 if (!car_id.equals(intent.getStringExtra(Names.ID)))
                     return;
                 if (intent.getAction().equals(FetchService.ACTION_UPDATE))
-                    api_key = preferences.getString(Names.CAR_KEY + car_id, "");
+                    api_key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
             }
         };
         IntentFilter intFilter = new IntentFilter(FetchService.ACTION_UPDATE_FORCE);

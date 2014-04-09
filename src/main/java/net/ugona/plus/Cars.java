@@ -27,6 +27,7 @@ import com.eclipsesource.json.ParseException;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.Vector;
 
@@ -49,7 +50,7 @@ public class Cars extends ActionBarActivity {
         Car[] cars = new Car[cars_id.length];
         for (int i = 0; i < cars_id.length; i++) {
             String id = cars_id[i];
-            String name = preferences.getString(Names.CAR_NAME + id, "");
+            String name = preferences.getString(Names.Car.CAR_NAME + id, "");
             if (name.equals("")) {
                 name = context.getString(R.string.car);
                 if (!id.equals(""))
@@ -59,7 +60,7 @@ public class Cars extends ActionBarActivity {
             car.id = id;
             car.name = name;
             car.pointers = new String[0];
-            String pointers = preferences.getString(Names.POINTERS + id, "");
+            String pointers = preferences.getString(Names.Car.POINTERS + id, "");
             if (!pointers.equals(""))
                 car.pointers = pointers.split(",");
             cars[i] = car;
@@ -70,38 +71,17 @@ public class Cars extends ActionBarActivity {
     static void deleteCarKeys(Context context, String id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor ed = preferences.edit();
-        ed.remove(Names.CAR_NAME + id);
-        ed.remove(Names.CAR_KEY + id);
-        ed.remove(Names.CAR_PHONE + id);
-        ed.remove(Names.EVENT_ID + id);
-        ed.remove(Names.EVENT_TIME + id);
-        ed.remove(Names.VOLTAGE_MAIN + id);
-        ed.remove(Names.VOLTAGE_RESERVED + id);
-        ed.remove(Names.BALANCE + id);
-        ed.remove(Names.LAT + id);
-        ed.remove(Names.LNG + id);
-        ed.remove(Names.COURSE + id);
-        ed.remove(Names.SPEED + id);
-        ed.remove(Names.GUARD + id);
-        ed.remove(Names.GUARD0 + id);
-        ed.remove(Names.GUARD1 + id);
-        ed.remove(Names.INPUT1 + id);
-        ed.remove(Names.INPUT2 + id);
-        ed.remove(Names.INPUT3 + id);
-        ed.remove(Names.INPUT4 + id);
-        ed.remove(Names.ZONE_DOOR + id);
-        ed.remove(Names.ZONE_HOOD + id);
-        ed.remove(Names.ZONE_TRUNK + id);
-        ed.remove(Names.ZONE_ACCESSORY + id);
-        ed.remove(Names.ZONE_IGNITION + id);
-        ed.remove(Names.LAST_EVENT + id);
-        ed.remove(Names.ENGINE + id);
-        ed.remove(Names.TEMPERATURE + id);
-        ed.remove(Names.GSM_SECTOR + id);
-        ed.remove(Names.GSM_ZONE + id);
-        ed.remove(Names.LOGIN + id);
-        ed.remove(Names.POINTER + id);
-        ed.remove(Names.POINTERS + id);
+        Field[] fields = Names.Car.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (!java.lang.reflect.Modifier.isStatic(f.getModifiers()))
+                continue;
+            try {
+                String val = (String) f.get(Names.Car.class);
+                ed.remove(val + id);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         ed.remove(Names.GCM_TIME);
         ed.commit();
         File cache = context.getCacheDir();
@@ -170,7 +150,7 @@ public class Cars extends ActionBarActivity {
                         @Override
                         public void onClick(final View v) {
                             String id = v.getTag().toString();
-                            String message = getString(R.string.delete) + " " + preferences.getString(Names.CAR_NAME + id, "") + "?";
+                            String message = getString(R.string.delete) + " " + preferences.getString(Names.Car.CAR_NAME + id, "") + "?";
                             AlertDialog dialog = new AlertDialog.Builder(Cars.this)
                                     .setTitle(R.string.delete)
                                     .setMessage(message)
@@ -210,9 +190,9 @@ public class Cars extends ActionBarActivity {
                         deleteCarKeys(this, i + "");
                         Intent intent = new Intent(this, AuthDialog.class);
                         intent.putExtra(Names.ID, i + "");
-                        intent.putExtra(Names.AUTH, true);
+                        intent.putExtra(Names.Car.AUTH, true);
                         if (State.hasTelephony(this))
-                            intent.putExtra(Names.CAR_PHONE, true);
+                            intent.putExtra(Names.Car.CAR_PHONE, true);
                         startActivityForResult(intent, NEW_CAR);
                         break;
                     }
@@ -239,7 +219,7 @@ public class Cars extends ActionBarActivity {
                     JsonArray array = res.get("photos").asArray();
                     if (array.size() > 0) {
                         SharedPreferences.Editor ed = preferences.edit();
-                        ed.putBoolean(Names.SHOW_PHOTO + car_id, true);
+                        ed.putBoolean(Names.Car.SHOW_PHOTO + car_id, true);
                         ed.commit();
                         Intent i = new Intent(FetchService.ACTION_UPDATE_FORCE);
                         i.putExtra(Names.ID, car_id);
@@ -252,13 +232,13 @@ public class Cars extends ActionBarActivity {
 
                 }
             };
-            task.execute(URL_PHOTOS, preferences.getString(Names.CAR_KEY + car_id, ""), new Date().getTime() - 3 * 24 * 60 * 60 * 1000);
+            task.execute(URL_PHOTOS, preferences.getString(Names.Car.CAR_KEY + car_id, ""), new Date().getTime() - 3 * 24 * 60 * 60 * 1000);
             setupCar(car_id);
         }
     }
 
     boolean checkPointer(final String car_id) {
-        if (!preferences.getBoolean(Names.POINTER + car_id, false))
+        if (!preferences.getBoolean(Names.Car.POINTER + car_id, false))
             return false;
         if (preferences.getString(Names.CARS, "").split(",").length < 2)
             return false;
@@ -338,12 +318,12 @@ public class Cars extends ActionBarActivity {
                     new_cars += "," + car.id;
                 }
                 ed.putString(Names.CARS, new_cars);
-                ed.putString(Names.CAR_NAME + car_id, "Pointer " + car_id);
-                String pointers = preferences.getString(Names.POINTERS + id, "");
+                ed.putString(Names.Car.CAR_NAME + car_id, "Pointer " + car_id);
+                String pointers = preferences.getString(Names.Car.POINTERS + id, "");
                 if (!pointers.equals(""))
                     pointers += ",";
                 pointers += car_id;
-                ed.putString(Names.POINTERS + id, pointers);
+                ed.putString(Names.Car.POINTERS + id, pointers);
                 ed.commit();
                 Intent i = new Intent(Cars.this, FetchService.class);
                 i.putExtra(Names.ID, car_id);
@@ -373,7 +353,7 @@ public class Cars extends ActionBarActivity {
                 CarId pid = new CarId();
                 pid.car = new Car();
                 pid.car.id = p;
-                pid.car.name = preferences.getString(Names.CAR_NAME + p, "");
+                pid.car.name = preferences.getString(Names.Car.CAR_NAME + p, "");
                 pid.pointer = true;
                 carsId.add(pid);
             }
@@ -414,7 +394,7 @@ public class Cars extends ActionBarActivity {
             } else {
                 res += "," + car;
             }
-            String pointer = preferences.getString(Names.POINTERS + car, "");
+            String pointer = preferences.getString(Names.Car.POINTERS + car, "");
             if (pointer.equals(""))
                 continue;
             String pointers = "";
@@ -427,7 +407,7 @@ public class Cars extends ActionBarActivity {
                     pointers += "," + p;
                 }
             }
-            ed.putString(Names.POINTERS + car, "");
+            ed.putString(Names.Car.POINTERS + car, pointers);
         }
         ed.putString(Names.CARS, res);
         ed.commit();

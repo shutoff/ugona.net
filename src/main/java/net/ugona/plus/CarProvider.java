@@ -33,6 +33,7 @@ public class CarProvider extends ContentProvider {
     static final int TYPE_BOOL = 2;
     static final int TYPE_LONG = 3;
     private static final UriMatcher uriMatcher;
+
     static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(AUTHORITY, CAR_PATH, URI_CARS);
@@ -45,27 +46,27 @@ public class CarProvider extends ContentProvider {
     public boolean onCreate() {
         field_types = new HashMap<String, Integer>();
         field_types.put(Names.ID, TYPE_ID);
-        field_types.put(Names.CAR_NAME, TYPE_STRING);
-        field_types.put(Names.EVENT_TIME, TYPE_LONG);
-        field_types.put(Names.ENGINE, TYPE_BOOL);
-        field_types.put(Names.LAST_EVENT, TYPE_LONG);
-        field_types.put(Names.LAST_STAND, TYPE_LONG);
-        field_types.put(Names.GUARD, TYPE_BOOL);
-        field_types.put(Names.GUARD0, TYPE_BOOL);
-        field_types.put(Names.GUARD1, TYPE_BOOL);
-        field_types.put(Names.INPUT1, TYPE_BOOL);
-        field_types.put(Names.INPUT2, TYPE_BOOL);
-        field_types.put(Names.INPUT3, TYPE_BOOL);
-        field_types.put(Names.INPUT4, TYPE_BOOL);
-        field_types.put(Names.ZONE_DOOR, TYPE_BOOL);
-        field_types.put(Names.ZONE_HOOD, TYPE_BOOL);
-        field_types.put(Names.ZONE_TRUNK, TYPE_BOOL);
-        field_types.put(Names.ZONE_ACCESSORY, TYPE_BOOL);
-        field_types.put(Names.ZONE_IGNITION, TYPE_BOOL);
-        field_types.put(Names.RELAY1, TYPE_BOOL);
-        field_types.put(Names.RELAY2, TYPE_BOOL);
-        field_types.put(Names.RELAY3, TYPE_BOOL);
-        field_types.put(Names.RELAY4, TYPE_BOOL);
+        field_types.put(Names.Car.CAR_NAME, TYPE_STRING);
+        field_types.put(Names.Car.EVENT_TIME, TYPE_LONG);
+        field_types.put(Names.Car.ENGINE, TYPE_BOOL);
+        field_types.put(Names.Car.LAST_EVENT, TYPE_LONG);
+        field_types.put(Names.Car.LAST_STAND, TYPE_LONG);
+        field_types.put(Names.Car.GUARD, TYPE_BOOL);
+        field_types.put(Names.Car.GUARD0, TYPE_BOOL);
+        field_types.put(Names.Car.GUARD1, TYPE_BOOL);
+        field_types.put(Names.Car.INPUT1, TYPE_BOOL);
+        field_types.put(Names.Car.INPUT2, TYPE_BOOL);
+        field_types.put(Names.Car.INPUT3, TYPE_BOOL);
+        field_types.put(Names.Car.INPUT4, TYPE_BOOL);
+        field_types.put(Names.Car.ZONE_DOOR, TYPE_BOOL);
+        field_types.put(Names.Car.ZONE_HOOD, TYPE_BOOL);
+        field_types.put(Names.Car.ZONE_TRUNK, TYPE_BOOL);
+        field_types.put(Names.Car.ZONE_ACCESSORY, TYPE_BOOL);
+        field_types.put(Names.Car.ZONE_IGNITION, TYPE_BOOL);
+        field_types.put(Names.Car.RELAY1, TYPE_BOOL);
+        field_types.put(Names.Car.RELAY2, TYPE_BOOL);
+        field_types.put(Names.Car.RELAY3, TYPE_BOOL);
+        field_types.put(Names.Car.RELAY4, TYPE_BOOL);
         return true;
     }
 

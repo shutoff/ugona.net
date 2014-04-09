@@ -14,22 +14,6 @@ import java.util.Date;
 
 public class CarDrawable {
 
-    static Bitmap bitmap;
-
-    int[] parts_id;
-
-    CarDrawable() {
-        parts_id = new int[7];
-
-        parts_id[0] = 0;
-        parts_id[1] = 0;
-        parts_id[2] = 0;
-        parts_id[3] = 0;
-        parts_id[4] = 0;
-        parts_id[5] = 0;
-        parts_id[6] = 0;
-    }
-
     static final int[] drawablesId = {
             R.drawable.car_black,           // 1
             R.drawable.car_white,           // 2
@@ -66,10 +50,24 @@ public class CarDrawable {
             R.drawable.heater,              // 33
             R.drawable.heater_blue,         // 34
     };
+    static Bitmap bitmap;
+    int[] parts_id;
+
+    CarDrawable() {
+        parts_id = new int[7];
+
+        parts_id[0] = 0;
+        parts_id[1] = 0;
+        parts_id[2] = 0;
+        parts_id[3] = 0;
+        parts_id[4] = 0;
+        parts_id[5] = 0;
+        parts_id[6] = 0;
+    }
 
     private boolean update(Context ctx, String car_id, boolean engine, boolean big) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
-        long last = preferences.getLong(Names.EVENT_TIME + car_id, 0);
+        long last = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
         Date now = new Date();
         boolean upd = false;
         if (last < now.getTime() - 24 * 60 * 60 * 1000) {
@@ -82,39 +80,39 @@ public class CarDrawable {
             upd |= setLayer(6, 0);
         } else {
 
-            boolean guard = preferences.getBoolean(Names.GUARD + car_id, false);
-            boolean guard0 = preferences.getBoolean(Names.GUARD0 + car_id, false);
-            boolean guard1 = preferences.getBoolean(Names.GUARD1 + car_id, false);
+            boolean guard = preferences.getBoolean(Names.Car.GUARD + car_id, false);
+            boolean guard0 = preferences.getBoolean(Names.Car.GUARD0 + car_id, false);
+            boolean guard1 = preferences.getBoolean(Names.Car.GUARD1 + car_id, false);
 
             boolean white = !guard || (guard0 && guard1);
 
-            upd = setModeCar(!white, preferences.getBoolean(Names.ZONE_ACCESSORY + car_id, false));
+            upd = setModeCar(!white, preferences.getBoolean(Names.Car.ZONE_ACCESSORY + car_id, false));
 
-            boolean doors_open = preferences.getBoolean(Names.INPUT1 + car_id, false);
-            boolean doors_alarm = preferences.getBoolean(Names.ZONE_DOOR + car_id, false);
+            boolean doors_open = preferences.getBoolean(Names.Car.INPUT1 + car_id, false);
+            boolean doors_alarm = preferences.getBoolean(Names.Car.ZONE_DOOR + car_id, false);
             if (white && doors_alarm) {
                 doors_alarm = false;
                 doors_open = true;
             }
             upd |= setModeOpen(0, !white, doors_open, doors_alarm);
 
-            boolean hood_open = preferences.getBoolean(Names.INPUT4 + car_id, false);
-            boolean hood_alarm = preferences.getBoolean(Names.ZONE_HOOD + car_id, false);
+            boolean hood_open = preferences.getBoolean(Names.Car.INPUT4 + car_id, false);
+            boolean hood_alarm = preferences.getBoolean(Names.Car.ZONE_HOOD + car_id, false);
             if (white && hood_alarm) {
                 hood_alarm = false;
                 hood_open = true;
             }
             upd |= setModeOpen(1, !white, hood_open, hood_alarm);
 
-            boolean trunk_open = preferences.getBoolean(Names.INPUT2 + car_id, false);
-            boolean trunk_alarm = preferences.getBoolean(Names.ZONE_TRUNK + car_id, false);
+            boolean trunk_open = preferences.getBoolean(Names.Car.INPUT2 + car_id, false);
+            boolean trunk_alarm = preferences.getBoolean(Names.Car.ZONE_TRUNK + car_id, false);
             if (white && trunk_alarm) {
                 trunk_alarm = false;
                 trunk_open = true;
             }
             upd |= setModeOpen(2, !white, trunk_open, trunk_alarm);
 
-            boolean az = preferences.getBoolean(Names.AZ + car_id, false);
+            boolean az = preferences.getBoolean(Names.Car.AZ + car_id, false);
             if (az && engine) {
                 upd |= setLayer(4, white ? 24 : 23);
             } else if (Preferences.getRele(preferences, car_id)) {
@@ -124,7 +122,7 @@ public class CarDrawable {
             }
 
             int ignition_id = 0;
-            if (!az && (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false)))
+            if (!az && (preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false)))
                 ignition_id = guard ? 26 : 25;
             upd |= setLayer(5, ignition_id);
 

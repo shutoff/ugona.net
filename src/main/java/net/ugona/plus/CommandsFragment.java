@@ -24,10 +24,10 @@ public class CommandsFragment extends SettingsFragment {
         items.add(new CheckBoxItem(R.string.autostart, State.CMD_AZ));
         items.add(new CheckBoxItem(R.string.rele, State.CMD_RELE));
         items.add(new CheckBoxItem(R.string.silent_mode, State.CMD_SOUND));
-        items.add(new CheckBoxEditItem(R.string.rele1, State.CMD_RELE1, Names.RELE1_NAME));
-        items.add(new CheckBoxEditItem(R.string.rele1i, State.CMD_RELE1I, Names.RELE1I_NAME));
-        items.add(new CheckBoxEditItem(R.string.rele2, State.CMD_RELE2, Names.RELE2_NAME));
-        items.add(new CheckBoxEditItem(R.string.rele2i, State.CMD_RELE2I, Names.RELE2I_NAME));
+        items.add(new CheckBoxEditItem(R.string.rele1, State.CMD_RELE1, Names.Car.RELE1_NAME));
+        items.add(new CheckBoxEditItem(R.string.rele1i, State.CMD_RELE1I, Names.Car.RELE1I_NAME));
+        items.add(new CheckBoxEditItem(R.string.rele2, State.CMD_RELE2, Names.Car.RELE2_NAME));
+        items.add(new CheckBoxEditItem(R.string.rele2i, State.CMD_RELE2I, Names.Car.RELE2I_NAME));
         return v;
     }
 
@@ -52,7 +52,7 @@ public class CommandsFragment extends SettingsFragment {
             state &= ~mask_;
             if (!value.equals(""))
                 state |= mask_;
-            ed.putInt(Names.COMMANDS + car_id, state);
+            ed.putInt(Names.Car.COMMANDS + car_id, state);
             ed.commit();
             Intent i = new Intent(FetchService.ACTION_UPDATE_FORCE);
             i.putExtra(Names.ID, car_id);

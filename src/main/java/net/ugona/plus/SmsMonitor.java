@@ -123,7 +123,7 @@ public class SmsMonitor extends BroadcastReceiver {
         PendingIntent sendPI = PendingIntent.getBroadcast(context, sms.id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         SmsManager smsManager = SmsManager.getDefault();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String phoneNumber = preferences.getString(Names.CAR_PHONE + car_id, "");
+        String phoneNumber = preferences.getString(Names.Car.CAR_PHONE + car_id, "");
         try {
             String text = sms.text;
             if (pswd != null)
@@ -267,7 +267,7 @@ public class SmsMonitor extends BroadcastReceiver {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
             String[] cars = preferences.getString(Names.CARS, "").split(",");
             for (String car : cars) {
-                String phone_config = preferences.getString(Names.CAR_PHONE + car, "");
+                String phone_config = preferences.getString(Names.Car.CAR_PHONE + car, "");
                 if (compareNumbers(phone_config, sms_from) || State.isDebug()) {
                     if (processCarMessage(context, body, car))
                         abortBroadcast();
@@ -368,7 +368,7 @@ public class SmsMonitor extends BroadcastReceiver {
         Intent alarmIntent = new Intent(context, Alarm.class);
         alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         alarmIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        alarmIntent.putExtra(Names.ALARM, text);
+        alarmIntent.putExtra(Names.Car.ALARM, text);
         alarmIntent.putExtra(Names.ID, car_id);
         context.startActivity(alarmIntent);
     }

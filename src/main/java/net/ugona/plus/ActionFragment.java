@@ -100,7 +100,7 @@ public class ActionFragment extends Fragment
                 void action(Context context, String car_id, boolean longTap) {
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                     Intent intent = new Intent(Intent.ACTION_CALL);
-                    intent.setData(Uri.parse("tel:" + preferences.getString(Names.CAR_PHONE + car_id, "") + ";;3"));
+                    intent.setData(Uri.parse("tel:" + preferences.getString(Names.Car.CAR_PHONE + car_id, "") + ";;3"));
                     context.startActivity(intent);
                 }
             },
@@ -140,37 +140,37 @@ public class ActionFragment extends Fragment
                     Actions.rele1(context, car_id, longTap);
                 }
             },
-            new Action(R.drawable.rele1_on, R.string.rele1_on, State.CMD_RELE1, Names.RELE1_NAME) {
+            new Action(R.drawable.rele1_on, R.string.rele1_on, State.CMD_RELE1, Names.Car.RELE1_NAME) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
                     Actions.rele(context, car_id, R.string.rele1_on, longTap);
                 }
             },
-            new Action(R.drawable.rele1_off, R.string.rele1_off, State.CMD_RELE1, Names.RELE1_NAME) {
+            new Action(R.drawable.rele1_off, R.string.rele1_off, State.CMD_RELE1, Names.Car.RELE1_NAME) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
                     Actions.rele(context, car_id, R.string.rele1_off, longTap);
                 }
             },
-            new Action(R.drawable.rele1_impulse, R.string.rele1i, State.CMD_RELE1I, Names.RELE1I_NAME) {
+            new Action(R.drawable.rele1_impulse, R.string.rele1i, State.CMD_RELE1I, Names.Car.RELE1I_NAME) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
                     Actions.rele(context, car_id, R.string.rele1i, longTap);
                 }
             },
-            new Action(R.drawable.rele2_on, R.string.rele2_on, State.CMD_RELE2, Names.RELE2_NAME) {
+            new Action(R.drawable.rele2_on, R.string.rele2_on, State.CMD_RELE2, Names.Car.RELE2_NAME) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
                     Actions.rele(context, car_id, R.string.rele2_on, longTap);
                 }
             },
-            new Action(R.drawable.rele2_off, R.string.rele2_off, State.CMD_RELE2, Names.RELE2_NAME) {
+            new Action(R.drawable.rele2_off, R.string.rele2_off, State.CMD_RELE2, Names.Car.RELE2_NAME) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
                     Actions.rele(context, car_id, R.string.rele2_off, longTap);
                 }
             },
-            new Action(R.drawable.rele2_impulse, R.string.rele2i, State.CMD_RELE2I, Names.RELE2I_NAME) {
+            new Action(R.drawable.rele2_impulse, R.string.rele2i, State.CMD_RELE2I, Names.Car.RELE2I_NAME) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
                     Actions.rele(context, car_id, R.string.rele2i, longTap);

@@ -56,7 +56,7 @@ public class Alarm extends Activity {
         int max_id = 0;
         String[] cars = preferences.getString(Names.CARS, "").split(",");
         for (String id : cars) {
-            String[] ids = preferences.getString(Names.N_IDS + id, "").split(",");
+            String[] ids = preferences.getString(Names.Car.N_IDS + id, "").split(",");
             for (String n_ids : ids) {
                 try {
                     int n = Integer.parseInt(n_ids);
@@ -69,22 +69,22 @@ public class Alarm extends Activity {
         }
         max_id++;
         SharedPreferences.Editor ed = preferences.edit();
-        String s = preferences.getString(Names.N_IDS + car_id, "");
+        String s = preferences.getString(Names.Car.N_IDS + car_id, "");
         if (!s.equals(""))
             s += ",";
         s += max_id;
-        ed.putString(Names.N_IDS + car_id, s);
+        ed.putString(Names.Car.N_IDS + car_id, s);
         ed.commit();
         Intent iNotification = new Intent(context, FetchService.class);
         iNotification.setAction(FetchService.ACTION_NOTIFICATION);
         iNotification.putExtra(Names.ID, car_id);
         if (sound != null)
-            iNotification.putExtra(Names.NOTIFY, sound);
+            iNotification.putExtra(Names.Car.NOTIFY, sound);
         iNotification.putExtra(Names.TITLE, text);
-        iNotification.putExtra(Names.ALARM, pictId);
-        iNotification.putExtra(Names.EVENT_ID, max_id);
+        iNotification.putExtra(Names.Car.ALARM, pictId);
+        iNotification.putExtra(Names.Car.EVENT_ID, max_id);
         if (when != 0)
-            iNotification.putExtra(Names.EVENT_TIME, when);
+            iNotification.putExtra(Names.Car.EVENT_TIME, when);
         Uri data = Uri.withAppendedPath(Uri.parse("http://service/notification/"), car_id);
         iNotification.setData(data);
         PendingIntent pi = PendingIntent.getService(context, 0, iNotification, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -96,7 +96,7 @@ public class Alarm extends Activity {
     static void removeNotification(Context context, String car_id, int n_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        String n_ids = preferences.getString(Names.N_IDS + car_id, "");
+        String n_ids = preferences.getString(Names.Car.N_IDS + car_id, "");
         String[] ids = n_ids.split(",");
         String res = null;
         for (String id : ids) {
@@ -113,16 +113,16 @@ public class Alarm extends Activity {
         }
         SharedPreferences.Editor ed = preferences.edit();
         if (res == null) {
-            ed.remove(Names.N_IDS + car_id);
+            ed.remove(Names.Car.N_IDS + car_id);
         } else {
-            ed.putString(Names.N_IDS + car_id, res);
+            ed.putString(Names.Car.N_IDS + car_id, res);
         }
         ed.commit();
     }
 
     static void zoneNotify(Context context, String car_id, boolean in_zone, String zone, boolean check, boolean silent, long when) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String old = preferences.getString(Names.ACTIVE_ZONE + car_id, "");
+        String old = preferences.getString(Names.Car.ACTIVE_ZONE + car_id, "");
         if (check) {
             if (in_zone) {
                 if ((zone != null) && zone.equals(old))
@@ -135,7 +135,7 @@ public class Alarm extends Activity {
             }
         }
 
-        int zone_notify = preferences.getInt(Names.ZONE_NOTIFY + car_id, 0);
+        int zone_notify = preferences.getInt(Names.Car.ZONE_NOTIFY + car_id, 0);
         if (zone_notify > 0)
             removeNotification(context, car_id, zone_notify);
         String message = context.getString(in_zone ? R.string.zone_in : R.string.zone_out);
@@ -146,12 +146,12 @@ public class Alarm extends Activity {
         SharedPreferences.Editor ed = preferences.edit();
         if (!silent) {
             zone_notify = createNotification(context, message, R.drawable.warning, car_id, null, when);
-            ed.putInt(Names.ZONE_NOTIFY + car_id, zone_notify);
+            ed.putInt(Names.Car.ZONE_NOTIFY + car_id, zone_notify);
         }
         if (in_zone) {
-            ed.putString(Names.ACTIVE_ZONE + car_id, (zone == null) ? "___" : zone);
+            ed.putString(Names.Car.ACTIVE_ZONE + car_id, (zone == null) ? "___" : zone);
         } else {
-            ed.remove(Names.ACTIVE_ZONE + car_id);
+            ed.remove(Names.Car.ACTIVE_ZONE + car_id);
         }
         ed.commit();
     }
@@ -243,7 +243,7 @@ public class Alarm extends Activity {
 
     void process(Intent intent) {
         car_id = Preferences.getCar(preferences, intent.getStringExtra(Names.ID));
-        String number = preferences.getString(Names.CAR_PHONE + car_id, "");
+        String number = preferences.getString(Names.Car.CAR_PHONE + car_id, "");
         if (number.length() > 0) {
 
             Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
@@ -296,12 +296,12 @@ public class Alarm extends Activity {
             }
         }
 
-        String alarm = intent.getStringExtra(Names.ALARM);
+        String alarm = intent.getStringExtra(Names.Car.ALARM + car_id);
         if (alarm != null) {
             show_main = !alarm.equals(getString(R.string.alarm_test));
             String[] cars = preferences.getString(Names.CARS, "").split(",");
             if (cars.length > 1) {
-                String name = preferences.getString(Names.CAR_NAME + car_id, "");
+                String name = preferences.getString(Names.Car.CAR_NAME + car_id, "");
                 if (name.length() == 0) {
                     name = getString(R.string.car);
                     if (car_id.length() > 0)

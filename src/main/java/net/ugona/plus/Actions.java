@@ -58,71 +58,71 @@ public class Actions {
 
     static void done_motor_on(Context context, String car_id, long when) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        if (!preferences.getBoolean(Names.GUARD + car_id, false))
+        if (!preferences.getBoolean(Names.Car.GUARD + car_id, false))
             return;
-        int id = preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0);
+        int id = preferences.getInt(Names.Car.MOTOR_ON_NOTIFY + car_id, 0);
         if (id != 0)
             return;
-        id = preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0);
+        id = preferences.getInt(Names.Car.MOTOR_OFF_NOTIFY + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
         id = Alarm.createNotification(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "start", when);
         SharedPreferences.Editor ed = preferences.edit();
-        ed.putInt(Names.MOTOR_ON_NOTIFY + car_id, id);
-        ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
+        ed.putInt(Names.Car.MOTOR_ON_NOTIFY + car_id, id);
+        ed.remove(Names.Car.MOTOR_OFF_NOTIFY + car_id);
         ed.commit();
     }
 
     static void done_motor_off(Context context, String car_id, long when) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        if (!preferences.getBoolean(Names.GUARD + car_id, false))
+        if (!preferences.getBoolean(Names.Car.GUARD + car_id, false))
             return;
-        int id = preferences.getInt(Names.MOTOR_OFF_NOTIFY + car_id, 0);
+        int id = preferences.getInt(Names.Car.MOTOR_OFF_NOTIFY + car_id, 0);
         if (id != 0)
             return;
-        id = preferences.getInt(Names.MOTOR_ON_NOTIFY + car_id, 0);
+        id = preferences.getInt(Names.Car.MOTOR_ON_NOTIFY + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
         String msg = context.getString(R.string.motor_off_ok);
-        long az_stop = preferences.getLong(Names.AZ_STOP + car_id, 0);
-        long az_start = preferences.getLong(Names.AZ_START + car_id, 0);
+        long az_stop = preferences.getLong(Names.Car.AZ_STOP + car_id, 0);
+        long az_start = preferences.getLong(Names.Car.AZ_START + car_id, 0);
         long time = (az_stop - az_start) / 60000;
         if ((time > 0) && (time <= 20))
             msg += " " + context.getString(R.string.motor_time).replace("$1", time + "");
         id = Alarm.createNotification(context, msg, R.drawable.white_motor_off, car_id, null, when);
         SharedPreferences.Editor ed = preferences.edit();
-        ed.putInt(Names.MOTOR_OFF_NOTIFY + car_id, id);
-        ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
+        ed.putInt(Names.Car.MOTOR_OFF_NOTIFY + car_id, id);
+        ed.remove(Names.Car.MOTOR_ON_NOTIFY + car_id);
         ed.commit();
     }
 
     static void done_valet_on(Context context, String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor ed = preferences.edit();
-        int id = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
+        int id = preferences.getInt(Names.Car.VALET_ON_NOTIFY + car_id, 0);
         if (id != 0)
             return;
-        id = preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0);
+        id = preferences.getInt(Names.Car.VALET_OFF_NOTIFY + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
         id = Alarm.createNotification(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet_on, car_id, "valet_on", 0);
-        ed.putInt(Names.VALET_ON_NOTIFY + car_id, id);
-        ed.remove(Names.VALET_OFF_NOTIFY + car_id);
+        ed.putInt(Names.Car.VALET_ON_NOTIFY + car_id, id);
+        ed.remove(Names.Car.VALET_OFF_NOTIFY + car_id);
         ed.commit();
     }
 
     static void done_valet_off(Context context, String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor ed = preferences.edit();
-        int id = preferences.getInt(Names.VALET_OFF_NOTIFY + car_id, 0);
+        int id = preferences.getInt(Names.Car.VALET_OFF_NOTIFY + car_id, 0);
         if (id != 0)
             return;
-        id = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
+        id = preferences.getInt(Names.Car.VALET_ON_NOTIFY + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
         id = Alarm.createNotification(context, context.getString(R.string.valet_off_ok), R.drawable.white_valet_off, car_id, "valet_off", 0);
-        ed.putInt(Names.VALET_OFF_NOTIFY + car_id, id);
-        ed.remove(Names.VALET_ON_NOTIFY + car_id);
+        ed.putInt(Names.Car.VALET_OFF_NOTIFY + car_id, id);
+        ed.remove(Names.Car.VALET_ON_NOTIFY + car_id);
         ed.commit();
     }
 
@@ -170,7 +170,7 @@ public class Actions {
             void answer(String pswd) {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                 SharedPreferences.Editor ed = preferences.edit();
-                ed.putBoolean(Names.ENGINE + car_id, false);
+                ed.putBoolean(Names.Car.ENGINE + car_id, false);
                 ed.commit();
                 SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.motor_on, "MOTOR ON", "", "MOTOR ON FAIL", R.string.motor_start_error) {
                     @Override
@@ -180,10 +180,10 @@ public class Actions {
                                 SmsMonitor.compare(text, "Remote Engine Start OK")) {
                             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                             SharedPreferences.Editor ed = preferences.edit();
-                            ed.putBoolean(Names.AZ + car_id, true);
+                            ed.putBoolean(Names.Car.AZ + car_id, true);
                             long now = new Date().getTime();
-                            if (now > preferences.getLong(Names.AZ_START + car_id, 0) + 60000)
-                                ed.putLong(Names.AZ_START + car_id, now);
+                            if (now > preferences.getLong(Names.Car.AZ_START + car_id, 0) + 60000)
+                                ed.putLong(Names.Car.AZ_START + car_id, now);
                             ed.commit();
                             try {
                                 Intent intent = new Intent(FetchService.ACTION_UPDATE);
@@ -256,10 +256,10 @@ public class Actions {
                     boolean process_answer(Context context, String car_id, String text) {
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                         SharedPreferences.Editor ed = preferences.edit();
-                        ed.putBoolean(Names.AZ + car_id, false);
+                        ed.putBoolean(Names.Car.AZ + car_id, false);
                         long now = new Date().getTime();
-                        if (now > preferences.getLong(Names.AZ_STOP + car_id, 0) + 60000)
-                            ed.putLong(Names.AZ_STOP + car_id, now);
+                        if (now > preferences.getLong(Names.Car.AZ_STOP + car_id, 0) + 60000)
+                            ed.putLong(Names.Car.AZ_STOP + car_id, now);
                         ed.commit();
                         try {
                             Intent intent = new Intent(FetchService.ACTION_UPDATE);
@@ -339,9 +339,9 @@ public class Actions {
 
                             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                             SharedPreferences.Editor ed = preferences.edit();
-                            ed.putFloat(Names.LAT + car_id, (float) lat);
-                            ed.putFloat(Names.LNG + car_id, (float) lng);
-                            ed.remove(Names.COURSE + car_id);
+                            ed.putFloat(Names.Car.LAT + car_id, (float) lat);
+                            ed.putFloat(Names.Car.LNG + car_id, (float) lng);
+                            ed.remove(Names.Car.COURSE + car_id);
                             ed.commit();
                             Intent i = new Intent(FetchService.ACTION_UPDATE);
                             i.putExtra(Names.ID, car_id);
@@ -350,8 +350,8 @@ public class Actions {
                             Intent intent = new Intent(context, MapDialog.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             intent.putExtra(Names.TITLE, context.getString(R.string.map_req));
-                            intent.putExtra(Names.LAT, lat);
-                            intent.putExtra(Names.LNG, lng);
+                            intent.putExtra(Names.Car.LAT, lat);
+                            intent.putExtra(Names.Car.LNG, lng);
                             intent.putExtra(Names.ID, car_id);
                             context.startActivity(intent);
                             return true;
@@ -396,17 +396,17 @@ public class Actions {
                             String alarm = parts[1];
                             if (!alarm.equals("Alarm NO")) {
                                 if (alarm.equals("Light shock")) {
-                                    intent.putExtra(Names.ALARM, context.getString(R.string.light_shock));
+                                    intent.putExtra(Names.Car.ALARM, context.getString(R.string.light_shock));
                                 } else {
                                     int i;
                                     for (i = 0; i < alarms.length; i++) {
                                         if (alarms[i].equals(alarm)) {
-                                            intent.putExtra(Names.ALARM, context.getString(R.string.alarms).split("\\|")[i]);
+                                            intent.putExtra(Names.Car.ALARM, context.getString(R.string.alarms).split("\\|")[i]);
                                             break;
                                         }
                                     }
                                     if (i >= alarms.length)
-                                        intent.putExtra(Names.ALARM, alarm);
+                                        intent.putExtra(Names.Car.ALARM, alarm);
                                 }
                             }
                         }
@@ -451,8 +451,8 @@ public class Actions {
                         String balance = matcher.group(0).replaceAll(",", ".");
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                         SharedPreferences.Editor ed = preferences.edit();
-                        ed.putLong(Names.BALANCE_TIME, new Date().getTime());
-                        ed.putString(Names.BALANCE + car_id, balance);
+                        ed.putLong(Names.Car.BALANCE_TIME + car_id, new Date().getTime());
+                        ed.putString(Names.Car.BALANCE + car_id, balance);
                         ed.commit();
                         Intent intent = new Intent(context, StatusDialog.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -573,9 +573,9 @@ public class Actions {
                             void answer(final String ccode) {
                                 final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-                                final boolean impulse = preferences.getBoolean(Names.RELE_IMPULSE + car_id, true);
-                                final boolean rele_on = preferences.getLong(Names.RELE_START + car_id, 0) > 0;
-                                final boolean rele2 = preferences.getString(Names.CAR_RELE + car_id, "").equals("2");
+                                final boolean impulse = preferences.getBoolean(Names.Car.RELE_IMPULSE + car_id, true);
+                                final boolean rele_on = preferences.getLong(Names.Car.RELE_START + car_id, 0) > 0;
+                                final boolean rele2 = preferences.getString(Names.Car.CAR_RELE + car_id, "").equals("2");
 
                                 int cmd = rele2 ? 514 : 258;
                                 if (!impulse) {
@@ -594,7 +594,7 @@ public class Actions {
                                     @Override
                                     void ok(Context context, long when) {
                                         SharedPreferences.Editor ed = preferences.edit();
-                                        ed.putLong(Names.RELE_START + car_id, new Date().getTime());
+                                        ed.putLong(Names.Car.RELE_START + car_id, new Date().getTime());
                                         ed.commit();
                                         Intent i = new Intent(FetchService.ACTION_UPDATE);
                                         i.putExtra(Names.ID, car_id);
@@ -603,10 +603,10 @@ public class Actions {
                                             i = new Intent(context, FetchService.class);
                                             i.setAction(FetchService.ACTION_RELE_OFF);
                                             i.putExtra(Names.ID, car_id);
-                                            i.putExtra(Names.AUTH, ccode);
+                                            i.putExtra(Names.Car.AUTH, ccode);
                                             PendingIntent pi = PendingIntent.getService(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
                                             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-                                            int timeout = preferences.getInt(Names.RELE_TIME + car_id, 0) * 60000;
+                                            int timeout = preferences.getInt(Names.Car.RELE_TIME + car_id, 0) * 60000;
                                             alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + timeout, pi);
                                         }
                                     }
@@ -636,9 +636,9 @@ public class Actions {
 
     static void rele_off(final Context context, final String car_id, String ccode, String pswd) {
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        if (preferences.getLong(Names.RELE_START + car_id, 0) == 0)
+        if (preferences.getLong(Names.Car.RELE_START + car_id, 0) == 0)
             return;
-        final boolean rele2 = preferences.getString(Names.CAR_RELE + car_id, "").equals("2");
+        final boolean rele2 = preferences.getString(Names.Car.CAR_RELE + car_id, "").equals("2");
         if (ccode != null) {
             int cmd = rele2 ? 513 : 257;
             new InetRequest(context, car_id, ccode, cmd, R.string.rele) {
@@ -651,7 +651,7 @@ public class Actions {
                 @Override
                 void ok(Context context, long when) {
                     SharedPreferences.Editor ed = preferences.edit();
-                    ed.putLong(Names.RELE_START + car_id, new Date().getTime());
+                    ed.putLong(Names.Car.RELE_START + car_id, new Date().getTime());
                     ed.commit();
                     Intent i = new Intent(FetchService.ACTION_UPDATE);
                     i.putExtra(Names.ID, car_id);
@@ -675,10 +675,10 @@ public class Actions {
             boolean process_answer(Context context, String car_id, String text) {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                 SharedPreferences.Editor ed = preferences.edit();
-                ed.putLong(Names.RELE_START + car_id, new Date().getTime());
+                ed.putLong(Names.Car.RELE_START + car_id, new Date().getTime());
                 ed.commit();
-                ed.remove(Names.RELE_START + car_id);
-                ed.putBoolean((rele2 ? Names.RELAY2 : Names.RELAY1) + car_id, false);
+                ed.remove(Names.Car.RELE_START + car_id);
+                ed.putBoolean((rele2 ? Names.Car.RELAY2 : Names.Car.RELAY1) + car_id, false);
                 ed.commit();
                 try {
                     Intent intent = new Intent(FetchService.ACTION_UPDATE);
@@ -700,9 +700,9 @@ public class Actions {
             void answer(final String pswd) {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-                final boolean impulse = preferences.getBoolean(Names.RELE_IMPULSE + car_id, true);
-                final boolean rele_on = preferences.getLong(Names.RELE_START + car_id, 0) > 0;
-                final boolean rele2 = preferences.getString(Names.CAR_RELE + car_id, "").equals("2");
+                final boolean impulse = preferences.getBoolean(Names.Car.RELE_IMPULSE + car_id, true);
+                final boolean rele_on = preferences.getLong(Names.Car.RELE_START + car_id, 0) > 0;
+                final boolean rele2 = preferences.getString(Names.Car.CAR_RELE + car_id, "").equals("2");
 
                 String text = rele2 ? "REL2 " : "REL1 ";
                 if (impulse) {
@@ -716,15 +716,15 @@ public class Actions {
                     boolean process_answer(Context context, String car_id, String text) {
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                         SharedPreferences.Editor ed = preferences.edit();
-                        ed.putLong(Names.RELE_START + car_id, new Date().getTime());
+                        ed.putLong(Names.Car.RELE_START + car_id, new Date().getTime());
                         ed.commit();
                         if (!impulse) {
                             if (rele_on) {
-                                ed.remove(Names.RELE_START + car_id);
-                                ed.putBoolean((rele2 ? Names.RELAY2 : Names.RELAY1) + car_id, false);
+                                ed.remove(Names.Car.RELE_START + car_id);
+                                ed.putBoolean((rele2 ? Names.Car.RELAY2 : Names.Car.RELAY1) + car_id, false);
                                 ed.commit();
                             } else {
-                                ed.putBoolean((rele2 ? Names.RELAY2 : Names.RELAY1) + car_id, true);
+                                ed.putBoolean((rele2 ? Names.Car.RELAY2 : Names.Car.RELAY1) + car_id, true);
                                 ed.commit();
                             }
                         }
@@ -804,11 +804,11 @@ public class Actions {
             boolean process_answer(Context context, String car_id, String text) {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                 SharedPreferences.Editor ed = preferences.edit();
-                ed.putBoolean(Names.GUARD0 + car_id, true);
-                ed.putBoolean(Names.GUARD1 + car_id, false);
-                ed.putBoolean(Names.GUARD + car_id, false);
-                ed.putLong(Names.VALET_TIME + car_id, new Date().getTime());
-                ed.remove(Names.INIT_TIME + car_id);
+                ed.putBoolean(Names.Car.GUARD0 + car_id, true);
+                ed.putBoolean(Names.Car.GUARD1 + car_id, false);
+                ed.putBoolean(Names.Car.GUARD + car_id, false);
+                ed.putLong(Names.Car.VALET_TIME + car_id, new Date().getTime());
+                ed.remove(Names.Car.INIT_TIME + car_id);
                 ed.commit();
                 try {
                     Intent intent = new Intent(FetchService.ACTION_UPDATE);
@@ -874,10 +874,10 @@ public class Actions {
             boolean process_answer(Context context, String car_id, String text) {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                 SharedPreferences.Editor ed = preferences.edit();
-                ed.putBoolean(Names.GUARD0 + car_id, false);
-                ed.putBoolean(Names.GUARD1 + car_id, false);
-                ed.putLong(Names.INIT_TIME + car_id, new Date().getTime());
-                ed.remove(Names.VALET_TIME + car_id);
+                ed.putBoolean(Names.Car.GUARD0 + car_id, false);
+                ed.putBoolean(Names.Car.GUARD1 + car_id, false);
+                ed.putLong(Names.Car.INIT_TIME + car_id, new Date().getTime());
+                ed.remove(Names.Car.VALET_TIME + car_id);
                 ed.commit();
                 try {
                     Intent intent = new Intent(FetchService.ACTION_UPDATE);
@@ -901,8 +901,8 @@ public class Actions {
                     boolean process_answer(Context context, String car_id, String text) {
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                         SharedPreferences.Editor ed = preferences.edit();
-                        ed.putBoolean(Names.GUARD0 + car_id, false);
-                        ed.putBoolean(Names.GUARD1 + car_id, true);
+                        ed.putBoolean(Names.Car.GUARD0 + car_id, false);
+                        ed.putBoolean(Names.Car.GUARD1 + car_id, true);
                         ed.commit();
                         try {
                             Intent intent = new Intent(FetchService.ACTION_UPDATE);
@@ -939,7 +939,7 @@ public class Actions {
 
     static void search(Context context, final String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String number = preferences.getString(Names.CAR_PHONE + car_id, "");
+        String number = preferences.getString(Names.Car.CAR_PHONE + car_id, "");
         number = "tel://" + number + ",,3";
         Intent i = new Intent(android.content.Intent.ACTION_CALL, Uri.parse(number));
         context.startActivity(i);
@@ -966,7 +966,7 @@ public class Actions {
                 progressDialog.setMessage(context.getString(R.string.send_command));
                 progressDialog.show();
 
-                if (preferences.getLong(Names.EVENT_TIME + car_id, 0) <= preferences.getLong(Names.SETTINGS_TIME + car_id, 0)) {
+                if (preferences.getLong(Names.Car.EVENT_TIME + car_id, 0) <= preferences.getLong(Names.Car.SETTINGS_TIME + car_id, 0)) {
                     int v = preferences.getInt("V_12_" + car_id, 0);
                     int new_v = v;
                     if (id == R.string.sound_off) {
@@ -984,10 +984,10 @@ public class Actions {
                         @Override
                         void result(JsonObject res) throws ParseException {
                             SharedPreferences.Editor ed = preferences.edit();
-                            long time = preferences.getLong(Names.EVENT_TIME + car_id, 0);
-                            final int wait_time = preferences.getInt(Names.CAR_TIMER + car_id, 10);
+                            long time = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
+                            final int wait_time = preferences.getInt(Names.Car.CAR_TIMER + car_id, 10);
                             time += wait_time * 90000;
-                            ed.putLong(Names.SETTINGS_TIME + car_id, time);
+                            ed.putLong(Names.Car.SETTINGS_TIME + car_id, time);
                             ed.putInt("V_12_" + car_id, val);
                             ed.commit();
                             progressDialog.dismiss();
@@ -1002,7 +1002,7 @@ public class Actions {
                             showMessage(context, id, R.string.error);
                         }
                     };
-                    setTask.execute(URL_SET, preferences.getString(Names.AUTH + car_id, ""), value);
+                    setTask.execute(URL_SET, preferences.getString(Names.Car.AUTH + car_id, ""), value);
                     return;
                 }
 
@@ -1035,10 +1035,10 @@ public class Actions {
                             @Override
                             void result(JsonObject res) throws ParseException {
                                 SharedPreferences.Editor ed = preferences.edit();
-                                long time = preferences.getLong(Names.EVENT_TIME + car_id, 0);
-                                final int wait_time = preferences.getInt(Names.CAR_TIMER + car_id, 10);
+                                long time = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
+                                final int wait_time = preferences.getInt(Names.Car.CAR_TIMER + car_id, 10);
                                 time += wait_time * 90000;
-                                ed.putLong(Names.SETTINGS_TIME + car_id, time);
+                                ed.putLong(Names.Car.SETTINGS_TIME + car_id, time);
                                 ed.putInt("V_12_" + car_id, val);
                                 ed.commit();
                                 progressDialog.dismiss();
@@ -1053,7 +1053,7 @@ public class Actions {
                                 showMessage(context, id, R.string.error);
                             }
                         };
-                        setTask.execute(URL_SET, preferences.getString(Names.AUTH + car_id, ""), value);
+                        setTask.execute(URL_SET, preferences.getString(Names.Car.AUTH + car_id, ""), value);
                     }
 
                     @Override
@@ -1062,7 +1062,7 @@ public class Actions {
                         showMessage(context, id, R.string.error);
                     }
                 };
-                task.execute(URL_SETTINGS, preferences.getString(Names.AUTH + car_id, ""));
+                task.execute(URL_SETTINGS, preferences.getString(Names.Car.AUTH + car_id, ""));
             }
         });
     }
@@ -1177,7 +1177,7 @@ public class Actions {
         final EditText ccode_text = (EditText) dialog.findViewById(R.id.ccode_text);
 
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String version = preferences.getString(Names.VERSION + car_id, "").toLowerCase();
+        String version = preferences.getString(Names.Car.VERSION + car_id, "").toLowerCase();
 
         final CheckBox checkBox = (CheckBox) dialog.findViewById(R.id.number);
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -1200,7 +1200,7 @@ public class Actions {
         if (version.contains("super")) {
             checkBox.setVisibility(View.GONE);
         } else {
-            checkBox.setChecked(preferences.getBoolean(Names.NUMBER + car_id, false));
+            checkBox.setChecked(preferences.getBoolean(Names.Car.NUMBER + car_id, false));
         }
 
         TextWatcher watcher = new TextWatcher() {
@@ -1229,7 +1229,7 @@ public class Actions {
                 EditText et = checkBox.isChecked() ? ccode_text : ccode_num;
                 after.answer(et.getText().toString());
                 SharedPreferences.Editor ed = preferences.edit();
-                ed.putBoolean(Names.NUMBER + car_id, checkBox.isChecked());
+                ed.putBoolean(Names.Car.NUMBER + car_id, checkBox.isChecked());
                 ed.commit();
             }
         });
@@ -1246,7 +1246,7 @@ public class Actions {
     static void selectRoute(final Context context, final String car_id, final Runnable asNetwork, final Runnable asSms, final Runnable asSmsFirst, final boolean longTap) {
         if (State.hasTelephony(context)) {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-            boolean route_sms = preferences.getString(Names.CONTROL + car_id, "").equals("");
+            boolean route_sms = preferences.getString(Names.Car.CONTROL + car_id, "").equals("");
             if (longTap)
                 route_sms = !route_sms;
             if (route_sms) {
@@ -1331,7 +1331,7 @@ public class Actions {
             car_id = id;
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-            final int wait_time = preferences.getInt(Names.CAR_TIMER + car_id, 10);
+            final int wait_time = preferences.getInt(Names.Car.CAR_TIMER + car_id, 10);
 
             final ProgressDialog progressDialog = new ProgressDialog(context);
             progressDialog.setMessage(context.getString(R.string.send_command));
@@ -1383,7 +1383,7 @@ public class Actions {
                             dialog.dismiss();
                             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                             Intent intent = new Intent(Intent.ACTION_CALL);
-                            intent.setData(Uri.parse("tel:" + preferences.getString(Names.CAR_PHONE + car_id, "")));
+                            intent.setData(Uri.parse("tel:" + preferences.getString(Names.Car.CAR_PHONE + car_id, "")));
                             context.startActivity(intent);
                         }
                     });
@@ -1430,7 +1430,7 @@ public class Actions {
                     });
                 }
             };
-            task.execute(COMMAND_URL, preferences.getString(Names.AUTH + car_id, ""), ccode, type);
+            task.execute(COMMAND_URL, preferences.getString(Names.Car.AUTH + car_id, ""), ccode, type);
         }
 
         abstract void error();

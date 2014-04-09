@@ -218,11 +218,11 @@ public class MapView extends GpsActivity {
 
         @JavascriptInterface
         String createData(String id) {
-            double lat = preferences.getFloat(Names.LAT + id, 0);
-            double lng = preferences.getFloat(Names.LNG + id, 0);
+            double lat = preferences.getFloat(Names.Car.LAT + id, 0);
+            double lng = preferences.getFloat(Names.Car.LNG + id, 0);
             String zone = "";
             if ((lat == 0) && (lng == 0)) {
-                zone = preferences.getString(Names.GSM_ZONE + id, "");
+                zone = preferences.getString(Names.Car.GSM_ZONE + id, "");
                 String points[] = zone.split("_");
                 double min_lat = 180;
                 double max_lat = -180;
@@ -251,9 +251,9 @@ public class MapView extends GpsActivity {
             String data = id + ";" +
                     lat + ";" +
                     lng + ";" +
-                    preferences.getInt(Names.COURSE + id, 0) + ";";
+                    preferences.getInt(Names.Car.COURSE + id, 0) + ";";
             if (cars.length > 1) {
-                String name = preferences.getString(Names.CAR_NAME + id, "");
+                String name = preferences.getString(Names.Car.CAR_NAME + id, "");
                 if (name.length() == 0) {
                     name = getString(R.string.car);
                     if (id.length() > 0)
@@ -262,15 +262,15 @@ public class MapView extends GpsActivity {
                 data += name + "<br/>";
             }
 
-            if (preferences.getBoolean(Names.POINTER + car_id, false)) {
-                long last_stand = preferences.getLong(Names.EVENT_TIME + id, 0);
+            if (preferences.getBoolean(Names.Car.POINTER + car_id, false)) {
+                long last_stand = preferences.getLong(Names.Car.EVENT_TIME + id, 0);
                 if (last_stand > 0) {
                     data += "<b>";
                     data += df.format(last_stand) + " " + tf.format(last_stand);
                     data += "</b> ";
                 }
             } else {
-                long last_stand = preferences.getLong(Names.LAST_STAND + id, 0);
+                long last_stand = preferences.getLong(Names.Car.LAST_STAND + id, 0);
                 if (last_stand > 0) {
                     LocalDateTime stand = new LocalDateTime(last_stand);
                     LocalDateTime now = new LocalDateTime();
@@ -282,7 +282,7 @@ public class MapView extends GpsActivity {
                     }
                     data += "</b> ";
                 } else if (last_stand < 0) {
-                    double speed = preferences.getFloat(Names.SPEED + id, 0);
+                    double speed = preferences.getFloat(Names.Car.SPEED + id, 0);
                     if (speed > 0) {
                         data += String.format(getString(R.string.speed), speed);
                         data += "<br/>";

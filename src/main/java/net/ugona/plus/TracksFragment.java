@@ -95,7 +95,7 @@ public class TracksFragment extends Fragment
         }
 
         preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        api_key = preferences.getString(Names.CAR_KEY + car_id, "");
+        api_key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
 
         tvSummary = (TextView) v.findViewById(R.id.summary);
         lvTracks = (ListView) v.findViewById(R.id.tracks);
@@ -151,7 +151,7 @@ public class TracksFragment extends Fragment
                 if (!car_id.equals(intent.getStringExtra(Names.ID)))
                     return;
                 if (intent.getAction().equals(FetchService.ACTION_UPDATE))
-                    api_key = preferences.getString(Names.CAR_KEY + car_id, "");
+                    api_key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
             }
         };
         IntentFilter intFilter = new IntentFilter(FetchService.ACTION_UPDATE_FORCE);

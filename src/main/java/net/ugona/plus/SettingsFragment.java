@@ -237,11 +237,17 @@ public class SettingsFragment extends Fragment {
 
     class CheckBoxItem extends CheckItem {
         String key;
+        boolean def_value_;
 
         CheckBoxItem(int name, String item_key, boolean def_value) {
             super(name);
             key = item_key;
-            setValue(preferences.getBoolean(key + car_id, def_value) ? "1" : "");
+            def_value_ = def_value;
+            setValue(preferences.getBoolean(key + car_id, def_value_) ? "1" : "");
+        }
+
+        void update() {
+            setValue(preferences.getBoolean(key + car_id, def_value_) ? "1" : "");
         }
 
         @Override

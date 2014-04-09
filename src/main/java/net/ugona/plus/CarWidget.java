@@ -285,7 +285,7 @@ public class CarWidget extends AppWidgetProvider {
         PendingIntent pIntent = PendingIntent.getService(context, widgetID, configIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         widgetView.setOnClickPendingIntent(R.id.update_block, pIntent);
 
-        long last = preferences.getLong(Names.EVENT_TIME + car_id, 0);
+        long last = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
         Date now = new Date();
         if (last > now.getTime() - 24 * 60 * 60 * 1000) {
             DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
@@ -296,11 +296,11 @@ public class CarWidget extends AppWidgetProvider {
 
         int show_count = 1;
 
-        String voltage = preferences.getString(Names.VOLTAGE_MAIN + car_id, "?");
+        String voltage = preferences.getString(Names.Car.VOLTAGE_MAIN + car_id, "?");
         boolean normal = false;
         try {
             double v = Double.parseDouble(voltage);
-            v += preferences.getInt(Names.VOLTAGE_SHIFT, 0) / 20.;
+            v += preferences.getInt(Names.Car.VOLTAGE_SHIFT + car_id, 0) / 20.;
             voltage = String.format("%.2f", v);
             if (v > 12.2)
                 normal = true;
@@ -309,8 +309,8 @@ public class CarWidget extends AppWidgetProvider {
         }
         widgetView.setTextViewText(R.id.voltage, voltage + " V");
         if (!normal) {
-            boolean az = preferences.getBoolean(Names.AZ + car_id, false);
-            boolean ignition = !az && (preferences.getBoolean(Names.INPUT3 + car_id, false) || preferences.getBoolean(Names.ZONE_IGNITION + car_id, false));
+            boolean az = preferences.getBoolean(Names.Car.AZ + car_id, false);
+            boolean ignition = !az && (preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false));
             if (az || ignition)
                 normal = true;
         }
@@ -329,18 +329,18 @@ public class CarWidget extends AppWidgetProvider {
 
         boolean show_balance = false;
         if (show_count < rows)
-            show_balance = preferences.getBoolean(Names.SHOW_BALANCE + car_id, true);
+            show_balance = preferences.getBoolean(Names.Car.SHOW_BALANCE + car_id, true);
         if (show_balance) {
-            String b = preferences.getString(Names.BALANCE + car_id, "---.--");
+            String b = preferences.getString(Names.Car.BALANCE + car_id, "---.--");
             int balance_limit = 50;
             try {
-                balance_limit = preferences.getInt(Names.LIMIT + car_id, 50);
+                balance_limit = preferences.getInt(Names.Car.LIMIT + car_id, 50);
             } catch (Exception ex) {
                 // ignore
             }
             widgetView.setInt(R.id.balance, "setTextColor", context.getResources().getColor(id_color[theme]));
             try {
-                double value = Double.parseDouble(preferences.getString(Names.BALANCE + car_id, ""));
+                double value = Double.parseDouble(preferences.getString(Names.Car.BALANCE + car_id, ""));
                 if ((value <= balance_limit) && (balance_limit >= 0))
                     widgetView.setInt(R.id.balance, "setTextColor", context.getResources().getColor(R.color.error));
                 b = String.format("%.2f", value);
@@ -355,7 +355,7 @@ public class CarWidget extends AppWidgetProvider {
 
         boolean show_level = (show_count < rows);
         if (show_level) {
-            int level = preferences.getInt(Names.GSM_DB + car_id, 0);
+            int level = preferences.getInt(Names.Car.GSM_DB + car_id, 0);
             if (level == 0) {
                 show_level = false;
             } else {
@@ -380,7 +380,7 @@ public class CarWidget extends AppWidgetProvider {
 
         boolean show_reserve = (show_count < rows);
         if (show_reserve) {
-            String rv = preferences.getString(Names.VOLTAGE_RESERVED + car_id, "?");
+            String rv = preferences.getString(Names.Car.VOLTAGE_RESERVED + car_id, "?");
             try {
                 double v = Double.parseDouble(rv);
                 rv = String.format("%.2f", v);
@@ -388,7 +388,7 @@ public class CarWidget extends AppWidgetProvider {
                 // ignore
             }
             widgetView.setTextViewText(R.id.reserve, rv + " V");
-            int r_color = preferences.getBoolean(Names.RESERVE_NORMAL + car_id, true) ? context.getResources().getColor(id_color[theme]) : context.getResources().getColor(R.color.error);
+            int r_color = preferences.getBoolean(Names.Car.RESERVE_NORMAL + car_id, true) ? context.getResources().getColor(id_color[theme]) : context.getResources().getColor(R.color.error);
             widgetView.setInt(R.id.reserve, "setTextColor", r_color);
 
         }
@@ -488,8 +488,8 @@ public class CarWidget extends AppWidgetProvider {
         double lat = 0;
         double lon = 0;
         try {
-            lat = (double) preferences.getFloat(Names.LAT + car_id, 0);
-            lon = (double) preferences.getFloat(Names.LNG + car_id, 0);
+            lat = (double) preferences.getFloat(Names.Car.LAT + car_id, 0);
+            lon = (double) preferences.getFloat(Names.Car.LNG + car_id, 0);
         } catch (Exception ex) {
             // ignore
         }

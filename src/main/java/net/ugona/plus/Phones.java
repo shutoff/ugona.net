@@ -75,14 +75,14 @@ public class Phones extends ActionBarActivity {
         vProgress = findViewById(R.id.progress);
 
         if (savedInstanceState != null)
-            phones = savedInstanceState.getStringArray(Names.CAR_PHONE);
+            phones = savedInstanceState.getStringArray(Names.Car.CAR_PHONE);
         if (phones == null) {
             if (!SmsMonitor.isProcessed(car_id, R.string.phones)) {
                 SmsMonitor.sendSMS(this, car_id, passwd, new SmsMonitor.Sms(R.string.phones, "USERS?", "USERS? ") {
                     @Override
                     boolean process_answer(Context context, String car_id, String text) {
                         Intent i = new Intent(USERS);
-                        i.putExtra(Names.CAR_PHONE, text);
+                        i.putExtra(Names.Car.CAR_PHONE, text);
                         i.putExtra(Names.ID, car_id);
                         context.sendBroadcast(i);
                         return true;
@@ -175,7 +175,7 @@ public class Phones extends ActionBarActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals(USERS)) {
-                    phones = intent.getStringExtra(Names.CAR_PHONE).split(",");
+                    phones = intent.getStringExtra(Names.Car.CAR_PHONE).split(",");
                     BaseAdapter adapter = (BaseAdapter) lvPhones.getAdapter();
                     adapter.notifyDataSetChanged();
                     showList();
@@ -196,7 +196,7 @@ public class Phones extends ActionBarActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (phones != null)
-            outState.putStringArray(Names.CAR_PHONE, phones);
+            outState.putStringArray(Names.Car.CAR_PHONE, phones);
     }
 
     @Override
@@ -244,7 +244,7 @@ public class Phones extends ActionBarActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if ((requestCode == ADD_PHONE) && (resultCode == RESULT_OK) && (phones != null)) {
-            String number = data.getStringExtra(Names.CAR_PHONE).replaceAll("[^0-9+]+", "");
+            String number = data.getStringExtra(Names.Car.CAR_PHONE).replaceAll("[^0-9+]+", "");
             String result = null;
             for (String phone : phones) {
                 if (result == null) {
@@ -264,7 +264,7 @@ public class Phones extends ActionBarActivity {
                 @Override
                 boolean process_answer(Context context, String car_id, String text) {
                     Intent i = new Intent(USERS);
-                    i.putExtra(Names.CAR_PHONE, r);
+                    i.putExtra(Names.Car.CAR_PHONE, r);
                     i.putExtra(Names.ID, car_id);
                     context.sendBroadcast(i);
                     return true;

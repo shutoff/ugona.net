@@ -259,7 +259,7 @@ public class ConfigWidget extends Activity {
             return;
         switch (requestCode) {
             case CAR_CONFIG:
-                if (preferences.getString(Names.CAR_KEY + car_id, "").length() > 0)
+                if (preferences.getString(Names.Car.CAR_KEY + car_id, "").length() > 0)
                     saveWidget();
                 finish();
                 break;

@@ -141,7 +141,7 @@ public class MainActivity extends ActionBarActivity {
         current = new LocalDate();
 
         show_pages = new boolean[6];
-        show_pages[PAGE_PHOTO] = preferences.getBoolean(Names.SHOW_PHOTO + car_id, false);
+        show_pages[PAGE_PHOTO] = preferences.getBoolean(Names.Car.SHOW_PHOTO + car_id, false);
         show_pages[PAGE_ACTIONS] = true;
         show_pages[PAGE_STATE] = true;
         show_pages[PAGE_EVENT] = true;
@@ -155,7 +155,7 @@ public class MainActivity extends ActionBarActivity {
             car_id = getIntent().getStringExtra(Names.ID);
             if (car_id == null) {
                 car_id = preferences.getString(Names.LAST, "");
-                if (preferences.getBoolean(Names.POINTER + car_id, false))
+                if (preferences.getBoolean(Names.Car.POINTER + car_id, false))
                     car_id = "";
             }
             car_id = Preferences.getCar(preferences, car_id);
@@ -200,23 +200,23 @@ public class MainActivity extends ActionBarActivity {
         });
 
         if (savedInstanceState == null) {
-            String phone = preferences.getString(Names.CAR_PHONE + car_id, "");
-            String key = preferences.getString(Names.CAR_KEY + car_id, "");
-            String auth = preferences.getString(Names.AUTH + car_id, "");
+            String phone = preferences.getString(Names.Car.CAR_PHONE + car_id, "");
+            String key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
+            String auth = preferences.getString(Names.Car.AUTH + car_id, "");
 
             if (preferences.getString(Names.CARS, "").equals("") && (auth.equals(""))) {
                 firstSetup();
             } else if (auth.equals("")) {
                 Intent i = new Intent(this, AuthDialog.class);
                 i.putExtra(Names.ID, car_id);
-                i.putExtra(Names.AUTH, true);
+                i.putExtra(Names.Car.AUTH, true);
                 if (State.hasTelephony(this) && (phone.length() == 0))
-                    i.putExtra(Names.CAR_PHONE, true);
+                    i.putExtra(Names.Car.CAR_PHONE, true);
                 startActivityForResult(i, CAR_SETUP);
             } else if (State.hasTelephony(this) && (phone.length() == 0)) {
                 Intent i = new Intent(this, AuthDialog.class);
                 i.putExtra(Names.ID, car_id);
-                i.putExtra(Names.CAR_PHONE, true);
+                i.putExtra(Names.Car.CAR_PHONE, true);
                 startActivityForResult(i, CAR_SETUP);
             } else if (!preferences.getBoolean(Names.INIT_POINTER, false)) {
                 SharedPreferences.Editor ed = preferences.edit();
@@ -234,9 +234,9 @@ public class MainActivity extends ActionBarActivity {
                                         Cars.deleteCarKeys(MainActivity.this, i + "");
                                         Intent intent = new Intent(MainActivity.this, AuthDialog.class);
                                         intent.putExtra(Names.ID, i + "");
-                                        intent.putExtra(Names.AUTH, true);
+                                        intent.putExtra(Names.Car.AUTH, true);
                                         if (State.hasTelephony(MainActivity.this))
-                                            intent.putExtra(Names.CAR_PHONE, true);
+                                            intent.putExtra(Names.Car.CAR_PHONE, true);
                                         startActivityForResult(intent, CAR_SETUP);
                                         break;
                                     }
@@ -259,7 +259,7 @@ public class MainActivity extends ActionBarActivity {
                     return;
                 }
                 if (action.equals(FetchService.ACTION_UPDATE_FORCE)) {
-                    boolean new_show_photo = preferences.getBoolean(Names.SHOW_PHOTO + car_id, false);
+                    boolean new_show_photo = preferences.getBoolean(Names.Car.SHOW_PHOTO + car_id, false);
                     if (new_show_photo != show_pages[PAGE_PHOTO]) {
                         int id = getPageId(mViewPager.getCurrentItem());
                         update();
@@ -382,7 +382,7 @@ public class MainActivity extends ActionBarActivity {
                     }
                 };
 
-                String api_key = preferences.getString(Names.CAR_KEY + car_id, "");
+                String api_key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
                 task.execute(FetchService.STATUS_URL, api_key);
                 return true;
             }
@@ -447,7 +447,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAR_SETUP) {
-            String key = preferences.getString(Names.CAR_KEY + car_id, "");
+            String key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
             if (key.length() == 0)
                 finish();
         }
@@ -466,7 +466,7 @@ public class MainActivity extends ActionBarActivity {
         String id = intent.getStringExtra(Names.ID);
         if (id != null)
             setCar(id);
-        mViewPager.setCurrentItem(preferences.getBoolean(Names.SHOW_PHOTO + car_id, false) ? 2 : 1);
+        mViewPager.setCurrentItem(preferences.getBoolean(Names.Car.SHOW_PHOTO + car_id, false) ? 2 : 1);
         removeNotifications();
     }
 
@@ -496,10 +496,10 @@ public class MainActivity extends ActionBarActivity {
 
     private void removeNotifications() {
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        String n_ids = preferences.getString(Names.N_IDS + car_id, "");
+        String n_ids = preferences.getString(Names.Car.N_IDS + car_id, "");
         if (n_ids.equals(""))
             return;
-        int id_valet_on = preferences.getInt(Names.VALET_ON_NOTIFY + car_id, 0);
+        int id_valet_on = preferences.getInt(Names.Car.VALET_ON_NOTIFY + car_id, 0);
         String[] ids = n_ids.split(",");
         for (String id : ids) {
             try {
@@ -512,16 +512,16 @@ public class MainActivity extends ActionBarActivity {
         }
         SharedPreferences.Editor ed = preferences.edit();
         if (id_valet_on != 0) {
-            ed.putString(Names.N_IDS + car_id, id_valet_on + "");
+            ed.putString(Names.Car.N_IDS + car_id, id_valet_on + "");
         } else {
-            ed.remove(Names.N_IDS + car_id);
+            ed.remove(Names.Car.N_IDS + car_id);
         }
-        ed.remove(Names.BALANCE_NOTIFICATION + car_id);
-        ed.remove(Names.GUARD_NOTIFY + car_id);
-        ed.remove(Names.MOTOR_ON_NOTIFY + car_id);
-        ed.remove(Names.MOTOR_OFF_NOTIFY + car_id);
-        ed.remove(Names.VALET_OFF_NOTIFY + car_id);
-        ed.remove(Names.ZONE_NOTIFY + car_id);
+        ed.remove(Names.Car.BALANCE_NOTIFICATION + car_id);
+        ed.remove(Names.Car.GUARD_NOTIFY + car_id);
+        ed.remove(Names.Car.MOTOR_ON_NOTIFY + car_id);
+        ed.remove(Names.Car.MOTOR_OFF_NOTIFY + car_id);
+        ed.remove(Names.Car.VALET_OFF_NOTIFY + car_id);
+        ed.remove(Names.Car.ZONE_NOTIFY + car_id);
         ed.commit();
     }
 
@@ -590,9 +590,9 @@ public class MainActivity extends ActionBarActivity {
 
     void setShowTracks() {
         boolean changed = false;
-        boolean show_tracks = (preferences.getFloat(Names.LAT + car_id, 0) != 0) ||
-                (preferences.getFloat(Names.LNG + car_id, 0) != 0);
-        pointer = preferences.getBoolean(Names.POINTER + car_id, false);
+        boolean show_tracks = (preferences.getFloat(Names.Car.LAT + car_id, 0) != 0) ||
+                (preferences.getFloat(Names.Car.LNG + car_id, 0) != 0);
+        pointer = preferences.getBoolean(Names.Car.POINTER + car_id, false);
         if (pointer)
             show_tracks = false;
         boolean show_actions = !pointer;
@@ -605,7 +605,7 @@ public class MainActivity extends ActionBarActivity {
             show_pages[PAGE_STAT] = show_tracks;
             changed = true;
         }
-        boolean show_photo = preferences.getBoolean(Names.SHOW_PHOTO + car_id, false);
+        boolean show_photo = preferences.getBoolean(Names.Car.SHOW_PHOTO + car_id, false);
         if (show_pages[PAGE_PHOTO] != show_photo) {
             show_pages[PAGE_PHOTO] = show_photo;
             changed = true;
@@ -746,7 +746,7 @@ public class MainActivity extends ActionBarActivity {
                     Cars.Car[] cars = Cars.getCars(MainActivity.this);
                     String d = null;
                     for (Cars.Car car : cars) {
-                        String key = preferences.getString(Names.CAR_KEY + car.id, "");
+                        String key = preferences.getString(Names.Car.CAR_KEY + car.id, "");
                         if (key.equals(""))
                             continue;
                         JsonObject c = new JsonObject();
@@ -840,14 +840,14 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onDismiss(DialogInterface dialog) {
                 auth_progress = null;
-                String auth = preferences.getString(Names.AUTH + car_id, "");
-                String phone = preferences.getString(Names.CAR_PHONE + car_id, "");
+                String auth = preferences.getString(Names.Car.AUTH + car_id, "");
+                String phone = preferences.getString(Names.Car.CAR_PHONE + car_id, "");
                 if (auth.equals("")) {
                     Intent i = new Intent(MainActivity.this, AuthDialog.class);
                     i.putExtra(Names.ID, car_id);
-                    i.putExtra(Names.AUTH, true);
+                    i.putExtra(Names.Car.AUTH, true);
                     if (State.hasTelephony(MainActivity.this) && (phone.length() == 0))
-                        i.putExtra(Names.CAR_PHONE, true);
+                        i.putExtra(Names.Car.CAR_PHONE, true);
                     startActivityForResult(i, CAR_SETUP);
                 }
             }
@@ -950,12 +950,12 @@ public class MainActivity extends ActionBarActivity {
             }
             cars += c_id;
             id++;
-            ed.putString(Names.CAR_PHONE + c_id, data.phone);
-            ed.putString(Names.CAR_KEY + c_id, data.key);
-            ed.putString(Names.LOGIN + c_id, data.login);
-            ed.putString(Names.AUTH + c_id, AuthDialog.crypt(data.login + "\0" + data.pass));
+            ed.putString(Names.Car.CAR_PHONE + c_id, data.phone);
+            ed.putString(Names.Car.CAR_KEY + c_id, data.key);
+            ed.putString(Names.Car.LOGIN + c_id, data.login);
+            ed.putString(Names.Car.AUTH + c_id, AuthDialog.crypt(data.login + "\0" + data.pass));
             if (data.photo)
-                ed.putBoolean(Names.SHOW_PHOTO + c_id, true);
+                ed.putBoolean(Names.Car.SHOW_PHOTO + c_id, true);
         }
         String pointers = "";
         int p_id = 0;
@@ -971,18 +971,18 @@ public class MainActivity extends ActionBarActivity {
             String name = getString(R.string.pointer);
             if (p_id++ > 0)
                 name += p_id;
-            ed.putString(Names.CAR_NAME + c_id, name);
-            ed.putString(Names.CAR_PHONE + c_id, data.phone);
-            ed.putString(Names.CAR_KEY + c_id, data.key);
-            ed.putString(Names.LOGIN + c_id, data.login);
-            ed.putString(Names.AUTH + c_id, AuthDialog.crypt(data.login + "\0" + data.pass));
-            ed.putBoolean(Names.POINTER + c_id, true);
+            ed.putString(Names.Car.CAR_NAME + c_id, name);
+            ed.putString(Names.Car.CAR_PHONE + c_id, data.phone);
+            ed.putString(Names.Car.CAR_KEY + c_id, data.key);
+            ed.putString(Names.Car.LOGIN + c_id, data.login);
+            ed.putString(Names.Car.AUTH + c_id, AuthDialog.crypt(data.login + "\0" + data.pass));
+            ed.putBoolean(Names.Car.POINTER + c_id, true);
             if (!pointers.equals(""))
                 pointers += ",";
             pointers += c_id;
         }
         if (!pointers.equals("")) {
-            ed.putString(Names.POINTERS, pointers);
+            ed.putString(Names.Car.POINTERS, pointers);
             ed.putBoolean(Names.INIT_POINTER, true);
         }
         ed.putString(Names.CARS, cars);

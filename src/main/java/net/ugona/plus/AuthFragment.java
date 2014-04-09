@@ -2,9 +2,11 @@ package net.ugona.plus;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -20,17 +22,19 @@ public class AuthFragment extends SettingsFragment {
     static final int REQUEST_AUTH = 1;
     static final int REQUEST_PHONE = 2;
     SharedPreferences preferences;
+    BroadcastReceiver br;
+    CheckBoxItem photo_item;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String phone_number = preferences.getString(Names.CAR_PHONE + car_id, "");
+        String phone_number = preferences.getString(Names.Car.CAR_PHONE + car_id, "");
         if (phone_number.equals(""))
             phone_number = getString(R.string.phone_number_summary);
 
-        String name = preferences.getString(Names.CAR_NAME + car_id, "");
+        String name = preferences.getString(Names.Car.CAR_NAME + car_id, "");
         if (name.equals("")) {
             name = getString(R.string.car);
             if (!car_id.equals(""))
@@ -42,7 +46,7 @@ public class AuthFragment extends SettingsFragment {
             void click() {
                 Intent i = new Intent(getActivity(), AuthDialog.class);
                 i.putExtra(Names.ID, car_id);
-                i.putExtra(Names.AUTH, true);
+                i.putExtra(Names.Car.AUTH, true);
                 startActivityForResult(i, REQUEST_AUTH);
             }
         });
@@ -52,7 +56,7 @@ public class AuthFragment extends SettingsFragment {
                 void click() {
                     Intent i = new Intent(getActivity(), AuthDialog.class);
                     i.putExtra(Names.ID, car_id);
-                    i.putExtra(Names.CAR_PHONE, true);
+                    i.putExtra(Names.Car.CAR_PHONE, true);
                     startActivityForResult(i, REQUEST_PHONE);
                 }
             });
@@ -76,14 +80,14 @@ public class AuthFragment extends SettingsFragment {
                         setValue(et.getText().toString());
                         dialog.dismiss();
                         SharedPreferences.Editor ed = preferences.edit();
-                        ed.putString(Names.CAR_NAME + car_id, getValue());
+                        ed.putString(Names.Car.CAR_NAME + car_id, getValue());
                         ed.commit();
                         update();
                     }
                 });
             }
         });
-        if (!preferences.getBoolean(Names.POINTER + car_id, false)) {
+        if (!preferences.getBoolean(Names.Car.POINTER + car_id, false)) {
             if (State.hasTelephony(getActivity())) {
                 items.add(new Item(R.string.main_phone, R.string.init_phone) {
                     @Override
@@ -106,7 +110,7 @@ public class AuthFragment extends SettingsFragment {
                         });
                     }
                 });
-                items.add(new ListItem(R.string.control_method, R.array.ctrl_entries, R.array.ctrl_values, Names.CONTROL + car_id, ""));
+                items.add(new ListItem(R.string.control_method, R.array.ctrl_entries, R.array.ctrl_values, Names.Car.CONTROL + car_id, ""));
                 items.add(new Item(R.string.alarm_mode, R.string.sms_mode_summary) {
                     @Override
                     void click() {
@@ -145,14 +149,34 @@ public class AuthFragment extends SettingsFragment {
                     }
                 });
             }
-            items.add(new CheckBoxItem(R.string.show_photo, Names.SHOW_PHOTO, false));
+            photo_item = new CheckBoxItem(R.string.show_photo, Names.Car.SHOW_PHOTO, false);
+            items.add(photo_item);
 
-            if (!preferences.getString(Names.VERSION + car_id, "").toLowerCase().contains("superagent"))
-                items.add(new CheckBoxItem(R.string.device_pswd, Names.DEVICE_PSWD, false));
+            if (!preferences.getString(Names.Car.VERSION + car_id, "").toLowerCase().contains("superagent"))
+                items.add(new CheckBoxItem(R.string.device_pswd, Names.Car.DEVICE_PSWD, false));
         }
         update();
 
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (photo_item == null)
+                    return;
+                photo_item.update();
+                update();
+            }
+        };
+        IntentFilter filter = new IntentFilter(FetchService.ACTION_UPDATE_FORCE);
+        getActivity().registerReceiver(br, filter);
+
         return v;
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (br != null)
+            getActivity().unregisterReceiver(br);
+        super.onDestroyView();
     }
 
     @Override
@@ -167,7 +191,7 @@ public class AuthFragment extends SettingsFragment {
             activity.updateSettings();
         }
         if (requestCode == REQUEST_PHONE) {
-            items.get(1).setValue(preferences.getString(Names.CAR_PHONE + car_id, ""));
+            items.get(1).setValue(preferences.getString(Names.Car.CAR_PHONE + car_id, ""));
             update();
         }
     }

@@ -99,7 +99,7 @@ public class SettingActivity extends ActionBarActivity {
         Cars.Car[] cars = Cars.getCars(this);
         String title = "";
         if (cars.length > 1)
-            title = preferences.getString(Names.CAR_NAME + car_id, "");
+            title = preferences.getString(Names.Car.CAR_NAME + car_id, "");
         if (!title.equals(""))
             setTitle(title);
 
@@ -313,20 +313,20 @@ public class SettingActivity extends ActionBarActivity {
         values = null;
         old_values = null;
 
-        if (preferences.getBoolean(Names.POINTER + car_id, false))
+        if (preferences.getBoolean(Names.Car.POINTER + car_id, false))
             return;
 
-        if (preferences.getLong(Names.EVENT_TIME + car_id, 0) <= preferences.getLong(Names.SETTINGS_TIME + car_id, 0)) {
+        if (preferences.getLong(Names.Car.EVENT_TIME + car_id, 0) <= preferences.getLong(Names.Car.SETTINGS_TIME + car_id, 0)) {
             values = new int[24];
             old_values = new int[24];
             for (int i = 0; i < 24; i++) {
                 int v = preferences.getInt("V_" + i + "_" + car_id, 0);
                 if (i == 21)
-                    v = preferences.getInt(Names.CAR_TIMER + car_id, 10);
+                    v = preferences.getInt(Names.Car.CAR_TIMER + car_id, 10);
                 values[i] = v;
                 old_values[i] = v;
             }
-            String[] zone_info = preferences.getString(Names.ZONE_INFO + car_id, "").split("\\|");
+            String[] zone_info = preferences.getString(Names.Car.ZONE_INFO + car_id, "").split("\\|");
             zones = new Vector<Zone>();
             for (String info : zone_info) {
                 String[] z = info.split(",");
@@ -343,7 +343,7 @@ public class SettingActivity extends ActionBarActivity {
                 zone.clearChanged();
                 zones.add(zone);
             }
-            String[] timers_info = preferences.getString(Names.TIMERS_INFO + car_id, "").split("\\|");
+            String[] timers_info = preferences.getString(Names.Car.TIMERS_INFO + car_id, "").split("\\|");
             timers = new Vector<Timer>();
             for (String info : timers_info) {
                 String[] z = info.split(",");
@@ -381,7 +381,7 @@ public class SettingActivity extends ActionBarActivity {
                         }
                     }
                     if (i == 21)
-                        v = preferences.getInt(Names.CAR_TIMER + car_id, 10);
+                        v = preferences.getInt(Names.Car.CAR_TIMER + car_id, 10);
                     values[i] = v;
                     old_values[i] = v;
                 }
@@ -418,7 +418,7 @@ public class SettingActivity extends ActionBarActivity {
                         if (zone.device)
                             info += "1";
                     }
-                    ed.putString(Names.ZONE_INFO + car_id, info);
+                    ed.putString(Names.Car.ZONE_INFO + car_id, info);
                 }
                 JsonValue t_value = res.get("timers");
                 if (t_value != null) {
@@ -450,7 +450,7 @@ public class SettingActivity extends ActionBarActivity {
                             info += "|";
                         info += timer.days + "," + timer.hours + "," + timer.minutes + "," + timer.period + "," + timer.com + "," + timer.param;
                     }
-                    ed.putString(Names.TIMERS_INFO + car_id, info);
+                    ed.putString(Names.Car.TIMERS_INFO + car_id, info);
                 }
                 ed.commit();
                 sendUpdate();
@@ -462,16 +462,16 @@ public class SettingActivity extends ActionBarActivity {
                 sendUpdate();
             }
         };
-        task.execute(URL_SETTINGS, preferences.getString(Names.AUTH + car_id, ""));
+        task.execute(URL_SETTINGS, preferences.getString(Names.Car.AUTH + car_id, ""));
 
         HttpTask version = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
                 String ver = res.get("version").asString();
-                if (ver.equals(preferences.getString(Names.VERSION + car_id, "")))
+                if (ver.equals(preferences.getString(Names.Car.VERSION + car_id, "")))
                     return;
                 SharedPreferences.Editor ed = preferences.edit();
-                ed.putString(Names.VERSION + car_id, ver);
+                ed.putString(Names.Car.VERSION + car_id, ver);
                 ed.commit();
                 sendUpdate();
             }
@@ -481,7 +481,7 @@ public class SettingActivity extends ActionBarActivity {
 
             }
         };
-        version.execute(URL_PROFILE, preferences.getString(Names.CAR_KEY + car_id, ""));
+        version.execute(URL_PROFILE, preferences.getString(Names.Car.CAR_KEY + car_id, ""));
         sendUpdate();
     }
 
@@ -543,7 +543,7 @@ public class SettingActivity extends ActionBarActivity {
                 if (z.device)
                     zone_data += "1";
             }
-            ed.putString(Names.ZONE_INFO + car_id, zone_data);
+            ed.putString(Names.Car.ZONE_INFO + car_id, zone_data);
         }
 
         String timer_data = null;
@@ -568,7 +568,7 @@ public class SettingActivity extends ActionBarActivity {
                 timer_data += t.com + ",";
                 timer_data += t.param;
             }
-            ed.putString(Names.TIMERS_INFO + car_id, timer_data);
+            ed.putString(Names.Car.TIMERS_INFO + car_id, timer_data);
         }
 
         ed.commit();
@@ -663,7 +663,7 @@ public class SettingActivity extends ActionBarActivity {
                         .create();
                 dialog.show();
                 TextView tv = (TextView) dialog.findViewById(R.id.msg);
-                final int wait_time = preferences.getInt(Names.CAR_TIMER + car_id, 10);
+                final int wait_time = preferences.getInt(Names.Car.CAR_TIMER + car_id, 10);
                 String msg = getString(R.string.wait_msg).replace("$1", wait_time + "");
                 tv.setText(msg);
                 Button btnCall = (Button) dialog.findViewById(R.id.call);
@@ -672,23 +672,23 @@ public class SettingActivity extends ActionBarActivity {
                     public void onClick(View v) {
                         dialog.dismiss();
                         Intent intent = new Intent(Intent.ACTION_CALL);
-                        intent.setData(Uri.parse("tel:" + preferences.getString(Names.CAR_PHONE + car_id, "")));
+                        intent.setData(Uri.parse("tel:" + preferences.getString(Names.Car.CAR_PHONE + car_id, "")));
                         startActivity(intent);
                     }
                 });
                 Button btnSms = (Button) dialog.findViewById(R.id.sms);
                 btnSms.setVisibility(View.GONE);
                 SharedPreferences.Editor ed = preferences.edit();
-                long time = preferences.getLong(Names.EVENT_TIME + car_id, 0);
+                long time = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
                 time += wait_time * 90000;
-                ed.putLong(Names.SETTINGS_TIME + car_id, time);
+                ed.putLong(Names.Car.SETTINGS_TIME + car_id, time);
                 for (int i = 0; i < set_values.length; i++) {
                     if (set_values[i] == old_values[i])
                         continue;
                     ed.putInt("V_" + i + "_" + car_id, set_values[i]);
                     old_values[i] = set_values[i];
                     if (i == 21)
-                        ed.putInt(Names.CAR_TIMER + car_id, set_values[i]);
+                        ed.putInt(Names.Car.CAR_TIMER + car_id, set_values[i]);
                 }
                 ed.commit();
             }
@@ -700,7 +700,7 @@ public class SettingActivity extends ActionBarActivity {
                 toast.show();
             }
         };
-        task.execute(URL_SET, preferences.getString(Names.AUTH + car_id, ""), value, "ccode", ccode, "zone", zones_data, "t", timer_data);
+        task.execute(URL_SET, preferences.getString(Names.Car.AUTH + car_id, ""), value, "ccode", ccode, "zone", zones_data, "t", timer_data);
     }
 
     static class Zone implements Serializable {
@@ -827,7 +827,7 @@ public class SettingActivity extends ActionBarActivity {
             int commands = State.getCommands(preferences, car_id);
             visible[4] = (commands & State.CMD_AZ) != 0;
             visible[5] = (commands & State.CMD_RELE) != 0;
-            visible[6] = (preferences.getFloat(Names.LAT + car_id, 0) != 0) || (preferences.getFloat(Names.LNG + car_id, 0) != 0);
+            visible[6] = (preferences.getFloat(Names.Car.LAT + car_id, 0) != 0) || (preferences.getFloat(Names.Car.LNG + car_id, 0) != 0);
         }
 
         int toID(int pos) {
@@ -889,7 +889,7 @@ public class SettingActivity extends ActionBarActivity {
 
         @Override
         public int getCount() {
-            if (preferences.getBoolean(Names.POINTER + car_id, false))
+            if (preferences.getBoolean(Names.Car.POINTER + car_id, false))
                 return 1;
             return fromID(visible.length);
         }

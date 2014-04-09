@@ -49,8 +49,8 @@ public class ZonesFragment extends DeviceFragment {
                     if (z.id <= zone.id)
                         z.id = zone.id + 1;
                 }
-                double lat = preferences.getFloat(Names.LAT + car_id, 0);
-                double lng = preferences.getFloat(Names.LNG + car_id, 0);
+                double lat = preferences.getFloat(Names.Car.LAT + car_id, 0);
+                double lng = preferences.getFloat(Names.Car.LNG + car_id, 0);
                 z.lat1 = lat - 0.01;
                 z.lat2 = lat + 0.01;
                 z.lng1 = lng - 0.01;

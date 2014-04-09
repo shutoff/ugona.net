@@ -27,6 +27,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -35,6 +36,7 @@ import com.google.i18n.phonenumbers.Phonenumber;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Vector;
 
@@ -44,6 +46,7 @@ public class AuthDialog extends Activity {
 
     final static String URL_KEY = "https://car-online.ugona.net/key?auth=$1";
     final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
+    final static String URL_PHOTOS = "https://car-online.ugona.net/photos?skey=$1&begin=$2";
     static boolean is_show;
     EditText edLogin;
     EditText edPasswd;
@@ -92,8 +95,8 @@ public class AuthDialog extends Activity {
 
         is_show = true;
 
-        show_auth = getIntent().getBooleanExtra(Names.AUTH, false);
-        show_phone = getIntent().getBooleanExtra(Names.CAR_PHONE, false);
+        show_auth = getIntent().getBooleanExtra(Names.Car.AUTH, false);
+        show_phone = getIntent().getBooleanExtra(Names.Car.CAR_PHONE, false);
 
         if (show_auth || show_phone) {
             car_id = getIntent().getStringExtra(Names.ID);
@@ -142,11 +145,11 @@ public class AuthDialog extends Activity {
                     HttpTask apiTask = new HttpTask() {
                         @Override
                         void result(JsonObject res) throws ParseException {
-                            String key = res.get("key").asString();
+                            final String key = res.get("key").asString();
                             SharedPreferences.Editor ed = preferences.edit();
-                            ed.putString(Names.CAR_KEY + car_id, key);
-                            ed.putString(Names.LOGIN + car_id, login);
-                            ed.putString(Names.AUTH + car_id, auth);
+                            ed.putString(Names.Car.CAR_KEY + car_id, key);
+                            ed.putString(Names.Car.LOGIN + car_id, login);
+                            ed.putString(Names.Car.AUTH + car_id, auth);
                             ed.remove(Names.GCM_TIME);
                             String[] cars = preferences.getString(Names.CARS, "").split(",");
                             boolean is_new = true;
@@ -166,12 +169,15 @@ public class AuthDialog extends Activity {
                                         String number = edNumber.getText().toString();
                                         if (!State.isDebug())
                                             number = Phones.formatPhoneNumber(number);
-                                        ed.putString(Names.CAR_PHONE + car_id, number);
+                                        ed.putString(Names.Car.CAR_PHONE + car_id, number);
                                     }
                                     String ver = res.get("version").asString();
-                                    ed.putString(Names.VERSION + car_id, ver);
-                                    if (ver.toUpperCase().substring(0, 5).equals("MS-TR"))
-                                        ed.putBoolean(Names.POINTER + car_id, true);
+                                    ed.putString(Names.Car.VERSION + car_id, ver);
+                                    boolean pointer = false;
+                                    if (ver.toUpperCase().substring(0, 5).equals("MS-TR")) {
+                                        ed.putBoolean(Names.Car.POINTER + car_id, true);
+                                        pointer = true;
+                                    }
                                     ed.commit();
                                     setResult(RESULT_OK, getIntent());
                                     dlgCheck.dismiss();
@@ -179,6 +185,31 @@ public class AuthDialog extends Activity {
                                     Intent intent = new Intent(FetchService.ACTION_UPDATE_FORCE);
                                     intent.putExtra(Names.ID, car_id);
                                     sendBroadcast(intent);
+                                    if (!pointer) {
+                                        boolean c1 = preferences.getBoolean(Names.Car.SHOW_PHOTO + car_id, false);
+                                        boolean c2 = preferences.getBoolean(Names.Car.SHOW_PHOTO + car_id, true);
+                                        if (!c1 && c2) {
+                                            HttpTask photo = new HttpTask() {
+                                                @Override
+                                                void result(JsonObject res) throws ParseException {
+                                                    JsonArray array = res.get("photos").asArray();
+                                                    SharedPreferences.Editor ed = preferences.edit();
+                                                    ed.putBoolean(Names.Car.SHOW_PHOTO + car_id, array.size() > 0);
+                                                    ed.commit();
+                                                    Intent intent = new Intent(FetchService.ACTION_UPDATE_FORCE);
+                                                    intent.putExtra(Names.ID, car_id);
+                                                    sendBroadcast(intent);
+                                                }
+
+                                                @Override
+                                                void error() {
+
+                                                }
+                                            };
+                                            Date now = new Date();
+                                            photo.execute(URL_PHOTOS, key, now.getTime() - 86400 * 3);
+                                        }
+                                    }
                                 }
 
                                 @Override
@@ -214,10 +245,10 @@ public class AuthDialog extends Activity {
                     if (!State.isDebug())
                         number = Phones.formatPhoneNumber(number);
                     if (car_id == null) {
-                        i.putExtra(Names.CAR_PHONE, number);
+                        i.putExtra(Names.Car.CAR_PHONE, number);
                     } else {
                         SharedPreferences.Editor ed = preferences.edit();
-                        ed.putString(Names.CAR_PHONE + car_id, number);
+                        ed.putString(Names.Car.CAR_PHONE + car_id, number);
                         ed.commit();
                     }
                 }
@@ -251,7 +282,7 @@ public class AuthDialog extends Activity {
 
 
         if (show_auth) {
-            edLogin.setText(preferences.getString(Names.LOGIN + car_id, ""));
+            edLogin.setText(preferences.getString(Names.Car.LOGIN + car_id, ""));
             edLogin.addTextChangedListener(watcher);
             edPasswd.addTextChangedListener(watcher);
             edLogin.requestFocus();
@@ -262,7 +293,7 @@ public class AuthDialog extends Activity {
 
         if (show_phone) {
             if (car_id != null)
-                edNumber.setText(preferences.getString(Names.CAR_PHONE + car_id, ""));
+                edNumber.setText(preferences.getString(Names.Car.CAR_PHONE + car_id, ""));
             edNumber.addTextChangedListener(watcher);
             if (!show_auth)
                 edNumber.requestFocus();

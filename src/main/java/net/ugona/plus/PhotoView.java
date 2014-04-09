@@ -35,12 +35,12 @@ public class PhotoView extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photo);
         iv = (ImageView) findViewById(R.id.photo);
-        byte[] data = getIntent().getByteArrayExtra(Names.SHOW_PHOTO);
+        byte[] data = getIntent().getByteArrayExtra(Names.Car.SHOW_PHOTO);
         long time = getIntent().getLongExtra(Names.TITLE, 0);
         car_id = getIntent().getStringExtra(Names.ID);
         camera = getIntent().getIntExtra(Names.CAMERA, 0);
         try {
-            File file = new File(getCacheDir(), "p" + car_id + "_" + getIntent().getLongExtra(Names.SHOW_PHOTO, 0));
+            File file = new File(getCacheDir(), "p" + car_id + "_" + getIntent().getLongExtra(Names.Car.SHOW_PHOTO, 0));
             bmpPhoto = BitmapFactory.decodeFile(file.getAbsolutePath());
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             if (preferences.getBoolean(Names.ROTATE + camera + "_" + car_id, false)) {

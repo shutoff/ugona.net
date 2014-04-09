@@ -33,7 +33,7 @@ public class StatusDialog extends Activity {
         TextView tvSms = (TextView) dialog.findViewById(R.id.sms);
         tvSms.setText(getIntent().getStringExtra(Names.SMS_TEXT));
 
-        String alarm = getIntent().getStringExtra(Names.ALARM);
+        String alarm = getIntent().getStringExtra(Names.Car.ALARM);
         TextView tvAlarm = (TextView) dialog.findViewById(R.id.alarm);
         if (alarm == null) {
             tvAlarm.setVisibility(View.GONE);

@@ -4,10 +4,18 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Environment;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class State {
 
@@ -23,7 +31,6 @@ public class State {
     static final int CMD_SEARCH = 1 << 9;
     static int telephony_state = 0;
 
-/*
     static void appendLog(String text) {
         File logFile = Environment.getExternalStorageDirectory();
         logFile = new File(logFile, "car.log");
@@ -57,7 +64,6 @@ public class State {
         String s = sw.toString();
         appendLog(s);
     }
-*/
 
     static boolean isDebug() {
         return Build.FINGERPRINT.startsWith("generic");
@@ -96,16 +102,16 @@ public class State {
     }
 
     static int getCommands(SharedPreferences preferences, String car_id) {
-        int res = preferences.getInt(Names.COMMANDS + car_id, -1);
+        int res = preferences.getInt(Names.Car.COMMANDS + car_id, -1);
         if (res != -1)
             return res;
         res = CMD_VALET;
         if (preferences.getBoolean("autostart_" + car_id, false))
             res |= CMD_AZ;
-        if (!preferences.getString(Names.CAR_RELE + car_id, "").equals(""))
+        if (!preferences.getString(Names.Car.CAR_RELE + car_id, "").equals(""))
             res |= CMD_RELE;
         SharedPreferences.Editor ed = preferences.edit();
-        ed.putInt(Names.COMMANDS + car_id, res);
+        ed.putInt(Names.Car.COMMANDS + car_id, res);
         ed.commit();
         return res;
     }

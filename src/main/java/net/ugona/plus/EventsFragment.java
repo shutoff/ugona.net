@@ -270,8 +270,8 @@ public class EventsFragment extends Fragment
         });
 
         preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        api_key = preferences.getString(Names.CAR_KEY + car_id, "");
-        pointer = preferences.getBoolean(Names.POINTER + car_id, false);
+        api_key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
+        pointer = preferences.getBoolean(Names.Car.POINTER + car_id, false);
 
         filtered = new Vector<Event>();
         if (events == null)
@@ -329,7 +329,7 @@ public class EventsFragment extends Fragment
                     fetcher.update();
                 }
                 if (intent.getAction().equals(FetchService.ACTION_UPDATE))
-                    api_key = preferences.getString(Names.CAR_KEY + car_id, "");
+                    api_key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
             }
         };
         IntentFilter intFilter = new IntentFilter(FetchService.ACTION_UPDATE);
@@ -620,7 +620,7 @@ public class EventsFragment extends Fragment
                     finish.toDate().getTime(),
                     first,
                     pointer,
-                    preferences.getString(Names.AUTH + car_id, ""));
+                    preferences.getString(Names.Car.AUTH + car_id, ""));
         }
     }
 
@@ -633,7 +633,7 @@ public class EventsFragment extends Fragment
             event_id = id;
             event_time = time;
             if ((type == 88) || (type == 140) || (type == -116)) {
-                String auth = preferences.getString(Names.AUTH + car_id, "");
+                String auth = preferences.getString(Names.Car.AUTH + car_id, "");
                 execute(URL_TEXT, auth, id, time, type);
                 return;
             }

@@ -13,7 +13,50 @@ import android.view.ViewGroup;
 
 public class NotificationFragment extends SettingsFragment {
 
+    SoundItem alarm_sound;
+    SoundItem notify_sound;
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = super.onCreateView(inflater, container, savedInstanceState);
+
+        alarm_sound = new SoundItem(R.string.alarm_sound, RingtoneManager.TYPE_RINGTONE, Preferences.getAlarm(preferences, car_id), Names.Car.ALARM);
+        notify_sound = new SoundItem(R.string.notify_sound, RingtoneManager.TYPE_NOTIFICATION, Preferences.getNotify(preferences, car_id), Names.Car.NOTIFY);
+
+        items.add(alarm_sound);
+        items.add(new Item(R.string.alarm_test, R.string.alarm_test_sum) {
+            @Override
+            void click() {
+                Intent intent = new Intent(getActivity(), Alarm.class);
+                intent.putExtra(Names.ID, car_id);
+                intent.putExtra(Names.Car.ALARM, getString(R.string.alarm_test));
+                startActivity(intent);
+            }
+        });
+        items.add(notify_sound);
+        items.add(new ListItem(R.string.guard_notify, R.array.guard_values, R.array.guard_entries, Names.Car.GUARD_MODE, "", R.string.notify_msg));
+        items.add(new CheckBoxItem(R.string.show_balance, Names.Car.SHOW_BALANCE, true));
+        items.add(new ListIntItem(R.string.balance_notification, R.array.balance_limit, R.array.balance_values, Names.Car.LIMIT, 50));
+
+        update();
+        return v;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK)
+            return;
+        if (requestCode == RingtoneManager.TYPE_RINGTONE)
+            alarm_sound.setData(data);
+        if (requestCode == RingtoneManager.TYPE_NOTIFICATION)
+            notify_sound.setData(data);
+    }
+
     class SoundItem extends Item {
+
+        int type_ringtone;
+        Uri uri;
+        String key;
 
         SoundItem(int name, int type, String init_uri, String item_key) {
             super(name, R.string.def);
@@ -64,49 +107,5 @@ public class NotificationFragment extends SettingsFragment {
                 update();
             }
         }
-
-        int type_ringtone;
-        Uri uri;
-        String key;
-    }
-
-
-    SoundItem alarm_sound;
-    SoundItem notify_sound;
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = super.onCreateView(inflater, container, savedInstanceState);
-
-        alarm_sound = new SoundItem(R.string.alarm_sound, RingtoneManager.TYPE_RINGTONE, Preferences.getAlarm(preferences, car_id), Names.ALARM);
-        notify_sound = new SoundItem(R.string.notify_sound, RingtoneManager.TYPE_NOTIFICATION, Preferences.getNotify(preferences, car_id), Names.NOTIFY);
-
-        items.add(alarm_sound);
-        items.add(new Item(R.string.alarm_test, R.string.alarm_test_sum) {
-            @Override
-            void click() {
-                Intent intent = new Intent(getActivity(), Alarm.class);
-                intent.putExtra(Names.ID, car_id);
-                intent.putExtra(Names.ALARM, getString(R.string.alarm_test));
-                startActivity(intent);
-            }
-        });
-        items.add(notify_sound);
-        items.add(new ListItem(R.string.guard_notify, R.array.guard_values, R.array.guard_entries, Names.GUARD_MODE, "", R.string.notify_msg));
-        items.add(new CheckBoxItem(R.string.show_balance, Names.SHOW_BALANCE, true));
-        items.add(new ListIntItem(R.string.balance_notification, R.array.balance_limit, R.array.balance_values, Names.LIMIT, 50));
-
-        update();
-        return v;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode != Activity.RESULT_OK)
-            return;
-        if (requestCode == RingtoneManager.TYPE_RINGTONE)
-            alarm_sound.setData(data);
-        if (requestCode == RingtoneManager.TYPE_NOTIFICATION)
-            notify_sound.setData(data);
     }
 }
