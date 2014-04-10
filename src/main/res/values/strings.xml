@@ -457,7 +457,7 @@
     <string name="sound_on">Silent guard mode OFF</string>
     <string name="silent_mode">Silent guard mode</string>
     <string name="km">km</string>
-    <string name="alarm_shock">Alarm on shock sensor</string>
+    <string name="alarm_shock">Alarm on sensors</string>
     <string name="inf_sms">Send SMS when engine started</string>
     <string name="inf_sms_msg"></string>
     <string name="voltage_shift">Voltage correction</string>

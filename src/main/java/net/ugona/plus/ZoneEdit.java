@@ -206,11 +206,13 @@ public class ZoneEdit extends GpsActivity {
             res += currentBestLocation.getAccuracy();
             if (currentBestLocation.hasBearing())
                 res += currentBestLocation.getBearing();
+            State.appendLog("getLocation: " + res);
             return res;
         }
 
         @JavascriptInterface
         public String getZone() {
+            State.appendLog("getZone: " + zone.lat1 + "," + zone.lng1 + "," + zone.lat2 + "," + zone.lng2);
             return zone.lat1 + "," + zone.lng1 + "," + zone.lat2 + "," + zone.lng2;
         }
 

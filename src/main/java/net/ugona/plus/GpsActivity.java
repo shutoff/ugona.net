@@ -231,7 +231,8 @@ abstract public class GpsActivity extends WebViewActivity {
             currentBestLocation = location;
         if (currentBestLocation == null)
             return;
-        webView.loadUrl("javascript:myLocation()");
+        if (loaded)
+            webView.loadUrl("javascript:myLocation()");
     }
 
     protected boolean isBetterLocation(Location location, Location currentBestLocation) {
