@@ -446,5 +446,5 @@
     <string name="timer_set">Таймер</string>
     <string name="timer_empty">Выберите дни недели</string>
     <string name="timer_delete">Удалить таймер?</string>
-    <string name="search">Поиск автомобиля</string>
+    <string name="search">Поиск на стоянке</string>
 </resources>
