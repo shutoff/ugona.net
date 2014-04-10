@@ -24,6 +24,8 @@ public class AutoStartFragment extends DeviceFragment {
 
     static final int TIMER_SETUP = 1000;
 
+    static int period_values[] = null;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
@@ -106,6 +108,7 @@ public class AutoStartFragment extends DeviceFragment {
                     SettingActivity.Timer timer = new SettingActivity.Timer();
                     timer.param = "";
                     timer.com = 1;
+                    timer.period = 7;
                     timer.clearChanged();
                     for (SettingActivity.Timer t : activity.timers) {
                         if (t.id >= timer.id)
@@ -169,6 +172,17 @@ public class AutoStartFragment extends DeviceFragment {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    int[] getPeriodValues() {
+        if (period_values == null) {
+            String[] values = getResources().getStringArray(R.array.period_values);
+            period_values = new int[values.length];
+            for (int i = 0; i < values.length; i++) {
+                period_values[i] = Integer.parseInt(values[i]);
+            }
+        }
+        return period_values;
+    }
+
     class TimerItem extends Item {
 
         SettingActivity.Timer timer;
@@ -184,45 +198,83 @@ public class AutoStartFragment extends DeviceFragment {
             super.setView(v);
             v.findViewById(R.id.block1).setVisibility(View.GONE);
             v.findViewById(R.id.block2).setVisibility(View.GONE);
-            v.findViewById(R.id.block_timer).setVisibility(View.VISIBLE);
             tvTime = (TextView) v.findViewById(R.id.time);
             tvTime.setText(String.format("%02d:%02d", timer.hours, timer.minutes));
             tvTime.setTextColor(getResources().getColor(changed() ? R.color.changed : android.R.color.secondary_text_dark));
-            Calendar calendar = Calendar.getInstance();
-            int first = calendar.getFirstDayOfWeek();
-            DateFormatSymbols symbols = new DateFormatSymbols(Locale.getDefault());
-            String[] dayNames = symbols.getShortWeekdays();
-            TextView tv1 = (TextView) v.findViewById(R.id.d1);
-            tv1.setTag(1);
-            setTextColor(tv1);
-            tv1.setText(dayNames[(first + 6) % 7 + 1]);
-            TextView tv2 = (TextView) v.findViewById(R.id.d2);
-            tv2.setTag(2);
-            setTextColor(tv2);
-            tv2.setText(dayNames[first % 7 + 1]);
-            TextView tv3 = (TextView) v.findViewById(R.id.d3);
-            tv3.setTag(3);
-            setTextColor(tv3);
-            tv3.setText(dayNames[(first + 1) % 7 + 1]);
-            TextView tv4 = (TextView) v.findViewById(R.id.d4);
-            tv4.setTag(4);
-            setTextColor(tv4);
-            tv4.setText(dayNames[(first + 2) % 7 + 1]);
-            TextView tv5 = (TextView) v.findViewById(R.id.d5);
-            tv5.setTag(5);
-            setTextColor(tv5);
-            tv5.setText(dayNames[(first + 3) % 7 + 1]);
-            TextView tv6 = (TextView) v.findViewById(R.id.d6);
-            tv6.setTag(6);
-            setTextColor(tv6);
-            tv6.setText(dayNames[(first + 4) % 7 + 1]);
-            TextView tv7 = (TextView) v.findViewById(R.id.d7);
-            tv7.setTag(7);
-            setTextColor(tv7);
-            tv7.setText(dayNames[(first + 5) % 7 + 1]);
+            int[] periods = getPeriodValues();
+            int pos;
+            for (pos = 0; pos < periods.length; pos++) {
+                if (period_values[pos] == timer.period)
+                    break;
+            }
+            v.findViewById(R.id.block_timer).setVisibility(View.VISIBLE);
+            v.findViewById(R.id.week).setVisibility(View.GONE);
+            TextView tvTimes = (TextView) v.findViewById(R.id.times);
+            tvTimes.setVisibility(View.GONE);
+            if (pos < 1) {
+                v.findViewById(R.id.week).setVisibility(View.VISIBLE);
+                Calendar calendar = Calendar.getInstance();
+                int first = calendar.getFirstDayOfWeek();
+                DateFormatSymbols symbols = new DateFormatSymbols(Locale.getDefault());
+                String[] dayNames = symbols.getShortWeekdays();
+                TextView tv1 = (TextView) v.findViewById(R.id.d1);
+                tv1.setTag(1);
+                setTextColor(tv1);
+                tv1.setText(dayNames[(first + 6) % 7 + 1]);
+                TextView tv2 = (TextView) v.findViewById(R.id.d2);
+                tv2.setTag(2);
+                setTextColor(tv2);
+                tv2.setText(dayNames[first % 7 + 1]);
+                TextView tv3 = (TextView) v.findViewById(R.id.d3);
+                tv3.setTag(3);
+                setTextColor(tv3);
+                tv3.setText(dayNames[(first + 1) % 7 + 1]);
+                TextView tv4 = (TextView) v.findViewById(R.id.d4);
+                tv4.setTag(4);
+                setTextColor(tv4);
+                tv4.setText(dayNames[(first + 2) % 7 + 1]);
+                TextView tv5 = (TextView) v.findViewById(R.id.d5);
+                tv5.setTag(5);
+                setTextColor(tv5);
+                tv5.setText(dayNames[(first + 3) % 7 + 1]);
+                TextView tv6 = (TextView) v.findViewById(R.id.d6);
+                tv6.setTag(6);
+                setTextColor(tv6);
+                tv6.setText(dayNames[(first + 4) % 7 + 1]);
+                TextView tv7 = (TextView) v.findViewById(R.id.d7);
+                tv7.setTag(7);
+                setTextColor(tv7);
+                tv7.setText(dayNames[(first + 5) % 7 + 1]);
+            } else if (pos > 2) {
+                int minutes = timer.minutes;
+                int hours = timer.hours;
+                int p = period_values[pos];
+                if (p > 4)
+                    p = 6;
+                while (hours > p) {
+                    hours -= p;
+                }
+                String res = "";
+                for (int i = 0; i < 3; i++) {
+                    if (!res.equals(""))
+                        res += ", ";
+                    res += String.format("%d:%02d", hours, minutes);
+                    hours += p;
+                }
+                if (p < 6)
+                    res += " ... ";
+                while (hours < 24) {
+                    hours += p;
+                }
+                hours -= p;
+                res += ", ";
+                res += String.format("%d:%02d", hours, minutes);
+                tvTimes.setText(res);
+                tvTimes.setVisibility(View.VISIBLE);
+            }
             TextView tvRepeat = (TextView) v.findViewById(R.id.repeat);
             String[] repeats = getResources().getStringArray(R.array.periods);
-            tvRepeat.setText(repeats[timer.period]);
+            tvRepeat.setText(repeats[pos]);
         }
 
         @Override

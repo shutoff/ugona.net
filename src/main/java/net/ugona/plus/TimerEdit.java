@@ -13,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -34,6 +35,9 @@ public class TimerEdit extends ActionBarActivity {
     Spinner repeat;
     boolean timer_delete;
     SettingActivity.Timer timer;
+    int[] period_values;
+    View vWeek;
+    TextView tvTimes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,9 +59,6 @@ public class TimerEdit extends ActionBarActivity {
         setContentView(R.layout.timer);
 
         picker = (TimePicker) findViewById(R.id.time);
-        picker.setIs24HourView(DateFormat.is24HourFormat(this));
-        picker.setCurrentHour(timer.hours);
-        picker.setCurrentMinute(timer.minutes);
 
         Calendar calendar = Calendar.getInstance();
         int first = calendar.getFirstDayOfWeek();
@@ -153,7 +154,37 @@ public class TimerEdit extends ActionBarActivity {
                 return v;
             }
         });
-        repeat.setSelection(timer.period);
+        vWeek = findViewById(R.id.week);
+        tvTimes = (TextView) findViewById(R.id.times);
+        repeat.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                setTimes();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        String[] values = getResources().getStringArray(R.array.period_values);
+        period_values = new int[values.length];
+        for (int i = 0; i < values.length; i++) {
+            period_values[i] = Integer.parseInt(values[i]);
+            if (period_values[i] == timer.period)
+                repeat.setSelection(i);
+        }
+
+        picker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
+            @Override
+            public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
+                setTimes();
+            }
+        });
+        picker.setIs24HourView(DateFormat.is24HourFormat(this));
+        picker.setCurrentHour(timer.hours);
+        picker.setCurrentMinute(timer.minutes);
     }
 
     @Override
@@ -161,7 +192,7 @@ public class TimerEdit extends ActionBarActivity {
         super.onSaveInstanceState(outState);
         timer.hours = picker.getCurrentHour();
         timer.minutes = picker.getCurrentMinute();
-        timer.period = repeat.getSelectedItemPosition();
+        timer.period = period_values[repeat.getSelectedItemPosition()];
         byte[] data = null;
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -208,6 +239,9 @@ public class TimerEdit extends ActionBarActivity {
 
     @Override
     public void finish() {
+        timer.period = period_values[repeat.getSelectedItemPosition()];
+        if (repeat.getSelectedItemPosition() > 1)
+            timer.days = 1;
         if (!timer_delete && (timer.days == 0) && timer.isChanged()) {
             AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle(R.string.error)
@@ -219,7 +253,6 @@ public class TimerEdit extends ActionBarActivity {
         }
         timer.hours = picker.getCurrentHour();
         timer.minutes = picker.getCurrentMinute();
-        timer.period = repeat.getSelectedItemPosition();
         Intent i = getIntent();
         try {
             byte[] data = null;
@@ -235,6 +268,38 @@ public class TimerEdit extends ActionBarActivity {
         }
         setResult(RESULT_OK, i);
         super.finish();
+    }
+
+    void setTimes() {
+        int position = repeat.getSelectedItemPosition();
+        vWeek.setVisibility((position > 1) ? View.GONE : View.VISIBLE);
+        tvTimes.setVisibility((position > 2) ? View.VISIBLE : View.GONE);
+        if (position > 2) {
+            int hours = picker.getCurrentHour();
+            int minutes = picker.getCurrentMinute();
+            int p = period_values[position];
+            if (p > 4)
+                p = 6;
+            while (hours > p) {
+                hours -= p;
+            }
+            String res = "";
+            for (int i = 0; i < 3; i++) {
+                if (!res.equals(""))
+                    res += ", ";
+                res += String.format("%d:%02d", hours, minutes);
+                hours += p;
+            }
+            if (p < 6)
+                res += " ... ";
+            while (hours < 24) {
+                hours += p;
+            }
+            hours -= p;
+            res += ", ";
+            res += String.format("%d:%02d", hours, minutes);
+            tvTimes.setText(res);
+        }
     }
 
     void setTextColor(TextView tv) {

@@ -476,15 +476,25 @@
     <string name="add_timer">Add timer</string>
     <string name="init">Initialization</string>
     <string name="zone_my">No notify if car around from me</string>
+    <string-array name="period_values">
+        <item>7</item>
+        <item>0</item>
+        <item>6</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
     <string-array name="periods">
+        <item>Weekly</item>
         <item>Once</item>
+        <item>1 day</item>
         <item>1 hour</item>
         <item>2 hours</item>
         <item>3 hours</item>
         <item>4 hours</item>
         <item>6 hours</item>
-        <item>1 day</item>
-        <item>weekly</item>
     </string-array>
     <string name="timer_set">Таймер</string>
     <string name="timer_empty">Select any weekdays</string>

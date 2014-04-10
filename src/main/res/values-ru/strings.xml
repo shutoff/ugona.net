@@ -434,14 +434,14 @@
     <string name="init">Инициализация</string>
     <string name="zone_my">Не уведомлять, если рядом с машиной</string>
     <string-array name="periods">
+        <item>еженедельно</item>
         <item>один раз</item>
+        <item>ежедневно</item>
         <item>1 час</item>
         <item>2 часа</item>
         <item>3 часа</item>
         <item>4 часа</item>
         <item>6 часов</item>
-        <item>ежедневно</item>
-        <item>еженедельно</item>
     </string-array>
     <string name="timer_set">Таймер</string>
     <string name="timer_empty">Выберите дни недели</string>

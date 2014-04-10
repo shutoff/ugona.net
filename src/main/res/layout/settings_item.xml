@@ -128,7 +128,14 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
 
+            <TextView
+                android:id="@+id/times"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
             <LinearLayout
+                android:id="@+id/week"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
