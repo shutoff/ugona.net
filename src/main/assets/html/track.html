@@ -196,7 +196,7 @@ function showPointInfo(event) {
     var lat = parseFloat(p[0]);
     var lon = parseFloat(p[1]);
     point_info = new google.maps.InfoWindow({
-        content: d.toLocaleTimeString() + '<br/>' + p[2] + ' км/ч'
+        content: d.toLocaleTimeString() + '<br/>' + p[2] + ' ' + android.kmh()
     });
     point_info.open(map);
     point_info.setPosition(new google.maps.LatLng(lat, lon));
@@ -217,6 +217,7 @@ function shareTrack() {
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
+
 
 
 

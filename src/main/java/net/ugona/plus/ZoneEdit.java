@@ -1,7 +1,6 @@
 package net.ugona.plus;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,7 +10,7 @@ import android.text.InputFilter;
 import android.text.Spanned;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
+import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -78,11 +77,8 @@ public class ZoneEdit extends GpsActivity {
         etName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                if (!b) {
-                    InputMethodManager imm = (InputMethodManager) getSystemService(
-                            Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(etName.getWindowToken(), 0);
-                }
+                if (!b)
+                    getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
             }
         });
         chkSms.setChecked(zone.sms);

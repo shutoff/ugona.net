@@ -17,6 +17,10 @@ import android.webkit.JavascriptInterface;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
+
 import org.joda.time.LocalDateTime;
 
 import java.text.DateFormat;
@@ -28,6 +32,10 @@ public class MapView extends GpsActivity {
     static final int REQUEST_ALARM = 4000;
     static final int UPDATE_INTERVAL = 30 * 1000;
 
+    final static String URL_TRACKS = "https://car-online.ugona.net/tracks?skey=$1&begin=$2&end=$3";
+
+    static String TRAFFIC = "traffic";
+
     BroadcastReceiver br;
     String car_id;
     String point_data;
@@ -38,6 +46,9 @@ public class MapView extends GpsActivity {
     Cars.Car[] cars;
     DateFormat df;
     DateFormat tf;
+
+    TrackView.Track track;
+    HttpTask trackTask;
 
     @Override
     String loadURL() {
@@ -85,11 +96,13 @@ public class MapView extends GpsActivity {
             public void onReceive(Context context, Intent intent) {
                 if (loaded)
                     webView.loadUrl("javascript:update()");
+                updateTrack();
                 stopTimer();
                 startTimer(false);
             }
         };
         registerReceiver(br, new IntentFilter(FetchService.ACTION_UPDATE));
+        updateTrack();
     }
 
     @Override
@@ -123,6 +136,47 @@ public class MapView extends GpsActivity {
         }
     }
 
+    void updateTrack() {
+        if (trackTask != null)
+            return;
+        boolean engine = preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false);
+        boolean az = preferences.getBoolean(Names.Car.AZ + car_id, false);
+        if (!engine || az) {
+            track = null;
+            return;
+        }
+
+        trackTask = new HttpTask() {
+            @Override
+            void result(JsonObject res) throws ParseException {
+                JsonArray list = res.get("tracks").asArray();
+                track = null;
+                if (list.size() > 0) {
+                    JsonObject v = list.get(list.size() - 1).asObject();
+                    track = new TrackView.Track();
+                    track.track = v.get("track").asString();
+                    track.mileage = v.get("mileage").asDouble();
+                    track.max_speed = v.get("max_speed").asDouble();
+                    track.begin = v.get("begin").asLong();
+                    track.end = v.get("end").asLong();
+                    track.avg_speed = v.get("avg_speed").asDouble();
+                    track.day_mileage = v.get("day_mileage").asDouble();
+                    track.day_max_speed = v.get("day_max_speed").asDouble();
+                }
+                trackTask = null;
+                if (loaded)
+                    webView.loadUrl("javascript:update()");
+            }
+
+            @Override
+            void error() {
+                trackTask = null;
+            }
+        };
+        long end = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
+        trackTask.execute(URL_TRACKS, preferences.getString(Names.Car.CAR_KEY + car_id, ""), end - 86400000, end);
+    }
+
     void setActionBar() {
         ActionBar actionBar = getSupportActionBar();
         cars = Cars.getCars(this);
@@ -149,6 +203,9 @@ public class MapView extends GpsActivity {
                         return true;
                     point_data = null;
                     car_id = cars[i].id;
+                    track = null;
+                    trackTask = null;
+                    updateTrack();
                     webView.loadUrl("javascript:update()");
                     webView.loadUrl("javascript:center()");
                     return true;
@@ -339,6 +396,23 @@ public class MapView extends GpsActivity {
                 data += "|" + createData(car.id);
             }
             return data;
+        }
+
+        @JavascriptInterface
+        public String getTrack() {
+            if (track != null)
+                return track.track;
+            return "";
+        }
+
+        @JavascriptInterface
+        public String kmh() {
+            return getString(R.string.kmh);
+        }
+
+        @JavascriptInterface
+        public String traffic() {
+            return preferences.getBoolean(TRAFFIC, true) ? "1" : "";
         }
     }
 
