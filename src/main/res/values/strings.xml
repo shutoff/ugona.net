@@ -500,4 +500,5 @@
     <string name="timer_empty">Select any weekdays</string>
     <string name="timer_delete">Delete timer?</string>
     <string name="search">Search car</string>
+    <string name="temp_sensors">Temperature sensors</string>
 </resources>

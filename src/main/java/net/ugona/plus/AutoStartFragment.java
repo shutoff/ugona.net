@@ -211,7 +211,7 @@ public class AutoStartFragment extends DeviceFragment {
             v.findViewById(R.id.week).setVisibility(View.GONE);
             TextView tvTimes = (TextView) v.findViewById(R.id.times);
             tvTimes.setVisibility(View.GONE);
-            if (pos < 1) {
+            if (pos < 2) {
                 v.findViewById(R.id.week).setVisibility(View.VISIBLE);
                 Calendar calendar = Calendar.getInstance();
                 int first = calendar.getFirstDayOfWeek();

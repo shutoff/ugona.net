@@ -819,7 +819,7 @@ public class SettingActivity extends ActionBarActivity {
         }
 
         void updateVisible() {
-            visible = new boolean[7];
+            visible = new boolean[8];
             visible[0] = true;
             visible[1] = true;
             visible[2] = true;
@@ -827,7 +827,8 @@ public class SettingActivity extends ActionBarActivity {
             int commands = State.getCommands(preferences, car_id);
             visible[4] = (commands & State.CMD_AZ) != 0;
             visible[5] = (commands & State.CMD_RELE) != 0;
-            visible[6] = (preferences.getFloat(Names.Car.LAT + car_id, 0) != 0) || (preferences.getFloat(Names.Car.LNG + car_id, 0) != 0);
+            visible[6] = false; // (Preferences.getTemperaturesCount(preferences, car_id) > 1);
+            visible[7] = (preferences.getFloat(Names.Car.LAT + car_id, 0) != 0) || (preferences.getFloat(Names.Car.LNG + car_id, 0) != 0);
         }
 
         int toID(int pos) {
@@ -878,6 +879,9 @@ public class SettingActivity extends ActionBarActivity {
                     res = new HeaterFragment();
                     break;
                 case 6:
+                    res = new TemperatureFragment();
+                    break;
+                case 7:
                     res = new ZonesFragment();
                     break;
             }
@@ -910,6 +914,8 @@ public class SettingActivity extends ActionBarActivity {
                 case 5:
                     return getString(R.string.rele);
                 case 6:
+                    return getString(R.string.temp_sensors);
+                case 7:
                     return getString(R.string.zones);
             }
             return null;

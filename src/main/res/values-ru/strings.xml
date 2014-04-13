@@ -447,4 +447,5 @@
     <string name="timer_empty">Выберите дни недели</string>
     <string name="timer_delete">Удалить таймер?</string>
     <string name="search">Поиск на стоянке</string>
+    <string name="temp_sensors">Датчики температуры</string>
 </resources>

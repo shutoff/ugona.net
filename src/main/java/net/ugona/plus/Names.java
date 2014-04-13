@@ -147,6 +147,9 @@ public final class Names {
         static final String ZONE_IN = "zone_in";
 
         static final String GUARD_MODE = "guard_mode_";
+        static final String GUARD_TIME = "guard_time_";
+        static final String GUARD_NEXT = "guard_next_";
+        static final String GUARD_MSG = "guard_msg_";
 
         static final String ALARM = "alarm";
         static final String NOTIFY = "notify";

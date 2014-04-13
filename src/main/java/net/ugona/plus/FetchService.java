@@ -45,9 +45,6 @@ public class FetchService extends Service {
     static final String URL_STATUS = "https://car-online.ugona.net/?skey=$1&time=$2";
     static final String URL_EVENTS = "https://car-online.ugona.net/events?skey=$1&auth=$2&begin=$3&end=$4";
 
-    static final int TWO_MINUTES = 1000 * 60 * 2;
-    static final int MIN_ACCURACY = 300;
-
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;
     private static final long LONG_TIMEOUT = 5 * 60 * 60 * 1000;
@@ -376,6 +373,7 @@ public class FetchService extends Service {
                     PendingIntent pi = PendingIntent.getService(FetchService.this, 0, iUpdate, 0);
                     alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + SCAN_TIMEOUT, pi);
                 }
+                repeatGuardNotify();
                 sendUpdate(ACTION_NOUPDATE, car_id);
                 return;
             }
@@ -420,6 +418,8 @@ public class FetchService extends Service {
                 setState(Names.Car.ZONE_TRUNK, contact, "trunk", 1);
                 setState(Names.Car.ZONE_ACCESSORY, contact, "accessory", 7);
                 setState(Names.Car.ZONE_IGNITION, contact, "realIgnition", 4);
+
+                ed.putInt(Names.Car.GUARD_MSG + car_id, msg_id);
 
                 long valet_time = preferences.getLong(Names.Car.VALET_TIME + car_id, 0);
                 if (valet_time > 0) {
@@ -553,6 +553,9 @@ public class FetchService extends Service {
             JsonValue settings = res.get("settings");
             if (settings != null)
                 ed.remove(Names.Car.SETTINGS_TIME + car_id);
+            JsonValue guard_time = res.get("guard_time");
+            if (guard_time != null)
+                ed.putLong(Names.Car.GUARD_TIME + car_id, guard_time.asLong());
 
             ed.commit();
 
@@ -581,49 +584,9 @@ public class FetchService extends Service {
                 int guard_mode = preferences.getBoolean(Names.Car.GUARD + car_id, false) ? 0 : 1;
                 if ((guard_mode == 0) && preferences.getBoolean(Names.Car.GUARD0 + car_id, false) && preferences.getBoolean(Names.Car.GUARD1 + car_id, false))
                     guard_mode = 2;
-                if (guard_mode != prev_guard_mode) {
-                    int notify_id = 0;
-                    try {
-                        notify_id = preferences.getInt(Names.Car.GUARD_NOTIFY + car_id, 0);
-                    } catch (Exception ex) {
-                        ed.remove(Names.Car.GUARD_NOTIFY + car_id);
-                        ed.commit();
-                    }
-                    if (notify_id != 0) {
-                        Alarm.removeNotification(FetchService.this, car_id, notify_id);
-                        ed.remove(Names.Car.GUARD_NOTIFY + car_id);
-                        ed.commit();
-                    }
-                    String guard_pref = preferences.getString(Names.Car.GUARD_MODE + car_id, "");
-                    boolean notify = false;
-                    if (guard_pref.equals("")) {
-                        notify = (guard_mode == 2);
-                    } else if (guard_pref.equals("all")) {
-                        notify = true;
-                    }
-                    if (notify) {
-                        int id = R.string.ps_guard;
-                        String sound = "warning";
-                        switch (guard_mode) {
-                            case 0:
-                                id = R.string.guard_on;
-                                sound = "guard_on";
-                                break;
-                            case 1:
-                                id = R.string.guard_off;
-                                sound = "guard_off";
-                                break;
-                        }
-                        notify_id = Alarm.createNotification(FetchService.this, getString(id), R.drawable.warning, car_id, sound, 0);
-                        ed.putInt(Names.Car.GUARD_NOTIFY + car_id, notify_id);
-                        ed.commit();
-                    } else if ((guard_mode == 0) && (msg_id != 0)) {
-                        String[] msg = getString(R.string.alarm).split("\\|");
-                        notify_id = Alarm.createNotification(FetchService.this, msg[msg_id], R.drawable.warning, car_id, null, 0);
-                        ed.putInt(Names.Car.GUARD_NOTIFY + car_id, notify_id);
-                        ed.commit();
-                    }
-                }
+                if (guard_mode != prev_guard_mode)
+                    guardNotify();
+
                 boolean valet = preferences.getBoolean(Names.Car.GUARD0 + car_id, false) && !preferences.getBoolean(Names.Car.GUARD1 + car_id, false);
                 if (valet != prev_valet) {
                     SmsMonitor.processMessageFromApi(FetchService.this, car_id, valet ? R.string.valet_on : R.string.valet_off, 0);
@@ -638,6 +601,7 @@ public class FetchService extends Service {
                     }
                 }
             }
+            repeatGuardNotify();
 
             if (balance_value != null)
                 Preferences.checkBalance(FetchService.this, car_id);
@@ -757,6 +721,94 @@ public class FetchService extends Service {
                 } catch (Exception ex) {
                     // ignore
                 }
+            }
+        }
+
+        void repeatGuardNotify() {
+            int notify_id = 0;
+            try {
+                notify_id = preferences.getInt(Names.Car.GUARD_NOTIFY + car_id, 0);
+            } catch (Exception ex) {
+                ed.remove(Names.Car.GUARD_NOTIFY + car_id);
+                ed.commit();
+            }
+            if (notify_id == 0)
+                return;
+            long next = preferences.getLong(Names.Car.GUARD_NEXT + car_id, 0);
+            if (next == 0)
+                return;
+            Date now = new Date();
+            if (now.getTime() < next)
+                return;
+            guardNotify();
+        }
+
+        void guardNotify() {
+            int guard_mode = preferences.getBoolean(Names.Car.GUARD + car_id, false) ? 0 : 1;
+            if ((guard_mode == 0) && preferences.getBoolean(Names.Car.GUARD0 + car_id, false) && preferences.getBoolean(Names.Car.GUARD1 + car_id, false))
+                guard_mode = 2;
+            int notify_id = 0;
+            try {
+                notify_id = preferences.getInt(Names.Car.GUARD_NOTIFY + car_id, 0);
+            } catch (Exception ex) {
+                ed.remove(Names.Car.GUARD_NOTIFY + car_id);
+                ed.commit();
+            }
+            if (notify_id != 0) {
+                Alarm.removeNotification(FetchService.this, car_id, notify_id);
+                ed.remove(Names.Car.GUARD_NOTIFY + car_id);
+                ed.commit();
+            }
+            String guard_pref = preferences.getString(Names.Car.GUARD_MODE + car_id, "");
+            boolean notify = false;
+            if (guard_pref.equals("")) {
+                notify = (guard_mode == 2);
+            } else if (guard_pref.equals("all")) {
+                notify = true;
+            }
+            Date now = new Date();
+            long guard_time = preferences.getLong(Names.Car.GUARD_TIME + car_id, 0);
+            if (guard_time == 0)
+                guard_time = now.getTime();
+            long delta = now.getTime() - guard_time;
+            if (delta < 120000)
+                delta = 120000;
+            long next_time = now.getTime() + delta;
+            if (notify) {
+                int id = R.string.ps_guard;
+                String sound = "warning";
+                switch (guard_mode) {
+                    case 0:
+                        id = R.string.guard_on;
+                        sound = "guard_on";
+                        break;
+                    case 1:
+                        id = R.string.guard_off;
+                        sound = "guard_off";
+                        break;
+                }
+                notify_id = Alarm.createNotification(FetchService.this, getString(id), R.drawable.warning, car_id, sound, guard_time);
+                ed.putInt(Names.Car.GUARD_NOTIFY + car_id, notify_id);
+                ed.putLong(Names.Car.GUARD_NEXT + car_id, next_time);
+                ed.commit();
+            } else if (guard_mode == 0) {
+                int msg_id = preferences.getInt(Names.Car.GUARD_MSG + car_id, 0);
+                if (msg_id != 0) {
+                    String[] msg = getString(R.string.alarm).split("\\|");
+                    notify_id = Alarm.createNotification(FetchService.this, msg[msg_id], R.drawable.warning, car_id, null, guard_time);
+                    ed.putInt(Names.Car.GUARD_NOTIFY + car_id, notify_id);
+                    ed.putLong(Names.Car.GUARD_NEXT + car_id, next_time);
+                    ed.commit();
+                }
+            }
+            if (notify_id != 0) {
+                Intent iUpdate = new Intent(FetchService.this, FetchService.class);
+                iUpdate.setAction(ACTION_UPDATE);
+                iUpdate.putExtra(Names.ID, car_id);
+                Uri data = Uri.withAppendedPath(Uri.parse("http://service/guard/"), car_id);
+                iUpdate.setData(data);
+                PendingIntent pi = PendingIntent.getService(FetchService.this, 0, iUpdate, 0);
+                alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + delta, pi);
             }
         }
 

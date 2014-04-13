@@ -51,6 +51,10 @@ public class Preferences {
         return null;
     }
 
+    static int getTemperaturesCount(SharedPreferences preferences, String car_id) {
+        return preferences.getString(Names.Car.TEMPERATURE + car_id, "").split(";").length;
+    }
+
     static boolean getRele(SharedPreferences preferences, String car_id) {
         long delta = (new Date().getTime() - preferences.getLong(Names.Car.RELE_START + car_id, 0)) / 60000;
         return delta < preferences.getInt(Names.Car.RELE_TIME + car_id, 30);

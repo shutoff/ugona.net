@@ -90,26 +90,13 @@
                     android:textColor="@color/caldroid_holo_blue_light" />
             </LinearLayout>
 
-            <FrameLayout
+            <net.ugona.plus.CarView
+                android:id="@+id/car"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:minHeight="500px"
-                android:padding="15dp">
-
-                <ImageView
-                    android:id="@+id/car"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-
-                <ImageView
-                    android:id="@+id/engine"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/engine"
-                    android:visibility="gone" />
-
-            </FrameLayout>
+                android:padding="15dp" />
 
             <LinearLayout
                 android:id="@+id/pointers1"

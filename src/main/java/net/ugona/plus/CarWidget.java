@@ -351,7 +351,7 @@ public class CarWidget extends AppWidgetProvider {
             show_count++;
         }
         widgetView.setViewVisibility(R.id.balance_block, show_balance ? View.VISIBLE : View.GONE);
-        widgetView.setViewVisibility(R.id.name, preferences.getBoolean(Names.SHOW_NAME + widgetID, true) ? View.VISIBLE : View.GONE);
+        widgetView.setViewVisibility(R.id.name, preferences.getBoolean(Names.SHOW_NAME + widgetID, true) && !isLockScreen(context, widgetID) ? View.VISIBLE : View.GONE);
 
         boolean show_level = (show_count < rows);
         if (show_level) {

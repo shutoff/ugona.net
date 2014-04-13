@@ -454,7 +454,7 @@ public class PhotoFragment extends Fragment
             HttpURLConnection connection = null;
             try {
                 URL u = new URL(url);
-                connection = HttpTask.client.open(u);
+                connection = (HttpURLConnection) u.openConnection();
                 int status = connection.getResponseCode();
                 if (status != HttpStatus.SC_OK)
                     return null;

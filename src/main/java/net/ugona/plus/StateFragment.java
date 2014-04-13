@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -49,8 +47,7 @@ public class StateFragment extends Fragment
     final int AUTH_REQUEST = 1;
     String car_id;
     SharedPreferences preferences;
-    ImageView imgCar;
-    ImageView imgEngine;
+    CarView vCar;
     View vAddress;
     TextView tvTime;
     TextView tvLocation;
@@ -130,8 +127,7 @@ public class StateFragment extends Fragment
 
         View v = inflater.inflate(pointer ? R.layout.pointer : R.layout.state, container, false);
 
-        imgCar = (ImageView) v.findViewById(R.id.car);
-        imgEngine = (ImageView) v.findViewById(R.id.engine);
+        vCar = (CarView) v.findViewById(R.id.car);
 
         vAddress = v.findViewById(R.id.address);
         tvTime = (TextView) v.findViewById(R.id.addr_time);
@@ -513,6 +509,9 @@ public class StateFragment extends Fragment
         } else {
             tvTemperature.setText(temperature);
             vTemperature.setVisibility(View.VISIBLE);
+            vCar.setT1(temperature);
+            vCar.setT2(temperature);
+            vCar.setT3(temperature);
         }
         temperature = Preferences.getTemperature(preferences, car_id, 2);
         if (temperature == null) {
@@ -529,9 +528,7 @@ public class StateFragment extends Fragment
             vTemperature3.setVisibility(View.VISIBLE);
         }
 
-        Drawable d = drawable.getDrawable(context, car_id);
-        if (d != null)
-            imgCar.setImageDrawable(d);
+        vCar.setDrawable(drawable.getDrawable(context, car_id));
         String time = "";
         long last_stand = preferences.getLong(Names.Car.LAST_STAND + car_id, 0);
         if (last_stand > 0) {
@@ -661,23 +658,20 @@ public class StateFragment extends Fragment
 
         if (az) {
             if (preferences.getBoolean(Names.Car.GUARD0 + car_id, false) && preferences.getBoolean(Names.Car.GUARD1 + car_id, false)) {
-                imgEngine.setImageResource(R.drawable.engine_blue);
+                vCar.setEngine(R.drawable.engine_blue);
             } else {
-                imgEngine.setImageResource(R.drawable.engine);
+                vCar.setEngine(R.drawable.engine);
             }
-            imgEngine.setVisibility(View.VISIBLE);
+            vCar.setEngineVisible(true);
             startAnimation();
         } else {
-            imgEngine.setVisibility(View.GONE);
-            AnimationDrawable animation = (AnimationDrawable) imgEngine.getDrawable();
-            animation.stop();
+            vCar.setEngineVisible(false);
         }
 
         mValet.setVisibility(valet ? View.VISIBLE : View.GONE);
 
         setPointer(vPointer1, tvPointer1, 0);
         setPointer(vPointer2, tvPointer2, 1);
-
     }
 
 
@@ -936,12 +930,9 @@ public class StateFragment extends Fragment
     }
 
     void startAnimation() {
-        if (imgEngine == null)
+        if (vCar == null)
             return;
-        if (imgEngine.getVisibility() == View.GONE)
-            return;
-        AnimationDrawable animation = (AnimationDrawable) imgEngine.getDrawable();
-        animation.start();
+        vCar.startAnimation();
     }
 
     void openPointer(int n) {
