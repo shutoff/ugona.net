@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -35,6 +34,7 @@ public class ConfigWidget extends Activity {
     int theme;
     int row;
     boolean show_name;
+    boolean lock_widget;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -232,10 +232,9 @@ public class ConfigWidget extends Activity {
         final SeekBar sbTransparency = (SeekBar) dialog.findViewById(R.id.background);
 
         final CheckBox checkBoxName = (CheckBox) dialog.findViewById(R.id.show_name);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            int host_category = extras.getInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY, -1);
-            if (host_category == AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)
-                checkBoxName.setVisibility(View.GONE);
+        if (lock_widget) {
+            checkBoxName.setVisibility(View.GONE);
+            dialog.findViewById(R.id.rows_block).setVisibility(View.GONE);
         }
 
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {

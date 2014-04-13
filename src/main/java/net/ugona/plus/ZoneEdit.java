@@ -77,8 +77,10 @@ public class ZoneEdit extends GpsActivity {
         etName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                if (!b)
+                if (!b) {
+                    State.appendLog("hide keyboard");
                     getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+                }
             }
         });
         chkSms.setChecked(zone.sms);

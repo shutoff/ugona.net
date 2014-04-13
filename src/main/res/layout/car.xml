@@ -31,7 +31,6 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="-1000dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/caldroid_black"
         android:textStyle="bold" />
 
     <TextView

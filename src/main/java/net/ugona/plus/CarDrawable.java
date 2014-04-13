@@ -40,21 +40,22 @@ public class CarDrawable {
             R.drawable.engine1,             // 23
             R.drawable.engine1_blue,        // 24
             R.drawable.ignition,            // 25
-            R.drawable.ignition_red,        // 26
-            R.drawable.lock_white,          // 27
-            R.drawable.lock_white_widget,   // 28
-            R.drawable.lock_blue,           // 29
-            R.drawable.lock_blue_widget,    // 30
-            R.drawable.valet,               // 31
-            R.drawable.block,               // 32
-            R.drawable.heater,              // 33
-            R.drawable.heater_blue,         // 34
+            R.drawable.ignition_blue,       // 26
+            R.drawable.ignition_red,        // 27
+            R.drawable.lock_white,          // 28
+            R.drawable.lock_white_widget,   // 29
+            R.drawable.lock_blue,           // 30
+            R.drawable.lock_blue_widget,    // 31
+            R.drawable.valet,               // 32
+            R.drawable.block,               // 33
+            R.drawable.heater,              // 34
+            R.drawable.heater_blue,         // 35
     };
     static Bitmap bitmap;
     int[] parts_id;
 
     CarDrawable() {
-        parts_id = new int[7];
+        parts_id = new int[6];
 
         parts_id[0] = 0;
         parts_id[1] = 0;
@@ -62,7 +63,6 @@ public class CarDrawable {
         parts_id[3] = 0;
         parts_id[4] = 0;
         parts_id[5] = 0;
-        parts_id[6] = 0;
     }
 
     private boolean update(Context ctx, String car_id, boolean engine, boolean big) {
@@ -77,7 +77,6 @@ public class CarDrawable {
             upd |= setLayer(3, 0);
             upd |= setLayer(4, 0);
             upd |= setLayer(5, 0);
-            upd |= setLayer(6, 0);
         } else {
 
             boolean guard = preferences.getBoolean(Names.Car.GUARD + car_id, false);
@@ -118,25 +117,23 @@ public class CarDrawable {
             } else if (Preferences.getRele(preferences, car_id)) {
                 upd |= setLayer(4, white ? 34 : 33);
             } else {
-                upd |= setLayer(4, 0);
+                int ignition_id = 0;
+//                if (!az && (preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false)))
+                ignition_id = guard ? 27 : (white ? 26 : 25);
+                upd |= setLayer(4, ignition_id);
             }
-
-            int ignition_id = 0;
-            if (!az && (preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false)))
-                ignition_id = guard ? 26 : 25;
-            upd |= setLayer(5, ignition_id);
 
             int state = 0;
             if (guard) {
-                state = white ? 29 : 27;
+                state = white ? 30 : 28;
                 if (!big)
                     state++;
             }
             if (guard0 && !guard1)
-                state = 31;
-            if (!guard0 && guard1)
                 state = 32;
-            upd |= setLayer(6, state);
+            if (!guard0 && guard1)
+                state = 33;
+            upd |= setLayer(5, state);
         }
         return upd;
     }
@@ -200,7 +197,7 @@ public class CarDrawable {
         int pos = guard ? 1 : 0;
         if (alarm)
             pos = 2;
-        if (open)
+        if (open || alarm)
             pos += 3;
         return setLayer(group + 1, group * 6 + pos + 5);
     }

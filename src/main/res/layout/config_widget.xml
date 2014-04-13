@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:padding="5dp">
 
     <Spinner
@@ -31,17 +31,26 @@
         android:id="@+id/show_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/show_name"
-        android:checked="true" />
+        android:checked="true"
+        android:text="@string/show_name" />
 
-    <TextView
+    <LinearLayout
+        android:id="@+id/rows_block"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/widget_rows" />
+        android:gravity="center"
+        android:orientation="horizontal">
 
-    <Spinner
-        android:id="@+id/rows"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_rows" />
+
+        <Spinner
+            android:id="@+id/rows"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
 
 </LinearLayout>

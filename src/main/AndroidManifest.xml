@@ -154,6 +154,15 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ConfigLockWidget"
+            android:label="@string/widget_config"
+            android:theme="@style/Theme.Transparent">
+            <intent-filter android:priority="999">
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <receiver android:name=".SmsMonitor">
             <intent-filter android:priority="7000">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
@@ -181,6 +190,22 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_metadata" />
+        </receiver>
+
+        <receiver android:name=".CarLockWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="net.ugona.plus.UPDATE_FORCE" />
+                <action android:name="net.ugona.plus.UPDATE" />
+                <action android:name="net.ugona.plus.NO_UPDATE" />
+                <action android:name="net.ugona.plus.ERROR" />
+                <action android:name="net.ugona.plus.START" />
+                <action android:name="net.ugona.plus.WIDGET_SCREEN_ON" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/lockwidget_metadata" />
         </receiver>
 
         <receiver

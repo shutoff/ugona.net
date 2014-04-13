@@ -754,14 +754,16 @@ public class Actions {
     }
 
     static void valet_on(final Context context, final String car_id, final boolean longTap) {
-        requestCCode(context, car_id, R.string.valet_on, R.string.valet_on_msg, new Actions.Answer() {
 
-            @Override
-            void answer(final String ccode) {
-                selectRoute(context, car_id,
-                        new Runnable() {
+        final Ccode c_code = new Ccode();
+        selectRoute(context, car_id,
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        requestCCode(context, car_id, R.string.valet_on, R.string.valet_on_msg, new Actions.Answer() {
                             @Override
-                            public void run() {
+                            void answer(final String ccode) {
+                                c_code.code = ccode;
                                 new InetRequest(context, car_id, ccode, 1793, R.string.valet_on) {
                                     @Override
                                     void error() {
@@ -774,15 +776,25 @@ public class Actions {
                                     }
                                 };
                             }
-                        }, new Runnable() {
+                        });
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        requestCCode(context, car_id, R.string.valet_on, R.string.valet_on_msg_sms, new Actions.Answer() {
                             @Override
-                            public void run() {
+                            void answer(String ccode) {
                                 valet_on_sms(context, car_id, ccode);
                             }
-                        }, null, longTap
-                );
-            }
-        });
+                        });
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        valet_on_sms(context, car_id, c_code.code);
+                    }
+                }, longTap
+        );
     }
 
     static void valet_on_sms(final Context context, final String car_id, final String ccode) {
@@ -824,14 +836,16 @@ public class Actions {
     }
 
     static void valet_off(final Context context, final String car_id, final boolean longTap) {
-        requestCCode(context, car_id, R.string.valet_on, R.string.valet_off_msg, new Actions.Answer() {
+        final Ccode c_code = new Ccode();
+        selectRoute(context, car_id,
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        requestCCode(context, car_id, R.string.valet_on, R.string.valet_off_msg, new Actions.Answer() {
 
-            @Override
-            void answer(final String ccode) {
-                selectRoute(context, car_id,
-                        new Runnable() {
                             @Override
-                            public void run() {
+                            void answer(final String ccode) {
+                                c_code.code = ccode;
                                 new InetRequest(context, car_id, ccode, 1794, R.string.valet_off) {
                                     @Override
                                     void error() {
@@ -844,15 +858,28 @@ public class Actions {
                                     }
                                 };
                             }
-                        }, new Runnable() {
+                        });
+
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        requestCCode(context, car_id, R.string.valet_on, R.string.valet_off_msg_sms, new Actions.Answer() {
                             @Override
-                            public void run() {
+                            void answer(String ccode) {
                                 valet_off_sms(context, car_id, ccode);
                             }
-                        }, null, longTap
-                );
-            }
-        });
+                        });
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        valet_off_sms(context, car_id, c_code.code);
+                    }
+                }, longTap
+        );
+
+
     }
 
     static void valet_off_sms(final Context context, final String car_id, final String ccode) {
@@ -1310,6 +1337,10 @@ public class Actions {
             return true;
         }
         return false;
+    }
+
+    static class Ccode {
+        String code;
     }
 
     static abstract class Answer {

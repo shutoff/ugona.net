@@ -100,7 +100,6 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="10dp"
                 android:singleLine="true"
-                android:text="@string/ugona_net"
                 android:textSize="9sp"
                 android:textStyle="bold" />
 

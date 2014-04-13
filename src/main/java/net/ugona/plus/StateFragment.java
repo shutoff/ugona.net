@@ -509,9 +509,6 @@ public class StateFragment extends Fragment
         } else {
             tvTemperature.setText(temperature);
             vTemperature.setVisibility(View.VISIBLE);
-            vCar.setT1(temperature);
-            vCar.setT2(temperature);
-            vCar.setT3(temperature);
         }
         temperature = Preferences.getTemperature(preferences, car_id, 2);
         if (temperature == null) {

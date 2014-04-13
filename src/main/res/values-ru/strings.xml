@@ -189,6 +189,8 @@
     <string name="guard2_off">Выключен режим охраны 2</string>
     <string name="valet_on_msg">Для включения режима АВТОСЕРВИС требуется ввод C-кода</string>
     <string name="valet_off_msg">Для отключения режима АВТОСЕРВИС требуется ввод C-кода</string>
+    <string name="valet_on_msg_sms">Отправка СМС для включения режима АВТОСЕРВИС требует ввода C-кода</string>
+    <string name="valet_off_msg_sms">Отправка СМС для отключения режима АВТОСЕРВИС требует ввода C-кода</string>
     <string name="bad_ccode">Неверный С-код</string>
     <string name="pswd">Пароль:</string>
     <string name="block_msg">Для отмены блокировки включите и выключите режим АВТОСЕРВИС</string>
@@ -340,7 +342,7 @@
     </string-array>
     <string name="guard_notify">Уведомления об охране</string>
     <string name="pointer_voltage">Низкий уровень заряда батарейки в маяке</string>
-    <string name="widget_rows">Количество значений:</string>
+    <string name="widget_rows">К-во значений:</string>
     <string name="auto">автоматически</string>
     <string name="send_sms">Отправить СМС</string>
     <string name="send_sms_message">Сеть передачи данных недоступна.\nОтправить команду с помощью СМС?</string>

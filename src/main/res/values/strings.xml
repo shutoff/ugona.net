@@ -196,6 +196,8 @@
     <string name="guard2_off">Guard mode 2 off</string>
     <string name="valet_on_msg">Turn on VALET require enter C-Code</string>
     <string name="valet_off_msg">Turn off VALET require enter C-Code</string>
+    <string name="valet_on_msg_sms">Send SMS for turn on VALET require enter C-Code</string>
+    <string name="valet_off_msg_sms">Send SMS for turn off VALET require enter C-Code</string>
     <string name="bad_ccode">Invalid C-Code</string>
     <string name="pswd">Password:</string>
     <string name="motor_start_error">Engine start failed</string>

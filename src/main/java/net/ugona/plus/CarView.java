@@ -20,9 +20,6 @@ public class CarView extends FrameLayout {
     TextView vT3;
     View view;
 
-    int w;
-    int h;
-
     public CarView(Context context) {
         super(context);
         init(context);
@@ -49,17 +46,11 @@ public class CarView extends FrameLayout {
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        h = MeasureSpec.getSize(heightMeasureSpec);
-        w = MeasureSpec.getSize(widthMeasureSpec);
-        setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
-    }
-
-    @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         int x = 0;
         int y = 0;
+        int w = vCar.getMeasuredWidth();
+        int h = vCar.getMeasuredHeight();
         int ws = w;
         int hs = w * 386 / 256;
         if (hs > h) {
@@ -69,8 +60,6 @@ public class CarView extends FrameLayout {
         } else {
             y = (h - hs) / 2;
         }
-        int width = vCar.getMeasuredWidth();
-        int height = vCar.getMeasuredHeight();
         RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) vT1.getLayoutParams();
         int w1 = vT1.getMeasuredWidth();
         int x1 = x + ws * 54 / 256 - w1;
@@ -82,13 +71,13 @@ public class CarView extends FrameLayout {
         lp = (RelativeLayout.LayoutParams) vT2.getLayoutParams();
         int w2 = vT2.getMeasuredWidth();
         int h2 = vT2.getMeasuredHeight();
-        lp.leftMargin = x + ws * 118 / 256 - w2 / 2;
-        lp.topMargin = y + hs * 265 / 386 - h2 / 2;
+        lp.leftMargin = x + ws * 120 / 256 - w2 / 2;
+        lp.topMargin = y + hs * 152 / 386 - h2 / 2;
 
         lp = (RelativeLayout.LayoutParams) vT3.getLayoutParams();
         int w3 = vT3.getMeasuredWidth();
         int h3 = vT3.getMeasuredHeight();
-        lp.leftMargin = x + ws * 163 / 256 - w3 / 2;
+        lp.leftMargin = x + ws * 153 / 256 - w3 / 2;
         lp.topMargin = y + hs * 39 / 386 - h3 / 2;
         if (lp.topMargin < 10)
             lp.topMargin = 10;
