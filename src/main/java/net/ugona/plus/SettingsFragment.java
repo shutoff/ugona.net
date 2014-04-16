@@ -140,6 +140,7 @@ public class SettingsFragment extends Fragment {
             v.findViewById(R.id.block1).setVisibility(View.VISIBLE);
             v.findViewById(R.id.block2).setVisibility(View.VISIBLE);
             v.findViewById(R.id.block_add).setVisibility(View.GONE);
+            v.findViewById(R.id.block_temp).setVisibility(View.GONE);
             TextView tvTitle = (TextView) v.findViewById(R.id.title);
             tvTitle.setVisibility(View.VISIBLE);
             tvTitle.setText(name);
@@ -468,4 +469,23 @@ public class SettingsFragment extends Fragment {
         }
     }
 
+    class SeekBarPrefItem extends SeekItem {
+        String key;
+
+        SeekBarPrefItem(int name, String id_key, int min, int max, String unit, double k) {
+            super(name, min, max, unit, k);
+            key = id_key;
+            setValue(preferences.getInt(key + car_id, 0) + "");
+        }
+
+        @Override
+        void click() {
+            SharedPreferences.Editor ed = preferences.edit();
+            ed.putInt(key + car_id, Integer.parseInt(getValue()));
+            ed.commit();
+            Intent intent = new Intent(FetchService.ACTION_UPDATE_FORCE);
+            intent.putExtra(Names.ID, car_id);
+            getActivity().sendBroadcast(intent);
+        }
+    }
 }

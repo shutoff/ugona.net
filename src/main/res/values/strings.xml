@@ -503,4 +503,12 @@
     <string name="timer_delete">Delete timer?</string>
     <string name="search">Search car</string>
     <string name="temp_sensors">Temperature sensors</string>
+    <string name="sensor">Sensor</string>
+    <string-array name="temp_where">
+        <item>Show in table</item>
+        <item>Atmosphere temperature</item>
+        <item>Salon temperature</item>
+        <item>Engine temperature</item>
+        <item>No show</item>
+    </string-array>
 </resources>

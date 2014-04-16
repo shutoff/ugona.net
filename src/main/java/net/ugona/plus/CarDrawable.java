@@ -118,8 +118,8 @@ public class CarDrawable {
                 upd |= setLayer(4, white ? 34 : 33);
             } else {
                 int ignition_id = 0;
-//                if (!az && (preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false)))
-                ignition_id = guard ? 27 : (white ? 26 : 25);
+                if (!az && (preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false)))
+                    ignition_id = guard ? 27 : (white ? 26 : 25);
                 upd |= setLayer(4, ignition_id);
             }
 

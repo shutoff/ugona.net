@@ -827,7 +827,7 @@ public class SettingActivity extends ActionBarActivity {
             int commands = State.getCommands(preferences, car_id);
             visible[4] = (commands & State.CMD_AZ) != 0;
             visible[5] = (commands & State.CMD_RELE) != 0;
-            visible[6] = false; // (Preferences.getTemperaturesCount(preferences, car_id) > 1);
+            visible[6] = (Preferences.getTemperaturesCount(preferences, car_id) > 1);
             visible[7] = (preferences.getFloat(Names.Car.LAT + car_id, 0) != 0) || (preferences.getFloat(Names.Car.LNG + car_id, 0) != 0);
         }
 

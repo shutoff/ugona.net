@@ -135,6 +135,8 @@ public final class Names {
 
         static final String TEMPERATURE = "temperature_";
         static final String TEMP_SIFT = "TempShift";
+        static final String TEMP_SETTINGS = "TempSettings";
+
         static final String VOLTAGE_SHIFT = "VoltageShift";
 
         static final String TIMEOUT = "timeout";

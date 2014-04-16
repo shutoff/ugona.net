@@ -23,7 +23,8 @@ public class DeviceSettingsFragment extends DeviceFragment {
         items.add(new SeekBarListItem(R.string.shock_sens, 14, R.array.levels));
         items.add(new CheckBitItem(R.string.tilt_low, 2, 1));
         items.add(new SeekBarItem(R.string.tilt_level, 1, 15, 45, R.string.unit));
-        items.add(new SeekBarPrefItem(R.string.temp_correct, Names.Car.TEMP_SIFT, -10, 10, "\u00B0C", 1));
+        if (Preferences.getTemperaturesCount(preferences, car_id) == 1)
+            items.add(new SeekBarPrefItem(R.string.temp_correct, Names.Car.TEMP_SIFT, -10, 10, "\u00B0C", 1));
         items.add(new SeekBarPrefItem(R.string.voltage_shift, Names.Car.VOLTAGE_SHIFT, -20, 20, "V", 0.05));
         items.add(new Item(R.string.version, preferences.getString(Names.Car.VERSION + car_id, "")));
 

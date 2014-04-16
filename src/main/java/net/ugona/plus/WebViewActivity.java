@@ -71,6 +71,5 @@ abstract public class WebViewActivity extends ActionBarActivity {
     }
 
     void log(String text) {
-        State.appendLog(text);
     }
 }

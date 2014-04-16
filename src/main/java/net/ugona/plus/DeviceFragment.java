@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -97,26 +96,6 @@ public class DeviceFragment extends SettingsFragment {
         SettingActivity activity = (SettingActivity) getActivity();
         if ((activity != null) && (activity.values != null) && (activity.values[index] != v))
             activity.values[index] = v;
-    }
-
-    class SeekBarPrefItem extends SeekItem {
-        String key;
-
-        SeekBarPrefItem(int name, String id_key, int min, int max, String unit, double k) {
-            super(name, min, max, unit, k);
-            key = id_key;
-            setValue(preferences.getInt(key + car_id, 0) + "");
-        }
-
-        @Override
-        void click() {
-            SharedPreferences.Editor ed = preferences.edit();
-            ed.putInt(key + car_id, Integer.parseInt(getValue()));
-            ed.commit();
-            Intent intent = new Intent(FetchService.ACTION_UPDATE_FORCE);
-            intent.putExtra(Names.ID, car_id);
-            getActivity().sendBroadcast(intent);
-        }
     }
 
     class CheckBitItem extends CheckItem {

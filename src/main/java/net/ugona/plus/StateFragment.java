@@ -524,6 +524,9 @@ public class StateFragment extends Fragment
             tvTemperature3.setText(temperature);
             vTemperature3.setVisibility(View.VISIBLE);
         }
+        vCar.setT1(Preferences.getTemperature(preferences, car_id, -1));
+        vCar.setT2(Preferences.getTemperature(preferences, car_id, -2));
+        vCar.setT3(Preferences.getTemperature(preferences, car_id, -3));
 
         vCar.setDrawable(drawable.getDrawable(context, car_id));
         String time = "";

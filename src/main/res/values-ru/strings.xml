@@ -450,4 +450,12 @@
     <string name="timer_delete">Удалить таймер?</string>
     <string name="search">Поиск на стоянке</string>
     <string name="temp_sensors">Датчики температуры</string>
+    <string name="sensor">Датчик</string>
+    <string-array name="temp_where">
+        <item>Показывать в таблице</item>
+        <item>Температура внешнего воздуха</item>
+        <item>Температура в салоне</item>
+        <item>Температура двигателя</item>
+        <item>Не показывать</item>
+    </string-array>
 </resources>

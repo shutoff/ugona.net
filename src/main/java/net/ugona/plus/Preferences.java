@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Preferences {
 
@@ -38,15 +40,66 @@ public class Preferences {
     }
 
     static String getTemperature(SharedPreferences preferences, String car_id, int sensor) {
-        String[] data = preferences.getString(Names.Car.TEMPERATURE + car_id, "").split(";");
-        if (sensor > data.length)
+        String temp = preferences.getString(Names.Car.TEMPERATURE + car_id, "");
+        if (temp.equals(""))
             return null;
-        try {
-            String[] d = data[sensor - 1].split(":");
-            int v = Integer.parseInt(d[1]) + preferences.getInt(Names.Car.TEMP_SIFT + car_id, 0);
-            return v + " \u00B0C";
-        } catch (Exception ex) {
-            // ignore
+
+        Map<Integer, TempConfig> config = new HashMap<Integer, TempConfig>();
+        String[] temp_config = preferences.getString(Names.Car.TEMP_SETTINGS + car_id, "").split(",");
+        for (String s : temp_config) {
+            String[] data = s.split(":");
+            if (data.length != 3)
+                continue;
+            try {
+                int id = Integer.parseInt(data[0]);
+                TempConfig c = new TempConfig();
+                c.shift = Integer.parseInt(data[1]);
+                c.where = Integer.parseInt(data[2]);
+                config.put(id, c);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        String[] data = temp.split(";");
+        if (sensor < 0) {
+            sensor = -sensor;
+            for (String s : data) {
+                try {
+                    String[] d = s.split(":");
+                    int id = Integer.parseInt(d[0]);
+                    TempConfig c = config.get(id);
+                    if (c == null)
+                        continue;
+                    if (c.where != sensor)
+                        continue;
+                    int v = Integer.parseInt(d[1]) + c.shift;
+                    return v + " \u00B0C";
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            return null;
+        }
+        for (String s : data) {
+            try {
+                String[] d = s.split(":");
+                int id = Integer.parseInt(d[0]);
+                TempConfig c = config.get(id);
+                if ((c != null) && (c.where > 0))
+                    continue;
+                int v = Integer.parseInt(d[1]);
+                if (--sensor > 0)
+                    continue;
+                if (id == 1) {
+                    v += preferences.getInt(Names.Car.TEMP_SIFT + car_id, 0);
+                } else if (c != null) {
+                    v += c.shift;
+                }
+                return v + " \u00B0C";
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
         return null;
     }
@@ -107,6 +160,11 @@ public class Preferences {
         if (preferences.getString(Names.Car.VERSION + car_id, "").toLowerCase().contains("superagent"))
             return false;
         return preferences.getBoolean(Names.Car.DEVICE_PSWD + car_id, false);
+    }
+
+    static class TempConfig {
+        int shift;
+        int where;
     }
 
 }
