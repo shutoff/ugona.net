@@ -20,6 +20,7 @@ public class DeviceSettingsFragment extends DeviceFragment {
             items.add(new DeviceFragment.ListItem(R.string.alarm_shock, 22, R.array.shock_entries));
         items.add(new SeekBarItem(R.string.guard_time, 4, 15, 60, R.string.sec));
         items.add(new SeekBarItem(R.string.robbery_time, 5, 1, 30, R.string.sec, 20));
+        items.add(new SeekBarItem(R.string.door_time, 10, 10, 30, R.string.sec));
         items.add(new SeekBarListItem(R.string.shock_sens, 14, R.array.levels));
         items.add(new CheckBitItem(R.string.tilt_low, 2, 1));
         items.add(new SeekBarItem(R.string.tilt_level, 1, 15, 45, R.string.unit));

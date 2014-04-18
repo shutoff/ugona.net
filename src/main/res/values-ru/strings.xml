@@ -458,4 +458,5 @@
         <item>Температура двигателя</item>
         <item>Не показывать</item>
     </string-array>
+    <string name="door_time">Задержка тревоги по зонам двери/багажник</string>
 </resources>

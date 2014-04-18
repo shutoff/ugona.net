@@ -100,7 +100,7 @@ public class ActionFragment extends Fragment
                 void action(Context context, String car_id, boolean longTap) {
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                     Intent intent = new Intent(Intent.ACTION_CALL);
-                    intent.setData(Uri.parse("tel:" + preferences.getString(Names.Car.CAR_PHONE + car_id, "") + ";;3"));
+                    intent.setData(Uri.parse("tel:" + preferences.getString(Names.Car.CAR_PHONE + car_id, "")));
                     context.startActivity(intent);
                 }
             },

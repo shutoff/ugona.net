@@ -43,7 +43,6 @@ var colors =
 ];
 
 function initialize() {
-    console.log('init');
 
     var data = android.getData();
     var cars = (data+"").split('|');
@@ -198,7 +197,7 @@ function initialize() {
 function showTrack() {
     if (tracks != null){
         for (var i in tracks){
-            tracks[i].setMap(null);
+            map.removeLayer(tracks);
         }
         tracks = null;
     }
@@ -514,6 +513,7 @@ function center() {
     var pos = markers[0].getLatLng();
     map.setView([ pos.lat, pos.lng ], map.getZoom(), { animate: true });
 }
+
 
 
 

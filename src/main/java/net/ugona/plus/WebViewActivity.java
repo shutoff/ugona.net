@@ -2,6 +2,7 @@ package net.ugona.plus;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
@@ -71,5 +72,6 @@ abstract public class WebViewActivity extends ActionBarActivity {
     }
 
     void log(String text) {
+        Log.v("webview", text);
     }
 }

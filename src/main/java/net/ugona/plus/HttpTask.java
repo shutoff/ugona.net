@@ -117,10 +117,15 @@ public abstract class HttpTask {
                 error();
             }
         };
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            bgTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
-        } else {
-            bgTask.execute(params);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                bgTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
+            } else {
+                bgTask.execute(params);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            error();
         }
     }
 

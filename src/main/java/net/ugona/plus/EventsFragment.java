@@ -157,7 +157,7 @@ public class EventsFragment extends Fragment
             new EventType(128, R.string.input5_on, R.drawable.input5_on, 2),
             new EventType(129, R.string.input5_off, R.drawable.input5_off, 2),
             new EventType(130, R.string.voice, R.drawable.voice),
-            new EventType(131, R.string.download_events, R.drawable.settings),
+            new EventType(131, R.string.download_events, R.drawable.settings, 1),
             new EventType(132, R.string.can_on, R.drawable.can, 1),
             new EventType(133, R.string.can_off, R.drawable.can, 1),
             new EventType(134, R.string.input6_on, R.drawable.input6_on, 2),

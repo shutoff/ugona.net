@@ -511,4 +511,5 @@
         <item>Engine temperature</item>
         <item>No show</item>
     </string-array>
+    <string name="door_time">Delay alarm for door and trunk zone</string>
 </resources>

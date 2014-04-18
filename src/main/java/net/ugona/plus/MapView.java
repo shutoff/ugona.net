@@ -24,6 +24,7 @@ import com.eclipsesource.json.ParseException;
 import org.joda.time.LocalDateTime;
 
 import java.text.DateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -400,9 +401,12 @@ public class MapView extends GpsActivity {
 
         @JavascriptInterface
         public String getTrack() {
-            if (track != null)
-                return track.track;
-            return "";
+            if (track == null)
+                return "";
+            String res = track.track;
+            Date now = new Date();
+            res += "|" + preferences.getFloat(Names.Car.LAT + car_id, 0) + "," + preferences.getFloat(Names.Car.LNG + car_id, 0) + "," + preferences.getFloat(Names.Car.SPEED + car_id, 0) + "," + now.getTime();
+            return res;
         }
 
         @JavascriptInterface
