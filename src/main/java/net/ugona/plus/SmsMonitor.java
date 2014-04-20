@@ -23,6 +23,7 @@ public class SmsMonitor extends BroadcastReceiver {
     static final String SMS_SENT = "net.ugona.plus.SMS_SENT";
     static final String SMS_ANSWER = "net.ugona.plus.SMS_ANSWER";
     static final String SMS_SEND = "net.ugona.plus.SMS_SEND";
+    static final String SMS_ACTION = "net.ugona.plus.ACTION";
     private static final String ACTION = "android.provider.Telephony.SMS_RECEIVED";
     static Map<String, SmsQueues> processed;
     static String[] notifications = {
@@ -213,6 +214,20 @@ public class SmsMonitor extends BroadcastReceiver {
         String action = intent.getAction();
         if (action == null)
             return;
+        if (action.equals(SMS_ACTION)) {
+            String car_id = intent.getStringExtra(Names.ID);
+            action = intent.getStringExtra("ACTION");
+            if (action.equals("refresh")) {
+                Intent i = new Intent(context, FetchService.class);
+                i.putExtra(Names.ID, car_id);
+                context.startService(i);
+            }
+            if (action.equals("motor_on"))
+                Actions.motor_on_sms(context, car_id, true);
+            if (action.equals("motor_off"))
+                Actions.motor_off_sms(context, car_id, true);
+            return;
+        }
         if (action.equals(SMS_SENT)) {
             int result_code = getResultCode();
             String car_id = intent.getStringExtra(Names.ID);

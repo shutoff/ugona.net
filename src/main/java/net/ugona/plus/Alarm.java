@@ -296,58 +296,59 @@ public class Alarm extends Activity {
             }
         }
 
-        String alarm = intent.getStringExtra(Names.Car.ALARM + car_id);
-        if (alarm != null) {
-            show_main = !alarm.equals(getString(R.string.alarm_test));
-            String[] cars = preferences.getString(Names.CARS, "").split(",");
-            if (cars.length > 1) {
-                String name = preferences.getString(Names.Car.CAR_NAME + car_id, "");
-                if (name.length() == 0) {
-                    name = getString(R.string.car);
-                    if (car_id.length() > 0)
-                        name += " " + car_id;
-                }
-                alarm = name + "\n" + alarm;
-            }
-            tvAlarm.setText(alarm);
-            String sound = Preferences.getAlarm(preferences, car_id);
-            Uri uri = Uri.parse(sound);
-            if (sound.equals(""))
-                uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-            Ringtone ringtone = RingtoneManager.getRingtone(getBaseContext(), uri);
-            if (ringtone == null) {
-                uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-                ringtone = RingtoneManager.getRingtone(getBaseContext(), uri);
-            }
-            if (timer != null)
-                timer.cancel();
-            TimerTask timerTask = new TimerTask() {
-                @Override
-                public void run() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            cancelAlarm();
-                        }
-                    });
-                }
-            };
-            timer = new Timer();
-            timer.schedule(timerTask, 3 * 60 * 1000);
+        String alarm = intent.getStringExtra(Names.Car.ALARM);
+        if (alarm == null) {
+            finish();
+            return;
 
-            try {
-                if (player == null) {
-                    volumeTask = new VolumeTask(this);
-                    player = new MediaPlayer();
-                    player.setDataSource(this, uri);
-                    player.setAudioStreamType(AudioManager.STREAM_RING);
-                    player.setLooping(true);
-                    player.prepare();
-                    player.start();
-                }
-            } catch (Exception err) {
-                // ignore
+        }
+        show_main = !alarm.equals(getString(R.string.alarm_test));
+        String[] cars = preferences.getString(Names.CARS, "").split(",");
+        if (cars.length > 1) {
+            String name = preferences.getString(Names.Car.CAR_NAME + car_id, "");
+            if (name.length() == 0) {
+                name = getString(R.string.car);
+                if (car_id.length() > 0)
+                    name += " " + car_id;
             }
+            alarm = name + "\n" + alarm;
+        }
+        tvAlarm.setText(alarm);
+        String sound = Preferences.getAlarm(preferences, car_id);
+        Uri uri = Uri.parse(sound);
+        if (sound.equals(""))
+            uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+        Ringtone ringtone = RingtoneManager.getRingtone(getBaseContext(), uri);
+        if (ringtone == null)
+            uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+        if (timer != null)
+            timer.cancel();
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        cancelAlarm();
+                    }
+                });
+            }
+        };
+        timer = new Timer();
+        timer.schedule(timerTask, 3 * 60 * 1000);
+
+        try {
+            if (player == null) {
+                volumeTask = new VolumeTask(this);
+                player = new MediaPlayer();
+                player.setDataSource(this, uri);
+                player.setAudioStreamType(AudioManager.STREAM_RING);
+                player.setLooping(true);
+                player.prepare();
+                player.start();
+            }
+        } catch (Exception err) {
+            // ignore
         }
     }
 

@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.ugona.plus"
     android:versionCode="5"
-    android:versionName="1.4 RC10">
+    android:versionName="1.4 RC11">
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -167,6 +167,7 @@
             <intent-filter android:priority="7000">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
                 <action android:name="net.ugona.plus.SMS_SENT" />
+                <action android:name="net.ugona.plus.ACTION" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
