@@ -539,11 +539,6 @@ public class FetchService extends Service {
             JsonValue azStop = res.get("az_stop");
             if (azStop != null)
                 ed.putLong(Names.Car.AZ_STOP + car_id, azStop.asLong());
-            if (preferences.getBoolean(Names.Car.AZ + car_id, false)) {
-                long az_start = preferences.getLong(Names.Car.AZ_START + car_id, 0);
-                if (time.asLong() - az_start > 130000)
-                    ed.putBoolean(Names.Car.AZ + car_id, false);
-            }
             JsonValue timer = res.get("timer");
             if (timer != null) {
                 int timerValue = timer.asInt();
