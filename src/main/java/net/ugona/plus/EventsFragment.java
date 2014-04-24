@@ -544,6 +544,8 @@ public class EventsFragment extends Fragment
 
         @Override
         void result(JsonObject data) throws ParseException {
+            if (getActivity() == null)
+                return;
             done();
             if (!current.equals(date))
                 return;
