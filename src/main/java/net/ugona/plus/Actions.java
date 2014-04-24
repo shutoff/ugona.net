@@ -781,6 +781,10 @@ public class Actions {
                 }, new Runnable() {
                     @Override
                     public void run() {
+                        if (c_code.code != null) {
+                            valet_on_sms(context, car_id, c_code.code);
+                            return;
+                        }
                         requestCCode(context, car_id, R.string.valet_on, R.string.valet_on_msg_sms, new Actions.Answer() {
                             @Override
                             void answer(String ccode) {
@@ -788,12 +792,7 @@ public class Actions {
                             }
                         });
                     }
-                }, new Runnable() {
-                    @Override
-                    public void run() {
-                        valet_on_sms(context, car_id, c_code.code);
-                    }
-                }, longTap
+                }, null, longTap
         );
     }
 
@@ -841,7 +840,7 @@ public class Actions {
                 new Runnable() {
                     @Override
                     public void run() {
-                        requestCCode(context, car_id, R.string.valet_on, R.string.valet_off_msg, new Actions.Answer() {
+                        requestCCode(context, car_id, R.string.valet_off, R.string.valet_off_msg, new Actions.Answer() {
 
                             @Override
                             void answer(final String ccode) {
@@ -864,19 +863,18 @@ public class Actions {
                 }, new Runnable() {
                     @Override
                     public void run() {
-                        requestCCode(context, car_id, R.string.valet_on, R.string.valet_off_msg_sms, new Actions.Answer() {
+                        if (c_code.code != null) {
+                            valet_off_sms(context, car_id, c_code.code);
+                            return;
+                        }
+                        requestCCode(context, car_id, R.string.valet_off, R.string.valet_off_msg_sms, new Actions.Answer() {
                             @Override
                             void answer(String ccode) {
                                 valet_off_sms(context, car_id, ccode);
                             }
                         });
                     }
-                }, new Runnable() {
-                    @Override
-                    public void run() {
-                        valet_off_sms(context, car_id, c_code.code);
-                    }
-                }, longTap
+                }, null, longTap
         );
 
 

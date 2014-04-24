@@ -384,6 +384,8 @@ public class TracksFragment extends Fragment
 
         @Override
         void result(JsonObject res) throws ParseException {
+            if (getActivity() == null)
+                return;
             done();
             if (date != current)
                 return;
@@ -456,6 +458,8 @@ public class TracksFragment extends Fragment
 
         @Override
         void result(String address) {
+            if (getActivity() == null)
+                return;
             if (address == null) {
                 showError();
                 return;
