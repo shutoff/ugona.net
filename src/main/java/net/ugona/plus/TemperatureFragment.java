@@ -118,7 +118,8 @@ public class TemperatureFragment extends SettingsFragment {
                     return v;
                 }
             });
-            spinner.setSelection(where);
+            if (where < values.length)
+                spinner.setSelection(where);
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

@@ -505,10 +505,7 @@
     <string name="temp_sensors">Temperature sensors</string>
     <string name="sensor">Sensor</string>
     <string-array name="temp_where">
-        <item>Show in table</item>
-        <item>Atmosphere temperature</item>
-        <item>Salon temperature</item>
-        <item>Engine temperature</item>
+        <item>Show</item>
         <item>No show</item>
     </string-array>
     <string name="door_time">Delay alarm for door and trunk zone</string>

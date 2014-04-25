@@ -452,10 +452,7 @@
     <string name="temp_sensors">Датчики температуры</string>
     <string name="sensor">Датчик</string>
     <string-array name="temp_where">
-        <item>Показывать в таблице</item>
-        <item>Температура внешнего воздуха</item>
-        <item>Температура в салоне</item>
-        <item>Температура двигателя</item>
+        <item>Показывать</item>
         <item>Не показывать</item>
     </string-array>
     <string name="door_time">Задержка тревоги по зонам двери/багажник</string>

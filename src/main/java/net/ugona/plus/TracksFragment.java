@@ -421,6 +421,8 @@ public class TracksFragment extends Fragment
 
         @Override
         void error() {
+            if (getActivity() == null)
+                return;
             if (!no_reload)
                 showError();
             done();

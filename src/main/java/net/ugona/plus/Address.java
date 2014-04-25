@@ -47,12 +47,14 @@ public abstract class Address {
                 double distance = calc_distance(lat, lng, db_lat, db_lon);
                 if (distance < 80) {
                     String address = cursor.getString(2);
+                    cursor.close();
                     return address;
                 }
                 if (!cursor.moveToNext())
                     break;
             }
         }
+        cursor.close();
         return null;
     }
 
@@ -171,19 +173,19 @@ public abstract class Address {
             super(context, DB_NAME, null, 2);
         }
 
-        final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " ("
-                + "ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-                + "Lat REAL NOT NULL, "
-                + "Lng REAL NOT NULL, "
-                + "Address TEXT NOT NULL, "
-                + "Param TEXT NOT NULL)";
-
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(CREATE_TABLE);
             db.execSQL("CREATE INDEX \"index_lng\" on address (Lng ASC)");
             db.execSQL("CREATE INDEX \"index_lat\" on address (Lat ASC)");
         }
+
+        final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " ("
+                + "ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+                + "Lat REAL NOT NULL, "
+                + "Lng REAL NOT NULL, "
+                + "Address TEXT NOT NULL, "
+                + "Param TEXT NOT NULL)";
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

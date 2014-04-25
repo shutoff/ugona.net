@@ -593,6 +593,8 @@ public class EventsFragment extends Fragment
 
         @Override
         void error() {
+            if (getActivity() == null)
+                return;
             if (!no_reload)
                 showError();
             done();
@@ -697,6 +699,8 @@ public class EventsFragment extends Fragment
 
         @Override
         void error() {
+            if (getActivity() == null)
+                return;
             setAddress(getString(R.string.error_load), null, null);
         }
 

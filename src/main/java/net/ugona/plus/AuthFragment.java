@@ -153,7 +153,7 @@ public class AuthFragment extends SettingsFragment {
             items.add(photo_item);
 
             String version = preferences.getString(Names.Car.VERSION + car_id, "").toLowerCase();
-            if (!version.equals("") && version.contains("superagent"))
+            if (!version.equals("") && !version.contains("superagent"))
                 items.add(new CheckBoxItem(R.string.device_pswd, Names.Car.DEVICE_PSWD, false));
         }
         update();
