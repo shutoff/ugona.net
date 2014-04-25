@@ -1271,7 +1271,8 @@ public class Actions {
     static void selectRoute(final Context context, final String car_id, final Runnable asNetwork, final Runnable asSms, final Runnable asSmsFirst, final boolean longTap) {
         if (State.hasTelephony(context)) {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-            boolean route_sms = preferences.getString(Names.Car.CONTROL + car_id, "").equals("");
+            String ctrl = preferences.getString(Names.Car.CONTROL + car_id, "");
+            boolean route_sms = ctrl.equals("");
             if (longTap)
                 route_sms = !route_sms;
             if (route_sms) {

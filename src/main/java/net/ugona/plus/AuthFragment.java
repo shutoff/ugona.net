@@ -110,7 +110,7 @@ public class AuthFragment extends SettingsFragment {
                         });
                     }
                 });
-                items.add(new ListItem(R.string.control_method, R.array.ctrl_entries, R.array.ctrl_values, Names.Car.CONTROL + car_id, ""));
+                items.add(new ListItem(R.string.control_method, R.array.ctrl_entries, R.array.ctrl_values, Names.Car.CONTROL, ""));
                 items.add(new Item(R.string.alarm_mode, R.string.sms_mode_summary) {
                     @Override
                     void click() {
