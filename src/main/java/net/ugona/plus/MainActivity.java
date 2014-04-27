@@ -730,8 +730,8 @@ public class MainActivity extends ActionBarActivity {
         long gcm_time = preferences.getLong(Names.GCM_TIME, 0);
         if (preferences.getInt(Names.GCM_VERSION, 0) != VERSION)
             reg_id = "";
-        if (!reg_id.equals("") && (gcm_time > new Date().getTime() - 86400 * 1000))
-            return;
+//        if (!reg_id.equals("") && (gcm_time > new Date().getTime() - 86400 * 1000))
+//            return;
         new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... params) {

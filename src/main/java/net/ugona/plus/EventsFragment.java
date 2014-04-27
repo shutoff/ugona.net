@@ -240,7 +240,7 @@ public class EventsFragment extends Fragment
                     if (!found)
                         info += getString(R.string.event) + " #" + e.type;
                     info += "</b><br/>";
-                    Intent i = new Intent(getActivity(), MapView.class);
+                    Intent i = new Intent(getActivity(), MapWebView.class);
                     String[] point = e.point.split(";");
                     if (point.length < 2)
                         return;

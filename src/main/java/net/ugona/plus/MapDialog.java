@@ -31,7 +31,7 @@ public class MapDialog extends Activity {
         builder.setPositiveButton(R.string.map, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Intent i = new Intent(MapDialog.this, MapView.class);
+                Intent i = new Intent(MapDialog.this, MapWebView.class);
                 i.putExtra(Names.ID, car_id);
                 startActivity(i);
             }
