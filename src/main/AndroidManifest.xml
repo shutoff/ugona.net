@@ -94,7 +94,7 @@
             android:label="@string/phones" />
 
         <activity
-            android:name=".MapView"
+            android:name=".MapPointActivity"
             android:uiOptions="splitActionBarWhenNarrow">
             <meta-data
                 android:name="android.support.UI_OPTIONS"

@@ -1,49 +1,83 @@
 package net.ugona.plus;
 
-import android.os.Bundle;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
-import org.osmdroid.api.IMapController;
-import org.osmdroid.util.GeoPoint;
+import org.osmdroid.ResourceProxy;
+import org.osmdroid.api.IGeoPoint;
+import org.osmdroid.tileprovider.MapTile;
+import org.osmdroid.tileprovider.MapTileProviderBase;
+import org.osmdroid.tileprovider.tilesource.ITileSource;
+import org.osmdroid.tileprovider.tilesource.XYTileSource;
+import org.osmdroid.util.ResourceProxyImpl;
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
-import java.text.DateFormat;
-import java.util.HashMap;
-import java.util.Map;
+public class MapView extends org.osmdroid.views.MapView {
 
-public class MapView extends MapActivity {
+    SharedPreferences preferences;
 
-    String car_id;
-    String point_data;
-    Map<String, String> times;
-    DateFormat df;
-    DateFormat tf;
+    MyLocationNewOverlay mLocationOverlay;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        car_id = getIntent().getStringExtra(Names.ID);
-        point_data = getIntent().getStringExtra(Names.POINT_DATA);
-        times = new HashMap<String, String>();
-        if (savedInstanceState != null) {
-            String car_data = savedInstanceState.getString(Names.CARS);
-            if (car_data != null) {
-                String[] data = car_data.split("\\|");
-                for (String d : data) {
-                    String[] p = d.split(";");
-                    times.put(p[0], p[1]);
-                }
-            }
-        }
+    public MapView(Context context, final MapTileProviderBase tileProvider) {
+        super(context, 256, new ResourceProxyImpl(context.getApplicationContext()), tileProvider);
 
-        df = android.text.format.DateFormat.getDateFormat(this);
-        tf = android.text.format.DateFormat.getTimeFormat(this);
-        super.onCreate(savedInstanceState);
+        preferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+        setUseSafeCanvas(true);
+
+        mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(context), this, getResourceProxy());
+        getOverlays().add(mLocationOverlay);
+
+        setBackgroundColor(getResources().getColor(R.color.caldroid_gray));
     }
 
-    @Override
-    void initMap(IMapController controller) {
-        double lat = preferences.getFloat(Names.Car.LAT + car_id, 0);
-        double lng = preferences.getFloat(Names.Car.LNG + car_id, 0);
-        controller.setZoom(16);
-        controller.setCenter(new GeoPoint(lat, lng));
+    static ITileSource createTileSource(SharedPreferences preferences) {
+        if (preferences.getString("map_type", "").equals("OSM")) {
+            final String[] tiles_urls = {
+                    "http://otile1.mqcdn.com/tiles/1.0.0/osm/"
+            };
+            return new XYTileSource("mqcdn", ResourceProxy.string.mapnik, 1, 18, 256, ".png", tiles_urls);
+        }
+        final String[] tiles_urls = {
+                "http://mt0.google.com/vt/lyrs=m&hl=ru&x=%s&y=%s&z=%s&s=Galileo",
+                "http://mt1.google.com/vt/lyrs=m&hl=ru&x=%s&y=%s&z=%s&s=Galileo",
+                "http://mt2.google.com/vt/lyrs=m&hl=ru&x=%s&y=%s&z=%s&s=Galileo",
+                "http://mt3.google.com/vt/lyrs=m&hl=ru&x=%s&y=%s&z=%s&s=Galileo"
+        };
+        return new myTileSource("google", ResourceProxy.string.mapnik, 1, 18, 256, ".png", tiles_urls);
+    }
+
+    void onResume() {
+        mLocationOverlay.enableMyLocation();
+        setBuiltInZoomControls(true);
+        setMultiTouchControls(true);
+    }
+
+    void onPause() {
+        mLocationOverlay.disableMyLocation();
+        setBuiltInZoomControls(false);
+        setMultiTouchControls(false);
+    }
+
+    IGeoPoint getMyLocation() {
+        if (mLocationOverlay == null)
+            return null;
+        return mLocationOverlay.getMyLocation();
+    }
+
+    static public class myTileSource extends XYTileSource {
+
+        public myTileSource(String aName, ResourceProxy.string aResourceId, int aZoomMinLevel, int aZoomMaxLevel, int aTileSizePixels, String aImageFilenameEnding, String[] aBaseUrl) {
+            super(aName, aResourceId, aZoomMinLevel, aZoomMaxLevel, aTileSizePixels, aImageFilenameEnding, aBaseUrl);
+        }
+
+        @Override
+        public String getTileURLString(MapTile aTile) {
+            return String.format(getBaseUrl(), aTile.getX(), aTile.getY(), aTile.getZoomLevel());
+        }
+
     }
 
 }

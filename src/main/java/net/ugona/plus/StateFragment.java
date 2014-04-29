@@ -793,7 +793,7 @@ public class StateFragment extends Fragment
             toast.show();
             return;
         }
-        Intent intent = new Intent(getActivity(), MapView.class);
+        Intent intent = new Intent(getActivity(), MapPointActivity.class);
         intent.putExtra(Names.ID, car_id);
         startActivity(intent);
     }

@@ -91,7 +91,6 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
      */
     private final Scroller mScroller;
     private final MapController mController;
-    private final ZoomButtonsController mZoomController;
     private final ResourceProxy mResourceProxy;
     private final Matrix mRotateMatrix = new Matrix();
     private final float[] mRotatePoints = new float[2];
@@ -109,6 +108,7 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
     protected MapListener mListener;
     protected BoundingBoxE6 mScrollableAreaBoundingBox;
     protected Rect mScrollableAreaLimit;
+    private ZoomButtonsController mZoomController;
     /**
      * Current zoom level for map tiles.
      */
@@ -147,13 +147,6 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
 
         this.mMapOverlay = new TilesOverlay(mTileProvider, mResourceProxy);
         mOverlayManager = new OverlayManager(mMapOverlay);
-
-        if (isInEditMode()) {
-            mZoomController = null;
-        } else {
-            mZoomController = new ZoomButtonsController(this);
-            mZoomController.setOnZoomListener(new MapViewZoomListener());
-        }
 
         mGestureDetector = new GestureDetector(context, new MapViewGestureDetectorListener());
         mGestureDetector.setOnDoubleTapListener(new MapViewDoubleClickListener());
@@ -1061,8 +1054,8 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
 
     @Override
     protected void onDetachedFromWindow() {
-        this.mZoomController.setVisible(false);
-        this.onDetach();
+        mZoomController.setVisible(false);
+        mZoomController = null;
         super.onDetachedFromWindow();
     }
 
@@ -1160,13 +1153,23 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
     // ===========================================================
 
     private void checkZoomButtons() {
-        this.mZoomController.setZoomInEnabled(canZoomIn());
-        this.mZoomController.setZoomOutEnabled(canZoomOut());
+        if (mZoomController != null) {
+            mZoomController.setZoomInEnabled(canZoomIn());
+            mZoomController.setZoomOutEnabled(canZoomOut());
+        }
     }
 
     public void setBuiltInZoomControls(final boolean on) {
-        this.mEnableZoomController = on;
-        this.checkZoomButtons();
+        if (on) {
+            if (isInEditMode()) {
+                mZoomController = null;
+            } else {
+                mZoomController = new ZoomButtonsController(this);
+                mZoomController.setOnZoomListener(new MapViewZoomListener());
+            }
+            this.mEnableZoomController = on;
+            this.checkZoomButtons();
+        }
     }
 
     public void setMultiTouchControls(final boolean on) {
