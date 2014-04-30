@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.overlay.ItemizedIconOverlay;
@@ -19,6 +20,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
 
 public class MapPointActivity extends MapActivity {
 
@@ -28,6 +30,7 @@ public class MapPointActivity extends MapActivity {
     DateFormat df;
     DateFormat tf;
     Cars.Car[] cars;
+    LocationOverlay mMyLocationOverlay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,36 +71,52 @@ public class MapPointActivity extends MapActivity {
         controller.setZoom(16);
         controller.setCenter(new GeoPoint(lat, lng));
         final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
-        int selected = 0;
         if (cars == null)
             cars = Cars.getCars(this);
-        for (Cars.Car car : cars) {
-            lat = preferences.getFloat(Names.Car.LAT + car.id, 0);
-            lng = preferences.getFloat(Names.Car.LNG + car.id, 0);
-            if ((lat == 0) || (lng == 0))
-                continue;
-            items.add(new OverlayItem(car.name, car.name, new GeoPoint(lat, lng)));
-            if (car.id.equals(car_id))
-                selected = items.size() - 1;
-        }
-        ItemizedOverlayWithFocus<OverlayItem> mMyLocationOverlay = new ItemizedOverlayWithFocus<OverlayItem>(items,
-                new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
-                    @Override
-                    public boolean onItemSingleTapUp(final int index, final OverlayItem item) {
-                        return true;
-                    }
 
-                    @Override
-                    public boolean onItemLongPress(final int index, final OverlayItem item) {
-                        return false;
-                    }
-                }, mMapView.getResourceProxy()
-        );
+        mMyLocationOverlay = new LocationOverlay();
 
         mMyLocationOverlay.setFocusItemsOnTap(true);
-        mMyLocationOverlay.setFocusedItem(selected);
+        mMyLocationOverlay.setFocusedItem(mMyLocationOverlay.find(car_id));
 
         mMapView.getOverlays().add(mMyLocationOverlay);
+    }
+
+    boolean updateItem(MyOverlayItem item) {
+        double lat = preferences.getFloat(Names.Car.LAT + item.getUid(), 0);
+        double lng = preferences.getFloat(Names.Car.LNG + item.getUid(), 0);
+        if ((lat == 0) || (lng == 0))
+            return false;
+        String data = Math.round(lat * 10000) / 10000. + "," + Math.round(lng * 10000) / 10000.;
+        String address = Address.getAddress(getBaseContext(), lat, lng);
+        if (address != null) {
+            String[] parts = address.split(", ");
+            if (parts.length >= 3) {
+                address = parts[0] + ", " + parts[1];
+                for (int n = 2; n < parts.length; n++)
+                    address += "\n" + parts[n];
+            }
+            data += "\n" + address;
+        } else {
+            Address addr = new Address() {
+                @Override
+                void result(String address) {
+                    update();
+                }
+            };
+            addr.get(this, lat, lng);
+        }
+        for (Cars.Car car : cars) {
+            if (!car.id.equals(item.getUid()))
+                continue;
+            item.set((cars.length > 1) ? car.name : "", data, new GeoPoint(lat, lng));
+            return true;
+        }
+        return false;
+    }
+
+    void update() {
+        mMyLocationOverlay.update();
     }
 
     void setActionBar() {
@@ -138,6 +157,63 @@ public class MapPointActivity extends MapActivity {
             actionBar.setDisplayShowHomeEnabled(true);
             actionBar.setDisplayUseLogoEnabled(false);
             setTitle(getString(R.string.app_name));
+        }
+    }
+
+    class MyOverlayItem extends OverlayItem {
+
+        public MyOverlayItem(String aUid) {
+            super(aUid, null, null, null);
+        }
+
+        void set(String title, String snippet, GeoPoint point) {
+            mTitle = title;
+            mSnippet = snippet;
+            mGeoPoint = point;
+        }
+
+    }
+
+    class LocationOverlay extends ItemizedOverlayWithFocus<MyOverlayItem> {
+
+        public LocationOverlay() {
+            super(new Vector<MyOverlayItem>(),
+                    mMapView.getResourceProxy().getDrawable(ResourceProxy.bitmap.marker_default), null,
+                    getResources().getColor(R.color.caldroid_white),
+                    new ItemizedIconOverlay.OnItemGestureListener<MyOverlayItem>() {
+                        @Override
+                        public boolean onItemSingleTapUp(final int index, final MyOverlayItem item) {
+                            return true;
+                        }
+
+                        @Override
+                        public boolean onItemLongPress(final int index, final MyOverlayItem item) {
+                            return false;
+                        }
+                    }, mMapView.getResourceProxy()
+            );
+            for (Cars.Car car : cars) {
+                MyOverlayItem item = new MyOverlayItem(car.id);
+                if (updateItem(item))
+                    mItemList.add(item);
+            }
+            populate();
+        }
+
+        void update() {
+            for (MyOverlayItem item : mItemList) {
+                if (!updateItem(item))
+                    mItemList.remove(item);
+            }
+            populate();
+        }
+
+        int find(String id) {
+            for (int i = 0; i < mItemList.size(); i++) {
+                if (getItem(i).getUid().equals(id))
+                    return i;
+            }
+            return -1;
         }
     }
 

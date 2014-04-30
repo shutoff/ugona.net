@@ -28,9 +28,9 @@ public class OverlayItem {
     // ===========================================================
     // Fields
     // ===========================================================
-    protected final String mTitle;
-    protected final String mSnippet;
-    protected final GeoPoint mGeoPoint;
+    protected String mTitle;
+    protected String mSnippet;
+    protected GeoPoint mGeoPoint;
     protected Drawable mMarker;
     protected HotspotPlace mHotspotPlace;
 
