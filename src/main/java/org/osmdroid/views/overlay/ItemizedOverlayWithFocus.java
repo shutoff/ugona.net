@@ -23,19 +23,8 @@ public class ItemizedOverlayWithFocus<Item extends OverlayItem> extends Itemized
     // Constants
     // ===========================================================
 
-    public static final int DESCRIPTION_BOX_PADDING = 3;
-    public static final int DESCRIPTION_BOX_CORNERWIDTH = 3;
-
-    public static final int DESCRIPTION_LINE_HEIGHT = 12;
-    /**
-     * Additional to <code>DESCRIPTION_LINE_HEIGHT</code>.
-     */
-    public static final int DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT = 2;
-
     // protected static final Point DEFAULTMARKER_FOCUSED_HOTSPOT = new Point(10, 19);
-    protected static final int DEFAULTMARKER_BACKGROUNDCOLOR = Color.rgb(101, 185, 74);
-
-    protected static final int DESCRIPTION_MAXWIDTH = 200;
+    protected static final int DEFAULTMARKER_BACKGROUNDCOLOR = Color.rgb(255, 255, 200);
 
     // ===========================================================
     // Fields
@@ -46,8 +35,13 @@ public class ItemizedOverlayWithFocus<Item extends OverlayItem> extends Itemized
     private final Point mFocusedScreenCoords = new Point();
     private final String UNKNOWN;
     private final Rect mRect = new Rect();
+    public int DESCRIPTION_BOX_PADDING;
+    public int DESCRIPTION_BOX_CORNERWIDTH;
+    public int DESCRIPTION_LINE_HEIGHT;
+    public int DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT;
     protected Drawable mMarkerFocusedBase;
     protected int mFocusedItemIndex;
+    protected int DESCRIPTION_MAXWIDTH;
 
     // ===========================================================
     // Constructors
@@ -56,12 +50,12 @@ public class ItemizedOverlayWithFocus<Item extends OverlayItem> extends Itemized
 
     public ItemizedOverlayWithFocus(final Context ctx, final List<Item> aList,
                                     final OnItemGestureListener<Item> aOnItemTapListener) {
-        this(aList, aOnItemTapListener, new DefaultResourceProxyImpl(ctx));
+        this(ctx, aList, aOnItemTapListener, new DefaultResourceProxyImpl(ctx));
     }
 
-    public ItemizedOverlayWithFocus(final List<Item> aList,
+    public ItemizedOverlayWithFocus(final Context context, final List<Item> aList,
                                     final OnItemGestureListener<Item> aOnItemTapListener, final ResourceProxy pResourceProxy) {
-        this(aList, pResourceProxy.getDrawable(ResourceProxy.bitmap.marker_default), null, NOT_SET,
+        this(context, aList, pResourceProxy.getDrawable(ResourceProxy.bitmap.marker_default), null, NOT_SET,
                 aOnItemTapListener, pResourceProxy);
     }
 
@@ -69,11 +63,18 @@ public class ItemizedOverlayWithFocus<Item extends OverlayItem> extends Itemized
     // Getter & Setter
     // ===========================================================
 
-    public ItemizedOverlayWithFocus(final List<Item> aList, final Drawable pMarker,
+    public ItemizedOverlayWithFocus(final Context context, final List<Item> aList, final Drawable pMarker,
                                     final Drawable pMarkerFocused, final int pFocusedBackgroundColor,
                                     final OnItemGestureListener<Item> aOnItemTapListener, final ResourceProxy pResourceProxy) {
 
         super(aList, pMarker, aOnItemTapListener, pResourceProxy);
+
+        float density = context.getResources().getDisplayMetrics().density;
+        DESCRIPTION_BOX_PADDING = (int) (3 * density);
+        DESCRIPTION_BOX_CORNERWIDTH = (int) (3 * density);
+        DESCRIPTION_LINE_HEIGHT = (int) (12 * density);
+        DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT = (int) (2 * density);
+        DESCRIPTION_MAXWIDTH = context.getResources().getDisplayMetrics().widthPixels * 3 / 4;
 
         UNKNOWN = mResourceProxy.getString(ResourceProxy.string.unknown);
 
@@ -91,9 +92,11 @@ public class ItemizedOverlayWithFocus<Item extends OverlayItem> extends Itemized
 
         this.mDescriptionPaint = new Paint();
         this.mDescriptionPaint.setAntiAlias(true);
+        this.mDescriptionPaint.setTextSize(18);
         this.mTitlePaint = new Paint();
         this.mTitlePaint.setFakeBoldText(true);
         this.mTitlePaint.setAntiAlias(true);
+        this.mTitlePaint.setTextSize(24);
         this.unSetFocusedItem();
     }
 
@@ -104,6 +107,10 @@ public class ItemizedOverlayWithFocus<Item extends OverlayItem> extends Itemized
         return this.mItemList.get(this.mFocusedItemIndex);
     }
 
+    public void setFocusedItem(final int pIndex) {
+        this.mFocusedItemIndex = pIndex;
+    }
+
     public void setFocusedItem(final Item pItem) {
         final int indexFound = super.mItemList.indexOf(pItem);
         if (indexFound < 0) {
@@ -111,10 +118,6 @@ public class ItemizedOverlayWithFocus<Item extends OverlayItem> extends Itemized
         }
 
         this.setFocusedItem(indexFound);
-    }
-
-    public void setFocusedItem(final int pIndex) {
-        this.mFocusedItemIndex = pIndex;
     }
 
     public void unSetFocusedItem() {
@@ -188,7 +191,7 @@ public class ItemizedOverlayWithFocus<Item extends OverlayItem> extends Itemized
 		 * bigger than DESCRIPTION_MAXWIDTH.
 		 */
         for (i = 0; i < widths.length; i++) {
-            if (!Character.isLetter(itemDescription.charAt(i))) {
+            if (Character.isWhitespace(itemDescription.charAt(i))) {
                 lastwhitespace = i;
             }
 
@@ -258,8 +261,8 @@ public class ItemizedOverlayWithFocus<Item extends OverlayItem> extends Itemized
 		/* Draw the title. */
         c.drawText(itemTitle, descLeft, descTextLineBottom - DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT,
                 this.mTitlePaint);
-        c.drawLine(descBoxLeft, descTextLineBottom, descBoxRight, descTextLineBottom,
-                mDescriptionPaint);
+        // c.drawLine(descBoxLeft, descTextLineBottom, descBoxRight, descTextLineBottom,
+        //        mDescriptionPaint);
 
 		/*
 		 * Finally draw the marker base. This is done in the end to make it look better.

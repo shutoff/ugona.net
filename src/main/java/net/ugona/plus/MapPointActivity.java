@@ -80,7 +80,7 @@ public class MapPointActivity extends MapActivity {
             if (car.id.equals(car_id))
                 selected = items.size() - 1;
         }
-        ItemizedOverlayWithFocus<OverlayItem> mMyLocationOverlay = new ItemizedOverlayWithFocus<OverlayItem>(items,
+        ItemizedOverlayWithFocus<OverlayItem> mMyLocationOverlay = new ItemizedOverlayWithFocus<OverlayItem>(this, items,
                 new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
                     @Override
                     public boolean onItemSingleTapUp(final int index, final OverlayItem item) {
@@ -122,6 +122,7 @@ public class MapPointActivity extends MapActivity {
                 public boolean onNavigationItemSelected(int i, long l) {
                     if (cars[i].id.equals(car_id))
                         return true;
+                    car_id = cars[i].id;
                     return true;
                 }
             });
