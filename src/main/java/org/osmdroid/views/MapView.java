@@ -1350,9 +1350,9 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
 
         private final int viewWidth_2 = getWidth() / 2;
         private final int viewHeight_2 = getHeight() / 2;
-        private final int offsetX = -off_worldSize_2;
-        private final int off_worldSize_2 = TileSystem.MapSize(mZoomLevel) / 2;
-        private final int offsetY = -off_worldSize_2;
+        private final int WORLD_SIZE_2 = TileSystem.MapSize(mZoomLevel) / 2;
+        private final int offsetX = -WORLD_SIZE_2;
+        private final int offsetY = -WORLD_SIZE_2;
         private final BoundingBoxE6 mBoundingBoxProjection;
         private final int mZoomLevelProjection;
         private final Rect mScreenRectProjection;
@@ -1430,8 +1430,8 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
          */
         public IGeoPoint fromPixels(final float x, final float y) {
             final Rect screenRect = getIntrinsicScreenRect();
-            return TileSystem.PixelXYToLatLong(screenRect.left + (int) x + off_worldSize_2,
-                    screenRect.top + (int) y + off_worldSize_2, mZoomLevelProjection, null);
+            return TileSystem.PixelXYToLatLong(screenRect.left + (int) x + WORLD_SIZE_2,
+                    screenRect.top + (int) y + WORLD_SIZE_2, mZoomLevelProjection, null);
         }
 
         public Point fromMapPixels(final int x, final int y, final Point reuse) {
