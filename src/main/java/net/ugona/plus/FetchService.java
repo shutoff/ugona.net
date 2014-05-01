@@ -776,10 +776,12 @@ public class FetchService extends Service {
                     case 0:
                         id = R.string.guard_on;
                         sound = "guard_on";
+                        next_time = 0;
                         break;
                     case 1:
                         id = R.string.guard_off;
                         sound = "guard_off";
+                        next_time = 0;
                         break;
                 }
                 notify_id = Alarm.createNotification(FetchService.this, getString(id), R.drawable.warning, car_id, sound, guard_time);
@@ -796,7 +798,7 @@ public class FetchService extends Service {
                     ed.commit();
                 }
             }
-            if (notify_id != 0) {
+            if ((notify_id != 0) && (next_time != 0)) {
                 Intent iUpdate = new Intent(FetchService.this, FetchService.class);
                 iUpdate.setAction(ACTION_UPDATE);
                 iUpdate.putExtra(Names.ID, car_id);
