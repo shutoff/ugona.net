@@ -209,7 +209,9 @@ public class MapPointActivity extends MapActivity {
                 JsonArray list = res.get("tracks").asArray();
                 if (list.size() > 0) {
                     JsonObject v = list.get(list.size() - 1).asObject();
-                    mTrackOverlay.set(v.get("track").asString());
+                    mTrackOverlay.clear();
+                    mTrackOverlay.add(v.get("track").asString());
+                    mMapView.invalidate();
                 }
                 trackTask = null;
             }

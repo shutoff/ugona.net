@@ -1,6 +1,8 @@
 package net.ugona.plus;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.ViewConfiguration;
 
 import org.osmdroid.api.IMapController;
@@ -60,7 +62,9 @@ public class TrackActivity extends MapActivity {
         }
 
         mTrackOverlay = new TrackOverlay(this);
-        mTrackOverlay.set(tracks.get(0).track);
+        for (Track track : tracks) {
+            mTrackOverlay.add(track.track);
+        }
 
         mMapView.getController().setZoom(mMapView.getMaxZoomLevel());
         mMapView.fitToRect(new GeoPoint(mTrackOverlay.min_lat, mTrackOverlay.min_lon), new GeoPoint(mTrackOverlay.max_lat, mTrackOverlay.max_lon), 750);
@@ -73,4 +77,18 @@ public class TrackActivity extends MapActivity {
         return R.menu.track;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.traffic:
+                mTrackOverlay.show_speed = !mTrackOverlay.show_speed;
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putBoolean(TRAFFIC, !preferences.getBoolean(TRAFFIC, mTrackOverlay.show_speed));
+                ed.commit();
+                updateMenu();
+                mMapView.invalidate();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

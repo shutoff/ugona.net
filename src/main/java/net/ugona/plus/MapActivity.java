@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
@@ -35,21 +34,19 @@ import org.osmdroid.tileprovider.modules.NetworkAvailabliltyCheck;
 import org.osmdroid.tileprovider.modules.TileWriter;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.util.SimpleRegisterReceiver;
-import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.overlay.Overlay;
 
 import java.util.ArrayList;
+import java.util.Vector;
 
 public abstract class MapActivity extends ActionBarActivity {
 
+    static final String TRAFFIC = "traffic";
     SharedPreferences preferences;
-
     FrameLayout holder;
     MapView mMapView;
-
     Menu topSubMenu;
-
     LocationManager locationManager;
 
     @Override
@@ -70,6 +67,9 @@ public abstract class MapActivity extends ActionBarActivity {
         boolean isOSM = preferences.getString("map_type", "").equals("OSM");
         menu.findItem(R.id.google).setTitle(getCheckedText(R.string.google, !isOSM));
         menu.findItem(R.id.osm).setTitle(getCheckedText(R.string.osm, isOSM));
+        MenuItem item = menu.findItem(R.id.traffic);
+        if (item != null)
+            item.setTitle(getCheckedText(R.string.traffic, preferences.getBoolean(TRAFFIC, true)));
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -205,6 +205,28 @@ public abstract class MapActivity extends ActionBarActivity {
 
     class TrackOverlay extends Overlay {
 
+        final int[] colors = {
+                Color.rgb(0, 0, 128),
+                Color.rgb(128, 0, 0),
+                Color.rgb(192, 0, 0),
+                Color.rgb(192, 64, 0),
+                Color.rgb(192, 128, 0),
+                Color.rgb(160, 128, 0),
+                Color.rgb(64, 128, 0),
+                Color.rgb(0, 160, 0),
+                Color.rgb(0, 160, 32),
+                Color.rgb(0, 160, 128),
+        };
+        final int[] speeds = {
+                5,
+                10,
+                20,
+                30,
+                40,
+                50,
+                60,
+                90,
+        };
         private final Path mPath = new Path();
         private final Point mTempPoint1 = new Point();
         private final Point mTempPoint2 = new Point();
@@ -213,10 +235,12 @@ public abstract class MapActivity extends ActionBarActivity {
         double max_lat;
         double min_lon;
         double max_lon;
-        private ArrayList<TrackPoint> mPoints;
+        Vector<ArrayList<TrackPoint>> tracks;
+        boolean show_speed;
 
         public TrackOverlay(Context ctx) {
             super(ctx);
+            show_speed = preferences.getBoolean(TRAFFIC, true);
         }
 
         @Override
@@ -229,75 +253,99 @@ public abstract class MapActivity extends ActionBarActivity {
             if (shadow)
                 return;
 
-            if (mPoints == null)
+            if (tracks == null)
                 return;
 
-            final int size = mPoints.size();
-            if (size < 2) {
-                // nothing to paint
-                return;
-            }
+            for (ArrayList<TrackPoint> track : tracks) {
 
-            final org.osmdroid.views.MapView.Projection pj = mapView.getProjection();
-
-            Point screenPoint0 = null; // points on screen
-            Point screenPoint1;
-            GeoPoint projectedPoint0; // points from the points list
-            GeoPoint projectedPoint1;
-
-            mPath.rewind();
-            projectedPoint0 = mPoints.get(size - 1).point;
-
-            for (int i = size - 2; i >= 0; i--) {
-                // compute next points
-                projectedPoint1 = mPoints.get(i).point;
-
-                // the starting point may be not calculated, because previous segment was out of clip
-                // bounds
-                if (screenPoint0 == null) {
-                    screenPoint0 = pj.toPixels(projectedPoint0, mTempPoint1);
-                    mPath.moveTo(screenPoint0.x, screenPoint0.y);
-                }
-
-                screenPoint1 = pj.toPixels(projectedPoint1, mTempPoint2);
-
-                // skip this point, too close to previous point
-                if (Math.abs(screenPoint1.x - screenPoint0.x) + Math.abs(screenPoint1.y - screenPoint0.y) <= 1) {
+                final int size = track.size();
+                if (size < 2)
                     continue;
+
+                final org.osmdroid.views.MapView.Projection pj = mapView.getProjection();
+
+                Point screenPoint0 = null; // points on screen
+                Point screenPoint1;
+                GeoPoint projectedPoint0; // points from the points list
+                GeoPoint projectedPoint1;
+
+                mPaint.setStrokeWidth(4);
+                mPaint.setStyle(Paint.Style.STROKE);
+                mPaint.setAntiAlias(true);
+
+                mPath.rewind();
+                TrackPoint p = track.get(size - 1);
+                projectedPoint0 = p.point;
+                int color = getColor(p.speed);
+
+                for (int i = size - 2; i >= 0; i--) {
+                    // compute next points
+                    projectedPoint1 = track.get(i).point;
+
+                    // the starting point may be not calculated, because previous segment was out of clip
+                    // bounds
+                    if (screenPoint0 == null) {
+                        screenPoint0 = pj.toPixels(projectedPoint0, mTempPoint1);
+                        mPath.moveTo(screenPoint0.x, screenPoint0.y);
+                    }
+
+                    screenPoint1 = pj.toPixels(projectedPoint1, mTempPoint2);
+
+                    // skip this point, too close to previous point
+                    if (Math.abs(screenPoint1.x - screenPoint0.x) + Math.abs(screenPoint1.y - screenPoint0.y) <= 1) {
+                        continue;
+                    }
+
+                    mPath.lineTo(screenPoint1.x, screenPoint1.y);
+                    int new_color = getColor(track.get(i).speed);
+                    if (new_color != color) {
+                        mPaint.setColor(colors[color]);
+                        canvas.drawPath(mPath, mPaint);
+                        mPath.rewind();
+                        mPath.moveTo(screenPoint1.x, screenPoint1.y);
+                        color = new_color;
+                    }
+
+                    // update starting point to next position
+                    projectedPoint0 = projectedPoint1;
+                    screenPoint0.x = screenPoint1.x;
+                    screenPoint0.y = screenPoint1.y;
                 }
 
-                mPath.lineTo(screenPoint1.x, screenPoint1.y);
-
-                // update starting point to next position
-                projectedPoint0 = projectedPoint1;
-                screenPoint0.x = screenPoint1.x;
-                screenPoint0.y = screenPoint1.y;
+                mPaint.setColor(colors[color]);
+                canvas.drawPath(mPath, mPaint);
             }
+        }
 
-            mPaint.setColor(Color.rgb(0, 0, 128));
-            mPaint.setStrokeWidth(4);
-            mPaint.setStyle(Paint.Style.STROKE);
-            mPaint.setPathEffect(new CornerPathEffect(10));
-            mPaint.setAntiAlias(true);
-            canvas.drawPath(mPath, mPaint);
-
-            BoundingBoxE6 box = mMapView.getBoundingBox();
+        int getColor(int speed) {
+            if (!show_speed)
+                return 0;
+            int res = 1;
+            for (int s : speeds) {
+                if (speed < s)
+                    break;
+                res++;
+            }
+            return res;
         }
 
         void clear() {
-            if (mPoints == null)
+            if (tracks == null)
                 return;
-            mPoints = null;
+            tracks = null;
             mMapView.invalidate();
         }
 
-        void set(String track) {
-            mPoints = new ArrayList<TrackPoint>();
+        void add(String track) {
+            if (tracks == null) {
+                tracks = new Vector<ArrayList<TrackPoint>>();
+                min_lat = 180;
+                min_lon = 180;
+                max_lat = -180;
+                max_lon = -180;
+            }
+            ArrayList<TrackPoint> trackPoints = new ArrayList<TrackPoint>();
             String[] points = track.split("\\|");
-            min_lat = 180;
-            min_lon = 180;
-            max_lat = -180;
-            max_lon = -180;
             for (String p : points) {
                 String[] parts = p.split(",");
                 if (parts.length != 4)
@@ -317,13 +365,12 @@ public abstract class MapActivity extends ActionBarActivity {
                     point.point = new GeoPoint(lat, lon);
                     point.speed = Integer.parseInt(parts[2]);
                     point.time = Long.parseLong(parts[3]);
-                    mPoints.add(point);
+                    trackPoints.add(point);
                 } catch (Exception ex) {
                     // ignore
                 }
             }
-
-            mMapView.invalidate();
+            tracks.add(trackPoints);
         }
     }
 }
