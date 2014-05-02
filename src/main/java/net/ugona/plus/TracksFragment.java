@@ -54,7 +54,7 @@ public class TracksFragment extends Fragment
     String api_key;
     LocalDate current;
     String car_id;
-    Vector<TrackView.Track> tracks;
+    Vector<Track> tracks;
     boolean loaded;
     int progress;
     long selected;
@@ -84,7 +84,7 @@ public class TracksFragment extends Fragment
                 try {
                     ByteArrayInputStream bis = new ByteArrayInputStream(track_data);
                     ObjectInput in = new ObjectInputStream(bis);
-                    tracks = (Vector<TrackView.Track>) in.readObject();
+                    tracks = (Vector<Track>) in.readObject();
                     in.close();
                     bis.close();
                     loaded = true;
@@ -252,9 +252,9 @@ public class TracksFragment extends Fragment
     }
 
     void showTrack(int index) {
-        Intent intent = new Intent(getActivity(), TrackView.class);
-        TrackView.Track track = tracks.get(index);
-        Vector<TrackView.Track> track1 = new Vector<TrackView.Track>();
+        Intent intent = new Intent(getActivity(), TrackActivity.class);
+        Track track = tracks.get(index);
+        Vector<Track> track1 = new Vector<Track>();
         track1.add(track);
         if (!setTrack(track1, intent))
             return;
@@ -267,7 +267,7 @@ public class TracksFragment extends Fragment
     void showDay() {
         if (tracks.size() == 0)
             return;
-        Intent intent = new Intent(getActivity(), TrackView.class);
+        Intent intent = new Intent(getActivity(), TrackActivity.class);
         if (!setTrack(tracks, intent))
             return;
         DateFormat df = android.text.format.DateFormat.getMediumDateFormat(getActivity());
@@ -275,7 +275,7 @@ public class TracksFragment extends Fragment
         startActivity(intent);
     }
 
-    boolean setTrack(Vector<TrackView.Track> tracks, Intent intent) {
+    boolean setTrack(Vector<Track> tracks, Intent intent) {
         byte[] data = null;
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -322,7 +322,7 @@ public class TracksFragment extends Fragment
         long start = current.toDateTime(new LocalTime(0, 0)).toDate().getTime();
         LocalDate next = current.plusDays(1);
         long finish = next.toDateTime(new LocalTime(0, 0)).toDate().getTime();
-        for (TrackView.Track track : tracks) {
+        for (Track track : tracks) {
             long begin = track.begin;
             if (begin < start)
                 begin = start;
@@ -389,11 +389,11 @@ public class TracksFragment extends Fragment
             done();
             if (date != current)
                 return;
-            tracks = new Vector<TrackView.Track>();
+            tracks = new Vector<Track>();
             JsonArray list = res.get("tracks").asArray();
             for (int i = 0; i < list.size(); i++) {
                 JsonObject v = list.get(i).asObject();
-                TrackView.Track track = new TrackView.Track();
+                Track track = new Track();
                 track.track = v.get("track").asString();
                 track.mileage = v.get("mileage").asDouble();
                 track.max_speed = v.get("max_speed").asDouble();
@@ -450,7 +450,7 @@ public class TracksFragment extends Fragment
 
         int pos;
 
-        abstract TrackView.Point getPoint(TrackView.Track track);
+        abstract Track.Point getPoint(Track track);
 
         abstract TrackPositionFetcher create();
 
@@ -481,8 +481,8 @@ public class TracksFragment extends Fragment
 
         void update(int track_pos) {
             pos = track_pos;
-            TrackView.Track track = tracks.get(pos);
-            TrackView.Point p = getPoint(track);
+            Track track = tracks.get(pos);
+            Track.Point p = getPoint(track);
             if (getActivity() == null)
                 return;
             get(getActivity(), p.latitude, p.longitude);
@@ -493,9 +493,9 @@ public class TracksFragment extends Fragment
     class TrackStartPositionFetcher extends TrackPositionFetcher {
 
         @Override
-        TrackView.Point getPoint(TrackView.Track track) {
+        Track.Point getPoint(Track track) {
             String[] points = track.track.split("\\|");
-            return new TrackView.Point(points[0]);
+            return new Track.Point(points[0]);
         }
 
         @Override
@@ -518,9 +518,9 @@ public class TracksFragment extends Fragment
     class TrackEndPositionFetcher extends TrackPositionFetcher {
 
         @Override
-        TrackView.Point getPoint(TrackView.Track track) {
+        Track.Point getPoint(Track track) {
             String[] points = track.track.split("\\|");
-            return new TrackView.Point(points[points.length - 1]);
+            return new Track.Point(points[points.length - 1]);
         }
 
         @Override
@@ -533,7 +533,7 @@ public class TracksFragment extends Fragment
             if (finish_address == null)
                 showError();
 
-            TrackView.Track track = tracks.get(pos);
+            Track track = tracks.get(pos);
 
             String[] start_parts = track.start.split(", ");
             String[] finish_parts = finish_address.split(", ");
@@ -596,7 +596,7 @@ public class TracksFragment extends Fragment
                 v = inflater.inflate(R.layout.track_item, null);
             }
             TextView tvTitle = (TextView) v.findViewById(R.id.title);
-            TrackView.Track track = (TrackView.Track) getItem(position);
+            Track track = (Track) getItem(position);
             DateFormat tf = android.text.format.DateFormat.getTimeFormat(getActivity());
             tvTitle.setText(tf.format(track.begin) + "-" + tf.format(track.end));
             TextView tvMileage = (TextView) v.findViewById(R.id.mileage);

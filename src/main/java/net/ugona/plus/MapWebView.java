@@ -48,7 +48,7 @@ public class MapWebView extends GpsActivity {
     DateFormat df;
     DateFormat tf;
 
-    TrackView.Track track;
+    Track track;
     HttpTask trackTask;
 
     @Override
@@ -154,7 +154,7 @@ public class MapWebView extends GpsActivity {
                 track = null;
                 if (list.size() > 0) {
                     JsonObject v = list.get(list.size() - 1).asObject();
-                    track = new TrackView.Track();
+                    track = new Track();
                     track.track = v.get("track").asString();
                     track.mileage = v.get("mileage").asDouble();
                     track.max_speed = v.get("max_speed").asDouble();

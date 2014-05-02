@@ -2,6 +2,7 @@ package net.ugona.plus;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 
 import org.osmdroid.ResourceProxy;
@@ -10,6 +11,7 @@ import org.osmdroid.tileprovider.MapTile;
 import org.osmdroid.tileprovider.MapTileProviderBase;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.XYTileSource;
+import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.ResourceProxyImpl;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
@@ -19,6 +21,9 @@ public class MapView extends org.osmdroid.views.MapView {
     SharedPreferences preferences;
 
     MyLocationNewOverlay mLocationOverlay;
+
+    Runnable mAfterLayout;
+    int layout_count;
 
     public MapView(Context context, final MapTileProviderBase tileProvider) {
         super(context, 256, new ResourceProxyImpl(context.getApplicationContext()), tileProvider);
@@ -49,6 +54,24 @@ public class MapView extends org.osmdroid.views.MapView {
         return new myTileSource("google", ResourceProxy.string.mapnik, 1, 18, 256, ".png", tiles_urls);
     }
 
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        if (mAfterLayout == null)
+            return;
+        if (--layout_count > 0)
+            return;
+        Runnable afterLayout = mAfterLayout;
+        mAfterLayout = null;
+        Handler handler = new Handler();
+        handler.postDelayed(afterLayout, 500);
+    }
+
+    void setAfterLayout(Runnable afterLayout) {
+        mAfterLayout = afterLayout;
+        layout_count = 2;
+    }
+
     void onResume() {
         mLocationOverlay.enableMyLocation();
         setBuiltInZoomControls(true);
@@ -65,6 +88,30 @@ public class MapView extends org.osmdroid.views.MapView {
         if (mLocationOverlay == null)
             return null;
         return mLocationOverlay.getMyLocation();
+    }
+
+    void fitToRect(IGeoPoint p1, IGeoPoint p2, int k) {
+        int lat1 = p1.getLatitudeE6();
+        int lat2 = p2.getLatitudeE6();
+        if (lat1 > lat2) {
+            int r = lat1;
+            lat1 = lat2;
+            lat2 = r;
+        }
+
+        int lon1 = p1.getLongitudeE6();
+        int lon2 = p2.getLongitudeE6();
+        if (lon1 > lon2) {
+            int r = lon1;
+            lon1 = lon2;
+            lon2 = r;
+        }
+        int lat = (lat1 + lat2) / 2;
+        int lon = (lon1 + lon2) / 2;
+        int dlat = (lat - lat1) * 1000 / k;
+        int dlon = (lon - lon1) * 1000 / k;
+
+        zoomToBoundingBox(new BoundingBoxE6(lat + dlat, lon - dlon, lat - dlat, lon + dlon));
     }
 
     static public class myTileSource extends XYTileSource {
