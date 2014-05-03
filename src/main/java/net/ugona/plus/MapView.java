@@ -26,7 +26,7 @@ public class MapView extends org.osmdroid.views.MapView {
     int layout_count;
 
     public MapView(Context context, final MapTileProviderBase tileProvider) {
-        super(context, 256, new ResourceProxyImpl(context.getApplicationContext()), tileProvider);
+        super(context, (int) (256 * context.getResources().getDisplayMetrics().density), new ResourceProxyImpl(context.getApplicationContext()), tileProvider);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
@@ -38,12 +38,12 @@ public class MapView extends org.osmdroid.views.MapView {
         setBackgroundColor(getResources().getColor(R.color.caldroid_gray));
     }
 
-    static ITileSource createTileSource(SharedPreferences preferences) {
+    static ITileSource createTileSource(Context ctx, SharedPreferences preferences) {
         if (preferences.getString("map_type", "").equals("OSM")) {
             final String[] tiles_urls = {
                     "http://otile1.mqcdn.com/tiles/1.0.0/osm/"
             };
-            return new XYTileSource("mqcdn", ResourceProxy.string.mapnik, 1, 18, 256, ".png", tiles_urls);
+            return new XYTileSource("mqcdn", ResourceProxy.string.mapnik, 1, 18, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
         }
         final String[] tiles_urls = {
                 "http://mt0.google.com/vt/lyrs=m&hl=ru&x=%s&y=%s&z=%s&s=Galileo",
@@ -51,7 +51,7 @@ public class MapView extends org.osmdroid.views.MapView {
                 "http://mt2.google.com/vt/lyrs=m&hl=ru&x=%s&y=%s&z=%s&s=Galileo",
                 "http://mt3.google.com/vt/lyrs=m&hl=ru&x=%s&y=%s&z=%s&s=Galileo"
         };
-        return new myTileSource("google", ResourceProxy.string.mapnik, 1, 18, 256, ".png", tiles_urls);
+        return new myTileSource("google", ResourceProxy.string.mapnik, 1, 18, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
     }
 
     @Override

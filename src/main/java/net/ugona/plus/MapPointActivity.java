@@ -7,18 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,9 +31,6 @@ import org.osmdroid.api.IMapController;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.util.TileSystem;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.ItemizedIconOverlay;
-import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
-import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.safecanvas.ISafeCanvas;
 import org.osmdroid.views.safecanvas.SafePaint;
@@ -49,7 +41,6 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Vector;
 
 public class MapPointActivity extends MapActivity {
 
@@ -164,7 +155,7 @@ public class MapPointActivity extends MapActivity {
         mTrackOverlay = new TrackOverlay(this);
         mMapView.getOverlays().add(mTrackOverlay);
 
-        mMyLocationOverlay = new LocationOverlay(mMapView, this);
+        mMyLocationOverlay = new LocationOverlay(this);
 
         mMyLocationOverlay.setFocusItemsOnTap(true);
         mMyLocationOverlay.setFocusedItem(mMyLocationOverlay.find(car_id));
@@ -389,65 +380,22 @@ public class MapPointActivity extends MapActivity {
         }
     }
 
-    class LocationOverlay extends ItemizedOverlayWithFocus<MyOverlayItem> {
+    class LocationOverlay extends ItemsOverlay<MyOverlayItem> {
 
-        public final int mMarkerFocusedBackgroundColor = Color.rgb(255, 255, 200);
         protected final Bitmap mDirectionArrowBitmap;
         protected final double mDirectionArrowCenterX;
         protected final double mDirectionArrowCenterY;
         protected final SafePaint mPaint = new SafePaint();
         private final float[] mMatrixValues = new float[9];
         private final Matrix mMatrix = new Matrix();
-        private final Point mFocusedScreenCoords = new Point();
-        private final Rect mRect = new Rect();
-        public int DESCRIPTION_BOX_PADDING = 3;
-        public int DESCRIPTION_BOX_CORNERWIDTH = 3;
 
-        public int DESCRIPTION_LINE_HEIGHT = 12;
-        public int DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT = 2;
-
-        protected int DESCRIPTION_MAXWIDTH = 200;
-        MapView mapView;
-        DisplayMetrics displayMetrics;
-
-        public LocationOverlay(MapView map, Context context) {
-            super(new Vector<MyOverlayItem>(),
-                    mMapView.getResourceProxy().getDrawable(ResourceProxy.bitmap.marker_default),
-                    null, NOT_SET,
-                    new ItemizedIconOverlay.OnItemGestureListener<MyOverlayItem>() {
-                        @Override
-                        public boolean onItemSingleTapUp(final int index, final MyOverlayItem item) {
-                            return true;
-                        }
-
-                        @Override
-                        public boolean onItemLongPress(final int index, final MyOverlayItem item) {
-                            return false;
-                        }
-                    }, mMapView.getResourceProxy()
-            );
-            mapView = map;
-
-            displayMetrics = context.getResources().getDisplayMetrics();
-            float density = displayMetrics.density;
-
-            DESCRIPTION_BOX_PADDING = (int) (6 * density);
-            DESCRIPTION_BOX_CORNERWIDTH = (int) (3 * density);
-
-            DESCRIPTION_LINE_HEIGHT = (int) (12 * density);
-            DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT = (int) (2 * density);
+        public LocationOverlay(Context ctx) {
+            super(ctx);
 
             mDirectionArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.direction_arrow);
 
             mDirectionArrowCenterX = mDirectionArrowBitmap.getWidth() / 2.0 - 0.5;
             mDirectionArrowCenterY = mDirectionArrowBitmap.getHeight() / 2.0 - 0.5;
-
-            int snippet_pixel = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                    12, displayMetrics);
-            int title_pixel = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                    14, displayMetrics);
-            mDescriptionPaint.setTextSize(snippet_pixel);
-            mTitlePaint.setTextSize(title_pixel);
 
             for (Cars.Car car : cars) {
                 MyOverlayItem item = new MyOverlayItem(car.id);
@@ -473,146 +421,9 @@ public class MapPointActivity extends MapActivity {
             return -1;
         }
 
-
-        @Override
-        protected void drawFocusedItem(Canvas c, MapView osmv) {
-            final MyOverlayItem focusedItem = super.mItemList.get(this.mFocusedItemIndex);
-            Drawable markerFocusedBase = focusedItem.getMarker(OverlayItem.ITEM_STATE_FOCUSED_MASK);
-            if (markerFocusedBase == null) {
-                markerFocusedBase = this.mMarkerFocusedBase;
-            }
-
-            DESCRIPTION_MAXWIDTH = displayMetrics.widthPixels * 3 / 4;
-
-		/* Calculate and set the bounds of the marker. */
-            osmv.getProjection().toMapPixels(focusedItem.getPoint(), mFocusedScreenCoords);
-
-            markerFocusedBase.copyBounds(mRect);
-            mRect.offset(mFocusedScreenCoords.x, mFocusedScreenCoords.y);
-
-		/* Strings of the OverlayItem, we need. */
-            final String itemTitle = (focusedItem.getTitle() == null) ? "" : focusedItem
-                    .getTitle();
-            final String itemDescription = (focusedItem.getSnippet() == null) ? "" : focusedItem
-                    .getSnippet();
-
-		/*
-         * Store the width needed for each char in the description to a float array. This is pretty
-		 * efficient.
-		 */
-            final float[] widths = new float[itemDescription.length()];
-            this.mDescriptionPaint.getTextWidths(itemDescription, widths);
-
-            final StringBuilder sb = new StringBuilder();
-            int maxWidth = 0;
-            int curLineWidth = 0;
-            int lastStop = 0;
-            int i;
-            int lastwhitespace = 0;
-        /*
-         * Loop through the charwidth array and harshly insert a linebreak, when the width gets
-		 * bigger than DESCRIPTION_MAXWIDTH.
-		 */
-            for (i = 0; i < widths.length; i++) {
-                if (itemDescription.charAt(i) == '\n') {
-                    sb.append(itemDescription.subSequence(lastStop, i));
-                    sb.append('\n');
-
-                    lastStop = i + 1;
-                    lastwhitespace = i + 1;
-                    maxWidth = Math.max(maxWidth, curLineWidth);
-                    curLineWidth = 0;
-                    continue;
-                }
-
-                if (Character.isWhitespace(itemDescription.charAt(i))) {
-                    lastwhitespace = i;
-                }
-
-                final float charwidth = widths[i];
-
-                if (curLineWidth + charwidth > DESCRIPTION_MAXWIDTH) {
-                    if (lastStop == lastwhitespace) {
-                        i--;
-                    } else {
-                        i = lastwhitespace;
-                    }
-
-                    sb.append(itemDescription.subSequence(lastStop, i));
-                    sb.append('\n');
-
-                    lastStop = i;
-                    maxWidth = Math.max(maxWidth, curLineWidth);
-                    curLineWidth = 0;
-                }
-
-                curLineWidth += charwidth;
-            }
-		/* Add the last line to the rest to the buffer. */
-            if (i != lastStop) {
-                final String rest = itemDescription.substring(lastStop, i);
-                maxWidth = Math.max(maxWidth, (int) this.mDescriptionPaint.measureText(rest));
-                sb.append(rest);
-            }
-            final String[] lines = sb.toString().split("\n");
-
-		/*
-		 * The title also needs to be taken into consideration for the width calculation.
-		 */
-            final int titleWidth = (int) this.mTitlePaint.measureText(itemTitle);
-
-            Rect bounds = new Rect();
-            mTitlePaint.getTextBounds("a", 0, 1, bounds);
-            final int titleLineHeight = bounds.height() + DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT * 2;
-            mDescriptionPaint.getTextBounds("a", 0, 1, bounds);
-            final int snippetLineHeight = bounds.height() + DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT * 2;
-
-            int totalHeight = lines.length * snippetLineHeight;
-            if (!itemTitle.equals(""))
-                totalHeight += DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT + titleLineHeight;
-
-            maxWidth = Math.max(maxWidth, titleWidth);
-            final int descWidth = Math.min(maxWidth, DESCRIPTION_MAXWIDTH);
-
-		/* Calculate the bounds of the Description box that needs to be drawn. */
-            final int descBoxLeft = mRect.left - descWidth / 2 - DESCRIPTION_BOX_PADDING
-                    + mRect.width() / 2;
-            final int descBoxRight = descBoxLeft + descWidth + 2 * DESCRIPTION_BOX_PADDING;
-            final int descBoxBottom = mRect.top;
-            final int descBoxTop = descBoxBottom - totalHeight - 2 * DESCRIPTION_BOX_PADDING;
-
-		/* Twice draw a RoundRect, once in black with 1px as a small border. */
-            this.mMarkerBackgroundPaint.setColor(Color.BLACK);
-            c.drawRoundRect(new RectF(descBoxLeft - 1, descBoxTop - 1, descBoxRight + 1,
-                            descBoxBottom + 1), DESCRIPTION_BOX_CORNERWIDTH, DESCRIPTION_BOX_CORNERWIDTH,
-                    this.mDescriptionPaint
-            );
-            this.mMarkerBackgroundPaint.setColor(this.mMarkerFocusedBackgroundColor);
-            c.drawRoundRect(new RectF(descBoxLeft, descBoxTop, descBoxRight, descBoxBottom),
-                    DESCRIPTION_BOX_CORNERWIDTH, DESCRIPTION_BOX_CORNERWIDTH,
-                    this.mMarkerBackgroundPaint);
-
-            final int descLeft = descBoxLeft + DESCRIPTION_BOX_PADDING;
-            int descTextLineBottom = descBoxBottom - DESCRIPTION_BOX_PADDING;
-
-		/* Draw all the lines of the description. */
-            for (int j = lines.length - 1; j >= 0; j--) {
-                c.drawText(lines[j].trim(), descLeft, descTextLineBottom, this.mDescriptionPaint);
-                descTextLineBottom -= snippetLineHeight;
-            }
-		/* Draw the title. */
-            c.drawText(itemTitle, descLeft, descTextLineBottom - DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT,
-                    this.mTitlePaint);
-		/*
-		 * Finally draw the marker base. This is done in the end to make it look better.
-		 */
-            Overlay.drawAt(c, markerFocusedBase, mFocusedScreenCoords.x, mFocusedScreenCoords.y, false, osmv.getMapOrientation());
-        }
-
-
         protected void onDrawItem(final ISafeCanvas canvas, final MyOverlayItem item, final Point curScreenCoords, final float aMapOrientation) {
 
-            final MapView.Projection pj = mapView.getProjection();
+            final MapView.Projection pj = mMapView.getProjection();
             if (item.zone != null) {
 
                 String points[] = item.zone.split("_");
@@ -656,14 +467,12 @@ public class MapPointActivity extends MapActivity {
                     projectedPoint1 = mPoints.get(i);
                     mLineBounds.union(projectedPoint1.x, projectedPoint1.y);
 
-/*
                     if (!Rect.intersects(clipBounds, mLineBounds)) {
                         // skip this line, move to next point
                         projectedPoint0 = projectedPoint1;
                         screenPoint0 = null;
                         continue;
                     }
-*/
 
                     // the starting point may be not calculated, because previous segment was out of clip
                     // bounds
