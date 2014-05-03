@@ -164,8 +164,12 @@ public class MapPointActivity extends MapActivity {
 
         controller.setZoom(16);
         int selected = mMyLocationOverlay.find(car_id);
-        if (selected >= 0)
-            controller.setCenter(mMyLocationOverlay.getItem(selected).getPoint());
+        if (selected >= 0) {
+            MyOverlayItem item = mMyLocationOverlay.getItem(selected);
+            controller.setCenter(item.getPoint());
+            if (item.zone != null)
+                mMapView.fitToRect(new GeoPoint(item.min_lat, item.min_lon), new GeoPoint(item.max_lat, item.max_lon), 700);
+        }
         updateTrack();
     }
 
@@ -190,7 +194,8 @@ public class MapPointActivity extends MapActivity {
         boolean engine = preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false);
         boolean az = preferences.getBoolean(Names.Car.AZ + car_id, false);
         if (!engine || az) {
-            mTrackOverlay.clear();
+            if (mTrackOverlay != null)
+                mTrackOverlay.clear();
             return;
         }
 
@@ -249,7 +254,7 @@ public class MapPointActivity extends MapActivity {
             }
             lat = ((min_lat + max_lat) / 2);
             lng = ((min_lon + max_lon) / 2);
-            item.zone = zone;
+            item.setZone(zone);
         }
         String title = "";
         String speed = "";
@@ -341,6 +346,8 @@ public class MapPointActivity extends MapActivity {
                     mMyLocationOverlay.setFocusedItem(current);
                     MyOverlayItem item = mMyLocationOverlay.getItem(current);
                     mMapView.getController().setCenter(item.getPoint());
+                    if (item.zone != null)
+                        mMapView.fitToRect(new GeoPoint(item.min_lat, item.min_lon), new GeoPoint(item.max_lat, item.max_lon), 700);
                     trackTask = null;
                     mTrackOverlay.clear();
                     updateTrack();
@@ -366,7 +373,11 @@ public class MapPointActivity extends MapActivity {
     class MyOverlayItem extends OverlayItem {
 
         int mBearing;
-        String zone;
+        ArrayList<GeoPoint> zone;
+        double min_lat;
+        double min_lon;
+        double max_lat;
+        double max_lon;
 
         public MyOverlayItem(String aUid) {
             super(aUid, null, null, null);
@@ -377,6 +388,38 @@ public class MapPointActivity extends MapActivity {
             mSnippet = snippet;
             mGeoPoint = point;
             mBearing = bearing;
+        }
+
+        void setZone(String s) {
+            if (s == null) {
+                zone = null;
+                return;
+            }
+            min_lat = 180;
+            min_lon = 180;
+            max_lat = -180;
+            max_lon = -180;
+            String points[] = s.split("_");
+
+            zone = new ArrayList<GeoPoint>();
+            for (String point : points) {
+                try {
+                    String[] p = point.split(",");
+                    double p_lat = Double.parseDouble(p[0]);
+                    double p_lon = Double.parseDouble(p[1]);
+                    if (p_lat < min_lat)
+                        min_lat = p_lat;
+                    if (p_lat > max_lat)
+                        max_lat = p_lat;
+                    if (p_lon < min_lon)
+                        min_lon = p_lon;
+                    if (p_lon > max_lon)
+                        max_lon = p_lon;
+                    zone.add(new GeoPoint(p_lat, p_lon));
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
         }
     }
 
@@ -421,36 +464,25 @@ public class MapPointActivity extends MapActivity {
             return -1;
         }
 
+        @Override
+        public boolean isHardwareAccelerated() {
+            return false;
+        }
+
         protected void onDrawItem(final ISafeCanvas canvas, final MyOverlayItem item, final Point curScreenCoords, final float aMapOrientation) {
 
             final MapView.Projection pj = mMapView.getProjection();
             if (item.zone != null) {
-
-                String points[] = item.zone.split("_");
-
-                ArrayList<Point> mPoints = new ArrayList<Point>();
-
-                Point mapCoords = new Point();
-                for (String point : points) {
-                    try {
-                        String[] p = point.split(",");
-                        double p_lat = Double.parseDouble(p[0]);
-                        double p_lon = Double.parseDouble(p[1]);
-                        pj.toMapPixelsProjected((int) (p_lat * 1000000), (int) (p_lon * 1000000), mapCoords);
-                        mPoints.add(mapCoords);
-                    } catch (Exception ex) {
-                        // ignore
-                    }
-                }
+                Rect screenRect = pj.getScreenRect();
 
                 Point screenPoint0 = null; // points on screen
                 Point screenPoint1;
-                Point projectedPoint0; // points from the points list
-                Point projectedPoint1;
+                GeoPoint projectedPoint0; // points from the points list
+                GeoPoint projectedPoint1;
 
                 // clipping rectangle in the intermediate projection, to avoid performing projection.
                 final Rect clipBounds = pj.fromPixelsToProjected(pj.getScreenRect());
-                int size = mPoints.size();
+                int size = item.zone.size();
 
                 SafeTranslatedPath mPath = new SafeTranslatedPath();
                 Rect mLineBounds = new Rect();
@@ -459,47 +491,44 @@ public class MapPointActivity extends MapActivity {
                 Point mTempPoint2 = new Point();
 
                 mPath.rewind();
-                projectedPoint0 = mPoints.get(size - 1);
-                mLineBounds.set(projectedPoint0.x, projectedPoint0.y, projectedPoint0.x, projectedPoint0.y);
+
+                projectedPoint0 = item.zone.get(size - 1);
 
                 for (int i = size - 2; i >= 0; i--) {
                     // compute next points
-                    projectedPoint1 = mPoints.get(i);
-                    mLineBounds.union(projectedPoint1.x, projectedPoint1.y);
-
-                    if (!Rect.intersects(clipBounds, mLineBounds)) {
-                        // skip this line, move to next point
-                        projectedPoint0 = projectedPoint1;
-                        screenPoint0 = null;
-                        continue;
-                    }
+                    projectedPoint1 = item.zone.get(i);
 
                     // the starting point may be not calculated, because previous segment was out of clip
                     // bounds
                     if (screenPoint0 == null) {
-                        screenPoint0 = pj.toMapPixelsTranslated(projectedPoint0, mTempPoint1);
-                        mPath.moveTo(screenPoint0.x, screenPoint0.y);
+                        screenPoint0 = pj.toPixels(projectedPoint0, mTempPoint1);
+                        mPath.moveTo(screenPoint0.x - screenRect.left, screenPoint0.y - screenRect.top);
                     }
 
-                    screenPoint1 = pj.toMapPixelsTranslated(projectedPoint1, mTempPoint2);
+                    screenPoint1 = pj.toPixels(projectedPoint1, mTempPoint2);
 
                     // skip this point, too close to previous point
                     if (Math.abs(screenPoint1.x - screenPoint0.x) + Math.abs(screenPoint1.y - screenPoint0.y) <= 1) {
                         continue;
                     }
 
-                    mPath.lineTo(screenPoint1.x, screenPoint1.y);
+                    mPath.lineTo(screenPoint1.x - screenRect.left, screenPoint1.y - screenRect.top);
 
                     // update starting point to next position
                     projectedPoint0 = projectedPoint1;
                     screenPoint0.x = screenPoint1.x;
                     screenPoint0.y = screenPoint1.y;
-                    mLineBounds.set(projectedPoint0.x, projectedPoint0.y, projectedPoint0.x, projectedPoint0.y);
                 }
+                mPath.close();
+
 
                 SafePaint mPaint = new SafePaint();
-                mPaint.setColor(Color.rgb(256, 0, 0));
-                mPaint.setStrokeWidth(2);
+                mPaint.setColor(Color.rgb(255, 0, 0));
+                mPaint.setStrokeWidth(4);
+                mPaint.setAlpha(20);
+                mPaint.setStyle(Paint.Style.FILL);
+                canvas.drawPath(mPath, mPaint);
+                mPaint.setAlpha(80);
                 mPaint.setStyle(Paint.Style.STROKE);
                 canvas.drawPath(mPath, mPaint);
                 return;

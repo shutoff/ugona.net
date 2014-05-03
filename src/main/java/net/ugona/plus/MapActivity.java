@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -44,6 +43,10 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
+import org.osmdroid.views.overlay.SafeDrawOverlay;
+import org.osmdroid.views.safecanvas.ISafeCanvas;
+import org.osmdroid.views.safecanvas.SafePaint;
+import org.osmdroid.views.safecanvas.SafeTranslatedPath;
 
 import java.util.ArrayList;
 import java.util.Vector;
@@ -404,7 +407,7 @@ public abstract class MapActivity extends ActionBarActivity {
         }
     }
 
-    class TrackOverlay extends Overlay {
+    class TrackOverlay extends SafeDrawOverlay {
 
         final int[] colors = {
                 Color.rgb(0, 0, 128),
@@ -428,10 +431,10 @@ public abstract class MapActivity extends ActionBarActivity {
                 60,
                 90,
         };
-        private final Path mPath = new Path();
+        private final SafeTranslatedPath mPath = new SafeTranslatedPath();
         private final Point mTempPoint1 = new Point();
         private final Point mTempPoint2 = new Point();
-        protected Paint mPaint = new Paint();
+        protected SafePaint mPaint = new SafePaint();
         double min_lat;
         double max_lat;
         double min_lon;
@@ -526,7 +529,7 @@ public abstract class MapActivity extends ActionBarActivity {
         }
 
         @Override
-        protected void draw(Canvas canvas, org.osmdroid.views.MapView mapView, boolean shadow) {
+        protected void drawSafe(ISafeCanvas canvas, org.osmdroid.views.MapView mapView, boolean shadow) {
             if (shadow)
                 return;
 
@@ -534,6 +537,7 @@ public abstract class MapActivity extends ActionBarActivity {
                 return;
 
             final org.osmdroid.views.MapView.Projection pj = mapView.getProjection();
+            Rect screenRect = pj.getScreenRect();
 
             for (ArrayList<TrackPoint> track : tracks) {
 
@@ -559,7 +563,7 @@ public abstract class MapActivity extends ActionBarActivity {
                     // bounds
                     if (screenPoint0 == null) {
                         screenPoint0 = pj.toPixels(projectedPoint0, mTempPoint1);
-                        mPath.moveTo(screenPoint0.x, screenPoint0.y);
+                        mPath.moveTo(screenPoint0.x - screenRect.left, screenPoint0.y - screenRect.top);
                     }
 
                     screenPoint1 = pj.toPixels(projectedPoint1, mTempPoint2);
@@ -569,13 +573,13 @@ public abstract class MapActivity extends ActionBarActivity {
                         continue;
                     }
 
-                    mPath.lineTo(screenPoint1.x, screenPoint1.y);
+                    mPath.lineTo(screenPoint1.x - screenRect.left, screenPoint1.y - screenRect.top);
                     int new_color = getColor(track.get(i).speed);
                     if (new_color != color) {
                         mPaint.setColor(colors[color]);
                         canvas.drawPath(mPath, mPaint);
                         mPath.rewind();
-                        mPath.moveTo(screenPoint1.x, screenPoint1.y);
+                        mPath.moveTo(screenPoint1.x - screenRect.left, screenPoint1.y - screenRect.top);
                         color = new_color;
                     }
 
