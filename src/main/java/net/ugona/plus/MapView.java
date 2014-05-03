@@ -39,7 +39,7 @@ public class MapView extends org.osmdroid.views.MapView {
     }
 
     static ITileSource createTileSource(Context ctx, SharedPreferences preferences) {
-        if (preferences.getString("map_type", "").equals("OSM")) {
+        if (preferences.getString("map_type", "OSM").equals("OSM")) {
             final String[] tiles_urls = {
                     "http://otile1.mqcdn.com/tiles/1.0.0/osm/"
             };

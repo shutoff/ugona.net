@@ -229,7 +229,7 @@ public class EventsFragment extends Fragment
                 if (e.id == current_id) {
                     if (e.point == null)
                         return;
-                    String info = "<b>" + State.formatTime(getActivity(), e.time) + " ";
+                    String info = State.formatTime(getActivity(), e.time) + " ";
                     boolean found = false;
                     for (EventType et : event_types) {
                         if (et.type == e.type) {
@@ -239,12 +239,12 @@ public class EventsFragment extends Fragment
                     }
                     if (!found)
                         info += getString(R.string.event) + " #" + e.type;
-                    info += "</b><br/>";
-                    Intent i = new Intent(getActivity(), MapWebView.class);
+                    info += "\n";
+                    Intent i = new Intent(getActivity(), MapEventActivity.class);
                     String[] point = e.point.split(";");
                     if (point.length < 2)
                         return;
-                    String point_data = ";" + point[0] + ";" + point[1] + ";" + e.course + ";" + info + e.address.replace("\n", "<br/>");
+                    String point_data = point[0] + ";" + point[1] + ";" + e.course + ";" + info + e.address;
                     if (point.length > 2)
                         point_data += ";" + point[2];
                     i.putExtra(Names.POINT_DATA, point_data);

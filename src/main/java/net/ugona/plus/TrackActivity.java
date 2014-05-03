@@ -33,6 +33,7 @@ public class TrackActivity extends MapActivity {
     ItemsOverlay<OverlayItem> mPointsOverlay;
     Vector<Track> tracks;
     OverlayItem mTrackItem;
+    int track_limit;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -46,6 +47,8 @@ public class TrackActivity extends MapActivity {
         } catch (Exception ex) {
             // Ignore
         }
+        float density = getResources().getDisplayMetrics().density;
+        track_limit = (int) (density * density * 64);
         super.onCreate(savedInstanceState);
         setTitle(getIntent().getStringExtra(Names.TITLE));
     }
@@ -77,7 +80,7 @@ public class TrackActivity extends MapActivity {
         mTrackOverlay = new TrackOverlay(this) {
             @Override
             void showBaloon(int dist, int track_index, int point_index, int pos) {
-                if (dist > 100) {
+                if (dist > track_limit) {
                     if (mTrackItem == null)
                         return;
                     if (mPointsOverlay.getFocusedItem() == mTrackItem)

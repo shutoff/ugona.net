@@ -5,8 +5,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -28,6 +30,7 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.tileprovider.IRegisterReceiver;
@@ -40,6 +43,7 @@ import org.osmdroid.tileprovider.modules.TileWriter;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.util.SimpleRegisterReceiver;
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.util.TileSystem;
 import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
@@ -47,6 +51,7 @@ import org.osmdroid.views.overlay.SafeDrawOverlay;
 import org.osmdroid.views.safecanvas.ISafeCanvas;
 import org.osmdroid.views.safecanvas.SafePaint;
 import org.osmdroid.views.safecanvas.SafeTranslatedPath;
+import org.osmdroid.views.util.constants.MapViewConstants;
 
 import java.util.ArrayList;
 import java.util.Vector;
@@ -75,7 +80,7 @@ public abstract class MapActivity extends ActionBarActivity {
         topSubMenu = menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(menuId(), menu);
-        boolean isOSM = preferences.getString("map_type", "").equals("OSM");
+        boolean isOSM = preferences.getString("map_type", "OSM").equals("OSM");
         menu.findItem(R.id.google).setTitle(getCheckedText(R.string.google, !isOSM));
         menu.findItem(R.id.osm).setTitle(getCheckedText(R.string.osm, isOSM));
         MenuItem item = menu.findItem(R.id.traffic);
@@ -297,10 +302,10 @@ public abstract class MapActivity extends ActionBarActivity {
          * Store the width needed for each char in the description to a float array. This is pretty
 		 * efficient.
 		 */
-            final float[] widths = new float[itemDescription.length()];
+            float[] widths = new float[itemDescription.length()];
             this.mDescriptionPaint.getTextWidths(itemDescription, widths);
 
-            final StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             int maxWidth = 0;
             int curLineWidth = 0;
             int lastStop = 0;
@@ -353,10 +358,60 @@ public abstract class MapActivity extends ActionBarActivity {
             }
             final String[] lines = sb.toString().split("\n");
 
-		/*
-		 * The title also needs to be taken into consideration for the width calculation.
+            widths = new float[itemTitle.length()];
+            this.mTitlePaint.getTextWidths(itemTitle, widths);
+
+            sb = new StringBuilder();
+            curLineWidth = 0;
+            lastStop = 0;
+            lastwhitespace = 0;
+
+        /*
+         * Loop through the charwidth array and harshly insert a linebreak, when the width gets
+		 * bigger than DESCRIPTION_MAXWIDTH.
 		 */
-            final int titleWidth = (int) this.mTitlePaint.measureText(itemTitle);
+            for (i = 0; i < widths.length; i++) {
+                if (itemTitle.charAt(i) == '\n') {
+                    sb.append(itemTitle.subSequence(lastStop, i));
+                    sb.append('\n');
+
+                    lastStop = i + 1;
+                    lastwhitespace = i + 1;
+                    maxWidth = Math.max(maxWidth, curLineWidth);
+                    curLineWidth = 0;
+                    continue;
+                }
+
+                if (Character.isWhitespace(itemTitle.charAt(i))) {
+                    lastwhitespace = i;
+                }
+
+                final float charwidth = widths[i];
+
+                if (curLineWidth + charwidth > DESCRIPTION_MAXWIDTH) {
+                    if (lastStop == lastwhitespace) {
+                        i--;
+                    } else {
+                        i = lastwhitespace;
+                    }
+
+                    sb.append(itemTitle.subSequence(lastStop, i));
+                    sb.append('\n');
+
+                    lastStop = i;
+                    maxWidth = Math.max(maxWidth, curLineWidth);
+                    curLineWidth = 0;
+                }
+
+                curLineWidth += charwidth;
+            }
+        /* Add the last line to the rest to the buffer. */
+            if (i != lastStop) {
+                final String rest = itemTitle.substring(lastStop, i);
+                maxWidth = Math.max(maxWidth, (int) this.mTitlePaint.measureText(rest));
+                sb.append(rest);
+            }
+            final String[] title_lines = sb.toString().split("\n");
 
             Rect bounds = new Rect();
             mTitlePaint.getTextBounds("a", 0, 1, bounds);
@@ -366,9 +421,8 @@ public abstract class MapActivity extends ActionBarActivity {
 
             int totalHeight = lines.length * snippetLineHeight;
             if (!itemTitle.equals(""))
-                totalHeight += DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT + titleLineHeight;
+                totalHeight += DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT + title_lines.length * titleLineHeight;
 
-            maxWidth = Math.max(maxWidth, titleWidth);
             final int descWidth = Math.min(maxWidth, DESCRIPTION_MAXWIDTH);
 
 		/* Calculate the bounds of the Description box that needs to be drawn. */
@@ -398,8 +452,12 @@ public abstract class MapActivity extends ActionBarActivity {
                 descTextLineBottom -= snippetLineHeight;
             }
 		/* Draw the title. */
-            c.drawText(itemTitle, descLeft, descTextLineBottom - DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT,
-                    this.mTitlePaint);
+            descTextLineBottom -= DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT;
+            for (int j = title_lines.length - 1; j >= 0; j--) {
+                c.drawText(title_lines[j].trim(), descLeft, descTextLineBottom, this.mTitlePaint);
+                descTextLineBottom -= titleLineHeight;
+            }
+
 		/*
 		 * Finally draw the marker base. This is done in the end to make it look better.
 		 */
@@ -653,4 +711,175 @@ public abstract class MapActivity extends ActionBarActivity {
             tracks.add(trackPoints);
         }
     }
+
+    class MyOverlayItem extends OverlayItem {
+
+        int mBearing;
+        ArrayList<GeoPoint> zone;
+        double min_lat;
+        double min_lon;
+        double max_lat;
+        double max_lon;
+
+        public MyOverlayItem(String aUid) {
+            super(aUid, null, null, null);
+        }
+
+        void set(String title, String snippet, GeoPoint point, int bearing) {
+            mTitle = title;
+            mSnippet = snippet;
+            mGeoPoint = point;
+            mBearing = bearing;
+        }
+
+        void setZone(String s) {
+            if (s == null) {
+                zone = null;
+                return;
+            }
+            min_lat = 180;
+            min_lon = 180;
+            max_lat = -180;
+            max_lon = -180;
+            String points[] = s.split("_");
+
+            zone = new ArrayList<GeoPoint>();
+            for (String point : points) {
+                try {
+                    String[] p = point.split(",");
+                    double p_lat = Double.parseDouble(p[0]);
+                    double p_lon = Double.parseDouble(p[1]);
+                    if (p_lat < min_lat)
+                        min_lat = p_lat;
+                    if (p_lat > max_lat)
+                        max_lat = p_lat;
+                    if (p_lon < min_lon)
+                        min_lon = p_lon;
+                    if (p_lon > max_lon)
+                        max_lon = p_lon;
+                    zone.add(new GeoPoint(p_lat, p_lon));
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+        }
+    }
+
+    class LocationOverlay extends ItemsOverlay<MyOverlayItem> {
+
+        protected final Bitmap mDirectionArrowBitmap;
+        protected final double mDirectionArrowCenterX;
+        protected final double mDirectionArrowCenterY;
+        protected final SafePaint mPaint = new SafePaint();
+        private final float[] mMatrixValues = new float[9];
+        private final Matrix mMatrix = new Matrix();
+
+        public LocationOverlay(Context ctx) {
+            super(ctx);
+
+            mDirectionArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.direction_arrow);
+
+            mDirectionArrowCenterX = mDirectionArrowBitmap.getWidth() / 2.0 - 0.5;
+            mDirectionArrowCenterY = mDirectionArrowBitmap.getHeight() / 2.0 - 0.5;
+        }
+
+        @Override
+        public boolean isHardwareAccelerated() {
+            return false;
+        }
+
+        protected void onDrawItem(final ISafeCanvas canvas, final MyOverlayItem item, final Point curScreenCoords, final float aMapOrientation) {
+
+            final org.osmdroid.views.MapView.Projection pj = mMapView.getProjection();
+            if (item.zone != null) {
+                Rect screenRect = pj.getScreenRect();
+
+                Point screenPoint0 = null; // points on screen
+                Point screenPoint1;
+                GeoPoint projectedPoint0; // points from the points list
+                GeoPoint projectedPoint1;
+
+                // clipping rectangle in the intermediate projection, to avoid performing projection.
+                final Rect clipBounds = pj.fromPixelsToProjected(pj.getScreenRect());
+                int size = item.zone.size();
+
+                SafeTranslatedPath mPath = new SafeTranslatedPath();
+                Rect mLineBounds = new Rect();
+
+                Point mTempPoint1 = new Point();
+                Point mTempPoint2 = new Point();
+
+                mPath.rewind();
+
+                projectedPoint0 = item.zone.get(size - 1);
+
+                for (int i = size - 2; i >= 0; i--) {
+                    // compute next points
+                    projectedPoint1 = item.zone.get(i);
+
+                    // the starting point may be not calculated, because previous segment was out of clip
+                    // bounds
+                    if (screenPoint0 == null) {
+                        screenPoint0 = pj.toPixels(projectedPoint0, mTempPoint1);
+                        mPath.moveTo(screenPoint0.x - screenRect.left, screenPoint0.y - screenRect.top);
+                    }
+
+                    screenPoint1 = pj.toPixels(projectedPoint1, mTempPoint2);
+
+                    // skip this point, too close to previous point
+                    if (Math.abs(screenPoint1.x - screenPoint0.x) + Math.abs(screenPoint1.y - screenPoint0.y) <= 1) {
+                        continue;
+                    }
+
+                    mPath.lineTo(screenPoint1.x - screenRect.left, screenPoint1.y - screenRect.top);
+
+                    // update starting point to next position
+                    projectedPoint0 = projectedPoint1;
+                    screenPoint0.x = screenPoint1.x;
+                    screenPoint0.y = screenPoint1.y;
+                }
+                mPath.close();
+
+
+                SafePaint mPaint = new SafePaint();
+                mPaint.setColor(Color.rgb(255, 0, 0));
+                mPaint.setStrokeWidth(4);
+                mPaint.setAlpha(20);
+                mPaint.setStyle(Paint.Style.FILL);
+                canvas.drawPath(mPath, mPaint);
+                mPaint.setAlpha(80);
+                mPaint.setStyle(Paint.Style.STROKE);
+                canvas.drawPath(mPath, mPaint);
+                return;
+            }
+
+            Point mapCoords = new Point();
+            TileSystem.LatLongToPixelXY(item.getPoint().getLatitude(), item.getPoint().getLongitude(),
+                    MapViewConstants.MAXIMUM_ZOOMLEVEL, mapCoords);
+            final int worldSize_2 = TileSystem.MapSize(MapViewConstants.MAXIMUM_ZOOMLEVEL) / 2;
+            mapCoords.offset(-worldSize_2, -worldSize_2);
+
+            final int zoomDiff = MapViewConstants.MAXIMUM_ZOOMLEVEL - pj.getZoomLevel();
+
+            canvas.getMatrix(mMatrix);
+            mMatrix.getValues(mMatrixValues);
+
+            float scaleX = (float) Math.sqrt(mMatrixValues[Matrix.MSCALE_X]
+                    * mMatrixValues[Matrix.MSCALE_X] + mMatrixValues[Matrix.MSKEW_Y]
+                    * mMatrixValues[Matrix.MSKEW_Y]);
+            float scaleY = (float) Math.sqrt(mMatrixValues[Matrix.MSCALE_Y]
+                    * mMatrixValues[Matrix.MSCALE_Y] + mMatrixValues[Matrix.MSKEW_X]
+                    * mMatrixValues[Matrix.MSKEW_X]);
+            final double x = mapCoords.x >> zoomDiff;
+            final double y = mapCoords.y >> zoomDiff;
+
+            canvas.save();
+            canvas.rotate(item.mBearing, x, y);
+            canvas.scale(1 / scaleX, 1 / scaleY, x, y);
+            canvas.drawBitmap(mDirectionArrowBitmap, x - mDirectionArrowCenterX, y
+                    - mDirectionArrowCenterY, mPaint);
+            canvas.restore();
+        }
+    }
+
 }

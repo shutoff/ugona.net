@@ -6,12 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
@@ -26,16 +20,9 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
 import org.joda.time.LocalDateTime;
-import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.util.TileSystem;
-import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.OverlayItem;
-import org.osmdroid.views.safecanvas.ISafeCanvas;
-import org.osmdroid.views.safecanvas.SafePaint;
-import org.osmdroid.views.safecanvas.SafeTranslatedPath;
-import org.osmdroid.views.util.constants.MapViewConstants;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -55,7 +42,7 @@ public class MapPointActivity extends MapActivity {
     DateFormat df;
     DateFormat tf;
     Cars.Car[] cars;
-    LocationOverlay mMyLocationOverlay;
+    CarsOverlay mMyLocationOverlay;
     TrackOverlay mTrackOverlay;
 
     AlarmManager alarmMgr;
@@ -155,7 +142,7 @@ public class MapPointActivity extends MapActivity {
         mTrackOverlay = new TrackOverlay(this);
         mMapView.getOverlays().add(mTrackOverlay);
 
-        mMyLocationOverlay = new LocationOverlay(this);
+        mMyLocationOverlay = new CarsOverlay(this);
 
         mMyLocationOverlay.setFocusItemsOnTap(true);
         mMyLocationOverlay.setFocusedItem(mMyLocationOverlay.find(car_id));
@@ -370,76 +357,10 @@ public class MapPointActivity extends MapActivity {
         }
     }
 
-    class MyOverlayItem extends OverlayItem {
+    class CarsOverlay extends LocationOverlay {
 
-        int mBearing;
-        ArrayList<GeoPoint> zone;
-        double min_lat;
-        double min_lon;
-        double max_lat;
-        double max_lon;
-
-        public MyOverlayItem(String aUid) {
-            super(aUid, null, null, null);
-        }
-
-        void set(String title, String snippet, GeoPoint point, int bearing) {
-            mTitle = title;
-            mSnippet = snippet;
-            mGeoPoint = point;
-            mBearing = bearing;
-        }
-
-        void setZone(String s) {
-            if (s == null) {
-                zone = null;
-                return;
-            }
-            min_lat = 180;
-            min_lon = 180;
-            max_lat = -180;
-            max_lon = -180;
-            String points[] = s.split("_");
-
-            zone = new ArrayList<GeoPoint>();
-            for (String point : points) {
-                try {
-                    String[] p = point.split(",");
-                    double p_lat = Double.parseDouble(p[0]);
-                    double p_lon = Double.parseDouble(p[1]);
-                    if (p_lat < min_lat)
-                        min_lat = p_lat;
-                    if (p_lat > max_lat)
-                        max_lat = p_lat;
-                    if (p_lon < min_lon)
-                        min_lon = p_lon;
-                    if (p_lon > max_lon)
-                        max_lon = p_lon;
-                    zone.add(new GeoPoint(p_lat, p_lon));
-                } catch (Exception ex) {
-                    // ignore
-                }
-            }
-        }
-    }
-
-    class LocationOverlay extends ItemsOverlay<MyOverlayItem> {
-
-        protected final Bitmap mDirectionArrowBitmap;
-        protected final double mDirectionArrowCenterX;
-        protected final double mDirectionArrowCenterY;
-        protected final SafePaint mPaint = new SafePaint();
-        private final float[] mMatrixValues = new float[9];
-        private final Matrix mMatrix = new Matrix();
-
-        public LocationOverlay(Context ctx) {
+        public CarsOverlay(Context ctx) {
             super(ctx);
-
-            mDirectionArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.direction_arrow);
-
-            mDirectionArrowCenterX = mDirectionArrowBitmap.getWidth() / 2.0 - 0.5;
-            mDirectionArrowCenterY = mDirectionArrowBitmap.getHeight() / 2.0 - 0.5;
-
             for (Cars.Car car : cars) {
                 MyOverlayItem item = new MyOverlayItem(car.id);
                 if (updateItem(item))
@@ -462,104 +383,6 @@ public class MapPointActivity extends MapActivity {
                     return i;
             }
             return -1;
-        }
-
-        @Override
-        public boolean isHardwareAccelerated() {
-            return false;
-        }
-
-        protected void onDrawItem(final ISafeCanvas canvas, final MyOverlayItem item, final Point curScreenCoords, final float aMapOrientation) {
-
-            final MapView.Projection pj = mMapView.getProjection();
-            if (item.zone != null) {
-                Rect screenRect = pj.getScreenRect();
-
-                Point screenPoint0 = null; // points on screen
-                Point screenPoint1;
-                GeoPoint projectedPoint0; // points from the points list
-                GeoPoint projectedPoint1;
-
-                // clipping rectangle in the intermediate projection, to avoid performing projection.
-                final Rect clipBounds = pj.fromPixelsToProjected(pj.getScreenRect());
-                int size = item.zone.size();
-
-                SafeTranslatedPath mPath = new SafeTranslatedPath();
-                Rect mLineBounds = new Rect();
-
-                Point mTempPoint1 = new Point();
-                Point mTempPoint2 = new Point();
-
-                mPath.rewind();
-
-                projectedPoint0 = item.zone.get(size - 1);
-
-                for (int i = size - 2; i >= 0; i--) {
-                    // compute next points
-                    projectedPoint1 = item.zone.get(i);
-
-                    // the starting point may be not calculated, because previous segment was out of clip
-                    // bounds
-                    if (screenPoint0 == null) {
-                        screenPoint0 = pj.toPixels(projectedPoint0, mTempPoint1);
-                        mPath.moveTo(screenPoint0.x - screenRect.left, screenPoint0.y - screenRect.top);
-                    }
-
-                    screenPoint1 = pj.toPixels(projectedPoint1, mTempPoint2);
-
-                    // skip this point, too close to previous point
-                    if (Math.abs(screenPoint1.x - screenPoint0.x) + Math.abs(screenPoint1.y - screenPoint0.y) <= 1) {
-                        continue;
-                    }
-
-                    mPath.lineTo(screenPoint1.x - screenRect.left, screenPoint1.y - screenRect.top);
-
-                    // update starting point to next position
-                    projectedPoint0 = projectedPoint1;
-                    screenPoint0.x = screenPoint1.x;
-                    screenPoint0.y = screenPoint1.y;
-                }
-                mPath.close();
-
-
-                SafePaint mPaint = new SafePaint();
-                mPaint.setColor(Color.rgb(255, 0, 0));
-                mPaint.setStrokeWidth(4);
-                mPaint.setAlpha(20);
-                mPaint.setStyle(Paint.Style.FILL);
-                canvas.drawPath(mPath, mPaint);
-                mPaint.setAlpha(80);
-                mPaint.setStyle(Paint.Style.STROKE);
-                canvas.drawPath(mPath, mPaint);
-                return;
-            }
-
-            Point mapCoords = new Point();
-            TileSystem.LatLongToPixelXY(item.getPoint().getLatitude(), item.getPoint().getLongitude(),
-                    MapViewConstants.MAXIMUM_ZOOMLEVEL, mapCoords);
-            final int worldSize_2 = TileSystem.MapSize(MapViewConstants.MAXIMUM_ZOOMLEVEL) / 2;
-            mapCoords.offset(-worldSize_2, -worldSize_2);
-
-            final int zoomDiff = MapViewConstants.MAXIMUM_ZOOMLEVEL - pj.getZoomLevel();
-
-            canvas.getMatrix(mMatrix);
-            mMatrix.getValues(mMatrixValues);
-
-            float scaleX = (float) Math.sqrt(mMatrixValues[Matrix.MSCALE_X]
-                    * mMatrixValues[Matrix.MSCALE_X] + mMatrixValues[Matrix.MSKEW_Y]
-                    * mMatrixValues[Matrix.MSKEW_Y]);
-            float scaleY = (float) Math.sqrt(mMatrixValues[Matrix.MSCALE_Y]
-                    * mMatrixValues[Matrix.MSCALE_Y] + mMatrixValues[Matrix.MSKEW_X]
-                    * mMatrixValues[Matrix.MSKEW_X]);
-            final double x = mapCoords.x >> zoomDiff;
-            final double y = mapCoords.y >> zoomDiff;
-
-            canvas.save();
-            canvas.rotate(item.mBearing, x, y);
-            canvas.scale(1 / scaleX, 1 / scaleY, x, y);
-            canvas.drawBitmap(mDirectionArrowBitmap, x - mDirectionArrowCenterX, y
-                    - mDirectionArrowCenterY, mPaint);
-            canvas.restore();
         }
     }
 
