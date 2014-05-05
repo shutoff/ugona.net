@@ -19,6 +19,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,7 +32,6 @@ import android.widget.Toast;
 
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IGeoPoint;
-import org.osmdroid.api.IMapController;
 import org.osmdroid.tileprovider.IRegisterReceiver;
 import org.osmdroid.tileprovider.MapTileProviderArray;
 import org.osmdroid.tileprovider.modules.MapTileDownloader;
@@ -58,9 +58,9 @@ public abstract class MapActivity extends ActionBarActivity {
     static final String TRAFFIC = "traffic";
     SharedPreferences preferences;
     FrameLayout holder;
-    MapView mMapView;
     Menu topSubMenu;
     LocationManager locationManager;
+    private MapView mMapView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +94,10 @@ public abstract class MapActivity extends ActionBarActivity {
     String getCheckedText(int id, boolean check) {
         String check_mark = check ? "\u2714" : "";
         return check_mark + getString(id);
+    }
+
+    MapView getMapView() {
+        return mMapView;
     }
 
     @Override
@@ -199,10 +203,9 @@ public abstract class MapActivity extends ActionBarActivity {
             mMapView.setAfterLayout(new Runnable() {
                 @Override
                 public void run() {
-                    initMap(mMapView.getController());
+                    initMap(mMapView);
                 }
             });
-
         }
         holder.addView(mMapView);
     }
@@ -236,7 +239,7 @@ public abstract class MapActivity extends ActionBarActivity {
         return res;
     }
 
-    abstract void initMap(IMapController controller);
+    abstract void initMap(MapView mapView);
 
     abstract int menuId();
 
@@ -246,7 +249,7 @@ public abstract class MapActivity extends ActionBarActivity {
         long time;
     }
 
-    class ItemsOverlay<Item extends OverlayItem> extends ItemizedOverlayWithFocus<Item> {
+    static class ItemsOverlay<Item extends OverlayItem> extends ItemizedOverlayWithFocus<Item> {
 
         public final int mMarkerFocusedBackgroundColor = Color.rgb(255, 255, 200);
         private final Point mFocusedScreenCoords = new Point();
@@ -259,7 +262,7 @@ public abstract class MapActivity extends ActionBarActivity {
         DisplayMetrics displayMetrics;
         Rect baloonRect;
 
-        public ItemsOverlay(Context ctx) {
+        public ItemsOverlay(MapActivity activity) {
             super(new Vector<Item>(), new OnItemGestureListener<Item>() {
                 @Override
                 public boolean onItemSingleTapUp(int index, Item item) {
@@ -270,9 +273,9 @@ public abstract class MapActivity extends ActionBarActivity {
                 public boolean onItemLongPress(int index, Item item) {
                     return false;
                 }
-            }, mMapView.getResourceProxy());
+            }, activity.mMapView.getResourceProxy());
 
-            displayMetrics = ctx.getResources().getDisplayMetrics();
+            displayMetrics = activity.getResources().getDisplayMetrics();
             float density = displayMetrics.density;
 
             DESCRIPTION_BOX_PADDING = (int) (6 * density);
@@ -303,6 +306,7 @@ public abstract class MapActivity extends ActionBarActivity {
                 onChangeFocus();
                 return true;
             }
+            Log.v("v", res + "," + mFocusedItemIndex);
             if (!res && (mFocusedItemIndex != NOT_SET)) {
                 unSetFocusedItem();
                 mapView.invalidate();
@@ -506,7 +510,7 @@ public abstract class MapActivity extends ActionBarActivity {
         }
     }
 
-    class TrackOverlay extends SafeDrawOverlay {
+    static class TrackOverlay extends SafeDrawOverlay {
 
         final int[] colors = {
                 Color.rgb(0, 0, 128),
@@ -544,6 +548,7 @@ public abstract class MapActivity extends ActionBarActivity {
 
         public TrackOverlay(Context ctx) {
             super(ctx);
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
             show_speed = preferences.getBoolean(TRAFFIC, true);
             DisplayMetrics displayMetrics = ctx.getResources().getDisplayMetrics();
             mPaint.setStrokeWidth((int) (displayMetrics.density * 4));
@@ -708,11 +713,11 @@ public abstract class MapActivity extends ActionBarActivity {
             return res;
         }
 
-        void clear() {
+        void clear(MapView mapView) {
             if (tracks == null)
                 return;
             tracks = null;
-            mMapView.invalidate();
+            mapView.invalidate();
         }
 
         void add(String track) {
@@ -753,68 +758,15 @@ public abstract class MapActivity extends ActionBarActivity {
         }
     }
 
-    class MyOverlayItem extends OverlayItem {
-
-        int mBearing;
-        ArrayList<GeoPoint> zone;
-        double min_lat;
-        double min_lon;
-        double max_lat;
-        double max_lon;
-
-        public MyOverlayItem(String aUid) {
-            super(aUid, null, null, null);
-        }
-
-        void set(String title, String snippet, GeoPoint point, int bearing) {
-            mTitle = title;
-            mSnippet = snippet;
-            mGeoPoint = point;
-            mBearing = bearing;
-        }
-
-        void setZone(String s) {
-            if (s == null) {
-                zone = null;
-                return;
-            }
-            min_lat = 180;
-            min_lon = 180;
-            max_lat = -180;
-            max_lon = -180;
-            String points[] = s.split("_");
-
-            zone = new ArrayList<GeoPoint>();
-            for (String point : points) {
-                try {
-                    String[] p = point.split(",");
-                    double p_lat = Double.parseDouble(p[0]);
-                    double p_lon = Double.parseDouble(p[1]);
-                    if (p_lat < min_lat)
-                        min_lat = p_lat;
-                    if (p_lat > max_lat)
-                        max_lat = p_lat;
-                    if (p_lon < min_lon)
-                        min_lon = p_lon;
-                    if (p_lon > max_lon)
-                        max_lon = p_lon;
-                    zone.add(new GeoPoint(p_lat, p_lon));
-                } catch (Exception ex) {
-                    // ignore
-                }
-            }
-        }
-    }
-
-    class LocationOverlay extends ItemsOverlay<MyOverlayItem> {
+    static class LocationOverlay extends ItemsOverlay<MyOverlayItem> {
 
         protected final Bitmap mDirectionArrowBitmap;
         protected final double mDirectionArrowCenterX;
         protected final double mDirectionArrowCenterY;
         protected final SafePaint mPaint = new SafePaint();
 
-        public LocationOverlay(Context ctx) {
-            super(ctx);
+        public LocationOverlay(MapActivity activity) {
+            super(activity);
 
             mDirectionArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.direction_arrow);
 
@@ -828,13 +780,28 @@ public abstract class MapActivity extends ActionBarActivity {
         }
 
         @Override
-        protected boolean hitTest(MyOverlayItem item, Drawable marker, int hitX, int hitY) {
-            return hitX * hitX + hitY * hitY <= mDirectionArrowBitmap.getWidth() * mDirectionArrowBitmap.getWidth() / 4;
+        protected boolean hitTest(org.osmdroid.views.MapView mapView, MyOverlayItem item, Drawable marker, int hitX, int hitY) {
+            if (item.zone == null) {
+                double x = hitX;
+                double y = hitY;
+                double r = mDirectionArrowBitmap.getWidth() / 2;
+                boolean res = x * x + y * y <= r * r;
+                return res;
+            }
+            final org.osmdroid.views.MapView.Projection pj = mapView.getProjection();
+            Point tempPoint = new Point();
+            pj.toPixels(item.getPoint(), tempPoint);
+            Rect screenRect = pj.getScreenRect();
+
+            IGeoPoint p = pj.fromPixels(hitX + tempPoint.x - screenRect.left, hitY + tempPoint.y - screenRect.top);
+            return (p.getLatitude() >= item.min_lat) && (p.getLatitude() <= item.max_lat) &&
+                    (p.getLongitude() >= item.min_lon) && (p.getLongitude() <= item.max_lon);
         }
 
-        protected void onDrawItem(final ISafeCanvas canvas, final MyOverlayItem item, final Point curScreenCoords, final float aMapOrientation) {
+        @Override
+        protected void onDrawItem(org.osmdroid.views.MapView mapView, final ISafeCanvas canvas, final MyOverlayItem item, final Point curScreenCoords, final float aMapOrientation) {
 
-            final org.osmdroid.views.MapView.Projection pj = mMapView.getProjection();
+            final org.osmdroid.views.MapView.Projection pj = mapView.getProjection();
             Rect screenRect = pj.getScreenRect();
 
             if (item.zone != null) {
@@ -902,6 +869,59 @@ public abstract class MapActivity extends ActionBarActivity {
             canvas.restore();
         }
 
+    }
+
+    class MyOverlayItem extends OverlayItem {
+
+        int mBearing;
+        ArrayList<GeoPoint> zone;
+        double min_lat;
+        double min_lon;
+        double max_lat;
+        double max_lon;
+
+        public MyOverlayItem(String aUid) {
+            super(aUid, null, null, null);
+        }
+
+        void set(String title, String snippet, GeoPoint point, int bearing) {
+            mTitle = title;
+            mSnippet = snippet;
+            mGeoPoint = point;
+            mBearing = bearing;
+        }
+
+        void setZone(String s) {
+            if (s == null) {
+                zone = null;
+                return;
+            }
+            min_lat = 180;
+            min_lon = 180;
+            max_lat = -180;
+            max_lon = -180;
+            String points[] = s.split("_");
+
+            zone = new ArrayList<GeoPoint>();
+            for (String point : points) {
+                try {
+                    String[] p = point.split(",");
+                    double p_lat = Double.parseDouble(p[0]);
+                    double p_lon = Double.parseDouble(p[1]);
+                    if (p_lat < min_lat)
+                        min_lat = p_lat;
+                    if (p_lat > max_lat)
+                        max_lat = p_lat;
+                    if (p_lon < min_lon)
+                        min_lon = p_lon;
+                    if (p_lon > max_lon)
+                        max_lon = p_lon;
+                    zone.add(new GeoPoint(p_lat, p_lon));
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+        }
     }
 
 }

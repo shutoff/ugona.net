@@ -13,6 +13,7 @@ import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.ResourceProxyImpl;
+import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
@@ -21,6 +22,8 @@ public class MapView extends org.osmdroid.views.MapView {
     SharedPreferences preferences;
 
     MyLocationNewOverlay mLocationOverlay;
+    Overlay mTrackOverlay;
+    Overlay mPointsOverlay;
 
     Runnable mAfterLayout;
     int layout_count;
@@ -109,9 +112,9 @@ public class MapView extends org.osmdroid.views.MapView {
         int lat = (lat1 + lat2) / 2;
         int lon = (lon1 + lon2) / 2;
         int dlat = lat - lat1;
-        dlat = (int) (dlat * k);
+        dlat = (int) (dlat / k);
         int dlon = lon - lon1;
-        dlon = (int) (dlon * k);
+        dlon = (int) (dlon / k);
 
         zoomToBoundingBox(new BoundingBoxE6(lat + dlat, lon - dlon, lat - dlat, lon + dlon));
     }

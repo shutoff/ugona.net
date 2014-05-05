@@ -21,7 +21,6 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
 import org.joda.time.LocalDateTime;
-import org.osmdroid.api.IMapController;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.overlay.OverlayItem;
 
@@ -43,8 +42,6 @@ public class MapPointActivity extends MapActivity {
     DateFormat df;
     DateFormat tf;
     Cars.Car[] cars;
-    CarsOverlay mMyLocationOverlay;
-    TrackOverlay mTrackOverlay;
 
     AlarmManager alarmMgr;
     PendingIntent pi;
@@ -134,29 +131,28 @@ public class MapPointActivity extends MapActivity {
     }
 
     @Override
-    void initMap(IMapController controller) {
+    void initMap(MapView mapView) {
 
         final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
         if (cars == null)
             cars = Cars.getCars(this);
 
-        mTrackOverlay = new TrackOverlay(this);
-        mMapView.getOverlays().add(mTrackOverlay);
+        mapView.mTrackOverlay = new TrackOverlay(this);
+        mapView.getOverlays().add(mapView.mTrackOverlay);
 
-        mMyLocationOverlay = new CarsOverlay(this);
+        CarsOverlay pointsOverlay = new CarsOverlay(this);
+        mapView.mPointsOverlay = pointsOverlay;
+        pointsOverlay.setFocusItemsOnTap(true);
+        pointsOverlay.setFocusedItem(pointsOverlay.find(car_id));
+        mapView.getOverlays().add(pointsOverlay);
 
-        mMyLocationOverlay.setFocusItemsOnTap(true);
-        mMyLocationOverlay.setFocusedItem(mMyLocationOverlay.find(car_id));
-
-        mMapView.getOverlays().add(mMyLocationOverlay);
-
-        controller.setZoom(16);
-        int selected = mMyLocationOverlay.find(car_id);
+        mapView.getController().setZoom(16);
+        int selected = pointsOverlay.find(car_id);
         if (selected >= 0) {
-            MyOverlayItem item = mMyLocationOverlay.getItem(selected);
-            controller.setCenter(item.getPoint());
+            MyOverlayItem item = pointsOverlay.getItem(selected);
+            mapView.getController().setCenter(item.getPoint());
             if (item.zone != null)
-                mMapView.fitToRect(new GeoPoint(item.min_lat, item.min_lon), new GeoPoint(item.max_lat, item.max_lon), 0.7);
+                mapView.fitToRect(new GeoPoint(item.min_lat, item.min_lon), new GeoPoint(item.max_lat, item.max_lon), 0.7);
         }
         updateTrack();
     }
@@ -164,12 +160,14 @@ public class MapPointActivity extends MapActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.map) {
-            int current = mMyLocationOverlay.find(car_id);
+            MapView mapView = getMapView();
+            CarsOverlay pointsOverlay = (CarsOverlay) mapView.mPointsOverlay;
+            int current = pointsOverlay.find(car_id);
             if (current < 0)
                 return true;
-            mMyLocationOverlay.setFocusedItem(current);
-            MyOverlayItem i = mMyLocationOverlay.getItem(current);
-            mMapView.getController().setCenter(i.getPoint());
+            pointsOverlay.setFocusedItem(current);
+            MyOverlayItem i = pointsOverlay.getItem(current);
+            mapView.getController().setCenter(i.getPoint());
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -177,9 +175,11 @@ public class MapPointActivity extends MapActivity {
 
     @Override
     void updateLocation(Rect rc) {
-        int selected = mMyLocationOverlay.find(car_id);
+        MapView mapView = getMapView();
+        CarsOverlay pointsOverlay = (CarsOverlay) mapView.mPointsOverlay;
+        int selected = pointsOverlay.find(car_id);
         if (selected >= 0) {
-            MyOverlayItem item = mMyLocationOverlay.getItem(selected);
+            MyOverlayItem item = pointsOverlay.getItem(selected);
             updateLocation(rc, item);
         }
     }
@@ -188,11 +188,13 @@ public class MapPointActivity extends MapActivity {
         if (trackTask != null)
             return;
 
+        final MapView mapView = getMapView();
+        final TrackOverlay trackOverlay = (TrackOverlay) mapView.mTrackOverlay;
         boolean engine = preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false);
         boolean az = preferences.getBoolean(Names.Car.AZ + car_id, false);
         if (!engine || az) {
-            if (mTrackOverlay != null)
-                mTrackOverlay.clear();
+            if (trackOverlay != null)
+                trackOverlay.clear(mapView);
             return;
         }
 
@@ -202,9 +204,9 @@ public class MapPointActivity extends MapActivity {
                 JsonArray list = res.get("tracks").asArray();
                 if (list.size() > 0) {
                     JsonObject v = list.get(list.size() - 1).asObject();
-                    mTrackOverlay.clear();
-                    mTrackOverlay.add(v.get("track").asString());
-                    mMapView.invalidate();
+                    trackOverlay.clear(mapView);
+                    trackOverlay.add(v.get("track").asString());
+                    mapView.invalidate();
                 }
                 trackTask = null;
             }
@@ -311,7 +313,8 @@ public class MapPointActivity extends MapActivity {
     }
 
     void update() {
-        mMyLocationOverlay.update();
+        CarsOverlay pointsOverlay = (CarsOverlay) getMapView().mPointsOverlay;
+        pointsOverlay.update();
     }
 
     void setActionBar() {
@@ -337,16 +340,19 @@ public class MapPointActivity extends MapActivity {
                     if (cars[i].id.equals(car_id))
                         return true;
                     car_id = cars[i].id;
-                    int current = mMyLocationOverlay.find(car_id);
+                    MapView mapView = getMapView();
+                    CarsOverlay pointsOverlay = (CarsOverlay) mapView.mPointsOverlay;
+                    int current = pointsOverlay.find(car_id);
                     if (current < 0)
                         return true;
-                    mMyLocationOverlay.setFocusedItem(current);
-                    MyOverlayItem item = mMyLocationOverlay.getItem(current);
-                    mMapView.getController().setCenter(item.getPoint());
+                    pointsOverlay.setFocusedItem(current);
+                    MyOverlayItem item = pointsOverlay.getItem(current);
+                    mapView.getController().setCenter(item.getPoint());
                     if (item.zone != null)
-                        mMapView.fitToRect(new GeoPoint(item.min_lat, item.min_lon), new GeoPoint(item.max_lat, item.max_lon), 0.7);
+                        mapView.fitToRect(new GeoPoint(item.min_lat, item.min_lon), new GeoPoint(item.max_lat, item.max_lon), 0.7);
                     trackTask = null;
-                    mTrackOverlay.clear();
+                    TrackOverlay trackOverlay = (TrackOverlay) mapView.mTrackOverlay;
+                    trackOverlay.clear(mapView);
                     updateTrack();
                     return true;
                 }
@@ -369,8 +375,8 @@ public class MapPointActivity extends MapActivity {
 
     class CarsOverlay extends LocationOverlay {
 
-        public CarsOverlay(Context ctx) {
-            super(ctx);
+        public CarsOverlay(MapActivity activity) {
+            super(activity);
             for (Cars.Car car : cars) {
                 MyOverlayItem item = new MyOverlayItem(car.id);
                 if (updateItem(item))

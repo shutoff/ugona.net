@@ -20,9 +20,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import org.osmdroid.api.IGeoPoint;
-import org.osmdroid.api.IMapController;
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.SafeDrawOverlay;
 import org.osmdroid.views.safecanvas.ISafeCanvas;
 import org.osmdroid.views.safecanvas.SafePaint;
@@ -119,21 +117,37 @@ public class ZoneEdit extends MapActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.delete) {
-            clear_zone = true;
-            finish();
-            return true;
+        switch (item.getItemId()) {
+            case R.id.delete:
+                clear_zone = true;
+                finish();
+                return true;
+            case R.id.map:
+                MapView mapView = getMapView();
+                mapView.getController().setZoom(16);
+                mapView.fitToRect(new GeoPoint(zone.lat1, zone.lng1), new GeoPoint(zone.lat2, zone.lng2), 0.5);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    void initMap(IMapController controller) {
+    void initMap(MapView mapView) {
         GeoPoint center = new GeoPoint((zone.lat1 + zone.lat2) / 2, (zone.lng1 + zone.lng2) / 2);
-        controller.setCenter(center);
-        controller.setZoom(16);
-        mMapView.fitToRect(new GeoPoint(zone.lat1, zone.lng1), new GeoPoint(zone.lat2, zone.lng2), 0.5);
-        mMapView.getOverlays().add(new RectOverlay(this));
+        mapView.getController().setCenter(center);
+        mapView.getController().setZoom(16);
+        mapView.fitToRect(new GeoPoint(zone.lat1, zone.lng1), new GeoPoint(zone.lat2, zone.lng2), 0.5);
+        mapView.mPointsOverlay = new RectOverlay(this, zone);
+        mapView.getOverlays().add(mapView.mPointsOverlay);
+    }
+
+    @Override
+    void initUI() {
+        super.initUI();
+        if (getMapView().mPointsOverlay != null) {
+            RectOverlay rectOverlay = (RectOverlay) getMapView().mPointsOverlay;
+            rectOverlay.m_zone = zone;
+        }
     }
 
     @Override
@@ -194,7 +208,35 @@ public class ZoneEdit extends MapActivity {
         zone.sms = chkSms.isChecked();
     }
 
-    class RectOverlay extends SafeDrawOverlay {
+    @Override
+    void updateLocation(Rect rc) {
+        double lat1 = zone.lat1;
+        double lat2 = zone.lat2;
+        if (lat2 > lat1) {
+            lat1 = zone.lat2;
+            lat2 = zone.lat1;
+        }
+        double lon1 = zone.lng1;
+        double lon2 = zone.lng2;
+        if (lon2 > lon1) {
+            lon1 = zone.lng2;
+            lon2 = zone.lng1;
+        }
+        int x1 = (int) (lat1 * 1000000);
+        int x2 = (int) (lat2 * 1000000);
+        int y1 = (int) (lon1 * 1000000);
+        int y2 = (int) (lon2 * 1000000);
+        if (rc.left > x1)
+            rc.left = x1;
+        if (rc.right < x2)
+            rc.right = x2;
+        if (rc.bottom > y1)
+            rc.bottom = y1;
+        if (rc.top < y2)
+            rc.top = y2;
+    }
+
+    static class RectOverlay extends SafeDrawOverlay {
 
         SafePaint mPaint = new SafePaint();
         SafeTranslatedPath mPath = new SafeTranslatedPath();
@@ -207,23 +249,26 @@ public class ZoneEdit extends MapActivity {
         int x_state;
         int y_state;
 
-        public RectOverlay(Context ctx) {
+        SettingActivity.Zone m_zone;
+
+        public RectOverlay(Context ctx, SettingActivity.Zone zone) {
             super(ctx);
+            m_zone = zone;
             mPaint.setColor(Color.rgb(255, 0, 0));
             mPaint.setStrokeWidth(2);
-            width = (int) (getResources().getDisplayMetrics().density * 6);
+            width = (int) (ctx.getResources().getDisplayMetrics().density * 6);
         }
 
         @Override
-        protected void drawSafe(ISafeCanvas c, MapView mapView, boolean shadow) {
+        protected void drawSafe(ISafeCanvas c, org.osmdroid.views.MapView osmv, boolean shadow) {
             if (shadow)
                 return;
-            final org.osmdroid.views.MapView.Projection pj = mapView.getProjection();
+            final org.osmdroid.views.MapView.Projection pj = osmv.getProjection();
             Rect screenRect = pj.getScreenRect();
             Point p0 = new Point();
-            pj.toPixels(new GeoPoint(zone.lat1, zone.lng1), p0);
+            pj.toPixels(new GeoPoint(m_zone.lat1, m_zone.lng1), p0);
             Point p1 = new Point();
-            pj.toPixels(new GeoPoint(zone.lat2, zone.lng2), p1);
+            pj.toPixels(new GeoPoint(m_zone.lat2, m_zone.lng2), p1);
             int x1 = p0.x - screenRect.left;
             int y1 = p0.y - screenRect.top;
             int x2 = p1.x - screenRect.left;
@@ -244,21 +289,21 @@ public class ZoneEdit extends MapActivity {
         }
 
         @Override
-        public boolean onDown(MotionEvent e, MapView mapView) {
+        public boolean onDown(MotionEvent e, org.osmdroid.views.MapView mapView) {
             float x = e.getX();
             float y = e.getY();
             final org.osmdroid.views.MapView.Projection pj = mapView.getProjection();
-            double min_lat = zone.lat1;
-            double max_lat = zone.lat2;
+            double min_lat = m_zone.lat1;
+            double max_lat = m_zone.lat2;
             if (max_lat < min_lat) {
-                min_lat = zone.lat2;
-                max_lat = zone.lat1;
+                min_lat = m_zone.lat2;
+                max_lat = m_zone.lat1;
             }
-            double min_lng = zone.lng1;
-            double max_lng = zone.lng2;
+            double min_lng = m_zone.lng1;
+            double max_lng = m_zone.lng2;
             if (max_lng < min_lng) {
-                min_lng = zone.lng2;
-                max_lng = zone.lng1;
+                min_lng = m_zone.lng2;
+                max_lng = m_zone.lng1;
             }
             Rect screenRect = pj.getScreenRect();
             Point p0 = new Point();
@@ -293,7 +338,7 @@ public class ZoneEdit extends MapActivity {
         }
 
         @Override
-        public boolean onScroll(MotionEvent pEvent1, MotionEvent pEvent2, float pDistanceX, float pDistanceY, MapView pMapView) {
+        public boolean onScroll(MotionEvent pEvent1, MotionEvent pEvent2, float pDistanceX, float pDistanceY, org.osmdroid.views.MapView pMapView) {
             if ((x_state == 0) || (y_state == 0))
                 return false;
             final org.osmdroid.views.MapView.Projection pj = pMapView.getProjection();
@@ -314,12 +359,12 @@ public class ZoneEdit extends MapActivity {
                 y2 -= pDistanceY;
             }
             IGeoPoint r = pj.fromPixels(x1, y1);
-            zone.lat2 = r.getLatitude();
-            zone.lng1 = r.getLongitude();
+            m_zone.lat2 = r.getLatitude();
+            m_zone.lng1 = r.getLongitude();
             r = pj.fromPixels(x2, y2);
-            zone.lat1 = r.getLatitude();
-            zone.lng2 = r.getLongitude();
-            mMapView.postInvalidate();
+            m_zone.lat1 = r.getLatitude();
+            m_zone.lng2 = r.getLongitude();
+            pMapView.postInvalidate();
             return true;
         }
     }

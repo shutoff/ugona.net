@@ -11,7 +11,6 @@ import android.view.ViewConfiguration;
 import android.widget.Toast;
 
 import org.joda.time.LocalDateTime;
-import org.osmdroid.api.IMapController;
 import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.overlay.OverlayItem;
@@ -30,8 +29,6 @@ import java.util.Vector;
 
 public class TrackActivity extends MapActivity {
 
-    TrackOverlay mTrackOverlay;
-    ItemsOverlay<OverlayItem> mPointsOverlay;
     Vector<Track> tracks;
     OverlayItem mTrackItem;
     int track_limit;
@@ -55,7 +52,7 @@ public class TrackActivity extends MapActivity {
     }
 
     @Override
-    void initMap(IMapController controller) {
+    void initMap(final MapView mapView) {
         try {
             byte[] track_data;
             String file_name = getIntent().getStringExtra(Names.TRACK_FILE);
@@ -78,49 +75,13 @@ public class TrackActivity extends MapActivity {
             finish();
         }
 
-        mTrackOverlay = new TrackOverlay(this) {
-            @Override
-            void showBaloon(int dist, int track_index, int point_index, int pos) {
-                if (dist > track_limit) {
-                    if (mTrackItem == null)
-                        return;
-                    if (mPointsOverlay.getFocusedItem() == mTrackItem)
-                        mPointsOverlay.unSetFocusedItem();
-                    mPointsOverlay.removeItem(mTrackItem);
-                    mTrackItem = null;
-                    mMapView.invalidate();
-                    return;
-                }
-                if (tracks == null)
-                    return;
-                TrackPoint p1 = tracks.get(track_index).get(point_index);
-                TrackPoint p2 = tracks.get(track_index).get(point_index + 1);
-                int lat1 = p1.point.getLatitudeE6();
-                int lon1 = p1.point.getLongitudeE6();
-                int lat2 = p2.point.getLatitudeE6();
-                int lon2 = p2.point.getLongitudeE6();
-                DateFormat tf = android.text.format.DateFormat.getTimeFormat(mMapView.getContext());
-                String title = tf.format(p1.time + (p2.time - p1.time) * pos / 1000);
-                String snippet = (p1.speed + (p2.speed - p1.speed) * pos / 1000) + " " + mMapView.getContext().getString(R.string.kmh);
-                if (mTrackItem != null)
-                    mPointsOverlay.removeItem(mTrackItem);
-                mTrackItem = new OverlayItem(title, snippet, new GeoPoint(lat1 + (lat2 - lat1) * pos / 1000, lon1 + (lon2 - lon1) * pos / 1000));
-                mPointsOverlay.addItem(mTrackItem);
-                mPointsOverlay.setFocusedItem(mPointsOverlay.size() - 1);
-                mMapView.invalidate();
-            }
-        };
-        for (Track track : tracks) {
-            mTrackOverlay.add(track.track);
-        }
-
-        mPointsOverlay = new ItemsOverlay<OverlayItem>(this) {
+        final ItemsOverlay<OverlayItem> pointsOverlay = new ItemsOverlay<OverlayItem>(this) {
             @Override
             void onChangeFocus() {
                 if (getFocusedItem() != mTrackItem) {
                     removeItem(mTrackItem);
                     mTrackItem = null;
-                    mMapView.invalidate();
+                    mapView.invalidate();
                 }
             }
         };
@@ -197,30 +158,69 @@ public class TrackActivity extends MapActivity {
                     title.append(" ");
                 }
                 OverlayItem item = new OverlayItem(title.toString(), marker.address, new GeoPoint(marker.latitude, marker.longitude));
-                mPointsOverlay.addItem(item);
+                pointsOverlay.addItem(item);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        mPointsOverlay.setFocusItemsOnTap(true);
+        pointsOverlay.setFocusItemsOnTap(true);
 
-        mMapView.getOverlays().add(mTrackOverlay);
-        mMapView.getOverlays().add(mPointsOverlay);
+        TrackOverlay trackOverlay = new TrackOverlay(this) {
+            @Override
+            void showBaloon(int dist, int track_index, int point_index, int pos) {
+                if (dist > track_limit) {
+                    if (mTrackItem == null)
+                        return;
+                    if (pointsOverlay.getFocusedItem() == mTrackItem)
+                        pointsOverlay.unSetFocusedItem();
+                    pointsOverlay.removeItem(mTrackItem);
+                    mTrackItem = null;
+                    mapView.invalidate();
+                    return;
+                }
+                if (tracks == null)
+                    return;
+                TrackPoint p1 = tracks.get(track_index).get(point_index);
+                TrackPoint p2 = tracks.get(track_index).get(point_index + 1);
+                int lat1 = p1.point.getLatitudeE6();
+                int lon1 = p1.point.getLongitudeE6();
+                int lat2 = p2.point.getLatitudeE6();
+                int lon2 = p2.point.getLongitudeE6();
+                DateFormat tf = android.text.format.DateFormat.getTimeFormat(mapView.getContext());
+                String title = tf.format(p1.time + (p2.time - p1.time) * pos / 1000);
+                String snippet = (p1.speed + (p2.speed - p1.speed) * pos / 1000) + " " + mapView.getContext().getString(R.string.kmh);
+                if (mTrackItem != null)
+                    pointsOverlay.removeItem(mTrackItem);
+                mTrackItem = new OverlayItem(title, snippet, new GeoPoint(lat1 + (lat2 - lat1) * pos / 1000, lon1 + (lon2 - lon1) * pos / 1000));
+                pointsOverlay.addItem(mTrackItem);
+                pointsOverlay.setFocusedItem(pointsOverlay.size() - 1);
+                mapView.invalidate();
+            }
+        };
+        for (Track track : tracks) {
+            trackOverlay.add(track.track);
+        }
 
-        mMapView.getController().setZoom(mMapView.getMaxZoomLevel());
-        mMapView.fitToRect(new GeoPoint(mTrackOverlay.min_lat, mTrackOverlay.min_lon), new GeoPoint(mTrackOverlay.max_lat, mTrackOverlay.max_lon), 0.75);
+        mapView.getOverlays().add(trackOverlay);
+        mapView.getOverlays().add(pointsOverlay);
+        mapView.mPointsOverlay = pointsOverlay;
+        mapView.mTrackOverlay = trackOverlay;
+
+        mapView.getController().setZoom(mapView.getMaxZoomLevel());
+        mapView.fitToRect(new GeoPoint(trackOverlay.min_lat, trackOverlay.min_lon), new GeoPoint(trackOverlay.max_lat, trackOverlay.max_lon), 0.75);
     }
 
     @Override
     void updateLocation(Rect rc) {
-        if (mTrackOverlay.min_lat < rc.left)
-            rc.left = (int) (mTrackOverlay.min_lat * 1000000);
-        if (mTrackOverlay.min_lon < rc.top)
-            rc.top = (int) (mTrackOverlay.min_lon * 1000000);
-        if (mTrackOverlay.max_lat < rc.right)
-            rc.right = (int) (mTrackOverlay.max_lat * 1000000);
-        if (mTrackOverlay.max_lon < rc.bottom)
-            rc.bottom = (int) (mTrackOverlay.max_lon * 1000000);
+        TrackOverlay trackOverlay = (TrackOverlay) getMapView().mTrackOverlay;
+        if (trackOverlay.min_lat < rc.left)
+            rc.left = (int) (trackOverlay.min_lat * 1000000);
+        if (trackOverlay.min_lon < rc.top)
+            rc.top = (int) (trackOverlay.min_lon * 1000000);
+        if (trackOverlay.max_lat < rc.right)
+            rc.right = (int) (trackOverlay.max_lat * 1000000);
+        if (trackOverlay.max_lon < rc.bottom)
+            rc.bottom = (int) (trackOverlay.max_lon * 1000000);
     }
 
     @Override
@@ -232,12 +232,14 @@ public class TrackActivity extends MapActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.traffic:
-                mTrackOverlay.show_speed = !mTrackOverlay.show_speed;
+                MapView mapView = getMapView();
+                TrackOverlay trackOverlay = (TrackOverlay) mapView.mTrackOverlay;
+                trackOverlay.show_speed = !trackOverlay.show_speed;
                 SharedPreferences.Editor ed = preferences.edit();
-                ed.putBoolean(TRAFFIC, !preferences.getBoolean(TRAFFIC, mTrackOverlay.show_speed));
+                ed.putBoolean(TRAFFIC, !preferences.getBoolean(TRAFFIC, trackOverlay.show_speed));
                 ed.commit();
                 updateMenu();
-                mMapView.invalidate();
+                mapView.invalidate();
                 return true;
             case R.id.save:
                 saveTrack(true);
@@ -250,7 +252,7 @@ public class TrackActivity extends MapActivity {
     }
 
     File saveTrack(boolean show_toast) {
-        BoundingBoxE6 box = mMapView.getBoundingBox();
+        BoundingBoxE6 box = getMapView().getBoundingBox();
         double min_lat = box.getLatSouthE6() / 1000000.;
         double max_lat = box.getLatNorthE6() / 1000000.;
         double min_lon = box.getLonEastE6() / 1000000.;

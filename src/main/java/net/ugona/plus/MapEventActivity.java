@@ -1,20 +1,18 @@
 package net.ugona.plus;
 
 import android.graphics.Rect;
+import android.view.MenuItem;
 
-import org.osmdroid.api.IMapController;
 import org.osmdroid.util.GeoPoint;
 
 public class MapEventActivity extends MapActivity {
 
-    LocationOverlay myLocationOverlay;
-
     @Override
-    void initMap(IMapController controller) {
+    void initMap(MapView mapView) {
         String car_id = getIntent().getStringExtra(Names.ID);
         String data = getIntent().getStringExtra(Names.POINT_DATA);
         String[] parts = data.split(";");
-        myLocationOverlay = new LocationOverlay(this);
+        LocationOverlay pointsOverlay = new LocationOverlay(this);
         MyOverlayItem item = new MyOverlayItem("");
         String p = parts[3];
         int index = p.indexOf("\n");
@@ -28,24 +26,37 @@ public class MapEventActivity extends MapActivity {
         item.set(p.substring(0, index), p.substring(index + 1), point, course);
         if (parts.length > 4)
             item.setZone(parts[4]);
-        myLocationOverlay.addItem(item);
-        myLocationOverlay.setFocusItemsOnTap(true);
-        myLocationOverlay.setFocusedItem(0);
-        mMapView.getOverlays().add(myLocationOverlay);
-        mMapView.getController().setZoom(16);
-        mMapView.getController().setCenter(point);
+        pointsOverlay.addItem(item);
+        pointsOverlay.setFocusItemsOnTap(true);
+        pointsOverlay.setFocusedItem(0);
+        mapView.getOverlays().add(pointsOverlay);
+        mapView.mPointsOverlay = pointsOverlay;
+        mapView.getController().setZoom(16);
+        mapView.getController().setCenter(point);
         if (item.zone != null)
-            mMapView.fitToRect(new GeoPoint(item.min_lat, item.min_lon), new GeoPoint(item.max_lat, item.max_lon), 0.7);
+            mapView.fitToRect(new GeoPoint(item.min_lat, item.min_lon), new GeoPoint(item.max_lat, item.max_lon), 0.7);
     }
 
     @Override
     void updateLocation(Rect rc) {
-        MyOverlayItem item = myLocationOverlay.getItem(0);
+        LocationOverlay pointsOverlay = (LocationOverlay) getMapView().mPointsOverlay;
+        MyOverlayItem item = pointsOverlay.getItem(0);
         updateLocation(rc, item);
     }
 
     @Override
     int menuId() {
         return R.menu.map;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.map) {
+            LocationOverlay pointsOverlay = (LocationOverlay) getMapView().mPointsOverlay;
+            MyOverlayItem i = pointsOverlay.getItem(0);
+            getMapView().getController().setCenter(i.getPoint());
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
