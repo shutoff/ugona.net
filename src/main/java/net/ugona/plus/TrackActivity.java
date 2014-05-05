@@ -2,6 +2,7 @@ package net.ugona.plus;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -207,7 +208,19 @@ public class TrackActivity extends MapActivity {
         mMapView.getOverlays().add(mPointsOverlay);
 
         mMapView.getController().setZoom(mMapView.getMaxZoomLevel());
-        mMapView.fitToRect(new GeoPoint(mTrackOverlay.min_lat, mTrackOverlay.min_lon), new GeoPoint(mTrackOverlay.max_lat, mTrackOverlay.max_lon), 750);
+        mMapView.fitToRect(new GeoPoint(mTrackOverlay.min_lat, mTrackOverlay.min_lon), new GeoPoint(mTrackOverlay.max_lat, mTrackOverlay.max_lon), 0.75);
+    }
+
+    @Override
+    void updateLocation(Rect rc) {
+        if (mTrackOverlay.min_lat < rc.left)
+            rc.left = (int) (mTrackOverlay.min_lat * 1000000);
+        if (mTrackOverlay.min_lon < rc.top)
+            rc.top = (int) (mTrackOverlay.min_lon * 1000000);
+        if (mTrackOverlay.max_lat < rc.right)
+            rc.right = (int) (mTrackOverlay.max_lat * 1000000);
+        if (mTrackOverlay.max_lon < rc.bottom)
+            rc.bottom = (int) (mTrackOverlay.max_lon * 1000000);
     }
 
     @Override

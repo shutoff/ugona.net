@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
@@ -155,7 +156,7 @@ public class MapPointActivity extends MapActivity {
             MyOverlayItem item = mMyLocationOverlay.getItem(selected);
             controller.setCenter(item.getPoint());
             if (item.zone != null)
-                mMapView.fitToRect(new GeoPoint(item.min_lat, item.min_lon), new GeoPoint(item.max_lat, item.max_lon), 700);
+                mMapView.fitToRect(new GeoPoint(item.min_lat, item.min_lon), new GeoPoint(item.max_lat, item.max_lon), 0.7);
         }
         updateTrack();
     }
@@ -172,6 +173,15 @@ public class MapPointActivity extends MapActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    void updateLocation(Rect rc) {
+        int selected = mMyLocationOverlay.find(car_id);
+        if (selected >= 0) {
+            MyOverlayItem item = mMyLocationOverlay.getItem(selected);
+            updateLocation(rc, item);
+        }
     }
 
     void updateTrack() {
@@ -334,7 +344,7 @@ public class MapPointActivity extends MapActivity {
                     MyOverlayItem item = mMyLocationOverlay.getItem(current);
                     mMapView.getController().setCenter(item.getPoint());
                     if (item.zone != null)
-                        mMapView.fitToRect(new GeoPoint(item.min_lat, item.min_lon), new GeoPoint(item.max_lat, item.max_lon), 700);
+                        mMapView.fitToRect(new GeoPoint(item.min_lat, item.min_lon), new GeoPoint(item.max_lat, item.max_lon), 0.7);
                     trackTask = null;
                     mTrackOverlay.clear();
                     updateTrack();
