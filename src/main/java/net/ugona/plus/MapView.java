@@ -43,7 +43,7 @@ public class MapView extends org.osmdroid.views.MapView {
             final String[] tiles_urls = {
                     "http://otile1.mqcdn.com/tiles/1.0.0/osm/"
             };
-            return new XYTileSource("mqcdn", ResourceProxy.string.mapnik, 1, 18, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
+            return new XYTileSource("mqcdn", ResourceProxy.string.mapnik, 1, 17, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
         }
         final String[] tiles_urls = {
                 "http://mt0.google.com/vt/lyrs=m&hl=ru&x=%s&y=%s&z=%s&s=Galileo",
@@ -51,7 +51,7 @@ public class MapView extends org.osmdroid.views.MapView {
                 "http://mt2.google.com/vt/lyrs=m&hl=ru&x=%s&y=%s&z=%s&s=Galileo",
                 "http://mt3.google.com/vt/lyrs=m&hl=ru&x=%s&y=%s&z=%s&s=Galileo"
         };
-        return new myTileSource("google", ResourceProxy.string.mapnik, 1, 18, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
+        return new myTileSource("google", ResourceProxy.string.mapnik, 1, 17, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
     }
 
     @Override

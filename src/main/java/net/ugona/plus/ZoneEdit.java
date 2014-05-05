@@ -269,20 +269,20 @@ public class ZoneEdit extends MapActivity {
             y1 = p1.y - screenRect.top;
             x2 = p1.x - screenRect.left;
             y2 = p0.y - screenRect.top;
-            if ((x < x1 - width) || (x >= x2 + width)) {
+            if ((x < x1 - width) || (x > x2 + width)) {
                 x_state = 0;
-            } else if (x < x1 + width) {
+            } else if (x < x1 + width * 2) {
                 x_state = 1;
-            } else if (x > x2 - width) {
+            } else if (x > x2 - width * 2) {
                 x_state = 2;
             } else {
                 x_state = 3;
             }
-            if ((y < y1 - width) || (y >= y2 + width)) {
+            if ((y < y1 - width) || (y > y2 + width)) {
                 y_state = 0;
-            } else if (y < y1 + width) {
+            } else if (y < y1 + width * 2) {
                 y_state = 1;
-            } else if (y > y2 - width) {
+            } else if (y > y2 - width * 2) {
                 y_state = 2;
             } else {
                 y_state = 3;
