@@ -1,5 +1,7 @@
 package net.ugona.plus;
 
+import android.graphics.Rect;
+
 import org.osmdroid.api.IMapController;
 import org.osmdroid.util.GeoPoint;
 
@@ -27,12 +29,19 @@ public class MapEventActivity extends MapActivity {
         if (parts.length > 4)
             item.setZone(parts[4]);
         myLocationOverlay.addItem(item);
+        myLocationOverlay.setFocusItemsOnTap(true);
         myLocationOverlay.setFocusedItem(0);
         mMapView.getOverlays().add(myLocationOverlay);
         mMapView.getController().setZoom(16);
         mMapView.getController().setCenter(point);
         if (item.zone != null)
-            mMapView.fitToRect(new GeoPoint(item.min_lat, item.min_lon), new GeoPoint(item.max_lat, item.max_lon), 700);
+            mMapView.fitToRect(new GeoPoint(item.min_lat, item.min_lon), new GeoPoint(item.max_lat, item.max_lon), 0.7);
+    }
+
+    @Override
+    void updateLocation(Rect rc) {
+        MyOverlayItem item = myLocationOverlay.getItem(0);
+        updateLocation(rc, item);
     }
 
     @Override

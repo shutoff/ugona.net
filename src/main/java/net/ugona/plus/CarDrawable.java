@@ -115,7 +115,7 @@ public class CarDrawable {
             if (az && engine) {
                 upd |= setLayer(4, white ? 24 : 23);
             } else if (Preferences.getRele(preferences, car_id)) {
-                upd |= setLayer(4, white ? 34 : 33);
+                upd |= setLayer(4, white ? 35 : 34);
             } else {
                 int ignition_id = 0;
                 if (!az && (preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false)))

@@ -132,7 +132,7 @@ public class ZoneEdit extends MapActivity {
         GeoPoint center = new GeoPoint((zone.lat1 + zone.lat2) / 2, (zone.lng1 + zone.lng2) / 2);
         controller.setCenter(center);
         controller.setZoom(16);
-        mMapView.fitToRect(new GeoPoint(zone.lat1, zone.lng1), new GeoPoint(zone.lat2, zone.lng2), 500);
+        mMapView.fitToRect(new GeoPoint(zone.lat1, zone.lng1), new GeoPoint(zone.lat2, zone.lng2), 0.5);
         mMapView.getOverlays().add(new RectOverlay(this));
     }
 

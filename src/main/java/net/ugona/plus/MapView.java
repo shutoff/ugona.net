@@ -90,7 +90,7 @@ public class MapView extends org.osmdroid.views.MapView {
         return mLocationOverlay.getMyLocation();
     }
 
-    void fitToRect(IGeoPoint p1, IGeoPoint p2, int k) {
+    void fitToRect(IGeoPoint p1, IGeoPoint p2, double k) {
         int lat1 = p1.getLatitudeE6();
         int lat2 = p2.getLatitudeE6();
         if (lat1 > lat2) {
@@ -108,8 +108,10 @@ public class MapView extends org.osmdroid.views.MapView {
         }
         int lat = (lat1 + lat2) / 2;
         int lon = (lon1 + lon2) / 2;
-        int dlat = (lat - lat1) * 1000 / k;
-        int dlon = (lon - lon1) * 1000 / k;
+        int dlat = lat - lat1;
+        dlat = (int) (dlat * k);
+        int dlon = lon - lon1;
+        dlon = (int) (dlon * k);
 
         zoomToBoundingBox(new BoundingBoxE6(lat + dlat, lon - dlon, lat - dlat, lon + dlon));
     }

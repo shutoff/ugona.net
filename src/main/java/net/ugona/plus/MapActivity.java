@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -43,7 +42,6 @@ import org.osmdroid.tileprovider.modules.TileWriter;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.util.SimpleRegisterReceiver;
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.util.TileSystem;
 import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
@@ -51,7 +49,6 @@ import org.osmdroid.views.overlay.SafeDrawOverlay;
 import org.osmdroid.views.safecanvas.ISafeCanvas;
 import org.osmdroid.views.safecanvas.SafePaint;
 import org.osmdroid.views.safecanvas.SafeTranslatedPath;
-import org.osmdroid.views.util.constants.MapViewConstants;
 
 import java.util.ArrayList;
 import java.util.Vector;
@@ -130,7 +127,9 @@ public abstract class MapActivity extends ActionBarActivity {
                     toast.show();
                     return true;
                 }
-                mMapView.getController().setCenter(myLocation);
+                final Rect rc = new Rect(myLocation.getLatitudeE6(), myLocation.getLongitudeE6(), myLocation.getLatitudeE6(), myLocation.getLongitudeE6());
+                updateLocation(rc);
+                mMapView.fitToRect(new GeoPoint(rc.left, rc.top), new GeoPoint(rc.right, rc.bottom), 0.9);
                 break;
             }
             case R.id.google: {
@@ -151,6 +150,34 @@ public abstract class MapActivity extends ActionBarActivity {
             }
         }
         return false;
+    }
+
+    void updateLocation(final Rect rc) {
+
+    }
+
+    void updateLocation(final Rect rc, MyOverlayItem item) {
+        if (item.zone != null) {
+            GeoPoint p1 = new GeoPoint(item.min_lat, item.min_lon);
+            if (rc.left > p1.getLatitudeE6())
+                rc.left = p1.getLatitudeE6();
+            if (rc.bottom > p1.getLongitudeE6())
+                rc.bottom = p1.getLongitudeE6();
+            GeoPoint p2 = new GeoPoint(item.max_lat, item.max_lon);
+            if (rc.right < p2.getLatitudeE6())
+                rc.right = p2.getLatitudeE6();
+            if (rc.top < p2.getLongitudeE6())
+                rc.top = p2.getLongitudeE6();
+        } else {
+            if (rc.left > item.getPoint().getLatitudeE6())
+                rc.left = item.getPoint().getLatitudeE6();
+            if (rc.top > item.getPoint().getLongitudeE6())
+                rc.top = item.getPoint().getLongitudeE6();
+            if (rc.right < item.getPoint().getLatitudeE6())
+                rc.right = item.getPoint().getLatitudeE6();
+            if (rc.bottom < item.getPoint().getLongitudeE6())
+                rc.bottom = item.getPoint().getLongitudeE6();
+        }
     }
 
     void initUI() {
@@ -230,12 +257,13 @@ public abstract class MapActivity extends ActionBarActivity {
         public int DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT = 2;
         protected int DESCRIPTION_MAXWIDTH = 200;
         DisplayMetrics displayMetrics;
+        Rect baloonRect;
 
         public ItemsOverlay(Context ctx) {
             super(new Vector<Item>(), new OnItemGestureListener<Item>() {
                 @Override
                 public boolean onItemSingleTapUp(int index, Item item) {
-                    return false;
+                    return true;
                 }
 
                 @Override
@@ -264,10 +292,20 @@ public abstract class MapActivity extends ActionBarActivity {
         @Override
         public boolean onSingleTapConfirmed(MotionEvent event, org.osmdroid.views.MapView mapView) {
             int focusedIndex = mFocusedItemIndex;
+            if (focusedIndex != NOT_SET) {
+                int x = (int) event.getX();
+                int y = (int) event.getY();
+                if ((baloonRect != null) && baloonRect.contains(x, y))
+                    return true;
+            }
             boolean res = super.onSingleTapConfirmed(event, mapView);
             if (mFocusedItemIndex != focusedIndex) {
                 onChangeFocus();
                 return true;
+            }
+            if (!res && (mFocusedItemIndex != NOT_SET)) {
+                unSetFocusedItem();
+                mapView.invalidate();
             }
             return res;
         }
@@ -439,6 +477,9 @@ public abstract class MapActivity extends ActionBarActivity {
                     this.mDescriptionPaint
             );
             this.mMarkerBackgroundPaint.setColor(this.mMarkerFocusedBackgroundColor);
+            baloonRect = new Rect(descBoxLeft, descBoxTop, descBoxRight, descBoxBottom);
+            final Rect screenRect = osmv.getProjection().getIntrinsicScreenRect();
+            baloonRect.offset(-screenRect.left, -screenRect.top);
             c.drawRoundRect(new RectF(descBoxLeft, descBoxTop, descBoxRight, descBoxBottom),
                     DESCRIPTION_BOX_CORNERWIDTH, DESCRIPTION_BOX_CORNERWIDTH,
                     this.mMarkerBackgroundPaint);
@@ -771,8 +812,6 @@ public abstract class MapActivity extends ActionBarActivity {
         protected final double mDirectionArrowCenterX;
         protected final double mDirectionArrowCenterY;
         protected final SafePaint mPaint = new SafePaint();
-        private final float[] mMatrixValues = new float[9];
-        private final Matrix mMatrix = new Matrix();
 
         public LocationOverlay(Context ctx) {
             super(ctx);
@@ -788,23 +827,26 @@ public abstract class MapActivity extends ActionBarActivity {
             return false;
         }
 
+        @Override
+        protected boolean hitTest(MyOverlayItem item, Drawable marker, int hitX, int hitY) {
+            return hitX * hitX + hitY * hitY <= mDirectionArrowBitmap.getWidth() * mDirectionArrowBitmap.getWidth() / 4;
+        }
+
         protected void onDrawItem(final ISafeCanvas canvas, final MyOverlayItem item, final Point curScreenCoords, final float aMapOrientation) {
 
             final org.osmdroid.views.MapView.Projection pj = mMapView.getProjection();
+            Rect screenRect = pj.getScreenRect();
+
             if (item.zone != null) {
-                Rect screenRect = pj.getScreenRect();
 
                 Point screenPoint0 = null; // points on screen
                 Point screenPoint1;
                 GeoPoint projectedPoint0; // points from the points list
                 GeoPoint projectedPoint1;
 
-                // clipping rectangle in the intermediate projection, to avoid performing projection.
-                final Rect clipBounds = pj.fromPixelsToProjected(pj.getScreenRect());
                 int size = item.zone.size();
 
                 SafeTranslatedPath mPath = new SafeTranslatedPath();
-                Rect mLineBounds = new Rect();
 
                 Point mTempPoint1 = new Point();
                 Point mTempPoint2 = new Point();
@@ -840,7 +882,6 @@ public abstract class MapActivity extends ActionBarActivity {
                 }
                 mPath.close();
 
-
                 SafePaint mPaint = new SafePaint();
                 mPaint.setColor(Color.rgb(255, 0, 0));
                 mPaint.setStrokeWidth(4);
@@ -853,33 +894,14 @@ public abstract class MapActivity extends ActionBarActivity {
                 return;
             }
 
-            Point mapCoords = new Point();
-            TileSystem.LatLongToPixelXY(item.getPoint().getLatitude(), item.getPoint().getLongitude(),
-                    MapViewConstants.MAXIMUM_ZOOMLEVEL, mapCoords);
-            final int worldSize_2 = TileSystem.MapSize(MapViewConstants.MAXIMUM_ZOOMLEVEL) / 2;
-            mapCoords.offset(-worldSize_2, -worldSize_2);
-
-            final int zoomDiff = MapViewConstants.MAXIMUM_ZOOMLEVEL - pj.getZoomLevel();
-
-            canvas.getMatrix(mMatrix);
-            mMatrix.getValues(mMatrixValues);
-
-            float scaleX = (float) Math.sqrt(mMatrixValues[Matrix.MSCALE_X]
-                    * mMatrixValues[Matrix.MSCALE_X] + mMatrixValues[Matrix.MSKEW_Y]
-                    * mMatrixValues[Matrix.MSKEW_Y]);
-            float scaleY = (float) Math.sqrt(mMatrixValues[Matrix.MSCALE_Y]
-                    * mMatrixValues[Matrix.MSCALE_Y] + mMatrixValues[Matrix.MSKEW_X]
-                    * mMatrixValues[Matrix.MSKEW_X]);
-            final double x = mapCoords.x >> zoomDiff;
-            final double y = mapCoords.y >> zoomDiff;
-
+            Point mTempPoint = new Point();
+            Point screenPoint = pj.toPixels(item.getPoint(), mTempPoint);
             canvas.save();
-            canvas.rotate(item.mBearing, x, y);
-            canvas.scale(1 / scaleX, 1 / scaleY, x, y);
-            canvas.drawBitmap(mDirectionArrowBitmap, x - mDirectionArrowCenterX, y
-                    - mDirectionArrowCenterY, mPaint);
+            canvas.rotate(item.mBearing, screenPoint.x, screenPoint.y);
+            canvas.drawBitmap(mDirectionArrowBitmap, screenPoint.x - mDirectionArrowCenterX, screenPoint.y - mDirectionArrowCenterY, null);
             canvas.restore();
         }
+
     }
 
 }
