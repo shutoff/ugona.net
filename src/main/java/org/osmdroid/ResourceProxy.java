@@ -51,7 +51,7 @@ public interface ResourceProxy {
         /**
          * For testing - the image doesn't exist.
          */
-        unknown,
+        unknown, cur_marker, marker,
 
         center, direction_arrow, cur_arrow, marker_default, marker_default_focused_base, navto_small, next, previous, person,
 

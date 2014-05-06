@@ -803,7 +803,7 @@ public class StateFragment extends Fragment
                 DateFormat tf = android.text.format.DateFormat.getTimeFormat(getActivity());
                 data += df.format(last) + " " + tf.format(last);
             }
-            data += ",";
+            data += "\n";
             data += Address.getAddress(getActivity(), preferences.getFloat(Names.Car.LAT + car_id, 0), preferences.getFloat(Names.Car.LNG + car_id, 0));
             String zone = preferences.getString(Names.Car.GSM_ZONE + car_id, "");
             if (!zone.equals(""))

@@ -38,7 +38,7 @@ public class MapDialog extends Activity {
                 double lat = preferences.getFloat(Names.Car.LAT + car_id, 0);
                 double lng = preferences.getFloat(Names.Car.LNG + car_id, 0);
                 String data = lat + ";" + lng + ";-1;";
-                data += fmt(lat) + " " + fmt(lng) + ",";
+                data += fmt(lat) + " " + fmt(lng) + "\n";
                 String address = Address.getAddress(MapDialog.this, lat, lng);
                 if (address != null)
                     data += address;

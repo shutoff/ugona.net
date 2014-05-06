@@ -762,6 +762,8 @@ public abstract class MapActivity extends ActionBarActivity {
 
         protected final Bitmap mDirectionArrowBitmap;
         protected final Bitmap mCurrentArrowBitmap;
+        protected final Bitmap mNoArrowBitmap;
+        protected final Bitmap mCurrentNoArrowBitmap;
         protected final double mDirectionArrowCenterX;
         protected final double mDirectionArrowCenterY;
         protected final SafePaint mPaint = new SafePaint();
@@ -772,7 +774,8 @@ public abstract class MapActivity extends ActionBarActivity {
 
             mDirectionArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.direction_arrow);
             mCurrentArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.cur_arrow);
-
+            mCurrentNoArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.cur_marker);
+            mNoArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.marker);
             mDirectionArrowCenterX = mDirectionArrowBitmap.getWidth() / 2.0 - 0.5;
             mDirectionArrowCenterY = mDirectionArrowBitmap.getHeight() / 2.0 - 0.5;
         }
@@ -873,6 +876,8 @@ public abstract class MapActivity extends ActionBarActivity {
             canvas.save();
             canvas.rotate(item.mBearing, screenPoint.x, screenPoint.y);
             Bitmap bitmap = (item.getUid().equals(car_id)) ? mCurrentArrowBitmap : mDirectionArrowBitmap;
+            if (item.mBearing == -1)
+                bitmap = (item.getUid().equals(car_id)) ? mCurrentNoArrowBitmap : mNoArrowBitmap;
             canvas.drawBitmap(bitmap, screenPoint.x - mDirectionArrowCenterX, screenPoint.y - mDirectionArrowCenterY, null);
             canvas.restore();
         }
