@@ -53,7 +53,7 @@ public interface ResourceProxy {
          */
         unknown,
 
-        center, direction_arrow, marker_default, marker_default_focused_base, navto_small, next, previous, person,
+        center, direction_arrow, cur_arrow, marker_default, marker_default_focused_base, navto_small, next, previous, person,
 
         /**
          * Menu icons

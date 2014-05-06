@@ -793,6 +793,26 @@ public class StateFragment extends Fragment
             toast.show();
             return;
         }
+        if (preferences.getBoolean(Names.Car.POINTER + car_id, false)) {
+            Intent intent = new Intent(getActivity(), MapEventActivity.class);
+            String data = preferences.getFloat(Names.Car.LAT + car_id, 0) + ";";
+            data += preferences.getFloat(Names.Car.LNG + car_id, 0) + ";-1;";
+            long last = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
+            if (last != 0) {
+                DateFormat df = android.text.format.DateFormat.getDateFormat(getActivity());
+                DateFormat tf = android.text.format.DateFormat.getTimeFormat(getActivity());
+                data += df.format(last) + " " + tf.format(last);
+            }
+            data += ",";
+            data += Address.getAddress(getActivity(), preferences.getFloat(Names.Car.LAT + car_id, 0), preferences.getFloat(Names.Car.LNG + car_id, 0));
+            String zone = preferences.getString(Names.Car.GSM_ZONE + car_id, "");
+            if (!zone.equals(""))
+                data += ";" + zone;
+            intent.putExtra(Names.POINT_DATA, data);
+            intent.putExtra(Names.ID, car_id);
+            startActivity(intent);
+            return;
+        }
         Intent intent = new Intent(getActivity(), MapPointActivity.class);
         intent.putExtra(Names.ID, car_id);
         startActivity(intent);

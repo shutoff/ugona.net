@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.widget.TextView;
 
@@ -31,7 +33,16 @@ public class MapDialog extends Activity {
         builder.setPositiveButton(R.string.map, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MapDialog.this);
                 Intent i = new Intent(MapDialog.this, MapEventActivity.class);
+                double lat = preferences.getFloat(Names.Car.LAT + car_id, 0);
+                double lng = preferences.getFloat(Names.Car.LNG + car_id, 0);
+                String data = lat + ";" + lng + ";-1;";
+                data += fmt(lat) + " " + fmt(lng) + ",";
+                String address = Address.getAddress(MapDialog.this, lat, lng);
+                if (address != null)
+                    data += address;
+                i.putExtra(Names.POINT_DATA, data);
                 i.putExtra(Names.ID, car_id);
                 startActivity(i);
             }

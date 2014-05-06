@@ -761,14 +761,17 @@ public abstract class MapActivity extends ActionBarActivity {
     static class LocationOverlay extends ItemsOverlay<MyOverlayItem> {
 
         protected final Bitmap mDirectionArrowBitmap;
+        protected final Bitmap mCurrentArrowBitmap;
         protected final double mDirectionArrowCenterX;
         protected final double mDirectionArrowCenterY;
         protected final SafePaint mPaint = new SafePaint();
+        String car_id;
 
         public LocationOverlay(MapActivity activity) {
             super(activity);
 
             mDirectionArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.direction_arrow);
+            mCurrentArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.cur_arrow);
 
             mDirectionArrowCenterX = mDirectionArrowBitmap.getWidth() / 2.0 - 0.5;
             mDirectionArrowCenterY = mDirectionArrowBitmap.getHeight() / 2.0 - 0.5;
@@ -850,7 +853,11 @@ public abstract class MapActivity extends ActionBarActivity {
                 mPath.close();
 
                 SafePaint mPaint = new SafePaint();
-                mPaint.setColor(Color.rgb(255, 0, 0));
+                if (item.getUid().equals(car_id)) {
+                    mPaint.setColor(Color.rgb(255, 0, 0));
+                } else {
+                    mPaint.setColor(Color.rgb(0, 0, 255));
+                }
                 mPaint.setStrokeWidth(4);
                 mPaint.setAlpha(20);
                 mPaint.setStyle(Paint.Style.FILL);
@@ -865,7 +872,8 @@ public abstract class MapActivity extends ActionBarActivity {
             Point screenPoint = pj.toPixels(item.getPoint(), mTempPoint);
             canvas.save();
             canvas.rotate(item.mBearing, screenPoint.x, screenPoint.y);
-            canvas.drawBitmap(mDirectionArrowBitmap, screenPoint.x - mDirectionArrowCenterX, screenPoint.y - mDirectionArrowCenterY, null);
+            Bitmap bitmap = (item.getUid().equals(car_id)) ? mCurrentArrowBitmap : mDirectionArrowBitmap;
+            canvas.drawBitmap(bitmap, screenPoint.x - mDirectionArrowCenterX, screenPoint.y - mDirectionArrowCenterY, null);
             canvas.restore();
         }
 

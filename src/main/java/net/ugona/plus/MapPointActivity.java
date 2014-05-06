@@ -141,6 +141,7 @@ public class MapPointActivity extends MapActivity {
         mapView.getOverlays().add(mapView.mTrackOverlay);
 
         CarsOverlay pointsOverlay = new CarsOverlay(this);
+        pointsOverlay.car_id = car_id;
         mapView.mPointsOverlay = pointsOverlay;
         pointsOverlay.setFocusItemsOnTap(true);
         pointsOverlay.setFocusedItem(pointsOverlay.find(car_id));
@@ -342,6 +343,7 @@ public class MapPointActivity extends MapActivity {
                     car_id = cars[i].id;
                     MapView mapView = getMapView();
                     CarsOverlay pointsOverlay = (CarsOverlay) mapView.mPointsOverlay;
+                    pointsOverlay.car_id = car_id;
                     int current = pointsOverlay.find(car_id);
                     if (current < 0)
                         return true;

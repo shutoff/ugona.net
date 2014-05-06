@@ -13,10 +13,11 @@ public class MapEventActivity extends MapActivity {
         String data = getIntent().getStringExtra(Names.POINT_DATA);
         String[] parts = data.split(";");
         LocationOverlay pointsOverlay = new LocationOverlay(this);
-        MyOverlayItem item = new MyOverlayItem("");
+        pointsOverlay.car_id = car_id;
+        MyOverlayItem item = new MyOverlayItem(car_id);
         String p = parts[3];
         int index = p.indexOf("\n");
-        int course = 0;
+        int course = -1;
         try {
             course = Integer.parseInt(parts[2]);
         } catch (Exception ex) {
