@@ -796,7 +796,8 @@ public class StateFragment extends Fragment
         if (preferences.getBoolean(Names.Car.POINTER + car_id, false)) {
             Intent intent = new Intent(getActivity(), MapEventActivity.class);
             String data = preferences.getFloat(Names.Car.LAT + car_id, 0) + ";";
-            data += preferences.getFloat(Names.Car.LNG + car_id, 0) + ";-1;";
+            data += preferences.getFloat(Names.Car.LNG + car_id, 0) + ";";
+            data += preferences.getFloat(Names.Car.COURSE + car_id, 0) + ";";
             long last = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
             if (last != 0) {
                 DateFormat df = android.text.format.DateFormat.getDateFormat(getActivity());
