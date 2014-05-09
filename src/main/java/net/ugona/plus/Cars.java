@@ -191,8 +191,6 @@ public class Cars extends ActionBarActivity {
                         Intent intent = new Intent(this, AuthDialog.class);
                         intent.putExtra(Names.ID, i + "");
                         intent.putExtra(Names.Car.AUTH, true);
-                        if (State.hasTelephony(this))
-                            intent.putExtra(Names.Car.CAR_PHONE, true);
                         startActivityForResult(intent, NEW_CAR);
                         break;
                     }

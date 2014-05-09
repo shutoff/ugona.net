@@ -49,7 +49,6 @@ public class EventsFragment extends Fragment
 
     final static String URL_EVENTS = "https://car-online.ugona.net/events?skey=$1&begin=$2&end=$3&first=$4&pointer=$5&auth=$6";
     final static String URL_EVENT = "https://car-online.ugona.net/event?skey=$1&id=$2&time=$3";
-    final static String URL_TEXT = "https://car-online.ugona.net/text?auth=$1&id=$2&time=$3&type=$4";
     static final String FILTER = "filter";
     static final String DATE = "events_date";
     static final String EVENTS_DATA = "events";
@@ -638,7 +637,7 @@ public class EventsFragment extends Fragment
             event_time = time;
             if ((type == 88) || (type == 140) || (type == -116)) {
                 String auth = preferences.getString(Names.Car.AUTH + car_id, "");
-                execute(URL_TEXT, auth, id, time, type);
+                execute(URL_EVENT, api_key, id, time, "type", type, "auth", auth);
                 return;
             }
             execute(URL_EVENT, api_key, id, time);
@@ -648,11 +647,7 @@ public class EventsFragment extends Fragment
         void result(JsonObject res) throws ParseException {
             if (getActivity() == null)
                 return;
-            JsonValue text = res.get("text");
-            if (text != null) {
-                setAddress(text.asString(), "", null);
-                return;
-            }
+            final JsonValue text = res.get("text");
             JsonValue value = res.get("gps");
             if (value != null) {
                 JsonObject gps = value.asObject();
@@ -662,7 +657,10 @@ public class EventsFragment extends Fragment
                 Address request = new Address() {
                     @Override
                     void result(String res) {
-                        String addr = lat + "," + lng;
+                        String addr = "";
+                        if (text != null)
+                            addr = text.asString() + "\n\n";
+                        addr += lat + "," + lng;
                         if (res != null)
                             addr += "\n" + res;
                         String course = null;
@@ -682,7 +680,10 @@ public class EventsFragment extends Fragment
                 Address request = new Address() {
                     @Override
                     void result(String res) {
-                        String addr = "MCC: " + gsm.get("cc").asInt();
+                        String addr = "";
+                        if (text != null)
+                            addr = text.asString() + "\n\n";
+                        addr += "MCC: " + gsm.get("cc").asInt();
                         addr += " NC: " + gsm.get("nc").asInt();
                         addr += " LAC: " + gsm.get("lac").asInt();
                         addr += " CID: " + gsm.get("cid").asInt();
@@ -694,7 +695,10 @@ public class EventsFragment extends Fragment
                 request.get(getActivity(), lat, lng);
                 return;
             }
-            setAddress("", "", null);
+            String addr = "";
+            if (text != null)
+                addr = text.asString();
+            setAddress(addr, "", null);
         }
 
         @Override
