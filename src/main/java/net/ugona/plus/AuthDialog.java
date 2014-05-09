@@ -126,7 +126,7 @@ public class AuthDialog extends Activity {
                             ed.putString(Names.Car.LOGIN + car_id, login);
                             ed.putString(Names.Car.AUTH + car_id, res.get("auth").asString());
                             ed.remove(Names.GCM_TIME);
-                            String[] cars = preferences.getString(Names.CARS, "").split(",");
+                            final String[] cars = preferences.getString(Names.CARS, "").split(",");
                             boolean is_new = true;
                             for (String car : cars) {
                                 if (car.equals(car_id))
@@ -185,6 +185,12 @@ public class AuthDialog extends Activity {
                                             photo.execute(URL_PHOTOS, key, now.getTime() - 86400 * 3);
                                         }
                                     }
+                                    if (!show_phone && State.hasTelephony(AuthDialog.this) && preferences.getString(Names.Car.CAR_PHONE, "").equals("")) {
+                                        Intent i = new Intent(AuthDialog.this, AuthDialog.class);
+                                        i.putExtra(Names.ID, car_id);
+                                        i.putExtra(Names.Car.CAR_PHONE, true);
+                                        startActivityForResult(i, 1000);
+                                    }
                                 }
 
                                 @Override
@@ -226,8 +232,8 @@ public class AuthDialog extends Activity {
                         ed.putString(Names.Car.CAR_PHONE + car_id, number);
                         ed.commit();
                     }
+                    setResult(RESULT_OK, i);
                 }
-                setResult(RESULT_OK, i);
                 dialog.dismiss();
             }
         });
@@ -254,7 +260,6 @@ public class AuthDialog extends Activity {
                 tvError.setVisibility(View.GONE);
             }
         };
-
 
         if (show_auth) {
             edLogin.setText(preferences.getString(Names.Car.LOGIN + car_id, ""));

@@ -13,17 +13,11 @@ import android.view.ViewGroup;
 
 public class NotificationFragment extends SettingsFragment {
 
-    SoundItem alarm_sound;
-    SoundItem notify_sound;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
-        alarm_sound = new SoundItem(R.string.alarm_sound, RingtoneManager.TYPE_RINGTONE, Preferences.getAlarm(preferences, car_id), Names.Car.ALARM);
-        notify_sound = new SoundItem(R.string.notify_sound, RingtoneManager.TYPE_NOTIFICATION, Preferences.getNotify(preferences, car_id), Names.Car.NOTIFY);
-
-        items.add(alarm_sound);
+        items.add(new SoundItem(R.string.alarm_sound, RingtoneManager.TYPE_RINGTONE, Names.Car.ALARM));
         items.add(new Item(R.string.alarm_test, R.string.alarm_test_sum) {
             @Override
             void click() {
@@ -33,7 +27,10 @@ public class NotificationFragment extends SettingsFragment {
                 startActivity(intent);
             }
         });
-        items.add(notify_sound);
+        items.add(new SoundItem(R.string.notify_sound, RingtoneManager.TYPE_NOTIFICATION, Names.Car.NOTIFY));
+        items.add(new SoundItem(R.string.zone_in_sound, RingtoneManager.TYPE_NOTIFICATION, Names.Car.ZONE_IN_SOUND));
+        items.add(new SoundItem(R.string.zone_out_sound, RingtoneManager.TYPE_NOTIFICATION, Names.Car.ZONE_OUT_SOUND));
+
         items.add(new ListItem(R.string.guard_notify, R.array.guard_values, R.array.guard_entries, Names.Car.GUARD_MODE, "", R.string.notify_msg));
         items.add(new CheckBoxItem(R.string.show_balance, Names.Car.SHOW_BALANCE, true));
         items.add(new ListIntItem(R.string.balance_notification, R.array.balance_limit, R.array.balance_values, Names.Car.LIMIT, 50));
@@ -46,10 +43,8 @@ public class NotificationFragment extends SettingsFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK)
             return;
-        if (requestCode == RingtoneManager.TYPE_RINGTONE)
-            alarm_sound.setData(data);
-        if (requestCode == RingtoneManager.TYPE_NOTIFICATION)
-            notify_sound.setData(data);
+        SoundItem item = (SoundItem) items.get(requestCode);
+        item.setData(data);
     }
 
     class SoundItem extends Item {
@@ -58,9 +53,10 @@ public class NotificationFragment extends SettingsFragment {
         Uri uri;
         String key;
 
-        SoundItem(int name, int type, String init_uri, String item_key) {
+        SoundItem(int name, int type, String item_key) {
             super(name, R.string.def);
             type_ringtone = type;
+            String init_uri = Preferences.getSound(preferences, item_key, car_id);
             if (init_uri.equals("")) {
                 uri = RingtoneManager.getDefaultUri(type_ringtone);
             } else {
@@ -93,7 +89,12 @@ public class NotificationFragment extends SettingsFragment {
             } else {
                 intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, (Uri) null);
             }
-            startActivityForResult(intent, type_ringtone);
+            for (int i = 0; i < items.size(); i++) {
+                if (items.get(i) == this) {
+                    startActivityForResult(intent, i);
+                    break;
+                }
+            }
         }
 
         void setData(Intent data) {

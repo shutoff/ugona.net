@@ -496,7 +496,7 @@ public abstract class MapActivity extends ActionBarActivity {
                 c.drawText(lines[j].trim(), descLeft, descTextLineBottom, this.mDescriptionPaint);
                 descTextLineBottom -= snippetLineHeight;
             }
-		/* Draw the title. */
+        /* Draw the title. */
             descTextLineBottom -= DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT;
             for (int j = title_lines.length - 1; j >= 0; j--) {
                 c.drawText(title_lines[j].trim(), descLeft, descTextLineBottom, this.mTitlePaint);
@@ -554,11 +554,6 @@ public abstract class MapActivity extends ActionBarActivity {
             mPaint.setStrokeWidth((int) (displayMetrics.density * 4));
             mPaint.setStyle(Paint.Style.STROKE);
             mPaint.setAntiAlias(true);
-        }
-
-        @Override
-        public boolean isHardwareAccelerated() {
-            return false;
         }
 
         @Override
@@ -778,11 +773,6 @@ public abstract class MapActivity extends ActionBarActivity {
             mNoArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.marker);
             mDirectionArrowCenterX = mDirectionArrowBitmap.getWidth() / 2.0 - 0.5;
             mDirectionArrowCenterY = mDirectionArrowBitmap.getHeight() / 2.0 - 0.5;
-        }
-
-        @Override
-        public boolean isHardwareAccelerated() {
-            return false;
         }
 
         @Override

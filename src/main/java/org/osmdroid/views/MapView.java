@@ -1166,7 +1166,16 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
             if (isInEditMode()) {
                 mZoomController = null;
             } else {
-                mZoomController = new ZoomButtonsController(this);
+                mZoomController = new ZoomButtonsController(this) {
+                    @Override
+                    public void setVisible(boolean visible) {
+                        try {
+                            super.setVisible(visible);
+                        } catch (Exception ex) {
+                            // ignore
+                        }
+                    }
+                };
                 mZoomController.setOnZoomListener(new MapViewZoomListener());
             }
             this.mEnableZoomController = on;

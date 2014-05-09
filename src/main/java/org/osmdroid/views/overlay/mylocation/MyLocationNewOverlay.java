@@ -228,11 +228,6 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
     }
 
     @Override
-    public boolean isHardwareAccelerated() {
-        return false;
-    }
-
-    @Override
     public boolean onSnapToItem(final int x, final int y, final Point snapPoint,
                                 final IMapView mapView) {
         if (this.mLocation != null) {

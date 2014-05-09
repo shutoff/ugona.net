@@ -509,4 +509,6 @@
         <item>No show</item>
     </string-array>
     <string name="door_time">Delay alarm for door and trunk zone</string>
+    <string name="zone_in_sound">Zone IN sound</string>
+    <string name="zone_out_sound">Zone OUT sound</string>
 </resources>

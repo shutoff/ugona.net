@@ -61,6 +61,7 @@ public class StateFragment extends Fragment
     TextView tvTemperature2;
     TextView tvTemperature3;
     TextView tvError;
+    View vReserve;
     View vTemperature;
     View vTemperature2;
     View vTemperature3;
@@ -139,6 +140,7 @@ public class StateFragment extends Fragment
         tvLast = (TextView) v.findViewById(R.id.last);
         tvVoltage = (TextView) v.findViewById(R.id.voltage);
         tvReserve = (TextView) v.findViewById(R.id.reserve);
+        vReserve = v.findViewById(R.id.reserve_block);
         tvBalance = (TextView) v.findViewById(R.id.balance);
         tvTemperature = (TextView) v.findViewById(R.id.temperature);
         vTemperature = v.findViewById(R.id.temperature_block);
@@ -734,15 +736,18 @@ public class StateFragment extends Fragment
     }
 
     void updateReserveVoltage(TextView tv, boolean normal) {
-        String val = preferences.getString(Names.Car.VOLTAGE_RESERVED + car_id, "?");
+        String val = preferences.getString(Names.Car.VOLTAGE_RESERVED + car_id, "");
         try {
             double v = Double.parseDouble(val);
             val = String.format("%.2f", v);
         } catch (Exception ex) {
             // ignore
+            vReserve.setVisibility(View.GONE);
+            return;
         }
         tv.setText(val + " V");
         tv.setTextColor(normal ? getResources().getColor(android.R.color.secondary_text_dark) : getResources().getColor(R.color.error));
+        vReserve.setVisibility(View.VISIBLE);
     }
 
     void updateMainVoltage(TextView tv, double limit) {
@@ -797,7 +802,7 @@ public class StateFragment extends Fragment
             Intent intent = new Intent(getActivity(), MapEventActivity.class);
             String data = preferences.getFloat(Names.Car.LAT + car_id, 0) + ";";
             data += preferences.getFloat(Names.Car.LNG + car_id, 0) + ";";
-            data += preferences.getFloat(Names.Car.COURSE + car_id, 0) + ";";
+            data += preferences.getFloat(Names.Car.COURSE + car_id, -1) + ";";
             long last = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
             if (last != 0) {
                 DateFormat df = android.text.format.DateFormat.getDateFormat(getActivity());

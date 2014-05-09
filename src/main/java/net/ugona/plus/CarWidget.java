@@ -386,6 +386,7 @@ public class CarWidget extends AppWidgetProvider {
                 rv = String.format("%.2f", v);
             } catch (Exception ex) {
                 // ignore
+                show_reserve = false;
             }
             widgetView.setTextViewText(R.id.reserve, rv + " V");
             int r_color = preferences.getBoolean(Names.Car.RESERVE_NORMAL + car_id, true) ? context.getResources().getColor(id_color[theme]) : context.getResources().getColor(R.color.error);

@@ -145,7 +145,7 @@ public class Alarm extends Activity {
         }
         SharedPreferences.Editor ed = preferences.edit();
         if (!silent) {
-            zone_notify = createNotification(context, message, R.drawable.warning, car_id, null, when);
+            zone_notify = createNotification(context, message, R.drawable.warning, car_id, in_zone ? Names.Car.ZONE_IN_SOUND : Names.Car.ZONE_OUT_SOUND, when);
             ed.putInt(Names.Car.ZONE_NOTIFY + car_id, zone_notify);
         }
         if (in_zone) {
@@ -314,7 +314,7 @@ public class Alarm extends Activity {
             alarm = name + "\n" + alarm;
         }
         tvAlarm.setText(alarm);
-        String sound = Preferences.getAlarm(preferences, car_id);
+        String sound = Preferences.getSound(preferences, Names.Car.ALARM, car_id);
         Uri uri = Uri.parse(sound);
         if (sound.equals(""))
             uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);

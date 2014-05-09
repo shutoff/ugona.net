@@ -113,18 +113,11 @@ public class Preferences {
         return delta < preferences.getInt(Names.Car.RELE_TIME + car_id, 30);
     }
 
-    static String getAlarm(SharedPreferences preferences, String car_id) {
-        String res = preferences.getString(Names.Car.ALARM + car_id, "");
+    static String getSound(SharedPreferences preferences, String key, String car_id) {
+        String res = preferences.getString(key + car_id, "");
         if (!res.equals(""))
             return res;
-        return preferences.getString(Names.Car.ALARM, "");
-    }
-
-    static String getNotify(SharedPreferences preferences, String car_id) {
-        String res = preferences.getString(Names.Car.NOTIFY + car_id, "");
-        if (!res.equals(""))
-            return res;
-        return preferences.getString(Names.Car.NOTIFY, "");
+        return preferences.getString(key, "");
     }
 
     static void checkBalance(Context context, String car_id) {

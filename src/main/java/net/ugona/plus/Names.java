@@ -147,6 +147,8 @@ public final class Names {
 
         static final String ZONE_TIME = "zone_time";
         static final String ZONE_IN = "zone_in";
+        static final String ZONE_IN_SOUND = ".zone_in";
+        static final String ZONE_OUT_SOUND = ".zone_out";
 
         static final String GUARD_MODE = "guard_mode_";
         static final String GUARD_TIME = "guard_time_";

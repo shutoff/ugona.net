@@ -456,4 +456,6 @@
         <item>Не показывать</item>
     </string-array>
     <string name="door_time">Задержка тревоги по зонам двери/багажник</string>
+    <string name="zone_in_sound">Уведомление о въезде в зону</string>
+    <string name="zone_out_sound">Уведомление о выезде из зоны</string>
 </resources>

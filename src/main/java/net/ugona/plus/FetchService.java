@@ -10,6 +10,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -72,16 +74,6 @@ public class FetchService extends Service {
 
     @Override
     public void onCreate() {
-
-/*
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread thread, Throwable ex) {
-                State.print(ex);
-            }
-        });
-*/
-
         super.onCreate();
         preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -145,6 +137,24 @@ public class FetchService extends Service {
         int defs = Notification.DEFAULT_LIGHTS + Notification.DEFAULT_VIBRATE;
         if (sound == null)
             defs |= Notification.DEFAULT_SOUND;
+
+        Uri uri = null;
+        if (sound != null) {
+            if (sound.charAt(0) == '.') {
+                String key = sound;
+                sound = preferences.getString(key, "");
+                sound = preferences.getString(key + car_id, sound);
+                if (!sound.equals("")) {
+                    uri = Uri.parse(sound);
+                    Ringtone ringtone = RingtoneManager.getRingtone(this, uri);
+                    if (ringtone == null)
+                        uri = null;
+                }
+            } else {
+                uri = Uri.parse("android.resource://net.ugona.plus/raw/" + sound);
+            }
+        }
+
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this)
                         .setDefaults(defs)
@@ -153,8 +163,9 @@ public class FetchService extends Service {
                         .setContentText(text);
         if (when != 0)
             builder.setWhen(when);
-        if (sound != null)
-            builder.setSound(Uri.parse("android.resource://net.ugona.plus/raw/" + sound));
+
+        if (uri != null)
+            builder.setSound(uri);
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -400,18 +411,20 @@ public class FetchService extends Service {
                 }
 
                 ed.putBoolean(Names.Car.GUARD + car_id, guard);
-                setState(Names.Car.INPUT1, contact, "input1", 3);
-                setState(Names.Car.INPUT2, contact, "input2", 1);
-                ed.putBoolean(Names.Car.INPUT3 + car_id, contact.get("input3").asBoolean());
-                setState(Names.Car.INPUT4, contact, "input4", 2);
-                ed.putBoolean(Names.Car.GUARD0 + car_id, contact.get("guardMode0").asBoolean());
-                ed.putBoolean(Names.Car.GUARD1 + car_id, contact.get("guardMode1").asBoolean());
-                ed.putBoolean(Names.Car.RELAY1 + car_id, contact.get("relay1").asBoolean());
-                ed.putBoolean(Names.Car.RELAY2 + car_id, contact.get("relay2").asBoolean());
-                ed.putBoolean(Names.Car.RELAY3 + car_id, contact.get("relay3").asBoolean());
-                ed.putBoolean(Names.Car.RELAY4 + car_id, contact.get("relay4").asBoolean());
-                ed.putBoolean(Names.Car.ENGINE + car_id, contact.get("engine").asBoolean());
-                ed.putBoolean(Names.Car.RESERVE_NORMAL + car_id, contact.get("reservePowerNormal").asBoolean());
+                if (contact.get("input1") != null) {
+                    setState(Names.Car.INPUT1, contact, "input1", 3);
+                    setState(Names.Car.INPUT2, contact, "input2", 1);
+                    ed.putBoolean(Names.Car.INPUT3 + car_id, contact.get("input3").asBoolean());
+                    setState(Names.Car.INPUT4, contact, "input4", 2);
+                    ed.putBoolean(Names.Car.GUARD0 + car_id, contact.get("guardMode0").asBoolean());
+                    ed.putBoolean(Names.Car.GUARD1 + car_id, contact.get("guardMode1").asBoolean());
+                    ed.putBoolean(Names.Car.RELAY1 + car_id, contact.get("relay1").asBoolean());
+                    ed.putBoolean(Names.Car.RELAY2 + car_id, contact.get("relay2").asBoolean());
+                    ed.putBoolean(Names.Car.RELAY3 + car_id, contact.get("relay3").asBoolean());
+                    ed.putBoolean(Names.Car.RELAY4 + car_id, contact.get("relay4").asBoolean());
+                    ed.putBoolean(Names.Car.ENGINE + car_id, contact.get("engine").asBoolean());
+                    ed.putBoolean(Names.Car.RESERVE_NORMAL + car_id, contact.get("reservePowerNormal").asBoolean());
+                }
 
                 setState(Names.Car.ZONE_DOOR, contact, "door", 3);
                 setState(Names.Car.ZONE_HOOD, contact, "hood", 2);
@@ -451,7 +464,8 @@ public class FetchService extends Service {
             if (voltage_value != null) {
                 JsonObject voltage = voltage_value.asObject();
                 ed.putString(Names.Car.VOLTAGE_MAIN + car_id, voltage.get("main").asDouble() + "");
-                ed.putString(Names.Car.VOLTAGE_RESERVED + car_id, voltage.get("reserved").asDouble() + "");
+                if (voltage.get("reserved") != null)
+                    ed.putString(Names.Car.VOLTAGE_RESERVED + car_id, voltage.get("reserved").asDouble() + "");
             }
 
             JsonValue gps_value = res.get("gps");
@@ -460,7 +474,7 @@ public class FetchService extends Service {
                 ed.putFloat(Names.Car.LAT + car_id, gps.get("latitude").asFloat());
                 ed.putFloat(Names.Car.LNG + car_id, gps.get("longitude").asFloat());
                 ed.putFloat(Names.Car.SPEED + car_id, gps.get("speed").asFloat());
-                if (gps_valid)
+                if (gps_valid && (gps.get("course") != null))
                     ed.putInt(Names.Car.COURSE + car_id, gps.get("course").asInt());
             } else {
                 JsonValue gsm_value = res.get("gsm");
