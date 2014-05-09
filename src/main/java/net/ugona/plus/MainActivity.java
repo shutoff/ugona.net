@@ -91,7 +91,7 @@ public class MainActivity extends ActionBarActivity {
 
     static final int VERSION = 2;
     static final String SENDER_ID = "915289471784";
-    final static String URL_KEY = "https://car-online.ugona.net/key?auth=$1";
+    final static String URL_KEY = "https://car-online.ugona.net/key?login=$1&password=$2";
     final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
     final static String URL_PHOTOS = "https://car-online.ugona.net/photos?skey=$1&begin=$2";
     ViewPager mViewPager;
@@ -610,8 +610,13 @@ public class MainActivity extends ActionBarActivity {
             show_pages[PAGE_PHOTO] = show_photo;
             changed = true;
         }
-        if (changed)
-            mViewPager.getAdapter().notifyDataSetChanged();
+        if (changed) {
+            try {
+                mViewPager.getAdapter().notifyDataSetChanged();
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
     }
 
     void setShowDate(int i) {
@@ -863,15 +868,19 @@ public class MainActivity extends ActionBarActivity {
                 if (cur.moveToFirst()) {
                     Pattern pat = Pattern.compile("www.car-online.ru \\(login:([A-Za-z0-9]+),password:([A-Za-z0-9]+)\\)");
                     while (cur.moveToNext()) {
-                        String body = cur.getString(2);
-                        Matcher matcher = pat.matcher(body);
-                        if (!matcher.find())
-                            continue;
-                        AuthData auth = new AuthData();
-                        auth.phone = cur.getString(1);
-                        auth.login = matcher.group(1);
-                        auth.pass = matcher.group(2);
-                        auth_data.add(auth);
+                        try {
+                            String body = cur.getString(2);
+                            Matcher matcher = pat.matcher(body);
+                            if (!matcher.find())
+                                continue;
+                            AuthData auth = new AuthData();
+                            auth.phone = cur.getString(1);
+                            auth.login = matcher.group(1);
+                            auth.pass = matcher.group(2);
+                            auth_data.add(auth);
+                        } catch (Exception ex) {
+                            // ignore
+                        }
                     }
                 }
                 return null;
@@ -923,6 +932,7 @@ public class MainActivity extends ActionBarActivity {
                             checkAuth();
                         }
                     };
+                    data.auth = res.get("auth").asString();
                     verTask.execute(URL_PROFILE, data.key);
                 }
 
@@ -931,8 +941,7 @@ public class MainActivity extends ActionBarActivity {
                     checkAuth();
                 }
             };
-            String auth = AuthDialog.crypt(data.login + "\0" + data.pass);
-            task.execute(URL_KEY, auth);
+            task.execute(URL_KEY, data.login, data.pass);
             return;
         }
         int id = 0;
@@ -954,7 +963,7 @@ public class MainActivity extends ActionBarActivity {
             ed.putString(Names.Car.CAR_PHONE + c_id, data.phone);
             ed.putString(Names.Car.CAR_KEY + c_id, data.key);
             ed.putString(Names.Car.LOGIN + c_id, data.login);
-            ed.putString(Names.Car.AUTH + c_id, AuthDialog.crypt(data.login + "\0" + data.pass));
+            ed.putString(Names.Car.AUTH + c_id, data.auth);
             if (data.photo)
                 ed.putBoolean(Names.Car.SHOW_PHOTO + c_id, true);
         }
@@ -976,7 +985,7 @@ public class MainActivity extends ActionBarActivity {
             ed.putString(Names.Car.CAR_PHONE + c_id, data.phone);
             ed.putString(Names.Car.CAR_KEY + c_id, data.key);
             ed.putString(Names.Car.LOGIN + c_id, data.login);
-            ed.putString(Names.Car.AUTH + c_id, AuthDialog.crypt(data.login + "\0" + data.pass));
+            ed.putString(Names.Car.AUTH + c_id, data.auth);
             ed.putBoolean(Names.Car.POINTER + c_id, true);
             if (!pointers.equals(""))
                 pointers += ",";
@@ -1013,6 +1022,7 @@ public class MainActivity extends ActionBarActivity {
         String pass;
         String key;
         String version;
+        String auth;
         boolean checked;
         boolean photo;
     }
