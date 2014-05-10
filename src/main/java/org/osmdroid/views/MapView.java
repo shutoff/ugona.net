@@ -1361,9 +1361,9 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
 
         private final int viewWidth_2 = getWidth() / 2;
         private final int viewHeight_2 = getHeight() / 2;
-        private final int offsetX = -WORLD_SIZE_2;
         private final int WORLD_SIZE_2 = TileSystem.MapSize(mZoomLevel) / 2;
         private final int offsetY = -WORLD_SIZE_2;
+        private final int offsetX = -WORLD_SIZE_2;
         private final BoundingBoxE6 mBoundingBoxProjection;
         private final int mZoomLevelProjection;
         private final Rect mScreenRectProjection;
