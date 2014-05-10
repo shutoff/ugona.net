@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.view.MotionEvent;
 
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IGeoPoint;
@@ -19,14 +20,14 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 public class MapView extends org.osmdroid.views.MapView {
 
+    private static final int IGNORE_MOVE_COUNT = 2;
     SharedPreferences preferences;
-
     MyLocationNewOverlay mLocationOverlay;
     Overlay mTrackOverlay;
     Overlay mPointsOverlay;
-
     Runnable mAfterLayout;
     int layout_count;
+    private int moveCount = 0;
 
     public MapView(Context context, final MapTileProviderBase tileProvider) {
         super(context, (int) (256 * context.getResources().getDisplayMetrics().density), new ResourceProxyImpl(context.getApplicationContext()), tileProvider);
@@ -55,6 +56,25 @@ public class MapView extends org.osmdroid.views.MapView {
                 "http://mt3.google.com/vt/lyrs=m&hl=ru&x=%s&y=%s&z=%s&s=Galileo"
         };
         return new myTileSource("google", ResourceProxy.string.mapnik, 1, 17, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_MOVE:
+
+                if (moveCount > 0) {
+                    moveCount--;
+                    return true;
+                }
+
+                break;
+
+            case MotionEvent.ACTION_POINTER_UP:
+                moveCount = IGNORE_MOVE_COUNT;
+                break;
+        }
+        return super.onTouchEvent(event);
     }
 
     @Override
