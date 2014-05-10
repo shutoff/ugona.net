@@ -504,7 +504,7 @@ public abstract class MapActivity extends ActionBarActivity {
             }
 
 		/*
-		 * Finally draw the marker base. This is done in the end to make it look better.
+         * Finally draw the marker base. This is done in the end to make it look better.
 		 */
             Overlay.drawAt(c, markerFocusedBase, mFocusedScreenCoords.x, mFocusedScreenCoords.y, false, osmv.getMapOrientation());
         }
@@ -755,24 +755,30 @@ public abstract class MapActivity extends ActionBarActivity {
 
     static class LocationOverlay extends ItemsOverlay<MyOverlayItem> {
 
-        protected final Bitmap mDirectionArrowBitmap;
-        protected final Bitmap mCurrentArrowBitmap;
-        protected final Bitmap mNoArrowBitmap;
-        protected final Bitmap mCurrentNoArrowBitmap;
-        protected final double mDirectionArrowCenterX;
-        protected final double mDirectionArrowCenterY;
+        protected final Bitmap mArrowBitmap;
+
+        protected final Bitmap mCurrentBitmap;
+        protected final Bitmap mNoCurrentBitmap;
+
+        protected final int mArrowCenterX;
+        protected final int mArrowCenterY;
+
+        protected final int mCenterX;
+        protected final int mCenterY;
+
         protected final SafePaint mPaint = new SafePaint();
         String car_id;
 
         public LocationOverlay(MapActivity activity) {
             super(activity);
 
-            mDirectionArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.direction_arrow);
-            mCurrentArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.cur_arrow);
-            mCurrentNoArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.cur_marker);
-            mNoArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.marker);
-            mDirectionArrowCenterX = mDirectionArrowBitmap.getWidth() / 2.0 - 0.5;
-            mDirectionArrowCenterY = mDirectionArrowBitmap.getHeight() / 2.0 - 0.5;
+            mArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.arrow);
+            mCurrentBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.cur_marker);
+            mNoCurrentBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.marker);
+            mArrowCenterX = mArrowBitmap.getWidth() / 2;
+            mArrowCenterY = mArrowBitmap.getHeight() / 2;
+            mCenterX = mCurrentBitmap.getWidth() / 2;
+            mCenterY = mCurrentBitmap.getHeight() / 2;
         }
 
         @Override
@@ -780,7 +786,7 @@ public abstract class MapActivity extends ActionBarActivity {
             if (item.zone == null) {
                 double x = hitX;
                 double y = hitY;
-                double r = mDirectionArrowBitmap.getWidth() / 2;
+                double r = mCenterX;
                 boolean res = x * x + y * y <= r * r;
                 return res;
             }
@@ -863,13 +869,14 @@ public abstract class MapActivity extends ActionBarActivity {
 
             Point mTempPoint = new Point();
             Point screenPoint = pj.toPixels(item.getPoint(), mTempPoint);
-            canvas.save();
-            canvas.rotate(item.mBearing, screenPoint.x, screenPoint.y);
-            Bitmap bitmap = (item.getUid().equals(car_id)) ? mCurrentArrowBitmap : mDirectionArrowBitmap;
-            if (item.mBearing == -1)
-                bitmap = (item.getUid().equals(car_id)) ? mCurrentNoArrowBitmap : mNoArrowBitmap;
-            canvas.drawBitmap(bitmap, screenPoint.x - mDirectionArrowCenterX, screenPoint.y - mDirectionArrowCenterY, null);
-            canvas.restore();
+            Bitmap bitmap = (item.getUid().equals(car_id)) ? mCurrentBitmap : mNoCurrentBitmap;
+            canvas.drawBitmap(bitmap, screenPoint.x - mCenterX, screenPoint.y - mCenterY, null);
+            if (item.mBearing >= 0) {
+                canvas.save();
+                canvas.rotate(item.mBearing, screenPoint.x, screenPoint.y);
+                canvas.drawBitmap(mArrowBitmap, screenPoint.x - mArrowCenterX, screenPoint.y - mArrowCenterY, null);
+                canvas.restore();
+            }
         }
 
     }

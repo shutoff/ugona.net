@@ -51,14 +51,11 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
     protected final SafePaint mPaint = new SafePaint();
     protected final SafePaint mCirclePaint = new SafePaint();
     protected final Bitmap mPersonBitmap;
-    protected final Bitmap mDirectionArrowBitmap;
     protected final MapView mMapView;
     /**
      * Coordinates the feet of the person are located scaled for display density.
      */
     protected final PointF mPersonHotspot;
-    protected final double mDirectionArrowCenterX;
-    protected final double mDirectionArrowCenterY;
     private final IMapController mMapController;
     private final LinkedList<Runnable> mRunOnFirstFix = new LinkedList<Runnable>();
     private final Point mMapCoords = new Point();
@@ -98,10 +95,6 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
         mCirclePaint.setAntiAlias(true);
 
         mPersonBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.person);
-        mDirectionArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.direction_arrow);
-
-        mDirectionArrowCenterX = mDirectionArrowBitmap.getWidth() / 2.0 - 0.5;
-        mDirectionArrowCenterY = mDirectionArrowBitmap.getHeight() / 2.0 - 0.5;
 
         // Calculate position of person icon's feet, scaled to screen density
         mPersonHotspot = new PointF(24.0f * mScale + 0.5f, 39.0f * mScale + 0.5f);
@@ -187,18 +180,8 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
         final int posX = mMapCoords.x >> zoomDiff;
         final int posY = mMapCoords.y >> zoomDiff;
 
-        // Start with the bitmap bounds
-        if (lastFix.hasBearing()) {
-            // Get a square bounding box around the object, and expand by the length of the diagonal
-            // so as to allow for extra space for rotating
-            int widestEdge = (int) Math.ceil(Math.max(mDirectionArrowBitmap.getWidth(),
-                    mDirectionArrowBitmap.getHeight()) * Math.sqrt(2));
-            reuse.set(posX, posY, posX + widestEdge, posY + widestEdge);
-            reuse.offset(-widestEdge / 2, -widestEdge / 2);
-        } else {
-            reuse.set(posX, posY, posX + mPersonBitmap.getWidth(), posY + mPersonBitmap.getHeight());
-            reuse.offset((int) (-mPersonHotspot.x + 0.5f), (int) (-mPersonHotspot.y + 0.5f));
-        }
+        reuse.set(posX, posY, posX + mPersonBitmap.getWidth(), posY + mPersonBitmap.getHeight());
+        reuse.offset((int) (-mPersonHotspot.x + 0.5f), (int) (-mPersonHotspot.y + 0.5f));
 
         // Add in the accuracy circle if enabled
         if (mDrawAccuracyEnabled) {
