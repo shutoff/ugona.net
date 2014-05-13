@@ -225,6 +225,18 @@ public class MapPointActivity extends MapActivity {
     boolean updateItem(MyOverlayItem item) {
         double lat = preferences.getFloat(Names.Car.LAT + item.getUid(), 0);
         double lng = preferences.getFloat(Names.Car.LNG + item.getUid(), 0);
+        if (item.getUid().equals(car_id)) {
+            final MapView mapView = getMapView();
+            final TrackOverlay trackOverlay = (TrackOverlay) mapView.mTrackOverlay;
+            if ((trackOverlay.tracks != null) && (trackOverlay.tracks.size() > 0)) {
+                ArrayList<TrackPoint> track = trackOverlay.tracks.get(trackOverlay.tracks.size() - 1);
+                if (track.size() > 0) {
+                    TrackPoint point = track.get(track.size() - 1);
+                    lat = point.point.getLatitude();
+                    lng = point.point.getLongitude();
+                }
+            }
+        }
         item.zone = null;
         if ((lat == 0) || (lng == 0)) {
             String zone = preferences.getString(Names.Car.GSM_ZONE + item.getUid(), "");

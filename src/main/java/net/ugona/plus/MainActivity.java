@@ -13,6 +13,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -126,6 +128,16 @@ public class MainActivity extends ActionBarActivity {
                 System.exit(1);
             }
         });
+
+        if (savedInstanceState == null) {
+            try {
+                PackageManager pkgManager = getPackageManager();
+                PackageInfo info = pkgManager.getPackageInfo("net.ugona.plus", 0);
+                State.appendLog("Start " + getString(R.string.version) + " " + info.versionName);
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
 
         try {
             ViewConfiguration config = ViewConfiguration.get(this);

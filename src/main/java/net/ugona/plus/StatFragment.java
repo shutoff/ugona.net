@@ -351,8 +351,8 @@ public class StatFragment extends Fragment implements OnRefreshListener {
             NumberFormat formatter = NumberFormat.getInstance(getResources().getConfiguration().locale);
             formatter.setMaximumFractionDigits(2);
             formatter.setMinimumFractionDigits(2);
-            String s = formatter.format(dist / 1000.) + " " + getString(R.string.km);
-            tvSummary.setText(String.format(status, s, timeFormat((int) (time / 60)), v, (double) speed));
+            String s = formatter.format(dist / 1000.);
+            tvSummary.setText(String.format(status, s, timeFormat((int) (time / 60)), (float) v, speed));
             vProgress.setVisibility(View.GONE);
             vLoading.setVisibility(View.GONE);
             vError.setVisibility(View.GONE);
@@ -402,10 +402,10 @@ public class StatFragment extends Fragment implements OnRefreshListener {
                     formatter.setMinimumFractionDigits(2);
                     String s = formatter.format(d.dist / 1000.) + " " + getString(R.string.km);
                     tvMileage.setText(s);
-                    double speed = d.dist * 3.6 / d.time;
+                    float speed = (float) (d.dist * 3.6 / d.time);
                     String status = getString(R.string.short_status);
                     TextView text = (TextView) v.findViewById(R.id.address);
-                    text.setText(String.format(status, timeFormat((int) (d.time / 60)), speed, (double) d.speed));
+                    text.setText(String.format(status, timeFormat((int) (d.time / 60)), speed, d.speed));
                     int p = text.getPaddingRight();
                     text.setPadding(p * (2 * d.level + 1), 0, p, 0);
                     text = (TextView) v.findViewById(R.id.status);

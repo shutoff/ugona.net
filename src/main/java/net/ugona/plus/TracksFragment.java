@@ -317,7 +317,7 @@ public class TracksFragment extends Fragment
             return;
         }
         double mileage = 0;
-        double max_speed = 0;
+        int max_speed = 0;
         long time = 0;
         long start = current.toDateTime(new LocalTime(0, 0)).toDate().getTime();
         LocalDate next = current.plusDays(1);
@@ -339,8 +339,8 @@ public class TracksFragment extends Fragment
         NumberFormat formatter = NumberFormat.getInstance(getResources().getConfiguration().locale);
         formatter.setMaximumFractionDigits(2);
         formatter.setMinimumFractionDigits(2);
-        String s = formatter.format(mileage) + " " + getString(R.string.km);
-        status = String.format(status, s, timeFormat((int) (time / 60000)), avg_speed, max_speed);
+        String s = formatter.format(mileage);
+        status = String.format(status, s, timeFormat((int) (time / 60000)), (float) avg_speed, max_speed);
         tvSummary.setText(status);
     }
 
@@ -395,13 +395,13 @@ public class TracksFragment extends Fragment
                 JsonObject v = list.get(i).asObject();
                 Track track = new Track();
                 track.track = v.get("track").asString();
-                track.mileage = v.get("mileage").asDouble();
-                track.max_speed = v.get("max_speed").asDouble();
+                track.mileage = v.get("mileage").asFloat();
+                track.max_speed = v.get("max_speed").asInt();
                 track.begin = v.get("begin").asLong();
                 track.end = v.get("end").asLong();
-                track.avg_speed = v.get("avg_speed").asDouble();
-                track.day_mileage = v.get("day_mileage").asDouble();
-                track.day_max_speed = v.get("day_max_speed").asDouble();
+                track.avg_speed = v.get("avg_speed").asFloat();
+                track.day_mileage = v.get("day_mileage").asFloat();
+                track.day_max_speed = v.get("day_max_speed").asInt();
                 tracks.add(track);
             }
 
@@ -600,7 +600,7 @@ public class TracksFragment extends Fragment
             DateFormat tf = android.text.format.DateFormat.getTimeFormat(getActivity());
             tvTitle.setText(tf.format(track.begin) + "-" + tf.format(track.end));
             TextView tvMileage = (TextView) v.findViewById(R.id.mileage);
-            String s = String.format(getString(R.string.mileage), track.mileage);
+            String s = String.format(getString(R.string.mileage), (float) track.mileage);
             tvMileage.setText(s);
             TextView tvAddress = (TextView) v.findViewById(R.id.address);
             tvAddress.setText(track.start + " - " + track.finish);
@@ -609,7 +609,7 @@ public class TracksFragment extends Fragment
             if (position == selected) {
                 text = String.format(getString(R.string.short_status),
                         timeFormat((int) ((track.end - track.begin) / 60000)),
-                        track.avg_speed,
+                        (float) track.avg_speed,
                         track.max_speed);
                 tvTitle.setTypeface(null, Typeface.BOLD);
                 tvMileage.setTypeface(null, Typeface.BOLD);

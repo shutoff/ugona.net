@@ -6,11 +6,11 @@ import java.util.Vector;
 public class Track implements Serializable {
     long begin;
     long end;
-    double mileage;
-    double day_mileage;
-    double avg_speed;
-    double max_speed;
-    double day_max_speed;
+    float mileage;
+    float day_mileage;
+    float avg_speed;
+    int max_speed;
+    int day_max_speed;
     String start;
     String finish;
     String track;

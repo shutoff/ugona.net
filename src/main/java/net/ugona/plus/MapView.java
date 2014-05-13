@@ -49,13 +49,14 @@ public class MapView extends org.osmdroid.views.MapView {
             };
             return new XYTileSource("mqcdn", ResourceProxy.string.mapnik, 1, 17, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
         }
+        String locale = ctx.getResources().getConfiguration().locale.getLanguage();
         final String[] tiles_urls = {
-                "http://mt0.google.com/vt/lyrs=m&hl=ru&x=%s&y=%s&z=%s&s=Galileo",
-                "http://mt1.google.com/vt/lyrs=m&hl=ru&x=%s&y=%s&z=%s&s=Galileo",
-                "http://mt2.google.com/vt/lyrs=m&hl=ru&x=%s&y=%s&z=%s&s=Galileo",
-                "http://mt3.google.com/vt/lyrs=m&hl=ru&x=%s&y=%s&z=%s&s=Galileo"
+                "https://mt0.google.com/vt/lyrs=m&hl=" + locale + "&x=%s&y=%s&z=%s&s=Galileo",
+                "https://mt1.google.com/vt/lyrs=m&hl=" + locale + "&x=%s&y=%s&z=%s&s=Galileo",
+                "https://mt2.google.com/vt/lyrs=m&hl=" + locale + "&x=%s&y=%s&z=%s&s=Galileo",
+                "https://mt3.google.com/vt/lyrs=m&hl=" + locale + "&x=%s&y=%s&z=%s&s=Galileo"
         };
-        return new myTileSource("google", ResourceProxy.string.mapnik, 1, 17, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
+        return new myTileSource("google_" + locale, ResourceProxy.string.mapnik, 1, 17, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
     }
 
     @Override

@@ -474,12 +474,27 @@ public abstract class MapActivity extends ActionBarActivity {
             final int descBoxBottom = mRect.top;
             final int descBoxTop = descBoxBottom - totalHeight - 2 * DESCRIPTION_BOX_PADDING;
 
-		/* Twice draw a RoundRect, once in black with 1px as a small border. */
-            this.mMarkerBackgroundPaint.setColor(Color.BLACK);
+            this.mDescriptionPaint.setColor(Color.argb(20, 0, 0, 0));
+            c.drawRoundRect(new RectF(descBoxLeft - 6, descBoxTop - 6, descBoxRight + 6,
+                            descBoxBottom + 6), DESCRIPTION_BOX_CORNERWIDTH + 6, DESCRIPTION_BOX_CORNERWIDTH + 6,
+                    this.mDescriptionPaint
+            );
+            this.mDescriptionPaint.setColor(Color.argb(60, 0, 0, 0));
+            c.drawRoundRect(new RectF(descBoxLeft - 4, descBoxTop - 4, descBoxRight + 4,
+                            descBoxBottom + 4), DESCRIPTION_BOX_CORNERWIDTH + 4, DESCRIPTION_BOX_CORNERWIDTH + 4,
+                    this.mDescriptionPaint
+            );
+            this.mDescriptionPaint.setColor(Color.argb(60, 0, 0, 0));
+            c.drawRoundRect(new RectF(descBoxLeft - 2, descBoxTop - 2, descBoxRight + 2,
+                            descBoxBottom + 2), DESCRIPTION_BOX_CORNERWIDTH + 2, DESCRIPTION_BOX_CORNERWIDTH + 2,
+                    this.mDescriptionPaint
+            );
+            this.mDescriptionPaint.setColor(Color.BLACK);
             c.drawRoundRect(new RectF(descBoxLeft - 1, descBoxTop - 1, descBoxRight + 1,
                             descBoxBottom + 1), DESCRIPTION_BOX_CORNERWIDTH, DESCRIPTION_BOX_CORNERWIDTH,
                     this.mDescriptionPaint
             );
+            this.mMarkerBackgroundPaint.setColor(Color.BLACK);
             this.mMarkerBackgroundPaint.setColor(this.mMarkerFocusedBackgroundColor);
             baloonRect = new Rect(descBoxLeft, descBoxTop, descBoxRight, descBoxBottom);
             final Rect screenRect = osmv.getProjection().getIntrinsicScreenRect();
