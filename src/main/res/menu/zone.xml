@@ -17,12 +17,14 @@
         android:icon="@android:drawable/ic_menu_mylocation"
         android:title="@string/map"
         car:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/google"
-        android:title="@string/google"
-        car:showAsAction="never" />
-    <item
-        android:id="@+id/osm"
-        android:title="@string/osm"
-        car:showAsAction="never" />
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/google"
+            android:title="@string/google"
+            car:showAsAction="never" />
+        <item
+            android:id="@+id/osm"
+            android:title="@string/osm"
+            car:showAsAction="never" />
+    </group>
 </menu>

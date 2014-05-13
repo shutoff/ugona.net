@@ -77,23 +77,20 @@ public abstract class MapActivity extends ActionBarActivity {
         topSubMenu = menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(menuId(), menu);
-        boolean isOSM = preferences.getString("map_type", "OSM").equals("OSM");
-        menu.findItem(R.id.google).setTitle(getCheckedText(R.string.google, !isOSM));
-        menu.findItem(R.id.osm).setTitle(getCheckedText(R.string.osm, isOSM));
+        if (preferences.getString("map_type", "OSM").equals("OSM")) {
+            menu.findItem(R.id.osm).setChecked(true);
+        } else {
+            menu.findItem(R.id.google).setChecked(true);
+        }
         MenuItem item = menu.findItem(R.id.traffic);
         if (item != null)
-            item.setTitle(getCheckedText(R.string.traffic, preferences.getBoolean(TRAFFIC, true)));
+            item.setChecked(preferences.getBoolean(TRAFFIC, true));
         return super.onCreateOptionsMenu(menu);
     }
 
     void updateMenu() {
         topSubMenu.clear();
         onCreateOptionsMenu(topSubMenu);
-    }
-
-    String getCheckedText(int id, boolean check) {
-        String check_mark = check ? "\u2714" : "";
-        return check_mark + getString(id);
     }
 
     MapView getMapView() {
