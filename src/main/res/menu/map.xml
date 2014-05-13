@@ -22,4 +22,12 @@
             android:title="@string/osm"
             car:showAsAction="never" />
     </group>
+    <group
+        android:id="@+id/tr"
+        android:checkableBehavior="all">
+        <item
+            android:id="@+id/traffic_layer"
+            android:title="@string/traffic_layer"
+            car:showAsAction="never" />
+    </group>
 </menu>

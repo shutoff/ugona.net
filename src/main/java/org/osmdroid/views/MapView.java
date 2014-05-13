@@ -364,9 +364,11 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
         final BoundingBoxE6 currentBox = getBoundingBox();
 
         // Calculated required zoom based on latitude span
-        final double maxZoomLatitudeSpan = mZoomLevel == getMaxZoomLevel() ?
+        double maxZoomLatitudeSpan = mZoomLevel == getMaxZoomLevel() ?
                 currentBox.getLatitudeSpanE6() :
                 currentBox.getLatitudeSpanE6() / Math.pow(2, getMaxZoomLevel() - mZoomLevel);
+        if (maxZoomLatitudeSpan < 1000)
+            maxZoomLatitudeSpan = 1000;
 
         final double requiredLatitudeZoom =
                 getMaxZoomLevel() -
@@ -374,19 +376,24 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
 
 
         // Calculated required zoom based on longitude span
-        final double maxZoomLongitudeSpan = mZoomLevel == getMaxZoomLevel() ?
+        double maxZoomLongitudeSpan = mZoomLevel == getMaxZoomLevel() ?
                 currentBox.getLongitudeSpanE6() :
                 currentBox.getLongitudeSpanE6() / Math.pow(2, getMaxZoomLevel() - mZoomLevel);
+
+        if (maxZoomLongitudeSpan < 1000)
+            maxZoomLongitudeSpan = 1000;
 
         final double requiredLongitudeZoom =
                 getMaxZoomLevel() -
                         Math.ceil(Math.log(boundingBox.getLongitudeSpanE6() / maxZoomLongitudeSpan) / Math.log(2));
 
+        int requiredZoom = (int) (requiredLatitudeZoom < requiredLongitudeZoom ?
+                requiredLatitudeZoom : requiredLongitudeZoom);
+        if (requiredZoom > getMaxZoomLevel())
+            requiredZoom = getMaxZoomLevel();
 
         // Zoom to boundingBox center, at calculated maximum allowed zoom level
-        getController().setZoom((int) (
-                requiredLatitudeZoom < requiredLongitudeZoom ?
-                        requiredLatitudeZoom : requiredLongitudeZoom));
+        getController().setZoom(requiredZoom);
 
         getController().setCenter(
                 new GeoPoint(boundingBox.getCenter().getLatitudeE6(), boundingBox.getCenter()

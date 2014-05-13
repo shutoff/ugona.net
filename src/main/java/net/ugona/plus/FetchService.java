@@ -46,6 +46,7 @@ public class FetchService extends Service {
 
     static final String URL_STATUS = "https://car-online.ugona.net/?skey=$1&time=$2";
     static final String URL_EVENTS = "https://car-online.ugona.net/events?skey=$1&auth=$2&begin=$3&end=$4";
+    static final String URL_GSM = "https://car-online.ugona.net/gsm?skey=$1&cc=$2&nc=$3&lac=$4&cid=$5";
 
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;
@@ -489,6 +490,7 @@ public class FetchService extends Service {
                         ed.remove(Names.Car.GSM_ZONE + car_id);
                         ed.remove(Names.Car.LAT + car_id);
                         ed.remove(Names.Car.LNG + car_id);
+                        new GsmZoneRequest(car_id);
                     }
                 }
             }
@@ -834,6 +836,29 @@ public class FetchService extends Service {
             if (state)
                 msg_id = msg;
             ed.putBoolean(id + car_id, state);
+        }
+    }
+
+    class GsmZoneRequest extends ServerRequest {
+
+        GsmZoneRequest(String id) {
+            super("G", id);
+        }
+
+        @Override
+        void result(JsonObject res) throws ParseException {
+            String sector = res.get("sector").asString();
+            SharedPreferences.Editor ed = preferences.edit();
+            ed.putString(Names.Car.GSM_ZONE + car_id, sector);
+            ed.commit();
+            sendUpdate(ACTION_UPDATE, car_id);
+        }
+
+        @Override
+        void exec(String api_key) {
+            String gsm = preferences.getString(Names.Car.GSM_SECTOR + car_id, "");
+            String[] gsm_parts = gsm.split(" ");
+            execute(URL_GSM, api_key, gsm_parts[0], gsm_parts[1], gsm_parts[2], gsm_parts[3]);
         }
     }
 

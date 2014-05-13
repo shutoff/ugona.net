@@ -43,7 +43,7 @@ public class StateFragment extends Fragment
         implements View.OnTouchListener, OnRefreshListener {
 
     static Pattern number_pattern = Pattern.compile("^[0-9]+ ?");
-    final String GSM_URL = "https://car-online.ugona.net/gsm?skey=$1&cc=$2&nc=$3&lac=$4&cid=$5";
+
     final int AUTH_REQUEST = 1;
     String car_id;
     SharedPreferences preferences;
@@ -419,33 +419,9 @@ public class StateFragment extends Fragment
         double lon = preferences.getFloat(Names.Car.LNG + car_id, 0);
         String location = "";
         if ((lat == 0) && (lon == 0)) {
-            String gsm = preferences.getString(Names.Car.GSM_SECTOR + car_id, "");
-            if (!gsm.equals("")) {
-                String[] parts = gsm.split(" ");
-                location = parts[0] + "-" + parts[1] + " LAC:" + parts[2] + " CID:" + parts[3];
-                String gsm_zone = preferences.getString(Names.Car.GSM_ZONE + car_id, "");
-                if (gsm_zone.equals("")) {
-                    HttpTask task = new HttpTask() {
-                        @Override
-                        void result(JsonObject res) throws ParseException {
-                            String sector = res.get("sector").asString();
-                            SharedPreferences.Editor ed = preferences.edit();
-                            ed.putString(Names.Car.GSM_ZONE + car_id, sector);
-                            ed.commit();
-                            updateZone(sector);
-                        }
-
-                        @Override
-                        void error() {
-                        }
-                    };
-                    String skey = preferences.getString(Names.Car.CAR_KEY + car_id, "");
-                    String[] gsm_parts = gsm.split(" ");
-                    task.execute(GSM_URL, skey, gsm_parts[0], gsm_parts[1], gsm_parts[2], gsm_parts[3]);
-                } else {
-                    updateZone(gsm_zone);
-                }
-            }
+            String gsm_zone = preferences.getString(Names.Car.GSM_ZONE + car_id, "");
+            if (!gsm_zone.equals(""))
+                updateZone(gsm_zone);
         } else {
             location = preferences.getFloat(Names.Car.LAT + car_id, 0) + " ";
             location += preferences.getFloat(Names.Car.LNG + car_id, 0);

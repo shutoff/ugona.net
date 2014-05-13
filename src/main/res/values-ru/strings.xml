@@ -85,6 +85,7 @@
     <string name="kmh">км/ч</string>
     <string name="close">Завершить</string>
     <string name="traffic">Показывать скорости</string>
+    <string name="traffic_layer">Показывать пробки</string>
     <string name="traffic_summary">Отображать скорость как цветной трек</string>
     <string name="events">События</string>
     <string name="alarms">Тревоги</string>

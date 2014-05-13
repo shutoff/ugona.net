@@ -85,6 +85,9 @@ public abstract class MapActivity extends ActionBarActivity {
         MenuItem item = menu.findItem(R.id.traffic);
         if (item != null)
             item.setChecked(preferences.getBoolean(TRAFFIC, true));
+        item = menu.findItem(R.id.traffic_layer);
+        if (item != null)
+            item.setChecked(preferences.getBoolean(Names.SHOW_TRAFFIC, false));
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -147,6 +150,16 @@ public abstract class MapActivity extends ActionBarActivity {
                 ed.commit();
                 updateMenu();
                 mMapView.setTileSource(MapView.createTileSource(this, preferences));
+                break;
+            }
+            case R.id.traffic_layer: {
+                boolean traffic = !preferences.getBoolean(Names.SHOW_TRAFFIC, false);
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putBoolean(Names.SHOW_TRAFFIC, traffic);
+                ed.commit();
+                updateMenu();
+                mMapView.mTrafficOverlay.setEnabled(traffic);
+                mMapView.postInvalidate();
                 break;
             }
         }
@@ -256,6 +269,7 @@ public abstract class MapActivity extends ActionBarActivity {
         public int DESCRIPTION_LINE_HEIGHT = 12;
         public int DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT = 2;
         protected int DESCRIPTION_MAXWIDTH = 200;
+        public int SHADOW_WIDTH = 5;
         DisplayMetrics displayMetrics;
         Rect baloonRect;
 
@@ -280,6 +294,8 @@ public abstract class MapActivity extends ActionBarActivity {
 
             DESCRIPTION_LINE_HEIGHT = (int) (12 * density);
             DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT = (int) (2 * density);
+
+            SHADOW_WIDTH = (int) (5 * density);
 
             int snippet_pixel = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                     14, displayMetrics);
@@ -472,21 +488,14 @@ public abstract class MapActivity extends ActionBarActivity {
             final int descBoxTop = descBoxBottom - totalHeight - 2 * DESCRIPTION_BOX_PADDING;
 
             this.mDescriptionPaint.setColor(Color.argb(20, 0, 0, 0));
-            c.drawRoundRect(new RectF(descBoxLeft - 6, descBoxTop - 6, descBoxRight + 6,
-                            descBoxBottom + 6), DESCRIPTION_BOX_CORNERWIDTH + 6, DESCRIPTION_BOX_CORNERWIDTH + 6,
-                    this.mDescriptionPaint
-            );
-            this.mDescriptionPaint.setColor(Color.argb(60, 0, 0, 0));
-            c.drawRoundRect(new RectF(descBoxLeft - 4, descBoxTop - 4, descBoxRight + 4,
-                            descBoxBottom + 4), DESCRIPTION_BOX_CORNERWIDTH + 4, DESCRIPTION_BOX_CORNERWIDTH + 4,
-                    this.mDescriptionPaint
-            );
-            this.mDescriptionPaint.setColor(Color.argb(60, 0, 0, 0));
-            c.drawRoundRect(new RectF(descBoxLeft - 2, descBoxTop - 2, descBoxRight + 2,
-                            descBoxBottom + 2), DESCRIPTION_BOX_CORNERWIDTH + 2, DESCRIPTION_BOX_CORNERWIDTH + 2,
-                    this.mDescriptionPaint
-            );
-            this.mDescriptionPaint.setColor(Color.BLACK);
+            for (int w = SHADOW_WIDTH; w > 1; w -= 1) {
+                c.drawRoundRect(new RectF(descBoxLeft - w, descBoxTop, descBoxRight + w,
+                                descBoxBottom + w * 2), DESCRIPTION_BOX_CORNERWIDTH + w, DESCRIPTION_BOX_CORNERWIDTH + w,
+                        this.mDescriptionPaint
+                );
+            }
+
+            this.mDescriptionPaint.setColor(Color.argb(128, 0, 0, 0));
             c.drawRoundRect(new RectF(descBoxLeft - 1, descBoxTop - 1, descBoxRight + 1,
                             descBoxBottom + 1), DESCRIPTION_BOX_CORNERWIDTH, DESCRIPTION_BOX_CORNERWIDTH,
                     this.mDescriptionPaint

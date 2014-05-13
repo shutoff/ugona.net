@@ -23,6 +23,7 @@ public class MapView extends org.osmdroid.views.MapView {
     private static final int IGNORE_MOVE_COUNT = 2;
     SharedPreferences preferences;
     MyLocationNewOverlay mLocationOverlay;
+    Overlay mTrafficOverlay;
     Overlay mTrackOverlay;
     Overlay mPointsOverlay;
     Runnable mAfterLayout;
@@ -35,6 +36,10 @@ public class MapView extends org.osmdroid.views.MapView {
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         setUseSafeCanvas(true);
+
+        mTrafficOverlay = new TrafficOverlay(context);
+        mTrafficOverlay.setEnabled(preferences.getBoolean(Names.SHOW_TRAFFIC, false));
+        getOverlays().add(mTrafficOverlay);
 
         mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(context), this, getResourceProxy());
         getOverlays().add(mLocationOverlay);
@@ -51,10 +56,10 @@ public class MapView extends org.osmdroid.views.MapView {
         }
         String locale = ctx.getResources().getConfiguration().locale.getLanguage();
         final String[] tiles_urls = {
-                "https://mt0.google.com/vt/lyrs=m&hl=" + locale + "&x=%s&y=%s&z=%s&s=Galileo",
-                "https://mt1.google.com/vt/lyrs=m&hl=" + locale + "&x=%s&y=%s&z=%s&s=Galileo",
-                "https://mt2.google.com/vt/lyrs=m&hl=" + locale + "&x=%s&y=%s&z=%s&s=Galileo",
-                "https://mt3.google.com/vt/lyrs=m&hl=" + locale + "&x=%s&y=%s&z=%s&s=Galileo"
+                "https://mt0.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo",
+                "https://mt1.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo",
+                "https://mt2.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo",
+                "https://mt3.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo"
         };
         return new myTileSource("google_" + locale, ResourceProxy.string.mapnik, 1, 17, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
     }
@@ -148,7 +153,10 @@ public class MapView extends org.osmdroid.views.MapView {
 
         @Override
         public String getTileURLString(MapTile aTile) {
-            return String.format(getBaseUrl(), aTile.getX(), aTile.getY(), aTile.getZoomLevel());
+            return getBaseUrl()
+                    .replace("%x", aTile.getX() + "")
+                    .replace("%y", aTile.getY() + "")
+                    .replace("%z", aTile.getZoomLevel() + "");
         }
 
     }

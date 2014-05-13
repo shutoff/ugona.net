@@ -90,6 +90,7 @@
     <string name="kmh">kmh</string>
     <string name="close">Close</string>
     <string name="traffic">Show speed</string>
+    <string name="traffic_layer">Show traffic</string>
     <string name="traffic_summary">Show speed as color track</string>
     <string name="alarms">Alarms</string>
     <string name="contacts">Contacts</string>

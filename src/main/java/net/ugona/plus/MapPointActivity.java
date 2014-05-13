@@ -223,6 +223,7 @@ public class MapPointActivity extends MapActivity {
     }
 
     boolean updateItem(MyOverlayItem item) {
+        String id = item.getUid();
         double lat = preferences.getFloat(Names.Car.LAT + item.getUid(), 0);
         double lng = preferences.getFloat(Names.Car.LNG + item.getUid(), 0);
         if (item.getUid().equals(car_id)) {

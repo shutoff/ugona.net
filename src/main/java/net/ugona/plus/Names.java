@@ -31,6 +31,7 @@ public final class Names {
     static final String TRAFIC_LEVEL = "trefic_level";
     static final String NO_GOOGLE = "no_google";
     static final String ROWS = "rows";
+    static final String SHOW_TRAFFIC = "show_traffic";
 
     public final class Car {
         static final String ENGINE = "Engine";

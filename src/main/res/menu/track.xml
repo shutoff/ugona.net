@@ -31,6 +31,10 @@
             android:id="@+id/traffic"
             android:title="@string/traffic"
             car:showAsAction="never" />
+        <item
+            android:id="@+id/traffic_layer"
+            android:title="@string/traffic_layer"
+            car:showAsAction="never" />
     </group>
 
 </menu>
