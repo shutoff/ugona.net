@@ -490,6 +490,9 @@ public class FetchService extends Service {
                         ed.remove(Names.Car.GSM_ZONE + car_id);
                         ed.remove(Names.Car.LAT + car_id);
                         ed.remove(Names.Car.LNG + car_id);
+                    }
+                    if (preferences.getString(Names.Car.GSM_ZONE + car_id, "").equals("")) {
+                        ed.commit();
                         new GsmZoneRequest(car_id);
                     }
                 }

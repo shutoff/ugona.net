@@ -267,6 +267,7 @@ public class MapPointActivity extends MapActivity {
             }
         }
         item.zone = null;
+        String data = Math.round(lat * 10000) / 10000. + "," + Math.round(lng * 10000) / 10000.;
         if ((lat == 0) || (lng == 0)) {
             String zone = preferences.getString(Names.Car.GSM_ZONE + item.getUid(), "");
             if (zone.equals(""))
@@ -296,6 +297,9 @@ public class MapPointActivity extends MapActivity {
             lat = ((min_lat + max_lat) / 2);
             lng = ((min_lon + max_lon) / 2);
             item.setZone(zone);
+            String[] gsm = preferences.getString(Names.Car.GSM_SECTOR + item.getUid(), "").split(" ");
+            if (gsm.length == 4)
+                data = "LAC: " + gsm[2] + " CID: " + gsm[3];
         }
         String title = "";
         String speed = "";
@@ -322,7 +326,6 @@ public class MapPointActivity extends MapActivity {
             }
         }
 
-        String data = Math.round(lat * 10000) / 10000. + "," + Math.round(lng * 10000) / 10000.;
         String address = Address.getAddress(getBaseContext(), lat, lng);
         if (address != null) {
             String[] parts = address.split(", ");

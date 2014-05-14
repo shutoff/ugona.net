@@ -419,6 +419,12 @@ public class StateFragment extends Fragment
         double lon = preferences.getFloat(Names.Car.LNG + car_id, 0);
         String location = "";
         if ((lat == 0) && (lon == 0)) {
+            String gsm_sector = preferences.getString(Names.Car.GSM_SECTOR + car_id, "");
+            if (!gsm_sector.equals("")) {
+                String[] parts = gsm_sector.split(" ");
+                if (parts.length == 4)
+                    location = "LAC: " + parts[2] + " CID: " + parts[3];
+            }
             String gsm_zone = preferences.getString(Names.Car.GSM_ZONE + car_id, "");
             if (!gsm_zone.equals(""))
                 updateZone(gsm_zone);
