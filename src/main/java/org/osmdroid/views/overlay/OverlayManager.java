@@ -238,11 +238,19 @@ public class OverlayManager extends AbstractList<Overlay> {
         return false;
     }
 
-	/* OnGestureListener */
+    public void setOptionsMenusEnabled(final boolean pEnabled) {
+        for (final Overlay overlay : mOverlayList) {
+            if ((overlay instanceof IOverlayMenuProvider)
+                    && ((IOverlayMenuProvider) overlay).isOptionsMenuEnabled()) {
+                ((IOverlayMenuProvider) overlay).setOptionsMenuEnabled(pEnabled);
+            }
+        }
+    }
 
-    public boolean onDown(final MotionEvent pEvent, final MapView pMapView) {
+    public boolean onFling(final MotionEvent pEvent1, final MotionEvent pEvent2,
+                           final float pVelocityX, final float pVelocityY, final MapView pMapView) {
         for (final Overlay overlay : this.overlaysReversed()) {
-            if (overlay.onDown(pEvent, pMapView)) {
+            if (overlay.onFling(pEvent1, pEvent2, pVelocityX, pVelocityY, pMapView)) {
                 return true;
             }
         }
@@ -250,10 +258,9 @@ public class OverlayManager extends AbstractList<Overlay> {
         return false;
     }
 
-    public boolean onFling(final MotionEvent pEvent1, final MotionEvent pEvent2,
-                           final float pVelocityX, final float pVelocityY, final MapView pMapView) {
+    public boolean onDown(final MotionEvent pEvent, final MapView pMapView) {
         for (final Overlay overlay : this.overlaysReversed()) {
-            if (overlay.onFling(pEvent1, pEvent2, pVelocityX, pVelocityY, pMapView)) {
+            if (overlay.onDown(pEvent, pMapView)) {
                 return true;
             }
         }
@@ -296,17 +303,6 @@ public class OverlayManager extends AbstractList<Overlay> {
         }
 
         return false;
-    }
-
-    // ** Options Menu **//
-
-    public void setOptionsMenusEnabled(final boolean pEnabled) {
-        for (final Overlay overlay : mOverlayList) {
-            if ((overlay instanceof IOverlayMenuProvider)
-                    && ((IOverlayMenuProvider) overlay).isOptionsMenuEnabled()) {
-                ((IOverlayMenuProvider) overlay).setOptionsMenuEnabled(pEnabled);
-            }
-        }
     }
 
     public boolean onCreateOptionsMenu(final Menu pMenu, final int menuIdOffset, final MapView mapView) {

@@ -6,11 +6,16 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
 import org.osmdroid.ResourceProxy;
+import org.osmdroid.tileprovider.IRegisterReceiver;
 import org.osmdroid.tileprovider.MapTile;
+import org.osmdroid.tileprovider.MapTileProviderArray;
 import org.osmdroid.tileprovider.MapTileProviderBase;
-import org.osmdroid.tileprovider.MapTileProviderBasic;
+import org.osmdroid.tileprovider.modules.MapTileDownloader;
+import org.osmdroid.tileprovider.modules.MapTileModuleProviderBase;
+import org.osmdroid.tileprovider.modules.NetworkAvailabliltyCheck;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.XYTileSource;
+import org.osmdroid.tileprovider.util.SimpleRegisterReceiver;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.TilesOverlay;
 
@@ -20,12 +25,12 @@ public class TrafficOverlay extends TilesOverlay {
 
     static final int TRAFFIC_ALPHA = 160;
 
-    public TrafficOverlay(Context aContext) {
-        super(createTileProvider(aContext), aContext);
+    public TrafficOverlay(net.ugona.plus.MapView mapView, Context aContext) {
+        super(createTileProvider(mapView, aContext), aContext);
         setLoadingBackgroundColor(Color.TRANSPARENT);
     }
 
-    static MapTileProviderBase createTileProvider(Context aContext) {
+    static MapTileProviderBase createTileProvider(MapView mapView, Context aContext) {
         final String[] tiles_urls = {
                 "http://jn0maps.mail.ru/tiles/newjams/%z/%y/%x.png",
                 "http://jn1maps.mail.ru/tiles/newjams/%z/%y/%x.png",
@@ -36,7 +41,13 @@ public class TrafficOverlay extends TilesOverlay {
         };
 
         ITileSource tileSource = new TileSource(aContext, tiles_urls);
-        return new MapTileProviderBasic(aContext, tileSource);
+        final IRegisterReceiver registerReceiver = new SimpleRegisterReceiver(aContext.getApplicationContext());
+
+        final NetworkAvailabliltyCheck networkAvailabliltyCheck = new NetworkAvailabliltyCheck(aContext.getApplicationContext());
+        final MapTileDownloader downloaderProvider = new MapTileDownloader(tileSource, null, networkAvailabliltyCheck);
+        MapTileProviderBase providerBase = new MapTileProviderArray(tileSource, registerReceiver, new MapTileModuleProviderBase[]{downloaderProvider});
+        providerBase.setTileRequestCompleteHandler(mapView.getTileRequestCompleteHandler());
+        return providerBase;
     }
 
     @Override
@@ -44,10 +55,15 @@ public class TrafficOverlay extends TilesOverlay {
         super.draw(c, osmv, shadow);
     }
 
+    @Override
+    public boolean isDrawingShadowLayer() {
+        return false;
+    }
+
     static class TileSource extends XYTileSource {
 
         public TileSource(Context ctx, String[] baseUrl) {
-            super("traffic", ResourceProxy.string.mapnik, 2, 17, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", baseUrl);
+            super("traffic", ResourceProxy.string.mapnik, 2, 17, 256, ".png", baseUrl);
         }
 
         @Override
@@ -61,13 +77,16 @@ public class TrafficOverlay extends TilesOverlay {
         @Override
         public Drawable getDrawable(InputStream aFileInputStream) throws LowMemoryException {
             Drawable res = super.getDrawable(aFileInputStream);
-            res.setAlpha(TRAFFIC_ALPHA);
+            if (res != null)
+                res.setAlpha(TRAFFIC_ALPHA);
             return res;
         }
 
         @Override
         public Drawable getDrawable(String aFilePath) {
             Drawable res = super.getDrawable(aFilePath);
+            if (res == null)
+                return null;
             res.setAlpha(TRAFFIC_ALPHA);
             return res;
         }

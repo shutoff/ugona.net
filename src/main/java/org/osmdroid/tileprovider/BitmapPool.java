@@ -19,10 +19,11 @@ public class BitmapPool {
 
     public void returnDrawableToPool(ReusableBitmapDrawable drawable) {
         Bitmap b = drawable.tryRecycle();
-        if (b != null && b.isMutable())
+        if (b != null && b.isMutable()) {
             synchronized (mPool) {
                 mPool.addLast(b);
             }
+        }
     }
 
     public void applyReusableOptions(final BitmapFactory.Options aBitmapOptions) {
@@ -68,12 +69,15 @@ public class BitmapPool {
         return null;
     }
 
-    public void clearBitmapPool() {
+    public boolean clearBitmapPool() {
         synchronized (sInstance.mPool) {
+            boolean res = false;
             while (!sInstance.mPool.isEmpty()) {
                 Bitmap bitmap = sInstance.mPool.remove();
                 bitmap.recycle();
+                res = true;
             }
+            return res;
         }
     }
 }

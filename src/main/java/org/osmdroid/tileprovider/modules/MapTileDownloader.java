@@ -201,7 +201,6 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
                     byteStream.reset();
                 }
                 final Drawable result = tileSource.getDrawable(byteStream);
-
                 return result;
             } catch (final UnknownHostException e) {
                 // no network connection so empty the queue
@@ -231,7 +230,7 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
             // don't return the tile because we'll wait for the fs provider to ask for it
             // this prevent flickering when a load of delayed downloads complete for tiles
             // that we might not even be interested in any more
-            pState.getCallback().mapTileRequestCompleted(pState, null);
+            pState.getCallback().mapTileRequestCompleted(pState, pDrawable);
             // We want to return the Bitmap to the BitmapPool if applicable
             if (pDrawable instanceof ReusableBitmapDrawable)
                 BitmapPool.getInstance().returnDrawableToPool((ReusableBitmapDrawable) pDrawable);

@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -31,7 +32,8 @@ public class State {
     static final int CMD_SEARCH = 1 << 9;
     static int telephony_state = 0;
 
-    static void appendLog(String text) {
+    static public void appendLog(String text) {
+        Log.v("v", text);
         File logFile = Environment.getExternalStorageDirectory();
         logFile = new File(logFile, "car.log");
         if (!logFile.exists()) {

@@ -19,7 +19,6 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -268,8 +267,8 @@ public abstract class MapActivity extends ActionBarActivity {
         public int DESCRIPTION_BOX_CORNERWIDTH = 3;
         public int DESCRIPTION_LINE_HEIGHT = 12;
         public int DESCRIPTION_TITLE_EXTRA_LINE_HEIGHT = 2;
-        protected int DESCRIPTION_MAXWIDTH = 200;
         public int SHADOW_WIDTH = 5;
+        protected int DESCRIPTION_MAXWIDTH = 200;
         DisplayMetrics displayMetrics;
         Rect baloonRect;
 
@@ -306,6 +305,11 @@ public abstract class MapActivity extends ActionBarActivity {
         }
 
         @Override
+        public boolean isDrawingShadowLayer() {
+            return false;
+        }
+
+        @Override
         public boolean onSingleTapConfirmed(MotionEvent event, org.osmdroid.views.MapView mapView) {
             int focusedIndex = mFocusedItemIndex;
             if (focusedIndex != NOT_SET) {
@@ -319,7 +323,6 @@ public abstract class MapActivity extends ActionBarActivity {
                 onChangeFocus();
                 return true;
             }
-            Log.v("v", res + "," + mFocusedItemIndex);
             if (!res && (mFocusedItemIndex != NOT_SET)) {
                 unSetFocusedItem();
                 mapView.invalidate();
@@ -649,6 +652,11 @@ public abstract class MapActivity extends ActionBarActivity {
         }
 
         @Override
+        public boolean isDrawingShadowLayer() {
+            return false;
+        }
+
+        @Override
         protected void drawSafe(ISafeCanvas canvas, org.osmdroid.views.MapView mapView, boolean shadow) {
             if (shadow)
                 return;
@@ -675,22 +683,43 @@ public abstract class MapActivity extends ActionBarActivity {
                 projectedPoint0 = p.point;
                 int color = getColor(p.speed);
 
+                boolean started = false;
+
                 for (int i = size - 2; i >= 0; i--) {
                     // compute next points
                     projectedPoint1 = track.get(i).point;
 
                     // the starting point may be not calculated, because previous segment was out of clip
                     // bounds
-                    if (screenPoint0 == null) {
+                    if (screenPoint0 == null)
                         screenPoint0 = pj.toPixels(projectedPoint0, mTempPoint1);
-                        mPath.moveTo(screenPoint0.x - screenRect.left, screenPoint0.y - screenRect.top);
-                    }
 
                     screenPoint1 = pj.toPixels(projectedPoint1, mTempPoint2);
 
                     // skip this point, too close to previous point
-                    if (Math.abs(screenPoint1.x - screenPoint0.x) + Math.abs(screenPoint1.y - screenPoint0.y) <= 1) {
+                    if (Math.abs(screenPoint1.x - screenPoint0.x) + Math.abs(screenPoint1.y - screenPoint0.y) <= 1)
                         continue;
+
+                    if ((screenPoint0.x < screenRect.left) && (screenPoint1.x < screenRect.left) ||
+                            (screenPoint0.x > screenRect.right) && (screenPoint1.x > screenRect.right) ||
+                            (screenPoint0.y < screenRect.top) && (screenPoint1.y < screenRect.top) ||
+                            (screenPoint0.y > screenRect.bottom) && (screenPoint1.y > screenRect.bottom)) {
+                        if (started) {
+                            mPaint.setColor(colors[color]);
+                            canvas.drawPath(mPath, mPaint);
+                            mPath.rewind();
+                            started = false;
+                        }
+                        projectedPoint0 = projectedPoint1;
+                        screenPoint0.x = screenPoint1.x;
+                        screenPoint0.y = screenPoint1.y;
+                        continue;
+                    }
+
+                    if (!started) {
+                        mPath.moveTo(screenPoint0.x - screenRect.left, screenPoint0.y - screenRect.top);
+                        started = true;
+                        color = getColor(track.get(i + 1).speed);
                     }
 
                     mPath.lineTo(screenPoint1.x - screenRect.left, screenPoint1.y - screenRect.top);
@@ -709,8 +738,10 @@ public abstract class MapActivity extends ActionBarActivity {
                     screenPoint0.y = screenPoint1.y;
                 }
 
-                mPaint.setColor(colors[color]);
-                canvas.drawPath(mPath, mPaint);
+                if (started) {
+                    mPaint.setColor(colors[color]);
+                    canvas.drawPath(mPath, mPaint);
+                }
             }
         }
 

@@ -172,6 +172,8 @@ public abstract class MapTileProviderBase implements IMapTileProviderCallback,
     protected void putTileIntoCache(MapTileRequestState pState, Drawable pDrawable) {
         final MapTile tile = pState.getMapTile();
         if (pDrawable != null) {
+            if (pDrawable instanceof ReusableBitmapDrawable)
+                ((ReusableBitmapDrawable) pDrawable).beginUsingDrawable();
             mTileCache.putTile(tile, pDrawable);
         }
     }

@@ -50,6 +50,9 @@ public class MapPointActivity extends MapActivity {
     boolean active;
     HttpTask trackTask;
 
+    Rect mScreenRect;
+    Rect mTempRect;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         car_id = getIntent().getStringExtra(Names.ID);
@@ -75,7 +78,7 @@ public class MapPointActivity extends MapActivity {
         br = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                updateTrack();
+                update();
                 stopTimer();
                 startTimer(false);
             }
@@ -147,6 +150,9 @@ public class MapPointActivity extends MapActivity {
         pointsOverlay.setFocusedItem(pointsOverlay.find(car_id));
         mapView.getOverlays().add(pointsOverlay);
 
+        mScreenRect = new Rect();
+        mTempRect = new Rect();
+
         mapView.getController().setZoom(16);
         int selected = pointsOverlay.find(car_id);
         if (selected >= 0) {
@@ -154,6 +160,7 @@ public class MapPointActivity extends MapActivity {
             mapView.getController().setCenter(item.getPoint());
             if (item.zone != null)
                 mapView.fitToRect(new GeoPoint(item.min_lat, item.min_lon), new GeoPoint(item.max_lat, item.max_lon), 0.7);
+            mapView.getScreenRect(mScreenRect);
         }
         updateTrack();
     }
@@ -169,6 +176,7 @@ public class MapPointActivity extends MapActivity {
             pointsOverlay.setFocusedItem(current);
             MyOverlayItem i = pointsOverlay.getItem(current);
             mapView.getController().setCenter(i.getPoint());
+            mapView.getScreenRect(mScreenRect);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -207,7 +215,14 @@ public class MapPointActivity extends MapActivity {
                     JsonObject v = list.get(list.size() - 1).asObject();
                     trackOverlay.clear(mapView);
                     trackOverlay.add(v.get("track").asString());
+                    CarsOverlay carsOverlay = (CarsOverlay) mapView.mPointsOverlay;
+                    int current = carsOverlay.find(car_id);
+                    if (current >= 0) {
+                        MyOverlayItem item = carsOverlay.getItem(current);
+                        updateItem(item);
+                    }
                     mapView.invalidate();
+                    updateCenter();
                 }
                 trackTask = null;
             }
@@ -222,8 +237,21 @@ public class MapPointActivity extends MapActivity {
 
     }
 
+    void updateCenter() {
+        MapView mapView = getMapView();
+        mapView.getScreenRect(mTempRect);
+        if ((mTempRect.left != mScreenRect.left) || (mTempRect.right != mScreenRect.right) || (mTempRect.top != mScreenRect.top) || (mTempRect.bottom != mScreenRect.bottom))
+            return;
+        CarsOverlay carsOverlay = (CarsOverlay) mapView.mPointsOverlay;
+        int current = carsOverlay.find(car_id);
+        if (current < 0)
+            return;
+        MyOverlayItem item = carsOverlay.getItem(current);
+        mapView.getController().setCenter(item.getPoint());
+        mapView.getScreenRect(mScreenRect);
+    }
+
     boolean updateItem(MyOverlayItem item) {
-        String id = item.getUid();
         double lat = preferences.getFloat(Names.Car.LAT + item.getUid(), 0);
         double lng = preferences.getFloat(Names.Car.LNG + item.getUid(), 0);
         if (item.getUid().equals(car_id)) {
@@ -327,8 +355,14 @@ public class MapPointActivity extends MapActivity {
     }
 
     void update() {
-        CarsOverlay pointsOverlay = (CarsOverlay) getMapView().mPointsOverlay;
+        final MapView mapView = getMapView();
+        if (mapView == null)
+            return;
+        CarsOverlay pointsOverlay = (CarsOverlay) mapView.mPointsOverlay;
+        if (pointsOverlay == null)
+            return;
         pointsOverlay.update();
+        getMapView().postInvalidate();
     }
 
     void setActionBar() {
@@ -365,6 +399,7 @@ public class MapPointActivity extends MapActivity {
                     mapView.getController().setCenter(item.getPoint());
                     if (item.zone != null)
                         mapView.fitToRect(new GeoPoint(item.min_lat, item.min_lon), new GeoPoint(item.max_lat, item.max_lon), 0.7);
+                    mapView.getScreenRect(mScreenRect);
                     trackTask = null;
                     TrackOverlay trackOverlay = (TrackOverlay) mapView.mTrackOverlay;
                     trackOverlay.clear(mapView);
