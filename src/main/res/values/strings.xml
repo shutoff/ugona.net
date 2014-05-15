@@ -512,4 +512,7 @@
     <string name="door_time">Delay alarm for door and trunk zone</string>
     <string name="zone_in_sound">Zone IN sound</string>
     <string name="zone_out_sound">Zone OUT sound</string>
+    <string name="voltage">Voltage</string>
+    <string name="reserved">Reserved voltage</string>
+    <string name="temperature">Temperature</string>
 </resources>

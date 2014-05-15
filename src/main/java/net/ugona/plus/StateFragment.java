@@ -25,9 +25,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.ParseException;
-
 import org.joda.time.LocalDateTime;
 
 import java.text.DateFormat;
@@ -102,6 +99,7 @@ public class StateFragment extends Fragment
     View mValet;
     View mNet;
     View balanceBlock;
+    View vMain;
     View vTime;
     ScrollView svAddress;
     CarDrawable drawable;
@@ -140,14 +138,33 @@ public class StateFragment extends Fragment
         tvLast = (TextView) v.findViewById(R.id.last);
         tvVoltage = (TextView) v.findViewById(R.id.voltage);
         tvReserve = (TextView) v.findViewById(R.id.reserve);
+
+        View.OnClickListener clickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showHistory(view.getTag().toString());
+            }
+        };
+
+        vMain = v.findViewById(R.id.main_block);
+        vMain.setTag("voltage");
+        vMain.setOnClickListener(clickListener);
         vReserve = v.findViewById(R.id.reserve_block);
+        vReserve.setTag("reserved");
+        vReserve.setOnClickListener(clickListener);
         tvBalance = (TextView) v.findViewById(R.id.balance);
         tvTemperature = (TextView) v.findViewById(R.id.temperature);
         vTemperature = v.findViewById(R.id.temperature_block);
+        vTemperature.setTag("t1");
+        vTemperature.setOnClickListener(clickListener);
         tvTemperature2 = (TextView) v.findViewById(R.id.temperature2);
         vTemperature2 = v.findViewById(R.id.temperature2_block);
+        vTemperature2.setTag("t2");
+        vTemperature2.setOnClickListener(clickListener);
         tvTemperature3 = (TextView) v.findViewById(R.id.temperature3);
         vTemperature3 = v.findViewById(R.id.temperature3_block);
+        vTemperature3.setTag("t3");
+        vTemperature3.setOnClickListener(clickListener);
 
         vMotor = v.findViewById(R.id.motor);
         vRele = v.findViewById(R.id.rele);
@@ -200,6 +217,8 @@ public class StateFragment extends Fragment
         }
 
         balanceBlock = v.findViewById(R.id.balance_block);
+        balanceBlock.setTag("balance");
+        balanceBlock.setOnClickListener(clickListener);
 
         tvError = (TextView) v.findViewById(R.id.error_text);
         vError = v.findViewById(R.id.error);
@@ -297,22 +316,7 @@ public class StateFragment extends Fragment
                     if (error_text == null)
                         error_text = getString(R.string.data_error);
                     if (error_text.equals("Auth error")) {
-                        HttpTask task = new HttpTask() {
-                            @Override
-                            void result(JsonObject res) throws ParseException {
-                                String key = res.get("key").asString();
-                                SharedPreferences.Editor ed = preferences.edit();
-                                ed.putString(Names.Car.CAR_KEY + car_id, key);
-                                ed.commit();
-                                startUpdate(getActivity());
-                            }
-
-                            @Override
-                            void error() {
-                                showAuth();
-                            }
-                        };
-                        task.execute(AuthDialog.URL_KEY, preferences.getString(Names.Car.AUTH + car_id, ""));
+                        showAuth();
                         return;
                     }
                     tvError.setText(error_text);
@@ -980,5 +984,12 @@ public class StateFragment extends Fragment
         if (prgUpdate.getVisibility() == View.VISIBLE)
             return;
         startUpdate(getActivity());
+    }
+
+    void showHistory(String type) {
+        Intent intent = new Intent(getActivity(), HistoryActivity.class);
+        intent.putExtra(Names.ID, car_id);
+        intent.putExtra(Names.STATE, type);
+        startActivity(intent);
     }
 }

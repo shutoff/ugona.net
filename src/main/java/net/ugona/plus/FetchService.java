@@ -44,9 +44,12 @@ public class FetchService extends Service {
     static final String ACTION_NOTIFICATION = "net.ugona.plus.NOTIFICATION";
     static final String ACTION_RELE_OFF = "net.ugona.plus.RELE_OFF";
 
+    static final String AUTH_ERROR = "Auth error";
+
     static final String URL_STATUS = "https://car-online.ugona.net/?skey=$1&time=$2";
     static final String URL_EVENTS = "https://car-online.ugona.net/events?skey=$1&auth=$2&begin=$3&end=$4";
     static final String URL_GSM = "https://car-online.ugona.net/gsm?skey=$1&cc=$2&nc=$3&lac=$4&cid=$5";
+    final static String URL_KEY = "https://car-online.ugona.net/key?auth=$1";
 
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;
@@ -315,6 +318,32 @@ public class FetchService extends Service {
                 m_activeNetwork = activeNetwork;
                 exec(preferences.getString(Names.Car.CAR_KEY + car_id, ""));
                 return;
+            }
+            if (AUTH_ERROR.equals(error_text)) {
+                String auth = preferences.getString(Names.Car.AUTH, "");
+                if (!auth.equals("")) {
+                    HttpTask authTask = new HttpTask() {
+                        @Override
+                        void result(JsonObject res) throws ParseException {
+                            String key = res.get("key").asString();
+                            SharedPreferences.Editor ed = preferences.edit();
+                            ed.putString(Names.Car.CAR_KEY + car_id, key);
+                            ed.commit();
+                            exec(preferences.getString(Names.Car.CAR_KEY + car_id, ""));
+                        }
+
+                        @Override
+                        void error() {
+                            requests.remove(key);
+                            new StatusRequest(car_id);
+                            long timeout = (error_text != null) ? REPEAT_AFTER_500 : REPEAT_AFTER_ERROR;
+                            alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + timeout, timeout, piTimer);
+                            sendError(error_text, car_id);
+                        }
+                    };
+                    authTask.execute(URL_KEY, auth);
+                    return;
+                }
             }
             requests.remove(key);
             new StatusRequest(car_id);
