@@ -63,7 +63,7 @@ public class TrafficOverlay extends TilesOverlay {
     static class TileSource extends XYTileSource {
 
         public TileSource(Context ctx, String[] baseUrl) {
-            super("traffic", ResourceProxy.string.mapnik, 2, 17, 256, ".png", baseUrl);
+            super("traffic", ResourceProxy.string.mapnik, 2, 17, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", baseUrl);
         }
 
         @Override

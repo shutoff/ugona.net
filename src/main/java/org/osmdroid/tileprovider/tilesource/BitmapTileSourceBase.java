@@ -105,8 +105,6 @@ public abstract class BitmapTileSourceBase implements ITileSource,
             BitmapPool.getInstance().applyReusableOptions(bitmapOptions);
             final Bitmap bitmap = BitmapFactory.decodeFile(aFilePath, bitmapOptions);
             if (bitmap != null) {
-                if ((bitmap.getWidth() != this.getTileSizePixels()) || (bitmap.getHeight() != this.getTileSizePixels()))
-                    return null;
                 return new ReusableBitmapDrawable(bitmap);
             } else {
                 // if we couldn't load it then it's invalid - delete it
@@ -160,11 +158,8 @@ public abstract class BitmapTileSourceBase implements ITileSource,
                     return null;
                 continue;
             }
-            if (bitmap != null) {
-                if ((bitmap.getWidth() != this.getTileSizePixels()) || (bitmap.getHeight() != this.getTileSizePixels()))
-                    return null;
+            if (bitmap != null)
                 return new ReusableBitmapDrawable(bitmap);
-            }
             return null;
         }
     }

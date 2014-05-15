@@ -143,7 +143,7 @@ public class MapTileFilesystemProvider extends MapTileFileStorageProviderBase {
 
             // Check the tile source to see if its file is available and if so, then render the
             // drawable and return the tile
-            final File file = new File(TILE_PATH_BASE,
+            final File file = new File(TileWriter.TILE_PATH_BASE,
                     tileSource.getTileRelativeFilenameString(tile) + TILE_PATH_EXTENSION);
             if (file.exists()) {
 

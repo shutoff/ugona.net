@@ -226,228 +226,232 @@ public class CarWidget extends AppWidgetProvider {
     }
 
     void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetID) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        int rows = preferences.getInt(Names.ROWS + widgetID, 0);
-        boolean bigPict = false;
-        if (rows == 0) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                Bundle options = appWidgetManager.getAppWidgetOptions(widgetID);
-                int maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
-                if (maxHeight > 0) {
-                    if (height_rows == null)
-                        height_rows = new HashMap<Integer, Integer>();
-                    if (!height_rows.containsKey(maxHeight)) {
-                        Intent intent = new Intent(Intent.ACTION_MAIN);
-                        intent.addCategory(Intent.CATEGORY_HOME);
-                        float density = context.getResources().getDisplayMetrics().density;
-                        int maxWidth = (int) (options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH) * density + 0.5);
-                        int h = (int) (maxHeight * density - 0.5);
-                        int h3 = getLayoutHeight(context, maxWidth, R.layout.widget3);
-                        int h4 = getLayoutHeight(context, maxWidth, R.layout.widget4);
-                        rows = 3;
-                        if (h < h3)
-                            rows = 2;
-                        if (h > h4) {
-                            rows = 5;
-                        }
-                        height_rows.put(maxHeight, rows);
-                    }
-                    rows = height_rows.get(maxHeight);
-                    bigPict = (rows > 3);
-                }
-            } else {
-                rows = 3;
-            }
-        }
-
-        int theme = preferences.getInt(Names.THEME + widgetID, 0);
-        if ((theme < 0) || (theme >= id_layout.length))
-            theme = 0;
-        RemoteViews widgetView = new RemoteViews(context.getPackageName(), getLayoutId(context, widgetID, theme));
-
-        String id = preferences.getString(Names.WIDGET + widgetID, "");
-        String car_id = Preferences.getCar(preferences, id);
-        if (!id.equals(car_id)) {
-            SharedPreferences.Editor ed = preferences.edit();
-            ed.putString(Names.WIDGET + widgetID, car_id);
-            ed.commit();
-        }
-        int transparency = preferences.getInt(Names.TRANSPARENCY + widgetID, 0);
-        widgetView.setInt(R.id.bg, "setAlpha", transparency);
-        if (transparency > 0)
-            widgetView.setImageViewResource(R.id.bg, id_bg[theme]);
-
-        Intent configIntent = new Intent(context, WidgetService.class);
-        configIntent.putExtra(Names.ID, car_id);
-        configIntent.setAction(WidgetService.ACTION_START);
-        Uri data = Uri.withAppendedPath(Uri.parse("http://widget/update/"), String.valueOf(widgetID));
-        configIntent.setData(data);
-        PendingIntent pIntent = PendingIntent.getService(context, widgetID, configIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        widgetView.setOnClickPendingIntent(R.id.update_block, pIntent);
-
-        long last = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
-        Date now = new Date();
-        if (last > now.getTime() - 24 * 60 * 60 * 1000) {
-            DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
-            widgetView.setTextViewText(R.id.last, tf.format(last));
-        } else {
-            widgetView.setTextViewText(R.id.last, "??:??");
-        }
-
-        int show_count = 1;
-
-        String voltage = preferences.getString(Names.Car.VOLTAGE_MAIN + car_id, "?");
-        boolean normal = false;
         try {
-            double v = Double.parseDouble(voltage);
-            v += preferences.getInt(Names.Car.VOLTAGE_SHIFT + car_id, 0) / 20.;
-            voltage = String.format("%.2f", v);
-            if (v > 12.2)
-                normal = true;
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            int rows = preferences.getInt(Names.ROWS + widgetID, 0);
+            boolean bigPict = false;
+            if (rows == 0) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    Bundle options = appWidgetManager.getAppWidgetOptions(widgetID);
+                    int maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
+                    if (maxHeight > 0) {
+                        if (height_rows == null)
+                            height_rows = new HashMap<Integer, Integer>();
+                        if (!height_rows.containsKey(maxHeight)) {
+                            Intent intent = new Intent(Intent.ACTION_MAIN);
+                            intent.addCategory(Intent.CATEGORY_HOME);
+                            float density = context.getResources().getDisplayMetrics().density;
+                            int maxWidth = (int) (options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH) * density + 0.5);
+                            int h = (int) (maxHeight * density - 0.5);
+                            int h3 = getLayoutHeight(context, maxWidth, R.layout.widget3);
+                            int h4 = getLayoutHeight(context, maxWidth, R.layout.widget4);
+                            rows = 3;
+                            if (h < h3)
+                                rows = 2;
+                            if (h > h4) {
+                                rows = 5;
+                            }
+                            height_rows.put(maxHeight, rows);
+                        }
+                        rows = height_rows.get(maxHeight);
+                        bigPict = (rows > 3);
+                    }
+                } else {
+                    rows = 3;
+                }
+            }
+
+            int theme = preferences.getInt(Names.THEME + widgetID, 0);
+            if ((theme < 0) || (theme >= id_layout.length))
+                theme = 0;
+            RemoteViews widgetView = new RemoteViews(context.getPackageName(), getLayoutId(context, widgetID, theme));
+
+            String id = preferences.getString(Names.WIDGET + widgetID, "");
+            String car_id = Preferences.getCar(preferences, id);
+            if (!id.equals(car_id)) {
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putString(Names.WIDGET + widgetID, car_id);
+                ed.commit();
+            }
+            int transparency = preferences.getInt(Names.TRANSPARENCY + widgetID, 0);
+            widgetView.setInt(R.id.bg, "setAlpha", transparency);
+            if (transparency > 0)
+                widgetView.setImageViewResource(R.id.bg, id_bg[theme]);
+
+            Intent configIntent = new Intent(context, WidgetService.class);
+            configIntent.putExtra(Names.ID, car_id);
+            configIntent.setAction(WidgetService.ACTION_START);
+            Uri data = Uri.withAppendedPath(Uri.parse("http://widget/update/"), String.valueOf(widgetID));
+            configIntent.setData(data);
+            PendingIntent pIntent = PendingIntent.getService(context, widgetID, configIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            widgetView.setOnClickPendingIntent(R.id.update_block, pIntent);
+
+            long last = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
+            Date now = new Date();
+            if (last > now.getTime() - 24 * 60 * 60 * 1000) {
+                DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
+                widgetView.setTextViewText(R.id.last, tf.format(last));
+            } else {
+                widgetView.setTextViewText(R.id.last, "??:??");
+            }
+
+            int show_count = 1;
+
+            String voltage = preferences.getString(Names.Car.VOLTAGE_MAIN + car_id, "?");
+            boolean normal = false;
+            try {
+                double v = Double.parseDouble(voltage);
+                v += preferences.getInt(Names.Car.VOLTAGE_SHIFT + car_id, 0) / 20.;
+                voltage = String.format("%.2f", v);
+                if (v > 12.2)
+                    normal = true;
+            } catch (Exception ex) {
+                // ignore
+            }
+            widgetView.setTextViewText(R.id.voltage, voltage + " V");
+            if (!normal) {
+                boolean az = preferences.getBoolean(Names.Car.AZ + car_id, false);
+                boolean ignition = !az && (preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false));
+                if (az || ignition)
+                    normal = true;
+            }
+
+            int v_color = normal ? context.getResources().getColor(id_color[theme]) : context.getResources().getColor(R.color.error);
+            widgetView.setInt(R.id.voltage, "setTextColor", v_color);
+
+            String temperature = Preferences.getTemperature(preferences, car_id, 1);
+            if (temperature == null) {
+                widgetView.setViewVisibility(R.id.temperature_block, View.GONE);
+            } else {
+                widgetView.setTextViewText(R.id.temperature, temperature);
+                widgetView.setViewVisibility(R.id.temperature_block, View.VISIBLE);
+                show_count++;
+            }
+
+            boolean show_balance = false;
+            if (show_count < rows)
+                show_balance = preferences.getBoolean(Names.Car.SHOW_BALANCE + car_id, true);
+            if (show_balance) {
+                String b = preferences.getString(Names.Car.BALANCE + car_id, "---.--");
+                int balance_limit = 50;
+                try {
+                    balance_limit = preferences.getInt(Names.Car.LIMIT + car_id, 50);
+                } catch (Exception ex) {
+                    // ignore
+                }
+                widgetView.setInt(R.id.balance, "setTextColor", context.getResources().getColor(id_color[theme]));
+                try {
+                    double value = Double.parseDouble(preferences.getString(Names.Car.BALANCE + car_id, ""));
+                    if ((value <= balance_limit) && (balance_limit >= 0))
+                        widgetView.setInt(R.id.balance, "setTextColor", context.getResources().getColor(R.color.error));
+                    b = String.format("%.2f", value);
+                } catch (Exception ex) {
+                    // ignore
+                }
+                widgetView.setTextViewText(R.id.balance, b);
+                show_count++;
+            }
+            widgetView.setViewVisibility(R.id.balance_block, show_balance ? View.VISIBLE : View.GONE);
+            widgetView.setViewVisibility(R.id.name, preferences.getBoolean(Names.SHOW_NAME + widgetID, true) && !isLockScreen(context, widgetID) ? View.VISIBLE : View.GONE);
+
+            boolean show_level = (show_count < rows);
+            if (show_level) {
+                int level = preferences.getInt(Names.Car.GSM_DB + car_id, 0);
+                if (level == 0) {
+                    show_level = false;
+                } else {
+                    int index = 0;
+                    if (level > -51) {
+                        index = 5;
+                    } else if (level > -65) {
+                        index = 4;
+                    } else if (level > -77) {
+                        index = 3;
+                    } else if (level > -91) {
+                        index = 2;
+                    } else if (level > -105) {
+                        index = 1;
+                    }
+                    widgetView.setImageViewResource(R.id.level_img, id_gsm_level[theme][index]);
+                    widgetView.setTextViewText(R.id.level, level + " dBm");
+                }
+                show_count++;
+            }
+            widgetView.setViewVisibility(R.id.level_block, show_level ? View.VISIBLE : View.GONE);
+
+            boolean show_reserve = (show_count < rows);
+            if (show_reserve) {
+                String rv = preferences.getString(Names.Car.VOLTAGE_RESERVED + car_id, "?");
+                try {
+                    double v = Double.parseDouble(rv);
+                    rv = String.format("%.2f", v);
+                } catch (Exception ex) {
+                    // ignore
+                    show_reserve = false;
+                }
+                widgetView.setTextViewText(R.id.reserve, rv + " V");
+                int r_color = preferences.getBoolean(Names.Car.RESERVE_NORMAL + car_id, true) ? context.getResources().getColor(id_color[theme]) : context.getResources().getColor(R.color.error);
+                widgetView.setInt(R.id.reserve, "setTextColor", r_color);
+
+            }
+            widgetView.setViewVisibility(R.id.reserve_block, show_reserve ? View.VISIBLE : View.GONE);
+
+            Cars.Car[] cars = Cars.getCars(context);
+            if (cars.length > 1) {
+                for (Cars.Car car : cars) {
+                    if (car.id.equals(car_id)) {
+                        widgetView.setTextViewText(R.id.name, car.name);
+                    }
+                }
+            }
+
+            boolean progress = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD);
+            if ((states == null) || !states.containsKey(car_id)) {
+                if (progress)
+                    widgetView.setViewVisibility(R.id.update, View.GONE);
+                widgetView.setViewVisibility(R.id.refresh, View.VISIBLE);
+                widgetView.setViewVisibility(R.id.error, View.GONE);
+            } else {
+                int state = states.get(car_id);
+                if (state == STATE_ERROR) {
+                    if (progress)
+                        widgetView.setViewVisibility(R.id.update, View.GONE);
+                    widgetView.setViewVisibility(R.id.refresh, View.GONE);
+                    widgetView.setViewVisibility(R.id.error, View.VISIBLE);
+                } else {
+                    if (progress) {
+                        widgetView.setViewVisibility(R.id.refresh, View.GONE);
+                        widgetView.setViewVisibility(R.id.update, View.VISIBLE);
+                    } else {
+                        widgetView.setViewVisibility(R.id.refresh, View.VISIBLE);
+                    }
+                    widgetView.setViewVisibility(R.id.error, View.GONE);
+                }
+            }
+
+            if (drawable == null)
+                drawable = new CarDrawable();
+
+            Bitmap bmp = drawable.getBitmap(context, car_id, bigPict);
+            if (bmp != null)
+                widgetView.setImageViewBitmap(R.id.car, bmp);
+
+            if (isLockScreen(context, widgetID)) {
+                updateLockWidget(context, widgetView, widgetID, car_id);
+            } else {
+                configIntent = new Intent(context, WidgetService.class);
+                configIntent.putExtra(Names.ID, car_id);
+                configIntent.setAction(WidgetService.ACTION_SHOW);
+                data = Uri.withAppendedPath(Uri.parse("http://widget/id/"), String.valueOf(widgetID));
+                configIntent.setData(data);
+                pIntent = PendingIntent.getService(context, widgetID, configIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                widgetView.setOnClickPendingIntent(R.id.widget, pIntent);
+            }
+
+            appWidgetManager.updateAppWidget(widgetID, widgetView);
         } catch (Exception ex) {
             // ignore
         }
-        widgetView.setTextViewText(R.id.voltage, voltage + " V");
-        if (!normal) {
-            boolean az = preferences.getBoolean(Names.Car.AZ + car_id, false);
-            boolean ignition = !az && (preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false));
-            if (az || ignition)
-                normal = true;
-        }
-
-        int v_color = normal ? context.getResources().getColor(id_color[theme]) : context.getResources().getColor(R.color.error);
-        widgetView.setInt(R.id.voltage, "setTextColor", v_color);
-
-        String temperature = Preferences.getTemperature(preferences, car_id, 1);
-        if (temperature == null) {
-            widgetView.setViewVisibility(R.id.temperature_block, View.GONE);
-        } else {
-            widgetView.setTextViewText(R.id.temperature, temperature);
-            widgetView.setViewVisibility(R.id.temperature_block, View.VISIBLE);
-            show_count++;
-        }
-
-        boolean show_balance = false;
-        if (show_count < rows)
-            show_balance = preferences.getBoolean(Names.Car.SHOW_BALANCE + car_id, true);
-        if (show_balance) {
-            String b = preferences.getString(Names.Car.BALANCE + car_id, "---.--");
-            int balance_limit = 50;
-            try {
-                balance_limit = preferences.getInt(Names.Car.LIMIT + car_id, 50);
-            } catch (Exception ex) {
-                // ignore
-            }
-            widgetView.setInt(R.id.balance, "setTextColor", context.getResources().getColor(id_color[theme]));
-            try {
-                double value = Double.parseDouble(preferences.getString(Names.Car.BALANCE + car_id, ""));
-                if ((value <= balance_limit) && (balance_limit >= 0))
-                    widgetView.setInt(R.id.balance, "setTextColor", context.getResources().getColor(R.color.error));
-                b = String.format("%.2f", value);
-            } catch (Exception ex) {
-                // ignore
-            }
-            widgetView.setTextViewText(R.id.balance, b);
-            show_count++;
-        }
-        widgetView.setViewVisibility(R.id.balance_block, show_balance ? View.VISIBLE : View.GONE);
-        widgetView.setViewVisibility(R.id.name, preferences.getBoolean(Names.SHOW_NAME + widgetID, true) && !isLockScreen(context, widgetID) ? View.VISIBLE : View.GONE);
-
-        boolean show_level = (show_count < rows);
-        if (show_level) {
-            int level = preferences.getInt(Names.Car.GSM_DB + car_id, 0);
-            if (level == 0) {
-                show_level = false;
-            } else {
-                int index = 0;
-                if (level > -51) {
-                    index = 5;
-                } else if (level > -65) {
-                    index = 4;
-                } else if (level > -77) {
-                    index = 3;
-                } else if (level > -91) {
-                    index = 2;
-                } else if (level > -105) {
-                    index = 1;
-                }
-                widgetView.setImageViewResource(R.id.level_img, id_gsm_level[theme][index]);
-                widgetView.setTextViewText(R.id.level, level + " dBm");
-            }
-            show_count++;
-        }
-        widgetView.setViewVisibility(R.id.level_block, show_level ? View.VISIBLE : View.GONE);
-
-        boolean show_reserve = (show_count < rows);
-        if (show_reserve) {
-            String rv = preferences.getString(Names.Car.VOLTAGE_RESERVED + car_id, "?");
-            try {
-                double v = Double.parseDouble(rv);
-                rv = String.format("%.2f", v);
-            } catch (Exception ex) {
-                // ignore
-                show_reserve = false;
-            }
-            widgetView.setTextViewText(R.id.reserve, rv + " V");
-            int r_color = preferences.getBoolean(Names.Car.RESERVE_NORMAL + car_id, true) ? context.getResources().getColor(id_color[theme]) : context.getResources().getColor(R.color.error);
-            widgetView.setInt(R.id.reserve, "setTextColor", r_color);
-
-        }
-        widgetView.setViewVisibility(R.id.reserve_block, show_reserve ? View.VISIBLE : View.GONE);
-
-        Cars.Car[] cars = Cars.getCars(context);
-        if (cars.length > 1) {
-            for (Cars.Car car : cars) {
-                if (car.id.equals(car_id)) {
-                    widgetView.setTextViewText(R.id.name, car.name);
-                }
-            }
-        }
-
-        boolean progress = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD);
-        if ((states == null) || !states.containsKey(car_id)) {
-            if (progress)
-                widgetView.setViewVisibility(R.id.update, View.GONE);
-            widgetView.setViewVisibility(R.id.refresh, View.VISIBLE);
-            widgetView.setViewVisibility(R.id.error, View.GONE);
-        } else {
-            int state = states.get(car_id);
-            if (state == STATE_ERROR) {
-                if (progress)
-                    widgetView.setViewVisibility(R.id.update, View.GONE);
-                widgetView.setViewVisibility(R.id.refresh, View.GONE);
-                widgetView.setViewVisibility(R.id.error, View.VISIBLE);
-            } else {
-                if (progress) {
-                    widgetView.setViewVisibility(R.id.refresh, View.GONE);
-                    widgetView.setViewVisibility(R.id.update, View.VISIBLE);
-                } else {
-                    widgetView.setViewVisibility(R.id.refresh, View.VISIBLE);
-                }
-                widgetView.setViewVisibility(R.id.error, View.GONE);
-            }
-        }
-
-        if (drawable == null)
-            drawable = new CarDrawable();
-
-        Bitmap bmp = drawable.getBitmap(context, car_id, bigPict);
-        if (bmp != null)
-            widgetView.setImageViewBitmap(R.id.car, bmp);
-
-        if (isLockScreen(context, widgetID)) {
-            updateLockWidget(context, widgetView, widgetID, car_id);
-        } else {
-            configIntent = new Intent(context, WidgetService.class);
-            configIntent.putExtra(Names.ID, car_id);
-            configIntent.setAction(WidgetService.ACTION_SHOW);
-            data = Uri.withAppendedPath(Uri.parse("http://widget/id/"), String.valueOf(widgetID));
-            configIntent.setData(data);
-            pIntent = PendingIntent.getService(context, widgetID, configIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            widgetView.setOnClickPendingIntent(R.id.widget, pIntent);
-        }
-
-        appWidgetManager.updateAppWidget(widgetID, widgetView);
     }
 
     boolean isLockScreen(Context context, int widgetID) {

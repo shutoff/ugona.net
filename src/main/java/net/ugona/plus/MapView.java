@@ -10,6 +10,7 @@ import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.tileprovider.MapTile;
 import org.osmdroid.tileprovider.MapTileProviderBase;
+import org.osmdroid.tileprovider.modules.TileWriter;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.BoundingBoxE6;
@@ -30,8 +31,10 @@ public class MapView extends org.osmdroid.views.MapView {
     int layout_count;
     private int moveCount = 0;
 
-    public MapView(Context context, final MapTileProviderBase tileProvider) {
+    public MapView(Context context, final MapTileProviderBase tileProvider, boolean enableLocation) {
         super(context, (int) (256 * context.getResources().getDisplayMetrics().density), new ResourceProxyImpl(context.getApplicationContext()), tileProvider);
+
+        TileWriter.TILE_PATH_BASE = context.getCacheDir();
 
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
@@ -41,8 +44,10 @@ public class MapView extends org.osmdroid.views.MapView {
         mTrafficOverlay.setEnabled(preferences.getBoolean(Names.SHOW_TRAFFIC, false));
         getOverlays().add(mTrafficOverlay);
 
-        mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(context), this, getResourceProxy());
-        getOverlays().add(mLocationOverlay);
+        if (enableLocation) {
+            mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(context), this, getResourceProxy());
+            getOverlays().add(mLocationOverlay);
+        }
 
         setBackgroundColor(getResources().getColor(R.color.caldroid_gray));
     }
@@ -52,7 +57,7 @@ public class MapView extends org.osmdroid.views.MapView {
             final String[] tiles_urls = {
                     "http://otile1.mqcdn.com/tiles/1.0.0/osm/"
             };
-            return new XYTileSource("mqcdn", ResourceProxy.string.mapnik, 1, 17, 256, ".png", tiles_urls);
+            return new XYTileSource("mqcdn", ResourceProxy.string.mapnik, 1, 17, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
         }
         String locale = ctx.getResources().getConfiguration().locale.getLanguage();
         final String[] tiles_urls = {
@@ -61,7 +66,7 @@ public class MapView extends org.osmdroid.views.MapView {
                 "https://mt2.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo",
                 "https://mt3.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo"
         };
-        return new myTileSource("google_" + locale, ResourceProxy.string.mapnik, 1, 17, 256, ".png", tiles_urls);
+        return new myTileSource("google_" + locale, ResourceProxy.string.mapnik, 1, 17, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
     }
 
     @Override
@@ -96,13 +101,20 @@ public class MapView extends org.osmdroid.views.MapView {
         handler.postDelayed(afterLayout, 500);
     }
 
+    @Override
+    public void setTileSource(ITileSource aTileSource) {
+        IGeoPoint center = getMapCenter();
+        super.setTileSource(aTileSource);
+        getController().setCenter(center);
+    }
+
     void setAfterLayout(Runnable afterLayout) {
         mAfterLayout = afterLayout;
         layout_count = 2;
     }
 
     void onResume() {
-        mLocationOverlay.enableMyLocation();
+        mLocationOverlay.enableMyLocation(preferences.getBoolean(Names.USE_GPS, true), true);
         setBuiltInZoomControls(true);
         setMultiTouchControls(true);
     }

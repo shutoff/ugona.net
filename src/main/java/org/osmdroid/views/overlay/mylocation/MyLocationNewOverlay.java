@@ -9,8 +9,6 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.location.Location;
 import android.util.FloatMath;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 
 import org.osmdroid.DefaultResourceProxyImpl;
@@ -21,7 +19,6 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.util.TileSystem;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.MapView.Projection;
-import org.osmdroid.views.overlay.IOverlayMenuProvider;
 import org.osmdroid.views.overlay.Overlay.Snappable;
 import org.osmdroid.views.overlay.SafeDrawOverlay;
 import org.osmdroid.views.safecanvas.ISafeCanvas;
@@ -36,8 +33,7 @@ import java.util.LinkedList;
  * @author Marc Kurtz
  * @author Manuel Stahl
  */
-public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocationConsumer,
-        IOverlayMenuProvider, Snappable {
+public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocationConsumer, Snappable {
     public static final int MENU_MY_LOCATION = getSafeMenuId();
 
     // ===========================================================
@@ -238,56 +234,6 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
     }
 
     // ===========================================================
-    // Menu handling methods
-    // ===========================================================
-
-    @Override
-    public boolean isOptionsMenuEnabled() {
-        return this.mOptionsMenuEnabled;
-    }
-
-    @Override
-    public void setOptionsMenuEnabled(final boolean pOptionsMenuEnabled) {
-        this.mOptionsMenuEnabled = pOptionsMenuEnabled;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(final Menu pMenu, final int pMenuIdOffset,
-                                       final MapView pMapView) {
-        pMenu.add(0, MENU_MY_LOCATION + pMenuIdOffset, Menu.NONE,
-                mResourceProxy.getString(ResourceProxy.string.my_location))
-                .setIcon(mResourceProxy.getDrawable(ResourceProxy.bitmap.ic_menu_mylocation))
-                .setCheckable(true);
-
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(final Menu pMenu, final int pMenuIdOffset,
-                                        final MapView pMapView) {
-        pMenu.findItem(MENU_MY_LOCATION + pMenuIdOffset).setChecked(this.isMyLocationEnabled());
-        return false;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(final MenuItem pItem, final int pMenuIdOffset,
-                                         final MapView pMapView) {
-        final int menuId = pItem.getItemId() - pMenuIdOffset;
-        if (menuId == MENU_MY_LOCATION) {
-            if (this.isMyLocationEnabled()) {
-                this.disableFollowLocation();
-                this.disableMyLocation();
-            } else {
-                this.enableFollowLocation();
-                this.enableMyLocation();
-            }
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    // ===========================================================
     // Methods
     // ===========================================================
 
@@ -400,12 +346,6 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
         mRunOnFirstFix.clear();
     }
 
-    public boolean enableMyLocation(IMyLocationProvider myLocationProvider) {
-        this.setMyLocationProvider(myLocationProvider);
-        mIsLocationEnabled = false;
-        return enableMyLocation();
-    }
-
     /**
      * Enable receiving location updates from the provided IMyLocationProvider and show your
      * location on the maps. You will likely want to call enableMyLocation() from your Activity's
@@ -413,11 +353,11 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
      * corresponding disableMyLocation() in your Activity's Activity.onPause() method to turn off
      * updates when in the background.
      */
-    public boolean enableMyLocation() {
+    public boolean enableMyLocation(boolean gps_enabled, boolean net_enabled) {
         if (mIsLocationEnabled)
             mMyLocationProvider.stopLocationProvider();
 
-        boolean result = mMyLocationProvider.startLocationProvider(this);
+        boolean result = mMyLocationProvider.startLocationProvider(this, gps_enabled, net_enabled);
         mIsLocationEnabled = result;
 
         // set initial location when enabled
@@ -474,4 +414,5 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
             return false;
         }
     }
+
 }

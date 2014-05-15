@@ -59,6 +59,7 @@ public abstract class MapActivity extends ActionBarActivity {
     FrameLayout holder;
     Menu topSubMenu;
     LocationManager locationManager;
+    boolean mEnableLocation = true;
     private MapView mMapView;
 
     @Override
@@ -87,6 +88,9 @@ public abstract class MapActivity extends ActionBarActivity {
         item = menu.findItem(R.id.traffic_layer);
         if (item != null)
             item.setChecked(preferences.getBoolean(Names.SHOW_TRAFFIC, false));
+        item = menu.findItem(R.id.gps);
+        if (item != null)
+            item.setChecked(preferences.getBoolean(Names.USE_GPS, true));
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -161,6 +165,16 @@ public abstract class MapActivity extends ActionBarActivity {
                 mMapView.postInvalidate();
                 break;
             }
+            case R.id.gps: {
+                boolean gps = !preferences.getBoolean(Names.USE_GPS, false);
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putBoolean(Names.USE_GPS, gps);
+                ed.commit();
+                updateMenu();
+                mMapView.mLocationOverlay.disableMyLocation();
+                mMapView.mLocationOverlay.enableMyLocation(gps, true);
+                break;
+            }
         }
         return false;
     }
@@ -207,7 +221,7 @@ public abstract class MapActivity extends ActionBarActivity {
             final MapTileDownloader downloaderProvider = new MapTileDownloader(tileSource, tileWriter, networkAvailabliltyCheck);
             final MapTileProviderArray tileProvider = new MapTileProviderArray(tileSource, registerReceiver, new MapTileModuleProviderBase[]{fileSystemProvider, downloaderProvider});
 
-            mMapView = new MapView(this, tileProvider);
+            mMapView = new MapView(this, tileProvider, mEnableLocation);
             mMapView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             mMapView.setAfterLayout(new Runnable() {
                 @Override

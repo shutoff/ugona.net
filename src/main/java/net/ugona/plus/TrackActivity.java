@@ -49,6 +49,7 @@ public class TrackActivity extends MapActivity {
         track_limit = (int) (density * density * 64);
         super.onCreate(savedInstanceState);
         setTitle(getIntent().getStringExtra(Names.TITLE));
+        mEnableLocation = false;
     }
 
     @Override

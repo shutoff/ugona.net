@@ -78,9 +78,13 @@ public class MapPointActivity extends MapActivity {
         br = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                update();
-                stopTimer();
-                startTimer(false);
+                try {
+                    update();
+                    stopTimer();
+                    startTimer(false);
+                } catch (Exception ex) {
+                    // ignore
+                }
             }
         };
         registerReceiver(br, new IntentFilter(FetchService.ACTION_UPDATE));
