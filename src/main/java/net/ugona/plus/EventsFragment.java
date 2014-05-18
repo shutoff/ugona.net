@@ -648,6 +648,42 @@ public class EventsFragment extends Fragment
             if (getActivity() == null)
                 return;
             final JsonValue text = res.get("text");
+            String data = "";
+            JsonValue voltage = res.get("voltage");
+            if (voltage != null) {
+                JsonObject v = voltage.asObject();
+                JsonValue main = v.get("main");
+                if (main != null) {
+                    double val = main.asDouble();
+                    val += preferences.getInt(Names.Car.VOLTAGE_SHIFT + car_id, 0) / 20.;
+                    data += getString(R.string.voltage) + ": " + String.format("%.2f", val) + "V\n";
+                }
+                JsonValue reserved = v.get("reserved");
+                if (reserved != null)
+                    data += getString(R.string.reserved) + ": " + reserved.asDouble() + "V\n";
+            }
+            JsonValue balance = res.get("balance");
+            if (balance != null)
+                data += getString(R.string.balance) + ": " + String.format("%.2f", balance.asDouble()) + "\n";
+            JsonValue temperature = res.get("temperature");
+            if (temperature != null) {
+                JsonObject t = temperature.asObject();
+                data += getString(R.string.temperature);
+                if (t.get("t1") != null)
+                    data += ": " + temp(t, 1) + "\n";
+                for (String name : t.names()) {
+                    try {
+                        int sensor = Integer.parseInt(name.substring(1));
+                        if (sensor == 1)
+                            continue;
+                        data += getString(R.string.sensor) + ": " + temp(t, sensor);
+                    } catch (Exception ex) {
+                        //ignore
+                    }
+                }
+            }
+            final String event_data = data;
+
             JsonValue value = res.get("gps");
             if (value != null) {
                 JsonObject gps = value.asObject();
@@ -657,7 +693,7 @@ public class EventsFragment extends Fragment
                 Address request = new Address() {
                     @Override
                     void result(String res) {
-                        String addr = "";
+                        String addr = event_data;
                         if (text != null)
                             addr = text.asString() + "\n\n";
                         addr += lat + "," + lng;
@@ -680,7 +716,7 @@ public class EventsFragment extends Fragment
                 Address request = new Address() {
                     @Override
                     void result(String res) {
-                        String addr = "";
+                        String addr = event_data;
                         if (text != null)
                             addr = text.asString() + "\n\n";
                         addr += "MCC: " + gsm.get("cc").asInt();
@@ -695,10 +731,36 @@ public class EventsFragment extends Fragment
                 request.get(getActivity(), lat, lng);
                 return;
             }
-            String addr = "";
+            String addr = event_data;
             if (text != null)
                 addr = text.asString();
             setAddress(addr, "", null);
+        }
+
+        String temp(JsonObject t, int sensor) {
+            JsonValue temp = t.get("t" + sensor);
+            if (temp == null)
+                return "";
+            int value = temp.asInt();
+            if (sensor == 1) {
+                value += preferences.getInt(Names.Car.TEMP_SIFT + car_id, 0);
+            } else {
+                String[] temp_config = preferences.getString(Names.Car.TEMP_SETTINGS + car_id, "").split(",");
+                for (String s : temp_config) {
+                    String[] data = s.split(":");
+                    if (data.length != 3)
+                        continue;
+                    try {
+                        if (Integer.parseInt(data[0]) == sensor) {
+                            value += Integer.parseInt(data[1]);
+                            break;
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+            return value + " \u00B0C";
         }
 
         @Override

@@ -9,8 +9,6 @@ import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 import com.squareup.okhttp.OkHttpClient;
 
-import org.apache.http.HttpStatus;
-
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -74,7 +72,7 @@ public abstract class HttpTask {
                         result = new JsonObject();
                         result.set("data", res);
                     }
-                    if (status != HttpStatus.SC_OK) {
+                    if (result.get("error") != null) {
                         error_text = result.get("error").asString();
                         return null;
                     }
