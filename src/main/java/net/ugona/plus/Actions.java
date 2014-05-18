@@ -1438,26 +1438,30 @@ public class Actions {
                     if (ctx == null)
                         return;
                     final Context context = ctx;
-                    progressDialog.dismiss();
-                    dialog = new AlertDialog.Builder(context)
-                            .setTitle(R.string.send_sms)
-                            .setMessage(R.string.send_sms_on_fail)
-                            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    InetRequest.this.error();
-                                }
-                            })
-                            .setNegativeButton(R.string.cancel, null)
-                            .create();
-                    dialog.show();
-                    dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dlg) {
-                            dialog = null;
-                            user(context);
-                        }
-                    });
+                    try {
+                        progressDialog.dismiss();
+                        dialog = new AlertDialog.Builder(context)
+                                .setTitle(R.string.send_sms)
+                                .setMessage(R.string.send_sms_on_fail)
+                                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        InetRequest.this.error();
+                                    }
+                                })
+                                .setNegativeButton(R.string.cancel, null)
+                                .create();
+                        dialog.show();
+                        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                            @Override
+                            public void onDismiss(DialogInterface dlg) {
+                                dialog = null;
+                                user(context);
+                            }
+                        });
+                    } catch (Exception ex) {
+                        // ignore
+                    }
                 }
             };
             task.execute(COMMAND_URL, preferences.getString(Names.Car.AUTH + car_id, ""), ccode, type);

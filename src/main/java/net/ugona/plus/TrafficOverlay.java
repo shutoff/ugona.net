@@ -56,6 +56,12 @@ public class TrafficOverlay extends TilesOverlay {
     }
 
     @Override
+    public void onDetach(MapView pMapView) {
+        super.onDetach(pMapView);
+        mTileProvider.clearTileCache();
+    }
+
+    @Override
     public boolean isDrawingShadowLayer() {
         return false;
     }
@@ -90,5 +96,6 @@ public class TrafficOverlay extends TilesOverlay {
             res.setAlpha(TRAFFIC_ALPHA);
             return res;
         }
+
     }
 }

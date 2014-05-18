@@ -121,8 +121,8 @@ public class MainActivity extends ActionBarActivity {
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
-                State.print(ex);
                 ex.printStackTrace();
+                State.print(ex);
                 System.exit(1);
             }
         });

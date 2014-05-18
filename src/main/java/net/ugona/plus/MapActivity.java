@@ -109,27 +109,30 @@ public abstract class MapActivity extends ActionBarActivity {
             case R.id.my: {
                 boolean gps_enabled = false;
                 IGeoPoint myLocation = mMapView.getMyLocation();
-                try {
-                    gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                } catch (Exception ex) {
-                    // ignore
+                if (preferences.getBoolean(Names.USE_GPS, false)) {
+                    try {
+                        gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                    if (!gps_enabled) {
+                        AlertDialog.Builder ad = new AlertDialog.Builder(this);
+                        ad.setTitle(R.string.no_gps_title);
+                        ad.setMessage((myLocation == null) ? R.string.no_gps_message : R.string.net_gps_message);
+                        ad.setPositiveButton(R.string.settings, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                startActivity(intent);
+                            }
+                        });
+                        ad.setNegativeButton(R.string.cancel, null);
+                        ad.show();
+                        if (myLocation == null)
+                            return true;
+                    }
                 }
-                if (!gps_enabled) {
-                    AlertDialog.Builder ad = new AlertDialog.Builder(this);
-                    ad.setTitle(R.string.no_gps_title);
-                    ad.setMessage((myLocation == null) ? R.string.no_gps_message : R.string.net_gps_message);
-                    ad.setPositiveButton(R.string.settings, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                            startActivity(intent);
-                        }
-                    });
-                    ad.setNegativeButton(R.string.cancel, null);
-                    ad.show();
-                    if (myLocation == null)
-                        return true;
-                } else if (myLocation == null) {
+                if (myLocation == null) {
                     Toast toast = Toast.makeText(this, R.string.no_location, Toast.LENGTH_SHORT);
                     toast.show();
                     return true;
@@ -249,6 +252,7 @@ public abstract class MapActivity extends ActionBarActivity {
     @Override
     protected void onPause() {
         mMapView.onPause();
+        mMapView.getTileProvider().clearTileCache();
         super.onPause();
     }
 

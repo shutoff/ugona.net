@@ -8,6 +8,7 @@ import android.view.MotionEvent;
 
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IGeoPoint;
+import org.osmdroid.tileprovider.BitmapPool;
 import org.osmdroid.tileprovider.MapTile;
 import org.osmdroid.tileprovider.MapTileProviderBase;
 import org.osmdroid.tileprovider.modules.TileWriter;
@@ -123,6 +124,12 @@ public class MapView extends org.osmdroid.views.MapView {
         mLocationOverlay.disableMyLocation();
         setBuiltInZoomControls(false);
         setMultiTouchControls(false);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        BitmapPool.getInstance().clearBitmapPool();
     }
 
     IGeoPoint getMyLocation() {
