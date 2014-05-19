@@ -35,6 +35,7 @@ public class MapView extends org.osmdroid.views.MapView {
 
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
+        setMaxZoomLevel(17);
         setUseSafeCanvas(true);
 
         mTrafficOverlay = new TrafficOverlay(this, context);
