@@ -59,6 +59,7 @@ public abstract class MapActivity extends ActionBarActivity {
     FrameLayout holder;
     Menu topSubMenu;
     LocationManager locationManager;
+    boolean mEnableLocation = true;
     private MapView mMapView;
 
     @Override
@@ -87,6 +88,9 @@ public abstract class MapActivity extends ActionBarActivity {
         item = menu.findItem(R.id.traffic_layer);
         if (item != null)
             item.setChecked(preferences.getBoolean(Names.SHOW_TRAFFIC, false));
+        item = menu.findItem(R.id.gps);
+        if (item != null)
+            item.setChecked(preferences.getBoolean(Names.USE_GPS, true));
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -105,27 +109,30 @@ public abstract class MapActivity extends ActionBarActivity {
             case R.id.my: {
                 boolean gps_enabled = false;
                 IGeoPoint myLocation = mMapView.getMyLocation();
-                try {
-                    gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                } catch (Exception ex) {
-                    // ignore
+                if (preferences.getBoolean(Names.USE_GPS, false)) {
+                    try {
+                        gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                    if (!gps_enabled) {
+                        AlertDialog.Builder ad = new AlertDialog.Builder(this);
+                        ad.setTitle(R.string.no_gps_title);
+                        ad.setMessage((myLocation == null) ? R.string.no_gps_message : R.string.net_gps_message);
+                        ad.setPositiveButton(R.string.settings, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                startActivity(intent);
+                            }
+                        });
+                        ad.setNegativeButton(R.string.cancel, null);
+                        ad.show();
+                        if (myLocation == null)
+                            return true;
+                    }
                 }
-                if (!gps_enabled) {
-                    AlertDialog.Builder ad = new AlertDialog.Builder(this);
-                    ad.setTitle(R.string.no_gps_title);
-                    ad.setMessage((myLocation == null) ? R.string.no_gps_message : R.string.net_gps_message);
-                    ad.setPositiveButton(R.string.settings, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                            startActivity(intent);
-                        }
-                    });
-                    ad.setNegativeButton(R.string.cancel, null);
-                    ad.show();
-                    if (myLocation == null)
-                        return true;
-                } else if (myLocation == null) {
+                if (myLocation == null) {
                     Toast toast = Toast.makeText(this, R.string.no_location, Toast.LENGTH_SHORT);
                     toast.show();
                     return true;
@@ -159,6 +166,16 @@ public abstract class MapActivity extends ActionBarActivity {
                 updateMenu();
                 mMapView.mTrafficOverlay.setEnabled(traffic);
                 mMapView.postInvalidate();
+                break;
+            }
+            case R.id.gps: {
+                boolean gps = !preferences.getBoolean(Names.USE_GPS, false);
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putBoolean(Names.USE_GPS, gps);
+                ed.commit();
+                updateMenu();
+                mMapView.mLocationOverlay.disableMyLocation();
+                mMapView.mLocationOverlay.enableMyLocation(gps, true);
                 break;
             }
         }
@@ -207,7 +224,7 @@ public abstract class MapActivity extends ActionBarActivity {
             final MapTileDownloader downloaderProvider = new MapTileDownloader(tileSource, tileWriter, networkAvailabliltyCheck);
             final MapTileProviderArray tileProvider = new MapTileProviderArray(tileSource, registerReceiver, new MapTileModuleProviderBase[]{fileSystemProvider, downloaderProvider});
 
-            mMapView = new MapView(this, tileProvider);
+            mMapView = new MapView(this, tileProvider, mEnableLocation);
             mMapView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             mMapView.setAfterLayout(new Runnable() {
                 @Override
@@ -235,6 +252,7 @@ public abstract class MapActivity extends ActionBarActivity {
     @Override
     protected void onPause() {
         mMapView.onPause();
+        mMapView.getTileProvider().clearTileCache();
         super.onPause();
     }
 

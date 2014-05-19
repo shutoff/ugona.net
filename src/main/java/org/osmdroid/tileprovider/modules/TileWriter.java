@@ -26,16 +26,16 @@ import java.util.NoSuchElementException;
  */
 public class TileWriter implements IFilesystemCache, OpenStreetMapTileProviderConstants {
 
+    private static final Logger logger = LoggerFactory.getLogger(TileWriter.class);
+
     // ===========================================================
     // Constants
     // ===========================================================
-
-    private static final Logger logger = LoggerFactory.getLogger(TileWriter.class);
+    public static File TILE_PATH_BASE = new File(OSMDROID_PATH, "tiles");
 
     // ===========================================================
     // Fields
     // ===========================================================
-
     /**
      * amount of disk space used by tile cache *
      */

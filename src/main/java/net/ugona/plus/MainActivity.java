@@ -121,8 +121,8 @@ public class MainActivity extends ActionBarActivity {
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
-                State.print(ex);
                 ex.printStackTrace();
+                State.print(ex);
                 System.exit(1);
             }
         });
@@ -314,6 +314,12 @@ public class MainActivity extends ActionBarActivity {
         super.onResume();
         registerGCM();
         removeNotifications();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        System.gc();
     }
 
     @Override

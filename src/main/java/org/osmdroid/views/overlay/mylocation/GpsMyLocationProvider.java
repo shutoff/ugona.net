@@ -65,12 +65,12 @@ public class GpsMyLocationProvider implements IMyLocationProvider, LocationListe
      * setLocationUpdateMinDistance(float)} before calling this method.
      */
     @Override
-    public boolean startLocationProvider(IMyLocationConsumer myLocationConsumer) {
+    public boolean startLocationProvider(IMyLocationConsumer myLocationConsumer, boolean enable_gps, boolean enable_net) {
         mMyLocationConsumer = myLocationConsumer;
         boolean result = false;
         for (final String provider : mLocationManager.getProviders(true)) {
-            if (LocationManager.GPS_PROVIDER.equals(provider)
-                    || LocationManager.NETWORK_PROVIDER.equals(provider)) {
+            if ((enable_gps && LocationManager.GPS_PROVIDER.equals(provider))
+                    || (enable_net && LocationManager.NETWORK_PROVIDER.equals(provider))) {
                 result = true;
                 mLocationManager.requestLocationUpdates(provider, mLocationUpdateMinTime,
                         mLocationUpdateMinDistance, this);

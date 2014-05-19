@@ -29,5 +29,9 @@
             android:id="@+id/traffic_layer"
             android:title="@string/traffic_layer"
             car:showAsAction="never" />
+        <item
+            android:id="@+id/gps"
+            android:title="@string/use_gps"
+            car:showAsAction="never" />
     </group>
 </menu>

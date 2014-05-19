@@ -147,24 +147,15 @@ public class StateFragment extends Fragment
         };
 
         vMain = v.findViewById(R.id.main_block);
-        vMain.setTag("voltage");
-        vMain.setOnClickListener(clickListener);
         vReserve = v.findViewById(R.id.reserve_block);
-        vReserve.setTag("reserved");
-        vReserve.setOnClickListener(clickListener);
+
         tvBalance = (TextView) v.findViewById(R.id.balance);
         tvTemperature = (TextView) v.findViewById(R.id.temperature);
         vTemperature = v.findViewById(R.id.temperature_block);
-        vTemperature.setTag("t1");
-        vTemperature.setOnClickListener(clickListener);
         tvTemperature2 = (TextView) v.findViewById(R.id.temperature2);
         vTemperature2 = v.findViewById(R.id.temperature2_block);
-        vTemperature2.setTag("t2");
-        vTemperature2.setOnClickListener(clickListener);
         tvTemperature3 = (TextView) v.findViewById(R.id.temperature3);
         vTemperature3 = v.findViewById(R.id.temperature3_block);
-        vTemperature3.setTag("t3");
-        vTemperature3.setOnClickListener(clickListener);
 
         vMotor = v.findViewById(R.id.motor);
         vRele = v.findViewById(R.id.rele);
@@ -214,6 +205,17 @@ public class StateFragment extends Fragment
             vRele2.setOnTouchListener(this);
             vRele2i.setOnTouchListener(this);
             vSound.setOnTouchListener(this);
+
+            vMain.setTag("voltage");
+            vMain.setOnClickListener(clickListener);
+            vReserve.setTag("reserved");
+            vReserve.setOnClickListener(clickListener);
+            vTemperature.setTag("t1");
+            vTemperature.setOnClickListener(clickListener);
+            vTemperature2.setTag("t2");
+            vTemperature2.setOnClickListener(clickListener);
+            vTemperature3.setTag("t3");
+            vTemperature3.setOnClickListener(clickListener);
         }
 
         balanceBlock = v.findViewById(R.id.balance_block);

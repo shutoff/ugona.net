@@ -32,6 +32,7 @@ public final class Names {
     static final String NO_GOOGLE = "no_google";
     static final String ROWS = "rows";
     static final String SHOW_TRAFFIC = "show_traffic";
+    static final String USE_GPS = "use_gps";
 
     public final class Car {
         static final String ENGINE = "Engine";

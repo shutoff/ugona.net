@@ -56,6 +56,12 @@ public class TrafficOverlay extends TilesOverlay {
     }
 
     @Override
+    public void onDetach(MapView pMapView) {
+        super.onDetach(pMapView);
+        mTileProvider.clearTileCache();
+    }
+
+    @Override
     public boolean isDrawingShadowLayer() {
         return false;
     }
@@ -63,7 +69,7 @@ public class TrafficOverlay extends TilesOverlay {
     static class TileSource extends XYTileSource {
 
         public TileSource(Context ctx, String[] baseUrl) {
-            super("traffic", ResourceProxy.string.mapnik, 2, 17, 256, ".png", baseUrl);
+            super("traffic", ResourceProxy.string.mapnik, 2, 17, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", baseUrl);
         }
 
         @Override
@@ -90,5 +96,6 @@ public class TrafficOverlay extends TilesOverlay {
             res.setAlpha(TRAFFIC_ALPHA);
             return res;
         }
+
     }
 }
