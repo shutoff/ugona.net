@@ -162,7 +162,11 @@ public class MapView extends org.osmdroid.views.MapView {
         int dlon = lon - lon1;
         dlon = (int) (dlon / k);
 
-        zoomToBoundingBox(new BoundingBoxE6(lat + dlat, lon - dlon, lat - dlat, lon + dlon));
+        try {
+            zoomToBoundingBox(new BoundingBoxE6(lat + dlat, lon - dlon, lat - dlat, lon + dlon));
+        } catch (Exception ex) {
+            // ignore
+        }
     }
 
     static public class myTileSource extends XYTileSource {

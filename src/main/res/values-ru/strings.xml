@@ -463,4 +463,5 @@
     <string name="reserved">Резервный источник</string>
     <string name="temperature">Температура</string>
     <string name="use_gps">Использовать GPS</string>
+    <string name="charts">Графики</string>
 </resources>

@@ -380,6 +380,13 @@ public class MainActivity extends ActionBarActivity {
                 startActivity(intent);
                 return true;
             }
+            case R.id.charts: {
+                Intent intent = new Intent(getBaseContext(), HistoryActivity.class);
+                intent.putExtra(Names.ID, car_id);
+                intent.putExtra(Names.STATE, "voltage");
+                startActivity(intent);
+                return true;
+            }
             case R.id.passwd:
                 setPassword();
                 return true;

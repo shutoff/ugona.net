@@ -12,6 +12,11 @@
         car:showAsAction="never" />
 
     <item
+        android:id="@+id/charts"
+        android:title="@string/charts"
+        car:showAsAction="never" />
+
+    <item
         android:id="@+id/cars"
         android:title="@string/cars"
         car:showAsAction="never" />

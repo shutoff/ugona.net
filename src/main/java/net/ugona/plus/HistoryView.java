@@ -3,6 +3,7 @@ package net.ugona.plus;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PointF;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
@@ -10,25 +11,31 @@ import android.util.FloatMath;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.androidplot.ui.YLayoutStyle;
+import com.androidplot.ui.YPositionMetric;
 import com.androidplot.util.PixelUtils;
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.LineAndPointFormatter;
+import com.androidplot.xy.XValueMarker;
 import com.androidplot.xy.XYSeries;
 import com.androidplot.xy.XYStepMode;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
+import org.joda.time.LocalDate;
+
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
 import java.util.Date;
+import java.util.Set;
 import java.util.Vector;
 
 public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTouchListener {
 
     final static String URL_HISTORY = "https://car-online.ugona.net/history?skey=$1&type=$2&begin=$3&end=$4";
-    final static long LOAD_INTERVAL = 5 * 86400 * 1000;
+    final static long LOAD_INTERVAL = 3 * 86400 * 1000;
     // Definition of the touch states
     static final int NONE = 0;
     int mode = NONE;
@@ -50,6 +57,8 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
     float distBetweenFingers;
     float lastZooming;
     boolean zoomChanged;
+    Paint markerPaint;
+    LocalDate current;
 
     public HistoryView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -65,16 +74,26 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         getLegendWidget().setVisible(false);
         getGraphWidget().setMarginBottom(PixelUtils.dpToPix(16));
         getGraphWidget().setMarginLeft(PixelUtils.dpToPix(8));
+        markerPaint = new Paint();
+        markerPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
+        markerPaint.setColor(Color.rgb(255, 255, 0));
+        markerPaint.setStrokeWidth(PixelUtils.dpToPix(0.5f));
+        markerPaint.setTextSize(PixelUtils.dpToPix(15));
         setOnTouchListener(this);
     }
 
-    void init(String id, String t) {
+    void init(String id, String t, LocalDate c) {
         car_id = id;
         type = t;
+        current = c;
         loadData();
     }
 
     void loadData() {
+        Set<XYSeries> seriesSet = getSeriesSet();
+        for (XYSeries series : seriesSet) {
+            removeSeries(series);
+        }
         HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
@@ -174,8 +193,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
                 mListener.errorLoading();
             }
         };
-        Date now = new Date();
-        long end = now.getTime();
+        long end = current.toDate().getTime() + 86400000;
         long begin = end - LOAD_INTERVAL;
         task.execute(URL_HISTORY, preferences.getString(Names.Car.CAR_KEY + car_id, ""), type, begin, end);
     }
@@ -187,13 +205,33 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
                 firstFinger = new PointF(event.getX(), event.getY());
                 mode = ONE_FINGER_DRAG;
                 zoomChanged = false;
+                double current = getGraphWidget().getXVal(event.getX());
+                XYSeries series = getSeriesSet().iterator().next();
+                int i;
+                for (i = 0; i < series.size(); i++) {
+                    if (series.getX(i).longValue() > current)
+                        break;
+                }
+                if ((i > 0) && (i < series.size())) {
+                    long t1 = series.getX(i - 1).longValue();
+                    long t2 = series.getX(i).longValue();
+                    if (current - t1 < t2 - current)
+                        i--;
+                    Date d = new Date(series.getX(i).longValue() * 1000);
+                    String text = time_format.format(d);
+                    text += " ";
+                    text += series.getY(i);
+                    text += getUnits();
+                    addMarker(new XValueMarker(series.getX(i), text, new YPositionMetric(5, YLayoutStyle.ABSOLUTE_FROM_TOP), markerPaint, markerPaint));
+                    postInvalidate();
+                }
                 break;
 
             case MotionEvent.ACTION_UP:
-                if (zoomChanged) {
+                if (zoomChanged)
                     setDomainSteps();
-                    postInvalidate();
-                }
+                removeXMarkers();
+                postInvalidate();
                 break;
 
             case MotionEvent.ACTION_POINTER_DOWN: // second finger
@@ -269,6 +307,14 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         screenMaxX += delta;
         setDomainBoundaries(screenMinX, screenMaxX, BoundaryMode.FIXED);
         postInvalidate();
+    }
+
+    String getUnits() {
+        if (type.equals("voltage") || type.equals("reserved"))
+            return "V";
+        if (type.substring(0, 1).equals("t"))
+            return "\u00B0C";
+        return "";
     }
 
     void setDomainSteps() {
@@ -347,6 +393,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
             } else {
                 buffer.append(v + "");
             }
+            buffer.append(getUnits());
             return buffer;
         }
 
