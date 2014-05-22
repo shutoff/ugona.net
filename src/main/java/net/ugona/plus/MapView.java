@@ -63,10 +63,10 @@ public class MapView extends org.osmdroid.views.MapView {
         }
         String locale = ctx.getResources().getConfiguration().locale.getLanguage();
         final String[] tiles_urls = {
-                "https://mt0.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo",
-                "https://mt1.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo",
-                "https://mt2.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo",
-                "https://mt3.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo"
+                "http://mt0.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo",
+                "http://mt1.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo",
+                "http://mt2.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo",
+                "http://mt3.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo"
         };
         return new myTileSource("google_" + locale, ResourceProxy.string.mapnik, 1, 17, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
     }

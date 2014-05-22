@@ -13,9 +13,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
@@ -55,10 +58,13 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -122,10 +128,62 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
                 ex.printStackTrace();
-                State.print(ex);
-                System.exit(1);
+                StringWriter sw = new StringWriter();
+                ex.printStackTrace(new PrintWriter(sw));
+                AsyncTask<String, Void, Void> task = new AsyncTask<String, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(String... urlParameters) {
+                        try {
+                            URL url = new URL("https://car-online.ugona.net/log");
+                            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                            connection.setRequestMethod("POST");
+                            connection.setRequestProperty("Content-Type",
+                                    "application/x-www-form-urlencoded");
+
+                            connection.setRequestProperty("Content-Length", "" +
+                                    Integer.toString(urlParameters[0].getBytes().length));
+                            connection.setRequestProperty("Content-Language", "en-US");
+
+                            connection.setUseCaches(false);
+                            connection.setDoInput(true);
+                            connection.setDoOutput(true);
+
+                            //Send request
+                            DataOutputStream wr = new DataOutputStream(
+                                    connection.getOutputStream());
+                            wr.writeBytes(urlParameters[0]);
+                            wr.flush();
+                            wr.close();
+
+                            //Get Response
+                            InputStream is = connection.getInputStream();
+                            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+                            String line;
+                            StringBuffer response = new StringBuffer();
+                            while ((line = rd.readLine()) != null) {
+                                response.append(line);
+                                response.append('\r');
+                            }
+                            rd.close();
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        } finally {
+                            System.exit(1);
+                        }
+                        return null;
+                    }
+                };
+                task.execute(sw.toString());
             }
         });
+
+        try {
+            PackageManager pkgManager = getPackageManager();
+            PackageInfo info = pkgManager.getPackageInfo("net.ugona.plus", 0);
+            State.appendLog(Build.VERSION.RELEASE + " " + info.versionName);
+        } catch (Exception ex) {
+            // ignore
+        }
 
         try {
             ViewConfiguration config = ViewConfiguration.get(this);
@@ -169,6 +227,32 @@ public class MainActivity extends ActionBarActivity {
                     car_id = "";
             }
             car_id = Preferences.getCar(preferences, car_id);
+            int inputs = preferences.getInt(Names.Car.INPUTS, -1);
+            if (inputs == -1) {
+                HttpTask task = new HttpTask() {
+                    @Override
+                    void result(JsonObject res) throws ParseException {
+                        int inputs = 0;
+                        if (res.get("in1") != null)
+                            inputs |= 1;
+                        if (res.get("in2") != null)
+                            inputs |= 2;
+                        if (res.get("in3") != null)
+                            inputs |= 4;
+                        if (res.get("in4") != null)
+                            inputs |= 8;
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putInt(Names.Car.INPUTS + car_id, inputs);
+                        ed.commit();
+                    }
+
+                    @Override
+                    void error() {
+
+                    }
+                };
+                task.execute(URL_PROFILE, preferences.getString(Names.Car.CAR_KEY, ""), "auth", preferences.getString(Names.Car.AUTH, ""));
+            }
         }
 
         mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -443,6 +527,9 @@ public class MainActivity extends ActionBarActivity {
                 caldroidFragment.setArguments(args);
                 LocalDateTime now = new LocalDateTime();
                 caldroidFragment.setMaxDate(now.toDate());
+                long first = preferences.getLong(Names.Car.FIRST_TIME + car_id, 0);
+                if (first > 0)
+                    caldroidFragment.setMinDate(new Date(first));
                 Date sel = current.toDate();
                 caldroidFragment.setSelectedDates(sel, sel);
                 caldroidFragment.show(getSupportFragmentManager(), "TAG");

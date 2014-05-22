@@ -3,9 +3,6 @@ package org.osmdroid.tileprovider.modules;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 
-import com.squareup.okhttp.OkHttpClient;
-
-import org.osmdroid.http.HttpClientFactory;
 import org.osmdroid.tileprovider.BitmapPool;
 import org.osmdroid.tileprovider.MapTile;
 import org.osmdroid.tileprovider.MapTileRequestState;
@@ -157,6 +154,7 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
             InputStream in = null;
             OutputStream out = null;
             final MapTile tile = aState.getMapTile();
+            HttpURLConnection connection = null;
 
             try {
 
@@ -178,8 +176,7 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
                     return null;
                 }
 
-                final OkHttpClient client = HttpClientFactory.createHttpClient();
-                HttpURLConnection connection = client.open(new URL(tileURLString));
+                connection = (HttpURLConnection) new URL(tileURLString).openConnection();
 
                 if (connection.getResponseCode() != 200) {
                     logger.warn("Problem downloading MapTile: " + tile + " HTTP response: " + connection.getResponseMessage());
@@ -219,6 +216,8 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
             } finally {
                 StreamUtils.closeStream(in);
                 StreamUtils.closeStream(out);
+                if (connection != null)
+                    connection.disconnect();
             }
 
             return null;

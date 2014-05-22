@@ -117,6 +117,7 @@ public final class Names {
         static final String VALET_TIME = "valet_time";
         static final String INIT_TIME = "init_time";
         static final String SETTINGS_TIME = "settings_time";
+        static final String FIRST_TIME = "first_time";
 
         static final String CONTROL = "control_";
         static final String NUMBER = "ccode_number_";
@@ -161,5 +162,6 @@ public final class Names {
         static final String NOTIFY = "notify";
 
         static final String DEVICE_PSWD = "device_paswd";
+        static final String INPUTS = "inputs";
     }
 }

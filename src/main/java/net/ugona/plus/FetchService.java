@@ -420,6 +420,9 @@ public class FetchService extends Service {
             }
             ed = preferences.edit();
             ed.putLong(Names.Car.EVENT_TIME + car_id, time.asLong());
+            JsonValue first_time = res.get("first_time");
+            if (first_time != null)
+                ed.putLong(Names.Car.FIRST_TIME + car_id, first_time.asLong());
             JsonValue contact_value = res.get("contact");
             boolean gps_valid = false;
             boolean prev_valet = false;
@@ -442,10 +445,14 @@ public class FetchService extends Service {
 
                 ed.putBoolean(Names.Car.GUARD + car_id, guard);
                 if (contact.get("input1") != null) {
-                    setState(Names.Car.INPUT1, contact, "input1", 3);
-                    setState(Names.Car.INPUT2, contact, "input2", 1);
-                    ed.putBoolean(Names.Car.INPUT3 + car_id, contact.get("input3").asBoolean());
-                    setState(Names.Car.INPUT4, contact, "input4", 2);
+                    int inputs = preferences.getInt(Names.Car.INPUTS + car_id, -1);
+                    setState(Names.Car.INPUT1, contact, "input1", 3, inputs & 1);
+                    setState(Names.Car.INPUT2, contact, "input2", 1, inputs & 2);
+                    boolean in3 = contact.get("input3").asBoolean();
+                    if ((inputs & 4) == 0)
+                        in3 = false;
+                    ed.putBoolean(Names.Car.INPUT3 + car_id, in3);
+                    setState(Names.Car.INPUT4, contact, "input4", 2, inputs & 4);
                     ed.putBoolean(Names.Car.GUARD0 + car_id, contact.get("guardMode0").asBoolean());
                     ed.putBoolean(Names.Car.GUARD1 + car_id, contact.get("guardMode1").asBoolean());
                     ed.putBoolean(Names.Car.RELAY1 + car_id, contact.get("relay1").asBoolean());
@@ -456,11 +463,11 @@ public class FetchService extends Service {
                     ed.putBoolean(Names.Car.RESERVE_NORMAL + car_id, contact.get("reservePowerNormal").asBoolean());
                 }
 
-                setState(Names.Car.ZONE_DOOR, contact, "door", 3);
-                setState(Names.Car.ZONE_HOOD, contact, "hood", 2);
-                setState(Names.Car.ZONE_TRUNK, contact, "trunk", 1);
-                setState(Names.Car.ZONE_ACCESSORY, contact, "accessory", 7);
-                setState(Names.Car.ZONE_IGNITION, contact, "realIgnition", 4);
+                setState(Names.Car.ZONE_DOOR, contact, "door", 3, 1);
+                setState(Names.Car.ZONE_HOOD, contact, "hood", 2, 1);
+                setState(Names.Car.ZONE_TRUNK, contact, "trunk", 1, 1);
+                setState(Names.Car.ZONE_ACCESSORY, contact, "accessory", 7, 1);
+                setState(Names.Car.ZONE_IGNITION, contact, "realIgnition", 4, 1);
 
                 ed.putInt(Names.Car.GUARD_MSG + car_id, msg_id);
 
@@ -863,8 +870,10 @@ public class FetchService extends Service {
             execute(URL_STATUS, api_key, preferences.getLong(Names.Car.EVENT_TIME + car_id, 0));
         }
 
-        void setState(String id, JsonObject contact, String key, int msg) throws ParseException {
-            boolean state = contact.get(key).asBoolean();
+        void setState(String id, JsonObject contact, String key, int msg, int inputs) throws ParseException {
+            boolean state = false;
+            if (inputs != 0)
+                state = contact.get(key).asBoolean();
             if (state)
                 msg_id = msg;
             ed.putBoolean(id + car_id, state);

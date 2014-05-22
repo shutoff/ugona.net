@@ -114,6 +114,9 @@ public class HistoryActivity extends ActionBarActivity {
                 caldroidFragment.setArguments(args);
                 LocalDateTime now = new LocalDateTime();
                 caldroidFragment.setMaxDate(now.toDate());
+                long first = mPlot.mHistory.preferences.getLong(Names.Car.FIRST_TIME + mPlot.mHistory.car_id, 0);
+                if (first > 0)
+                    caldroidFragment.setMinDate(new Date(first));
                 Date sel = current.toDate();
                 caldroidFragment.setSelectedDates(sel, sel);
                 caldroidFragment.show(getSupportFragmentManager(), "TAG");

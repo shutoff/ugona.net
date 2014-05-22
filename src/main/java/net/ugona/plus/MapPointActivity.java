@@ -192,7 +192,7 @@ public class MapPointActivity extends MapActivity {
         CarsOverlay pointsOverlay = (CarsOverlay) mapView.mPointsOverlay;
         int selected = pointsOverlay.find(car_id);
         if (selected >= 0) {
-            pointsOverlay.car_id = null;
+            pointsOverlay.unSetFocusedItem();
             MyOverlayItem item = pointsOverlay.getItem(selected);
             updateLocation(rc, item);
         }

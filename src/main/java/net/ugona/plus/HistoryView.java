@@ -35,7 +35,7 @@ import java.util.Vector;
 public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTouchListener {
 
     final static String URL_HISTORY = "https://car-online.ugona.net/history?skey=$1&type=$2&begin=$3&end=$4";
-    final static long LOAD_INTERVAL = 3 * 86400 * 1000;
+    final static long LOAD_INTERVAL = 5 * 86400 * 1000;
     // Definition of the touch states
     static final int NONE = 0;
     int mode = NONE;
@@ -205,25 +205,29 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
                 firstFinger = new PointF(event.getX(), event.getY());
                 mode = ONE_FINGER_DRAG;
                 zoomChanged = false;
-                double current = getGraphWidget().getXVal(event.getX());
-                XYSeries series = getSeriesSet().iterator().next();
-                int i;
-                for (i = 0; i < series.size(); i++) {
-                    if (series.getX(i).longValue() > current)
-                        break;
-                }
-                if ((i > 0) && (i < series.size())) {
-                    long t1 = series.getX(i - 1).longValue();
-                    long t2 = series.getX(i).longValue();
-                    if (current - t1 < t2 - current)
-                        i--;
-                    Date d = new Date(series.getX(i).longValue() * 1000);
-                    String text = time_format.format(d);
-                    text += " ";
-                    text += series.getY(i);
-                    text += getUnits();
-                    addMarker(new XValueMarker(series.getX(i), text, new YPositionMetric(5, YLayoutStyle.ABSOLUTE_FROM_TOP), markerPaint, markerPaint));
-                    postInvalidate();
+                try {
+                    double current = getGraphWidget().getXVal(event.getX());
+                    XYSeries series = getSeriesSet().iterator().next();
+                    int i;
+                    for (i = 0; i < series.size(); i++) {
+                        if (series.getX(i).longValue() > current)
+                            break;
+                    }
+                    if ((i > 0) && (i < series.size())) {
+                        long t1 = series.getX(i - 1).longValue();
+                        long t2 = series.getX(i).longValue();
+                        if (current - t1 < t2 - current)
+                            i--;
+                        Date d = new Date(series.getX(i).longValue() * 1000);
+                        String text = time_format.format(d);
+                        text += " ";
+                        text += series.getY(i);
+                        text += getUnits();
+                        addMarker(new XValueMarker(series.getX(i), text, new YPositionMetric(5, YLayoutStyle.ABSOLUTE_FROM_TOP), markerPaint, markerPaint));
+                        postInvalidate();
+                    }
+                } catch (Exception ex) {
+                    // ignore
                 }
                 break;
 
@@ -274,6 +278,8 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
             new_scale = 3;
         if (new_scale < 0.05)
             new_scale = 0.05;
+        if (new_scale > (maxX - minX) / 86400.)
+            new_scale = (maxX - minX) / 86400.;
         if (new_scale == cur_scale)
             return;
         new_scale = new_scale * 43200;
