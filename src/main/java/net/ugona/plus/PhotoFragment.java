@@ -26,8 +26,9 @@ import android.widget.TextView;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
-import org.apache.http.HttpStatus;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -36,7 +37,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -451,17 +451,15 @@ public class PhotoFragment extends Fragment
             String url = URL_PHOTO + api_key;
             url += "&id=" + params[0].id;
             Photo p = params[0];
-            HttpURLConnection connection = null;
             try {
-                URL u = new URL(url);
-                connection = (HttpURLConnection) u.openConnection();
-                int status = connection.getResponseCode();
-                if (status != HttpStatus.SC_OK)
+                Request request = new Request.Builder().url(url).build();
+                Response response = HttpTask.client.newCall(request).execute();
+                if (response.code() != HttpURLConnection.HTTP_OK)
                     return null;
                 File file = new File(cacheDir, "t" + car_id + "_" + p.id);
                 file.createNewFile();
                 FileOutputStream out = new FileOutputStream(file);
-                InputStream in = connection.getInputStream();
+                InputStream in = response.body().byteStream();
                 byte[] buffer = new byte[4096];
                 int bytesRead;
                 while ((bytesRead = in.read(buffer)) != -1) {
@@ -476,9 +474,6 @@ public class PhotoFragment extends Fragment
             } catch (Exception e) {
                 p.loading = -1;
                 e.printStackTrace();
-            } finally {
-                if (connection != null)
-                    connection.disconnect();
             }
             return null;
         }

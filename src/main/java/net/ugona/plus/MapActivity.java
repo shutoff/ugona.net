@@ -64,6 +64,7 @@ public abstract class MapActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        State.appendLog("MapView.onCreate");
         super.onCreate(savedInstanceState);
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         setContentView(R.layout.webview);
@@ -241,6 +242,7 @@ public abstract class MapActivity extends ActionBarActivity {
         if (mMapView != null)
             mMapView.onDetach();
         super.onDestroy();
+        State.appendLog("MapView.onDestroy");
     }
 
     @Override

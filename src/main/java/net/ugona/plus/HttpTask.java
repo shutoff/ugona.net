@@ -7,20 +7,28 @@ import android.util.Log;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
+import java.util.concurrent.TimeUnit;
 
 public abstract class HttpTask {
 
+    public static final OkHttpClient client = createClient();
     AsyncTask<Object, Void, JsonObject> bgTask;
     int pause = 0;
     String error_text;
+
+    static OkHttpClient createClient() {
+        OkHttpClient client = new OkHttpClient();
+        client.setConnectTimeout(15, TimeUnit.SECONDS);
+        client.setReadTimeout(60, TimeUnit.SECONDS);
+        return client;
+    }
 
     abstract void result(JsonObject res) throws ParseException;
 
@@ -37,7 +45,6 @@ public abstract class HttpTask {
             protected JsonObject doInBackground(Object... params) {
                 String url = params[0].toString();
                 Reader reader = null;
-                HttpURLConnection connection = null;
                 try {
                     int last_param = 1;
                     for (; ; last_param++) {
@@ -56,13 +63,14 @@ public abstract class HttpTask {
                     if (pause > 0)
                         Thread.sleep(pause);
                     Log.v("url", url);
-                    connection = (HttpURLConnection) new URL(url).openConnection();
-                    if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                        error_text = connection.getResponseMessage();
+                    Request request = new Request.Builder().url(url).build();
+                    Response response = client.newCall(request).execute();
+
+                    if (response.code() != HttpURLConnection.HTTP_OK) {
+                        error_text = response.message();
                         return null;
                     }
-                    InputStream in = new BufferedInputStream(connection.getInputStream(), 8192);
-                    reader = new InputStreamReader(in);
+                    reader = response.body().charStream();
                     JsonValue res = JsonValue.readFrom(reader);
                     reader.close();
                     reader = null;
@@ -89,8 +97,6 @@ public abstract class HttpTask {
                     State.print(ex);
                     ex.printStackTrace();
                 } finally {
-                    if (connection != null)
-                        connection.disconnect();
                     if (reader != null) {
                         try {
                             reader.close();

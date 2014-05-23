@@ -94,108 +94,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         for (XYSeries series : seriesSet) {
             removeSeries(series);
         }
-        HttpTask task = new HttpTask() {
-            @Override
-            void result(JsonObject res) throws ParseException {
-                double delta = 0;
-                if (type.equals("voltage")) {
-                    delta = preferences.getInt(Names.Car.VOLTAGE_SHIFT + car_id, 0) / 20.;
-                } else if (type.equals("t1")) {
-                    delta = preferences.getInt(Names.Car.TEMP_SIFT + car_id, 0);
-                }
-
-                final JsonArray data_array = res.get("res").asArray();
-                final Vector<Data> data = new Vector<Data>();
-                for (int i = 0; i < data_array.size(); i++) {
-                    JsonObject r = data_array.get(i).asObject();
-                    Data d = new Data();
-                    d.time = r.get("t").asLong() / 1000;
-                    d.value = r.get("v").asDouble() + delta;
-                    data.add(d);
-                }
-                if (data.size() == 0) {
-                    if (mListener != null)
-                        mListener.noData();
-                    return;
-                }
-
-                XYSeries series = new XYSeries() {
-                    @Override
-                    public int size() {
-                        return data.size();
-                    }
-
-                    @Override
-                    public Number getX(int i) {
-                        return data.get(i).time;
-                    }
-
-                    @Override
-                    public Number getY(int i) {
-                        return data.get(i).value;
-                    }
-
-                    @Override
-                    public String getTitle() {
-                        return "";
-                    }
-                };
-                if (series.size() == 0)
-                    return;
-                maxX = series.getX(series.size() - 1).longValue();
-                minX = series.getX(0).longValue();
-
-                screenMaxX = maxX;
-                screenMinX = minX;
-                if (screenMinX < screenMaxX - 86400)
-                    screenMinX = screenMaxX - 86400;
-
-                double min_value = data.get(data.size() - 1).value;
-                double max_value = min_value;
-                for (Data d : data) {
-                    double v = d.value;
-                    if (v < min_value)
-                        min_value = v;
-                    if (v > max_value)
-                        max_value = v;
-                }
-                double dv = max_value - min_value;
-                if (dv < 0.1)
-                    dv = 0.1;
-                double pmv = min_value;
-                min_value -= dv / 4;
-                if ((min_value < 0) && (pmv >= 0))
-                    min_value = 0;
-                max_value += dv / 4;
-
-                addSeries(series, new LineAndPointFormatter(Color.rgb(0, 0, 255), null, Color.argb(128, 0, 0, 128), null));
-
-                setDomainSteps();
-                setDomainBoundaries(screenMinX, screenMaxX, BoundaryMode.FIXED);
-
-                double delta_val = (max_value - min_value) / 3;
-                if (delta_val < 0.01)
-                    delta_val = 0.01;
-                v10 = (int) Math.floor(Math.log10(delta_val));
-                double val_step = Math.pow(10, (double) v10);
-                setRangeStep(XYStepMode.INCREMENT_BY_VAL, val_step);
-                setUserRangeOrigin(Math.ceil(min_value / val_step) * val_step);
-
-                setRangeBoundaries(min_value, max_value, BoundaryMode.FIXED);
-
-                redraw();
-                if (mListener != null)
-                    mListener.dataReady();
-            }
-
-            @Override
-            void error() {
-                mListener.errorLoading();
-            }
-        };
-        long end = current.toDate().getTime() + 86400000;
-        long begin = end - LOAD_INTERVAL;
-        task.execute(URL_HISTORY, preferences.getString(Names.Car.CAR_KEY + car_id, ""), type, begin, end);
+        new FetchTask();
     }
 
     @Override
@@ -367,6 +266,127 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
     static class Data {
         long time;
         double value;
+    }
+
+    class FetchTask extends HttpTask {
+
+        String m_id;
+        String m_type;
+        LocalDate m_date;
+
+        FetchTask() {
+            m_id = car_id;
+            m_type = type;
+            m_date = current;
+
+            long end = current.toDate().getTime() + 86400000;
+            long begin = end - LOAD_INTERVAL;
+            execute(URL_HISTORY, preferences.getString(Names.Car.CAR_KEY + car_id, ""), type, begin, end);
+        }
+
+        @Override
+        void result(JsonObject res) throws ParseException {
+
+            if (!m_id.equals(car_id) || !m_type.equals(type) || !m_date.equals(current))
+                return;
+
+            double delta = 0;
+            if (type.equals("voltage")) {
+                delta = preferences.getInt(Names.Car.VOLTAGE_SHIFT + car_id, 0) / 20.;
+            } else if (type.equals("t1")) {
+                delta = preferences.getInt(Names.Car.TEMP_SIFT + car_id, 0);
+            }
+
+            final JsonArray data_array = res.get("res").asArray();
+            final Vector<Data> data = new Vector<Data>();
+            for (int i = 0; i < data_array.size(); i++) {
+                JsonObject r = data_array.get(i).asObject();
+                Data d = new Data();
+                d.time = r.get("t").asLong() / 1000;
+                d.value = r.get("v").asDouble() + delta;
+                data.add(d);
+            }
+            if (data.size() == 0) {
+                if (mListener != null)
+                    mListener.noData();
+                return;
+            }
+
+            XYSeries series = new XYSeries() {
+                @Override
+                public int size() {
+                    return data.size();
+                }
+
+                @Override
+                public Number getX(int i) {
+                    return data.get(i).time;
+                }
+
+                @Override
+                public Number getY(int i) {
+                    return data.get(i).value;
+                }
+
+                @Override
+                public String getTitle() {
+                    return "";
+                }
+            };
+            if (series.size() == 0)
+                return;
+            maxX = series.getX(series.size() - 1).longValue();
+            minX = series.getX(0).longValue();
+
+            screenMaxX = maxX;
+            screenMinX = minX;
+            if (screenMinX < screenMaxX - 86400)
+                screenMinX = screenMaxX - 86400;
+
+            double min_value = data.get(data.size() - 1).value;
+            double max_value = min_value;
+            for (Data d : data) {
+                double v = d.value;
+                if (v < min_value)
+                    min_value = v;
+                if (v > max_value)
+                    max_value = v;
+            }
+            double dv = max_value - min_value;
+            if (dv < 0.1)
+                dv = 0.1;
+            double pmv = min_value;
+            min_value -= dv / 4;
+            if ((min_value < 0) && (pmv >= 0))
+                min_value = 0;
+            max_value += dv / 4;
+
+            addSeries(series, new LineAndPointFormatter(Color.rgb(0, 0, 255), null, Color.argb(128, 0, 0, 128), null));
+
+            setDomainSteps();
+            setDomainBoundaries(screenMinX, screenMaxX, BoundaryMode.FIXED);
+
+            double delta_val = (max_value - min_value) / 3;
+            if (delta_val < 0.01)
+                delta_val = 0.01;
+            v10 = (int) Math.floor(Math.log10(delta_val));
+            double val_step = Math.pow(10, (double) v10);
+            setRangeStep(XYStepMode.INCREMENT_BY_VAL, val_step);
+            setUserRangeOrigin(Math.ceil(min_value / val_step) * val_step);
+
+            setRangeBoundaries(min_value, max_value, BoundaryMode.FIXED);
+
+            redraw();
+            if (mListener != null)
+                mListener.dataReady();
+        }
+
+        @Override
+        void error() {
+            if (!m_id.equals(car_id) || !m_type.equals(type) || !m_date.equals(current))
+                return;
+            mListener.errorLoading();
+        }
     }
 
     class DateFormat extends Format {

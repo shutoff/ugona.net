@@ -51,13 +51,15 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.romorama.caldroid.CaldroidFragment;
 import com.romorama.caldroid.CaldroidListener;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
 import com.viewpagerindicator.TitlePageIndicator;
 
-import org.apache.http.HttpStatus;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -584,13 +586,17 @@ public class MainActivity extends ActionBarActivity {
         id = Preferences.getCar(preferences, id);
         if (id.equals(car_id))
             return;
-        int current_id = getPageId(mViewPager.getCurrentItem());
-        car_id = id;
-        setActionBar();
-        update();
-        int current = getPagePosition(current_id);
-        mViewPager.setCurrentItem(current);
-        setShowDate(current);
+        try {
+            int current_id = getPageId(mViewPager.getCurrentItem());
+            car_id = id;
+            setActionBar();
+            update();
+            int current = getPagePosition(current_id);
+            mViewPager.setCurrentItem(current);
+            setShowDate(current);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     void startTimer(boolean now) {
@@ -877,26 +883,13 @@ public class MainActivity extends ActionBarActivity {
                     TimeZone tz = cal.getTimeZone();
                     data.add("tz", tz.getID());
                     String url = "https://car-online.ugona.net/reg";
-                    URL u = new URL(url);
-                    connection = (HttpURLConnection) u.openConnection();
-                    connection.setDoOutput(true);
-                    connection.setDoInput(true);
-                    connection.setInstanceFollowRedirects(false);
-                    connection.setRequestMethod("POST");
-                    connection.setRequestProperty("Content-Type", "application/json");
-                    connection.setRequestProperty("Charset", "utf-8");
-                    connection.setUseCaches(false);
 
-                    DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-                    wr.writeBytes(data.toString());
-                    wr.flush();
-                    wr.close();
-
-                    InputStream in = new BufferedInputStream(connection.getInputStream());
-                    int status = connection.getResponseCode();
-                    if (status != HttpStatus.SC_OK)
+                    RequestBody body = RequestBody.create(MediaType.parse("application/json"), data.toString());
+                    Request request = new Request.Builder().url(url).post(body).build();
+                    Response response = HttpTask.client.newCall(request).execute();
+                    if (response.code() != HttpURLConnection.HTTP_OK)
                         return null;
-                    reader = new InputStreamReader(in);
+                    reader = response.body().charStream();
                     JsonObject res = JsonValue.readFrom(reader).asObject();
                     if (res.asObject().get("error") != null)
                         return null;

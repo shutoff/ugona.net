@@ -3,6 +3,11 @@ package org.osmdroid.tileprovider.modules;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+
+import net.ugona.plus.HttpTask;
+
 import org.osmdroid.tileprovider.BitmapPool;
 import org.osmdroid.tileprovider.MapTile;
 import org.osmdroid.tileprovider.MapTileRequestState;
@@ -22,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -154,7 +158,6 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
             InputStream in = null;
             OutputStream out = null;
             final MapTile tile = aState.getMapTile();
-            HttpURLConnection connection = null;
 
             try {
 
@@ -176,14 +179,14 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
                     return null;
                 }
 
-                connection = (HttpURLConnection) new URL(tileURLString).openConnection();
-
-                if (connection.getResponseCode() != 200) {
-                    logger.warn("Problem downloading MapTile: " + tile + " HTTP response: " + connection.getResponseMessage());
+                Request request = new Request.Builder().url(tileURLString).build();
+                Response response = HttpTask.client.newCall(request).execute();
+                if (response.code() != HttpURLConnection.HTTP_OK) {
+                    logger.warn("Problem downloading MapTile: " + tile + " HTTP response: " + response.message());
                     return null;
                 }
 
-                in = connection.getInputStream();
+                in = response.body().byteStream();
 
                 final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
                 out = new BufferedOutputStream(dataStream, StreamUtils.IO_BUFFER_SIZE);
@@ -216,8 +219,6 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
             } finally {
                 StreamUtils.closeStream(in);
                 StreamUtils.closeStream(out);
-                if (connection != null)
-                    connection.disconnect();
             }
 
             return null;
