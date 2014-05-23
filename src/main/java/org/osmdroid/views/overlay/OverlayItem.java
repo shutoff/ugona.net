@@ -28,9 +28,9 @@ public class OverlayItem {
     // ===========================================================
     // Fields
     // ===========================================================
-    protected final String mTitle;
-    protected final String mSnippet;
-    protected final GeoPoint mGeoPoint;
+    protected String mTitle;
+    protected String mSnippet;
+    protected GeoPoint mGeoPoint;
     protected Drawable mMarker;
     protected HotspotPlace mHotspotPlace;
 
@@ -59,7 +59,7 @@ public class OverlayItem {
     // Methods
     // ===========================================================
     /*
-	 * (copied from the Google API docs) Sets the state of a drawable to match a given state bitset.
+     * (copied from the Google API docs) Sets the state of a drawable to match a given state bitset.
 	 * This is done by converting the state bitset bits into a state set of R.attr.state_pressed,
 	 * R.attr.state_selected and R.attr.state_focused attributes, and then calling {@link
 	 * Drawable.setState(int[])}.

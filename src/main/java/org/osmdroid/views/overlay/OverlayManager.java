@@ -3,8 +3,6 @@ package org.osmdroid.views.overlay;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 
 import org.osmdroid.api.IMapView;
@@ -298,69 +296,4 @@ public class OverlayManager extends AbstractList<Overlay> {
         return false;
     }
 
-    // ** Options Menu **//
-
-    public void setOptionsMenusEnabled(final boolean pEnabled) {
-        for (final Overlay overlay : mOverlayList) {
-            if ((overlay instanceof IOverlayMenuProvider)
-                    && ((IOverlayMenuProvider) overlay).isOptionsMenuEnabled()) {
-                ((IOverlayMenuProvider) overlay).setOptionsMenuEnabled(pEnabled);
-            }
-        }
-    }
-
-    public boolean onCreateOptionsMenu(final Menu pMenu, final int menuIdOffset, final MapView mapView) {
-        boolean result = true;
-        for (final Overlay overlay : this.overlaysReversed()) {
-            if (overlay instanceof IOverlayMenuProvider) {
-                final IOverlayMenuProvider overlayMenuProvider = (IOverlayMenuProvider) overlay;
-                if (overlayMenuProvider.isOptionsMenuEnabled()) {
-                    result &= overlayMenuProvider.onCreateOptionsMenu(pMenu, menuIdOffset, mapView);
-                }
-            }
-        }
-
-        if (mTilesOverlay != null && mTilesOverlay.isOptionsMenuEnabled()) {
-            result &= mTilesOverlay.onCreateOptionsMenu(pMenu, menuIdOffset, mapView);
-        }
-
-        return result;
-    }
-
-    public boolean onPrepareOptionsMenu(final Menu pMenu, final int menuIdOffset, final MapView mapView) {
-        for (final Overlay overlay : this.overlaysReversed()) {
-            if (overlay instanceof IOverlayMenuProvider) {
-                final IOverlayMenuProvider overlayMenuProvider = (IOverlayMenuProvider) overlay;
-                if (overlayMenuProvider.isOptionsMenuEnabled()) {
-                    overlayMenuProvider.onPrepareOptionsMenu(pMenu, menuIdOffset, mapView);
-                }
-            }
-        }
-
-        if (mTilesOverlay != null && mTilesOverlay.isOptionsMenuEnabled()) {
-            mTilesOverlay.onPrepareOptionsMenu(pMenu, menuIdOffset, mapView);
-        }
-
-        return true;
-    }
-
-    public boolean onOptionsItemSelected(final MenuItem item, final int menuIdOffset, final MapView mapView) {
-        for (final Overlay overlay : this.overlaysReversed()) {
-            if (overlay instanceof IOverlayMenuProvider) {
-                final IOverlayMenuProvider overlayMenuProvider = (IOverlayMenuProvider) overlay;
-                if (overlayMenuProvider.isOptionsMenuEnabled() &&
-                        overlayMenuProvider.onOptionsItemSelected(item, menuIdOffset, mapView)) {
-                    return true;
-                }
-            }
-        }
-
-        if (mTilesOverlay != null &&
-                mTilesOverlay.isOptionsMenuEnabled() &&
-                mTilesOverlay.onOptionsItemSelected(item, menuIdOffset, mapView)) {
-            return true;
-        }
-
-        return false;
-    }
 }

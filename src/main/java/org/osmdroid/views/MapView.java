@@ -33,13 +33,8 @@ import org.osmdroid.api.IProjection;
 import org.osmdroid.events.MapListener;
 import org.osmdroid.events.ScrollEvent;
 import org.osmdroid.events.ZoomEvent;
-import org.osmdroid.tileprovider.MapTileProviderArray;
 import org.osmdroid.tileprovider.MapTileProviderBase;
-import org.osmdroid.tileprovider.MapTileProviderBasic;
-import org.osmdroid.tileprovider.modules.MapTileModuleProviderBase;
-import org.osmdroid.tileprovider.tilesource.IStyledTileSource;
 import org.osmdroid.tileprovider.tilesource.ITileSource;
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.tileprovider.util.SimpleInvalidationHandler;
 import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
@@ -91,7 +86,6 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
      */
     private final Scroller mScroller;
     private final MapController mController;
-    private final ZoomButtonsController mZoomController;
     private final ResourceProxy mResourceProxy;
     private final Matrix mRotateMatrix = new Matrix();
     private final float[] mRotatePoints = new float[2];
@@ -109,6 +103,7 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
     protected MapListener mListener;
     protected BoundingBoxE6 mScrollableAreaBoundingBox;
     protected Rect mScrollableAreaLimit;
+    ZoomButtonsController mZoomController;
     /**
      * Current zoom level for map tiles.
      */
@@ -131,13 +126,6 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
         this.mController = new MapController(this);
         this.mScroller = new Scroller(context);
         TileSystem.setTileSize(tileSizePixels);
-
-        if (tileProvider == null) {
-            final ITileSource tileSource = getTileSourceFromAttributes(attrs);
-            tileProvider = isInEditMode()
-                    ? new MapTileProviderArray(tileSource, null, new MapTileModuleProviderBase[0])
-                    : new MapTileProviderBasic(context, tileSource);
-        }
 
         mTileRequestCompleteHandler = tileRequestCompleteHandler == null
                 ? new SimpleInvalidationHandler(this)
@@ -786,6 +774,10 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
     }
 
     public void onDetach() {
+        if (mZoomController != null) {
+            mZoomController.setVisible(false);
+            mZoomController = null;
+        }
         this.getOverlayManager().onDetach(this);
         mTileProvider.detach();
     }
@@ -1160,48 +1152,36 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
     // ===========================================================
 
     private void checkZoomButtons() {
-        this.mZoomController.setZoomInEnabled(canZoomIn());
-        this.mZoomController.setZoomOutEnabled(canZoomOut());
+        if (mZoomController != null) {
+            mZoomController.setZoomInEnabled(canZoomIn());
+            mZoomController.setZoomOutEnabled(canZoomOut());
+        }
     }
 
     public void setBuiltInZoomControls(final boolean on) {
-        this.mEnableZoomController = on;
-        this.checkZoomButtons();
+        if (on) {
+            if (isInEditMode()) {
+                mZoomController = null;
+            } else {
+                mZoomController = new ZoomButtonsController(this) {
+                    @Override
+                    public void setVisible(boolean visible) {
+                        try {
+                            super.setVisible(visible);
+                        } catch (Exception ex) {
+                            // ignore
+                        }
+                    }
+                };
+                mZoomController.setOnZoomListener(new MapViewZoomListener());
+            }
+            this.mEnableZoomController = on;
+            this.checkZoomButtons();
+        }
     }
 
     public void setMultiTouchControls(final boolean on) {
         mMultiTouchController = on ? new MultiTouchController<Object>(this, false) : null;
-    }
-
-    private ITileSource getTileSourceFromAttributes(final AttributeSet aAttributeSet) {
-
-        ITileSource tileSource = TileSourceFactory.DEFAULT_TILE_SOURCE;
-
-        if (aAttributeSet != null) {
-            final String tileSourceAttr = aAttributeSet.getAttributeValue(null, "tilesource");
-            if (tileSourceAttr != null) {
-                try {
-                    final ITileSource r = TileSourceFactory.getTileSource(tileSourceAttr);
-                    logger.info("Using tile source specified in layout attributes: " + r);
-                    tileSource = r;
-                } catch (final IllegalArgumentException e) {
-                    logger.warn("Invalid tile source specified in layout attributes: " + tileSource);
-                }
-            }
-        }
-
-        if (aAttributeSet != null && tileSource instanceof IStyledTileSource) {
-            final String style = aAttributeSet.getAttributeValue(null, "style");
-            if (style == null) {
-                logger.info("Using default style: 1");
-            } else {
-                logger.info("Using style specified in layout attributes: " + style);
-                ((IStyledTileSource<?>) tileSource).setStyle(style);
-            }
-        }
-
-        logger.info("Using tile source: " + tileSource);
-        return tileSource;
     }
 
     // ===========================================================
@@ -1346,9 +1326,9 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
     public class Projection implements IProjection, GeoConstants {
 
         private final int viewWidth_2 = getWidth() / 2;
+        private final int worldSize_2 = TileSystem.MapSize(mZoomLevel) / 2;
         private final int viewHeight_2 = getHeight() / 2;
         private final int offsetX = -worldSize_2;
-        private final int worldSize_2 = TileSystem.MapSize(mZoomLevel) / 2;
         private final int offsetY = -worldSize_2;
         private final BoundingBoxE6 mBoundingBoxProjection;
         private final int mZoomLevelProjection;

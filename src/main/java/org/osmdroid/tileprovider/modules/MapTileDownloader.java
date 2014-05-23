@@ -3,12 +3,11 @@ package org.osmdroid.tileprovider.modules;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.osmdroid.http.HttpClientFactory;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+
+import net.ugona.plus.HttpTask;
+
 import org.osmdroid.tileprovider.BitmapPool;
 import org.osmdroid.tileprovider.MapTile;
 import org.osmdroid.tileprovider.MapTileRequestState;
@@ -27,6 +26,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -179,23 +179,14 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
                     return null;
                 }
 
-                final HttpClient client = HttpClientFactory.createHttpClient();
-                final HttpUriRequest head = new HttpGet(tileURLString);
-                final HttpResponse response = client.execute(head);
-
-                // Check to see if we got success
-                final org.apache.http.StatusLine line = response.getStatusLine();
-                if (line.getStatusCode() != 200) {
-                    logger.warn("Problem downloading MapTile: " + tile + " HTTP response: " + line);
+                Request request = new Request.Builder().url(tileURLString).build();
+                Response response = HttpTask.client.newCall(request).execute();
+                if (response.code() != HttpURLConnection.HTTP_OK) {
+                    logger.warn("Problem downloading MapTile: " + tile + " HTTP response: " + response.message());
                     return null;
                 }
 
-                final HttpEntity entity = response.getEntity();
-                if (entity == null) {
-                    logger.warn("No content downloading MapTile: " + tile);
-                    return null;
-                }
-                in = entity.getContent();
+                in = response.body().byteStream();
 
                 final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
                 out = new BufferedOutputStream(dataStream, StreamUtils.IO_BUFFER_SIZE);

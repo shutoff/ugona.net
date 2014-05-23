@@ -104,6 +104,10 @@ public class ItemizedOverlayWithFocus<Item extends OverlayItem> extends Itemized
         return this.mItemList.get(this.mFocusedItemIndex);
     }
 
+    public void setFocusedItem(final int pIndex) {
+        this.mFocusedItemIndex = pIndex;
+    }
+
     public void setFocusedItem(final Item pItem) {
         final int indexFound = super.mItemList.indexOf(pItem);
         if (indexFound < 0) {
@@ -111,10 +115,6 @@ public class ItemizedOverlayWithFocus<Item extends OverlayItem> extends Itemized
         }
 
         this.setFocusedItem(indexFound);
-    }
-
-    public void setFocusedItem(final int pIndex) {
-        this.mFocusedItemIndex = pIndex;
     }
 
     public void unSetFocusedItem() {
@@ -151,6 +151,11 @@ public class ItemizedOverlayWithFocus<Item extends OverlayItem> extends Itemized
             return;
         }
 
+        drawFocusedItem(c, osmv);
+    }
+
+    protected void drawFocusedItem(final Canvas c, final MapView osmv) {
+
         // get focused item's preferred marker & hotspot
         final Item focusedItem = super.mItemList.get(this.mFocusedItemIndex);
         Drawable markerFocusedBase = focusedItem.getMarker(OverlayItem.ITEM_STATE_FOCUSED_MASK);
@@ -183,7 +188,7 @@ public class ItemizedOverlayWithFocus<Item extends OverlayItem> extends Itemized
         int lastStop = 0;
         int i;
         int lastwhitespace = 0;
-		/*
+        /*
 		 * Loop through the charwidth array and harshly insert a linebreak, when the width gets
 		 * bigger than DESCRIPTION_MAXWIDTH.
 		 */

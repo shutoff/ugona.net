@@ -31,6 +31,7 @@ public class TileWriter implements IFilesystemCache, OpenStreetMapTileProviderCo
     // ===========================================================
 
     private static final Logger logger = LoggerFactory.getLogger(TileWriter.class);
+    public static File TILE_PATH_BASE = new File(OSMDROID_PATH, "tiles");
 
     // ===========================================================
     // Fields
