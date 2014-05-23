@@ -3,11 +3,12 @@ package org.osmdroid.tileprovider.modules;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
-
-import net.ugona.plus.HttpTask;
-
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.osmdroid.http.HttpClientFactory;
 import org.osmdroid.tileprovider.BitmapPool;
 import org.osmdroid.tileprovider.MapTile;
 import org.osmdroid.tileprovider.MapTileRequestState;
@@ -26,7 +27,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -179,14 +179,23 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
                     return null;
                 }
 
-                Request request = new Request.Builder().url(tileURLString).build();
-                Response response = HttpTask.client.newCall(request).execute();
-                if (response.code() != HttpURLConnection.HTTP_OK) {
-                    logger.warn("Problem downloading MapTile: " + tile + " HTTP response: " + response.message());
+                final HttpClient client = HttpClientFactory.createHttpClient();
+                final HttpUriRequest head = new HttpGet(tileURLString);
+                final HttpResponse response = client.execute(head);
+
+                // Check to see if we got success
+                final org.apache.http.StatusLine line = response.getStatusLine();
+                if (line.getStatusCode() != 200) {
+                    logger.warn("Problem downloading MapTile: " + tile + " HTTP response: " + line);
                     return null;
                 }
 
-                in = response.body().byteStream();
+                final HttpEntity entity = response.getEntity();
+                if (entity == null) {
+                    logger.warn("No content downloading MapTile: " + tile);
+                    return null;
+                }
+                in = entity.getContent();
 
                 final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
                 out = new BufferedOutputStream(dataStream, StreamUtils.IO_BUFFER_SIZE);
@@ -201,6 +210,7 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
                     byteStream.reset();
                 }
                 final Drawable result = tileSource.getDrawable(byteStream);
+
                 return result;
             } catch (final UnknownHostException e) {
                 // no network connection so empty the queue
@@ -230,7 +240,7 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
             // don't return the tile because we'll wait for the fs provider to ask for it
             // this prevent flickering when a load of delayed downloads complete for tiles
             // that we might not even be interested in any more
-            pState.getCallback().mapTileRequestCompleted(pState, pDrawable);
+            pState.getCallback().mapTileRequestCompleted(pState, null);
             // We want to return the Bitmap to the BitmapPool if applicable
             if (pDrawable instanceof ReusableBitmapDrawable)
                 BitmapPool.getInstance().returnDrawableToPool((ReusableBitmapDrawable) pDrawable);

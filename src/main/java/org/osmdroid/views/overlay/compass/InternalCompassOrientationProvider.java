@@ -6,12 +6,14 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
-public class InternalCompassOrientationProvider implements SensorEventListener, IOrientationProvider {
+public class InternalCompassOrientationProvider implements SensorEventListener, IOrientationProvider
+{
     private final SensorManager mSensorManager;
     private IOrientationConsumer mOrientationConsumer;
     private float mAzimuth;
 
-    public InternalCompassOrientationProvider(Context context) {
+    public InternalCompassOrientationProvider(Context context)
+    {
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
     }
 
@@ -23,7 +25,8 @@ public class InternalCompassOrientationProvider implements SensorEventListener, 
      * Enable orientation updates from the internal compass sensor and show the compass.
      */
     @Override
-    public boolean startOrientationProvider(IOrientationConsumer orientationConsumer) {
+    public boolean startOrientationProvider(IOrientationConsumer orientationConsumer)
+    {
         mOrientationConsumer = orientationConsumer;
         boolean result = false;
 
@@ -35,12 +38,14 @@ public class InternalCompassOrientationProvider implements SensorEventListener, 
     }
 
     @Override
-    public void stopOrientationProvider() {
+    public void stopOrientationProvider()
+    {
         mSensorManager.unregisterListener(this);
     }
 
     @Override
-    public float getLastKnownOrientation() {
+    public float getLastKnownOrientation()
+    {
         return mAzimuth;
     }
 
@@ -49,12 +54,14 @@ public class InternalCompassOrientationProvider implements SensorEventListener, 
     //
 
     @Override
-    public void onAccuracyChanged(final Sensor sensor, final int accuracy) {
+    public void onAccuracyChanged(final Sensor sensor, final int accuracy)
+    {
         // This is not interesting for us at the moment
     }
 
     @Override
-    public void onSensorChanged(final SensorEvent event) {
+    public void onSensorChanged(final SensorEvent event)
+    {
         if (event.sensor.getType() == Sensor.TYPE_ORIENTATION) {
             if (event.values != null) {
                 mAzimuth = event.values[0];

@@ -174,7 +174,7 @@ public class ItemizedIconOverlay<Item extends OverlayItem> extends ItemizedOverl
 
             pj.toPixels(item.getPoint(), mItemPoint);
 
-            if (hitTest(mapView, item, marker, mTouchScreenPoint.x - mItemPoint.x, mTouchScreenPoint.y
+            if (hitTest(item, marker, mTouchScreenPoint.x - mItemPoint.x, mTouchScreenPoint.y
                     - mItemPoint.y)) {
                 if (task.run(i)) {
                     return true;

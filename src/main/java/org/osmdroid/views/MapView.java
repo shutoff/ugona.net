@@ -91,6 +91,7 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
      */
     private final Scroller mScroller;
     private final MapController mController;
+    private final ZoomButtonsController mZoomController;
     private final ResourceProxy mResourceProxy;
     private final Matrix mRotateMatrix = new Matrix();
     private final float[] mRotatePoints = new float[2];
@@ -108,7 +109,6 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
     protected MapListener mListener;
     protected BoundingBoxE6 mScrollableAreaBoundingBox;
     protected Rect mScrollableAreaLimit;
-    private ZoomButtonsController mZoomController;
     /**
      * Current zoom level for map tiles.
      */
@@ -147,6 +147,13 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
 
         this.mMapOverlay = new TilesOverlay(mTileProvider, mResourceProxy);
         mOverlayManager = new OverlayManager(mMapOverlay);
+
+        if (isInEditMode()) {
+            mZoomController = null;
+        } else {
+            mZoomController = new ZoomButtonsController(this);
+            mZoomController.setOnZoomListener(new MapViewZoomListener());
+        }
 
         mGestureDetector = new GestureDetector(context, new MapViewGestureDetectorListener());
         mGestureDetector.setOnDoubleTapListener(new MapViewDoubleClickListener());
@@ -364,11 +371,9 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
         final BoundingBoxE6 currentBox = getBoundingBox();
 
         // Calculated required zoom based on latitude span
-        double maxZoomLatitudeSpan = mZoomLevel == getMaxZoomLevel() ?
+        final double maxZoomLatitudeSpan = mZoomLevel == getMaxZoomLevel() ?
                 currentBox.getLatitudeSpanE6() :
                 currentBox.getLatitudeSpanE6() / Math.pow(2, getMaxZoomLevel() - mZoomLevel);
-        if (maxZoomLatitudeSpan < 1000)
-            maxZoomLatitudeSpan = 1000;
 
         final double requiredLatitudeZoom =
                 getMaxZoomLevel() -
@@ -376,24 +381,19 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
 
 
         // Calculated required zoom based on longitude span
-        double maxZoomLongitudeSpan = mZoomLevel == getMaxZoomLevel() ?
+        final double maxZoomLongitudeSpan = mZoomLevel == getMaxZoomLevel() ?
                 currentBox.getLongitudeSpanE6() :
                 currentBox.getLongitudeSpanE6() / Math.pow(2, getMaxZoomLevel() - mZoomLevel);
-
-        if (maxZoomLongitudeSpan < 1000)
-            maxZoomLongitudeSpan = 1000;
 
         final double requiredLongitudeZoom =
                 getMaxZoomLevel() -
                         Math.ceil(Math.log(boundingBox.getLongitudeSpanE6() / maxZoomLongitudeSpan) / Math.log(2));
 
-        int requiredZoom = (int) (requiredLatitudeZoom < requiredLongitudeZoom ?
-                requiredLatitudeZoom : requiredLongitudeZoom);
-        if (requiredZoom > getMaxZoomLevel())
-            requiredZoom = getMaxZoomLevel();
 
         // Zoom to boundingBox center, at calculated maximum allowed zoom level
-        getController().setZoom(requiredZoom);
+        getController().setZoom((int) (
+                requiredLatitudeZoom < requiredLongitudeZoom ?
+                        requiredLatitudeZoom : requiredLongitudeZoom));
 
         getController().setCenter(
                 new GeoPoint(boundingBox.getCenter().getLatitudeE6(), boundingBox.getCenter()
@@ -1061,10 +1061,8 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
 
     @Override
     protected void onDetachedFromWindow() {
-        if (mZoomController != null) {
-            mZoomController.setVisible(false);
-            mZoomController = null;
-        }
+        this.mZoomController.setVisible(false);
+        this.onDetach();
         super.onDetachedFromWindow();
     }
 
@@ -1162,32 +1160,13 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
     // ===========================================================
 
     private void checkZoomButtons() {
-        if (mZoomController != null) {
-            mZoomController.setZoomInEnabled(canZoomIn());
-            mZoomController.setZoomOutEnabled(canZoomOut());
-        }
+        this.mZoomController.setZoomInEnabled(canZoomIn());
+        this.mZoomController.setZoomOutEnabled(canZoomOut());
     }
 
     public void setBuiltInZoomControls(final boolean on) {
-        if (on) {
-            if (isInEditMode()) {
-                mZoomController = null;
-            } else {
-                mZoomController = new ZoomButtonsController(this) {
-                    @Override
-                    public void setVisible(boolean visible) {
-                        try {
-                            super.setVisible(visible);
-                        } catch (Exception ex) {
-                            // ignore
-                        }
-                    }
-                };
-                mZoomController.setOnZoomListener(new MapViewZoomListener());
-            }
-            this.mEnableZoomController = on;
-            this.checkZoomButtons();
-        }
+        this.mEnableZoomController = on;
+        this.checkZoomButtons();
     }
 
     public void setMultiTouchControls(final boolean on) {
@@ -1368,9 +1347,9 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
 
         private final int viewWidth_2 = getWidth() / 2;
         private final int viewHeight_2 = getHeight() / 2;
-        private final int WORLD_SIZE_2 = TileSystem.MapSize(mZoomLevel) / 2;
-        private final int offsetY = -WORLD_SIZE_2;
-        private final int offsetX = -WORLD_SIZE_2;
+        private final int offsetX = -worldSize_2;
+        private final int worldSize_2 = TileSystem.MapSize(mZoomLevel) / 2;
+        private final int offsetY = -worldSize_2;
         private final BoundingBoxE6 mBoundingBoxProjection;
         private final int mZoomLevelProjection;
         private final Rect mScreenRectProjection;
@@ -1448,8 +1427,8 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
          */
         public IGeoPoint fromPixels(final float x, final float y) {
             final Rect screenRect = getIntrinsicScreenRect();
-            return TileSystem.PixelXYToLatLong(screenRect.left + (int) x + WORLD_SIZE_2,
-                    screenRect.top + (int) y + WORLD_SIZE_2, mZoomLevelProjection, null);
+            return TileSystem.PixelXYToLatLong(screenRect.left + (int) x + worldSize_2,
+                    screenRect.top + (int) y + worldSize_2, mZoomLevelProjection, null);
         }
 
         public Point fromMapPixels(final int x, final int y, final Point reuse) {

@@ -214,8 +214,6 @@ public class TilesOverlay extends SafeDrawOverlay implements IOverlayMenuProvide
 
     protected void onTileReadyToDraw(final Canvas c, final Drawable currentMapTile,
                                      final Rect tileRect) {
-        if (currentMapTile == null)
-            return;
         tileRect.offset(-mWorldSize_2, -mWorldSize_2);
         currentMapTile.setBounds(tileRect);
         currentMapTile.draw(c);

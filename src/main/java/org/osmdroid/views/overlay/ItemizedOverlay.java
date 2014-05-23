@@ -121,7 +121,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends SafeDraw
             final Item item = getItem(i);
             pj.toMapPixels(item.getPoint(), mCurScreenCoords);
 
-            onDrawItem(mapView, canvas, item, mCurScreenCoords, mapView.getMapOrientation());
+            onDrawItem(canvas, item, mCurScreenCoords, mapView.getMapOrientation());
         }
     }
 
@@ -161,7 +161,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends SafeDraw
      * @param curScreenCoords
      * @param aMapOrientation
      */
-    protected void onDrawItem(MapView mapView, final ISafeCanvas canvas, final Item item, final Point curScreenCoords, final float aMapOrientation) {
+    protected void onDrawItem(final ISafeCanvas canvas, final Item item, final Point curScreenCoords, final float aMapOrientation) {
         final int state = (mDrawFocusedItem && (mFocusedItem == item) ? OverlayItem.ITEM_STATE_FOCUSED_MASK
                 : 0);
         final Drawable marker = (item.getMarker(state) == null) ? getDefaultMarker(state) : item
@@ -200,7 +200,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends SafeDraw
      * @param hitY   y coordinate of point to check
      * @return true if the hit point is within the marker
      */
-    protected boolean hitTest(org.osmdroid.views.MapView mapView, final Item item, final android.graphics.drawable.Drawable marker, final int hitX,
+    protected boolean hitTest(final Item item, final android.graphics.drawable.Drawable marker, final int hitX,
                               final int hitY) {
         return marker.getBounds().contains(hitX, hitY);
     }
@@ -220,7 +220,7 @@ public abstract class ItemizedOverlay<Item extends OverlayItem> extends SafeDraw
             final Drawable marker = (item.getMarker(state) == null) ? getDefaultMarker(state)
                     : item.getMarker(state);
             boundToHotspot(marker, item.getMarkerHotspot());
-            if (hitTest(mapView, item, marker, -mCurScreenCoords.x + screenRect.left + (int) e.getX(),
+            if (hitTest(item, marker, -mCurScreenCoords.x + screenRect.left + (int) e.getX(),
                     -mCurScreenCoords.y + screenRect.top + (int) e.getY())) {
                 // We have a hit, do we get a response from onTap?
                 if (onTap(i)) {

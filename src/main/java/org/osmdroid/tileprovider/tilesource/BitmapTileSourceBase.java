@@ -3,9 +3,6 @@ package org.osmdroid.tileprovider.tilesource;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
-
-import net.ugona.plus.State;
 
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.ResourceProxy.string;
@@ -137,31 +134,21 @@ public abstract class BitmapTileSourceBase implements ITileSource,
 
     @Override
     public Drawable getDrawable(final InputStream aFileInputStream) throws LowMemoryException {
-        for (; ; ) {
+        try {
+            // default implementation will load the file as a bitmap and create
+            // a BitmapDrawable from it
             BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
             BitmapPool.getInstance().applyReusableOptions(bitmapOptions);
-            Bitmap bitmap = null;
-            try {
-                bitmap = BitmapFactory.decodeStream(aFileInputStream, null, bitmapOptions);
-            } catch (final IllegalArgumentException e) {
-                State.appendLog("Illegal state");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    if (bitmapOptions.inBitmap == null)
-                        return null;
-                    continue;
-                }
-                return null;
-            } catch (final OutOfMemoryError e) {
-                State.appendLog("Out of memory");
-                System.gc();
-                if (!BitmapPool.getInstance().clearBitmapPool())
-                    return null;
-                continue;
-            }
-            if (bitmap != null)
+            final Bitmap bitmap = BitmapFactory.decodeStream(aFileInputStream, null, bitmapOptions);
+            if (bitmap != null) {
                 return new ReusableBitmapDrawable(bitmap);
-            return null;
+            }
+        } catch (final OutOfMemoryError e) {
+            logger.error("OutOfMemoryError loading bitmap");
+            System.gc();
+            throw new LowMemoryException(e);
         }
+        return null;
     }
 
     public final class LowMemoryException extends Exception {

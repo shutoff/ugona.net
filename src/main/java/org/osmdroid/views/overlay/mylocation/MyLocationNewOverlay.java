@@ -9,6 +9,8 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.location.Location;
 import android.util.FloatMath;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 
 import org.osmdroid.DefaultResourceProxyImpl;
@@ -19,6 +21,7 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.util.TileSystem;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.MapView.Projection;
+import org.osmdroid.views.overlay.IOverlayMenuProvider;
 import org.osmdroid.views.overlay.Overlay.Snappable;
 import org.osmdroid.views.overlay.SafeDrawOverlay;
 import org.osmdroid.views.safecanvas.ISafeCanvas;
@@ -33,7 +36,8 @@ import java.util.LinkedList;
  * @author Marc Kurtz
  * @author Manuel Stahl
  */
-public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocationConsumer, Snappable {
+public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocationConsumer,
+        IOverlayMenuProvider, Snappable {
     public static final int MENU_MY_LOCATION = getSafeMenuId();
 
     // ===========================================================
@@ -47,11 +51,14 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
     protected final SafePaint mPaint = new SafePaint();
     protected final SafePaint mCirclePaint = new SafePaint();
     protected final Bitmap mPersonBitmap;
+    protected final Bitmap mDirectionArrowBitmap;
     protected final MapView mMapView;
     /**
      * Coordinates the feet of the person are located scaled for display density.
      */
     protected final PointF mPersonHotspot;
+    protected final double mDirectionArrowCenterX;
+    protected final double mDirectionArrowCenterY;
     private final IMapController mMapController;
     private final LinkedList<Runnable> mRunOnFirstFix = new LinkedList<Runnable>();
     private final Point mMapCoords = new Point();
@@ -91,6 +98,10 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
         mCirclePaint.setAntiAlias(true);
 
         mPersonBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.person);
+        mDirectionArrowBitmap = mResourceProxy.getBitmap(ResourceProxy.bitmap.direction_arrow);
+
+        mDirectionArrowCenterX = mDirectionArrowBitmap.getWidth() / 2.0 - 0.5;
+        mDirectionArrowCenterY = mDirectionArrowBitmap.getHeight() / 2.0 - 0.5;
 
         // Calculate position of person icon's feet, scaled to screen density
         mPersonHotspot = new PointF(24.0f * mScale + 0.5f, 39.0f * mScale + 0.5f);
@@ -148,9 +159,7 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
     protected void drawMyLocation(final ISafeCanvas canvas, final MapView mapView,
                                   final Location lastFix) {
         final Projection pj = mapView.getProjection();
-
-        Point mTempPoint = new Point();
-        Point screenPoint = pj.toPixels(new GeoPoint(lastFix), mTempPoint);
+        final int zoomDiff = MapViewConstants.MAXIMUM_ZOOMLEVEL - pj.getZoomLevel();
 
         if (mDrawAccuracyEnabled) {
             final float radius = lastFix.getAccuracy()
@@ -159,13 +168,58 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
 
             mCirclePaint.setAlpha(50);
             mCirclePaint.setStyle(Style.FILL);
-            canvas.drawCircle(screenPoint.x, screenPoint.y, radius, mCirclePaint);
+            canvas.drawCircle(mMapCoords.x >> zoomDiff, mMapCoords.y >> zoomDiff, radius,
+                    mCirclePaint);
 
             mCirclePaint.setAlpha(150);
             mCirclePaint.setStyle(Style.STROKE);
-            canvas.drawCircle(screenPoint.x, screenPoint.y, radius, mCirclePaint);
+            canvas.drawCircle(mMapCoords.x >> zoomDiff, mMapCoords.y >> zoomDiff, radius,
+                    mCirclePaint);
         }
-        canvas.drawBitmap(mPersonBitmap, screenPoint.x - mPersonHotspot.x, screenPoint.y - mPersonHotspot.y, null);
+
+        canvas.getMatrix(mMatrix);
+        mMatrix.getValues(mMatrixValues);
+
+        if (DEBUGMODE) {
+            final float tx = (-mMatrixValues[Matrix.MTRANS_X] + 20)
+                    / mMatrixValues[Matrix.MSCALE_X];
+            final float ty = (-mMatrixValues[Matrix.MTRANS_Y] + 90)
+                    / mMatrixValues[Matrix.MSCALE_Y];
+            canvas.drawText("Lat: " + lastFix.getLatitude(), tx, ty + 5, mPaint);
+            canvas.drawText("Lon: " + lastFix.getLongitude(), tx, ty + 20, mPaint);
+            canvas.drawText("Alt: " + lastFix.getAltitude(), tx, ty + 35, mPaint);
+            canvas.drawText("Acc: " + lastFix.getAccuracy(), tx, ty + 50, mPaint);
+        }
+
+        // Calculate real scale including accounting for rotation
+        float scaleX = (float) Math.sqrt(mMatrixValues[Matrix.MSCALE_X]
+                * mMatrixValues[Matrix.MSCALE_X] + mMatrixValues[Matrix.MSKEW_Y]
+                * mMatrixValues[Matrix.MSKEW_Y]);
+        float scaleY = (float) Math.sqrt(mMatrixValues[Matrix.MSCALE_Y]
+                * mMatrixValues[Matrix.MSCALE_Y] + mMatrixValues[Matrix.MSKEW_X]
+                * mMatrixValues[Matrix.MSKEW_X]);
+        final double x = mMapCoords.x >> zoomDiff;
+        final double y = mMapCoords.y >> zoomDiff;
+        if (lastFix.hasBearing()) {
+            canvas.save();
+            // Rotate the icon
+            canvas.rotate(lastFix.getBearing(), x, y);
+            // Counteract any scaling that may be happening so the icon stays the same size
+            canvas.scale(1 / scaleX, 1 / scaleY, x, y);
+            // Draw the bitmap
+            canvas.drawBitmap(mDirectionArrowBitmap, x - mDirectionArrowCenterX, y
+                    - mDirectionArrowCenterY, mPaint);
+            canvas.restore();
+        } else {
+            canvas.save();
+            // Unrotate the icon if the maps are rotated so the little man stays upright
+            canvas.rotate(-mMapView.getMapOrientation(), x, y);
+            // Counteract any scaling that may be happening so the icon stays the same size
+            canvas.scale(1 / scaleX, 1 / scaleY, x, y);
+            // Draw the bitmap
+            canvas.drawBitmap(mPersonBitmap, x - mPersonHotspot.x, y - mPersonHotspot.y, mPaint);
+            canvas.restore();
+        }
     }
 
     protected Rect getMyLocationDrawingBounds(int zoomLevel, Location lastFix, Rect reuse) {
@@ -176,8 +230,18 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
         final int posX = mMapCoords.x >> zoomDiff;
         final int posY = mMapCoords.y >> zoomDiff;
 
-        reuse.set(posX, posY, posX + mPersonBitmap.getWidth(), posY + mPersonBitmap.getHeight());
-        reuse.offset((int) (-mPersonHotspot.x + 0.5f), (int) (-mPersonHotspot.y + 0.5f));
+        // Start with the bitmap bounds
+        if (lastFix.hasBearing()) {
+            // Get a square bounding box around the object, and expand by the length of the diagonal
+            // so as to allow for extra space for rotating
+            int widestEdge = (int) Math.ceil(Math.max(mDirectionArrowBitmap.getWidth(),
+                    mDirectionArrowBitmap.getHeight()) * Math.sqrt(2));
+            reuse.set(posX, posY, posX + widestEdge, posY + widestEdge);
+            reuse.offset(-widestEdge / 2, -widestEdge / 2);
+        } else {
+            reuse.set(posX, posY, posX + mPersonBitmap.getWidth(), posY + mPersonBitmap.getHeight());
+            reuse.offset((int) (-mPersonHotspot.x + 0.5f), (int) (-mPersonHotspot.y + 0.5f));
+        }
 
         // Add in the accuracy circle if enabled
         if (mDrawAccuracyEnabled) {
@@ -231,6 +295,56 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
         }
 
         return super.onTouchEvent(event, mapView);
+    }
+
+    // ===========================================================
+    // Menu handling methods
+    // ===========================================================
+
+    @Override
+    public boolean isOptionsMenuEnabled() {
+        return this.mOptionsMenuEnabled;
+    }
+
+    @Override
+    public void setOptionsMenuEnabled(final boolean pOptionsMenuEnabled) {
+        this.mOptionsMenuEnabled = pOptionsMenuEnabled;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(final Menu pMenu, final int pMenuIdOffset,
+                                       final MapView pMapView) {
+        pMenu.add(0, MENU_MY_LOCATION + pMenuIdOffset, Menu.NONE,
+                mResourceProxy.getString(ResourceProxy.string.my_location))
+                .setIcon(mResourceProxy.getDrawable(ResourceProxy.bitmap.ic_menu_mylocation))
+                .setCheckable(true);
+
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(final Menu pMenu, final int pMenuIdOffset,
+                                        final MapView pMapView) {
+        pMenu.findItem(MENU_MY_LOCATION + pMenuIdOffset).setChecked(this.isMyLocationEnabled());
+        return false;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem pItem, final int pMenuIdOffset,
+                                         final MapView pMapView) {
+        final int menuId = pItem.getItemId() - pMenuIdOffset;
+        if (menuId == MENU_MY_LOCATION) {
+            if (this.isMyLocationEnabled()) {
+                this.disableFollowLocation();
+                this.disableMyLocation();
+            } else {
+                this.enableFollowLocation();
+                this.enableMyLocation();
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 
     // ===========================================================
@@ -346,6 +460,12 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
         mRunOnFirstFix.clear();
     }
 
+    public boolean enableMyLocation(IMyLocationProvider myLocationProvider) {
+        this.setMyLocationProvider(myLocationProvider);
+        mIsLocationEnabled = false;
+        return enableMyLocation();
+    }
+
     /**
      * Enable receiving location updates from the provided IMyLocationProvider and show your
      * location on the maps. You will likely want to call enableMyLocation() from your Activity's
@@ -353,11 +473,11 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
      * corresponding disableMyLocation() in your Activity's Activity.onPause() method to turn off
      * updates when in the background.
      */
-    public boolean enableMyLocation(boolean gps_enabled, boolean net_enabled) {
+    public boolean enableMyLocation() {
         if (mIsLocationEnabled)
             mMyLocationProvider.stopLocationProvider();
 
-        boolean result = mMyLocationProvider.startLocationProvider(this, gps_enabled, net_enabled);
+        boolean result = mMyLocationProvider.startLocationProvider(this);
         mIsLocationEnabled = result;
 
         // set initial location when enabled
@@ -414,5 +534,4 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
             return false;
         }
     }
-
 }
