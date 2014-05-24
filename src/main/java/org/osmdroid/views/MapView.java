@@ -1053,7 +1053,13 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
 
     @Override
     protected void onDetachedFromWindow() {
-        this.mZoomController.setVisible(false);
+        if (this.mZoomController != null) {
+            try {
+                this.mZoomController.setVisible(false);
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
         this.onDetach();
         super.onDetachedFromWindow();
     }
@@ -1326,8 +1332,8 @@ public class MapView extends ViewGroup implements IMapView, MapViewConstants,
     public class Projection implements IProjection, GeoConstants {
 
         private final int viewWidth_2 = getWidth() / 2;
-        private final int worldSize_2 = TileSystem.MapSize(mZoomLevel) / 2;
         private final int viewHeight_2 = getHeight() / 2;
+        private final int worldSize_2 = TileSystem.MapSize(mZoomLevel) / 2;
         private final int offsetX = -worldSize_2;
         private final int offsetY = -worldSize_2;
         private final BoundingBoxE6 mBoundingBoxProjection;

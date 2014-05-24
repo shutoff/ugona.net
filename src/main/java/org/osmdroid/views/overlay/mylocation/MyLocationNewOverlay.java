@@ -148,7 +148,9 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
     protected void drawMyLocation(final ISafeCanvas canvas, final MapView mapView,
                                   final Location lastFix) {
         final Projection pj = mapView.getProjection();
-        final int zoomDiff = MapViewConstants.MAXIMUM_ZOOMLEVEL - pj.getZoomLevel();
+
+        Point mTempPoint = new Point();
+        Point screenPoint = pj.toPixels(new GeoPoint(lastFix), mTempPoint);
 
         if (mDrawAccuracyEnabled) {
             final float radius = lastFix.getAccuracy()
@@ -157,46 +159,14 @@ public class MyLocationNewOverlay extends SafeDrawOverlay implements IMyLocation
 
             mCirclePaint.setAlpha(50);
             mCirclePaint.setStyle(Style.FILL);
-            canvas.drawCircle(mMapCoords.x >> zoomDiff, mMapCoords.y >> zoomDiff, radius,
-                    mCirclePaint);
+            canvas.drawCircle(screenPoint.x, screenPoint.y, radius, mCirclePaint);
 
             mCirclePaint.setAlpha(150);
             mCirclePaint.setStyle(Style.STROKE);
-            canvas.drawCircle(mMapCoords.x >> zoomDiff, mMapCoords.y >> zoomDiff, radius,
-                    mCirclePaint);
+            canvas.drawCircle(screenPoint.x, screenPoint.y, radius, mCirclePaint);
         }
+        canvas.drawBitmap(mPersonBitmap, screenPoint.x - mPersonHotspot.x, screenPoint.y - mPersonHotspot.y, null);
 
-        canvas.getMatrix(mMatrix);
-        mMatrix.getValues(mMatrixValues);
-
-        if (DEBUGMODE) {
-            final float tx = (-mMatrixValues[Matrix.MTRANS_X] + 20)
-                    / mMatrixValues[Matrix.MSCALE_X];
-            final float ty = (-mMatrixValues[Matrix.MTRANS_Y] + 90)
-                    / mMatrixValues[Matrix.MSCALE_Y];
-            canvas.drawText("Lat: " + lastFix.getLatitude(), tx, ty + 5, mPaint);
-            canvas.drawText("Lon: " + lastFix.getLongitude(), tx, ty + 20, mPaint);
-            canvas.drawText("Alt: " + lastFix.getAltitude(), tx, ty + 35, mPaint);
-            canvas.drawText("Acc: " + lastFix.getAccuracy(), tx, ty + 50, mPaint);
-        }
-
-        // Calculate real scale including accounting for rotation
-        float scaleX = (float) Math.sqrt(mMatrixValues[Matrix.MSCALE_X]
-                * mMatrixValues[Matrix.MSCALE_X] + mMatrixValues[Matrix.MSKEW_Y]
-                * mMatrixValues[Matrix.MSKEW_Y]);
-        float scaleY = (float) Math.sqrt(mMatrixValues[Matrix.MSCALE_Y]
-                * mMatrixValues[Matrix.MSCALE_Y] + mMatrixValues[Matrix.MSKEW_X]
-                * mMatrixValues[Matrix.MSKEW_X]);
-        final double x = mMapCoords.x >> zoomDiff;
-        final double y = mMapCoords.y >> zoomDiff;
-        canvas.save();
-        // Unrotate the icon if the maps are rotated so the little man stays upright
-        canvas.rotate(-mMapView.getMapOrientation(), x, y);
-        // Counteract any scaling that may be happening so the icon stays the same size
-        canvas.scale(1 / scaleX, 1 / scaleY, x, y);
-        // Draw the bitmap
-        canvas.drawBitmap(mPersonBitmap, x - mPersonHotspot.x, y - mPersonHotspot.y, mPaint);
-        canvas.restore();
     }
 
     protected Rect getMyLocationDrawingBounds(int zoomLevel, Location lastFix, Rect reuse) {
