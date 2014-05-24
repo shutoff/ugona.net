@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
 public class Actions {
 
     static final String INCORRECT_MESSAGE = "Incorrect message";
-    static final String COMMAND_URL = "https://car-online.ugona.net/command?auth=$1&ccode=$2&command=$3";
+    static final String COMMAND_URL = "https://car-online.ugona.net/command?auth=$1&command=$2";
     final static String URL_SET = "https://car-online.ugona.net/set?auth=$1&v=$2";
     final static String URL_SETTINGS = "https://car-online.ugona.net/settings?auth=$1";
     static Pattern location;
@@ -563,6 +563,86 @@ public class Actions {
         });
     }
 
+    static void heater_ctrl(final Context context, final String car_id, final boolean long_tap, final int heater, final int cmd, final int cmd_id, final boolean silent) {
+        final Runnable done = new Runnable() {
+            @Override
+            public void run() {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putInt(Names.Car.HEATER + car_id, heater);
+                Date now = new Date();
+                ed.putLong(Names.Car.RELE_START + car_id, now.getTime());
+                ed.commit();
+                Intent i = new Intent(FetchService.ACTION_UPDATE);
+                i.putExtra(Names.ID, car_id);
+                context.sendBroadcast(i);
+            }
+        };
+        requestPassword(context, car_id, R.string.thermocode, silent ? 0 : cmd_id, new Answer() {
+            @Override
+            void answer(String t) {
+                selectRoute(context, car_id, new Runnable() {
+                    @Override
+                    public void run() {
+                        new InetRequest(context, car_id, null, cmd, cmd_id) {
+
+                            @Override
+                            void error() {
+                                final SmsMonitor.Sms sms = new SmsMonitor.Sms(cmd_id, "HEAT " + heater, null);
+                                SmsMonitor.sendSMS(context, car_id, null, sms);
+                            }
+
+                            @Override
+                            void ok(Context context, long when) {
+                                done.run();
+                            }
+
+                            @Override
+                            void user(Context context) {
+                                ok(context, 0);
+                            }
+
+                            @Override
+                            void sent(Context context) {
+                                SmsMonitor.cancelSMS(context, car_id, cmd_id);
+                                ok(context, 0);
+                            }
+                        };
+                    }
+                }, new Runnable() {
+                    @Override
+                    public void run() {
+                        final SmsMonitor.Sms sms = new SmsMonitor.Sms(cmd_id, "HEAT " + heater, null) {
+                            @Override
+                            boolean process_answer(Context context, String car_id, String text) {
+                                done.run();
+                                return super.process_answer(context, car_id, text);
+                            }
+                        };
+                        SmsMonitor.sendSMS(context, car_id, null, sms);
+                    }
+                }, null, long_tap);
+
+            }
+        });
+    }
+
+    static void heater_on(final Context context, final String car_id, boolean long_tap, boolean silent) {
+        heater_ctrl(context, car_id, long_tap, 2, 258, R.string.heater_on, silent);
+    }
+
+    static void heater_on_air(final Context context, final String car_id, boolean long_tap, boolean silent) {
+        heater_ctrl(context, car_id, long_tap, 1, 514, R.string.heater_air, silent);
+    }
+
+    static void heater_air(final Context context, final String car_id, boolean long_tap, boolean silent) {
+        heater_ctrl(context, car_id, long_tap, 3, 256, R.string.air, silent);
+    }
+
+    static void heater_off(final Context context, final String car_id, boolean long_tap, boolean silent) {
+        heater_ctrl(context, car_id, long_tap, 0, 257, R.string.heater_off, silent);
+    }
+
     static void rele1(final Context context, final String car_id, final boolean longTap) {
         selectRoute(context, car_id,
                 new Runnable() {
@@ -615,6 +695,7 @@ public class Actions {
                                     void user(Context context) {
                                         ok(context, 0);
                                     }
+
                                 };
                             }
                         });
@@ -1431,6 +1512,7 @@ public class Actions {
                     i = new Intent(context, FetchService.class);
                     i.putExtra(Names.ID, car_id);
                     context.startService(i);
+                    sent(context);
                 }
 
                 @Override
@@ -1464,12 +1546,15 @@ public class Actions {
                     }
                 }
             };
-            task.execute(COMMAND_URL, preferences.getString(Names.Car.AUTH + car_id, ""), ccode, type);
+            task.execute(COMMAND_URL, preferences.getString(Names.Car.AUTH + car_id, ""), type, "ccode", ccode);
         }
 
         abstract void error();
 
         abstract void ok(Context context, long when);
+
+        void sent(Context context) {
+        }
 
         void user(Context context) {
         }

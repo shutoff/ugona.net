@@ -37,6 +37,7 @@ public class State {
     static final int CMD_RELE2I = 1 << 7;
     static final int CMD_SOUND = 1 << 8;
     static final int CMD_SEARCH = 1 << 9;
+    static final int CMD_THERMOCODE = 1 << 10;
     static int telephony_state = 0;
 
     static public void appendLog(String text) {

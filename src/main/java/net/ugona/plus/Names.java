@@ -163,5 +163,7 @@ public final class Names {
 
         static final String DEVICE_PSWD = "device_paswd";
         static final String INPUTS = "inputs";
+
+        static final String HEATER = "heater";
     }
 }

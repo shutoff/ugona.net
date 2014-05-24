@@ -402,6 +402,7 @@
     <string-array name="heater_values">
         <item>РЕЛЕ 1</item>
         <item>РЕЛЕ 2</item>
+        <item>ThermoCode</item>
     </string-array>
     <string name="error">Ошибка</string>
     <string name="no_network">Сеть для передачи данных недоступна</string>
@@ -464,4 +465,8 @@
     <string name="temperature">Температура</string>
     <string name="use_gps">Использовать GPS</string>
     <string name="charts">Графики</string>
+    <string name="heater_on">Обогреватель без салона</string>
+    <string name="heater_air">Обогреватель с салоном</string>
+    <string name="heater_off">Выключить обогреватель</string>
+    <string name="air">Включить вентилятор</string>
 </resources>

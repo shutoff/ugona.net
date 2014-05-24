@@ -435,10 +435,12 @@
     <string-array name="heater">
         <item>1</item>
         <item>2</item>
+        <item>3</item>
     </string-array>
     <string-array name="heater_values">
         <item>RELE 1</item>
         <item>RELE 2</item>
+        <item>ThermoCode</item>
     </string-array>
     <string name="error">Error</string>
     <string name="no_network">Netwrok is not available</string>
@@ -517,4 +519,9 @@
     <string name="reserved">Reserved voltage</string>
     <string name="temperature">Temperature</string>
     <string name="charts">Charts</string>
+    <string name="heater_on">Heater without salon</string>
+    <string name="heater_air">Heater with salon</string>
+    <string name="heater_off">Heater off</string>
+    <string name="air">Salon fan</string>
+    <string name="thermocode">Thermocode</string>
 </resources>

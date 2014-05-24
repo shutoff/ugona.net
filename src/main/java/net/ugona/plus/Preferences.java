@@ -110,6 +110,8 @@ public class Preferences {
 
     static boolean getRele(SharedPreferences preferences, String car_id) {
         long delta = (new Date().getTime() - preferences.getLong(Names.Car.RELE_START + car_id, 0)) / 60000;
+        if (preferences.getString(Names.Car.CAR_RELE + car_id, "").equals("3") && (preferences.getInt(Names.Car.HEATER + car_id, 0) == 0))
+            return false;
         return delta < preferences.getInt(Names.Car.RELE_TIME + car_id, 30);
     }
 

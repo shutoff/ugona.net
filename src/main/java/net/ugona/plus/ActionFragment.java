@@ -140,6 +140,30 @@ public class ActionFragment extends Fragment
                     Actions.rele1(context, car_id, longTap);
                 }
             },
+            new Action(R.drawable.icon_heater, R.string.heater_on, State.CMD_THERMOCODE) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.heater_on(context, car_id, longTap, false);
+                }
+            },
+            new Action(R.drawable.icon_heater_air, R.string.heater_air, State.CMD_THERMOCODE) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.heater_on_air(context, car_id, longTap, false);
+                }
+            },
+            new Action(R.drawable.icon_air, R.string.air, State.CMD_THERMOCODE) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.heater_air(context, car_id, longTap, false);
+                }
+            },
+            new Action(R.drawable.icon_heater_on, R.string.heater_off, State.CMD_THERMOCODE) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.heater_off(context, car_id, longTap, false);
+                }
+            },
             new Action(R.drawable.rele1_on, R.string.rele1_on, State.CMD_RELE1, Names.Car.RELE1_NAME) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
@@ -298,6 +322,12 @@ public class ActionFragment extends Fragment
     void fill_actions() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         int flags = State.getCommands(preferences, car_id);
+        if ((flags & State.CMD_RELE) != 0) {
+            if (preferences.getString(Names.Car.CAR_RELE + car_id, "").equals("3")) {
+                flags |= State.CMD_THERMOCODE;
+                flags &= ~State.CMD_RELE;
+            }
+        }
         adapter.actions = new Vector<Action>();
         for (Action action : def_actions) {
             if ((action.flags > 0) && ((action.flags & flags) == 0))

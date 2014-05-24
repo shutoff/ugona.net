@@ -1,8 +1,10 @@
 package net.ugona.plus;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -18,10 +20,12 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -558,7 +562,12 @@ public class StateFragment extends Fragment
         }
         if (((commands & State.CMD_RELE) != 0) && !ignition) {
             vRele.setVisibility(View.VISIBLE);
-            pRele.setVisibility(SmsMonitor.isProcessed(car_id, R.string.rele) ? View.VISIBLE : View.GONE);
+            boolean processed = SmsMonitor.isProcessed(car_id, R.string.rele);
+            processed |= SmsMonitor.isProcessed(car_id, R.string.heater_on);
+            processed |= SmsMonitor.isProcessed(car_id, R.string.heater_off);
+            processed |= SmsMonitor.isProcessed(car_id, R.string.heater_air);
+            processed |= SmsMonitor.isProcessed(car_id, R.string.air);
+            pRele.setVisibility(processed ? View.VISIBLE : View.GONE);
             if (Preferences.getRele(preferences, car_id)) {
                 ivRele.setImageResource(R.drawable.icon_heater_on);
             } else {
@@ -857,7 +866,7 @@ public class StateFragment extends Fragment
         return false;
     }
 
-    void doCommand(View v, boolean longTap) {
+    void doCommand(View v, final boolean longTap) {
         if (v == vMotor) {
             boolean az = (Boolean) vMotor.getTag();
             if (az) {
@@ -877,6 +886,99 @@ public class StateFragment extends Fragment
             }
         }
         if (v == vRele) {
+            if (preferences.getString(Names.Car.CAR_RELE + car_id, "").equals("3")) {
+                if (SmsMonitor.isProcessed(car_id, R.string.heater_air)) {
+                    SmsMonitor.cancelSMS(getActivity(), car_id, R.string.heater_air);
+                    update(getActivity());
+                }
+                if (SmsMonitor.isProcessed(car_id, R.string.heater_on)) {
+                    SmsMonitor.cancelSMS(getActivity(), car_id, R.string.heater_on);
+                    update(getActivity());
+                }
+                if (SmsMonitor.isProcessed(car_id, R.string.air)) {
+                    SmsMonitor.cancelSMS(getActivity(), car_id, R.string.air);
+                    update(getActivity());
+                }
+                if (SmsMonitor.isProcessed(car_id, R.string.heater_off)) {
+                    SmsMonitor.cancelSMS(getActivity(), car_id, R.string.heater_off);
+                    update(getActivity());
+                }
+                final LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                final AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                        .setTitle(R.string.thermocode)
+                        .setNegativeButton(R.string.cancel, null)
+                        .setPositiveButton(R.string.ok, null)
+                        .setView(inflater.inflate(R.layout.heater, null))
+                        .create();
+                dialog.show();
+                final Spinner spinner = (Spinner) dialog.findViewById(R.id.heater);
+                final int[] values = {
+                        R.string.heater_on,
+                        R.string.heater_air,
+                        R.string.air,
+                        R.string.heater_off
+                };
+                spinner.setAdapter(new BaseAdapter() {
+                    @Override
+                    public int getCount() {
+                        return values.length;
+                    }
+
+                    @Override
+                    public Object getItem(int position) {
+                        return values[position];
+                    }
+
+                    @Override
+                    public long getItemId(int position) {
+                        return position;
+                    }
+
+                    @Override
+                    public View getView(int position, View convertView, ViewGroup parent) {
+                        View v = convertView;
+                        if (v == null)
+                            v = inflater.inflate(R.layout.list_item, null);
+                        TextView tvName = (TextView) v.findViewById(R.id.name);
+                        tvName.setText(getString(values[position]));
+                        return v;
+                    }
+
+                    @Override
+                    public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                        View v = convertView;
+                        if (v == null)
+                            v = inflater.inflate(R.layout.list_dropdown_item, null);
+                        TextView tvName = (TextView) v.findViewById(R.id.name);
+                        tvName.setText(getString(values[position]));
+                        return v;
+                    }
+                });
+                if (Preferences.getRele(preferences, car_id))
+                    spinner.setSelection(3);
+                dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int cmd = spinner.getSelectedItemPosition();
+                        dialog.dismiss();
+                        switch (cmd) {
+                            case 0:
+                                Actions.heater_on(getActivity(), car_id, longTap, true);
+                                break;
+                            case 1:
+                                Actions.heater_on_air(getActivity(), car_id, longTap, true);
+                                break;
+                            case 2:
+                                Actions.heater_air(getActivity(), car_id, longTap, true);
+                                break;
+                            case 3:
+                                Actions.heater_off(getActivity(), car_id, longTap, true);
+                                break;
+                        }
+                    }
+                });
+                return;
+            }
             if (SmsMonitor.isProcessed(car_id, R.string.rele)) {
                 SmsMonitor.cancelSMS(getActivity(), car_id, R.string.rele);
                 update(getActivity());

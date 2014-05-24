@@ -2,9 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.ugona.plus"
     android:versionCode="6"
-    android:versionName="1.5 RC7">
+    android:versionName="1.5 RC8">
 
-    <uses-sdk
+<uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="19" />
 
