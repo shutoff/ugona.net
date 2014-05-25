@@ -2,9 +2,12 @@ package net.ugona.plus;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Paint;
+import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.view.MotionEvent;
+import android.view.View;
 
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IGeoPoint;
@@ -19,6 +22,8 @@ import org.osmdroid.util.ResourceProxyImpl;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+
+import java.lang.reflect.Method;
 
 public class MapView extends org.osmdroid.views.MapView {
 
@@ -52,6 +57,15 @@ public class MapView extends org.osmdroid.views.MapView {
         }
 
         setBackgroundColor(getResources().getColor(R.color.caldroid_gray));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            try {
+                Method m = View.class.getMethod("setLayerType", int.class, Paint.class);
+                m.invoke(this, 0x01, null);
+            } catch (Throwable t) {
+                State.print(t);
+            }
+        }
     }
 
     static ITileSource createTileSource(Context ctx, SharedPreferences preferences) {

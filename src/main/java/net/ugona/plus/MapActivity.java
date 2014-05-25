@@ -923,7 +923,6 @@ public abstract class MapActivity extends ActionBarActivity {
                 }
                 mPath.close();
 
-                SafePaint mPaint = new SafePaint();
                 if (item.getUid().equals(car_id)) {
                     mPaint.setColor(Color.rgb(255, 0, 0));
                 } else {
