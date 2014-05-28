@@ -13,12 +13,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
@@ -60,16 +57,9 @@ import com.viewpagerindicator.TitlePageIndicator;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -126,6 +116,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+/*
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
@@ -162,6 +153,7 @@ public class MainActivity extends ActionBarActivity {
                             BufferedReader rd = new BufferedReader(new InputStreamReader(is));
                             String line;
                             StringBuffer response = new StringBuffer();
+                            response.append("Ugona net:\n");
                             while ((line = rd.readLine()) != null) {
                                 response.append(line);
                                 response.append('\r');
@@ -178,14 +170,7 @@ public class MainActivity extends ActionBarActivity {
                 task.execute(sw.toString());
             }
         });
-
-        try {
-            PackageManager pkgManager = getPackageManager();
-            PackageInfo info = pkgManager.getPackageInfo("net.ugona.plus", 0);
-            State.appendLog(Build.VERSION.RELEASE + " " + info.versionName);
-        } catch (Exception ex) {
-            // ignore
-        }
+*/
 
         try {
             ViewConfiguration config = ViewConfiguration.get(this);

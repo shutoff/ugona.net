@@ -63,7 +63,7 @@ public class MapView extends org.osmdroid.views.MapView {
                 Method m = View.class.getMethod("setLayerType", int.class, Paint.class);
                 m.invoke(this, 0x01, null);
             } catch (Throwable t) {
-                State.print(t);
+                t.printStackTrace();
             }
         }
     }

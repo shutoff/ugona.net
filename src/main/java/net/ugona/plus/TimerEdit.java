@@ -38,6 +38,8 @@ public class TimerEdit extends ActionBarActivity {
     int[] period_values;
     View vWeek;
     TextView tvTimes;
+    DeviceFragment.TimerCommands cmd;
+    Spinner vCmd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +54,14 @@ public class TimerEdit extends ActionBarActivity {
             ByteArrayInputStream bis = new ByteArrayInputStream(data);
             ObjectInput in = new ObjectInputStream(bis);
             timer = (SettingActivity.Timer) in.readObject();
+        } catch (Exception ex) {
+            // ignore
+        }
+        data = getIntent().getByteArrayExtra(Names.STATE);
+        try {
+            ByteArrayInputStream bis = new ByteArrayInputStream(data);
+            ObjectInput in = new ObjectInputStream(bis);
+            cmd = (DeviceFragment.TimerCommands) in.readObject();
         } catch (Exception ex) {
             // ignore
         }
@@ -185,6 +195,52 @@ public class TimerEdit extends ActionBarActivity {
         picker.setIs24HourView(DateFormat.is24HourFormat(this));
         picker.setCurrentHour(timer.hours);
         picker.setCurrentMinute(timer.minutes);
+
+        vCmd = (Spinner) findViewById(R.id.cmd);
+        if (cmd.size() > 1) {
+            vCmd.setVisibility(View.VISIBLE);
+            vCmd.setAdapter(new BaseAdapter() {
+                @Override
+                public int getCount() {
+                    return cmd.size();
+                }
+
+                @Override
+                public Object getItem(int position) {
+                    return cmd.get(position);
+                }
+
+                @Override
+                public long getItemId(int position) {
+                    return position;
+                }
+
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    View v = convertView;
+                    if (v == null) {
+                        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+                        v = inflater.inflate(R.layout.list_item, null);
+                    }
+                    TextView tv = (TextView) v.findViewById(R.id.name);
+                    tv.setText(cmd.get(position).name);
+                    return v;
+                }
+
+                @Override
+                public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                    View v = convertView;
+                    if (v == null) {
+                        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+                        v = inflater.inflate(R.layout.list_dropdown_item, null);
+                    }
+                    TextView tv = (TextView) v.findViewById(R.id.name);
+                    tv.setText(cmd.get(position).name);
+                    return v;
+                }
+            });
+            vCmd.setSelection(cmd.getPosition(timer.com));
+        }
     }
 
     @Override
@@ -253,6 +309,8 @@ public class TimerEdit extends ActionBarActivity {
         }
         timer.hours = picker.getCurrentHour();
         timer.minutes = picker.getCurrentMinute();
+        if (cmd.size() > 1)
+            timer.com = cmd.get(vCmd.getSelectedItemPosition()).id;
         Intent i = getIntent();
         try {
             byte[] data = null;

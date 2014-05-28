@@ -94,7 +94,6 @@ public abstract class HttpTask {
                         if (pos > 0)
                             error_text = error_text.substring(0, pos);
                     }
-                    State.print(ex);
                     ex.printStackTrace();
                 } finally {
                     if (reader != null) {
