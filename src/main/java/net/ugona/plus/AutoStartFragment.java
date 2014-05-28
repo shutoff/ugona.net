@@ -79,7 +79,7 @@ public class AutoStartFragment extends DeviceFragment {
             });
 
         TimerCommands cmd = new TimerCommands();
-        cmd.add(new TimerCommand(1, R.drawable.icon_motor_on, R.string.motor_on));
+        cmd.add(new TimerCommand(1, 0, R.string.motor_on));
         addTimers(cmd);
     }
 

@@ -450,10 +450,10 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
         Segment head = this.head;
         if (head.pos + byteCount > head.limit) {
             // If the string spans multiple segments, delegate to readBytes().
-            return new String(readByteArray(byteCount), charset);
+            return new String(readByteArray(byteCount));
         }
 
-        String result = new String(head.data, head.pos, (int) byteCount, charset);
+        String result = new String(head.data, head.pos, (int) byteCount);
         head.pos += byteCount;
         size -= byteCount;
 
@@ -597,7 +597,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
     public Buffer writeString(String string, Charset charset) {
         if (string == null) throw new IllegalArgumentException("string == null");
         if (charset == null) throw new IllegalArgumentException("charset == null");
-        byte[] data = string.getBytes(charset);
+        byte[] data = string.getBytes();
         return write(data, 0, data.length);
     }
 

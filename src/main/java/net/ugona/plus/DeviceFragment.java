@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.ByteArrayInputStream;
@@ -172,7 +173,7 @@ public class DeviceFragment extends SettingsFragment {
             for (SettingActivity.Timer timer : activity.timers) {
                 if (commands.getPosition(timer.com) < 0)
                     continue;
-                items.add(new TimerItem(timer));
+                items.add(new TimerItem(timer, commands));
             }
             items.add(new AddTimerItem(commands));
         }
@@ -352,10 +353,12 @@ public class DeviceFragment extends SettingsFragment {
 
         SettingActivity.Timer timer;
         TextView tvTime;
+        TimerCommands cmd;
 
-        TimerItem(SettingActivity.Timer t) {
+        TimerItem(SettingActivity.Timer t, TimerCommands commands) {
             super(R.string.timer, "");
             timer = t;
+            cmd = commands;
         }
 
         @Override
@@ -440,6 +443,16 @@ public class DeviceFragment extends SettingsFragment {
             TextView tvRepeat = (TextView) v.findViewById(R.id.repeat);
             String[] repeats = getResources().getStringArray(R.array.periods);
             tvRepeat.setText(repeats[pos]);
+            ImageView icon = (ImageView) v.findViewById(R.id.timer_icon);
+            icon.setVisibility(View.GONE);
+            int p = cmd.getPosition(timer.com);
+            if (p >= 0) {
+                TimerCommand c = cmd.get(p);
+                if (c.picture > 0) {
+                    icon.setImageResource(c.picture);
+                    icon.setVisibility(View.VISIBLE);
+                }
+            }
         }
 
         @Override
@@ -454,6 +467,13 @@ public class DeviceFragment extends SettingsFragment {
                 out.close();
                 bos.close();
                 i.putExtra(Names.TRACK, data);
+                bos = new ByteArrayOutputStream();
+                out = new ObjectOutputStream(bos);
+                out.writeObject(cmd);
+                data = bos.toByteArray();
+                out.close();
+                bos.close();
+                i.putExtra(Names.STATE, data);
             } catch (Exception ex) {
                 // ignore
             }

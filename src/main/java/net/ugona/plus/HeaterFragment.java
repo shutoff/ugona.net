@@ -10,6 +10,17 @@ public class HeaterFragment extends DeviceFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
+        fill();
+        return v;
+    }
+
+    @Override
+    void update() {
+        fill();
+        super.update();
+    }
+
+    void fill() {
         items.add(new SettingsFragment.ListItem(R.string.connection, R.array.heater_values, R.array.heater, Names.Car.CAR_RELE, "1"));
         items.add(new CheckBoxItem(R.string.impulse, Names.Car.RELE_IMPULSE, true));
         items.add(new SeekBarItem(R.string.heater_time, 13, 0, 255, R.string.minutes));
@@ -24,6 +35,5 @@ public class HeaterFragment extends DeviceFragment {
             cmd.add(new TimerCommand(4, R.drawable.icon_heater_on, R.string.heater_off));
         }
         addTimers(cmd);
-        return v;
     }
 }
