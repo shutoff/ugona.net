@@ -35,7 +35,7 @@ import java.util.Vector;
 public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTouchListener {
 
     final static String URL_HISTORY = "https://car-online.ugona.net/history?skey=$1&type=$2&begin=$3&end=$4";
-    final static long LOAD_INTERVAL = 5 * 86400 * 1000;
+    final static long LOAD_INTERVAL = 7 * 86400 * 1000;
     // Definition of the touch states
     static final int NONE = 0;
     int mode = NONE;
@@ -73,7 +73,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         setRangeValueFormat(new ValueFormat());
         getLegendWidget().setVisible(false);
         getGraphWidget().setMarginBottom(PixelUtils.dpToPix(16));
-        getGraphWidget().setMarginLeft(PixelUtils.dpToPix(8));
+        getGraphWidget().setMarginLeft(PixelUtils.dpToPix(14));
         markerPaint = new Paint();
         markerPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
         markerPaint.setColor(Color.rgb(255, 255, 0));
@@ -415,9 +415,10 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         public StringBuffer format(Object object, StringBuffer buffer, FieldPosition field) {
             double v = (Double) object;
             if (v10 >= 0) {
-                buffer.append((int) v + "");
+                buffer.append(String.format("%,d", (int) v));
             } else {
-                buffer.append(v + "");
+                String format = "%1$,." + (-v10) + "f";
+                buffer.append(String.format(format, v));
             }
             buffer.append(getUnits());
             return buffer;
