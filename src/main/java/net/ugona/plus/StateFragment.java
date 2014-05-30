@@ -560,7 +560,7 @@ public class StateFragment extends Fragment
         } else {
             vMotor.setVisibility(View.GONE);
         }
-        if (((commands & State.CMD_RELE) != 0) && !ignition) {
+        if (((commands & State.CMD_RELE) != 0) && (!ignition || preferences.getString(Names.Car.CAR_RELE + car_id, "1").equals("3"))) {
             vRele.setVisibility(View.VISIBLE);
             boolean processed = SmsMonitor.isProcessed(car_id, R.string.rele);
             processed |= SmsMonitor.isProcessed(car_id, R.string.heater_on);
