@@ -201,12 +201,11 @@ public class FetchService extends Service {
     boolean startRequest() {
         for (Map.Entry<String, ServerRequest> entry : requests.entrySet()) {
             if (entry.getValue().started)
-                return true;
-        }
-        for (Map.Entry<String, ServerRequest> entry : requests.entrySet()) {
+                continue;
             entry.getValue().start();
-            return true;
         }
+        if (requests.size() > 0)
+            return true;
         if (piUpdate == null) {
             Intent iUpdate = new Intent(this, FetchService.class);
             iUpdate.setAction(ACTION_UPDATE);

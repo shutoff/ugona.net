@@ -26,7 +26,7 @@ public abstract class HttpTask {
     static OkHttpClient createClient() {
         OkHttpClient client = new OkHttpClient();
         client.setConnectTimeout(15, TimeUnit.SECONDS);
-        client.setReadTimeout(60, TimeUnit.SECONDS);
+        client.setReadTimeout(40, TimeUnit.SECONDS);
         return client;
     }
 
