@@ -165,5 +165,7 @@ public final class Names {
         static final String INPUTS = "inputs";
 
         static final String HEATER = "heater";
+        static final String CARD = "card";
+        static final String CARD_NOTIFICATION = "card_notify";
     }
 }

@@ -524,4 +524,5 @@
     <string name="heater_off">Heater off</string>
     <string name="air">Salon fan</string>
     <string name="thermocode">Thermocode</string>
+    <string name="card_message">Security card in car</string>
 </resources>
