@@ -172,6 +172,7 @@ public class MainActivity extends ActionBarActivity {
         });
 */
 
+        Thread.currentThread().setContextClassLoader(this.getClassLoader());
         try {
             ViewConfiguration config = ViewConfiguration.get(this);
             Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
@@ -950,26 +951,30 @@ public class MainActivity extends ActionBarActivity {
         AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                Uri uri = Uri.parse("content://sms/inbox");
-                Cursor cur = getContentResolver().query(uri, new String[]{"_id", "address", "body"}, null, null, null);
-                auth_data = new Vector<AuthData>();
-                if (cur.moveToFirst()) {
-                    Pattern pat = Pattern.compile("www.car-online.ru \\(login:([A-Za-z0-9]+),password:([A-Za-z0-9]+)\\)");
-                    while (cur.moveToNext()) {
-                        try {
-                            String body = cur.getString(2);
-                            Matcher matcher = pat.matcher(body);
-                            if (!matcher.find())
-                                continue;
-                            AuthData auth = new AuthData();
-                            auth.phone = cur.getString(1);
-                            auth.login = matcher.group(1);
-                            auth.pass = matcher.group(2);
-                            auth_data.add(auth);
-                        } catch (Exception ex) {
-                            // ignore
+                try {
+                    Uri uri = Uri.parse("content://sms/inbox");
+                    Cursor cur = getContentResolver().query(uri, new String[]{"_id", "address", "body"}, null, null, null);
+                    auth_data = new Vector<AuthData>();
+                    if (cur.moveToFirst()) {
+                        Pattern pat = Pattern.compile("www.car-online.ru \\(login:([A-Za-z0-9]+),password:([A-Za-z0-9]+)\\)");
+                        while (cur.moveToNext()) {
+                            try {
+                                String body = cur.getString(2);
+                                Matcher matcher = pat.matcher(body);
+                                if (!matcher.find())
+                                    continue;
+                                AuthData auth = new AuthData();
+                                auth.phone = cur.getString(1);
+                                auth.login = matcher.group(1);
+                                auth.pass = matcher.group(2);
+                                auth_data.add(auth);
+                            } catch (Exception ex) {
+                                // ignore
+                            }
                         }
                     }
+                }catch (Exception ex){
+                    // ignore
                 }
                 return null;
             }
