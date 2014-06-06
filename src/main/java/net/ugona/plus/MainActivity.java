@@ -973,7 +973,7 @@ public class MainActivity extends ActionBarActivity {
                             }
                         }
                     }
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     // ignore
                 }
                 return null;

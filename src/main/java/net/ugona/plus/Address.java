@@ -182,18 +182,18 @@ public abstract class Address {
             db.execSQL("CREATE INDEX \"index_lat\" on address (Lat ASC)");
         }
 
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            db.execSQL("DROP TABLE IF EXISTS address");
+            onCreate(db);
+        }
+
         final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " ("
                 + "ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
                 + "Lat REAL NOT NULL, "
                 + "Lng REAL NOT NULL, "
                 + "Address TEXT NOT NULL, "
                 + "Param TEXT NOT NULL)";
-
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            db.execSQL("DROP TABLE IF EXISTS address");
-            onCreate(db);
-        }
 
 
     }
