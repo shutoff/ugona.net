@@ -39,6 +39,8 @@ public abstract class Address {
                 (lng - 0.001) + "",
                 (lng + 0.001) + ""
         };
+        if (address_db == null)
+            return null;
         Cursor cursor = address_db.query(TABLE_NAME, columns, "(Param = ?) AND (Lat BETWEEN ? AND ?) AND (Lng BETWEEN ? AND ?)", conditions, null, null, null, null);
         if (cursor.moveToFirst()) {
             for (; ; ) {

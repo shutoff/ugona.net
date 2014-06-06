@@ -35,7 +35,7 @@ import java.util.Vector;
 public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTouchListener {
 
     final static String URL_HISTORY = "https://car-online.ugona.net/history?skey=$1&type=$2&begin=$3&end=$4";
-    final static long LOAD_INTERVAL = 7 * 86400 * 1000;
+    final static long LOAD_INTERVAL = 5 * 86400 * 1000;
     // Definition of the touch states
     static final int NONE = 0;
     int mode = NONE;
