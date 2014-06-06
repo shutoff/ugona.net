@@ -150,8 +150,13 @@ public class CarDrawable {
         Drawable[] parts = new Drawable[count];
         int n = 0;
         for (int part : parts_id) {
-            if (part > 0)
-                parts[n++] = ctx.getResources().getDrawable(drawablesId[part - 1]);
+            if (part > 0) {
+                try {
+                    parts[n++] = ctx.getResources().getDrawable(drawablesId[part - 1]);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
         return new LayerDrawable(parts);
     }
