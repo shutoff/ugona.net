@@ -184,7 +184,7 @@ public class SettingActivity extends ActionBarActivity {
                         return;
                     adapter.notifyDataSetChanged();
                     if (az != new_az) {
-                        int index = adapter.fromID(4);
+                        int index = adapter.fromID(5);
                         if (new_az) {
                             actionBar.addTab(
                                     actionBar.newTab()
@@ -197,7 +197,7 @@ public class SettingActivity extends ActionBarActivity {
                         az = new_az;
                     }
                     if (rele != new_rele) {
-                        int index = adapter.fromID(5);
+                        int index = adapter.fromID(6);
                         if (new_rele) {
                             actionBar.addTab(
                                     actionBar.newTab()
@@ -819,16 +819,17 @@ public class SettingActivity extends ActionBarActivity {
         }
 
         void updateVisible() {
-            visible = new boolean[8];
+            visible = new boolean[9];
             visible[0] = true;
             visible[1] = true;
             visible[2] = true;
             visible[3] = true;
+            visible[4] = true;
             int commands = State.getCommands(preferences, car_id);
-            visible[4] = (commands & State.CMD_AZ) != 0;
-            visible[5] = (commands & State.CMD_RELE) != 0;
-            visible[6] = (Preferences.getTemperaturesCount(preferences, car_id) > 1);
-            visible[7] = (preferences.getFloat(Names.Car.LAT + car_id, 0) != 0) || (preferences.getFloat(Names.Car.LNG + car_id, 0) != 0);
+            visible[5] = (commands & State.CMD_AZ) != 0;
+            visible[6] = (commands & State.CMD_RELE) != 0;
+            visible[7] = (Preferences.getTemperaturesCount(preferences, car_id) > 1);
+            visible[8] = (preferences.getFloat(Names.Car.LAT + car_id, 0) != 0) || (preferences.getFloat(Names.Car.LNG + car_id, 0) != 0);
         }
 
         int toID(int pos) {
@@ -867,21 +868,24 @@ public class SettingActivity extends ActionBarActivity {
                     res = new NotificationFragment();
                     break;
                 case 2:
-                    res = new CommandsFragment();
+                    res = new WidgetsFragment();
                     break;
                 case 3:
-                    res = new DeviceSettingsFragment();
+                    res = new CommandsFragment();
                     break;
                 case 4:
-                    res = new AutoStartFragment();
+                    res = new DeviceSettingsFragment();
                     break;
                 case 5:
-                    res = new HeaterFragment();
+                    res = new AutoStartFragment();
                     break;
                 case 6:
-                    res = new TemperatureFragment();
+                    res = new HeaterFragment();
                     break;
                 case 7:
+                    res = new TemperatureFragment();
+                    break;
+                case 8:
                     res = new ZonesFragment();
                     break;
             }
@@ -906,16 +910,18 @@ public class SettingActivity extends ActionBarActivity {
                 case 1:
                     return getString(R.string.notifications);
                 case 2:
-                    return getString(R.string.commands);
+                    return getString(R.string.widgets);
                 case 3:
-                    return getString(R.string.device_settings);
+                    return getString(R.string.commands);
                 case 4:
-                    return getString(R.string.autostart);
+                    return getString(R.string.device_settings);
                 case 5:
-                    return getString(R.string.rele);
+                    return getString(R.string.autostart);
                 case 6:
-                    return getString(R.string.temp_sensors);
+                    return getString(R.string.rele);
                 case 7:
+                    return getString(R.string.temp_sensors);
+                case 8:
                     return getString(R.string.zones);
             }
             return null;

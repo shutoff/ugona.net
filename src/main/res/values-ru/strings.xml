@@ -470,4 +470,5 @@
     <string name="heater_off">Выключить обогреватель</string>
     <string name="air">Включить вентилятор</string>
     <string name="card_message">Возможно метка осталась в машине</string>
+    <string name="widgets">Виджеты</string>
 </resources>

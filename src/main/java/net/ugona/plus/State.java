@@ -4,10 +4,19 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Environment;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class State {
 
@@ -24,52 +33,8 @@ public class State {
     static final int CMD_THERMOCODE = 1 << 10;
     static int telephony_state = 0;
 
-/*
     static public void appendLog(String text) {
         Log.v("v", text);
-
-        AsyncTask<String, Void, Void> task = new AsyncTask<String, Void, Void>() {
-            @Override
-            protected Void doInBackground(String... urlParameters) {
-                try {
-                    URL url = new URL("https://car-online.ugona.net/log");
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    connection.setRequestMethod("POST");
-                    connection.setRequestProperty("Content-Type",
-                            "application/x-www-form-urlencoded");
-
-                    connection.setRequestProperty("Content-Length", "" +
-                            Integer.toString(urlParameters[0].getBytes().length));
-                    connection.setRequestProperty("Content-Language", "en-US");
-
-                    connection.setUseCaches(false);
-                    connection.setDoInput(true);
-                    connection.setDoOutput(true);
-
-                    //Send request
-                    DataOutputStream wr = new DataOutputStream(
-                            connection.getOutputStream());
-                    wr.writeBytes(urlParameters[0]);
-                    wr.flush();
-                    wr.close();
-
-                    //Get Response
-                    InputStream is = connection.getInputStream();
-                    BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-                    String line;
-                    StringBuffer response = new StringBuffer();
-                    while ((line = rd.readLine()) != null) {
-                        response.append(line);
-                        response.append('\r');
-                    }
-                    rd.close();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                return null;
-            }
-        };
-        task.execute(text);
 
         File logFile = Environment.getExternalStorageDirectory();
         logFile = new File(logFile, "car.log");
@@ -103,7 +68,6 @@ public class State {
         String s = sw.toString();
         appendLog(s);
     }
-*/
 
     static boolean isDebug() {
         return Build.FINGERPRINT.startsWith("generic");
