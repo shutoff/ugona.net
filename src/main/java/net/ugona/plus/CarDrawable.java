@@ -50,6 +50,7 @@ public class CarDrawable {
             R.drawable.block,               // 33
             R.drawable.heater,              // 34
             R.drawable.heater_blue,         // 35
+            R.drawable.warn                 // 36
     };
     static Bitmap bitmap;
     int[] parts_id;
@@ -128,6 +129,8 @@ public class CarDrawable {
                 state = white ? 30 : 28;
                 if (!big)
                     state++;
+                if (preferences.getLong(Names.Car.CARD + car_id, 0) < 0)
+                    state = 36;
             }
             if (guard0 && !guard1)
                 state = 32;
