@@ -74,12 +74,12 @@ public class StatFragment extends Fragment implements OnRefreshListener {
         vError.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getData();
+                getData(null);
             }
         });
         tvSummary = (TextView) v.findViewById(R.id.summary);
         lvStat = (ListView) v.findViewById(R.id.tracks);
-        getData();
+        getData(null);
         return v;
     }
 
@@ -178,17 +178,19 @@ public class StatFragment extends Fragment implements OnRefreshListener {
         }
     }
 
-    void getData() {
+    void getData(String refresh) {
         fetcher = new DataFetcher();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String api_key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
         Calendar cal = Calendar.getInstance();
         TimeZone tz = cal.getTimeZone();
-        fetcher.execute(STAT_URL, api_key, tz.getID());
+        fetcher.execute(STAT_URL, api_key, tz.getID(), "recalc", refresh);
         vProgress.setVisibility(View.VISIBLE);
         vLoading.setVisibility(View.VISIBLE);
         vError.setVisibility(View.GONE);
         lvStat.setVisibility(View.GONE);
+        vSpace.setVisibility(View.VISIBLE);
+        tvSummary.setText("");
     }
 
     void showError() {
@@ -226,6 +228,10 @@ public class StatFragment extends Fragment implements OnRefreshListener {
         Calendar cal = Calendar.getInstance();
         TimeZone tz = cal.getTimeZone();
         fetcher.execute(STAT_URL, api_key, tz.getID());
+    }
+
+    void recalc() {
+        getData("1");
     }
 
     static class Day {

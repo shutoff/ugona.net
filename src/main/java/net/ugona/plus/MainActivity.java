@@ -100,12 +100,14 @@ public class MainActivity extends ActionBarActivity {
     String car_id;
     Cars.Car[] cars;
     boolean show_date;
+    boolean show_stat;
     boolean pointer;
     boolean[] show_pages;
     LocalDate current;
     Menu topSubMenu;
     boolean active;
     StateFragment state_fragment;
+    StatFragment stat_fragment;
     CaldroidFragment caldroidFragment;
     Set<DateChangeListener> dateChangeListenerSet;
     GoogleCloudMessaging gcm;
@@ -283,7 +285,6 @@ public class MainActivity extends ActionBarActivity {
 
         if (savedInstanceState == null) {
             String phone = preferences.getString(Names.Car.CAR_PHONE + car_id, "");
-            String key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
             String auth = preferences.getString(Names.Car.AUTH + car_id, "");
 
             if (preferences.getString(Names.CARS, "").equals("") && (auth.equals(""))) {
@@ -427,6 +428,8 @@ public class MainActivity extends ActionBarActivity {
         } else {
             menu.removeItem(R.id.date);
         }
+        if (!show_stat)
+            menu.removeItem(R.id.recalc);
         if (!State.hasTelephony(this))
             menu.removeItem(R.id.passwd);
         return super.onCreateOptionsMenu(menu);
@@ -462,6 +465,24 @@ public class MainActivity extends ActionBarActivity {
             case R.id.passwd:
                 setPassword();
                 return true;
+            case R.id.recalc: {
+                final AlertDialog dialog = new AlertDialog.Builder(this)
+                        .setTitle(R.string.recalc_stat)
+                        .setMessage(R.string.recalc_message)
+                        .setNegativeButton(R.string.cancel, null)
+                        .setPositiveButton(R.string.ok, null)
+                        .create();
+                dialog.show();
+                dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (stat_fragment != null)
+                            stat_fragment.recalc();
+                        dialog.dismiss();
+                    }
+                });
+                return true;
+            }
 
 /*
             case R.id.log: {
@@ -502,7 +523,6 @@ public class MainActivity extends ActionBarActivity {
                                 caldroidFragment.dismiss();
                             }
                         };
-
                         setCaldroidListener(listener);
                     }
 
@@ -726,8 +746,10 @@ public class MainActivity extends ActionBarActivity {
         boolean new_show_date = (id == PAGE_PHOTO) || (id == PAGE_EVENT) || (id == PAGE_TRACK);
         if (pointer && (id == PAGE_EVENT))
             new_show_date = false;
-        if (new_show_date != show_date) {
+        boolean new_show_stat = (id == PAGE_STAT);
+        if ((new_show_date != show_date) || (new_show_stat != show_stat)) {
             show_date = new_show_date;
+            show_stat = new_show_stat;
             updateMenu();
         }
     }
@@ -1161,6 +1183,7 @@ public class MainActivity extends ActionBarActivity {
                 case PAGE_STAT: {
                     StatFragment fragment = new StatFragment();
                     fragment.car_id = car_id;
+                    stat_fragment = fragment;
                     return fragment;
                 }
             }

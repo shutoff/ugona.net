@@ -526,4 +526,9 @@
     <string name="thermocode">Thermocode</string>
     <string name="card_message">Security card in car</string>
     <string name="widgets">Widgets</string>
+    <string name="lock_widget">Lockscreen widget</string>
+    <string name="no_widgets">No widgets</string>
+    <string name="add_lock_widget">You can add widget on lockscreen</string>
+    <string name="recalc_stat">Recalc statistic</string>
+    <string name="recalc_message">Process of statics require some minutes</string>
 </resources>

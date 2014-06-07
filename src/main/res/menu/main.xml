@@ -7,6 +7,11 @@
         car:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/recalc"
+        android:title="@string/recalc_stat"
+        car:showAsAction="never" />
+
+    <item
         android:id="@+id/preferences"
         android:title="@string/preferences"
         car:showAsAction="never" />

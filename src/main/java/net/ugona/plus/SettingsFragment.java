@@ -131,6 +131,7 @@ public class SettingsFragment extends Fragment {
 
         Item(String n) {
             name = n;
+            value_ = "";
         }
 
         void click() {
@@ -159,6 +160,7 @@ public class SettingsFragment extends Fragment {
             v.findViewById(R.id.check_edit).setVisibility(View.GONE);
             v.findViewById(R.id.progress).setVisibility(View.GONE);
             v.findViewById(R.id.block_timer).setVisibility(View.GONE);
+            v.findViewById(R.id.block_widget).setVisibility(View.GONE);
         }
 
         String getValue() {

@@ -471,4 +471,9 @@
     <string name="air">Включить вентилятор</string>
     <string name="card_message">Возможно метка осталась в машине</string>
     <string name="widgets">Виджеты</string>
+    <string name="lock_widget">Виджет экрана блокировки</string>
+    <string name="no_widgets">Нет виджетов</string>
+    <string name="add_lock_widget">Вы можете добавить виджет на экран блокировки</string>
+    <string name="recalc_stat">Пересчитать статистику</string>
+    <string name="recalc_message">Процесс пересчета займет несколько минут</string>
 </resources>
