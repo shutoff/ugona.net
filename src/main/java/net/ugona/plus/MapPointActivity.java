@@ -80,6 +80,7 @@ public class MapPointActivity extends MapActivity {
             public void onReceive(Context context, Intent intent) {
                 try {
                     update();
+                    updateTrack();
                     stopTimer();
                     startTimer(false);
                 } catch (Exception ex) {
