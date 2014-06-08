@@ -267,8 +267,17 @@ public class MapPointActivity extends MapActivity {
                 ArrayList<TrackPoint> track = trackOverlay.tracks.get(trackOverlay.tracks.size() - 1);
                 if (track.size() > 0) {
                     TrackPoint point = track.get(track.size() - 1);
-                    lat = point.point.getLatitude();
-                    lng = point.point.getLongitude();
+                    long time = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
+                    if (point.time > time) {
+                        lat = point.point.getLatitude();
+                        lng = point.point.getLongitude();
+                    } else if (point.time < time) {
+                        TrackPoint p = new TrackPoint();
+                        p.time = time;
+                        p.speed = (int) preferences.getFloat(Names.Car.SPEED + car_id, 0);
+                        p.point = new GeoPoint(lat, lng);
+                        track.add(p);
+                    }
                 }
             }
         }
