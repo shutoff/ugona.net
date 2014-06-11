@@ -736,6 +736,10 @@ public class StateFragment extends Fragment
         String val = preferences.getString(Names.Car.VOLTAGE_RESERVED + car_id, "");
         try {
             double v = Double.parseDouble(val);
+            if (v == 0) {
+                vReserve.setVisibility(View.GONE);
+                return;
+            }
             val = String.format("%.2f", v);
         } catch (Exception ex) {
             // ignore

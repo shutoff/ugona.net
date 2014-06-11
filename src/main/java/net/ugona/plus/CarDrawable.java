@@ -130,7 +130,7 @@ public class CarDrawable {
                 state = white ? 30 : 28;
                 long guard_t = preferences.getLong(Names.Car.GUARD_TIME + car_id, 0);
                 long card_t = preferences.getLong(Names.Car.CARD + car_id, 0);
-                if ((guard_t < 0) && (card_t > 0))
+                if ((guard_t > 0) && (card_t > 0))
                     state = 36;
                 if (!big)
                     state++;
