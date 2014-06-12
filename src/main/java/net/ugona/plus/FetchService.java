@@ -320,7 +320,7 @@ public class FetchService extends Service {
                 return;
             }
             if (AUTH_ERROR.equals(error_text)) {
-                String auth = preferences.getString(Names.Car.AUTH, "");
+                String auth = preferences.getString(Names.Car.AUTH + car_id, "");
                 if (!auth.equals("")) {
                     HttpTask authTask = new HttpTask() {
                         @Override
@@ -495,6 +495,11 @@ public class FetchService extends Service {
                     ed.putBoolean(Names.Car.GUARD1 + car_id, false);
                 }
                 gps_valid = contact.get("gpsValid").asBoolean();
+
+                setDoor("door_front_left", contact, Names.Car.DOOR_FL);
+                setDoor("door_front_right", contact, Names.Car.DOOR_FR);
+                setDoor("door_back_left", contact, Names.Car.DOOR_BL);
+                setDoor("door_back_right", contact, Names.Car.DOOR_BR);
             }
 
             JsonValue voltage_value = res.get("voltage");
@@ -734,8 +739,7 @@ public class FetchService extends Service {
             } else {
                 long card_t = preferences.getLong(Names.Car.CARD + car_id, 0);
                 long guard_t = preferences.getLong(Names.Car.GUARD_TIME + car_id, 0);
-                State.appendLog(car_id + ", " + card_t + ", " + guard_t);
-                if ((card_t > 0) && (guard_t > 0)) {
+                if ((card_t > 0) && (guard_t > 0) && (card_t < guard_t)) {
                     long event_t = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
                     if (event_t - guard_t > CARD_TIME) {
                         if (preferences.getLong(Names.Car.CARD_EVENT + car_id, 0) != card_t) {
@@ -749,7 +753,7 @@ public class FetchService extends Service {
                         }
                     } else {
                         Intent iUpdate = new Intent(FetchService.this, FetchService.class);
-                        iUpdate.setAction(ACTION_UPDATE);
+                        iUpdate.setAction(ACTION_START);
                         iUpdate.putExtra(Names.ID, car_id);
                         Uri data = Uri.withAppendedPath(Uri.parse("http://service/update/"), car_id);
                         iUpdate.setData(data);
@@ -894,7 +898,7 @@ public class FetchService extends Service {
             }
             if ((notify_id != 0) && (next_time != 0)) {
                 Intent iUpdate = new Intent(FetchService.this, FetchService.class);
-                iUpdate.setAction(ACTION_UPDATE);
+                iUpdate.setAction(ACTION_START);
                 iUpdate.putExtra(Names.ID, car_id);
                 Uri data = Uri.withAppendedPath(Uri.parse("http://service/guard/"), car_id);
                 iUpdate.setData(data);
@@ -907,6 +911,16 @@ public class FetchService extends Service {
         void exec(String api_key) {
             sendUpdate(ACTION_START, car_id);
             execute(URL_STATUS, api_key, preferences.getLong(Names.Car.EVENT_TIME + car_id, 0));
+        }
+
+        void setDoor(String id, JsonObject contact, String key) throws ParseException {
+            JsonValue v = contact.get(id);
+            if (v == null) {
+                ed.remove(Names.Car.DOORS_4 + car_id);
+                return;
+            }
+            ed.putBoolean(key + car_id, v.asBoolean());
+            ed.putBoolean(Names.Car.DOORS_4 + car_id, true);
         }
 
         void setState(String id, JsonObject contact, String key, int msg, int inputs) throws ParseException {

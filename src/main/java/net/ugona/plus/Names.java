@@ -168,5 +168,11 @@ public final class Names {
         static final String CARD = "card";
         static final String CARD_NOTIFICATION = "card_notify";
         static final String CARD_EVENT = "card_event";
+
+        static final String DOORS_4 = "doors4_";
+        static final String DOOR_FL = "door_fl";
+        static final String DOOR_FR = "door_fr";
+        static final String DOOR_BL = "door_bl";
+        static final String DOOR_BR = "door_br";
     }
 }
