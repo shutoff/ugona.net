@@ -256,8 +256,8 @@ public class TrackActivity extends MapActivity {
         BoundingBoxE6 box = getMapView().getBoundingBox();
         double min_lat = box.getLatSouthE6() / 1000000.;
         double max_lat = box.getLatNorthE6() / 1000000.;
-        double min_lon = box.getLonEastE6() / 1000000.;
-        double max_lon = box.getLonWestE6() / 1000000.;
+        double min_lon = box.getLonWestE6() / 1000000.;
+        double max_lon = box.getLonEastE6() / 1000000.;
         try {
             File path = Environment.getExternalStorageDirectory();
             if (path == null)
@@ -278,6 +278,12 @@ public class TrackActivity extends MapActivity {
                     end = p.time;
                 }
             }
+            if ((begin == 0) || (end == 0)) {
+                Toast toast = Toast.makeText(this, R.string.no_points, Toast.LENGTH_SHORT);
+                toast.show();
+                return null;
+            }
+
             LocalDateTime d2 = new LocalDateTime(begin);
             LocalDateTime d1 = new LocalDateTime(end);
 

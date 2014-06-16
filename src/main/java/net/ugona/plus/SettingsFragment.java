@@ -156,6 +156,7 @@ public class SettingsFragment extends Fragment {
             v.findViewById(R.id.spinner).setVisibility(View.GONE);
             v.findViewById(R.id.seekbar).setVisibility(View.GONE);
             v.findViewById(R.id.v).setVisibility(View.GONE);
+            v.findViewById(R.id.v1).setVisibility(View.GONE);
             v.findViewById(R.id.title1).setVisibility(View.GONE);
             v.findViewById(R.id.check_edit).setVisibility(View.GONE);
             v.findViewById(R.id.progress).setVisibility(View.GONE);

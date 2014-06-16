@@ -1095,6 +1095,8 @@ public class StateFragment extends Fragment
     }
 
     void showHistory(String type) {
+        if (State.isPandora(preferences, car_id))
+            return;
         Intent intent = new Intent(getActivity(), HistoryActivity.class);
         intent.putExtra(Names.ID, car_id);
         intent.putExtra(Names.STATE, type);

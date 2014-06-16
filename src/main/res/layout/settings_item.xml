@@ -75,6 +75,13 @@
             android:layout_height="wrap_content"
             android:layout_weight="1" />
 
+        <TextView
+            android:id="@+id/v1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:paddingLeft="10dp" />
+
         <ImageView
             android:id="@+id/check_sms"
             android:layout_width="48dp"

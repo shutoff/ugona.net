@@ -96,11 +96,7 @@ public class CarDrawable {
                 String ignition_id = null;
                 if (!az && (preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false)))
                     ignition_id = guard ? "ignition_red" : (white ? "ignition_blue" : "ignition");
-                if (ignition_id == null) {
-                    upd |= setLayer(4);
-                } else {
-                    upd |= setLayer(4, ignition_id);
-                }
+                upd |= setLayer(4, ignition_id);
             }
 
             String state = null;
@@ -117,11 +113,7 @@ public class CarDrawable {
                 state = "valet";
             if (!guard0 && guard1)
                 state = "block";
-            if (state == null) {
-                upd |= setLayer(5);
-            } else {
-                upd |= setLayer(5, state);
-            }
+            upd |= setLayer(5, state);
         }
         return upd;
     }
@@ -181,10 +173,17 @@ public class CarDrawable {
     boolean setLayer(int n) {
         if (parts_id[n] == null)
             return false;
+        parts_id[n] = null;
         return true;
     }
 
     boolean setLayer(int n, String name) {
+        if (name == null) {
+            if (parts_id[n] == null)
+                return false;
+            parts_id[n] = null;
+            return true;
+        }
         if (parts_id[n] == null) {
             parts_id[n] = name;
             return true;

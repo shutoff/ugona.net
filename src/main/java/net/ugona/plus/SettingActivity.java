@@ -43,7 +43,7 @@ import java.util.Vector;
 public class SettingActivity extends ActionBarActivity {
 
     final static String UPDATE_SETTINGS = "net.ugona.plus.UPDATE_SETTINGS";
-    final static String URL_SETTINGS = "https://car-online.ugona.net/settings?auth=$1";
+    final static String URL_SETTINGS = "https://car-online.ugona.net/settings?auth=$1&skey=$2";
     final static String URL_SET = "https://car-online.ugona.net/set?auth=$1&v=$2";
     final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
 
@@ -462,7 +462,7 @@ public class SettingActivity extends ActionBarActivity {
                 sendUpdate();
             }
         };
-        task.execute(URL_SETTINGS, preferences.getString(Names.Car.AUTH + car_id, ""));
+        task.execute(URL_SETTINGS, preferences.getString(Names.Car.AUTH + car_id, ""), preferences.getString(Names.Car.CAR_KEY + car_id, ""));
 
         HttpTask version = new HttpTask() {
             @Override
@@ -821,15 +821,15 @@ public class SettingActivity extends ActionBarActivity {
         void updateVisible() {
             visible = new boolean[9];
             visible[0] = true;
-            visible[1] = true;
+            visible[1] = !State.isPandora(preferences, car_id);
             visible[2] = true;
             visible[3] = true;
             visible[4] = true;
             int commands = State.getCommands(preferences, car_id);
             visible[5] = (commands & State.CMD_AZ) != 0;
             visible[6] = (commands & State.CMD_RELE) != 0;
-            visible[7] = (Preferences.getTemperaturesCount(preferences, car_id) > 1);
-            visible[8] = (preferences.getFloat(Names.Car.LAT + car_id, 0) != 0) || (preferences.getFloat(Names.Car.LNG + car_id, 0) != 0);
+            visible[7] = !State.isPandora(preferences, car_id) && (Preferences.getTemperaturesCount(preferences, car_id) > 1);
+            visible[8] = !State.isPandora(preferences, car_id) && ((preferences.getFloat(Names.Car.LAT + car_id, 0) != 0) || (preferences.getFloat(Names.Car.LNG + car_id, 0) != 0));
         }
 
         int toID(int pos) {

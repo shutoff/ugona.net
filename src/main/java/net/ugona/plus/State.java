@@ -113,4 +113,11 @@ public class State {
         return res;
     }
 
+    static boolean isPandora(SharedPreferences preferences, String car_id) {
+        String key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
+        if (key.length() < 3)
+            return false;
+        return key.substring(0, 2).equals("P_");
+    }
+
 }

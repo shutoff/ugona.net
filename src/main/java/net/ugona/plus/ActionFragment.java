@@ -94,6 +94,7 @@ public class ActionFragment extends Fragment
                 }
             },
     };
+
     static Action[] def_actions = {
             new Action(R.drawable.icon_phone, R.string.call) {
                 @Override
@@ -267,6 +268,73 @@ public class ActionFragment extends Fragment
                 }
             },
     };
+
+    static Action[] pandora_actions = {
+            new Action(R.drawable.icon_phone, R.string.call) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                    Intent intent = new Intent(Intent.ACTION_CALL);
+                    intent.setData(Uri.parse("tel:" + preferences.getString(Names.Car.CAR_PHONE + car_id, "")));
+                    context.startActivity(intent);
+                }
+            },
+            new Action(R.drawable.icon_guard_on, R.string.guard_on) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+
+                }
+            },
+            new Action(R.drawable.icon_guard_off, R.string.guard_off) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+
+                }
+            },
+            new Action(R.drawable.icon_motor_on, R.string.motor_on, State.CMD_AZ) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+
+                }
+            },
+            new Action(R.drawable.icon_motor_off, R.string.motor_off, State.CMD_AZ) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+
+                }
+            },
+            new Action(R.drawable.icon_turbo_on, R.string.turbo_on) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+
+                }
+            },
+            new Action(R.drawable.icon_turbo_off, R.string.turbo_off) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+
+                }
+            },
+            new Action(R.drawable.icon_heater, R.string.rele, State.CMD_RELE) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+
+                }
+            },
+            new Action(R.drawable.icon_heater_on, R.string.heater_off, State.CMD_RELE) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+
+                }
+            },
+            new Action(R.drawable.sound, R.string.sound) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+
+                }
+            },
+    };
+
     String car_id;
     ActionAdapter adapter;
 
@@ -321,6 +389,17 @@ public class ActionFragment extends Fragment
 
     void fill_actions() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        adapter.actions = new Vector<Action>();
+        if (State.isPandora(preferences, car_id)) {
+            int flags = State.getCommands(preferences, car_id);
+            for (Action action : pandora_actions) {
+                if ((action.flags > 0) && ((action.flags & flags) == 0))
+                    continue;
+                adapter.actions.add(action);
+            }
+            return;
+        }
+
         int flags = State.getCommands(preferences, car_id);
         if ((flags & State.CMD_RELE) != 0) {
             if (preferences.getString(Names.Car.CAR_RELE + car_id, "").equals("3")) {
@@ -328,7 +407,6 @@ public class ActionFragment extends Fragment
                 flags &= ~State.CMD_RELE;
             }
         }
-        adapter.actions = new Vector<Action>();
         for (Action action : def_actions) {
             if ((action.flags > 0) && ((action.flags & flags) == 0))
                 continue;

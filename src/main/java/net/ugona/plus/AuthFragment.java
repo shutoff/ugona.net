@@ -87,7 +87,7 @@ public class AuthFragment extends SettingsFragment {
                 });
             }
         });
-        if (!preferences.getBoolean(Names.Car.POINTER + car_id, false)) {
+        if (!preferences.getBoolean(Names.Car.POINTER + car_id, false) && !State.isPandora(preferences, car_id)) {
             if (State.hasTelephony(getActivity())) {
                 items.add(new Item(R.string.main_phone, R.string.init_phone) {
                     @Override

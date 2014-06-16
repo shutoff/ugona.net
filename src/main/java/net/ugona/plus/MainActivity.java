@@ -432,6 +432,8 @@ public class MainActivity extends ActionBarActivity {
             menu.removeItem(R.id.recalc);
         if (!State.hasTelephony(this))
             menu.removeItem(R.id.passwd);
+        if (State.isPandora(preferences, car_id))
+            menu.removeItem(R.id.charts);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -597,6 +599,7 @@ public class MainActivity extends ActionBarActivity {
             car_id = id;
             setActionBar();
             update();
+            updateMenu();
             int current = getPagePosition(current_id);
             mViewPager.setCurrentItem(current);
             setShowDate(current);

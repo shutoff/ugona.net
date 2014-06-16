@@ -606,4 +606,11 @@
     <string name="e1702">Trunk open by phone</string>
     <string name="e1703">Trunk open by internet</string>
     <string name="e3700">Road rougness</string>
+    <string name="sound">Sound signal</string>
+    <string name="shock_sensor_secondary">Shock sensor: preliminary level</string>
+    <string name="shock_sensor_primary">Shock sensor: primary level</string>
+    <string name="move_sensor">Moving sensor</string>
+    <string name="ext_sensor_secondary">External sensor: preliminary level</string>
+    <string name="ext_sensor_primary">External sensor: primary level</string>
+    <string name="no_points">No points in selected area</string>
 </resources>

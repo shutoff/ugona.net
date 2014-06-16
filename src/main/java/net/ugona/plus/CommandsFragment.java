@@ -19,15 +19,19 @@ public class CommandsFragment extends SettingsFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
         items.add(new CheckBoxItem(R.string.call, State.CMD_CALL));
-        items.add(new CheckBoxItem(R.string.search, State.CMD_SEARCH));
-        items.add(new CheckBoxItem(R.string.valet_cmd, State.CMD_VALET));
+        if (!State.isPandora(preferences, car_id)) {
+            items.add(new CheckBoxItem(R.string.search, State.CMD_SEARCH));
+            items.add(new CheckBoxItem(R.string.valet_cmd, State.CMD_VALET));
+        }
         items.add(new CheckBoxItem(R.string.autostart, State.CMD_AZ));
         items.add(new CheckBoxItem(R.string.rele, State.CMD_RELE));
-        items.add(new CheckBoxItem(R.string.silent_mode, State.CMD_SOUND));
-        items.add(new CheckBoxEditItem(R.string.rele1, State.CMD_RELE1, Names.Car.RELE1_NAME));
-        items.add(new CheckBoxEditItem(R.string.rele1i, State.CMD_RELE1I, Names.Car.RELE1I_NAME));
-        items.add(new CheckBoxEditItem(R.string.rele2, State.CMD_RELE2, Names.Car.RELE2_NAME));
-        items.add(new CheckBoxEditItem(R.string.rele2i, State.CMD_RELE2I, Names.Car.RELE2I_NAME));
+        if (!State.isPandora(preferences, car_id)) {
+            items.add(new CheckBoxItem(R.string.silent_mode, State.CMD_SOUND));
+            items.add(new CheckBoxEditItem(R.string.rele1, State.CMD_RELE1, Names.Car.RELE1_NAME));
+            items.add(new CheckBoxEditItem(R.string.rele1i, State.CMD_RELE1I, Names.Car.RELE1I_NAME));
+            items.add(new CheckBoxEditItem(R.string.rele2, State.CMD_RELE2, Names.Car.RELE2_NAME));
+            items.add(new CheckBoxEditItem(R.string.rele2i, State.CMD_RELE2I, Names.Car.RELE2I_NAME));
+        }
         return v;
     }
 

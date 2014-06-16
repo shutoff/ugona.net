@@ -551,4 +551,11 @@
     <string name="e1702">Открытие багажника с телефона</string>
     <string name="e1703">Открытие багажника по команде с интернет-сервиса</string>
     <string name="e3700">Неровность дороги</string>
+    <string name="sound">Подача звукового сигнала</string>
+    <string name="shock_sensor_secondary">Датчик удара - предварительный уровень</string>
+    <string name="shock_sensor_primary">Датчик удара - основной уровень</string>
+    <string name="move_sensor">Датчик движения</string>
+    <string name="ext_sensor_secondary">Дополнительный датчик - предварительный уровень</string>
+    <string name="ext_sensor_primary">Дополнительный датчик - основной уровень</string>
+    <string name="no_points">Нет точек в выделенной области</string>
 </resources>
