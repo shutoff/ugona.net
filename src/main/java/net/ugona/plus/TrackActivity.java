@@ -329,8 +329,10 @@ public class TrackActivity extends MapActivity {
                     writer.append("<time>" + t.toString("yyyy-MM-dd'T'HH:mm:ss'Z") + "</time>\n");
                     writer.append("</trkpt>\n");
                 }
-                if (trk)
+                if (trk) {
+                    trk = false;
                     writer.append("</trkseg>");
+                }
             }
             writer.append("</trk>\n");
             writer.append("</gpx>");
