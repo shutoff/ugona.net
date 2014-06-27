@@ -42,7 +42,6 @@
     <string name="turbo_off">Turbo Off</string>
     <string name="turbo_on_sum">Start turbo mode</string>
     <string name="turbo_off_sum">Cancel turbo mode</string>
-    <string name="widget_name">Car alarm</string>
     <string name="empty_voltage">-- V</string>
     <string name="empty_balance">---.--</string>
     <string name="empty_temperature">-- °C</string>
@@ -177,7 +176,6 @@
     <string name="no_events">No events</string>
     <string name="unknown">unknown</string>
     <string name="cars">Cars</string>
-    <string name="cars_sum">Control your cars</string>
     <string name="new_car">New car</string>
     <string name="name">Name</string>
     <string name="car">Car</string>
@@ -259,7 +257,6 @@
     <string name="application">Application UGONA.NET+ works with MS-PGSM devices</string>
     <string name="service_btn">Service Ugona.net</string>
     <string name="forum_btn">Support forum</string>
-    <string name="log">Log state</string>
     <string name="balance">Balance</string>
     <string name="balance_request">Balance request</string>
     <string name="valet_warning">VALET mode ON</string>
@@ -347,8 +344,6 @@
     <string name="brake_off">Hand brake off</string>
     <string name="ps_guard">Guard with passengers is ON</string>
     <string name="time_warning">Long time no events from car</string>
-    <string name="demo">Demo mode</string>
-    <string name="demo_msg">Application is now running in demo mode</string>
     <string name="gsm_new">GSM sector changed</string>
     <string name="trace_point">Trace point</string>
     <string name="nondigits">Code is non digits</string>
@@ -451,12 +446,6 @@
     <string name="exit">Exit</string>
     <string name="notify_msg">Notifications come with some delay depend on device timer settings and phone data connection</string>
     <string name="command_name">Command name:</string>
-    <string name="sms_settings">Settings by SMS</string>
-    <string name="prior4">Disable shock sensor</string>
-    <string name="prior3">Disable light shock notifications</string>
-    <string name="prior1">Enable shock sensor</string>
-    <string name="inf_sms_yes">Enable send information SMS</string>
-    <string name="inf_sms_no">Disable send information SMS</string>
     <string name="device_phone_number">Device phone number</string>
     <string name="sound_off">Silent guard mode</string>
     <string name="sound_on">Silent guard mode OFF</string>

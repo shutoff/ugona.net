@@ -558,4 +558,47 @@
     <string name="ext_sensor_secondary">Дополнительный датчик - предварительный уровень</string>
     <string name="ext_sensor_primary">Дополнительный датчик - основной уровень</string>
     <string name="no_points">Нет точек в выделенной области</string>
+    <string name="empty_voltage">-- V</string>
+    <string name="empty_balance">---.--</string>
+    <string name="empty_temperature">-- °C</string>
+    <string name="google">Google</string>
+    <string name="osm">OSM</string>
+    <string name="copyright">© 2013-2014 Ugona.net, info@ugona.net</string>
+    <string-array name="alarm_mode_values">
+        <item>SMS</item>
+        <item>CALL</item>
+    </string-array>
+    <string-array name="balance_values">
+        <item>-1</item>
+        <item>10</item>
+        <item>50</item>
+        <item>100</item>
+        <item>200</item>
+        <item>300</item>
+    </string-array>
+    <string-array name="guard_entries">
+        <item>none</item>
+        <item>all</item>
+        <item></item>
+    </string-array>
+    <string-array name="ctrl_values">
+        <item></item>
+        <item>inet</item>
+    </string-array>
+    <string-array name="heater">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="period_values">
+        <item>7</item>
+        <item>0</item>
+        <item>6</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string name="thermocode">Thermocode</string>
 </resources>
