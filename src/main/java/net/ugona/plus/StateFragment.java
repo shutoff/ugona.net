@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -16,6 +17,12 @@ import android.os.CountDownTimer;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.method.ScrollingMovementMethod;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,7 +31,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,11 +55,7 @@ public class StateFragment extends Fragment
     String car_id;
     SharedPreferences preferences;
     CarView vCar;
-    View vAddress;
-    TextView tvTime;
-    TextView tvLocation;
-    TextView tvAddress2;
-    TextView tvAddress3;
+    TextView tvAddress;
     TextView tvLast;
     TextView tvVoltage;
     TextView tvReserve;
@@ -105,7 +107,10 @@ public class StateFragment extends Fragment
     View balanceBlock;
     View vMain;
     View vTime;
-    ScrollView svAddress;
+
+    String location;
+    String time;
+
     CarDrawable drawable;
     BroadcastReceiver br;
     View vPointer1;
@@ -132,13 +137,8 @@ public class StateFragment extends Fragment
 
         vCar = (CarView) v.findViewById(R.id.car);
 
-        vAddress = v.findViewById(R.id.address);
-        tvTime = (TextView) v.findViewById(R.id.addr_time);
-        tvLocation = (TextView) v.findViewById(R.id.location);
-        tvAddress2 = (TextView) v.findViewById(R.id.address2);
-        svAddress = (ScrollView) v.findViewById(R.id.addr_block);
+        tvAddress = (TextView) v.findViewById(R.id.addr);
 
-        tvAddress3 = (TextView) v.findViewById(R.id.address3);
         tvLast = (TextView) v.findViewById(R.id.last);
         tvVoltage = (TextView) v.findViewById(R.id.voltage);
         tvReserve = (TextView) v.findViewById(R.id.reserve);
@@ -236,19 +236,13 @@ public class StateFragment extends Fragment
 
         vTime = v.findViewById(R.id.time);
 
-        vAddress.setOnClickListener(new View.OnClickListener() {
+        tvAddress.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showMap();
             }
         });
-        View v_addr = v.findViewById(R.id.addr_data);
-        v_addr.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showMap();
-            }
-        });
+        tvAddress.setMovementMethod(new ScrollingMovementMethod());
 
         vTime.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -427,7 +421,8 @@ public class StateFragment extends Fragment
 
         double lat = preferences.getFloat(Names.Car.LAT + car_id, 0);
         double lon = preferences.getFloat(Names.Car.LNG + car_id, 0);
-        String location = "";
+
+        location = "";
         if ((lat == 0) && (lon == 0)) {
             String gsm_sector = preferences.getString(Names.Car.GSM_SECTOR + car_id, "");
             if (!gsm_sector.equals("")) {
@@ -449,7 +444,6 @@ public class StateFragment extends Fragment
             };
             req.get(getActivity(), lat, lon);
         }
-        tvLocation.setText(location);
 
         String balance = preferences.getString(Names.Car.BALANCE + car_id, "");
         if (!balance.equals("") && preferences.getBoolean(Names.Car.SHOW_BALANCE + car_id, true)) {
@@ -528,7 +522,7 @@ public class StateFragment extends Fragment
         }
 
         vCar.setDrawable(drawable.getDrawable(context, car_id));
-        String time = "";
+        time = "";
         long last_stand = preferences.getLong(Names.Car.LAST_STAND + car_id, 0);
         if (last_stand > 0) {
             LocalDateTime stand = new LocalDateTime(last_stand);
@@ -547,7 +541,7 @@ public class StateFragment extends Fragment
             if (speed > 0)
                 time += " " + speed + " " + getString(R.string.kmh) + " ";
         }
-        tvTime.setText(time);
+        updateAddress(null);
 
         int commands = State.getCommands(preferences, car_id);
         boolean block = !preferences.getBoolean(Names.Car.GUARD0 + car_id, false) && preferences.getBoolean(Names.Car.GUARD1 + car_id, false);
@@ -680,29 +674,44 @@ public class StateFragment extends Fragment
 
 
     void updateAddress(String addr) {
-        if (addr == null)
-            return;
-        String parts[] = addr.split(", ");
-        addr = parts[0];
-        int start = 2;
-        if (parts.length > 1)
-            addr += ", " + parts[1];
-        if (parts.length > 2) {
-            Matcher matcher = number_pattern.matcher(parts[2]);
-            if (matcher.matches()) {
-                addr += ", " + parts[2];
-                start++;
+        String str = location;
+        int span_start = 0;
+        int span_end = 0;
+        if (!time.equals(""))
+            str = time + " " + str;
+        if (addr != null) {
+            str += "\n";
+            span_start = str.length();
+            String parts[] = addr.split(", ");
+            str += parts[0];
+            int start = 2;
+            if (parts.length > 1)
+                str += ", " + parts[1];
+            if (parts.length > 2) {
+                Matcher matcher = number_pattern.matcher(parts[2]);
+                if (matcher.matches()) {
+                    str += ", " + parts[2];
+                    start++;
+                }
+            }
+            span_end = str.length();
+            str += "\n";
+            for (int i = start; i < parts.length; i++) {
+                if (i != start)
+                    str += ", ";
+                str += parts[i];
             }
         }
-        tvAddress2.setText(addr);
-        addr = "";
-        for (int i = start; i < parts.length; i++) {
-            if (!addr.equals(""))
-                addr += ", ";
-            addr += parts[i];
+        Spannable spannable = new SpannableString(str);
+        if (span_end > span_start) {
+            spannable.setSpan(new StyleSpan(Typeface.BOLD), span_start, span_end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.caldroid_holo_blue_light)), span_start, span_end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-        tvAddress3.setText(addr);
-        svAddress.scrollTo(0, 0);
+        if (!time.equals("")) {
+            spannable.setSpan(new StyleSpan(Typeface.BOLD), 0, time.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.caldroid_holo_blue_light)), 0, time.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        tvAddress.setText(spannable);
     }
 
     void updateZone(String zone) {
