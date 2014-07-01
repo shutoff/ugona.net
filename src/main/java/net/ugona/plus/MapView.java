@@ -73,7 +73,7 @@ public class MapView extends org.osmdroid.views.MapView {
             final String[] tiles_urls = {
                     "http://otile1.mqcdn.com/tiles/1.0.0/osm/"
             };
-            return new XYTileSource("mqcdn", ResourceProxy.string.mapnik, 1, 17, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
+            return new XYTileSource("mqcdn", ResourceProxy.string.mapnik, 1, 18, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
         }
         String locale = ctx.getResources().getConfiguration().locale.getLanguage();
         final String[] tiles_urls = {
@@ -82,7 +82,7 @@ public class MapView extends org.osmdroid.views.MapView {
                 "https://mt2.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo",
                 "https://mt3.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo"
         };
-        return new myTileSource("google_" + locale, ResourceProxy.string.mapnik, 1, 17, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
+        return new myTileSource("google_" + locale, ResourceProxy.string.mapnik, 1, 18, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
     }
 
     @Override

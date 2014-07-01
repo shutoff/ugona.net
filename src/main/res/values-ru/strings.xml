@@ -601,4 +601,5 @@
         <item>5</item>
     </string-array>
     <string name="thermocode">Thermocode</string>
+    <string name="lost">Связь с автомобилем потеряна</string>
 </resources>

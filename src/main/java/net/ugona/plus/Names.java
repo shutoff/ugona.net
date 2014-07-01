@@ -56,21 +56,9 @@ public final class Names {
         static final String RELAY3 = "relay3_";
         static final String RELAY4 = "relay4_";
 
-        static final String GUARD_NOTIFY = "ps_notify_";
-        static final String TIME_NOTIFY = "time_notify_";
-
         static final String AZ = "az_";
         static final String AZ_START = "az_start";
         static final String AZ_STOP = "az_stop";
-
-        static final String BALANCE_NOTIFICATION = "balance_id";
-
-        static final String MOTOR_ON_NOTIFY = "motor_on_notify_";
-        static final String MOTOR_OFF_NOTIFY = "motor_off_notify_";
-
-        static final String VALET_ON_NOTIFY = "valet_on_notify_";
-        static final String VALET_OFF_NOTIFY = "valet_off_notify_";
-        static final String VOLTAGE_NOTIFY = "voltage_notify_";
 
         static final String CAR_PHONE = "phone";
         static final String CAR_KEY = "apikey";
@@ -103,7 +91,6 @@ public final class Names {
         static final String N_IDS = "n_ids";
 
         static final String ACTIVE_ZONE = "active_zone_";
-        static final String ZONE_NOTIFY = "zone_notify_";
 
         static final String COMMANDS = "commands_";
         static final String RELE_TIME = "rele_time";
@@ -143,7 +130,6 @@ public final class Names {
         static final String VOLTAGE_SHIFT = "VoltageShift";
 
         static final String TIMEOUT = "timeout";
-        static final String TIMEOUT_NOTIFICATION = "timeout_id";
 
         static final String ZONE_INFO = "zone_info";
         static final String TIMERS_INFO = "timers";
@@ -166,7 +152,6 @@ public final class Names {
 
         static final String HEATER = "heater";
         static final String CARD = "card";
-        static final String CARD_NOTIFICATION = "card_notify";
         static final String CARD_EVENT = "card_event";
 
         static final String DOORS_4 = "doors4_";
@@ -174,5 +159,23 @@ public final class Names {
         static final String DOOR_FR = "door_fr";
         static final String DOOR_BL = "door_bl";
         static final String DOOR_BR = "door_br";
+
+        static final String LOST = "lost";
+
+        static final String VALET_ON_NOTIFY = "valet_on_notify_";
+    }
+
+    public final class Notify {
+        static final String GUARD = "ps_notify_";
+        static final String BALANCE = "balance_id";
+        static final String MOTOR_ON = "motor_on_notify_";
+        static final String MOTOR_OFF = "motor_off_notify_";
+        static final String VALET_ON = "valet_on_notify_";
+        static final String VALET_OFF = "valet_off_notify_";
+        static final String VOLTAGE = "voltage_notify_";
+        static final String TIMEOUT = "timeout_id";
+        static final String CARD = "card_notify";
+        static final String LOST = "lost_notify_";
+        static final String ZONE = "zone_notify_";
     }
 }

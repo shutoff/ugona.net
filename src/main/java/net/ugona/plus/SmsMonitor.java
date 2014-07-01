@@ -13,10 +13,13 @@ import android.telephony.SmsMessage;
 import android.widget.Toast;
 
 import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDateTime;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SmsMonitor extends BroadcastReceiver {
 
@@ -50,6 +53,9 @@ public class SmsMonitor extends BroadcastReceiver {
             "Remote Engine Start OK",
             "MOTOR OFF OK",
     };
+
+    static Pattern lostChannel = Pattern.compile("\\[(.*)\\] Lost control channel in ([0-9]{4})\\.([0-9]{2})\\.([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})");
+    static Pattern restoreChannel = Pattern.compile("\\[(.*)\\] Restored control channel in ([0-9]{4})\\.([0-9]{2})\\.([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})");
 
     static boolean compareNumbers(String config, String from) {
         if (config.length() == 4)
@@ -284,9 +290,51 @@ public class SmsMonitor extends BroadcastReceiver {
             for (String car : cars) {
                 String phone_config = preferences.getString(Names.Car.CAR_PHONE + car, "");
                 if (compareNumbers(phone_config, sms_from) || State.isDebug()) {
-                    if (processCarMessage(context, body, car))
+                    if (processCarMessage(context, body, car)) {
                         abortBroadcast();
-                    return;
+                        return;
+                    }
+                }
+            }
+            body = "[car48412] Lost control channel in 2014.06.30 23:14:00";
+            boolean restore = false;
+            Matcher matcher = lostChannel.matcher(body);
+            if (!matcher.matches()) {
+                restore = true;
+                matcher = restoreChannel.matcher(body);
+            }
+            if (matcher.matches()) {
+                String login = matcher.group(1);
+                for (String car : cars) {
+                    String car_login = preferences.getString(Names.Car.LOGIN + car, "");
+                    if (car_login.equals(login)) {
+                        int year = Integer.parseInt(matcher.group(2));
+                        int month = Integer.parseInt(matcher.group(3));
+                        int day = Integer.parseInt(matcher.group(4));
+                        int hour = Integer.parseInt(matcher.group(5));
+                        int min = Integer.parseInt(matcher.group(6));
+                        int sec = Integer.parseInt(matcher.group(7));
+                        LocalDateTime time = new LocalDateTime(year, month, day, hour, min, sec);
+                        SharedPreferences.Editor ed = preferences.edit();
+                        if (restore) {
+                            ed.remove(Names.Car.LOST + car);
+                            int id = preferences.getInt(Names.Notify.LOST + car, 0);
+                            if (id > 0) {
+                                ed.remove(Names.Notify.LOST + car);
+                                Alarm.removeNotification(context, car, id);
+                            }
+                        } else {
+                            ed.putLong(Names.Car.LOST + car, time.toDate().getTime());
+                            int id = Alarm.createNotification(context, context.getString(R.string.lost), R.drawable.warning, car, null, time.toDate().getTime());
+                            ed.putInt(Names.Notify.LOST + car, id);
+                        }
+                        ed.commit();
+                        Intent i = new Intent(FetchService.ACTION_UPDATE_FORCE);
+                        i.putExtra(Names.ID, car);
+                        context.sendBroadcast(i);
+                        abortBroadcast();
+                        return;
+                    }
                 }
             }
         }

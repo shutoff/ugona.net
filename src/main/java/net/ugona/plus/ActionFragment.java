@@ -213,13 +213,13 @@ public class ActionFragment extends Fragment
                     Actions.block_motor(context, car_id);
                 }
             },
-            new Action(R.drawable.sound_off, R.string.sound_off) {
+            new Action(R.drawable.sound_off, R.string.sound_off, true) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
                     Actions.sound_off(context, car_id);
                 }
             },
-            new Action(R.drawable.sound, R.string.sound_on) {
+            new Action(R.drawable.sound, R.string.sound_on, true) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
                     Actions.sound_on(context, car_id);

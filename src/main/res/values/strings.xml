@@ -602,4 +602,5 @@
     <string name="ext_sensor_secondary">External sensor: preliminary level</string>
     <string name="ext_sensor_primary">External sensor: primary level</string>
     <string name="no_points">No points in selected area</string>
+    <string name="lost">Lost control channel</string>
 </resources>

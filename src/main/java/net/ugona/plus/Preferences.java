@@ -126,21 +126,21 @@ public class Preferences {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         int limit = preferences.getInt(Names.Car.LIMIT + car_id, 50);
         if (limit >= 0) {
-            int balance_id = preferences.getInt(Names.Car.BALANCE_NOTIFICATION + car_id, 0);
+            int balance_id = preferences.getInt(Names.Notify.BALANCE + car_id, 0);
             try {
                 double value = Double.parseDouble(preferences.getString(Names.Car.BALANCE + car_id, ""));
                 if (value <= limit) {
                     if (balance_id == 0) {
                         SharedPreferences.Editor ed = preferences.edit();
                         balance_id = Alarm.createNotification(context, context.getString(R.string.low_balance), R.drawable.white_balance, car_id, null, 0);
-                        ed.putInt(Names.Car.BALANCE_NOTIFICATION + car_id, balance_id);
+                        ed.putInt(Names.Notify.BALANCE + car_id, balance_id);
                         ed.commit();
                     }
                 } else {
                     if (balance_id > 0) {
                         SharedPreferences.Editor ed = preferences.edit();
                         Alarm.removeNotification(context, car_id, balance_id);
-                        ed.remove(Names.Car.BALANCE_NOTIFICATION + car_id);
+                        ed.remove(Names.Notify.BALANCE + car_id);
                         ed.commit();
                     }
                 }

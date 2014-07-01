@@ -624,7 +624,7 @@ public class MainActivity extends ActionBarActivity {
         String n_ids = preferences.getString(Names.Car.N_IDS + car_id, "");
         if (n_ids.equals(""))
             return;
-        int id_valet_on = preferences.getInt(Names.Car.VALET_ON_NOTIFY + car_id, 0);
+        int id_valet_on = preferences.getInt(Names.Notify.VALET_ON + car_id, 0);
         String[] ids = n_ids.split(",");
         for (String id : ids) {
             try {
@@ -641,12 +641,17 @@ public class MainActivity extends ActionBarActivity {
         } else {
             ed.remove(Names.Car.N_IDS + car_id);
         }
-        ed.remove(Names.Car.BALANCE_NOTIFICATION + car_id);
-        ed.remove(Names.Car.GUARD_NOTIFY + car_id);
-        ed.remove(Names.Car.MOTOR_ON_NOTIFY + car_id);
-        ed.remove(Names.Car.MOTOR_OFF_NOTIFY + car_id);
-        ed.remove(Names.Car.VALET_OFF_NOTIFY + car_id);
-        ed.remove(Names.Car.ZONE_NOTIFY + car_id);
+        Field[] fields = Names.Notify.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (!java.lang.reflect.Modifier.isStatic(f.getModifiers()))
+                continue;
+            try {
+                String val = (String) f.get(Names.Notify.class);
+                ed.remove(val + car_id);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         ed.commit();
     }
 

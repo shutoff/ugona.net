@@ -482,20 +482,25 @@ public class StateFragment extends Fragment
             vLevel.setVisibility(View.GONE);
         } else {
             vLevel.setVisibility(View.VISIBLE);
-            if (level > -51) {
-                ivLevel.setImageResource(R.drawable.gsm_level5);
-            } else if (level > -65) {
-                ivLevel.setImageResource(R.drawable.gsm_level4);
-            } else if (level > -77) {
-                ivLevel.setImageResource(R.drawable.gsm_level3);
-            } else if (level > -91) {
-                ivLevel.setImageResource(R.drawable.gsm_level2);
-            } else if (level > -105) {
-                ivLevel.setImageResource(R.drawable.gsm_level1);
+            if (preferences.getLong(Names.Car.LOST + car_id, 0) > preferences.getLong(Names.Car.EVENT_TIME + car_id, 0)) {
+                ivLevel.setImageResource(R.drawable.gsm_level);
+                tvLevel.setText("--");
             } else {
-                ivLevel.setImageResource(R.drawable.gsm_level0);
+                if (level > -51) {
+                    ivLevel.setImageResource(R.drawable.gsm_level5);
+                } else if (level > -65) {
+                    ivLevel.setImageResource(R.drawable.gsm_level4);
+                } else if (level > -77) {
+                    ivLevel.setImageResource(R.drawable.gsm_level3);
+                } else if (level > -91) {
+                    ivLevel.setImageResource(R.drawable.gsm_level2);
+                } else if (level > -105) {
+                    ivLevel.setImageResource(R.drawable.gsm_level1);
+                } else {
+                    ivLevel.setImageResource(R.drawable.gsm_level0);
+                }
+                tvLevel.setText(level + " dBm");
             }
-            tvLevel.setText(level + " dBm");
         }
 
         updateReserveVoltage(tvReserve, preferences.getBoolean(Names.Car.RESERVE_NORMAL + car_id, true));

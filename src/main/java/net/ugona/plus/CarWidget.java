@@ -75,7 +75,8 @@ public class CarWidget extends AppWidgetProvider {
                     R.drawable.gsm_level2,
                     R.drawable.gsm_level3,
                     R.drawable.gsm_level4,
-                    R.drawable.gsm_level5
+                    R.drawable.gsm_level5,
+                    R.drawable.gsm_level
             },
             {
                     R.drawable.gsm_level0_white,
@@ -83,7 +84,8 @@ public class CarWidget extends AppWidgetProvider {
                     R.drawable.gsm_level2_white,
                     R.drawable.gsm_level3_white,
                     R.drawable.gsm_level4_white,
-                    R.drawable.gsm_level5_white
+                    R.drawable.gsm_level5_white,
+                    R.drawable.gsm_level_white
             }
     };
     static CarDrawable drawable;
@@ -359,6 +361,9 @@ public class CarWidget extends AppWidgetProvider {
                 int level = preferences.getInt(Names.Car.GSM_DB + car_id, 0);
                 if (level == 0) {
                     show_level = false;
+                } else if (preferences.getLong(Names.Car.LOST + car_id, 0) > preferences.getLong(Names.Car.EVENT_TIME + car_id, 0)) {
+                    widgetView.setImageViewResource(R.id.level_img, id_gsm_level[theme][6]);
+                    widgetView.setTextViewText(R.id.level, "--");
                 } else {
                     int index = 0;
                     if (level > -51) {

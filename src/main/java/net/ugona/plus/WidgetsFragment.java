@@ -1,6 +1,7 @@
 package net.ugona.plus;
 
 import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -39,6 +40,9 @@ public class WidgetsFragment extends SettingsFragment {
             int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
             for (int appWidgetID : ids) {
+                AppWidgetProviderInfo info = appWidgetManager.getAppWidgetInfo(appWidgetID);
+                if (info == null)
+                    continue;
                 if (preferences.getString(Names.WIDGET + appWidgetID, "").equals(car_id)) {
                     items.add(new WidgetItem("", appWidgetID, false));
                 }
@@ -51,6 +55,9 @@ public class WidgetsFragment extends SettingsFragment {
             ids = appWidgetManager.getAppWidgetIds(thisAppWidget);
             boolean is_lock = false;
             for (int appWidgetID : ids) {
+                AppWidgetProviderInfo info = appWidgetManager.getAppWidgetInfo(appWidgetID);
+                if (info == null)
+                    continue;
                 if (preferences.getString(Names.WIDGET + appWidgetID, "").equals(car_id)) {
                     items.add(new WidgetItem(getString(R.string.lock_widget), appWidgetID, true));
                     is_lock = true;

@@ -25,6 +25,7 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -251,20 +252,19 @@ public class FetchService extends Service {
             res += n_id;
         }
         SharedPreferences.Editor ed = preferences.edit();
-        if (id == preferences.getInt(Names.Car.BALANCE_NOTIFICATION + car_id, 0))
-            ed.remove(Names.Car.BALANCE_NOTIFICATION + car_id);
-        if (id == preferences.getInt(Names.Car.GUARD_NOTIFY + car_id, 0))
-            ed.remove(Names.Car.GUARD_NOTIFY + car_id);
-        if (id == preferences.getInt(Names.Car.MOTOR_ON_NOTIFY + car_id, 0))
-            ed.remove(Names.Car.MOTOR_ON_NOTIFY + car_id);
-        if (id == preferences.getInt(Names.Car.MOTOR_OFF_NOTIFY + car_id, 0))
-            ed.remove(Names.Car.MOTOR_OFF_NOTIFY + car_id);
-        if (id == preferences.getInt(Names.Car.VALET_ON_NOTIFY + car_id, 0))
-            ed.remove(Names.Car.VALET_ON_NOTIFY + car_id);
-        if (id == preferences.getInt(Names.Car.VALET_OFF_NOTIFY + car_id, 0))
-            ed.remove(Names.Car.VALET_OFF_NOTIFY + car_id);
-        if (id == preferences.getInt(Names.Car.ZONE_NOTIFY + car_id, 0))
-            ed.remove(Names.Car.ZONE_NOTIFY + car_id);
+        Field[] fields = Names.Notify.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (!java.lang.reflect.Modifier.isStatic(f.getModifiers()))
+                continue;
+            try {
+                String val = (String) f.get(Names.Notify.class);
+                if (preferences.getInt(val + car_id, 0) == id)
+                    ed.remove(val + car_id);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
         if (res == null) {
             ed.remove(Names.Car.N_IDS + car_id);
         } else {
@@ -420,6 +420,14 @@ public class FetchService extends Service {
             }
             ed = preferences.edit();
             ed.putLong(Names.Car.EVENT_TIME + car_id, time.asLong());
+            if (time.asLong() > preferences.getLong(Names.Car.LOST + car_id, 0)) {
+                int lost_id = preferences.getInt(Names.Notify.LOST + car_id, 0);
+                if (lost_id > 0) {
+                    Alarm.removeNotification(FetchService.this, car_id, lost_id);
+                    ed.remove(Names.Notify.LOST + car_id);
+                }
+            }
+
             JsonValue first_time = res.get("first_time");
             if (first_time != null)
                 ed.putLong(Names.Car.FIRST_TIME + car_id, first_time.asLong());
@@ -649,7 +657,7 @@ public class FetchService extends Service {
                 if (valet != prev_valet) {
                     SmsMonitor.processMessageFromApi(FetchService.this, car_id, valet ? R.string.valet_on : R.string.valet_off, 0);
                     if (valet) {
-                        int id = preferences.getInt(Names.Car.VALET_OFF_NOTIFY + car_id, 0);
+                        int id = preferences.getInt(Names.Notify.VALET_OFF + car_id, 0);
                         if (id != 0)
                             Actions.done_valet_on(FetchService.this, car_id);
                     } else {
@@ -692,7 +700,7 @@ public class FetchService extends Service {
                     SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_on);
                 }
                 if (!processed &&
-                        ((preferences.getInt(Names.Car.MOTOR_ON_NOTIFY + car_id, 0) != 0) || (preferences.getInt(Names.Car.MOTOR_OFF_NOTIFY + car_id, 0) != 0))) {
+                        ((preferences.getInt(Names.Notify.MOTOR_ON + car_id, 0) != 0) || (preferences.getInt(Names.Notify.MOTOR_OFF + car_id, 0) != 0))) {
                     if (az.asBoolean()) {
                         Actions.done_motor_on(FetchService.this, car_id, 0);
                     } else {
@@ -722,16 +730,16 @@ public class FetchService extends Service {
             }
 
             if (!preferences.getBoolean(Names.Car.GUARD + car_id, false)) {
-                int id = preferences.getInt(Names.Car.MOTOR_OFF_NOTIFY + car_id, 0);
+                int id = preferences.getInt(Names.Notify.MOTOR_OFF + car_id, 0);
                 if (id != 0) {
                     Alarm.removeNotification(FetchService.this, car_id, id);
-                    ed.remove(Names.Car.MOTOR_OFF_NOTIFY + car_id);
+                    ed.remove(Names.Notify.MOTOR_OFF + car_id);
                     ed.commit();
                 }
-                id = preferences.getInt(Names.Car.MOTOR_ON_NOTIFY + car_id, 0);
+                id = preferences.getInt(Names.Notify.MOTOR_ON + car_id, 0);
                 if (id != 0) {
                     Alarm.removeNotification(FetchService.this, car_id, id);
-                    ed.remove(Names.Car.MOTOR_ON_NOTIFY + car_id);
+                    ed.remove(Names.Notify.MOTOR_ON + car_id);
                     ed.commit();
                 }
                 SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_on);
@@ -744,10 +752,10 @@ public class FetchService extends Service {
                     if (event_t - guard_t > CARD_TIME) {
                         if (preferences.getLong(Names.Car.CARD_EVENT + car_id, 0) != card_t) {
                             ed.putLong(Names.Car.CARD_EVENT + car_id, card_t);
-                            int card_id = preferences.getInt(Names.Car.CARD_NOTIFICATION + car_id, 0);
+                            int card_id = preferences.getInt(Names.Notify.CARD + car_id, 0);
                             if (card_id == 0) {
                                 card_id = Alarm.createNotification(FetchService.this, getString(R.string.card_message), R.drawable.warning, car_id, null, 0);
-                                ed.putInt(Names.Car.CARD_NOTIFICATION + car_id, card_id);
+                                ed.putInt(Names.Notify.CARD + car_id, card_id);
                             }
                             ed.commit();
                         }
@@ -763,12 +771,12 @@ public class FetchService extends Service {
                 }
             }
 
-            int card_id = preferences.getInt(Names.Car.CARD_NOTIFICATION + car_id, 0);
+            int card_id = preferences.getInt(Names.Notify.CARD + car_id, 0);
             if (card_id != 0) {
                 long card_t = preferences.getLong(Names.Car.CARD + car_id, 0);
                 if (!preferences.getBoolean(Names.Car.GUARD + car_id, false) || (card_t <= 0)) {
                     Alarm.removeNotification(FetchService.this, car_id, card_id);
-                    ed.remove(Names.Car.CARD_NOTIFICATION + car_id);
+                    ed.remove(Names.Notify.CARD + car_id);
                     ed.commit();
                 }
             }
@@ -778,18 +786,18 @@ public class FetchService extends Service {
                 boolean new_state = ((now - time.asLong()) > 25 * 60 * 60 * 1000);
                 if (new_state != preferences.getBoolean(Names.Car.TIMEOUT + car_id, false)) {
                     ed.putBoolean(Names.Car.TIMEOUT + car_id, new_state);
-                    int timeout_id = preferences.getInt(Names.Car.TIMEOUT_NOTIFICATION + car_id, 0);
+                    int timeout_id = preferences.getInt(Names.Notify.TIMEOUT + car_id, 0);
                     try {
                         if (new_state) {
                             if (timeout_id == 0) {
                                 timeout_id = Alarm.createNotification(FetchService.this, getString(R.string.timeout), R.drawable.warning, car_id, null, 0);
-                                ed.putInt(Names.Car.TIMEOUT_NOTIFICATION + car_id, timeout_id);
+                                ed.putInt(Names.Notify.TIMEOUT + car_id, timeout_id);
                                 ed.commit();
                             }
                         } else {
                             if (timeout_id > 0) {
                                 Alarm.removeNotification(FetchService.this, car_id, timeout_id);
-                                ed.remove(Names.Car.TIMEOUT_NOTIFICATION + car_id);
+                                ed.remove(Names.Notify.TIMEOUT + car_id);
                                 ed.commit();
                             }
                         }
@@ -799,16 +807,16 @@ public class FetchService extends Service {
                     ed.commit();
                 }
                 double voltage = Double.parseDouble(preferences.getString(Names.Car.VOLTAGE_MAIN + car_id, ""));
-                int voltage_id = preferences.getInt(Names.Car.VOLTAGE_NOTIFY + car_id, 0);
+                int voltage_id = preferences.getInt(Names.Notify.VOLTAGE + car_id, 0);
                 if (voltage_id != 0) {
                     Alarm.removeNotification(FetchService.this, car_id, voltage_id);
-                    ed.remove(Names.Car.VOLTAGE_NOTIFY + car_id);
+                    ed.remove(Names.Notify.VOLTAGE + car_id);
                     ed.commit();
                 }
                 try {
                     if (voltage < 2.5) {
                         voltage_id = Alarm.createNotification(FetchService.this, getString(R.string.timeout), R.drawable.warning, car_id, null, 0);
-                        ed.putInt(Names.Car.VOLTAGE_NOTIFY + car_id, voltage_id);
+                        ed.putInt(Names.Notify.VOLTAGE + car_id, voltage_id);
                         ed.commit();
                     }
                 } catch (Exception ex) {
@@ -820,9 +828,9 @@ public class FetchService extends Service {
         void repeatGuardNotify() {
             int notify_id = 0;
             try {
-                notify_id = preferences.getInt(Names.Car.GUARD_NOTIFY + car_id, 0);
+                notify_id = preferences.getInt(Names.Notify.GUARD + car_id, 0);
             } catch (Exception ex) {
-                ed.remove(Names.Car.GUARD_NOTIFY + car_id);
+                ed.remove(Names.Notify.GUARD + car_id);
                 ed.commit();
             }
             if (notify_id == 0)
@@ -842,14 +850,14 @@ public class FetchService extends Service {
                 guard_mode = 2;
             int notify_id = 0;
             try {
-                notify_id = preferences.getInt(Names.Car.GUARD_NOTIFY + car_id, 0);
+                notify_id = preferences.getInt(Names.Notify.GUARD + car_id, 0);
             } catch (Exception ex) {
-                ed.remove(Names.Car.GUARD_NOTIFY + car_id);
+                ed.remove(Names.Notify.GUARD + car_id);
                 ed.commit();
             }
             if (notify_id != 0) {
                 Alarm.removeNotification(FetchService.this, car_id, notify_id);
-                ed.remove(Names.Car.GUARD_NOTIFY + car_id);
+                ed.remove(Names.Notify.GUARD + car_id);
                 ed.commit();
             }
             String guard_pref = preferences.getString(Names.Car.GUARD_MODE + car_id, "");
@@ -883,7 +891,7 @@ public class FetchService extends Service {
                         break;
                 }
                 notify_id = Alarm.createNotification(FetchService.this, getString(id), R.drawable.warning, car_id, sound, guard_time);
-                ed.putInt(Names.Car.GUARD_NOTIFY + car_id, notify_id);
+                ed.putInt(Names.Notify.GUARD + car_id, notify_id);
                 ed.putLong(Names.Car.GUARD_NEXT + car_id, next_time);
                 ed.commit();
             } else if (guard_mode == 0) {
@@ -891,7 +899,7 @@ public class FetchService extends Service {
                 if (msg_id != 0) {
                     String[] msg = getString(R.string.alarm).split("\\|");
                     notify_id = Alarm.createNotification(FetchService.this, msg[msg_id], R.drawable.warning, car_id, null, guard_time);
-                    ed.putInt(Names.Car.GUARD_NOTIFY + car_id, notify_id);
+                    ed.putInt(Names.Notify.GUARD + car_id, notify_id);
                     ed.putLong(Names.Car.GUARD_NEXT + car_id, next_time);
                     ed.commit();
                 }

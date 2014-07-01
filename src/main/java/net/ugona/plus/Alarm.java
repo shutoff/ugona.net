@@ -135,7 +135,7 @@ public class Alarm extends Activity {
             }
         }
 
-        int zone_notify = preferences.getInt(Names.Car.ZONE_NOTIFY + car_id, 0);
+        int zone_notify = preferences.getInt(Names.Notify.ZONE + car_id, 0);
         if (zone_notify > 0)
             removeNotification(context, car_id, zone_notify);
         String message = context.getString(in_zone ? R.string.zone_in : R.string.zone_out);
@@ -146,7 +146,7 @@ public class Alarm extends Activity {
         SharedPreferences.Editor ed = preferences.edit();
         if (!silent) {
             zone_notify = createNotification(context, message, R.drawable.warning, car_id, in_zone ? Names.Car.ZONE_IN_SOUND : Names.Car.ZONE_OUT_SOUND, when);
-            ed.putInt(Names.Car.ZONE_NOTIFY + car_id, zone_notify);
+            ed.putInt(Names.Notify.ZONE + car_id, zone_notify);
         }
         if (in_zone) {
             ed.putString(Names.Car.ACTIVE_ZONE + car_id, (zone == null) ? "___" : zone);
