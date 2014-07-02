@@ -130,13 +130,15 @@ public class MapView extends org.osmdroid.views.MapView {
     }
 
     void onResume() {
-        mLocationOverlay.enableMyLocation(preferences.getBoolean(Names.USE_GPS, true), true);
+        if (mLocationOverlay != null)
+            mLocationOverlay.enableMyLocation(preferences.getBoolean(Names.USE_GPS, true), true);
         setBuiltInZoomControls(true);
         setMultiTouchControls(true);
     }
 
     void onPause() {
-        mLocationOverlay.disableMyLocation();
+        if (mLocationOverlay != null)
+            mLocationOverlay.disableMyLocation();
         setBuiltInZoomControls(false);
         setMultiTouchControls(false);
     }

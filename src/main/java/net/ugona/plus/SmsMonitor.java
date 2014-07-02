@@ -319,14 +319,12 @@ public class SmsMonitor extends BroadcastReceiver {
                             ed.remove(Names.Car.LOST + car);
                             int id = preferences.getInt(Names.Notify.LOST + car, 0);
                             if (id > 0) {
-                                State.appendLog("restore " + id);
                                 ed.remove(Names.Notify.LOST + car);
                                 Alarm.removeNotification(context, car, id);
                             }
                         } else {
                             ed.putLong(Names.Car.LOST + car, time.toDate().getTime());
                             int id = Alarm.createNotification(context, context.getString(R.string.lost), R.drawable.warning, car, null, time.toDate().getTime());
-                            State.appendLog("Lost " + id);
                             ed.putInt(Names.Notify.LOST + car, id);
                         }
                         ed.commit();

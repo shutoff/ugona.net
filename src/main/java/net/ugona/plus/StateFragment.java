@@ -468,8 +468,25 @@ public class StateFragment extends Fragment
             balanceBlock.setVisibility(View.GONE);
         }
 
-        if (pointer)
+        if (pointer) {
+            time = "";
+            long last_time = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
+            if (last_time > 0) {
+                LocalDateTime stand = new LocalDateTime(last_time);
+                LocalDateTime now = new LocalDateTime();
+                if (stand.toLocalDate().equals(now.toLocalDate())) {
+                    DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
+                    time = tf.format(last_time);
+                } else {
+                    DateFormat df = android.text.format.DateFormat.getDateFormat(context);
+                    DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
+                    time = df.format(last_time) + " " + tf.format(last_time);
+                }
+                time += " ";
+            }
+            updateAddress(null);
             return;
+        }
 
         int level = preferences.getInt(Names.Car.GSM_DB + car_id, 0);
         if (level == 0) {
