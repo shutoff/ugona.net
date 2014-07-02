@@ -28,9 +28,8 @@ public class ReusableBitmapDrawable extends ExpirableBitmapDrawable {
 
     public void finishUsingDrawable() {
         synchronized (this) {
-            mUsageRefCount--;
-            if (mUsageRefCount < 0)
-                throw new IllegalStateException("Unbalanced endUsingDrawable() called.");
+            if (mUsageRefCount > 0)
+                mUsageRefCount--;
         }
     }
 

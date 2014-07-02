@@ -120,6 +120,7 @@ public class TilesOverlay extends SafeDrawOverlay {
 
     public TilesOverlay(final MapTileProviderBase aTileProvider, final ResourceProxy pResourceProxy) {
         super(pResourceProxy);
+        mLoadingBackgroundColor = Color.TRANSPARENT;
         if (aTileProvider == null) {
             throw new IllegalArgumentException(
                     "You must pass a valid tile provider to the tiles overlay.");

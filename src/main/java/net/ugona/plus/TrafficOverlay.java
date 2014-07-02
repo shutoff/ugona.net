@@ -1,8 +1,10 @@
 package net.ugona.plus;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 import org.osmdroid.ResourceProxy;
@@ -27,7 +29,6 @@ public class TrafficOverlay extends TilesOverlay {
 
     public TrafficOverlay(net.ugona.plus.MapView mapView, Context aContext) {
         super(createTileProvider(mapView, aContext), aContext);
-        setLoadingBackgroundColor(Color.TRANSPARENT);
     }
 
     static MapTileProviderBase createTileProvider(MapView mapView, Context aContext) {
@@ -83,8 +84,14 @@ public class TrafficOverlay extends TilesOverlay {
         @Override
         public Drawable getDrawable(InputStream aFileInputStream) throws LowMemoryException {
             Drawable res = super.getDrawable(aFileInputStream);
-            if (res != null)
-                res.setAlpha(TRAFFIC_ALPHA);
+            if (res == null)
+                return null;
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) res;
+            Bitmap bitmap = bitmapDrawable.getBitmap();
+            int pixel = bitmap.getPixel(0, 0);
+            if ((Color.blue(pixel) == 255) && (Color.red(pixel) == 255) && (Color.green(pixel) == 255))
+                return null;
+            res.setAlpha(TRAFFIC_ALPHA);
             return res;
         }
 
@@ -92,6 +99,11 @@ public class TrafficOverlay extends TilesOverlay {
         public Drawable getDrawable(String aFilePath) {
             Drawable res = super.getDrawable(aFilePath);
             if (res == null)
+                return null;
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) res;
+            Bitmap bitmap = bitmapDrawable.getBitmap();
+            int pixel = bitmap.getPixel(0, 0);
+            if ((Color.blue(pixel) == 255) && (Color.red(pixel) == 255) && (Color.green(pixel) == 255))
                 return null;
             res.setAlpha(TRAFFIC_ALPHA);
             return res;

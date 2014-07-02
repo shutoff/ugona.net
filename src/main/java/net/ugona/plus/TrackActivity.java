@@ -45,11 +45,11 @@ public class TrackActivity extends MapActivity {
         } catch (Exception ex) {
             // Ignore
         }
+        mEnableLocation = false;
         float density = getResources().getDisplayMetrics().density;
         track_limit = (int) (density * density * 64);
         super.onCreate(savedInstanceState);
         setTitle(getIntent().getStringExtra(Names.TITLE));
-        mEnableLocation = false;
     }
 
     @Override

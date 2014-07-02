@@ -193,6 +193,9 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
                 StreamUtils.copy(in, out);
                 out.flush();
                 final byte[] data = dataStream.toByteArray();
+                if (data.length == 100)
+                    return null;
+
                 final ByteArrayInputStream byteStream = new ByteArrayInputStream(data);
 
                 // Save the data to the filesystem cache
@@ -201,7 +204,6 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
                     byteStream.reset();
                 }
                 final Drawable result = tileSource.getDrawable(byteStream);
-
                 return result;
             } catch (final UnknownHostException e) {
                 // no network connection so empty the queue
