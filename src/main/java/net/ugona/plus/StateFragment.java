@@ -701,6 +701,8 @@ public class StateFragment extends Fragment
                     str += ", ";
                 str += parts[i];
             }
+        } else {
+            str += "\n";
         }
         Spannable spannable = new SpannableString(str);
         if (span_end > span_start) {
