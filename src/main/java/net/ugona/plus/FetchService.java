@@ -423,8 +423,6 @@ public class FetchService extends Service {
             if (time.asLong() > preferences.getLong(Names.Car.LOST + car_id, 0)) {
                 int lost_id = preferences.getInt(Names.Notify.LOST + car_id, 0);
                 if (lost_id > 0) {
-                    State.appendLog("Lost time " + time.asLong() + " " + preferences.getLong(Names.Car.LOST + car_id, 0));
-                    State.appendLog("Remove on time " + lost_id);
                     Alarm.removeNotification(FetchService.this, car_id, lost_id);
                     ed.remove(Names.Notify.LOST + car_id);
                 }
