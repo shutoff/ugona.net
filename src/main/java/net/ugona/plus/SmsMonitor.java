@@ -296,7 +296,6 @@ public class SmsMonitor extends BroadcastReceiver {
                     }
                 }
             }
-            body = "[car48412] Lost control channel in 2014.06.30 23:14:00";
             boolean restore = false;
             Matcher matcher = lostChannel.matcher(body);
             if (!matcher.matches()) {
@@ -309,8 +308,8 @@ public class SmsMonitor extends BroadcastReceiver {
                     String car_login = preferences.getString(Names.Car.LOGIN + car, "");
                     if (car_login.equals(login)) {
                         int year = Integer.parseInt(matcher.group(2));
-                        int month = Integer.parseInt(matcher.group(3));
-                        int day = Integer.parseInt(matcher.group(4));
+                        int month = Integer.parseInt(matcher.group(4));
+                        int day = Integer.parseInt(matcher.group(3));
                         int hour = Integer.parseInt(matcher.group(5));
                         int min = Integer.parseInt(matcher.group(6));
                         int sec = Integer.parseInt(matcher.group(7));
@@ -320,12 +319,14 @@ public class SmsMonitor extends BroadcastReceiver {
                             ed.remove(Names.Car.LOST + car);
                             int id = preferences.getInt(Names.Notify.LOST + car, 0);
                             if (id > 0) {
+                                State.appendLog("restore " + id);
                                 ed.remove(Names.Notify.LOST + car);
                                 Alarm.removeNotification(context, car, id);
                             }
                         } else {
                             ed.putLong(Names.Car.LOST + car, time.toDate().getTime());
                             int id = Alarm.createNotification(context, context.getString(R.string.lost), R.drawable.warning, car, null, time.toDate().getTime());
+                            State.appendLog("Lost " + id);
                             ed.putInt(Names.Notify.LOST + car, id);
                         }
                         ed.commit();

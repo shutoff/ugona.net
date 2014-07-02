@@ -9,51 +9,51 @@
         android:id="@+id/error"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center"
+        android:orientation="horizontal"
         android:padding="5dp">
 
         <ImageView
-            android:src="@android:drawable/stat_notify_error"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/stat_notify_error" />
 
         <TextView
             android:id="@+id/error_text"
-            android:text="@string/data_error"
-            android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:textColor="@color/error"
+            android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:text="@string/data_error"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/error" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/valet_warning"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/valet_warning"
         android:gravity="center"
-        android:visibility="gone"
+        android:text="@string/valet_warning"
+        android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/error"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/net_warning"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/net_warning"
         android:gravity="center"
-        android:visibility="gone"
+        android:text="@string/net_warning"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/error"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:padding="5dp">
 
         <ProgressBar
@@ -63,19 +63,19 @@
 
         <ImageView
             android:id="@+id/refresh"
-            android:src="@drawable/update"
             android:layout_width="24dp"
-            android:layout_height="24dp" />
+            android:layout_height="24dp"
+            android:src="@drawable/update" />
 
         <TextView
             android:id="@+id/last"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/caldroid_holo_blue_light"
+            android:paddingLeft="15dp"
             android:singleLine="true"
-            android:paddingLeft="15dp" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/caldroid_holo_blue_light" />
 
         <TableLayout
             android:layout_width="wrap_content"
@@ -88,19 +88,19 @@
                 android:layout_height="wrap_content">
 
                 <ImageView
-                    android:src="@drawable/icon_voltage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="2dp" />
+                    android:padding="2dp"
+                    android:src="@drawable/icon_voltage" />
 
                 <TextView
                     android:id="@+id/voltage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
                     android:layout_gravity="right"
                     android:padding="2dp"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textStyle="bold" />
             </TableRow>
 
             <TableRow
@@ -109,19 +109,19 @@
                 android:layout_height="wrap_content">
 
                 <ImageView
-                    android:src="@drawable/icon_balance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="2dp" />
+                    android:padding="2dp"
+                    android:src="@drawable/icon_balance" />
 
                 <TextView
                     android:id="@+id/balance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
                     android:layout_gravity="right"
                     android:padding="2dp"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textStyle="bold" />
             </TableRow>
 
         </TableLayout>
@@ -139,8 +139,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/map_bg"
-        android:orientation="horizontal"
-        android:gravity="center">
+        android:gravity="center"
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="10dp"
@@ -151,66 +151,12 @@
             android:layout_height="wrap_content"
             android:src="@drawable/marker_map" />
 
-        <ScrollView
-            android:id="@+id/addr_block"
+        <TextView
+            android:id="@+id/addr"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_gravity="center">
-
-            <LinearLayout
-                android:id="@+id/addr_data"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:layout_gravity="center">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingTop="10dp"
-                    android:gravity="center">
-
-                    <TextView
-                        android:id="@+id/addr_time"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/caldroid_holo_blue_light"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/location"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceSmall" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/address2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:textColor="@color/caldroid_holo_blue_light"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/address3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="10dp" />
-
-            </LinearLayout>
-
-        </ScrollView>
+            android:gravity="center" />
 
     </LinearLayout>
 
