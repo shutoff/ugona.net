@@ -53,7 +53,7 @@ public class TilesOverlay extends SafeDrawOverlay {
      * A drawable loading tile *
      */
     private BitmapDrawable mLoadingTile = null;
-    private int mLoadingBackgroundColor = Color.rgb(216, 208, 208);
+    private int mLoadingBackgroundColor = Color.TRANSPARENT;
     private int mLoadingLineColor = Color.rgb(200, 192, 192);
 
     /**

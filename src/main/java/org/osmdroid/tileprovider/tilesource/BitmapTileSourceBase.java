@@ -140,7 +140,6 @@ public abstract class BitmapTileSourceBase implements ITileSource,
             BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
             BitmapPool.getInstance().applyReusableOptions(bitmapOptions);
 
-
             final Bitmap bitmap = BitmapFactory.decodeStream(aFileInputStream, null, bitmapOptions);
             if (bitmap != null) {
                 return new ReusableBitmapDrawable(bitmap);

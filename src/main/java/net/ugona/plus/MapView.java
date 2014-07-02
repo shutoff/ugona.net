@@ -56,8 +56,6 @@ public class MapView extends org.osmdroid.views.MapView {
             getOverlays().add(mLocationOverlay);
         }
 
-        setBackgroundColor(getResources().getColor(R.color.caldroid_gray));
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             try {
                 Method m = View.class.getMethod("setLayerType", int.class, Paint.class);
