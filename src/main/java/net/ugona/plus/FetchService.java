@@ -421,10 +421,12 @@ public class FetchService extends Service {
             ed = preferences.edit();
             ed.putLong(Names.Car.EVENT_TIME + car_id, time.asLong());
             if (time.asLong() > preferences.getLong(Names.Car.LOST + car_id, 0)) {
-                int lost_id = preferences.getInt(Names.Car.LOST_NOTIFY + car_id, 0);
-                if (lost_id > 0) {
-                    Alarm.removeNotification(FetchService.this, car_id, lost_id);
+                int id = preferences.getInt(Names.Car.LOST_NOTIFY + car_id, 0);
+                if (id > 0) {
                     ed.remove(Names.Car.LOST_NOTIFY + car_id);
+                    Alarm.removeNotification(FetchService.this, car_id, id);
+                    id = Alarm.createNotification(FetchService.this, getString(R.string.restore), R.drawable.gsm_restore, car_id, Names.Car.RESTORE_SOUND, 0);
+                    ed.putInt(Names.Notify.RESTORE + car_id, id);
                 }
             }
 

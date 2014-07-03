@@ -321,10 +321,17 @@ public class SmsMonitor extends BroadcastReceiver {
                             if (id > 0) {
                                 ed.remove(Names.Car.LOST_NOTIFY + car);
                                 Alarm.removeNotification(context, car, id);
+                                id = Alarm.createNotification(context, context.getString(R.string.restore), R.drawable.gsm_restore, car, Names.Car.RESTORE_SOUND, 0);
+                                ed.putInt(Names.Notify.RESTORE + car, id);
                             }
                         } else {
                             ed.putLong(Names.Car.LOST + car, time.toDate().getTime());
-                            int id = Alarm.createNotification(context, context.getString(R.string.lost), R.drawable.gsm_lost, car, null, time.toDate().getTime());
+                            int id = preferences.getInt(Names.Notify.RESTORE + car, 0);
+                            if (id > 0) {
+                                ed.remove(Names.Notify.RESTORE + car);
+                                Alarm.removeNotification(context, car, id);
+                            }
+                            id = Alarm.createNotification(context, context.getString(R.string.lost), R.drawable.gsm_lost, car, Names.Car.LOST_SOUND, time.toDate().getTime());
                             ed.putInt(Names.Car.LOST_NOTIFY + car, id);
                         }
                         ed.commit();

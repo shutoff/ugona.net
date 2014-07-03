@@ -603,5 +603,8 @@
     <string name="ext_sensor_primary">External sensor: primary level</string>
     <string name="no_points">No points in selected area</string>
     <string name="lost">Lost control channel</string>
+    <string name="restore">Restore control channel</string>
     <string name="cmd_error">Send command error</string>
+    <string name="lost_sound">Lost sound</string>
+    <string name="restore_sound">Restore sound</string>
 </resources>

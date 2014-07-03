@@ -30,6 +30,8 @@ public class NotificationFragment extends SettingsFragment {
         items.add(new SoundItem(R.string.notify_sound, RingtoneManager.TYPE_NOTIFICATION, Names.Car.NOTIFY));
         items.add(new SoundItem(R.string.zone_in_sound, RingtoneManager.TYPE_NOTIFICATION, Names.Car.ZONE_IN_SOUND));
         items.add(new SoundItem(R.string.zone_out_sound, RingtoneManager.TYPE_NOTIFICATION, Names.Car.ZONE_OUT_SOUND));
+        items.add(new SoundItem(R.string.lost_sound, RingtoneManager.TYPE_NOTIFICATION, Names.Car.LOST_SOUND));
+        items.add(new SoundItem(R.string.restore_sound, RingtoneManager.TYPE_NOTIFICATION, Names.Car.RESTORE_SOUND));
 
         items.add(new ListItem(R.string.guard_notify, R.array.guard_values, R.array.guard_entries, Names.Car.GUARD_MODE, "", R.string.notify_msg));
         items.add(new CheckBoxItem(R.string.show_balance, Names.Car.SHOW_BALANCE, true));

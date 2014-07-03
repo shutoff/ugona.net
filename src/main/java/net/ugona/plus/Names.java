@@ -138,6 +138,8 @@ public final class Names {
         static final String ZONE_IN = "zone_in";
         static final String ZONE_IN_SOUND = ".zone_in";
         static final String ZONE_OUT_SOUND = ".zone_out";
+        static final String LOST_SOUND = ".lost";
+        static final String RESTORE_SOUND = ".restore";
 
         static final String GUARD_MODE = "guard_mode_";
         static final String GUARD_TIME = "guard_time_";
@@ -176,5 +178,6 @@ public final class Names {
         static final String TIMEOUT = "timeout_id";
         static final String CARD = "card_notify";
         static final String ZONE = "zone_notify_";
+        static final String RESTORE = "restore_notify_";
     }
 }
