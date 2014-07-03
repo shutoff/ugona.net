@@ -43,6 +43,7 @@ public class Actions {
     static final String COMMAND_URL = "https://car-online.ugona.net/command?auth=$1&command=$2";
     final static String URL_SET = "https://car-online.ugona.net/set?auth=$1&v=$2";
     final static String URL_SETTINGS = "https://car-online.ugona.net/settings?auth=$1";
+    static final String URL_CMD = "https://car-online.ugona.net/command?skey=$1&cmd=$2";
     static Pattern location;
     static String[] alarms = {
             "Heavy shock",
@@ -1417,6 +1418,32 @@ public class Actions {
             return true;
         }
         return false;
+    }
+
+    static void send_pandora_cmd(final Context context, final String car_id, int cmd) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        HttpTask task = new HttpTask() {
+            @Override
+            void result(JsonObject res) throws ParseException {
+                Intent i = new Intent(SmsMonitor.SMS_SEND);
+                i.putExtra(Names.ID, car_id);
+                context.sendBroadcast(i);
+                i = new Intent(context, FetchService.class);
+                i.putExtra(Names.ID, car_id);
+                context.startService(i);
+            }
+
+            @Override
+            void error() {
+                AlertDialog dialog = new AlertDialog.Builder(context)
+                        .setTitle(R.string.error)
+                        .setMessage(R.string.cmd_error)
+                        .setNegativeButton(R.string.cancel, null)
+                        .create();
+                dialog.show();
+            }
+        };
+        task.execute(URL_CMD, preferences.getString(Names.Car.CAR_KEY + car_id, ""), cmd);
     }
 
     static class Ccode {

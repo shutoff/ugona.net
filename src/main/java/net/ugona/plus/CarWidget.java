@@ -363,7 +363,7 @@ public class CarWidget extends AppWidgetProvider {
                     show_level = false;
                 } else if (preferences.getLong(Names.Car.LOST + car_id, 0) > preferences.getLong(Names.Car.EVENT_TIME + car_id, 0)) {
                     widgetView.setImageViewResource(R.id.level_img, id_gsm_level[theme][6]);
-                    widgetView.setTextViewText(R.id.level, "--");
+                    widgetView.setTextViewText(R.id.level, "----");
                     widgetView.setInt(R.id.level, "setTextColor", context.getResources().getColor(R.color.error));
                 } else {
                     int index = 0;

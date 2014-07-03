@@ -495,7 +495,7 @@ public class StateFragment extends Fragment
             vLevel.setVisibility(View.VISIBLE);
             if (preferences.getLong(Names.Car.LOST + car_id, 0) > preferences.getLong(Names.Car.EVENT_TIME + car_id, 0)) {
                 ivLevel.setImageResource(R.drawable.gsm_level);
-                tvLevel.setText("--");
+                tvLevel.setText("----");
                 tvLevel.setTextColor(getResources().getColor(R.color.error));
             } else {
                 if (level > -51) {
@@ -693,46 +693,50 @@ public class StateFragment extends Fragment
 
 
     void updateAddress(String addr) {
-        String str = location;
-        int span_start = 0;
-        int span_end = 0;
-        if (!time.equals(""))
-            str = time + " " + str;
-        if (addr != null) {
-            str += "\n";
-            span_start = str.length();
-            String parts[] = addr.split(", ");
-            str += parts[0];
-            int start = 2;
-            if (parts.length > 1)
-                str += ", " + parts[1];
-            if (parts.length > 2) {
-                Matcher matcher = number_pattern.matcher(parts[2]);
-                if (matcher.matches()) {
-                    str += ", " + parts[2];
-                    start++;
+        try {
+            String str = location;
+            int span_start = 0;
+            int span_end = 0;
+            if (!time.equals(""))
+                str = time + " " + str;
+            if (addr != null) {
+                str += "\n";
+                span_start = str.length();
+                String parts[] = addr.split(", ");
+                str += parts[0];
+                int start = 2;
+                if (parts.length > 1)
+                    str += ", " + parts[1];
+                if (parts.length > 2) {
+                    Matcher matcher = number_pattern.matcher(parts[2]);
+                    if (matcher.matches()) {
+                        str += ", " + parts[2];
+                        start++;
+                    }
                 }
+                span_end = str.length();
+                str += "\n";
+                for (int i = start; i < parts.length; i++) {
+                    if (i != start)
+                        str += ", ";
+                    str += parts[i];
+                }
+            } else {
+                str += "\n";
             }
-            span_end = str.length();
-            str += "\n";
-            for (int i = start; i < parts.length; i++) {
-                if (i != start)
-                    str += ", ";
-                str += parts[i];
+            Spannable spannable = new SpannableString(str);
+            if (span_end > span_start) {
+                spannable.setSpan(new StyleSpan(Typeface.BOLD), span_start, span_end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.caldroid_holo_blue_light)), span_start, span_end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
-        } else {
-            str += "\n";
+            if (!time.equals("")) {
+                spannable.setSpan(new StyleSpan(Typeface.BOLD), 0, time.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.caldroid_holo_blue_light)), 0, time.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            tvAddress.setText(spannable);
+        } catch (Exception ex) {
+            // ignore
         }
-        Spannable spannable = new SpannableString(str);
-        if (span_end > span_start) {
-            spannable.setSpan(new StyleSpan(Typeface.BOLD), span_start, span_end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.caldroid_holo_blue_light)), span_start, span_end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-        if (!time.equals("")) {
-            spannable.setSpan(new StyleSpan(Typeface.BOLD), 0, time.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.caldroid_holo_blue_light)), 0, time.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-        tvAddress.setText(spannable);
     }
 
     void updateZone(String zone) {

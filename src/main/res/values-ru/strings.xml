@@ -602,4 +602,5 @@
     </string-array>
     <string name="thermocode">Thermocode</string>
     <string name="lost">Связь с автомобилем потеряна</string>
+    <string name="cmd_error">Ошибка выполнения комманды</string>
 </resources>

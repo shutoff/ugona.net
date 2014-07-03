@@ -282,55 +282,55 @@ public class ActionFragment extends Fragment
             new Action(R.drawable.icon_guard_on, R.string.guard_on) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-
+                    Actions.send_pandora_cmd(context, car_id, 1);
                 }
             },
             new Action(R.drawable.icon_guard_off, R.string.guard_off) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-
+                    Actions.send_pandora_cmd(context, car_id, 2);
                 }
             },
             new Action(R.drawable.icon_motor_on, R.string.motor_on, State.CMD_AZ) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-
+                    Actions.send_pandora_cmd(context, car_id, 4);
                 }
             },
             new Action(R.drawable.icon_motor_off, R.string.motor_off, State.CMD_AZ) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-
+                    Actions.send_pandora_cmd(context, car_id, 8);
                 }
             },
             new Action(R.drawable.icon_turbo_on, R.string.turbo_on) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-
+                    Actions.send_pandora_cmd(context, car_id, 0x10);
                 }
             },
             new Action(R.drawable.icon_turbo_off, R.string.turbo_off) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-
+                    Actions.send_pandora_cmd(context, car_id, 0x20);
                 }
             },
             new Action(R.drawable.icon_heater, R.string.rele, State.CMD_RELE) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-
+                    Actions.send_pandora_cmd(context, car_id, 0x15);
                 }
             },
             new Action(R.drawable.icon_heater_on, R.string.heater_off, State.CMD_RELE) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-
+                    Actions.send_pandora_cmd(context, car_id, 0x16);
                 }
             },
             new Action(R.drawable.sound, R.string.sound) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-
+                    Actions.send_pandora_cmd(context, car_id, 0x17);
                 }
             },
     };

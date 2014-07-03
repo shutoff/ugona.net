@@ -195,7 +195,7 @@ public class FetchService extends Service {
         // Add as notification
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Notification notification = builder.build();
-        if ((pictId == R.drawable.white_valet_on) || (pictId == R.drawable.gsm_level))
+        if ((pictId == R.drawable.white_valet_on) || (pictId == R.drawable.gsm_lost))
             notification.flags = Notification.FLAG_ONGOING_EVENT;
         manager.notify(max_id, notification);
     }

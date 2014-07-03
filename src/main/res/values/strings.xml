@@ -603,4 +603,5 @@
     <string name="ext_sensor_primary">External sensor: primary level</string>
     <string name="no_points">No points in selected area</string>
     <string name="lost">Lost control channel</string>
+    <string name="cmd_error">Send command error</string>
 </resources>
