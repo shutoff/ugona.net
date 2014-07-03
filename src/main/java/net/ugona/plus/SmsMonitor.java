@@ -317,15 +317,15 @@ public class SmsMonitor extends BroadcastReceiver {
                         SharedPreferences.Editor ed = preferences.edit();
                         if (restore) {
                             ed.remove(Names.Car.LOST + car);
-                            int id = preferences.getInt(Names.Notify.LOST + car, 0);
+                            int id = preferences.getInt(Names.Car.LOST_NOTIFY + car, 0);
                             if (id > 0) {
-                                ed.remove(Names.Notify.LOST + car);
+                                ed.remove(Names.Car.LOST_NOTIFY + car);
                                 Alarm.removeNotification(context, car, id);
                             }
                         } else {
                             ed.putLong(Names.Car.LOST + car, time.toDate().getTime());
-                            int id = Alarm.createNotification(context, context.getString(R.string.lost), R.drawable.warning, car, null, time.toDate().getTime());
-                            ed.putInt(Names.Notify.LOST + car, id);
+                            int id = Alarm.createNotification(context, context.getString(R.string.lost), R.drawable.gsm_level, car, null, time.toDate().getTime());
+                            ed.putInt(Names.Car.LOST_NOTIFY + car, id);
                         }
                         ed.commit();
                         Intent i = new Intent(FetchService.ACTION_UPDATE_FORCE);

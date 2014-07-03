@@ -99,14 +99,14 @@ public class Actions {
     static void done_valet_on(Context context, String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor ed = preferences.edit();
-        int id = preferences.getInt(Names.Notify.VALET_ON + car_id, 0);
+        int id = preferences.getInt(Names.Car.VALET_ON_NOTIFY + car_id, 0);
         if (id != 0)
             return;
         id = preferences.getInt(Names.Notify.VALET_OFF + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
         id = Alarm.createNotification(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet_on, car_id, "valet_on", 0);
-        ed.putInt(Names.Notify.VALET_ON + car_id, id);
+        ed.putInt(Names.Car.VALET_ON_NOTIFY + car_id, id);
         ed.remove(Names.Notify.VALET_OFF + car_id);
         ed.commit();
     }
@@ -117,12 +117,12 @@ public class Actions {
         int id = preferences.getInt(Names.Notify.VALET_OFF + car_id, 0);
         if (id != 0)
             return;
-        id = preferences.getInt(Names.Notify.VALET_ON + car_id, 0);
+        id = preferences.getInt(Names.Car.VALET_ON_NOTIFY + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
         id = Alarm.createNotification(context, context.getString(R.string.valet_off_ok), R.drawable.white_valet_off, car_id, "valet_off", 0);
         ed.putInt(Names.Notify.VALET_OFF + car_id, id);
-        ed.remove(Names.Notify.VALET_ON + car_id);
+        ed.remove(Names.Car.VALET_ON_NOTIFY + car_id);
         ed.commit();
     }
 

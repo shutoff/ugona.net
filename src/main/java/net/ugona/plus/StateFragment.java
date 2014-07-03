@@ -496,6 +496,7 @@ public class StateFragment extends Fragment
             if (preferences.getLong(Names.Car.LOST + car_id, 0) > preferences.getLong(Names.Car.EVENT_TIME + car_id, 0)) {
                 ivLevel.setImageResource(R.drawable.gsm_level);
                 tvLevel.setText("--");
+                tvLevel.setTextColor(getResources().getColor(R.color.error));
             } else {
                 if (level > -51) {
                     ivLevel.setImageResource(R.drawable.gsm_level5);
@@ -511,6 +512,7 @@ public class StateFragment extends Fragment
                     ivLevel.setImageResource(R.drawable.gsm_level0);
                 }
                 tvLevel.setText(level + " dBm");
+                tvLevel.setTextColor(getResources().getColor(android.R.color.secondary_text_dark));
             }
         }
 

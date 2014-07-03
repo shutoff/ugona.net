@@ -364,6 +364,7 @@ public class CarWidget extends AppWidgetProvider {
                 } else if (preferences.getLong(Names.Car.LOST + car_id, 0) > preferences.getLong(Names.Car.EVENT_TIME + car_id, 0)) {
                     widgetView.setImageViewResource(R.id.level_img, id_gsm_level[theme][6]);
                     widgetView.setTextViewText(R.id.level, "--");
+                    widgetView.setInt(R.id.level, "setTextColor", context.getResources().getColor(R.color.error));
                 } else {
                     int index = 0;
                     if (level > -51) {
@@ -379,6 +380,7 @@ public class CarWidget extends AppWidgetProvider {
                     }
                     widgetView.setImageViewResource(R.id.level_img, id_gsm_level[theme][index]);
                     widgetView.setTextViewText(R.id.level, level + " dBm");
+                    widgetView.setInt(R.id.level, "setTextColor", context.getResources().getColor(id_color[theme]));
                 }
                 show_count++;
             }

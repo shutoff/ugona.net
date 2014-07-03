@@ -163,6 +163,7 @@ public final class Names {
         static final String LOST = "lost";
 
         static final String VALET_ON_NOTIFY = "valet_on_notify_";
+        static final String LOST_NOTIFY = "lost_notify_";
     }
 
     public final class Notify {
@@ -170,12 +171,10 @@ public final class Names {
         static final String BALANCE = "balance_id";
         static final String MOTOR_ON = "motor_on_notify_";
         static final String MOTOR_OFF = "motor_off_notify_";
-        static final String VALET_ON = "valet_on_notify_";
         static final String VALET_OFF = "valet_off_notify_";
         static final String VOLTAGE = "voltage_notify_";
         static final String TIMEOUT = "timeout_id";
         static final String CARD = "card_notify";
-        static final String LOST = "lost_notify_";
         static final String ZONE = "zone_notify_";
     }
 }

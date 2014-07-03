@@ -118,7 +118,6 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-/*
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
@@ -126,7 +125,6 @@ public class MainActivity extends ActionBarActivity {
                 System.exit(1);
             }
         });
-*/
 
         Thread.currentThread().setContextClassLoader(this.getClassLoader());
         try {
@@ -578,7 +576,7 @@ public class MainActivity extends ActionBarActivity {
         String n_ids = preferences.getString(Names.Car.N_IDS + car_id, "");
         if (n_ids.equals(""))
             return;
-        int id_valet_on = preferences.getInt(Names.Notify.VALET_ON + car_id, 0);
+        int id_valet_on = preferences.getInt(Names.Car.VALET_ON_NOTIFY + car_id, 0);
         String[] ids = n_ids.split(",");
         for (String id : ids) {
             try {

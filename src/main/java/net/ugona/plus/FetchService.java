@@ -195,7 +195,7 @@ public class FetchService extends Service {
         // Add as notification
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Notification notification = builder.build();
-        if (pictId == R.drawable.white_valet_on)
+        if ((pictId == R.drawable.white_valet_on) || (pictId == R.drawable.gsm_level))
             notification.flags = Notification.FLAG_ONGOING_EVENT;
         manager.notify(max_id, notification);
     }
@@ -421,10 +421,10 @@ public class FetchService extends Service {
             ed = preferences.edit();
             ed.putLong(Names.Car.EVENT_TIME + car_id, time.asLong());
             if (time.asLong() > preferences.getLong(Names.Car.LOST + car_id, 0)) {
-                int lost_id = preferences.getInt(Names.Notify.LOST + car_id, 0);
+                int lost_id = preferences.getInt(Names.Car.LOST_NOTIFY + car_id, 0);
                 if (lost_id > 0) {
                     Alarm.removeNotification(FetchService.this, car_id, lost_id);
-                    ed.remove(Names.Notify.LOST + car_id);
+                    ed.remove(Names.Car.LOST_NOTIFY + car_id);
                 }
             }
 
