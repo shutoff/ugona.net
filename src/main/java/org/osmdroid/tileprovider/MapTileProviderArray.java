@@ -79,8 +79,8 @@ public class MapTileProviderArray extends MapTileProviderBase {
 
 	@Override
 	public Drawable getMapTile(final MapTile pTile) {
-		final Drawable tile = mTileCache.getMapTile(pTile);
-		if (tile != null && !ExpirableBitmapDrawable.isDrawableExpired(tile)) {
+        final Drawable tile = mTileCache.getMapTile(pTile);
+        if (tile != null && !ExpirableBitmapDrawable.isDrawableExpired(tile)) {
 			return tile;
 		} else {
 			boolean alreadyInProgress = false;

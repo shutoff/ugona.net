@@ -128,14 +128,6 @@ public class MapTileFilesystemProvider extends MapTileFileStorageProviderBase {
 
             final MapTile tile = pState.getMapTile();
 
-            // if there's no sdcard then don't do anything
-            if (!getSdCardAvailable()) {
-                if (DEBUGMODE) {
-                    logger.debug("No sdcard - do nothing for tile: " + tile);
-                }
-                return null;
-            }
-
             // Check the tile source to see if its file is available and if so, then render the
             // drawable and return the tile
             final File file = new File(TileWriter.TILE_PATH_BASE,
@@ -156,7 +148,6 @@ public class MapTileFilesystemProvider extends MapTileFileStorageProviderBase {
                         }
                         drawable.setState(new int[]{ExpirableBitmapDrawable.EXPIRED});
                     }
-
                     return drawable;
                 } catch (final LowMemoryException e) {
                     // low memory so empty the queue
@@ -164,7 +155,6 @@ public class MapTileFilesystemProvider extends MapTileFileStorageProviderBase {
                     throw new CantContinueException(e);
                 }
             }
-
             // If we get here then there is no file in the file cache
             return null;
         }

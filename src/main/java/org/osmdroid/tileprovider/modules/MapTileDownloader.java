@@ -223,7 +223,6 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
                 StreamUtils.closeStream(in);
                 StreamUtils.closeStream(out);
             }
-
             return null;
         }
 
