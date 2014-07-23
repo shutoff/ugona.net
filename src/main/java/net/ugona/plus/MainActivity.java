@@ -215,27 +215,32 @@ public class MainActivity extends ActionBarActivity {
         mViewPager.setCurrentItem(getPagePosition(PAGE_STATE));
 
         TitlePageIndicator titleIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
-        titleIndicator.setViewPager(mViewPager);
-        titleIndicator.setFooterIndicatorStyle(TitlePageIndicator.IndicatorStyle.Triangle);
+        if (titleIndicator != null) {
+            titleIndicator.setViewPager(mViewPager);
+            titleIndicator.setFooterIndicatorStyle(TitlePageIndicator.IndicatorStyle.Triangle);
 
-        titleIndicator.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int i, float v, int i2) {
+            titleIndicator.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int i, float v, int i2) {
 
-            }
+                }
 
-            @Override
-            public void onPageSelected(int i) {
-                setShowDate(i);
-                if ((getPageId(i) == PAGE_STATE) && (state_fragment != null))
-                    state_fragment.startAnimation();
-            }
+                @Override
+                public void onPageSelected(int i) {
+                    setShowDate(i);
+                    if ((getPageId(i) == PAGE_STATE) && (state_fragment != null))
+                        state_fragment.startAnimation();
+                }
 
-            @Override
-            public void onPageScrollStateChanged(int i) {
+                @Override
+                public void onPageScrollStateChanged(int i) {
 
-            }
-        });
+                }
+            });
+        } else {
+            MenuPager pager = (MenuPager) findViewById(R.id.menu);
+            pager.setPager(mViewPager);
+        }
 
         if (savedInstanceState == null) {
             String phone = preferences.getString(Names.Car.CAR_PHONE + car_id, "");

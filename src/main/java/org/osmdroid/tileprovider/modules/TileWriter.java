@@ -104,7 +104,15 @@ public class TileWriter implements IFilesystemCache, OpenStreetMapTileProviderCo
 
             mUsedCacheSpace += length;
             if (mUsedCacheSpace > TILE_MAX_CACHE_SIZE_BYTES) {
-                cutCurrentCache(); // TODO perhaps we should do this in the background
+                final Thread t = new Thread() {
+                    @Override
+                    public void run() {
+                        cutCurrentCache();
+                    }
+                };
+                t.setPriority(Thread.MIN_PRIORITY);
+                t.start();
+
             }
         } catch (final IOException e) {
             return false;
