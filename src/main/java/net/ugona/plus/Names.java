@@ -166,6 +166,8 @@ public final class Names {
 
         static final String VALET_ON_NOTIFY = "valet_on_notify_";
         static final String LOST_NOTIFY = "lost_notify_";
+        static final String LIGHT_SHOCK = "light_shock_";
+        static final String BALANCE_SOUND = ".balance";
     }
 
     public final class Notify {

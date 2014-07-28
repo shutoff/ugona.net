@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Ugona.net+</string>
-    <string name="notification">Light shock|Low card battery|Supply reserve|Supply regular|ERROR
+    <string name="notification">Low card battery|Supply reserve|Supply regular|ERROR
         LAN-devices|Low reserve voltage|Roaming. Internet OFF
     </string>
     <string name="alarm">Heavy shock|Trunk|Hood|Doors|Ignition Lock|MovTilt sensor|Rogue|Accessory zone|Ignition lock</string>
@@ -607,4 +607,6 @@
     <string name="cmd_error">Send command error</string>
     <string name="lost_sound">Lost sound</string>
     <string name="restore_sound">Restore sound</string>
+    <string name="light_shock_alarm">Alarm on light shock</string>
+    <string name="balance_sound">Low balance notification</string>
 </resources>

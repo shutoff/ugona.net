@@ -163,6 +163,15 @@ public class CarWidget extends AppWidgetProvider {
                         updateLockWidgets(context);
                     }
                 }
+                if (action.equals(WidgetService.ACTION_SCREEN))
+                    updateWidgets(context, null, true);
+                if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                    ConnectivityManager conMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                    NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
+                    if ((activeNetwork == null) || !activeNetwork.isConnected())
+                        return;
+                    updateWidgets(context, null, true);
+                }
             }
         }
         super.onReceive(context, intent);
@@ -180,17 +189,17 @@ public class CarWidget extends AppWidgetProvider {
         if (appWidgetManager != null) {
             int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-            boolean update = false;
             for (int appWidgetID : ids) {
-                if ((car_id == null) || preferences.getString(Names.WIDGET + appWidgetID, "").equals(car_id)) {
+                String id = preferences.getString(Names.WIDGET + appWidgetID, "");
+                if ((car_id == null) || id.equals(car_id)) {
                     updateWidget(context, appWidgetManager, appWidgetID);
-                    update = true;
+                    if (sendUpdate) {
+                        Intent i = new Intent(context, WidgetService.class);
+                        i.setAction(WidgetService.ACTION_UPDATE);
+                        i.putExtra(Names.ID, id);
+                        context.startService(i);
+                    }
                 }
-            }
-            if (sendUpdate && update) {
-                Intent i = new Intent(context, WidgetService.class);
-                i.setAction(WidgetService.ACTION_UPDATE);
-                context.startService(i);
             }
         }
     }

@@ -30,7 +30,6 @@ public class SmsMonitor extends BroadcastReceiver {
     private static final String ACTION = "android.provider.Telephony.SMS_RECEIVED";
     static Map<String, SmsQueues> processed;
     static String[] notifications = {
-            "ALARM Light shock",
             "Low Card Battery",
             "Supply reserve",
             "Supply regular",
@@ -412,6 +411,14 @@ public class SmsMonitor extends BroadcastReceiver {
                 String[] msg = context.getString(R.string.alarm).split("\\|");
                 showAlarm(context, msg[i], car_id);
                 return true;
+            }
+        }
+        if (compare(body, "ALARM Light shock")) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            if (preferences.getBoolean(Names.Car.LIGHT_SHOCK, true)) {
+                showAlarm(context, context.getString(R.string.light_shock), car_id);
+            } else {
+                showNotification(context, context.getString(R.string.light_shock), car_id);
             }
         }
         for (int i = 0; i < msg.length; i++) {

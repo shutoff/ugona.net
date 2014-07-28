@@ -38,8 +38,8 @@ public class DeviceSettingsFragment extends DeviceFragment {
             if (Preferences.getTemperaturesCount(preferences, car_id) == 1)
                 items.add(new SeekBarPrefItem(R.string.temp_correct, Names.Car.TEMP_SIFT, -10, 10, "\u00B0C", 1));
             items.add(new SeekBarPrefItem(R.string.voltage_shift, Names.Car.VOLTAGE_SHIFT, -20, 20, "V", 0.05));
-            items.add(new Item(R.string.version, preferences.getString(Names.Car.VERSION + car_id, "")));
         }
+        items.add(new Item(R.string.version, preferences.getString(Names.Car.VERSION + car_id, "")));
         return v;
     }
 

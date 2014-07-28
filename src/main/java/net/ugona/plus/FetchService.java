@@ -100,7 +100,7 @@ public class FetchService extends Service {
             if (action != null) {
                 if (action.equals(ACTION_CLEAR))
                     clearNotification(car_id, intent.getIntExtra(Names.Car.NOTIFY, 0));
-                if (action.equals(ACTION_UPDATE)) {
+                if (action.equals(ACTION_UPDATE) && (car_id == null)) {
                     Cars.Car[] cars = Cars.getCars(this);
                     for (Cars.Car car : cars) {
                         new StatusRequest(Preferences.getCar(preferences, car.id));
