@@ -28,7 +28,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class CarWidget extends AppWidgetProvider {
 
@@ -149,20 +151,8 @@ public class CarWidget extends AppWidgetProvider {
                         updateWidgets(context, car_id, false);
                     }
                 }
-                if (action.equalsIgnoreCase(FetchService.ACTION_UPDATE_FORCE)) {
+                if (action.equalsIgnoreCase(FetchService.ACTION_UPDATE_FORCE))
                     updateWidgets(context, null, false);
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    if (action.equals(WidgetService.ACTION_SCREEN))
-                        updateLockWidgets(context);
-                    if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                        ConnectivityManager conMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-                        NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
-                        if ((activeNetwork == null) || !activeNetwork.isConnected())
-                            return;
-                        updateLockWidgets(context);
-                    }
-                }
                 if (action.equals(WidgetService.ACTION_SCREEN))
                     updateWidgets(context, null, true);
                 if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
@@ -189,11 +179,15 @@ public class CarWidget extends AppWidgetProvider {
         if (appWidgetManager != null) {
             int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            Set<String> updated = new HashSet<String>();
             for (int appWidgetID : ids) {
                 String id = preferences.getString(Names.WIDGET + appWidgetID, "");
                 if ((car_id == null) || id.equals(car_id)) {
                     updateWidget(context, appWidgetManager, appWidgetID);
                     if (sendUpdate) {
+                        if (updated.contains(id))
+                            continue;
+                        updated.add(id);
                         Intent i = new Intent(context, WidgetService.class);
                         i.setAction(WidgetService.ACTION_UPDATE);
                         i.putExtra(Names.ID, id);
