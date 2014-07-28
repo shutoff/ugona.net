@@ -198,20 +198,6 @@ public class CarWidget extends AppWidgetProvider {
         }
     }
 
-    void updateLockWidgets(Context context) {
-        ComponentName thisAppWidget = new ComponentName(
-                context.getPackageName(), getClass().getName());
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-        if (appWidgetManager != null) {
-            int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
-            for (int appWidgetID : ids) {
-                Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetID);
-                if (options.getInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY, -1) == AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)
-                    updateWidget(context, appWidgetManager, appWidgetID);
-            }
-        }
-    }
-
     int getLayoutHeight(Context context, int maxWidth, int id) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflater.inflate(id, null);

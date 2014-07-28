@@ -328,6 +328,7 @@ public class FetchService extends Service {
                             String key = res.get("key").asString();
                             SharedPreferences.Editor ed = preferences.edit();
                             ed.putString(Names.Car.CAR_KEY + car_id, key);
+                            ed.remove(Names.GCM_TIME);
                             ed.commit();
                             exec(preferences.getString(Names.Car.CAR_KEY + car_id, ""));
                         }
