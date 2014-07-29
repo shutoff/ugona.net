@@ -455,6 +455,9 @@
     <string name="sensor">Датчик</string>
     <string-array name="temp_where">
         <item>Показывать</item>
+        <item>Температура двигателя</item>
+        <item>Температура в салоне</item>
+        <item>Температура окружающего воздуха</item>
         <item>Не показывать</item>
     </string-array>
     <string name="door_time">Задержка тревоги по зонам двери/багажник</string>

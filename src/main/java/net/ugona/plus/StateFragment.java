@@ -60,14 +60,23 @@ public class StateFragment extends Fragment
     TextView tvVoltage;
     TextView tvReserve;
     TextView tvBalance;
+    TextView tvError;
+    View vReserve;
+
     TextView tvTemperature;
     TextView tvTemperature2;
     TextView tvTemperature3;
-    TextView tvError;
-    View vReserve;
+    TextView tvTemperature4;
+    TextView tvTemperature5;
+    TextView tvTemperature6;
+
     View vTemperature;
     View vTemperature2;
     View vTemperature3;
+    View vTemperature4;
+    View vTemperature5;
+    View vTemperature6;
+
     View vError;
     ImageView imgRefresh;
     ProgressBar prgUpdate;
@@ -154,12 +163,19 @@ public class StateFragment extends Fragment
         vReserve = v.findViewById(R.id.reserve_block);
 
         tvBalance = (TextView) v.findViewById(R.id.balance);
+
         tvTemperature = (TextView) v.findViewById(R.id.temperature);
         vTemperature = v.findViewById(R.id.temperature_block);
         tvTemperature2 = (TextView) v.findViewById(R.id.temperature2);
         vTemperature2 = v.findViewById(R.id.temperature2_block);
         tvTemperature3 = (TextView) v.findViewById(R.id.temperature3);
         vTemperature3 = v.findViewById(R.id.temperature3_block);
+        tvTemperature4 = (TextView) v.findViewById(R.id.temperature4);
+        vTemperature4 = v.findViewById(R.id.temperature4_block);
+        tvTemperature5 = (TextView) v.findViewById(R.id.temperature5);
+        vTemperature5 = v.findViewById(R.id.temperature5_block);
+        tvTemperature6 = (TextView) v.findViewById(R.id.temperature6);
+        vTemperature6 = v.findViewById(R.id.temperature6_block);
 
         vMotor = v.findViewById(R.id.motor);
         vRele = v.findViewById(R.id.rele);
@@ -220,6 +236,12 @@ public class StateFragment extends Fragment
             vTemperature2.setOnClickListener(clickListener);
             vTemperature3.setTag("t3");
             vTemperature3.setOnClickListener(clickListener);
+            vTemperature4.setTag("t-1");
+            vTemperature4.setOnClickListener(clickListener);
+            vTemperature5.setTag("t-2");
+            vTemperature5.setOnClickListener(clickListener);
+            vTemperature6.setTag("t-3");
+            vTemperature6.setOnClickListener(clickListener);
         }
 
         balanceBlock = v.findViewById(R.id.balance_block);
@@ -538,6 +560,27 @@ public class StateFragment extends Fragment
         } else {
             tvTemperature3.setText(temperature);
             vTemperature3.setVisibility(View.VISIBLE);
+        }
+        temperature = Preferences.getTemperature(preferences, car_id, -1);
+        if (temperature == null) {
+            vTemperature4.setVisibility(View.GONE);
+        } else {
+            tvTemperature4.setText(temperature);
+            vTemperature4.setVisibility(View.VISIBLE);
+        }
+        temperature = Preferences.getTemperature(preferences, car_id, -2);
+        if (temperature == null) {
+            vTemperature5.setVisibility(View.GONE);
+        } else {
+            tvTemperature5.setText(temperature);
+            vTemperature5.setVisibility(View.VISIBLE);
+        }
+        temperature = Preferences.getTemperature(preferences, car_id, -3);
+        if (temperature == null) {
+            vTemperature6.setVisibility(View.GONE);
+        } else {
+            tvTemperature6.setText(temperature);
+            vTemperature6.setVisibility(View.VISIBLE);
         }
 
         vCar.setDrawable(drawable.getDrawable(context, car_id));

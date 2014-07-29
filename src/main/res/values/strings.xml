@@ -498,6 +498,9 @@
     <string name="sensor">Sensor</string>
     <string-array name="temp_where">
         <item>Show</item>
+        <item>Engine temperature</item>
+        <item>Cabine temperature</item>
+        <item>Atmosphere temperature</item>
         <item>No show</item>
     </string-array>
     <string name="door_time">Delay alarm for door and trunk zone</string>

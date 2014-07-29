@@ -44,6 +44,14 @@ public class Preferences {
         if (temp.equals(""))
             return null;
 
+        if (State.isPandora(preferences, car_id)) {
+            if (sensor >= 0)
+                return null;
+            String[] data = temp.split(";");
+            String[] res = data[-sensor - 1].split(":");
+            return res[1] + " \u00B0C";
+        }
+
         Map<Integer, TempConfig> config = new HashMap<Integer, TempConfig>();
         String[] temp_config = preferences.getString(Names.Car.TEMP_SETTINGS + car_id, "").split(",");
         for (String s : temp_config) {
