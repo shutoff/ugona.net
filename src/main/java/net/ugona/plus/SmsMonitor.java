@@ -420,6 +420,7 @@ public class SmsMonitor extends BroadcastReceiver {
             } else {
                 showNotification(context, context.getString(R.string.light_shock), car_id);
             }
+            return true;
         }
         for (int i = 0; i < msg.length; i++) {
             if (compare(body, msg[i]))
