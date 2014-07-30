@@ -9,38 +9,6 @@
         android:layout_height="match_parent"
         android:orientation="horizontal">
 
-        <TextView
-            android:layout_height="wrap_content"
-            android:layout_width="200dp" />
-
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:layout_height="0dp"
-                android:layout_width="wrap_content"
-                android:layout_weight="1" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/map_bg"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
         <ListView
             android:id="@+id/events"
             android:layout_width="0dp"
@@ -54,17 +22,17 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center_horizontal"
-            android:text="@string/no_events"
             android:paddingTop="20dp"
+            android:text="@string/no_events"
             android:visibility="gone" />
 
         <LinearLayout
             android:id="@+id/error"
-            android:orientation="horizontal"
-            android:gravity="center_horizontal"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
             android:paddingTop="20dp"
             android:visibility="gone">
 
@@ -77,51 +45,51 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="@string/error_load"
-                android:paddingLeft="10dp" />
+                android:paddingLeft="10dp"
+                android:text="@string/error_load" />
 
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/progress"
-            android:orientation="vertical"
-            android:gravity="center"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
 
             <ProgressBar
+                style="?android:attr/progressBarStyleLarge"
                 android:layout_width="80dp"
-                android:layout_height="80dp"
-                style="?android:attr/progressBarStyleLarge" />
+                android:layout_height="80dp" />
 
         </LinearLayout>
 
         <LinearLayout
-            android:layout_height="match_parent"
             android:layout_width="140dp"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
             <Button
                 android:id="@+id/actions"
-                android:layout_height="wrap_content"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:background="@drawable/button"
                 android:text="@string/actions" />
 
             <Button
                 android:id="@+id/contacts"
-                android:layout_height="wrap_content"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:background="@drawable/button"
                 android:text="@string/contacts" />
 
             <Button
                 android:id="@+id/system"
-                android:layout_height="wrap_content"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:background="@drawable/button"
                 android:text="@string/system" />

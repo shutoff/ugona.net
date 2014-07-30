@@ -430,7 +430,7 @@ public class StateFragment extends Fragment
         if (last != 0) {
             DateFormat df = android.text.format.DateFormat.getDateFormat(context);
             DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
-            tvLast.setText(df.format(last) + " " + tf.format(last));
+            tvLast.setText(tf.format(last) + " " + df.format(last));
         } else {
             tvLast.setText(getString(R.string.unknown));
         }

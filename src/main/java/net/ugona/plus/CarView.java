@@ -8,16 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 public class CarView extends FrameLayout {
 
     ImageView vCar;
     ImageView vEngine;
-    TextView vT1;
-    TextView vT2;
-    TextView vT3;
     View view;
 
     public CarView(Context context) {
@@ -40,56 +35,12 @@ public class CarView extends FrameLayout {
         addView(view);
         vCar = (ImageView) view.findViewById(R.id.car);
         vEngine = (ImageView) view.findViewById(R.id.engine);
-        vT1 = (TextView) view.findViewById(R.id.t1);
-        vT2 = (TextView) view.findViewById(R.id.t2);
-        vT3 = (TextView) view.findViewById(R.id.t3);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        int x = 0;
-        int y = 0;
-        int w = vCar.getMeasuredWidth();
-        int h = vCar.getMeasuredHeight();
-        int ws = w;
-        int hs = w * 386 / 256;
-        if (hs > h) {
-            ws = h * 256 / 386;
-            hs = h;
-            x = (w - ws) / 2;
-        } else {
-            y = (h - hs) / 2;
-        }
-
-        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) vT1.getLayoutParams();
-        int w1 = vT1.getMeasuredWidth();
-        int x1 = x + ws * 54 / 256 - w1;
-        if (x1 < 0)
-            x1 = 0;
-        lp.setMargins(x1, y, 0, 0);
-        vT1.setLayoutParams(lp);
-
-        lp = (RelativeLayout.LayoutParams) vT2.getLayoutParams();
-        int w2 = vT2.getMeasuredWidth();
-        int h2 = vT2.getMeasuredHeight();
-        lp.setMargins(x + ws * 120 / 256 - w2 / 2, y + hs * 152 / 386 - h2 / 2, 0, 0);
-        vT2.setLayoutParams(lp);
-
-        lp = (RelativeLayout.LayoutParams) vT3.getLayoutParams();
-        int w3 = vT3.getMeasuredWidth();
-        int h3 = vT3.getMeasuredHeight();
-        int top = y + hs * 39 / 386 - h3 / 2;
-        if (lp.topMargin < 10)
-            lp.topMargin = 10;
-        lp.setMargins(x + ws * 153 / 256 - w3 / 2, top, 0, 0);
-        vT3.setLayoutParams(lp);
-
-        super.onLayout(changed, l, t, r, b);
     }
 
     void setDrawable(Drawable d) {
-        if (d != null)
-            vCar.setImageDrawable(d);
+        if (d == null)
+            return;
+        vCar.setImageDrawable(d);
     }
 
     void setEngine(int id) {
@@ -109,31 +60,6 @@ public class CarView extends FrameLayout {
             return;
         AnimationDrawable animation = (AnimationDrawable) vEngine.getDrawable();
         animation.start();
-    }
-
-    void setT1(String t1) {
-        vT1.setText(addPlus(t1));
-        requestLayout();
-    }
-
-    void setT2(String t2) {
-        vT2.setText(addPlus(t2));
-        requestLayout();
-    }
-
-    void setT3(String t3) {
-        vT3.setText(addPlus(t3));
-        requestLayout();
-    }
-
-    String addPlus(String t) {
-        if (t == null)
-            return "";
-        t = t.substring(0, t.length() - 3);
-        String first = t.substring(0, 1);
-        if (first.equals("-") || first.equals("0"))
-            return t;
-        return "+" + t;
     }
 
 }

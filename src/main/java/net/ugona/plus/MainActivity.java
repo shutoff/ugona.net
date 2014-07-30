@@ -27,6 +27,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -214,32 +215,34 @@ public class MainActivity extends ActionBarActivity {
         setShowTracks();
         mViewPager.setCurrentItem(getPagePosition(PAGE_STATE));
 
+        ViewPager.OnPageChangeListener pageChangeListener = new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int i, float v, int i2) {
+
+            }
+
+            @Override
+            public void onPageSelected(int i) {
+                setShowDate(i);
+                if ((getPageId(i) == PAGE_STATE) && (state_fragment != null))
+                    state_fragment.startAnimation();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {
+
+            }
+        };
+
         TitlePageIndicator titleIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
         if (titleIndicator != null) {
             titleIndicator.setViewPager(mViewPager);
             titleIndicator.setFooterIndicatorStyle(TitlePageIndicator.IndicatorStyle.Triangle);
-
-            titleIndicator.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                @Override
-                public void onPageScrolled(int i, float v, int i2) {
-
-                }
-
-                @Override
-                public void onPageSelected(int i) {
-                    setShowDate(i);
-                    if ((getPageId(i) == PAGE_STATE) && (state_fragment != null))
-                        state_fragment.startAnimation();
-                }
-
-                @Override
-                public void onPageScrollStateChanged(int i) {
-
-                }
-            });
+            titleIndicator.setOnPageChangeListener(pageChangeListener);
         } else {
             MenuPager pager = (MenuPager) findViewById(R.id.menu);
             pager.setPager(mViewPager);
+            pager.setOnPageChangeListener(pageChangeListener);
         }
 
         if (savedInstanceState == null) {
@@ -1118,6 +1121,7 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         public Fragment getItem(int i) {
+            Log.v("v", "getItem " + i + ", " + getPageId(i));
             switch (getPageId(i)) {
                 case PAGE_PHOTO: {
                     PhotoFragment fragment = new PhotoFragment();

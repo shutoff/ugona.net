@@ -4,17 +4,10 @@
     android:layout_height="fill_parent"
     android:orientation="horizontal">
 
-    <ScrollView
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent">
-
-        <net.ugona.plus.MenuPager
-            android:id="@+id/menu"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-
-    </ScrollView>
+    <net.ugona.plus.MenuPager
+        android:id="@+id/menu"
+        android:layout_width="120dp"
+        android:layout_height="fill_parent" />
 
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
