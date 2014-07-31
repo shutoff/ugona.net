@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.preference.PreferenceManager;
@@ -16,6 +18,7 @@ public class CarDrawable {
 
     static Bitmap bitmap;
     String[] parts_id;
+    boolean horizontal;
 
     CarDrawable() {
         parts_id = new String[9];
@@ -27,7 +30,7 @@ public class CarDrawable {
         Date now = new Date();
         boolean upd = false;
         boolean doors4 = preferences.getBoolean(Names.Car.DOORS_4 + car_id, false);
-        if (last < now.getTime() - 24 * 60 * 60 * 1000) {
+        if ((last < now.getTime() - 24 * 60 * 60 * 1000)) {
             upd = setLayer(0, doors4 ? "car_black4" : "car_black");
             upd |= setLayer(1);
             upd |= setLayer(2);
@@ -104,7 +107,7 @@ public class CarDrawable {
                 state = white ? "lock_blue" : "lock_white";
                 long guard_t = preferences.getLong(Names.Car.GUARD_TIME + car_id, 0);
                 long card_t = preferences.getLong(Names.Car.CARD + car_id, 0);
-                if ((guard_t > 0) && (card_t > 0))
+                if ((guard_t > 0) && (card_t > 0) && (card_t < guard_t))
                     state = "lock_red";
                 if (!big)
                     state += "_widget";
@@ -116,6 +119,29 @@ public class CarDrawable {
             upd |= setLayer(5, state);
         }
         return upd;
+    }
+
+    Drawable getResource(Context ctx, String name) {
+        String n = name;
+        if (horizontal)
+            n += "_h";
+        try {
+            int id = ctx.getResources().getIdentifier(n, "drawable", ctx.getPackageName());
+            if (id != 0)
+                return ctx.getResources().getDrawable(id);
+            if (horizontal) {
+                id = ctx.getResources().getIdentifier(name, "drawable", ctx.getPackageName());
+                BitmapDrawable bitmapDrawable = (BitmapDrawable) ctx.getResources().getDrawable(id);
+                Bitmap bitmap = bitmapDrawable.getBitmap();
+                Matrix matrix = new Matrix();
+                matrix.postRotate(90);
+                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                return new BitmapDrawable(bitmap);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 
     Drawable getDrawable(Context ctx, String car_id) {
@@ -132,12 +158,7 @@ public class CarDrawable {
         for (String part : parts_id) {
             if (part == null)
                 continue;
-            try {
-                int id = ctx.getResources().getIdentifier(part, "drawable", ctx.getPackageName());
-                parts[n++] = ctx.getResources().getDrawable(id);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            parts[n++] = getResource(ctx, part);
         }
         return new LayerDrawable(parts);
     }
@@ -158,14 +179,9 @@ public class CarDrawable {
         for (String part : parts_id) {
             if (part == null)
                 continue;
-            try {
-                int id = ctx.getResources().getIdentifier(part, "drawable", ctx.getPackageName());
-                Drawable d = ctx.getResources().getDrawable(id);
-                d.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-                d.draw(canvas);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            Drawable d = getResource(ctx, part);
+            d.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            d.draw(canvas);
         }
         return bitmap;
     }

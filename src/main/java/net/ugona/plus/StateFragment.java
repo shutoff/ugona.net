@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -274,6 +275,7 @@ public class StateFragment extends Fragment
         });
 
         drawable = new CarDrawable();
+        drawable.horizontal = (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
 
         vPointer1 = v.findViewById(R.id.pointers1);
         vPointer2 = v.findViewById(R.id.pointers2);
@@ -717,10 +719,11 @@ public class StateFragment extends Fragment
         }
 
         if (az) {
+            boolean horizontal = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
             if (preferences.getBoolean(Names.Car.GUARD0 + car_id, false) && preferences.getBoolean(Names.Car.GUARD1 + car_id, false)) {
-                vCar.setEngine(R.drawable.engine_blue);
+                vCar.setEngine(horizontal ? R.drawable.engine1_blue_h : R.drawable.engine_blue);
             } else {
-                vCar.setEngine(R.drawable.engine);
+                vCar.setEngine(horizontal ? R.drawable.engine_h : R.drawable.engine);
             }
             vCar.setEngineVisible(true);
             startAnimation();
