@@ -50,7 +50,8 @@ public class FetchService extends Service {
     static final String URL_STATUS = "https://car-online.ugona.net/?skey=$1&time=$2";
     static final String URL_EVENTS = "https://car-online.ugona.net/events?skey=$1&auth=$2&begin=$3&end=$4";
     static final String URL_GSM = "https://car-online.ugona.net/gsm?skey=$1&cc=$2&nc=$3&lac=$4&cid=$5";
-    final static String URL_KEY = "https://car-online.ugona.net/key?auth=$1";
+    static final String URL_KEY = "https://car-online.ugona.net/key?auth=$1";
+    static final String URL_CARD = "https://car-online.ugona.net/card?auth=$1&t=$2";
 
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;
@@ -752,6 +753,7 @@ public class FetchService extends Service {
                 long guard_t = preferences.getLong(Names.Car.GUARD_TIME + car_id, 0);
                 if ((card_t > 0) && (guard_t > 0) && (card_t < guard_t)) {
                     long event_t = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
+                    new CardRequest(car_id);
                     if (event_t - guard_t > CARD_TIME) {
                         if (preferences.getLong(Names.Car.CARD_EVENT + car_id, 0) != card_t) {
                             ed.putLong(Names.Car.CARD_EVENT + car_id, card_t);
@@ -941,6 +943,38 @@ public class FetchService extends Service {
             if (state)
                 msg_id = msg;
             ed.putBoolean(id + car_id, state);
+        }
+    }
+
+    class CardRequest extends ServerRequest {
+
+        CardRequest(String id) {
+            super("C", id);
+        }
+
+        @Override
+        void result(JsonObject res) throws ParseException {
+            JsonValue v = res.get("card");
+            if (v != null) {
+                long card_t = v.asLong();
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putLong(Names.Car.CARD + car_id, card_t);
+                ed.commit();
+                int card_id = preferences.getInt(Names.Notify.CARD + car_id, 0);
+                if (card_id != 0) {
+                    if (!preferences.getBoolean(Names.Car.GUARD + car_id, false) || (card_t <= 0)) {
+                        Alarm.removeNotification(FetchService.this, car_id, card_id);
+                        ed.remove(Names.Notify.CARD + car_id);
+                        ed.commit();
+                    }
+                }
+                sendUpdate(ACTION_UPDATE, car_id);
+            }
+        }
+
+        @Override
+        void exec(String api_key) {
+            execute(URL_CARD, api_key, preferences.getLong(Names.Car.GUARD_TIME, 0));
         }
     }
 
