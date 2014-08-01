@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.Typeface;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.FloatMath;
@@ -14,6 +15,7 @@ import android.view.View;
 import com.androidplot.ui.YLayoutStyle;
 import com.androidplot.ui.YPositionMetric;
 import com.androidplot.util.PixelUtils;
+import com.androidplot.xy.AxisValueLabelFormatter;
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.XValueMarker;
@@ -74,6 +76,14 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         getLegendWidget().setVisible(false);
         getGraphWidget().setMarginBottom(PixelUtils.dpToPix(16));
         getGraphWidget().setMarginLeft(PixelUtils.dpToPix(14));
+        getGraphWidget().addDomainAxisValueLabelRegion(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, new AxisValueLabelFormatter() {
+            @Override
+            public void paint(Paint p, double value) {
+                Date d = new Date((long) value * 1000);
+                if (d.getHours() == 0)
+                    p.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+            }
+        });
         markerPaint = new Paint();
         markerPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
         markerPaint.setColor(Color.rgb(255, 255, 0));

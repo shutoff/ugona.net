@@ -773,6 +773,8 @@ public class FetchService extends Service {
                         PendingIntent pi = PendingIntent.getService(FetchService.this, 0, iUpdate, 0);
                         alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + CARD_TIME, pi);
                     }
+                } else if (guard_t < 0) {
+                    new CardRequest(car_id);
                 }
             }
 
@@ -954,7 +956,14 @@ public class FetchService extends Service {
 
         @Override
         void result(JsonObject res) throws ParseException {
-            JsonValue v = res.get("card");
+            JsonValue v = res.get("guard");
+            boolean update = false;
+            if (v != null) {
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putLong(Names.Car.GUARD_TIME + car_id, v.asLong());
+                ed.commit();
+            }
+            v = res.get("card");
             if (v != null) {
                 long card_t = v.asLong();
                 SharedPreferences.Editor ed = preferences.edit();
@@ -968,8 +977,10 @@ public class FetchService extends Service {
                         ed.commit();
                     }
                 }
-                sendUpdate(ACTION_UPDATE, car_id);
+                update = true;
             }
+            if (update)
+                sendUpdate(ACTION_UPDATE, car_id);
         }
 
         @Override
