@@ -168,6 +168,8 @@ public final class Names {
         static final String LOST_NOTIFY = "lost_notify_";
         static final String LIGHT_SHOCK = "light_shock_";
         static final String BALANCE_SOUND = ".balance";
+
+        static final String OFFLINE = "offline";
     }
 
     public final class Notify {

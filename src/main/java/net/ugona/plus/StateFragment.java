@@ -270,7 +270,7 @@ public class StateFragment extends Fragment
         vTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startUpdate(context);
+                startUpdate(context, true);
             }
         });
 
@@ -373,7 +373,7 @@ public class StateFragment extends Fragment
             }
             adapter.attach(getActivity(), lvActions);
         }
-        startUpdate(getActivity());
+        startUpdate(getActivity(), false);
 
         return v;
     }
@@ -395,7 +395,7 @@ public class StateFragment extends Fragment
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if ((requestCode == AUTH_REQUEST) && (requestCode == Activity.RESULT_OK))
-            startUpdate(getActivity());
+            startUpdate(getActivity(), false);
     }
 
     @Override
@@ -436,6 +436,7 @@ public class StateFragment extends Fragment
         } else {
             tvLast.setText(getString(R.string.unknown));
         }
+        imgRefresh.setImageResource(preferences.getBoolean(Names.Car.OFFLINE + car_id, false) ? R.drawable.update_white : R.drawable.update);
 
         boolean az = preferences.getBoolean(Names.Car.AZ + car_id, false);
         boolean ignition = !az && (preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false));
@@ -860,9 +861,11 @@ public class StateFragment extends Fragment
         mNet.setVisibility(isConnected ? View.GONE : View.VISIBLE);
     }
 
-    void startUpdate(Context context) {
+    void startUpdate(Context context, boolean connect) {
         Intent intent = new Intent(context, FetchService.class);
         intent.putExtra(Names.ID, car_id);
+        if (connect)
+            intent.putExtra(Names.Car.OFFLINE, true);
         context.startService(intent);
         vError.setVisibility(View.GONE);
         imgRefresh.setVisibility(View.GONE);
@@ -1176,7 +1179,7 @@ public class StateFragment extends Fragment
     public void onRefreshStarted(View view) {
         if (prgUpdate.getVisibility() == View.VISIBLE)
             return;
-        startUpdate(getActivity());
+        startUpdate(getActivity(), true);
     }
 
     void showHistory(String type) {

@@ -98,15 +98,16 @@ public class FetchService extends Service {
         if (intent != null) {
             String car_id = intent.getStringExtra(Names.ID);
             String action = intent.getAction();
+            boolean connect = intent.getBooleanExtra(Names.Car.OFFLINE, false);
             if (action != null) {
                 if (action.equals(ACTION_CLEAR))
                     clearNotification(car_id, intent.getIntExtra(Names.Car.NOTIFY, 0));
                 if (action.equals(ACTION_UPDATE) && (car_id == null)) {
                     Cars.Car[] cars = Cars.getCars(this);
                     for (Cars.Car car : cars) {
-                        new StatusRequest(Preferences.getCar(preferences, car.id));
+                        new StatusRequest(Preferences.getCar(preferences, car.id), connect);
                         for (String p : car.pointers) {
-                            new StatusRequest(p);
+                            new StatusRequest(p, false);
                         }
                     }
                 }
@@ -122,7 +123,7 @@ public class FetchService extends Service {
                     Actions.rele_off(this, car_id, intent.getStringExtra(Names.Car.AUTH), intent.getStringExtra(Names.PASSWORD));
             }
             if (car_id != null)
-                new StatusRequest(Preferences.getCar(preferences, car_id));
+                new StatusRequest(Preferences.getCar(preferences, car_id), connect);
         }
         if (startRequest())
             return START_STICKY;
@@ -337,7 +338,7 @@ public class FetchService extends Service {
                         @Override
                         void error() {
                             requests.remove(key);
-                            new StatusRequest(car_id);
+                            new StatusRequest(car_id, false);
                             long timeout = (error_text != null) ? REPEAT_AFTER_500 : REPEAT_AFTER_ERROR;
                             alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + timeout, timeout, piTimer);
                             sendError(error_text, car_id);
@@ -348,7 +349,7 @@ public class FetchService extends Service {
                 }
             }
             requests.remove(key);
-            new StatusRequest(car_id);
+            new StatusRequest(car_id, false);
             long timeout = (error_text != null) ? REPEAT_AFTER_500 : REPEAT_AFTER_ERROR;
             alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + timeout, timeout, piTimer);
             sendError(error_text, car_id);
@@ -392,9 +393,11 @@ public class FetchService extends Service {
 
         SharedPreferences.Editor ed;
         int msg_id;
+        boolean m_connect;
 
-        StatusRequest(String id) {
+        StatusRequest(String id, boolean connect) {
             super("S", id);
+            m_connect = connect;
         }
 
         @Override
@@ -403,6 +406,16 @@ public class FetchService extends Service {
             if (error != null) {
                 sendError(error.asString(), car_id);
                 return;
+            }
+
+            JsonValue offline = res.get("offline");
+            if (offline != null) {
+                boolean state = offline.asBoolean();
+                if (state != preferences.getBoolean(Names.Car.OFFLINE + car_id, false)) {
+                    SharedPreferences.Editor ed = preferences.edit();
+                    ed.putBoolean(Names.Car.OFFLINE + car_id, state);
+                    ed.commit();
+                }
             }
 
             JsonValue time = res.get("time");
@@ -925,7 +938,7 @@ public class FetchService extends Service {
         @Override
         void exec(String api_key) {
             sendUpdate(ACTION_START, car_id);
-            execute(URL_STATUS, api_key, preferences.getLong(Names.Car.EVENT_TIME + car_id, 0));
+            execute(URL_STATUS, api_key, preferences.getLong(Names.Car.EVENT_TIME + car_id, 0), "connect", m_connect ? 1 : null);
         }
 
         void setDoor(String id, JsonObject contact, String key) throws ParseException {
