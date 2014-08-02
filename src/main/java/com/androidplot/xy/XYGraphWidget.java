@@ -480,6 +480,9 @@ public class XYGraphWidget extends Widget {
                                 Paint labelPaint, Paint linePaint, boolean drawLineOnly) {
         if (!drawLineOnly) {
             if (linePaint != null) {
+                AxisValueLabelFormatter rf = getAxisValueLabelFormatterForRangeVal(xVal.longValue());
+                if ((rf != null) && (rf.isMain(xVal.longValue())))
+                    linePaint = domainOriginLinePaint;
                 if (domainAxisBottom) {
                     canvas.drawLine(xPix, gridRect.top, xPix, gridRect.bottom
                             + domainLabelTickExtension, linePaint);
@@ -583,7 +586,7 @@ public class XYGraphWidget extends Widget {
                 olp = domainLabelPaint;
             }
             drawDomainTick(canvas, domainOriginF, plot.getDomainOrigin()
-                    .doubleValue(), olp, domainOriginLinePaint, false);
+                    .doubleValue(), olp, domainGridLinePaint, false);
         }
 
         // draw ticks LEFT of origin:

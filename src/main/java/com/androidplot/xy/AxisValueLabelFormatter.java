@@ -17,7 +17,16 @@
 package com.androidplot.xy;
 
 import android.graphics.Paint;
+import android.graphics.Typeface;
 
 public abstract class AxisValueLabelFormatter {
-    abstract public void paint(Paint p, double value);
+
+    abstract public boolean isMain(double value);
+
+    public void paint(Paint p, double value) {
+        if (isMain(value)) {
+            p.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+            p.setTextSize(p.getTextSize() + 1);
+        }
+    }
 }

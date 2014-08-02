@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
-import android.graphics.Typeface;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.FloatMath;
@@ -78,10 +77,9 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         getGraphWidget().setMarginLeft(PixelUtils.dpToPix(14));
         getGraphWidget().addDomainAxisValueLabelRegion(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, new AxisValueLabelFormatter() {
             @Override
-            public void paint(Paint p, double value) {
+            public boolean isMain(double value) {
                 Date d = new Date((long) value * 1000);
-                if (d.getHours() == 0)
-                    p.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+                return d.getHours() == 0;
             }
         });
         markerPaint = new Paint();
@@ -130,7 +128,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
                         Date d = new Date(series.getX(i).longValue() * 1000);
                         String text = time_format.format(d);
                         text += " ";
-                        text += series.getY(i);
+                        text += String.format("%.2f", series.getY(i));
                         text += getUnits();
                         addMarker(new XValueMarker(series.getX(i), text, new YPositionMetric(5, YLayoutStyle.ABSOLUTE_FROM_TOP), markerPaint, markerPaint));
                         postInvalidate();
