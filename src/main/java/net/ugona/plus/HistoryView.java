@@ -374,7 +374,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
             setDomainSteps();
             setDomainBoundaries(screenMinX, screenMaxX, BoundaryMode.FIXED);
 
-            double delta_val = (max_value - min_value) / 3;
+            double delta_val = (max_value - min_value) / 2.2;
             if (delta_val < 0.01)
                 delta_val = 0.01;
             v10 = (int) Math.floor(Math.log10(delta_val));
