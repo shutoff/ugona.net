@@ -22,6 +22,13 @@ import com.squareup.okhttp.Headers;
 import com.squareup.okhttp.Response;
 import com.squareup.okhttp.internal.Internal;
 import com.squareup.okhttp.internal.Util;
+import com.squareup.okio.Buffer;
+import com.squareup.okio.BufferedSink;
+import com.squareup.okio.BufferedSource;
+import com.squareup.okio.Okio;
+import com.squareup.okio.Sink;
+import com.squareup.okio.Source;
+import com.squareup.okio.Timeout;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -30,14 +37,6 @@ import java.net.ProtocolException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.concurrent.TimeUnit;
-
-import okio.Buffer;
-import okio.BufferedSink;
-import okio.BufferedSource;
-import okio.Okio;
-import okio.Sink;
-import okio.Source;
-import okio.Timeout;
 
 import static com.squareup.okhttp.internal.Util.checkOffsetAndCount;
 import static com.squareup.okhttp.internal.http.StatusLine.HTTP_CONTINUE;
@@ -438,7 +437,7 @@ public final class HttpConnection {
                 Internal.instance.recycle(pool, connection);
             } else if (onIdle == ON_IDLE_CLOSE) {
                 state = STATE_CLOSED;
-                connection.getSocket();
+                connection.getSocket().close();
             }
         }
 

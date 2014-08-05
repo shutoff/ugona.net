@@ -18,7 +18,7 @@
     <string name="call_mode">Switch to call mode</string>
     <string name="sms_mode_summary">Select alarm mode: SMS or call</string>
     <string name="auth">Authorization</string>
-    <string name="auth_summary">Authorization on car-online.ru</string>
+    <string name="auth_summary">Authorization on server</string>
     <string name="sms_error">Can&amp;t send SMS</string>
     <string name="sms_err">SMS send error</string>
     <string name="save">Save</string>

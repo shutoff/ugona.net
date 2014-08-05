@@ -1,6 +1,26 @@
+/*
+ * Copyright (C) 2013 Square, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.squareup.okhttp.internal.spdy;
 
 import com.squareup.okhttp.internal.BitArray;
+import com.squareup.okio.Buffer;
+import com.squareup.okio.BufferedSource;
+import com.squareup.okio.ByteString;
+import com.squareup.okio.Okio;
+import com.squareup.okio.Source;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,22 +30,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import okio.Buffer;
-import okio.BufferedSource;
-import okio.ByteString;
-import okio.Okio;
-import okio.Source;
-
 /**
- * Read and write HPACK v07.
+ * Read and write HPACK v08.
  * <p/>
- * http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-07
+ * http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-08
  * <p/>
  * This implementation uses an array for the header table with a bitset for
  * references.  Dynamic entries are added to the array, starting in the last
  * position moving forward.  When the array fills, it is doubled.
  */
-final class HpackDraft07 {
+final class HpackDraft08 {
     private static final int PREFIX_4_BITS = 0x0f;
     private static final int PREFIX_6_BITS = 0x3f;
     private static final int PREFIX_7_BITS = 0x7f;
@@ -46,7 +60,7 @@ final class HpackDraft07 {
             new Header(Header.RESPONSE_STATUS, "404"),
             new Header(Header.RESPONSE_STATUS, "500"),
             new Header("accept-charset", ""),
-            new Header("accept-encoding", ""),
+            new Header("accept-encoding", "gzip, deflate"),
             new Header("accept-language", ""),
             new Header("accept-ranges", ""),
             new Header("accept", ""),
@@ -95,12 +109,11 @@ final class HpackDraft07 {
     };
     private static final Map<ByteString, Integer> NAME_TO_FIRST_INDEX = nameToFirstIndex();
 
-    private HpackDraft07() {
+    private HpackDraft08() {
     }
 
     private static Map<ByteString, Integer> nameToFirstIndex() {
-        Map<ByteString, Integer> result =
-                new LinkedHashMap<ByteString, Integer>(STATIC_HEADER_TABLE.length);
+        Map<ByteString, Integer> result = new LinkedHashMap<ByteString, Integer>(STATIC_HEADER_TABLE.length);
         for (int i = 0; i < STATIC_HEADER_TABLE.length; i++) {
             if (!result.containsKey(STATIC_HEADER_TABLE[i].name)) {
                 result.put(STATIC_HEADER_TABLE[i].name, i);
@@ -123,7 +136,7 @@ final class HpackDraft07 {
         return name;
     }
 
-    // http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-07#section-3.2
+    // http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-08#section-3.2
     static final class Reader {
 
         private final List<Header> emittedHeaders = new ArrayList<Header>();
@@ -436,7 +449,7 @@ final class HpackDraft07 {
         /**
          * This does not use "never indexed" semantics for sensitive headers.
          */
-        // https://tools.ietf.org/html/draft-ietf-httpbis-header-compression-07#section-4.3.3
+        // https://tools.ietf.org/html/draft-ietf-httpbis-header-compression-08#section-4.3.3
         void writeHeaders(List<Header> headerBlock) throws IOException {
             // TODO: implement index tracking
             for (int i = 0, size = headerBlock.size(); i < size; i++) {
@@ -454,7 +467,7 @@ final class HpackDraft07 {
             }
         }
 
-        // http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-07#section-4.1.1
+        // http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-08#section-4.1.1
         void writeInt(int value, int prefixMask, int bits) throws IOException {
             // Write the raw value for a single byte value.
             if (value < prefixMask) {

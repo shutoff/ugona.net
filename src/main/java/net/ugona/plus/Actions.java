@@ -1046,6 +1046,10 @@ public class Actions {
 
     static void search(Context context, final String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (State.isPandora(preferences, car_id)) {
+            send_pandora_cmd(context, car_id, 0x17);
+            return;
+        }
         String number = preferences.getString(Names.Car.CAR_PHONE + car_id, "");
         number = "tel://" + number + ",,3";
         Intent i = new Intent(android.content.Intent.ACTION_CALL, Uri.parse(number));

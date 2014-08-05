@@ -21,12 +21,11 @@ import com.squareup.okhttp.internal.http.HttpEngine;
 import com.squareup.okhttp.internal.http.HttpMethod;
 import com.squareup.okhttp.internal.http.OkHeaders;
 import com.squareup.okhttp.internal.http.RetryableSink;
+import com.squareup.okio.BufferedSink;
+import com.squareup.okio.BufferedSource;
 
 import java.io.IOException;
 import java.net.ProtocolException;
-
-import okio.BufferedSink;
-import okio.BufferedSource;
 
 import static com.squareup.okhttp.internal.http.HttpEngine.MAX_REDIRECTS;
 
@@ -35,9 +34,8 @@ import static com.squareup.okhttp.internal.http.HttpEngine.MAX_REDIRECTS;
  * canceled. As this object represents a single request/response pair (stream),
  * it cannot be executed twice.
  */
-public final class Call {
+public class Call {
     private final OkHttpClient client;
-    private final Dispatcher dispatcher;
     volatile boolean canceled;
     HttpEngine engine;
     private int redirectionCount;
@@ -48,9 +46,10 @@ public final class Call {
      */
     private Request request;
 
-    Call(OkHttpClient client, Dispatcher dispatcher, Request request) {
-        this.client = client;
-        this.dispatcher = dispatcher;
+    protected Call(OkHttpClient client, Request request) {
+        // Copy the client. Otherwise changes (socket factory, redirect policy,
+        // etc.) may incorrectly be reflected in the request when it is executed.
+        this.client = client.copyWithDefaults();
         this.request = request;
     }
 
@@ -102,7 +101,7 @@ public final class Call {
             if (executed) throw new IllegalStateException("Already Executed");
             executed = true;
         }
-        dispatcher.enqueue(new AsyncCall(responseCallback));
+        client.getDispatcher().enqueue(new AsyncCall(responseCallback));
     }
 
     /**
@@ -123,11 +122,12 @@ public final class Call {
         RequestBody body = request.body();
         RetryableSink requestBodyOut = null;
         if (body != null) {
-            MediaType contentType = body.contentType();
-            if (contentType == null) throw new IllegalStateException("contentType == null");
-
             Request.Builder requestBuilder = request.newBuilder();
-            requestBuilder.header("Content-Type", contentType.toString());
+
+            MediaType contentType = body.contentType();
+            if (contentType != null) {
+                requestBuilder.header("Content-Type", contentType.toString());
+            }
 
             long contentLength = body.contentLength();
             if (contentLength != -1) {
@@ -253,14 +253,15 @@ public final class Call {
                     responseCallback.onFailure(request, new IOException("Canceled"));
                 } else {
                     signalledCallback = true;
+                    engine.releaseConnection();
                     responseCallback.onResponse(response);
                 }
             } catch (IOException e) {
-                if (signalledCallback) return; // Do not signal the callback twice!
+                if (signalledCallback)
+                    throw new RuntimeException(e); // Do not signal the callback twice!
                 responseCallback.onFailure(request, e);
             } finally {
-                engine.close(); // Close the connection if it isn't already.
-                dispatcher.finished(this);
+                client.getDispatcher().finished(this);
             }
         }
     }

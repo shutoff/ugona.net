@@ -18,7 +18,7 @@
 /**
  * @author Alexander Y. Kleymenov
  */
-package okio;
+package com.squareup.okio;
 
 import java.io.UnsupportedEncodingException;
 

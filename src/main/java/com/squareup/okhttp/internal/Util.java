@@ -18,6 +18,9 @@ package com.squareup.okhttp.internal;
 
 import com.squareup.okhttp.internal.http.RetryableSink;
 import com.squareup.okhttp.internal.spdy.Header;
+import com.squareup.okio.Buffer;
+import com.squareup.okio.ByteString;
+import com.squareup.okio.Source;
 
 import java.io.Closeable;
 import java.io.File;
@@ -35,10 +38,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
-
-import okio.Buffer;
-import okio.ByteString;
-import okio.Source;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 

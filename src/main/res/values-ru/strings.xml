@@ -19,7 +19,7 @@
     <string name="sms_error">Не могу отправить SMS</string>
     <string name="sms_err">Ошибка отправки SMS</string>
     <string name="auth">Авторизация</string>
-    <string name="auth_summary">Авторизация на car-online.ru</string>
+    <string name="auth_summary">Авторизация на сервере</string>
     <string name="save">Сохранить</string>
     <string name="bad_key">Неправильный ключ API</string>
     <string name="valet_on">Включить режим АВТОСЕРВИС</string>

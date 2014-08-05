@@ -92,6 +92,7 @@ public class StateFragment extends Fragment
     View vRele2;
     View vRele2i;
     View vSound;
+    View vGuard;
     View pMotor;
     View pRele;
     View pBlock;
@@ -101,12 +102,14 @@ public class StateFragment extends Fragment
     View pRele2;
     View pRele2i;
     View pSound;
+    View pGuard;
     ImageView ivMotor;
     ImageView ivRele;
     ImageView ivValet;
     ImageView ivRele1;
     ImageView ivRele2;
     ImageView ivSound;
+    ImageView ivGuard;
 
     View vLevel;
     TextView tvLevel;
@@ -189,6 +192,7 @@ public class StateFragment extends Fragment
         vRele2 = v.findViewById(R.id.rele2);
         vRele2i = v.findViewById(R.id.rele2_impulse);
         vSound = v.findViewById(R.id.sound);
+        vGuard = v.findViewById(R.id.guard);
 
         pMotor = v.findViewById(R.id.motor_prg);
         pRele = v.findViewById(R.id.rele_prg);
@@ -199,6 +203,7 @@ public class StateFragment extends Fragment
         pRele2 = v.findViewById(R.id.rele2_prg);
         pRele2i = v.findViewById(R.id.rele2_impulse_prg);
         pSound = v.findViewById(R.id.sound_prg);
+        pGuard = v.findViewById(R.id.guard_prg);
 
         ivMotor = (ImageView) v.findViewById(R.id.motor_img);
         ivValet = (ImageView) v.findViewById(R.id.valet_img);
@@ -206,6 +211,7 @@ public class StateFragment extends Fragment
         ivRele1 = (ImageView) v.findViewById(R.id.rele1_img);
         ivRele2 = (ImageView) v.findViewById(R.id.rele2_img);
         ivSound = (ImageView) v.findViewById(R.id.sound_img);
+        ivGuard = (ImageView) v.findViewById(R.id.guard_img);
 
         vLevel = v.findViewById(R.id.level_row);
         ivLevel = (ImageView) v.findViewById(R.id.level_img);
@@ -226,6 +232,7 @@ public class StateFragment extends Fragment
             vRele2.setOnTouchListener(this);
             vRele2i.setOnTouchListener(this);
             vSound.setOnTouchListener(this);
+            vGuard.setOnTouchListener(this);
 
             vMain.setTag("voltage");
             vMain.setOnClickListener(clickListener);
@@ -646,7 +653,7 @@ public class StateFragment extends Fragment
             vBlock.setVisibility(View.GONE);
         }
         boolean valet = preferences.getBoolean(Names.Car.GUARD0 + car_id, false) && !preferences.getBoolean(Names.Car.GUARD1 + car_id, false);
-        if ((((commands & State.CMD_VALET) != 0) || valet || block)) {
+        if (!State.isPandora(preferences, car_id) && (((commands & State.CMD_VALET) != 0) || valet || block)) {
             if (valet) {
                 ivValet.setImageResource(R.drawable.icon_valet_off);
                 pValet.setVisibility(SmsMonitor.isProcessed(car_id, R.string.valet_off) ? View.VISIBLE : View.GONE);
@@ -657,6 +664,16 @@ public class StateFragment extends Fragment
             vValet.setVisibility(View.VISIBLE);
         } else {
             vValet.setVisibility(View.GONE);
+        }
+        if (State.isPandora(preferences, car_id) && ((commands & State.CMD_GUARD) != 0)) {
+            if (preferences.getBoolean(Names.Car.GUARD + car_id, false)) {
+                ivGuard.setImageResource(R.drawable.icon_guard_off);
+            } else {
+                ivGuard.setImageResource(R.drawable.icon_guard_on);
+            }
+            vGuard.setVisibility(View.VISIBLE);
+        } else {
+            vGuard.setVisibility(View.GONE);
         }
         if (State.hasTelephony(context) && ((commands & State.CMD_CALL) != 0)) {
             vPhone.setVisibility(View.VISIBLE);
@@ -1098,6 +1115,13 @@ public class StateFragment extends Fragment
                 } else {
                     Actions.valet_on(getActivity(), car_id, longTap);
                 }
+            }
+        }
+        if (v == vGuard) {
+            if (preferences.getBoolean(Names.Car.GUARD + car_id, false)) {
+                Actions.send_pandora_cmd(getActivity(), car_id, 2);
+            } else {
+                Actions.send_pandora_cmd(getActivity(), car_id, 1);
             }
         }
         if (v == vSound) {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okio;
+package com.squareup.okio;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,7 +26,7 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static okio.Util.checkOffsetAndCount;
+import static com.squareup.okio.Util.checkOffsetAndCount;
 
 /**
  * Essential APIs for working with Okio.
@@ -173,7 +173,6 @@ public final class Okio {
         if (file == null) throw new IllegalArgumentException("file == null");
         return source(new FileInputStream(file));
     }
-
 
     /**
      * Returns a sink that writes to {@code file}.

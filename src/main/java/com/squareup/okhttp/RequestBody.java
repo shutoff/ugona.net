@@ -16,37 +16,36 @@
 package com.squareup.okhttp;
 
 import com.squareup.okhttp.internal.Util;
+import com.squareup.okio.BufferedSink;
+import com.squareup.okio.Okio;
+import com.squareup.okio.Source;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
-import okio.BufferedSink;
-import okio.Okio;
-import okio.Source;
+import java.nio.charset.Charset;
 
 public abstract class RequestBody {
     /**
      * Returns a new request body that transmits {@code content}. If {@code
-     * contentType} lacks a charset, this will use UTF-8.
+     * contentType} is non-null and lacks a charset, this will use UTF-8.
      */
     public static RequestBody create(MediaType contentType, String content) {
-        contentType = contentType.charset() != null
-                ? contentType
-                : MediaType.parse(contentType + "; charset=utf-8");
-        try {
-            byte[] bytes = content.getBytes(contentType.charset().name());
-            return create(contentType, bytes);
-        } catch (UnsupportedEncodingException e) {
-            throw new AssertionError();
+        Charset charset = Util.UTF_8;
+        if (contentType != null) {
+            charset = contentType.charset();
+            if (charset == null) {
+                charset = Util.UTF_8;
+                contentType = MediaType.parse(contentType + "; charset=utf-8");
+            }
         }
+        byte[] bytes = content.getBytes(charset);
+        return create(contentType, bytes);
     }
 
     /**
      * Returns a new request body that transmits {@code content}.
      */
     public static RequestBody create(final MediaType contentType, final byte[] content) {
-        if (contentType == null) throw new NullPointerException("contentType == null");
         if (content == null) throw new NullPointerException("content == null");
 
         return new RequestBody() {
@@ -71,7 +70,6 @@ public abstract class RequestBody {
      * Returns a new request body that transmits the content of {@code file}.
      */
     public static RequestBody create(final MediaType contentType, final File file) {
-        if (contentType == null) throw new NullPointerException("contentType == null");
         if (file == null) throw new NullPointerException("content == null");
 
         return new RequestBody() {

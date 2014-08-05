@@ -16,6 +16,11 @@
 
 package com.squareup.okhttp.internal;
 
+import com.squareup.okio.Buffer;
+import com.squareup.okio.BufferedSink;
+import com.squareup.okio.BufferedSource;
+import com.squareup.okio.Okio;
+
 import java.io.Closeable;
 import java.io.EOFException;
 import java.io.File;
@@ -26,6 +31,7 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,11 +40,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import okio.Buffer;
-import okio.BufferedSink;
-import okio.BufferedSource;
-import okio.Okio;
 
 /**
  * A cache that uses a bounded amount of space on a filesystem. Each cache
@@ -153,8 +154,7 @@ public final class DiskLruCache implements Closeable {
     private final File journalFileBackup;
     private final int appVersion;
     private final int valueCount;
-    private final LinkedHashMap<String, Entry> lruEntries =
-            new LinkedHashMap<String, Entry>(0, 0.75f, true);
+    private final LinkedHashMap<String, Entry> lruEntries = new LinkedHashMap<String, Entry>(0, 0.75f, true);
     private long maxSize;
     private long size = 0;
     private BufferedSink journalWriter;
@@ -230,7 +230,7 @@ public final class DiskLruCache implements Closeable {
             try {
                 cache.readJournal();
                 cache.processJournal();
-                cache.journalWriter = Okio.buffer(Okio.sink(new FileOutputStream(cache.journalFile, true)));
+                cache.journalWriter = Okio.buffer(Okio.appendingSink(cache.journalFile));
                 return cache;
             } catch (IOException journalIsCorrupt) {
                 Platform.get().logW("DiskLruCache " + directory + " is corrupt: "
@@ -358,8 +358,8 @@ public final class DiskLruCache implements Closeable {
             } else {
                 entry.currentEditor = null;
                 for (int t = 0; t < valueCount; t++) {
-                    deleteIfExists(entry.getCleanFile(t));
-                    deleteIfExists(entry.getDirtyFile(t));
+                    deleteIfExists(entry.cleanFiles[t]);
+                    deleteIfExists(entry.dirtyFiles[t]);
                 }
                 i.remove();
             }
@@ -431,7 +431,7 @@ public final class DiskLruCache implements Closeable {
         InputStream[] ins = new InputStream[valueCount];
         try {
             for (int i = 0; i < valueCount; i++) {
-                ins[i] = new FileInputStream(entry.getCleanFile(i));
+                ins[i] = new FileInputStream(entry.cleanFiles[i]);
             }
         } catch (FileNotFoundException e) {
             // A file must have been deleted manually!
@@ -532,7 +532,7 @@ public final class DiskLruCache implements Closeable {
                     editor.abort();
                     throw new IllegalStateException("Newly created entry didn't create value for index " + i);
                 }
-                if (!entry.getDirtyFile(i).exists()) {
+                if (!entry.dirtyFiles[i].exists()) {
                     editor.abort();
                     return;
                 }
@@ -540,10 +540,10 @@ public final class DiskLruCache implements Closeable {
         }
 
         for (int i = 0; i < valueCount; i++) {
-            File dirty = entry.getDirtyFile(i);
+            File dirty = entry.dirtyFiles[i];
             if (success) {
                 if (dirty.exists()) {
-                    File clean = entry.getCleanFile(i);
+                    File clean = entry.cleanFiles[i];
                     dirty.renameTo(clean);
                     long oldLength = entry.lengths[i];
                     long newLength = clean.length();
@@ -604,7 +604,7 @@ public final class DiskLruCache implements Closeable {
         }
 
         for (int i = 0; i < valueCount; i++) {
-            File file = entry.getCleanFile(i);
+            File file = entry.cleanFiles[i];
             deleteIfExists(file);
             size -= entry.lengths[i];
             entry.lengths[i] = 0;
@@ -766,7 +766,7 @@ public final class DiskLruCache implements Closeable {
                     return null;
                 }
                 try {
-                    return new FileInputStream(entry.getCleanFile(index));
+                    return new FileInputStream(entry.cleanFiles[index]);
                 } catch (FileNotFoundException e) {
                     return null;
                 }
@@ -797,7 +797,7 @@ public final class DiskLruCache implements Closeable {
                 if (!entry.readable) {
                     written[index] = true;
                 }
-                File dirtyFile = entry.getDirtyFile(index);
+                File dirtyFile = entry.dirtyFiles[index];
                 FileOutputStream outputStream;
                 try {
                     outputStream = new FileOutputStream(dirtyFile);
@@ -905,6 +905,8 @@ public final class DiskLruCache implements Closeable {
          * Lengths of this entry's files.
          */
         private final long[] lengths;
+        private final File[] cleanFiles;
+        private final File[] dirtyFiles;
 
         /**
          * True if this entry has ever been published.
@@ -923,7 +925,21 @@ public final class DiskLruCache implements Closeable {
 
         private Entry(String key) {
             this.key = key;
-            this.lengths = new long[valueCount];
+
+            lengths = new long[valueCount];
+            cleanFiles = new File[valueCount];
+            dirtyFiles = new File[valueCount];
+
+            // The names are repetitive so re-use the same builder to avoid allocations.
+            StringBuilder fileBuilder = new StringBuilder(key).append('.');
+            int truncateTo = fileBuilder.length();
+            for (int i = 0; i < valueCount; i++) {
+                fileBuilder.append(i);
+                cleanFiles[i] = new File(directory, fileBuilder.toString());
+                fileBuilder.append(".tmp");
+                dirtyFiles[i] = new File(directory, fileBuilder.toString());
+                fileBuilder.setLength(truncateTo);
+            }
         }
 
         public String getLengths() throws IOException {
@@ -952,15 +968,7 @@ public final class DiskLruCache implements Closeable {
         }
 
         private IOException invalidLengths(String[] strings) throws IOException {
-            throw new IOException("unexpected journal line: " + java.util.Arrays.toString(strings));
-        }
-
-        public File getCleanFile(int i) {
-            return new File(directory, key + "." + i);
-        }
-
-        public File getDirtyFile(int i) {
-            return new File(directory, key + "." + i + ".tmp");
+            throw new IOException("unexpected journal line: " + Arrays.toString(strings));
         }
     }
 }

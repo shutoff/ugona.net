@@ -23,6 +23,11 @@ import com.squareup.okhttp.internal.http.CacheStrategy;
 import com.squareup.okhttp.internal.http.HttpMethod;
 import com.squareup.okhttp.internal.http.OkHeaders;
 import com.squareup.okhttp.internal.http.StatusLine;
+import com.squareup.okio.BufferedSource;
+import com.squareup.okio.ByteString;
+import com.squareup.okio.ForwardingSource;
+import com.squareup.okio.Okio;
+import com.squareup.okio.Source;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -41,12 +46,6 @@ import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import okio.BufferedSource;
-import okio.ByteString;
-import okio.ForwardingSource;
-import okio.Okio;
-import okio.Source;
 
 import static com.squareup.okhttp.internal.Util.UTF_8;
 
@@ -536,7 +535,7 @@ public final class Cache {
             String contentLength = responseHeaders.get("Content-Length");
             Request cacheRequest = new Request.Builder()
                     .url(url)
-                    .method(message, null)
+                    .method(requestMethod, null)
                     .headers(varyHeaders)
                     .build();
             return new Response.Builder()
