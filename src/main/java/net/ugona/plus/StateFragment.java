@@ -974,6 +974,14 @@ public class StateFragment extends Fragment
 
     void doCommand(View v, final boolean longTap) {
         if (v == vMotor) {
+            if (State.isPandora(preferences, car_id)) {
+                if (preferences.getBoolean(Names.Car.AZ + car_id, false)) {
+                    Actions.send_pandora_cmd(getActivity(), car_id, 4, R.string.motor_on);
+                } else {
+                    Actions.send_pandora_cmd(getActivity(), car_id, 8, R.string.motor_off);
+                }
+                return;
+            }
             boolean az = (Boolean) vMotor.getTag();
             if (az) {
                 if (SmsMonitor.isProcessed(car_id, R.string.motor_off)) {
@@ -992,6 +1000,14 @@ public class StateFragment extends Fragment
             }
         }
         if (v == vRele) {
+            if (State.isPandora(preferences, car_id)) {
+                if (preferences.getBoolean(Names.Car.HEATER + car_id, false)) {
+                    Actions.send_pandora_cmd(getActivity(), car_id, 0x16, R.string.rele);
+                } else {
+                    Actions.send_pandora_cmd(getActivity(), car_id, 0x17, R.string.heater_off);
+                }
+                return;
+            }
             if (preferences.getString(Names.Car.CAR_RELE + car_id, "").equals("3")) {
                 if (SmsMonitor.isProcessed(car_id, R.string.heater_air)) {
                     SmsMonitor.cancelSMS(getActivity(), car_id, R.string.heater_air);
@@ -1119,9 +1135,9 @@ public class StateFragment extends Fragment
         }
         if (v == vGuard) {
             if (preferences.getBoolean(Names.Car.GUARD + car_id, false)) {
-                Actions.send_pandora_cmd(getActivity(), car_id, 2);
+                Actions.send_pandora_cmd(getActivity(), car_id, 2, R.string.guard_off);
             } else {
-                Actions.send_pandora_cmd(getActivity(), car_id, 1);
+                Actions.send_pandora_cmd(getActivity(), car_id, 1, R.string.guard_on);
             }
         }
         if (v == vSound) {

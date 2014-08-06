@@ -279,58 +279,58 @@ public class ActionFragment extends Fragment
                     context.startActivity(intent);
                 }
             },
-            new Action(R.drawable.icon_guard_on, R.string.guard_on) {
-                @Override
-                void action(Context context, String car_id, boolean longTap) {
-                    Actions.send_pandora_cmd(context, car_id, 1);
-                }
-            },
             new Action(R.drawable.icon_guard_off, R.string.guard_off) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-                    Actions.send_pandora_cmd(context, car_id, 2);
+                    Actions.send_pandora_cmd(context, car_id, 2, R.string.guard_off);
+                }
+            },
+            new Action(R.drawable.icon_guard_on, R.string.guard_on) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.send_pandora_cmd(context, car_id, 1, R.string.guard_on);
                 }
             },
             new Action(R.drawable.icon_motor_on, R.string.motor_on, State.CMD_AZ) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-                    Actions.send_pandora_cmd(context, car_id, 4);
+                    Actions.send_pandora_cmd(context, car_id, 4, R.string.motor_on);
                 }
             },
             new Action(R.drawable.icon_motor_off, R.string.motor_off, State.CMD_AZ) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-                    Actions.send_pandora_cmd(context, car_id, 8);
+                    Actions.send_pandora_cmd(context, car_id, 8, R.string.motor_off);
                 }
             },
             new Action(R.drawable.icon_turbo_on, R.string.turbo_on) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-                    Actions.send_pandora_cmd(context, car_id, 0x10);
+                    Actions.send_pandora_cmd(context, car_id, 0x10, R.string.turbo_on);
                 }
             },
             new Action(R.drawable.icon_turbo_off, R.string.turbo_off) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-                    Actions.send_pandora_cmd(context, car_id, 0x20);
+                    Actions.send_pandora_cmd(context, car_id, 0x20, R.string.turbo_off);
                 }
             },
             new Action(R.drawable.icon_heater, R.string.rele, State.CMD_RELE) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-                    Actions.send_pandora_cmd(context, car_id, 0x15);
+                    Actions.send_pandora_cmd(context, car_id, 0x15, R.string.rele);
                 }
             },
             new Action(R.drawable.icon_heater_on, R.string.heater_off, State.CMD_RELE) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-                    Actions.send_pandora_cmd(context, car_id, 0x16);
+                    Actions.send_pandora_cmd(context, car_id, 0x16, R.string.heater_off);
                 }
             },
             new Action(R.drawable.sound, R.string.sound) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-                    Actions.send_pandora_cmd(context, car_id, 0x17);
+                    Actions.send_pandora_cmd(context, car_id, 0x17, R.string.sound);
                 }
             },
     };

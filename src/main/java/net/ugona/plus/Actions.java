@@ -1047,7 +1047,7 @@ public class Actions {
     static void search(Context context, final String car_id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         if (State.isPandora(preferences, car_id)) {
-            send_pandora_cmd(context, car_id, 0x17);
+            send_pandora_cmd(context, car_id, 0x17, R.string.sound);
             return;
         }
         String number = preferences.getString(Names.Car.CAR_PHONE + car_id, "");
@@ -1424,30 +1424,67 @@ public class Actions {
         return false;
     }
 
-    static void send_pandora_cmd(final Context context, final String car_id, int cmd) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        HttpTask task = new HttpTask() {
+    static void send_pandora_cmd(final Context context, final String car_id, final int cmd, final int id_title) {
+        if (!isNetwork(context)) {
+            AlertDialog dialog = new AlertDialog.Builder(context)
+                    .setTitle(R.string.error)
+                    .setMessage(R.string.no_network)
+                    .setNegativeButton(R.string.cancel, null)
+                    .setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            send_pandora_cmd(context, car_id, cmd, id_title);
+                        }
+                    })
+                    .create();
+            dialog.show();
+            return;
+        }
+        requestPassword(context, car_id, id_title, 0, new Answer() {
             @Override
-            void result(JsonObject res) throws ParseException {
-                Intent i = new Intent(SmsMonitor.SMS_SEND);
-                i.putExtra(Names.ID, car_id);
-                context.sendBroadcast(i);
-                i = new Intent(context, FetchService.class);
-                i.putExtra(Names.ID, car_id);
-                context.startService(i);
-            }
+            void answer(String text) {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                final ProgressDialog progressDialog = new ProgressDialog(context);
+                progressDialog.setMessage(context.getString(R.string.send_command));
+                progressDialog.show();
+                HttpTask task = new HttpTask() {
+                    @Override
+                    void result(JsonObject res) throws ParseException {
+                        try {
+                            progressDialog.dismiss();
+                        } catch (Exception ex) {
+                            // ignore
+                        }
+                        Intent i = new Intent(SmsMonitor.SMS_SEND);
+                        i.putExtra(Names.ID, car_id);
+                        context.sendBroadcast(i);
+                        i = new Intent(context, FetchService.class);
+                        i.putExtra(Names.ID, car_id);
+                        context.startService(i);
+                    }
 
-            @Override
-            void error() {
-                AlertDialog dialog = new AlertDialog.Builder(context)
-                        .setTitle(R.string.error)
-                        .setMessage(R.string.cmd_error)
-                        .setNegativeButton(R.string.cancel, null)
-                        .create();
-                dialog.show();
+                    @Override
+                    void error() {
+                        try {
+                            progressDialog.dismiss();
+                            if (error_text.equals("Can't connect to car"))
+                                error_text = context.getString(R.string.cant_connect);
+                            if (error_text.equals("Can't execute command"))
+                                error_text = context.getString(R.string.cmd_error);
+                            AlertDialog dialog = new AlertDialog.Builder(context)
+                                    .setTitle(R.string.error)
+                                    .setMessage(error_text)
+                                    .setNegativeButton(R.string.cancel, null)
+                                    .create();
+                            dialog.show();
+                        } catch (Exception ex) {
+                            // ignore
+                        }
+                    }
+                };
+                task.execute(URL_CMD, preferences.getString(Names.Car.CAR_KEY + car_id, ""), cmd);
             }
-        };
-        task.execute(URL_CMD, preferences.getString(Names.Car.CAR_KEY + car_id, ""), cmd);
+        });
     }
 
     static class Ccode {
