@@ -620,4 +620,5 @@
     <string name="old_ccode">Old C-code:</string>
     <string name="new_ccode">New C-code:</string>
     <string name="new_ccode_invalid">С-code does not match</string>
+    <string name="open_trunk">Open trunk</string>
 </resources>

@@ -46,17 +46,16 @@ public class ConfigWidget extends Activity {
             widgetID = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
                     AppWidgetManager.INVALID_APPWIDGET_ID);
         }
+
+        resultValue = new Intent();
+        resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetID);
+
+        setResult(RESULT_CANCELED, resultValue);
+
         if (widgetID == AppWidgetManager.INVALID_APPWIDGET_ID) {
             finish();
             return;
         }
-
-        // формируем intent ответа
-        resultValue = new Intent();
-        resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetID);
-
-        // отрицательный ответ
-        setResult(RESULT_CANCELED, resultValue);
 
         final Cars.Car[] cars = Cars.getCars(this);
         preferences = PreferenceManager.getDefaultSharedPreferences(this);

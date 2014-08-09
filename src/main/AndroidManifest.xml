@@ -4,7 +4,7 @@
     android:versionCode="7"
     android:versionName="1.6 RC14">
 
-<uses-sdk
+    <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="19" />
 

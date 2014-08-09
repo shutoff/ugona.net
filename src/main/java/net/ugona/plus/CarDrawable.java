@@ -58,15 +58,14 @@ public class CarDrawable {
             upd = setModeCar(!white, preferences.getBoolean(Names.Car.ZONE_ACCESSORY + car_id, false), doors4);
 
             if (doors4) {
-                boolean doors_alarm = preferences.getBoolean(Names.Car.ZONE_DOOR + car_id, false);
                 boolean fl = preferences.getBoolean(Names.Car.DOOR_FL + car_id, false);
-                upd |= setModeOpen(1, "door_fl", !white, fl, fl && doors_alarm, false);
+                upd |= setModeOpen(1, "door_fl", !white, fl, fl && guard, false);
                 boolean fr = preferences.getBoolean(Names.Car.DOOR_FR + car_id, false);
-                upd |= setModeOpen(6, "door_fr", !white, fr, fr && doors_alarm, false);
+                upd |= setModeOpen(6, "door_fr", !white, fr, fr && guard, false);
                 boolean bl = preferences.getBoolean(Names.Car.DOOR_BL + car_id, false);
-                upd |= setModeOpen(7, "door_bl", !white, bl, bl && doors_alarm, false);
+                upd |= setModeOpen(7, "door_bl", !white, bl, bl && guard, false);
                 boolean br = preferences.getBoolean(Names.Car.DOOR_BR + car_id, false);
-                upd |= setModeOpen(8, "door_br", !white, br, br && doors_alarm, false);
+                upd |= setModeOpen(8, "door_br", !white, br, br && guard, false);
 
             } else {
                 boolean doors_open = preferences.getBoolean(Names.Car.INPUT1 + car_id, false);

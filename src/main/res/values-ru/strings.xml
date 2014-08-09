@@ -619,4 +619,5 @@
     <string name="old_ccode">Старый C-код:</string>
     <string name="new_ccode">Новый C-код:</string>
     <string name="new_ccode_invalid">Новый код и подиверждение не совпадают</string>
+    <string name="open_trunk">Открыть багажник</string>
 </resources>

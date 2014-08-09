@@ -105,7 +105,7 @@ public class ActionFragment extends Fragment
                     context.startActivity(intent);
                 }
             },
-            new Action(R.drawable.icon_status, R.string.search) {
+            new Action(R.drawable.icon_parking, R.string.search) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
                     Actions.search(context, car_id);
@@ -327,10 +327,16 @@ public class ActionFragment extends Fragment
                     Actions.send_pandora_cmd(context, car_id, 0x16, R.string.heater_off);
                 }
             },
-            new Action(R.drawable.sound, R.string.sound) {
+            new Action(R.drawable.icon_parking, R.string.sound) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
                     Actions.send_pandora_cmd(context, car_id, 0x17, R.string.sound);
+                }
+            },
+            new Action(R.drawable.icon_trunk, R.string.open_trunk) {
+                @Override
+                void action(Context context, String car_id, boolean longTap) {
+                    Actions.send_pandora_cmd(context, car_id, 0x23, R.string.open_trunk);
                 }
             },
     };
