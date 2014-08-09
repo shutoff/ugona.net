@@ -98,16 +98,15 @@ public class FetchService extends Service {
         if (intent != null) {
             String car_id = intent.getStringExtra(Names.ID);
             String action = intent.getAction();
-            boolean connect = intent.getBooleanExtra(Names.Car.OFFLINE, false);
             if (action != null) {
                 if (action.equals(ACTION_CLEAR))
                     clearNotification(car_id, intent.getIntExtra(Names.Car.NOTIFY, 0));
                 if (action.equals(ACTION_UPDATE) && (car_id == null)) {
                     Cars.Car[] cars = Cars.getCars(this);
                     for (Cars.Car car : cars) {
-                        new StatusRequest(Preferences.getCar(preferences, car.id), connect);
+                        new StatusRequest(Preferences.getCar(preferences, car.id));
                         for (String p : car.pointers) {
-                            new StatusRequest(p, false);
+                            new StatusRequest(p);
                         }
                     }
                 }
@@ -117,20 +116,21 @@ public class FetchService extends Service {
                     int pictId = intent.getIntExtra(Names.Car.ALARM, 0);
                     int max_id = intent.getIntExtra(Names.Car.EVENT_ID, 0);
                     long when = intent.getLongExtra(Names.Car.EVENT_TIME, 0);
-                    showNotification(car_id, text, pictId, max_id, sound, when);
+                    boolean outgoing = intent.getBooleanExtra(Names.Car.ALARM_MODE, false);
+                    showNotification(car_id, text, pictId, max_id, sound, when, outgoing);
                 }
                 if (action.equals(ACTION_RELE_OFF))
                     Actions.rele_off(this, car_id, intent.getStringExtra(Names.Car.AUTH), intent.getStringExtra(Names.PASSWORD));
             }
             if (car_id != null)
-                new StatusRequest(Preferences.getCar(preferences, car_id), connect);
+                new StatusRequest(Preferences.getCar(preferences, car_id));
         }
         if (startRequest())
             return START_STICKY;
         return START_NOT_STICKY;
     }
 
-    void showNotification(String car_id, String text, int pictId, int max_id, String sound, long when) {
+    void showNotification(String car_id, String text, int pictId, int max_id, String sound, long when, boolean outgoing) {
         String title = getString(R.string.app_name);
         String[] cars = preferences.getString(Names.CARS, "").split(",");
         if (cars.length > 1) {
@@ -197,7 +197,7 @@ public class FetchService extends Service {
         // Add as notification
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Notification notification = builder.build();
-        if ((pictId == R.drawable.white_valet_on) || (pictId == R.drawable.gsm_lost))
+        if (outgoing)
             notification.flags = Notification.FLAG_ONGOING_EVENT;
         manager.notify(max_id, notification);
     }
@@ -338,7 +338,7 @@ public class FetchService extends Service {
                         @Override
                         void error() {
                             requests.remove(key);
-                            new StatusRequest(car_id, false);
+                            new StatusRequest(car_id);
                             long timeout = (error_text != null) ? REPEAT_AFTER_500 : REPEAT_AFTER_ERROR;
                             alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + timeout, timeout, piTimer);
                             sendError(error_text, car_id);
@@ -349,7 +349,7 @@ public class FetchService extends Service {
                 }
             }
             requests.remove(key);
-            new StatusRequest(car_id, false);
+            new StatusRequest(car_id);
             long timeout = (error_text != null) ? REPEAT_AFTER_500 : REPEAT_AFTER_ERROR;
             alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + timeout, timeout, piTimer);
             sendError(error_text, car_id);
@@ -393,11 +393,9 @@ public class FetchService extends Service {
 
         SharedPreferences.Editor ed;
         int msg_id;
-        boolean m_connect;
 
-        StatusRequest(String id, boolean connect) {
+        StatusRequest(String id) {
             super("S", id);
-            m_connect = connect;
         }
 
         @Override
@@ -411,6 +409,7 @@ public class FetchService extends Service {
             JsonValue offline = res.get("offline");
             if (offline != null) {
                 boolean state = offline.asBoolean();
+                State.appendLog("offline=" + state);
                 if (state != preferences.getBoolean(Names.Car.OFFLINE + car_id, false)) {
                     SharedPreferences.Editor ed = preferences.edit();
                     ed.putBoolean(Names.Car.OFFLINE + car_id, state);
@@ -938,7 +937,7 @@ public class FetchService extends Service {
         @Override
         void exec(String api_key) {
             sendUpdate(ACTION_START, car_id);
-            execute(URL_STATUS, api_key, preferences.getLong(Names.Car.EVENT_TIME + car_id, 0), "connect", m_connect ? 1 : null);
+            execute(URL_STATUS, api_key, preferences.getLong(Names.Car.EVENT_TIME + car_id, 0));
         }
 
         void setDoor(String id, JsonObject contact, String key) throws ParseException {

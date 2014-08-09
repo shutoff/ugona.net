@@ -49,7 +49,7 @@ import javax.net.ssl.SSLSocketFactory;
  * {@link #clone()} to make a shallow copy of the OkHttpClient that can be
  * safely modified with further configuration changes.
  */
-public final class OkHttpClient implements Cloneable {
+public class OkHttpClient implements Cloneable {
     static {
         Internal.instance = new Internal() {
             @Override
@@ -74,11 +74,6 @@ public final class OkHttpClient implements Cloneable {
             }
 
             @Override
-            public Object getOwner(Connection connection) {
-                return connection.getOwner();
-            }
-
-            @Override
             public void setProtocol(Connection connection, Protocol protocol) {
                 connection.setProtocol(protocol);
             }
@@ -86,28 +81,6 @@ public final class OkHttpClient implements Cloneable {
             @Override
             public void setOwner(Connection connection, HttpEngine httpEngine) {
                 connection.setOwner(httpEngine);
-            }
-
-            @Override
-            public void connect(Connection connection, int connectTimeout, int readTimeout,
-                                int writeTimeout, Request request) throws IOException {
-                connection.connect(connectTimeout, readTimeout, writeTimeout, request);
-            }
-
-            @Override
-            public boolean isConnected(Connection connection) {
-                return connection.isConnected();
-            }
-
-            @Override
-            public boolean isSpdy(Connection connection) {
-                return connection.isSpdy();
-            }
-
-            @Override
-            public void setTimeouts(Connection connection, int readTimeout, int writeTimeout)
-                    throws IOException {
-                connection.setTimeouts(readTimeout, writeTimeout);
             }
 
             @Override
@@ -136,13 +109,14 @@ public final class OkHttpClient implements Cloneable {
             }
 
             @Override
-            public void share(ConnectionPool connectionPool, Connection connection) {
-                connectionPool.share(connection);
+            public RouteDatabase routeDatabase(OkHttpClient client) {
+                return client.routeDatabase();
             }
 
             @Override
-            public RouteDatabase routeDatabase(OkHttpClient client) {
-                return client.routeDatabase;
+            public void connectAndSetOwner(OkHttpClient client, Connection connection,
+                                           HttpEngine owner, Request request) throws IOException {
+                connection.connectAndSetOwner(client, owner, request);
             }
         };
     }
@@ -171,6 +145,7 @@ public final class OkHttpClient implements Cloneable {
     private Authenticator authenticator;
     private ConnectionPool connectionPool;
     private boolean followSslRedirects = true;
+    private boolean followRedirects = true;
     private int connectTimeout;
     private int readTimeout;
     private int writeTimeout;
@@ -180,24 +155,44 @@ public final class OkHttpClient implements Cloneable {
         dispatcher = new Dispatcher();
     }
 
+    private OkHttpClient(OkHttpClient okHttpClient) {
+        this.routeDatabase = okHttpClient.routeDatabase();
+        this.dispatcher = okHttpClient.getDispatcher();
+        this.proxy = okHttpClient.getProxy();
+        this.protocols = okHttpClient.getProtocols();
+        this.proxySelector = okHttpClient.getProxySelector();
+        this.cookieHandler = okHttpClient.getCookieHandler();
+        this.cache = okHttpClient.getCache();
+        this.internalCache = cache != null ? cache.internalCache : okHttpClient.internalCache;
+        this.socketFactory = okHttpClient.getSocketFactory();
+        this.sslSocketFactory = okHttpClient.getSslSocketFactory();
+        this.hostnameVerifier = okHttpClient.getHostnameVerifier();
+        this.authenticator = okHttpClient.getAuthenticator();
+        this.connectionPool = okHttpClient.getConnectionPool();
+        this.followSslRedirects = okHttpClient.getFollowSslRedirects();
+        this.followRedirects = okHttpClient.getFollowRedirects();
+        this.connectTimeout = okHttpClient.getConnectTimeout();
+        this.readTimeout = okHttpClient.getReadTimeout();
+        this.writeTimeout = okHttpClient.getWriteTimeout();
+    }
+
     /**
      * Sets the default connect timeout for new connections. A value of 0 means no timeout.
      *
      * @see URLConnection#setConnectTimeout(int)
      */
-    public OkHttpClient setConnectTimeout(long timeout, TimeUnit unit) {
+    public final void setConnectTimeout(long timeout, TimeUnit unit) {
         if (timeout < 0) throw new IllegalArgumentException("timeout < 0");
         if (unit == null) throw new IllegalArgumentException("unit == null");
         long millis = unit.toMillis(timeout);
         if (millis > Integer.MAX_VALUE) throw new IllegalArgumentException("Timeout too large.");
         connectTimeout = (int) millis;
-        return this;
     }
 
     /**
      * Default connect timeout (in milliseconds).
      */
-    public int getConnectTimeout() {
+    public final int getConnectTimeout() {
         return connectTimeout;
     }
 
@@ -206,42 +201,40 @@ public final class OkHttpClient implements Cloneable {
      *
      * @see URLConnection#setReadTimeout(int)
      */
-    public OkHttpClient setReadTimeout(long timeout, TimeUnit unit) {
+    public final void setReadTimeout(long timeout, TimeUnit unit) {
         if (timeout < 0) throw new IllegalArgumentException("timeout < 0");
         if (unit == null) throw new IllegalArgumentException("unit == null");
         long millis = unit.toMillis(timeout);
         if (millis > Integer.MAX_VALUE) throw new IllegalArgumentException("Timeout too large.");
         readTimeout = (int) millis;
-        return this;
     }
 
     /**
      * Default read timeout (in milliseconds).
      */
-    public int getReadTimeout() {
+    public final int getReadTimeout() {
         return readTimeout;
     }
 
     /**
      * Sets the default write timeout for new connections. A value of 0 means no timeout.
      */
-    public OkHttpClient setWriteTimeout(long timeout, TimeUnit unit) {
+    public final void setWriteTimeout(long timeout, TimeUnit unit) {
         if (timeout < 0) throw new IllegalArgumentException("timeout < 0");
         if (unit == null) throw new IllegalArgumentException("unit == null");
         long millis = unit.toMillis(timeout);
         if (millis > Integer.MAX_VALUE) throw new IllegalArgumentException("Timeout too large.");
         writeTimeout = (int) millis;
-        return this;
     }
 
     /**
      * Default write timeout (in milliseconds).
      */
-    public int getWriteTimeout() {
+    public final int getWriteTimeout() {
         return writeTimeout;
     }
 
-    public Proxy getProxy() {
+    public final Proxy getProxy() {
         return proxy;
     }
 
@@ -251,12 +244,12 @@ public final class OkHttpClient implements Cloneable {
      * only honored when this proxy is null (which it is by default). To disable
      * proxy use completely, call {@code setProxy(Proxy.NO_PROXY)}.
      */
-    public OkHttpClient setProxy(Proxy proxy) {
+    public final OkHttpClient setProxy(Proxy proxy) {
         this.proxy = proxy;
         return this;
     }
 
-    public ProxySelector getProxySelector() {
+    public final ProxySelector getProxySelector() {
         return proxySelector;
     }
 
@@ -269,12 +262,12 @@ public final class OkHttpClient implements Cloneable {
      * <p>If unset, the {@link ProxySelector#getDefault() system-wide default}
      * proxy selector will be used.
      */
-    public OkHttpClient setProxySelector(ProxySelector proxySelector) {
+    public final OkHttpClient setProxySelector(ProxySelector proxySelector) {
         this.proxySelector = proxySelector;
         return this;
     }
 
-    public CookieHandler getCookieHandler() {
+    public final CookieHandler getCookieHandler() {
         return cookieHandler;
     }
 
@@ -285,7 +278,7 @@ public final class OkHttpClient implements Cloneable {
      * <p>If unset, the {@link CookieHandler#getDefault() system-wide default}
      * cookie handler will be used.
      */
-    public OkHttpClient setCookieHandler(CookieHandler cookieHandler) {
+    public final OkHttpClient setCookieHandler(CookieHandler cookieHandler) {
         this.cookieHandler = cookieHandler;
         return this;
     }
@@ -293,27 +286,26 @@ public final class OkHttpClient implements Cloneable {
     /**
      * Sets the response cache to be used to read and write cached responses.
      */
-    OkHttpClient setInternalCache(InternalCache internalCache) {
+    final void setInternalCache(InternalCache internalCache) {
         this.internalCache = internalCache;
         this.cache = null;
-        return this;
     }
 
-    InternalCache internalCache() {
+    final InternalCache internalCache() {
         return internalCache;
     }
 
-    public Cache getCache() {
+    public final Cache getCache() {
         return cache;
     }
 
-    public OkHttpClient setCache(Cache cache) {
+    public final OkHttpClient setCache(Cache cache) {
         this.cache = cache;
-        this.internalCache = cache != null ? cache.internalCache : null;
+        this.internalCache = null;
         return this;
     }
 
-    public SocketFactory getSocketFactory() {
+    public final SocketFactory getSocketFactory() {
         return socketFactory;
     }
 
@@ -323,12 +315,12 @@ public final class OkHttpClient implements Cloneable {
      * <p>If unset, the {@link SocketFactory#getDefault() system-wide default}
      * socket factory will be used.
      */
-    public OkHttpClient setSocketFactory(SocketFactory socketFactory) {
+    public final OkHttpClient setSocketFactory(SocketFactory socketFactory) {
         this.socketFactory = socketFactory;
         return this;
     }
 
-    public SSLSocketFactory getSslSocketFactory() {
+    public final SSLSocketFactory getSslSocketFactory() {
         return sslSocketFactory;
     }
 
@@ -337,12 +329,12 @@ public final class OkHttpClient implements Cloneable {
      * <p/>
      * <p>If unset, a lazily created SSL socket factory will be used.
      */
-    public OkHttpClient setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
+    public final OkHttpClient setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
         this.sslSocketFactory = sslSocketFactory;
         return this;
     }
 
-    public HostnameVerifier getHostnameVerifier() {
+    public final HostnameVerifier getHostnameVerifier() {
         return hostnameVerifier;
     }
 
@@ -354,12 +346,12 @@ public final class OkHttpClient implements Cloneable {
      * {@link javax.net.ssl.HttpsURLConnection#getDefaultHostnameVerifier()
      * system-wide default} hostname verifier will be used.
      */
-    public OkHttpClient setHostnameVerifier(HostnameVerifier hostnameVerifier) {
+    public final OkHttpClient setHostnameVerifier(HostnameVerifier hostnameVerifier) {
         this.hostnameVerifier = hostnameVerifier;
         return this;
     }
 
-    public Authenticator getAuthenticator() {
+    public final Authenticator getAuthenticator() {
         return authenticator;
     }
 
@@ -370,12 +362,12 @@ public final class OkHttpClient implements Cloneable {
      * <p>If unset, the {@link java.net.Authenticator#setDefault system-wide default}
      * authenticator will be used.
      */
-    public OkHttpClient setAuthenticator(Authenticator authenticator) {
+    public final OkHttpClient setAuthenticator(Authenticator authenticator) {
         this.authenticator = authenticator;
         return this;
     }
 
-    public ConnectionPool getConnectionPool() {
+    public final ConnectionPool getConnectionPool() {
         return connectionPool;
     }
 
@@ -385,12 +377,12 @@ public final class OkHttpClient implements Cloneable {
      * <p>If unset, the {@link ConnectionPool#getDefault() system-wide
      * default} connection pool will be used.
      */
-    public OkHttpClient setConnectionPool(ConnectionPool connectionPool) {
+    public final OkHttpClient setConnectionPool(ConnectionPool connectionPool) {
         this.connectionPool = connectionPool;
         return this;
     }
 
-    public boolean getFollowSslRedirects() {
+    public final boolean getFollowSslRedirects() {
         return followSslRedirects;
     }
 
@@ -401,16 +393,30 @@ public final class OkHttpClient implements Cloneable {
      * <p>If unset, protocol redirects will be followed. This is different than
      * the built-in {@code HttpURLConnection}'s default.
      */
-    public OkHttpClient setFollowSslRedirects(boolean followProtocolRedirects) {
+    public final OkHttpClient setFollowSslRedirects(boolean followProtocolRedirects) {
         this.followSslRedirects = followProtocolRedirects;
         return this;
     }
 
-    RouteDatabase getRoutesDatabase() {
+    public final boolean getFollowRedirects() {
+        return followRedirects;
+    }
+
+    /**
+     * Configure this client to follow redirects.
+     * <p/>
+     * <p>If unset, redirects will not be followed. This is the equivalent as the
+     * built-in {@code HttpURLConnection}'s default.
+     */
+    public final void setFollowRedirects(boolean followRedirects) {
+        this.followRedirects = followRedirects;
+    }
+
+    final RouteDatabase routeDatabase() {
         return routeDatabase;
     }
 
-    public Dispatcher getDispatcher() {
+    public final Dispatcher getDispatcher() {
         return dispatcher;
     }
 
@@ -418,13 +424,13 @@ public final class OkHttpClient implements Cloneable {
      * Sets the dispatcher used to set policy and execute asynchronous requests.
      * Must not be null.
      */
-    public OkHttpClient setDispatcher(Dispatcher dispatcher) {
+    public final OkHttpClient setDispatcher(Dispatcher dispatcher) {
         if (dispatcher == null) throw new IllegalArgumentException("dispatcher == null");
         this.dispatcher = dispatcher;
         return this;
     }
 
-    public List<Protocol> getProtocols() {
+    public final List<Protocol> getProtocols() {
         return protocols;
     }
 
@@ -439,11 +445,11 @@ public final class OkHttpClient implements Cloneable {
      * <ul>
      * <li><a href="http://www.w3.org/Protocols/rfc2616/rfc2616.html">http/1.1</a>
      * <li><a href="http://www.chromium.org/spdy/spdy-protocol/spdy-protocol-draft3-1">spdy/3.1</a>
-     * <li><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-12">h2-12</a>
+     * <li><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-13">h2-13</a>
      * </ul>
      * <p/>
      * <p><strong>This is an evolving set.</strong> Future releases may drop
-     * support for transitional protocols (like h2-12), in favor of their
+     * support for transitional protocols (like h2-13), in favor of their
      * successors (h2). The http/1.1 transport will never be dropped.
      * <p/>
      * <p>If multiple protocols are specified, <a
@@ -454,7 +460,7 @@ public final class OkHttpClient implements Cloneable {
      * @param protocols the protocols to use, in order of preference. The list
      *                  must contain {@link Protocol#HTTP_1_1}. It must not contain null.
      */
-    public OkHttpClient setProtocols(List<Protocol> protocols) {
+    public final OkHttpClient setProtocols(List<Protocol> protocols) {
         protocols = Util.immutableList(protocols);
         if (!protocols.contains(Protocol.HTTP_1_1)) {
             throw new IllegalArgumentException("protocols doesn't contain http/1.1: " + protocols);
@@ -470,10 +476,7 @@ public final class OkHttpClient implements Cloneable {
      * Prepares the {@code request} to be executed at some point in the future.
      */
     public Call newCall(Request request) {
-        // Copy the client. Otherwise changes (socket factory, redirect policy,
-        // etc.) may incorrectly be reflected in the request when it is executed.
-        OkHttpClient client = copyWithDefaults();
-        return new Call(client, dispatcher, request);
+        return new Call(this, request);
     }
 
     /**
@@ -481,7 +484,7 @@ public final class OkHttpClient implements Cloneable {
      * complete cannot be canceled.
      */
     public OkHttpClient cancel(Object tag) {
-        dispatcher.cancel(tag);
+        getDispatcher().cancel(tag);
         return this;
     }
 
@@ -489,8 +492,8 @@ public final class OkHttpClient implements Cloneable {
      * Returns a shallow copy of this OkHttpClient that uses the system-wide
      * default for each field that hasn't been explicitly configured.
      */
-    OkHttpClient copyWithDefaults() {
-        OkHttpClient result = clone();
+    final OkHttpClient copyWithDefaults() {
+        OkHttpClient result = new OkHttpClient(this);
         if (result.proxySelector == null) {
             result.proxySelector = ProxySelector.getDefault();
         }
@@ -546,7 +549,7 @@ public final class OkHttpClient implements Cloneable {
      * Returns a shallow copy of this OkHttpClient.
      */
     @Override
-    public OkHttpClient clone() {
+    public final OkHttpClient clone() {
         try {
             return (OkHttpClient) super.clone();
         } catch (CloneNotSupportedException e) {

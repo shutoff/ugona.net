@@ -16,13 +16,13 @@
 
 package com.squareup.okhttp.internal.http;
 
+import com.squareup.okio.Buffer;
+import com.squareup.okio.BufferedSink;
+import com.squareup.okio.Sink;
+import com.squareup.okio.Timeout;
+
 import java.io.IOException;
 import java.net.ProtocolException;
-
-import okio.Buffer;
-import okio.BufferedSink;
-import okio.Sink;
-import okio.Timeout;
 
 import static com.squareup.okhttp.internal.Util.checkOffsetAndCount;
 

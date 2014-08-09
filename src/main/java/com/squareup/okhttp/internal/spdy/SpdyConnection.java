@@ -18,6 +18,10 @@ package com.squareup.okhttp.internal.spdy;
 import com.squareup.okhttp.Protocol;
 import com.squareup.okhttp.internal.NamedRunnable;
 import com.squareup.okhttp.internal.Util;
+import com.squareup.okio.Buffer;
+import com.squareup.okio.BufferedSource;
+import com.squareup.okio.ByteString;
+import com.squareup.okio.Okio;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -35,11 +39,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import okio.Buffer;
-import okio.BufferedSource;
-import okio.ByteString;
-import okio.Okio;
 
 import static com.squareup.okhttp.internal.spdy.Settings.DEFAULT_INITIAL_WINDOW_SIZE;
 
@@ -69,12 +68,12 @@ public final class SpdyConnection implements Closeable {
     private static final ExecutorService executor = new ThreadPoolExecutor(0,
             Integer.MAX_VALUE, 60, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(),
             Util.threadFactory("OkHttp SpdyConnection", true));
-
+    // okHttpSettings.set(Settings.MAX_CONCURRENT_STREAMS, 0, max);
+    private static final int OKHTTP_CLIENT_WINDOW_SIZE = 16 * 1024 * 1024;
     /**
      * The protocol variant, like {@link com.squareup.okhttp.internal.spdy.Spdy3}.
      */
     final Protocol protocol;
-
     /**
      * True if this peer initiated the connection.
      */
@@ -118,7 +117,6 @@ public final class SpdyConnection implements Closeable {
      */
     // Visible for testing
     long unacknowledgedBytesRead = 0;
-    // okHttpSettings.set(Settings.MAX_CONCURRENT_STREAMS, 0, max);
     /**
      * Count of bytes that can be written on the connection before receiving a
      * window update.
@@ -141,8 +139,12 @@ public final class SpdyConnection implements Closeable {
         pushObserver = builder.pushObserver;
         client = builder.client;
         handler = builder.handler;
-        // http://tools.ietf.org/html/draft-ietf-httpbis-http2-12#section-5.1.1
-        nextStreamId = builder.client ? 3 : 2; // 1 on client is reserved for Upgrade
+        // http://tools.ietf.org/html/draft-ietf-httpbis-http2-13#section-5.1.1
+        nextStreamId = builder.client ? 1 : 2;
+        if (builder.client && protocol == Protocol.HTTP_2) {
+            nextStreamId += 2; // In HTTP/2, 1 on client is reserved for Upgrade.
+        }
+
         nextPingId = builder.client ? 1 : 2;
 
         // Flow control was designed more for servers, or proxies than edge clients.
@@ -150,18 +152,20 @@ public final class SpdyConnection implements Closeable {
         // thrashing window updates every 64KiB, yet small enough to avoid blowing
         // up the heap.
         if (builder.client) {
-            okHttpSettings.set(Settings.INITIAL_WINDOW_SIZE, 0, 16 * 1024 * 1024);
+            okHttpSettings.set(Settings.INITIAL_WINDOW_SIZE, 0, OKHTTP_CLIENT_WINDOW_SIZE);
         }
 
         hostName = builder.hostName;
 
         if (protocol == Protocol.HTTP_2) {
-            variant = new Http20Draft12();
+            variant = new Http20Draft13();
             // Like newSingleThreadExecutor, except lazy creates the thread.
             pushExecutor = new ThreadPoolExecutor(0, 1,
                     0L, TimeUnit.MILLISECONDS,
                     new LinkedBlockingQueue<Runnable>(),
                     Util.threadFactory(String.format("OkHttp %s Push Observer", hostName), true));
+            // 1 less than SPDY http://tools.ietf.org/html/draft-ietf-httpbis-http2-13#section-6.9.2
+            peerSettings.set(Settings.INITIAL_WINDOW_SIZE, 0, 65535);
         } else if (protocol == Protocol.SPDY_3) {
             variant = new Spdy3();
             pushExecutor = null;
@@ -516,6 +520,10 @@ public final class SpdyConnection implements Closeable {
     public void sendConnectionPreface() throws IOException {
         frameWriter.connectionPreface();
         frameWriter.settings(okHttpSettings);
+        int windowSize = okHttpSettings.getInitialWindowSize(Settings.DEFAULT_INITIAL_WINDOW_SIZE);
+        if (windowSize != Settings.DEFAULT_INITIAL_WINDOW_SIZE) {
+            frameWriter.windowUpdate(0, windowSize - Settings.DEFAULT_INITIAL_WINDOW_SIZE);
+        }
     }
 
     /**

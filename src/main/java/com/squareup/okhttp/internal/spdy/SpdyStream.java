@@ -16,18 +16,18 @@
 
 package com.squareup.okhttp.internal.spdy;
 
+import com.squareup.okio.AsyncTimeout;
+import com.squareup.okio.Buffer;
+import com.squareup.okio.BufferedSource;
+import com.squareup.okio.Sink;
+import com.squareup.okio.Source;
+import com.squareup.okio.Timeout;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import okio.AsyncTimeout;
-import okio.Buffer;
-import okio.BufferedSource;
-import okio.Sink;
-import okio.Source;
-import okio.Timeout;
 
 import static com.squareup.okhttp.internal.spdy.Settings.DEFAULT_INITIAL_WINDOW_SIZE;
 
@@ -416,7 +416,7 @@ public final class SpdyStream {
                 // Flow control: notify the peer that we're ready for more data!
                 unacknowledgedBytesRead += read;
                 if (unacknowledgedBytesRead
-                        >= connection.peerSettings.getInitialWindowSize(DEFAULT_INITIAL_WINDOW_SIZE) / 2) {
+                        >= connection.okHttpSettings.getInitialWindowSize(DEFAULT_INITIAL_WINDOW_SIZE) / 2) {
                     connection.writeWindowUpdateLater(id, unacknowledgedBytesRead);
                     unacknowledgedBytesRead = 0;
                 }
@@ -426,7 +426,7 @@ public final class SpdyStream {
             synchronized (connection) { // Multiple application threads may hit this section.
                 connection.unacknowledgedBytesRead += read;
                 if (connection.unacknowledgedBytesRead
-                        >= connection.peerSettings.getInitialWindowSize(DEFAULT_INITIAL_WINDOW_SIZE) / 2) {
+                        >= connection.okHttpSettings.getInitialWindowSize(DEFAULT_INITIAL_WINDOW_SIZE) / 2) {
                     connection.writeWindowUpdateLater(0, connection.unacknowledgedBytesRead);
                     connection.unacknowledgedBytesRead = 0;
                 }

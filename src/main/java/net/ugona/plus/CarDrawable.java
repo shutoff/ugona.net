@@ -45,20 +45,27 @@ public class CarDrawable {
             boolean guard = preferences.getBoolean(Names.Car.GUARD + car_id, false);
             boolean guard0 = preferences.getBoolean(Names.Car.GUARD0 + car_id, false);
             boolean guard1 = preferences.getBoolean(Names.Car.GUARD1 + car_id, false);
+            boolean card = false;
+            if (guard) {
+                long guard_t = preferences.getLong(Names.Car.GUARD_TIME + car_id, 0);
+                long card_t = preferences.getLong(Names.Car.CARD + car_id, 0);
+                if ((guard_t > 0) && (card_t > 0) && (card_t < guard_t))
+                    card = true;
+            }
 
-            boolean white = !guard || (guard0 && guard1);
+            boolean white = !guard || (guard0 && guard1) || card;
 
             upd = setModeCar(!white, preferences.getBoolean(Names.Car.ZONE_ACCESSORY + car_id, false), doors4);
 
             if (doors4) {
                 boolean doors_alarm = preferences.getBoolean(Names.Car.ZONE_DOOR + car_id, false);
-                boolean fl = preferences.getBoolean(Names.Car.DOOR_FL, false);
+                boolean fl = preferences.getBoolean(Names.Car.DOOR_FL + car_id, false);
                 upd |= setModeOpen(1, "door_fl", !white, fl, fl && doors_alarm, false);
-                boolean fr = preferences.getBoolean(Names.Car.DOOR_FR, false);
+                boolean fr = preferences.getBoolean(Names.Car.DOOR_FR + car_id, false);
                 upd |= setModeOpen(6, "door_fr", !white, fr, fr && doors_alarm, false);
-                boolean bl = preferences.getBoolean(Names.Car.DOOR_BL, false);
+                boolean bl = preferences.getBoolean(Names.Car.DOOR_BL + car_id, false);
                 upd |= setModeOpen(7, "door_bl", !white, bl, bl && doors_alarm, false);
-                boolean br = preferences.getBoolean(Names.Car.DOOR_BR, false);
+                boolean br = preferences.getBoolean(Names.Car.DOOR_BR + car_id, false);
                 upd |= setModeOpen(8, "door_br", !white, br, br && doors_alarm, false);
 
             } else {
@@ -91,8 +98,9 @@ public class CarDrawable {
             upd |= setModeOpen(3, "trunk", !white, trunk_open, trunk_alarm, doors4);
 
             boolean az = preferences.getBoolean(Names.Car.AZ + car_id, false);
-            if (az && engine) {
-                upd |= setLayer(4, "engine1", !white);
+            if (az) {
+                if (engine)
+                    upd |= setLayer(4, "engine1", !white);
             } else if (Preferences.getRele(preferences, car_id)) {
                 upd |= setLayer(4, "heater", !white);
             } else {
@@ -105,9 +113,7 @@ public class CarDrawable {
             String state = null;
             if (guard) {
                 state = white ? "lock_blue" : "lock_white";
-                long guard_t = preferences.getLong(Names.Car.GUARD_TIME + car_id, 0);
-                long card_t = preferences.getLong(Names.Car.CARD + car_id, 0);
-                if ((guard_t > 0) && (card_t > 0) && (card_t < guard_t))
+                if (card)
                     state = "lock_red";
                 if (!big)
                     state += "_widget";

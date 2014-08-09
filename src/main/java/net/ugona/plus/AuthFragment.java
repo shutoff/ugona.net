@@ -148,6 +148,28 @@ public class AuthFragment extends SettingsFragment {
                         });
                     }
                 });
+                items.add(new Item(R.string.ccode_change, R.string.ccode_change_msg) {
+                    @Override
+                    void click() {
+                        if (preferences.getBoolean(Names.Car.GUARD + car_id, false)) {
+                            final AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                                    .setTitle(R.string.ccode_change_msg)
+                                    .setMessage(R.string.ccode_guard)
+                                    .setNegativeButton(R.string.cancel, null)
+                                    .create();
+                            dialog.show();
+                            return;
+                        }
+                        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                        final AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                                .setTitle(R.string.ccode_change_msg)
+                                .setView(inflater.inflate(R.layout.ccode_change, null))
+                                .setNegativeButton(R.string.cancel, null)
+                                .setPositiveButton(R.string.ok, null)
+                                .create();
+                        dialog.show();
+                    }
+                });
             }
             photo_item = new CheckBoxItem(R.string.show_photo, Names.Car.SHOW_PHOTO, false);
             items.add(photo_item);

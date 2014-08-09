@@ -330,7 +330,7 @@ public class SmsMonitor extends BroadcastReceiver {
                                 ed.remove(Names.Notify.RESTORE + car);
                                 Alarm.removeNotification(context, car, id);
                             }
-                            id = Alarm.createNotification(context, context.getString(R.string.lost), R.drawable.gsm_lost, car, Names.Car.LOST_SOUND, time.toDate().getTime());
+                            id = Alarm.createNotification(context, context.getString(R.string.lost), R.drawable.gsm_lost, car, Names.Car.LOST_SOUND, time.toDate().getTime(), true);
                             ed.putInt(Names.Car.LOST_NOTIFY + car, id);
                         }
                         ed.commit();

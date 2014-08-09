@@ -24,12 +24,14 @@ public interface Callback {
      * exchange, it is possible that the remote server accepted the request
      * before the failure.
      */
-    void onFailure(Request request, Throwable throwable);
+    void onFailure(Request request, IOException e);
 
     /**
      * Called when the HTTP response was successfully returned by the remote
      * server. The callback may proceed to read the response body with {@link
-     * Response#body}.
+     * Response#body}. The response is still live until its response body is
+     * closed with {@code response.body().close()}. The recipient of the callback
+     * may even consume the response body on another thread.
      * <p/>
      * <p>Note that transport-layer success (receiving a HTTP response code,
      * headers and body) does not necessarily indicate application-layer

@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okio;
+package com.squareup.okio;
 
 import java.io.IOException;
 import java.util.zip.Deflater;
 
-import static okio.Util.checkOffsetAndCount;
+import static com.squareup.okio.Util.checkOffsetAndCount;
 
 /**
  * A sink that uses <a href="http://tools.ietf.org/html/rfc1951">DEFLATE</a> to
@@ -34,13 +34,13 @@ import static okio.Util.checkOffsetAndCount;
  * This class does not offer any partial flush mechanism. For best performance,
  * only call {@link #flush} when application behavior requires it.
  */
-public final class DeflaterSink implements Sink {
+public final class DeflaterSink implements com.squareup.okio.Sink {
     private final BufferedSink sink;
     private final Deflater deflater;
     private boolean closed;
 
-    public DeflaterSink(Sink sink, Deflater deflater) {
-        this(Okio.buffer(sink), deflater);
+    public DeflaterSink(com.squareup.okio.Sink sink, Deflater deflater) {
+        this(com.squareup.okio.Okio.buffer(sink), deflater);
     }
 
     /**

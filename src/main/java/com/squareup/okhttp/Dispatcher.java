@@ -19,9 +19,7 @@ import com.squareup.okhttp.Call.AsyncCall;
 import com.squareup.okhttp.internal.Util;
 import com.squareup.okhttp.internal.http.HttpEngine;
 
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -38,11 +36,11 @@ public final class Dispatcher {
     /**
      * Ready calls in the order they'll be run.
      */
-    private final Set<AsyncCall> readyCalls = new HashSet<AsyncCall>();
+    private final edu.emory.mathcs.backport.java.util.Deque readyCalls = new edu.emory.mathcs.backport.java.util.ArrayDeque();
     /**
      * Running calls. Includes canceled calls that haven't finished yet.
      */
-    private final Set<AsyncCall> runningCalls = new HashSet<AsyncCall>();
+    private final edu.emory.mathcs.backport.java.util.Deque runningCalls = new edu.emory.mathcs.backport.java.util.ArrayDeque();
     private int maxRequests = 64;
     private int maxRequestsPerHost = 5;
     /**
@@ -122,7 +120,8 @@ public final class Dispatcher {
             if (Util.equal(tag, i.next().tag())) i.remove();
         }
 
-        for (AsyncCall call : runningCalls) {
+        for (Object o : runningCalls) {
+            AsyncCall call = (AsyncCall) o;
             if (Util.equal(tag, call.tag())) {
                 call.get().canceled = true;
                 HttpEngine engine = call.get().engine;
@@ -161,7 +160,8 @@ public final class Dispatcher {
      */
     private int runningCallsForHost(AsyncCall call) {
         int result = 0;
-        for (AsyncCall c : runningCalls) {
+        for (Object o : runningCalls) {
+            AsyncCall c = (AsyncCall) o;
             if (c.host().equals(call.host())) result++;
         }
         return result;

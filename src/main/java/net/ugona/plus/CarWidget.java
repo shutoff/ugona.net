@@ -236,12 +236,14 @@ public class CarWidget extends AppWidgetProvider {
                             int h = (int) (maxHeight * density - 0.5);
                             int h3 = getLayoutHeight(context, maxWidth, R.layout.widget3);
                             int h4 = getLayoutHeight(context, maxWidth, R.layout.widget4);
+                            int h5 = getLayoutHeight(context, maxWidth, R.layout.widget5);
                             rows = 3;
                             if (h < h3)
                                 rows = 2;
-                            if (h > h4) {
+                            if (h > h4)
                                 rows = 5;
-                            }
+                            if (h > h5)
+                                rows = 6;
                             height_rows.put(maxHeight, rows);
                         }
                         rows = height_rows.get(maxHeight);
@@ -312,10 +314,10 @@ public class CarWidget extends AppWidgetProvider {
 
             String temperature = Preferences.getTemperature(preferences, car_id, 1);
             if (temperature == null) {
-                widgetView.setViewVisibility(R.id.temperature_block, View.GONE);
+                widgetView.setViewVisibility(R.id.temperature1_block, View.GONE);
             } else {
-                widgetView.setTextViewText(R.id.temperature, temperature);
-                widgetView.setViewVisibility(R.id.temperature_block, View.VISIBLE);
+                widgetView.setTextViewText(R.id.temperature1, temperature);
+                widgetView.setViewVisibility(R.id.temperature1_block, View.VISIBLE);
                 show_count++;
             }
 
@@ -345,6 +347,17 @@ public class CarWidget extends AppWidgetProvider {
             widgetView.setViewVisibility(R.id.balance_block, show_balance ? View.VISIBLE : View.GONE);
             widgetView.setViewVisibility(R.id.name, preferences.getBoolean(Names.SHOW_NAME + widgetID, true) && !isLockScreen(context, widgetID) ? View.VISIBLE : View.GONE);
 
+            String temp = null;
+            if (show_count < rows)
+                temp = Preferences.getTemperature(preferences, car_id, -3);
+            if (temp != null) {
+                widgetView.setTextViewText(R.id.temperature6, temp);
+                widgetView.setViewVisibility(R.id.temperature6_block, View.VISIBLE);
+                show_count++;
+            } else {
+                widgetView.setViewVisibility(R.id.temperature6_block, View.GONE);
+            }
+
             boolean show_level = (show_count < rows);
             if (show_level) {
                 int level = preferences.getInt(Names.Car.GSM_DB + car_id, 0);
@@ -354,6 +367,7 @@ public class CarWidget extends AppWidgetProvider {
                     widgetView.setImageViewResource(R.id.level_img, id_gsm_level[theme][6]);
                     widgetView.setTextViewText(R.id.level, "----");
                     widgetView.setInt(R.id.level, "setTextColor", context.getResources().getColor(R.color.error));
+                    show_count++;
                 } else {
                     int index = 0;
                     if (level > -51) {
@@ -370,10 +384,54 @@ public class CarWidget extends AppWidgetProvider {
                     widgetView.setImageViewResource(R.id.level_img, id_gsm_level[theme][index]);
                     widgetView.setTextViewText(R.id.level, level + " dBm");
                     widgetView.setInt(R.id.level, "setTextColor", context.getResources().getColor(id_color[theme]));
+                    show_count++;
                 }
-                show_count++;
             }
             widgetView.setViewVisibility(R.id.level_block, show_level ? View.VISIBLE : View.GONE);
+
+            temp = null;
+            if (show_count < rows)
+                temp = Preferences.getTemperature(preferences, car_id, -1);
+            if (temp != null) {
+                widgetView.setTextViewText(R.id.temperature4, temp);
+                widgetView.setViewVisibility(R.id.temperature4_block, View.VISIBLE);
+                show_count++;
+            } else {
+                widgetView.setViewVisibility(R.id.temperature4_block, View.GONE);
+            }
+
+            temp = null;
+            if (show_count < rows)
+                temp = Preferences.getTemperature(preferences, car_id, -2);
+            if (temp != null) {
+                widgetView.setTextViewText(R.id.temperature5, temp);
+                widgetView.setViewVisibility(R.id.temperature5_block, View.VISIBLE);
+                show_count++;
+            } else {
+                widgetView.setViewVisibility(R.id.temperature5_block, View.GONE);
+            }
+
+            temp = null;
+            if (show_count < rows)
+                temp = Preferences.getTemperature(preferences, car_id, 2);
+            if (temp != null) {
+                widgetView.setTextViewText(R.id.temperature2, temp);
+                widgetView.setViewVisibility(R.id.temperature2_block, View.VISIBLE);
+                show_count++;
+            } else {
+                widgetView.setViewVisibility(R.id.temperature2_block, View.GONE);
+            }
+
+            temp = null;
+            if (show_count < rows)
+                temp = Preferences.getTemperature(preferences, car_id, 3);
+            if (temp != null) {
+                widgetView.setTextViewText(R.id.temperature3, temp);
+                widgetView.setViewVisibility(R.id.temperature3_block, View.VISIBLE);
+                show_count++;
+            } else {
+                widgetView.setViewVisibility(R.id.temperature3_block, View.GONE);
+            }
 
             boolean show_reserve = (show_count < rows);
             if (show_reserve) {
