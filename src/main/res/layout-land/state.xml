@@ -26,6 +26,16 @@
             android:text="@string/data_error"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@color/error" />
+
+        <TextView
+            android:id="@+id/error_info_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="@string/data_error"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/error" />
+
     </LinearLayout>
 
     <TextView

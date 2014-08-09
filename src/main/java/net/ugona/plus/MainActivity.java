@@ -25,6 +25,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -88,7 +89,7 @@ public class MainActivity extends ActionBarActivity {
     static final int PAGE_TRACK = 4;
     static final int PAGE_STAT = 5;
 
-    static final int VERSION = 2;
+    static final int VERSION = 4;
     static final String SENDER_ID = "915289471784";
     final static String URL_KEY = "https://car-online.ugona.net/key?login=$1&password=$2";
     final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
@@ -854,13 +855,26 @@ public class MainActivity extends ActionBarActivity {
                             d = key;
                         }
                         d += ";" + car.id;
+                        String phone = preferences.getString(Names.Car.CAR_PHONE + car.id, "");
+                        if (!phone.equals(""))
+                            d += ";" + phone;
+                        State.appendLog("device " + phone);
                     }
                     data.add("cars", d);
                     Calendar cal = Calendar.getInstance();
                     TimeZone tz = cal.getTimeZone();
                     data.add("tz", tz.getID());
+                    String phone = "";
+                    TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                    try {
+                        phone = tm.getLine1Number();
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                    if (!phone.equals(""))
+                        data.add("phone", phone);
                     String url = "https://car-online.ugona.net/reg";
-
+                    State.appendLog(data.toString());
                     RequestBody body = RequestBody.create(MediaType.parse("application/json"), data.toString());
                     Request request = new Request.Builder().url(url).post(body).build();
                     Response response = HttpTask.client.newCall(request).execute();

@@ -106,7 +106,7 @@ public class Actions {
         id = preferences.getInt(Names.Notify.VALET_OFF + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
-        id = Alarm.createNotification(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet_on, car_id, "valet_on", 0);
+        id = Alarm.createNotification(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet, car_id, "valet_on", 0, true);
         ed.putInt(Names.Car.VALET_ON_NOTIFY + car_id, id);
         ed.remove(Names.Notify.VALET_OFF + car_id);
         ed.commit();
@@ -121,7 +121,7 @@ public class Actions {
         id = preferences.getInt(Names.Car.VALET_ON_NOTIFY + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
-        id = Alarm.createNotification(context, context.getString(R.string.valet_off_ok), R.drawable.white_valet_off, car_id, "valet_off", 0);
+        id = Alarm.createNotification(context, context.getString(R.string.valet_off_ok), R.drawable.white_valet, car_id, "valet_off", 0);
         ed.putInt(Names.Notify.VALET_OFF + car_id, id);
         ed.remove(Names.Car.VALET_ON_NOTIFY + car_id);
         ed.commit();
@@ -1425,6 +1425,10 @@ public class Actions {
     }
 
     static void send_pandora_cmd(final Context context, final String car_id, final int cmd, final int id_title) {
+        send_pandora_cmd(context, car_id, cmd, id_title, 0, 0, null);
+    }
+
+    static void send_pandora_cmd(final Context context, final String car_id, final int cmd, final int id_title, final int id_msg, final int id_pict, final String sound) {
         if (!isNetwork(context)) {
             AlertDialog dialog = new AlertDialog.Builder(context)
                     .setTitle(R.string.error)
@@ -1433,17 +1437,17 @@ public class Actions {
                     .setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            send_pandora_cmd(context, car_id, cmd, id_title);
+                            send_pandora_cmd(context, car_id, cmd, id_title, id_msg, id_pict, sound);
                         }
                     })
                     .create();
             dialog.show();
             return;
         }
-        requestPassword(context, car_id, id_title, 0, new Answer() {
+        requestPassword(context, car_id, id_title, R.string.send_cmd, new Answer() {
             @Override
             void answer(String text) {
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                 final ProgressDialog progressDialog = new ProgressDialog(context);
                 progressDialog.setMessage(context.getString(R.string.send_command));
                 progressDialog.show();
@@ -1461,6 +1465,15 @@ public class Actions {
                         i = new Intent(context, FetchService.class);
                         i.putExtra(Names.ID, car_id);
                         context.startService(i);
+                        if (id_msg != 0) {
+                            int id = preferences.getInt(Names.Notify.ZONE + car_id, 0);
+                            if (id != 0)
+                                Alarm.removeNotification(context, car_id, id);
+                            id = Alarm.createNotification(context, context.getString(id_msg), id_pict, car_id, sound, 0);
+                            SharedPreferences.Editor ed = preferences.edit();
+                            ed.putInt(Names.Notify.ZONE + car_id, id);
+                            ed.commit();
+                        }
                     }
 
                     @Override

@@ -116,7 +116,8 @@ public class FetchService extends Service {
                     int pictId = intent.getIntExtra(Names.Car.ALARM, 0);
                     int max_id = intent.getIntExtra(Names.Car.EVENT_ID, 0);
                     long when = intent.getLongExtra(Names.Car.EVENT_TIME, 0);
-                    showNotification(car_id, text, pictId, max_id, sound, when);
+                    boolean outgoing = intent.getBooleanExtra(Names.Car.ALARM_MODE, false);
+                    showNotification(car_id, text, pictId, max_id, sound, when, outgoing);
                 }
                 if (action.equals(ACTION_RELE_OFF))
                     Actions.rele_off(this, car_id, intent.getStringExtra(Names.Car.AUTH), intent.getStringExtra(Names.PASSWORD));
@@ -129,7 +130,7 @@ public class FetchService extends Service {
         return START_NOT_STICKY;
     }
 
-    void showNotification(String car_id, String text, int pictId, int max_id, String sound, long when) {
+    void showNotification(String car_id, String text, int pictId, int max_id, String sound, long when, boolean outgoing) {
         String title = getString(R.string.app_name);
         String[] cars = preferences.getString(Names.CARS, "").split(",");
         if (cars.length > 1) {
@@ -196,7 +197,7 @@ public class FetchService extends Service {
         // Add as notification
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Notification notification = builder.build();
-        if ((pictId == R.drawable.white_valet_on) || (pictId == R.drawable.gsm_lost))
+        if (outgoing)
             notification.flags = Notification.FLAG_ONGOING_EVENT;
         manager.notify(max_id, notification);
     }
@@ -403,6 +404,17 @@ public class FetchService extends Service {
             if (error != null) {
                 sendError(error.asString(), car_id);
                 return;
+            }
+
+            JsonValue offline = res.get("offline");
+            if (offline != null) {
+                boolean state = offline.asBoolean();
+                State.appendLog("offline=" + state);
+                if (state != preferences.getBoolean(Names.Car.OFFLINE + car_id, false)) {
+                    SharedPreferences.Editor ed = preferences.edit();
+                    ed.putBoolean(Names.Car.OFFLINE + car_id, state);
+                    ed.commit();
+                }
             }
 
             JsonValue time = res.get("time");

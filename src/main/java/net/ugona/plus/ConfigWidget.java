@@ -81,6 +81,7 @@ public class ConfigWidget extends Activity {
         rows.add(3);
         rows.add(4);
         rows.add(5);
+        rows.add(6);
 
         final Spinner lvRows = (Spinner) dialog.findViewById(R.id.rows);
         lvRows.setAdapter(new BaseAdapter() {

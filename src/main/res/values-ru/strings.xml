@@ -612,4 +612,11 @@
     <string name="light_shock_alarm">Тревога по событию легкий удар</string>
     <string name="balance_sound">Уведомление о балансе</string>
     <string name="cant_connect">Невозможно установить соединение с автомобилем</string>
+    <string name="send_cmd">Выполнить команду?</string>
+    <string name="ccode_change">C-код</string>
+    <string name="ccode_change_msg">Смена C-кода</string>
+    <string name="ccode_guard">Для смены С-кода вы должны снять автомобиль с охраны</string>
+    <string name="old_ccode">Старый C-код:</string>
+    <string name="new_ccode">Новый C-код:</string>
+    <string name="new_ccode_invalid">Новый код и подиверждение не совпадают</string>
 </resources>

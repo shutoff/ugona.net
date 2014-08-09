@@ -613,4 +613,11 @@
     <string name="light_shock_alarm">Alarm on light shock</string>
     <string name="balance_sound">Low balance notification</string>
     <string name="cant_connect">Can&amp;t connect to car</string>
+    <string name="send_cmd">Execute command?</string>
+    <string name="ccode_change">C-code</string>
+    <string name="ccode_change_msg">Change C-code</string>
+    <string name="ccode_guard">For changing C-code You must guard OFF</string>
+    <string name="old_ccode">Old C-code:</string>
+    <string name="new_ccode">New C-code:</string>
+    <string name="new_ccode_invalid">С-code does not match</string>
 </resources>

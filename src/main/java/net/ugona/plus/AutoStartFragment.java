@@ -56,27 +56,29 @@ public class AutoStartFragment extends DeviceFragment {
                 super.setValue(value);
             }
         });
-        items.add(new CheckBitItem(R.string.soft_start, 19, 1));
-        if (State.hasTelephony(getActivity()))
-            items.add(new CheckBitItem(R.string.inf_sms, 23, 1) {
-                @Override
-                void setView(View v) {
-                    super.setView(v);
-                    TextView tv = (TextView) v.findViewById(R.id.value);
-                    tv.setVisibility(View.VISIBLE);
-                    tv.setText(R.string.inf_sms_msg);
-                }
+        if (!State.isPandora(preferences, car_id)) {
+            items.add(new CheckBitItem(R.string.soft_start, 19, 1));
+            if (State.hasTelephony(getActivity()))
+                items.add(new CheckBitItem(R.string.inf_sms, 23, 1) {
+                    @Override
+                    void setView(View v) {
+                        super.setView(v);
+                        TextView tv = (TextView) v.findViewById(R.id.value);
+                        tv.setVisibility(View.VISIBLE);
+                        tv.setText(R.string.inf_sms_msg);
+                    }
 
-                @Override
-                String getValue() {
-                    return super.getValue().equals("") ? "1" : "";
-                }
+                    @Override
+                    String getValue() {
+                        return super.getValue().equals("") ? "1" : "";
+                    }
 
-                @Override
-                void setValue(String value) {
-                    super.setValue(value.equals("") ? "1" : "");
-                }
-            });
+                    @Override
+                    void setValue(String value) {
+                        super.setValue(value.equals("") ? "1" : "");
+                    }
+                });
+        }
 
         TimerCommands cmd = new TimerCommands();
         cmd.add(new TimerCommand(1, 0, R.string.motor_on));

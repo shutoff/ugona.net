@@ -294,13 +294,13 @@ public class ActionFragment extends Fragment
             new Action(R.drawable.icon_motor_on, R.string.motor_on, State.CMD_AZ) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-                    Actions.send_pandora_cmd(context, car_id, 4, R.string.motor_on);
+                    Actions.send_pandora_cmd(context, car_id, 4, R.string.motor_on, R.string.motor_on_ok, R.drawable.white_motor_on, "start");
                 }
             },
             new Action(R.drawable.icon_motor_off, R.string.motor_off, State.CMD_AZ) {
                 @Override
                 void action(Context context, String car_id, boolean longTap) {
-                    Actions.send_pandora_cmd(context, car_id, 8, R.string.motor_off);
+                    Actions.send_pandora_cmd(context, car_id, 8, R.string.motor_off, R.string.motor_off_ok, R.drawable.white_motor_off, "stop");
                 }
             },
             new Action(R.drawable.icon_turbo_on, R.string.turbo_on) {

@@ -61,7 +61,8 @@ public class StateFragment extends Fragment
     TextView tvVoltage;
     TextView tvReserve;
     TextView tvBalance;
-    TextView tvError;
+    TextView tvErrorMsg;
+    TextView tvErrorInfo;
     View vReserve;
 
     TextView tvTemperature;
@@ -115,7 +116,8 @@ public class StateFragment extends Fragment
     TextView tvLevel;
     ImageView ivLevel;
 
-    View mValet;
+    TextView tvValet;
+
     View mNet;
     View balanceBlock;
     View vMain;
@@ -217,7 +219,7 @@ public class StateFragment extends Fragment
         ivLevel = (ImageView) v.findViewById(R.id.level_img);
         tvLevel = (TextView) v.findViewById(R.id.level);
 
-        mValet = v.findViewById(R.id.valet_warning);
+        tvValet = (TextView) v.findViewById(R.id.valet_warning);
         mNet = v.findViewById(R.id.net_warning);
 
         if (!pointer) {
@@ -256,7 +258,8 @@ public class StateFragment extends Fragment
         balanceBlock.setTag("balance");
         balanceBlock.setOnClickListener(clickListener);
 
-        tvError = (TextView) v.findViewById(R.id.error_text);
+        tvErrorMsg = (TextView) v.findViewById(R.id.error_text);
+        tvErrorInfo = (TextView) v.findViewById(R.id.error_info_text);
         vError = v.findViewById(R.id.error);
         vError.setVisibility(View.GONE);
 
@@ -322,6 +325,7 @@ public class StateFragment extends Fragment
                     return;
                 if (intent.getAction().equals(FetchService.ACTION_UPDATE)) {
                     vError.setVisibility(View.GONE);
+                    imgRefresh.setImageResource(preferences.getBoolean(Names.Car.OFFLINE + car_id, false) ? R.drawable.update_white : R.drawable.update);
                     imgRefresh.setVisibility(View.VISIBLE);
                     prgUpdate.setVisibility(View.GONE);
                     update(context);
@@ -338,6 +342,7 @@ public class StateFragment extends Fragment
                 }
                 if (intent.getAction().equals(FetchService.ACTION_NOUPDATE)) {
                     vError.setVisibility(View.GONE);
+                    imgRefresh.setImageResource(preferences.getBoolean(Names.Car.OFFLINE + car_id, false) ? R.drawable.update_white : R.drawable.update);
                     imgRefresh.setVisibility(View.VISIBLE);
                     prgUpdate.setVisibility(View.GONE);
                     mPullToRefreshLayout.setRefreshComplete();
@@ -350,7 +355,7 @@ public class StateFragment extends Fragment
                         showAuth();
                         return;
                     }
-                    tvError.setText(error_text);
+                    tvErrorInfo.setText(error_text);
                     vError.setVisibility(View.VISIBLE);
                     imgRefresh.setVisibility(View.VISIBLE);
                     prgUpdate.setVisibility(View.GONE);
@@ -748,7 +753,30 @@ public class StateFragment extends Fragment
             vCar.setEngineVisible(false);
         }
 
-        mValet.setVisibility(valet ? View.VISIBLE : View.GONE);
+        if (valet) {
+            tvValet.setText(R.string.valet_warning);
+            tvValet.setVisibility(View.VISIBLE);
+        } else {
+            boolean guard = preferences.getBoolean(Names.Car.GUARD + car_id, false);
+            boolean guard0 = preferences.getBoolean(Names.Car.GUARD0 + car_id, false);
+            boolean guard1 = preferences.getBoolean(Names.Car.GUARD1 + car_id, false);
+            boolean card = false;
+            if (guard) {
+                long guard_t = preferences.getLong(Names.Car.GUARD_TIME + car_id, 0);
+                long card_t = preferences.getLong(Names.Car.CARD + car_id, 0);
+                if ((guard_t > 0) && (card_t > 0) && (card_t < guard_t))
+                    card = true;
+            }
+            if (guard0 && guard1) {
+                tvValet.setText(R.string.ps_guard);
+                tvValet.setVisibility(View.VISIBLE);
+            } else if (card) {
+                tvValet.setText(R.string.card_message);
+                tvValet.setVisibility(View.VISIBLE);
+            } else {
+                tvValet.setVisibility(View.GONE);
+            }
+        }
 
         setPointer(vPointer1, tvPointer1, 0);
         setPointer(vPointer2, tvPointer2, 1);
@@ -976,9 +1004,9 @@ public class StateFragment extends Fragment
         if (v == vMotor) {
             if (State.isPandora(preferences, car_id)) {
                 if (preferences.getBoolean(Names.Car.AZ + car_id, false)) {
-                    Actions.send_pandora_cmd(getActivity(), car_id, 4, R.string.motor_on);
+                    Actions.send_pandora_cmd(getActivity(), car_id, 4, R.string.motor_off, R.string.motor_off_ok, R.drawable.white_motor_off, "start");
                 } else {
-                    Actions.send_pandora_cmd(getActivity(), car_id, 8, R.string.motor_off);
+                    Actions.send_pandora_cmd(getActivity(), car_id, 8, R.string.motor_on, R.string.motor_on_ok, R.drawable.white_motor_on, "stop");
                 }
                 return;
             }
