@@ -32,6 +32,7 @@ public class State {
     static final int CMD_SEARCH = 1 << 9;
     static final int CMD_THERMOCODE = 1 << 10;
     static final int CMD_GUARD = 1 << 11;
+    static final int CMD_TRUNK = 1 << 12;
     static int telephony_state = 0;
 
     static public void appendLog(String text) {
@@ -126,6 +127,15 @@ public class State {
         if (key.length() < 3)
             return false;
         return key.substring(0, 2).equals("P_");
+    }
+
+    static boolean getOffline(SharedPreferences preferences, String car_id) {
+        if (isPandora(preferences, car_id))
+            return preferences.getBoolean(Names.Car.OFFLINE + car_id, false);
+        long last_event = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
+        long interval = preferences.getInt(Names.Car.CAR_TIMER + car_id, 10) + 1;
+        Date now = new Date();
+        return last_event + interval * 60000 < now.getTime();
     }
 
 }

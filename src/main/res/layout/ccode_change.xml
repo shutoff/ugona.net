@@ -1,54 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="6dp">
+
+
+    <TableLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="6dp">
+
+        <TableRow>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/old_ccode" />
+
+            <EditText
+                android:id="@+id/old_ccode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword|numberDecimal"
+                android:maxEms="6"
+                android:maxLength="6"
+                android:minEms="6"
+                android:password="true" />
+
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/new_ccode" />
+
+            <EditText
+                android:id="@+id/ccode1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword|numberDecimal"
+                android:maxEms="6"
+                android:maxLength="6"
+                android:minEms="6"
+                android:password="true" />
+
+        </TableRow>
+
+        <TableRow>
+
+            <TextView />
+
+            <EditText
+                android:id="@+id/ccode2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword|numberDecimal"
+                android:maxEms="6"
+                android:maxLength="6"
+                android:minEms="6"
+                android:password="true" />
+
+        </TableRow>
+
+    </TableLayout>
 
     <TextView
+        android:id="@+id/invalid_confirm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/old_ccode" />
-
-    <EditText
-        android:id="@+id/old_ccode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPassword|numberDecimal"
-        android:maxEms="6"
-        android:maxLength="6"
-        android:minEms="6"
-        android:password="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/new_ccode" />
-
-    <EditText
-        android:id="@+id/ccode1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPassword|numberDecimal"
-        android:maxEms="6"
-        android:maxLength="6"
-        android:minEms="6"
-        android:password="true" />
-
-    <EditText
-        android:id="@+id/ccode2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPassword|numberDecimal"
-        android:maxEms="6"
-        android:maxLength="6"
-        android:minEms="6"
-        android:password="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_span="2"
         android:text="@string/new_ccode_invalid"
+        android:textColor="@color/error"
         android:visibility="gone" />
 
 </LinearLayout>

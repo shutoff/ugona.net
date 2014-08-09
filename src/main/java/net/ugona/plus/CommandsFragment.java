@@ -24,6 +24,7 @@ public class CommandsFragment extends SettingsFragment {
             items.add(new CheckBoxItem(R.string.valet_cmd, State.CMD_VALET));
         } else {
             items.add(new CheckBoxItem(R.string.guard_on, State.CMD_GUARD));
+            items.add(new CheckBoxItem(R.string.open_trunk, State.CMD_TRUNK));
         }
         items.add(new CheckBoxItem(R.string.autostart, State.CMD_AZ));
         items.add(new CheckBoxItem(R.string.rele, State.CMD_RELE));

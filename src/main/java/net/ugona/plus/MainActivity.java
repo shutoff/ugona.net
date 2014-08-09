@@ -858,7 +858,6 @@ public class MainActivity extends ActionBarActivity {
                         String phone = preferences.getString(Names.Car.CAR_PHONE + car.id, "");
                         if (!phone.equals(""))
                             d += ";" + phone;
-                        State.appendLog("device " + phone);
                     }
                     data.add("cars", d);
                     Calendar cal = Calendar.getInstance();
@@ -874,7 +873,6 @@ public class MainActivity extends ActionBarActivity {
                     if (!phone.equals(""))
                         data.add("phone", phone);
                     String url = "https://car-online.ugona.net/reg";
-                    State.appendLog(data.toString());
                     RequestBody body = RequestBody.create(MediaType.parse("application/json"), data.toString());
                     Request request = new Request.Builder().url(url).post(body).build();
                     Response response = HttpTask.client.newCall(request).execute();

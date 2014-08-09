@@ -618,6 +618,11 @@
     <string name="ccode_guard">Для смены С-кода вы должны снять автомобиль с охраны</string>
     <string name="old_ccode">Старый C-код:</string>
     <string name="new_ccode">Новый C-код:</string>
-    <string name="new_ccode_invalid">Новый код и подиверждение не совпадают</string>
+    <string name="new_ccode_invalid">Новый код и подтверждение не совпадают</string>
+    <string name="ccode_format">С-код должен содержать 6 цифр</string>
+    <string name="ccode_zero">Новый С-код содержит нули, его невозможно набрать с кодонаборника</string>
     <string name="open_trunk">Открыть багажник</string>
+    <string name="ccode_fail">Ошибка изменения C-кода</string>
+    <string name="delete_widget">Удалить виджет</string>
+    <string name="delete_widget_msg">Вы действительно хотите удалить виджет?</string>
 </resources>

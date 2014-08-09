@@ -94,6 +94,7 @@ public class StateFragment extends Fragment
     View vRele2i;
     View vSound;
     View vGuard;
+    View vTrunk;
     View pMotor;
     View pRele;
     View pBlock;
@@ -104,6 +105,7 @@ public class StateFragment extends Fragment
     View pRele2i;
     View pSound;
     View pGuard;
+    View pTrunk;
     ImageView ivMotor;
     ImageView ivRele;
     ImageView ivValet;
@@ -195,6 +197,7 @@ public class StateFragment extends Fragment
         vRele2i = v.findViewById(R.id.rele2_impulse);
         vSound = v.findViewById(R.id.sound);
         vGuard = v.findViewById(R.id.guard);
+        vTrunk = v.findViewById(R.id.trunk);
 
         pMotor = v.findViewById(R.id.motor_prg);
         pRele = v.findViewById(R.id.rele_prg);
@@ -206,6 +209,7 @@ public class StateFragment extends Fragment
         pRele2i = v.findViewById(R.id.rele2_impulse_prg);
         pSound = v.findViewById(R.id.sound_prg);
         pGuard = v.findViewById(R.id.guard_prg);
+        pTrunk = v.findViewById(R.id.trunk);
 
         ivMotor = (ImageView) v.findViewById(R.id.motor_img);
         ivValet = (ImageView) v.findViewById(R.id.valet_img);
@@ -235,6 +239,7 @@ public class StateFragment extends Fragment
             vRele2i.setOnTouchListener(this);
             vSound.setOnTouchListener(this);
             vGuard.setOnTouchListener(this);
+            vTrunk.setOnTouchListener(this);
 
             vMain.setTag("voltage");
             vMain.setOnClickListener(clickListener);
@@ -325,7 +330,7 @@ public class StateFragment extends Fragment
                     return;
                 if (intent.getAction().equals(FetchService.ACTION_UPDATE)) {
                     vError.setVisibility(View.GONE);
-                    imgRefresh.setImageResource(preferences.getBoolean(Names.Car.OFFLINE + car_id, false) ? R.drawable.update_white : R.drawable.update);
+                    imgRefresh.setImageResource(State.getOffline(preferences, car_id) ? R.drawable.update_white : R.drawable.update);
                     imgRefresh.setVisibility(View.VISIBLE);
                     prgUpdate.setVisibility(View.GONE);
                     update(context);
@@ -680,6 +685,11 @@ public class StateFragment extends Fragment
             vGuard.setVisibility(View.VISIBLE);
         } else {
             vGuard.setVisibility(View.GONE);
+        }
+        if (State.isPandora(preferences, car_id) && ((commands & State.CMD_TRUNK) != 0)) {
+            vTrunk.setVisibility(View.VISIBLE);
+        } else {
+            vTrunk.setVisibility(View.GONE);
         }
         if (State.hasTelephony(context) && ((commands & State.CMD_CALL) != 0)) {
             vPhone.setVisibility(View.VISIBLE);
@@ -1170,6 +1180,9 @@ public class StateFragment extends Fragment
             } else {
                 Actions.send_pandora_cmd(getActivity(), car_id, 1, R.string.guard_on);
             }
+        }
+        if (v == vGuard) {
+            Actions.send_pandora_cmd(getActivity(), car_id, 0x23, R.string.open_trunk);
         }
         if (v == vSound) {
             if ((preferences.getInt("V_12_" + car_id, 0) & 8) != 0) {

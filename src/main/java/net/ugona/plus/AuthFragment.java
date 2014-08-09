@@ -10,12 +10,15 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 public class AuthFragment extends SettingsFragment {
 
@@ -168,6 +171,63 @@ public class AuthFragment extends SettingsFragment {
                                 .setPositiveButton(R.string.ok, null)
                                 .create();
                         dialog.show();
+                        final Button btnOk = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                        btnOk.setEnabled(false);
+                        final EditText edOld = (EditText) dialog.findViewById(R.id.old_ccode);
+                        final EditText edNew1 = (EditText) dialog.findViewById(R.id.ccode1);
+                        final EditText edNew2 = (EditText) dialog.findViewById(R.id.ccode2);
+                        final TextView tvError = (TextView) dialog.findViewById(R.id.invalid_confirm);
+                        TextWatcher watcher = new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                            }
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {
+                                String old = edOld.getText().toString();
+                                String new1 = edNew1.getText().toString();
+                                String new2 = edNew2.getText().toString();
+                                if ((old.length() != 6) || (new1.length() != 6) || (new2.length() != 6)) {
+                                    tvError.setText(R.string.ccode_format);
+                                    tvError.setVisibility(View.VISIBLE);
+                                    btnOk.setEnabled(false);
+                                    return;
+                                }
+                                if (!new1.equals(new2)) {
+                                    tvError.setText(R.string.new_ccode_invalid);
+                                    tvError.setVisibility(View.VISIBLE);
+                                    btnOk.setEnabled(false);
+                                    return;
+                                }
+                                if (new1.indexOf("0") >= 0) {
+                                    tvError.setText(R.string.ccode_zero);
+                                    tvError.setVisibility(View.VISIBLE);
+                                } else {
+                                    tvError.setVisibility(View.GONE);
+                                }
+                                btnOk.setEnabled(true);
+                            }
+                        };
+                        edOld.addTextChangedListener(watcher);
+                        edNew1.addTextChangedListener(watcher);
+                        edNew2.addTextChangedListener(watcher);
+                        btnOk.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                String old = edOld.getText().toString();
+                                String new1 = edNew1.getText().toString();
+
+                                final String text = "CHANGE C " + old + " " + new1;
+                                SmsMonitor.sendSMS(getActivity(), car_id, null, new SmsMonitor.Sms(R.string.ccode_change, text, "CHANGE C OK", "CHANGE C FAILED", R.string.ccode_fail));
+                                dialog.dismiss();
+                            }
+                        });
                     }
                 });
             }

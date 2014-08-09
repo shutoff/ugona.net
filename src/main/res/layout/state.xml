@@ -549,7 +549,25 @@
                                 android:layout_height="wrap_content"
                                 android:layout_centerInParent="true"
                                 android:padding="5dp"
-                                android:src="@drawable/icon_status" />
+                                android:src="@drawable/icon_parking" />
+
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:id="@+id/trunk"
+                            android:layout_width="100dp"
+                            android:layout_height="50dp"
+                            android:layout_margin="5dp"
+                            android:background="@drawable/button_normal"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:id="@+id/trunk_img"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:padding="5dp"
+                                android:src="@drawable/icon_trunk" />
 
                         </RelativeLayout>
 

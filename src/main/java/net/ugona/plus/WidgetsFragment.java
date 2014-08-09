@@ -1,11 +1,13 @@
 package net.ugona.plus;
 
+import android.app.AlertDialog;
 import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -18,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -235,6 +238,34 @@ public class WidgetsFragment extends SettingsFragment {
                 rows.add(4);
                 rows.add(5);
                 rows.add(6);
+
+                final ImageView ivDelete = (ImageView) v.findViewById(R.id.delete_widget);
+                ivDelete.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                                .setTitle(R.string.delete_widget)
+                                .setMessage(R.string.delete_widget_msg)
+                                .setNegativeButton(R.string.cancel, null)
+                                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        try {
+                                            AppWidgetHost appWidgetHost = new AppWidgetHost(getActivity(), 1);
+                                            appWidgetHost.deleteAppWidgetId(widget_id);
+                                        } catch (Exception ex) {
+                                            // ignore
+                                        }
+                                        SharedPreferences.Editor ed = preferences.edit();
+                                        ed.remove(Names.WIDGET + widget_id);
+                                        ed.commit();
+                                        update();
+                                    }
+                                })
+                                .create();
+                        dialog.show();
+                    }
+                });
 
                 final Spinner lvRows = (Spinner) v.findViewById(R.id.rows);
                 lvRows.setAdapter(new BaseAdapter() {

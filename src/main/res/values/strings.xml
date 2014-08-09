@@ -620,5 +620,10 @@
     <string name="old_ccode">Old C-code:</string>
     <string name="new_ccode">New C-code:</string>
     <string name="new_ccode_invalid">С-code does not match</string>
+    <string name="ccode_format">С-code mist contains 6 digits</string>
+    <string name="ccode_zero">New С-code contains zero</string>
     <string name="open_trunk">Open trunk</string>
+    <string name="ccode_fail">Change C-code failed</string>
+    <string name="delete_widget">Delete widget</string>
+    <string name="delete_widget_msg">Delete widget?</string>
 </resources>
