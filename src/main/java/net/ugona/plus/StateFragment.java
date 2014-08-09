@@ -347,7 +347,7 @@ public class StateFragment extends Fragment
                 }
                 if (intent.getAction().equals(FetchService.ACTION_NOUPDATE)) {
                     vError.setVisibility(View.GONE);
-                    imgRefresh.setImageResource(preferences.getBoolean(Names.Car.OFFLINE + car_id, false) ? R.drawable.update_white : R.drawable.update);
+                    imgRefresh.setImageResource(State.getOffline(preferences, car_id) ? R.drawable.update_white : R.drawable.update);
                     imgRefresh.setVisibility(View.VISIBLE);
                     prgUpdate.setVisibility(View.GONE);
                     mPullToRefreshLayout.setRefreshComplete();
@@ -453,7 +453,7 @@ public class StateFragment extends Fragment
         } else {
             tvLast.setText(getString(R.string.unknown));
         }
-        imgRefresh.setImageResource(preferences.getBoolean(Names.Car.OFFLINE + car_id, false) ? R.drawable.update_white : R.drawable.update);
+        imgRefresh.setImageResource(State.getOffline(preferences, car_id) ? R.drawable.update_white : R.drawable.update);
 
         boolean az = preferences.getBoolean(Names.Car.AZ + car_id, false);
         boolean ignition = !az && (preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false));
