@@ -1017,9 +1017,9 @@ public class StateFragment extends Fragment
         if (v == vMotor) {
             if (State.isPandora(preferences, car_id)) {
                 if (preferences.getBoolean(Names.Car.AZ + car_id, false)) {
-                    Actions.send_pandora_cmd(getActivity(), car_id, 4, R.string.motor_off, R.string.motor_off_ok, R.drawable.white_motor_off, "start");
+                    Actions.send_pandora_cmd(getActivity(), car_id, 8, R.string.motor_off, R.string.motor_off_ok, R.drawable.white_motor_off, "start");
                 } else {
-                    Actions.send_pandora_cmd(getActivity(), car_id, 8, R.string.motor_on, R.string.motor_on_ok, R.drawable.white_motor_on, "stop");
+                    Actions.send_pandora_cmd(getActivity(), car_id, 4, R.string.motor_on, R.string.motor_on_ok, R.drawable.white_motor_on, "stop");
                 }
                 return;
             }
@@ -1181,7 +1181,7 @@ public class StateFragment extends Fragment
                 Actions.send_pandora_cmd(getActivity(), car_id, 1, R.string.guard_on);
             }
         }
-        if (v == vGuard) {
+        if (v == vTrunk) {
             Actions.send_pandora_cmd(getActivity(), car_id, 0x23, R.string.open_trunk);
         }
         if (v == vSound) {

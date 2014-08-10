@@ -44,7 +44,7 @@ public class SettingActivity extends ActionBarActivity {
 
     final static String UPDATE_SETTINGS = "net.ugona.plus.UPDATE_SETTINGS";
     final static String URL_SETTINGS = "https://car-online.ugona.net/settings?auth=$1&skey=$2";
-    final static String URL_SET = "https://car-online.ugona.net/set?auth=$1&v=$2";
+    final static String URL_SET = "https://car-online.ugona.net/set?auth=$1&skey=$2&v=$3";
     final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
 
     final static String ZONES = "zones";
@@ -655,6 +655,8 @@ public class SettingActivity extends ActionBarActivity {
                     return;
                 }
                 progressDialog.dismiss();
+                if (State.isPandora(preferences, car_id))
+                    return;
                 LayoutInflater inflater = (LayoutInflater) getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
                 final AlertDialog dialog = new AlertDialog.Builder(SettingActivity.this)
                         .setTitle(R.string.setup)
@@ -700,7 +702,7 @@ public class SettingActivity extends ActionBarActivity {
                 toast.show();
             }
         };
-        task.execute(URL_SET, preferences.getString(Names.Car.AUTH + car_id, ""), value, "ccode", ccode, "zone", zones_data, "t", timer_data);
+        task.execute(URL_SET, preferences.getString(Names.Car.AUTH + car_id, ""), preferences.getString(Names.Car.CAR_KEY + car_id, ""), value, "ccode", ccode, "zone", zones_data, "t", timer_data);
     }
 
     static class Zone implements Serializable {

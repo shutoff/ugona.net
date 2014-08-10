@@ -51,7 +51,7 @@ public class FetchService extends Service {
     static final String URL_EVENTS = "https://car-online.ugona.net/events?skey=$1&auth=$2&begin=$3&end=$4";
     static final String URL_GSM = "https://car-online.ugona.net/gsm?skey=$1&cc=$2&nc=$3&lac=$4&cid=$5";
     static final String URL_KEY = "https://car-online.ugona.net/key?auth=$1";
-    static final String URL_CARD = "https://car-online.ugona.net/card?auth=$1&t=$2";
+    static final String URL_CARD = "https://car-online.ugona.net/card?skey=$1&t=$2";
 
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;

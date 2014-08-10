@@ -1474,6 +1474,25 @@ public class Actions {
                             ed.putInt(Names.Notify.ZONE + car_id, id);
                             ed.commit();
                         }
+                        if (cmd == 4) {
+                            if (!preferences.getBoolean(Names.Car.AZ + car_id, false)) {
+                                SharedPreferences.Editor ed = preferences.edit();
+                                ed.putBoolean(Names.Car.AZ + car_id, true);
+                                ed.commit();
+                                Intent intent = new Intent(FetchService.ACTION_UPDATE);
+                                intent.putExtra(Names.ID, car_id);
+                                context.sendBroadcast(intent);
+                            }
+                        } else if (cmd == 8) {
+                            if (preferences.getBoolean(Names.Car.AZ + car_id, false)) {
+                                SharedPreferences.Editor ed = preferences.edit();
+                                ed.putBoolean(Names.Car.AZ + car_id, false);
+                                ed.commit();
+                                Intent intent = new Intent(FetchService.ACTION_UPDATE);
+                                intent.putExtra(Names.ID, car_id);
+                                context.sendBroadcast(intent);
+                            }
+                        }
                     }
 
                     @Override
