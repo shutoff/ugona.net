@@ -409,7 +409,6 @@ public class FetchService extends Service {
             JsonValue offline = res.get("offline");
             if (offline != null) {
                 boolean state = offline.asBoolean();
-                State.appendLog("offline=" + state);
                 if (state != preferences.getBoolean(Names.Car.OFFLINE + car_id, false)) {
                     SharedPreferences.Editor ed = preferences.edit();
                     ed.putBoolean(Names.Car.OFFLINE + car_id, state);
