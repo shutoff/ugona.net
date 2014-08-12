@@ -625,4 +625,5 @@
     <string name="ccode_fail">Ошибка изменения C-кода</string>
     <string name="delete_widget">Удалить виджет</string>
     <string name="delete_widget_msg">Вы действительно хотите удалить виджет?</string>
+    <string name="card_info" formatted="false">Уровень сигнала: %d dB\nЗаряд батареи: %.2f V</string>
 </resources>

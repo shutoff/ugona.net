@@ -71,6 +71,7 @@ public class StateFragment extends Fragment
     TextView tvTemperature4;
     TextView tvTemperature5;
     TextView tvTemperature6;
+    TextView tvCard;
 
     View vTemperature;
     View vTemperature2;
@@ -78,6 +79,7 @@ public class StateFragment extends Fragment
     View vTemperature4;
     View vTemperature5;
     View vTemperature6;
+    View vCard;
 
     View vError;
     ImageView imgRefresh;
@@ -184,6 +186,8 @@ public class StateFragment extends Fragment
         vTemperature5 = v.findViewById(R.id.temperature5_block);
         tvTemperature6 = (TextView) v.findViewById(R.id.temperature6);
         vTemperature6 = v.findViewById(R.id.temperature6_block);
+        tvCard = (TextView) v.findViewById(R.id.card);
+        vCard = v.findViewById(R.id.card_block);
 
         vMotor = v.findViewById(R.id.motor);
         vRele = v.findViewById(R.id.rele);
@@ -601,6 +605,13 @@ public class StateFragment extends Fragment
         } else {
             tvTemperature6.setText(temperature);
             vTemperature6.setVisibility(View.VISIBLE);
+        }
+        float card_volt = preferences.getFloat(Names.Car.CARD_VOLTAGE + car_id, 0);
+        if (card_volt != 0) {
+            tvCard.setText(String.format("%.2f V", card_volt));
+            vCard.setVisibility(View.VISIBLE);
+        } else {
+            vCard.setVisibility(View.GONE);
         }
 
         vCar.setDrawable(drawable.getDrawable(context, car_id));

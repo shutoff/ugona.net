@@ -709,7 +709,7 @@ public class EventsFragment extends Fragment
         EventRequest(long id, long time, int type) {
             event_id = id;
             event_time = time;
-            if ((type == 88) || (type == 140) || (type == -116)) {
+            if ((type == 88) || (type == 140) || (type == -116) || (type == 121) || (type == 122) || (type == 123) || (type == 124) || (type == 125)) {
                 String auth = preferences.getString(Names.Car.AUTH + car_id, "");
                 execute(URL_EVENT, api_key, id, time, "type", type, "auth", auth);
                 return;
@@ -756,6 +756,18 @@ public class EventsFragment extends Fragment
                     }
                 }
             }
+            JsonValue vLevel = res.get("card_level");
+            JsonValue vVoltage = res.get("card_voltage");
+            if ((vLevel != null) && (vVoltage != null)) {
+                String f = getString(R.string.card_info);
+                data += String.format(f, vLevel.asInt(), vVoltage.asFloat());
+                data += "\n";
+            }
+            if (text != null) {
+                data += text.asString();
+                data += "\n";
+            }
+
             final String event_data = data;
 
             JsonValue value = res.get("gps");
@@ -806,8 +818,6 @@ public class EventsFragment extends Fragment
                 return;
             }
             String addr = event_data;
-            if (text != null)
-                addr = text.asString();
             setAddress(addr, "", null);
         }
 

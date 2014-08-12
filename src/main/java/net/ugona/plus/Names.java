@@ -165,6 +165,9 @@ public final class Names {
         static final String LOST = "lost";
         static final String OFFLINE = "offline";
 
+        static final String CARD_VOLTAGE = "card_voltage";
+        static final String CARD_LEVEL = "card_level";
+
         static final String VALET_ON_NOTIFY = "valet_on_notify_";
         static final String LOST_NOTIFY = "lost_notify_";
         static final String LIGHT_SHOCK = "light_shock_";

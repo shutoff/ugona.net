@@ -52,6 +52,7 @@ public class FetchService extends Service {
     static final String URL_GSM = "https://car-online.ugona.net/gsm?skey=$1&cc=$2&nc=$3&lac=$4&cid=$5";
     static final String URL_KEY = "https://car-online.ugona.net/key?auth=$1";
     static final String URL_CARD = "https://car-online.ugona.net/card?skey=$1&t=$2";
+    static final String URL_EVENT = "https://car-online.ugona.net/event?skey=$1&auth=$2&type=$3&time=$4&id=$5";
 
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;
@@ -610,6 +611,12 @@ public class FetchService extends Service {
                 new ZoneRequest(car_id);
             }
 
+            JsonValue card_event = res.get("card_event");
+            if (card_event != null) {
+                JsonObject event = card_event.asObject();
+                new CardEventRequest(car_id, event.get("type").asInt(), event.get("time").asLong(), event.get("id").asLong());
+            }
+
             JsonValue last_stand = res.get("last_stand");
             if (last_stand != null)
                 ed.putLong(Names.Car.LAST_STAND + car_id, last_stand.asLong());
@@ -956,6 +963,41 @@ public class FetchService extends Service {
             if (state)
                 msg_id = msg;
             ed.putBoolean(id + car_id, state);
+        }
+    }
+
+    class CardEventRequest extends ServerRequest {
+
+        int type_;
+        long time_;
+        long event_id_;
+
+        CardEventRequest(String id, int type, long time, long event_id) {
+            super("E", id);
+            type_ = type;
+            time_ = time;
+            event_id_ = event_id;
+        }
+
+        @Override
+        void result(JsonObject res) throws ParseException {
+            JsonValue vLevel = res.get("card_level");
+            JsonValue vVoltage = res.get("card_voltage");
+            if ((vLevel != null) && (vVoltage != null)) {
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putInt(Names.Car.CARD_LEVEL + car_id, vLevel.asInt());
+                ed.putFloat(Names.Car.CARD_VOLTAGE + car_id, vVoltage.asFloat());
+                ed.commit();
+                sendUpdate(ACTION_UPDATE, car_id);
+            }
+        }
+
+        @Override
+        void exec(String api_key) {
+            String auth = preferences.getString(Names.Car.AUTH + car_id, "");
+            if (auth.equals(""))
+                return;
+            execute(URL_EVENT, api_key, auth, type_, time_, event_id_);
         }
     }
 
