@@ -608,6 +608,7 @@ public class StateFragment extends Fragment
         }
         float card_volt = preferences.getFloat(Names.Car.CARD_VOLTAGE + car_id, 0);
         if (card_volt != 0) {
+            tvCard.setTextColor((card_volt >= 2.6f) ? getResources().getColor(android.R.color.secondary_text_dark) : getResources().getColor(R.color.error));
             tvCard.setText(String.format("%.2f V", card_volt));
             vCard.setVisibility(View.VISIBLE);
         } else {

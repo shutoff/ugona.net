@@ -155,6 +155,7 @@ public final class Names {
         static final String HEATER = "heater";
         static final String CARD = "card";
         static final String CARD_EVENT = "card_event";
+        static final String CARD_TIME = "card_time";
 
         static final String DOORS_4 = "doors4_";
         static final String DOOR_FL = "door_fl";
