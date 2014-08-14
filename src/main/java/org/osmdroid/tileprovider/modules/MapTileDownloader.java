@@ -179,7 +179,9 @@ public class MapTileDownloader extends MapTileModuleProviderBase {
                     return null;
                 }
 
-                Request request = new Request.Builder().url(tileURLString).build();
+                Request.Builder builder = new Request.Builder().url(tileURLString);
+                builder.header("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
+                Request request = builder.build();
                 Response response = HttpTask.client.newCall(request).execute();
                 if (response.code() != HttpURLConnection.HTTP_OK) {
                     logger.warn("Problem downloading MapTile: " + tile + " HTTP response: " + response.message());
