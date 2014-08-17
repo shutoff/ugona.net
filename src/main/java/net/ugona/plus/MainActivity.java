@@ -120,7 +120,6 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-/*
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
@@ -128,7 +127,6 @@ public class MainActivity extends ActionBarActivity {
                 System.exit(1);
             }
         });
-*/
 
         Thread.currentThread().setContextClassLoader(this.getClassLoader());
         try {
@@ -553,22 +551,33 @@ public class MainActivity extends ActionBarActivity {
         removeNotifications();
     }
 
-    void setCar(String id) {
-        id = Preferences.getCar(preferences, id);
+    void setCar(String new_id) {
+        final String id = Preferences.getCar(preferences, new_id);
         if (id.equals(car_id))
             return;
-        try {
-            int current_id = getPageId(mViewPager.getCurrentItem());
-            car_id = id;
-            setActionBar();
-            update();
-            updateMenu();
-            int current = getPagePosition(current_id);
-            mViewPager.setCurrentItem(current);
-            setShowDate(current);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                try {
+                    int current_id = getPageId(mViewPager.getCurrentItem());
+                    car_id = id;
+                    setActionBar();
+                    update();
+                    updateMenu();
+                    int current = getPagePosition(current_id);
+                    mViewPager.setCurrentItem(current);
+                    setShowDate(current);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        };
+        task.execute();
     }
 
     void startTimer(boolean now) {
@@ -735,23 +744,11 @@ public class MainActivity extends ActionBarActivity {
     void update() {
         final int cur = mViewPager.getCurrentItem();
         setShowTracks();
-        AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                mViewPager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
-                mViewPager.setCurrentItem(cur);
-                Intent intent = new Intent(MainActivity.this, FetchService.class);
-                intent.putExtra(Names.ID, car_id);
-                startService(intent);
-            }
-        };
-        task.execute();
+        mViewPager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
+        mViewPager.setCurrentItem(cur);
+        Intent intent = new Intent(MainActivity.this, FetchService.class);
+        intent.putExtra(Names.ID, car_id);
+        startService(intent);
     }
 
     void changeDate(Date d) {
