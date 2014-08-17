@@ -733,13 +733,25 @@ public class MainActivity extends ActionBarActivity {
     }
 
     void update() {
-        int cur = mViewPager.getCurrentItem();
+        final int cur = mViewPager.getCurrentItem();
         setShowTracks();
-        mViewPager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
-        mViewPager.setCurrentItem(cur);
-        Intent intent = new Intent(this, FetchService.class);
-        intent.putExtra(Names.ID, car_id);
-        startService(intent);
+        AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                mViewPager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
+                mViewPager.setCurrentItem(cur);
+                Intent intent = new Intent(MainActivity.this, FetchService.class);
+                intent.putExtra(Names.ID, car_id);
+                startService(intent);
+            }
+        };
+        task.execute();
     }
 
     void changeDate(Date d) {

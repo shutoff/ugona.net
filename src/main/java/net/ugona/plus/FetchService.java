@@ -947,7 +947,7 @@ public class FetchService extends Service {
                 Intent iUpdate = new Intent(FetchService.this, FetchService.class);
                 iUpdate.setAction(ACTION_START);
                 iUpdate.putExtra(Names.ID, car_id);
-                Uri data = Uri.withAppendedPath(Uri.parse("http://service/guard/"), car_id);
+                Uri data = Uri.withAppendedPath(Uri.parse("http://service/card/"), car_id);
                 iUpdate.setData(data);
                 PendingIntent pi = PendingIntent.getService(FetchService.this, 0, iUpdate, 0);
                 alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + delta, pi);
