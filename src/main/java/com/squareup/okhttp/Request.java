@@ -30,12 +30,12 @@ import java.util.List;
  * is null or itself immutable.
  */
 public final class Request {
+    static String USER_AGENT = "User-Agent";
     private final String urlString;
     private final String method;
     private final Headers headers;
     private final RequestBody body;
     private final Object tag;
-
     private volatile URL url; // Lazily initialized.
     private volatile URI uri; // Lazily initialized.
     private volatile CacheControl cacheControl; // Lazily initialized.
@@ -134,6 +134,7 @@ public final class Request {
         public Builder() {
             this.method = "GET";
             this.headers = new Headers.Builder();
+            addHeader(USER_AGENT, System.getProperty("http.agent"));
         }
 
         private Builder(Request request) {
@@ -143,6 +144,8 @@ public final class Request {
             this.body = request.body;
             this.tag = request.tag;
             this.headers = request.headers.newBuilder();
+            if (this.headers.get(USER_AGENT) == null)
+                addHeader(USER_AGENT, System.getProperty("http.agent"));
         }
 
         public Builder url(String url) {

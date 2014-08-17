@@ -89,7 +89,7 @@ public class MainActivity extends ActionBarActivity {
     static final int PAGE_TRACK = 4;
     static final int PAGE_STAT = 5;
 
-    static final int VERSION = 4;
+    static final int VERSION = 5;
     static final String SENDER_ID = "915289471784";
     final static String URL_KEY = "https://car-online.ugona.net/key?login=$1&password=$2";
     final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
