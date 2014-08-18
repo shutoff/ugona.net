@@ -1622,9 +1622,12 @@ public class Actions {
                     final Context context = ctx;
                     try {
                         progressDialog.dismiss();
+                        String msg = context.getString(R.string.send_sms_on_fail);
+                        if (error_text != null)
+                            msg = msg.replace(".", " (" + error_text + ").");
                         dialog = new AlertDialog.Builder(context)
                                 .setTitle(R.string.send_sms)
-                                .setMessage(R.string.send_sms_on_fail)
+                                .setMessage(msg)
                                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {

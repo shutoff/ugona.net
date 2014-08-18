@@ -626,5 +626,7 @@
     <string name="delete_widget">Удалить виджет</string>
     <string name="delete_widget_msg">Вы действительно хотите удалить виджет?</string>
     <string name="card_info" formatted="false">Уровень сигнала: %d dB\nЗаряд батареи: %.2f V</string>
-    <string name="demo_mode">Деио режим</string>
+    <string name="demo_mode">Демо режим</string>
+    <string name="ccode_ok">C-код изменен</string>
+    <string name="ccode_failed">Ошибка изменения C-кода</string>
 </resources>

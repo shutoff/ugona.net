@@ -2,6 +2,7 @@ package net.ugona.plus;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -223,9 +224,36 @@ public class AuthFragment extends SettingsFragment {
                                 String old = edOld.getText().toString();
                                 String new1 = edNew1.getText().toString();
 
-                                final String text = "CHANGE C " + old + " " + new1;
-                                SmsMonitor.sendSMS(getActivity(), car_id, null, new SmsMonitor.Sms(R.string.ccode_change, text, "CHANGE C OK", "CHANGE C FAILED", R.string.ccode_fail));
                                 dialog.dismiss();
+
+                                final ProgressDialog progressDialog = new ProgressDialog(getActivity());
+                                progressDialog.setMessage(getString(R.string.ccode_change));
+                                progressDialog.show();
+
+                                final String text = "CHANGE C " + old + " " + new1;
+                                SmsMonitor.sendSMS(getActivity(), car_id, null, new SmsMonitor.Sms(R.string.ccode_change, text, "CHANGE C OK", "CHANGE C FAILED", R.string.ccode_fail) {
+                                    @Override
+                                    boolean process_answer(Context context, String car_id, String text) {
+                                        try {
+                                            progressDialog.dismiss();
+                                        } catch (Exception ex) {
+                                            // ignore
+                                        }
+                                        showMessage(R.string.ccode_ok);
+                                        return true;
+                                    }
+
+                                    @Override
+                                    String process_error(String text) {
+                                        try {
+                                            progressDialog.dismiss();
+                                        } catch (Exception ex) {
+                                            // ignore
+                                        }
+                                        showMessage(R.string.ccode_failed);
+                                        return super.process_error(text);
+                                    }
+                                });
                             }
                         });
                     }
@@ -253,6 +281,14 @@ public class AuthFragment extends SettingsFragment {
         getActivity().registerReceiver(br, filter);
 
         return v;
+    }
+
+    void showMessage(int id) {
+        AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                .setTitle(id)
+                .setNegativeButton(R.string.ok, null)
+                .create();
+        dialog.show();
     }
 
     @Override

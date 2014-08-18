@@ -35,7 +35,6 @@ public class PhotoView extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photo);
         iv = (ImageView) findViewById(R.id.photo);
-        byte[] data = getIntent().getByteArrayExtra(Names.Car.SHOW_PHOTO);
         long time = getIntent().getLongExtra(Names.TITLE, 0);
         car_id = getIntent().getStringExtra(Names.ID);
         camera = getIntent().getIntExtra(Names.CAMERA, 0);

@@ -155,7 +155,10 @@ public class AuthDialog extends Activity {
         };
 
         if (show_auth) {
-            edLogin.setText(preferences.getString(Names.Car.LOGIN + car_id, ""));
+            String login = preferences.getString(Names.Car.LOGIN + car_id, "");
+            if (login.equals("demo"))
+                login = "";
+            edLogin.setText(login);
             edLogin.addTextChangedListener(watcher);
             edPasswd.addTextChangedListener(watcher);
             edLogin.requestFocus();

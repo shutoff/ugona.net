@@ -374,6 +374,13 @@ public class Cars extends ActionBarActivity {
     }
 
     void setupCar(String car_id) {
+        String[] cars = preferences.getString(Names.CARS, "").split(",");
+        for (String car : cars) {
+            if (preferences.getString(Names.Car.CAR_KEY + car, "").equals("demo")) {
+                deleteCar(car_id);
+                break;
+            }
+        }
         Intent intent = new Intent(this, SettingActivity.class);
         intent.putExtra(Names.ID, car_id);
         startActivityForResult(intent, CAR_SETUP);

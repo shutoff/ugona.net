@@ -956,6 +956,7 @@ public class MainActivity extends ActionBarActivity {
                     Intent i = new Intent(MainActivity.this, AuthDialog.class);
                     i.putExtra(Names.ID, car_id);
                     i.putExtra(Names.Car.AUTH, true);
+                    i.putExtra(Names.Car.CAR_NAME, true);
                     if (State.hasTelephony(MainActivity.this) && (phone.length() == 0))
                         i.putExtra(Names.Car.CAR_PHONE, true);
                     startActivityForResult(i, CAR_SETUP);
