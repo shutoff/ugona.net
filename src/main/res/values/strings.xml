@@ -627,4 +627,5 @@
     <string name="delete_widget">Delete widget</string>
     <string name="delete_widget_msg">Delete widget?</string>
     <string name="card_info" formatted="false">Signal level: %d dB\nVoltage: %.2f V</string>
+    <string name="demo_mode">Demo mode</string>
 </resources>

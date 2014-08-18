@@ -250,19 +250,20 @@ public class MainActivity extends ActionBarActivity {
 
             if (preferences.getString(Names.CARS, "").equals("") && (auth.equals(""))) {
                 firstSetup();
-            } else if (auth.equals("")) {
+            } else if (auth.equals("") || preferences.getString(Names.Car.CAR_KEY + car_id, "").equals("demo")) {
                 Intent i = new Intent(this, AuthDialog.class);
                 i.putExtra(Names.ID, car_id);
                 i.putExtra(Names.Car.AUTH, true);
+                i.putExtra(Names.Car.CAR_NAME, true);
                 if (State.hasTelephony(this) && (phone.length() == 0))
                     i.putExtra(Names.Car.CAR_PHONE, true);
                 startActivityForResult(i, CAR_SETUP);
-            } else if (State.hasTelephony(this) && (phone.length() == 0)) {
+            } else if (State.hasTelephony(this) && (phone.length() == 0) && !preferences.getString(Names.Car.CAR_KEY + car_id, "").equals("demo")) {
                 Intent i = new Intent(this, AuthDialog.class);
                 i.putExtra(Names.ID, car_id);
                 i.putExtra(Names.Car.CAR_PHONE, true);
                 startActivityForResult(i, CAR_SETUP);
-            } else if (!preferences.getBoolean(Names.INIT_POINTER, false)) {
+            } else if (!preferences.getBoolean(Names.INIT_POINTER, false) && preferences.getString(Names.Car.CAR_KEY + car_id, "").equals("demo")) {
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putBoolean(Names.INIT_POINTER, true);
                 ed.commit();

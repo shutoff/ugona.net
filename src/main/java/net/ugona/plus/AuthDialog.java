@@ -50,6 +50,7 @@ public class AuthDialog extends Activity {
     boolean show_phone;
     String car_id;
     SharedPreferences preferences;
+    AlertDialog dialog;
 
     static boolean isValidPhoneNumber(String number) {
         if (State.isDebug())
@@ -88,9 +89,17 @@ public class AuthDialog extends Activity {
                 .setPositiveButton(R.string.ok, null)
                 .setNegativeButton(R.string.cancel, null)
                 .setView(inflater.inflate(R.layout.apikeydialog, null));
+        if (getIntent().getBooleanExtra(Names.Car.CAR_NAME, false)) {
+            builder.setNeutralButton(R.string.demo_mode, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    auth("demo", "demo", "+7(495)995-30-54");
+                }
+            });
+        }
         if (show_auth)
             builder.setMessage(R.string.auth_summary);
-        final AlertDialog dialog = builder.create();
+        dialog = builder.create();
         dialog.show();
         edNumber = (EditText) dialog.findViewById(R.id.number);
         edLogin = (EditText) dialog.findViewById(R.id.login);
@@ -108,133 +117,17 @@ public class AuthDialog extends Activity {
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = getIntent();
+                String login = null;
+                String pass = null;
+                String phone = null;
                 if (show_auth) {
-                    final ProgressDialog dlgCheck = new ProgressDialog(AuthDialog.this);
-                    dlgCheck.setMessage(getString(R.string.check_auth));
-                    dlgCheck.show();
-
-                    final String login = edLogin.getText().toString();
-                    final String pass = edPasswd.getText().toString();
-
-                    HttpTask apiTask = new HttpTask() {
-                        @Override
-                        void result(JsonObject res) throws ParseException {
-                            final String key = res.get("key").asString();
-                            SharedPreferences.Editor ed = preferences.edit();
-                            ed.putString(Names.Car.CAR_KEY + car_id, key);
-                            ed.putString(Names.Car.LOGIN + car_id, login);
-                            ed.putString(Names.Car.AUTH + car_id, res.get("auth").asString());
-                            ed.remove(Names.GCM_TIME);
-                            final String[] cars = preferences.getString(Names.CARS, "").split(",");
-                            boolean is_new = true;
-                            for (String car : cars) {
-                                if (car.equals(car_id))
-                                    is_new = false;
-                            }
-                            if (is_new)
-                                ed.putString(Names.CARS, preferences.getString(Names.CARS, "") + "," + car_id);
-                            ed.commit();
-
-                            HttpTask version = new HttpTask() {
-                                @Override
-                                void result(JsonObject res) throws ParseException {
-                                    SharedPreferences.Editor ed = preferences.edit();
-                                    if (show_phone) {
-                                        String number = edNumber.getText().toString();
-                                        if (!State.isDebug())
-                                            number = Phones.formatPhoneNumber(number);
-                                        ed.putString(Names.Car.CAR_PHONE + car_id, number);
-                                    }
-                                    String ver = res.get("version").asString();
-                                    ed.putString(Names.Car.VERSION + car_id, ver);
-                                    boolean pointer = false;
-                                    if (ver.toUpperCase().substring(0, 5).equals("MS-TR")) {
-                                        ed.putBoolean(Names.Car.POINTER + car_id, true);
-                                        pointer = true;
-                                    }
-                                    ed.commit();
-                                    setResult(RESULT_OK, getIntent());
-                                    dlgCheck.dismiss();
-                                    dialog.dismiss();
-                                    Intent intent = new Intent(FetchService.ACTION_UPDATE_FORCE);
-                                    intent.putExtra(Names.ID, car_id);
-                                    sendBroadcast(intent);
-                                    if (!pointer) {
-                                        boolean c1 = preferences.getBoolean(Names.Car.SHOW_PHOTO + car_id, false);
-                                        boolean c2 = preferences.getBoolean(Names.Car.SHOW_PHOTO + car_id, true);
-                                        if (!c1 && c2) {
-                                            HttpTask photo = new HttpTask() {
-                                                @Override
-                                                void result(JsonObject res) throws ParseException {
-                                                    JsonArray array = res.get("photos").asArray();
-                                                    SharedPreferences.Editor ed = preferences.edit();
-                                                    ed.putBoolean(Names.Car.SHOW_PHOTO + car_id, array.size() > 0);
-                                                    ed.commit();
-                                                    Intent intent = new Intent(FetchService.ACTION_UPDATE_FORCE);
-                                                    intent.putExtra(Names.ID, car_id);
-                                                    sendBroadcast(intent);
-                                                }
-
-                                                @Override
-                                                void error() {
-
-                                                }
-                                            };
-                                            Date now = new Date();
-                                            photo.execute(URL_PHOTOS, key, now.getTime() - 86400 * 3);
-                                        }
-                                    }
-                                    if (!show_phone && State.hasTelephony(AuthDialog.this) && preferences.getString(Names.Car.CAR_PHONE, "").equals("")) {
-                                        Intent i = new Intent(AuthDialog.this, AuthDialog.class);
-                                        i.putExtra(Names.ID, car_id);
-                                        i.putExtra(Names.Car.CAR_PHONE, true);
-                                        startActivityForResult(i, 1000);
-                                    }
-                                }
-
-                                @Override
-                                void error() {
-                                    tvError.setText(R.string.auth_error);
-                                    tvError.setVisibility(View.VISIBLE);
-                                    dlgCheck.dismiss();
-                                    dialog.dismiss();
-                                }
-                            };
-                            version.execute(URL_PROFILE, key);
-                        }
-
-                        @Override
-                        void error() {
-                            try {
-                                Toast toast = Toast.makeText(AuthDialog.this, getString(R.string.auth_error), Toast.LENGTH_LONG);
-                                toast.show();
-                                tvError.setText(R.string.auth_error);
-                                tvError.setVisibility(View.VISIBLE);
-                                dlgCheck.dismiss();
-                            } catch (Exception ex) {
-                                // ignore
-                            }
-                        }
-                    };
-
-                    apiTask.execute(URL_KEY, login, pass);
-                    return;
+                    login = edLogin.getText().toString();
+                    pass = edPasswd.getText().toString();
                 }
                 if (show_phone) {
-                    String number = edNumber.getText().toString();
-                    if (!State.isDebug())
-                        number = Phones.formatPhoneNumber(number);
-                    if (car_id == null) {
-                        i.putExtra(Names.Car.CAR_PHONE, number);
-                    } else {
-                        SharedPreferences.Editor ed = preferences.edit();
-                        ed.putString(Names.Car.CAR_PHONE + car_id, number);
-                        ed.commit();
-                    }
-                    setResult(RESULT_OK, i);
+                    phone = edNumber.getText().toString();
                 }
-                dialog.dismiss();
+                auth(login, pass, phone);
             }
         });
 
@@ -290,6 +183,139 @@ public class AuthDialog extends Activity {
                 startActivityForResult(intent, 1);
             }
         });
+    }
+
+    void auth(final String login, final String pass, String phone) {
+        final ProgressDialog dlgCheck = new ProgressDialog(AuthDialog.this);
+        dlgCheck.setMessage(getString(R.string.check_auth));
+        dlgCheck.show();
+
+        Intent i = getIntent();
+        if (phone != null) {
+            String number = phone;
+            if (!State.isDebug())
+                number = Phones.formatPhoneNumber(number);
+            if (car_id == null) {
+                i.putExtra(Names.Car.CAR_PHONE, number);
+            } else {
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putString(Names.Car.CAR_PHONE + car_id, number);
+                ed.commit();
+            }
+        }
+
+        if ((login == null) || (pass == null)) {
+            setResult(RESULT_OK, i);
+            return;
+        }
+
+        HttpTask apiTask = new HttpTask() {
+            @Override
+            void result(JsonObject res) throws ParseException {
+                final String key = res.get("key").asString();
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putString(Names.Car.CAR_KEY + car_id, key);
+                ed.putString(Names.Car.LOGIN + car_id, login);
+                ed.putString(Names.Car.AUTH + car_id, res.get("auth").asString());
+                if (key.equals("demo")) {
+                    ed.putString(Names.Car.CONTROL + car_id, "inet");
+                    ed.putString(Names.Car.CAR_NAME + car_id, "Demo");
+                }
+                ed.remove(Names.GCM_TIME);
+                final String[] cars = preferences.getString(Names.CARS, "").split(",");
+                boolean is_new = true;
+                for (String car : cars) {
+                    if (car.equals(car_id))
+                        is_new = false;
+                }
+                if (is_new)
+                    ed.putString(Names.CARS, preferences.getString(Names.CARS, "") + "," + car_id);
+                ed.commit();
+
+                HttpTask version = new HttpTask() {
+                    @Override
+                    void result(JsonObject res) throws ParseException {
+                        SharedPreferences.Editor ed = preferences.edit();
+                        if (show_phone) {
+                            String number = edNumber.getText().toString();
+                            if (!State.isDebug())
+                                number = Phones.formatPhoneNumber(number);
+                            ed.putString(Names.Car.CAR_PHONE + car_id, number);
+                        }
+                        String ver = res.get("version").asString();
+                        ed.putString(Names.Car.VERSION + car_id, ver);
+                        boolean pointer = false;
+                        if (ver.toUpperCase().substring(0, 5).equals("MS-TR")) {
+                            ed.putBoolean(Names.Car.POINTER + car_id, true);
+                            pointer = true;
+                        }
+                        ed.commit();
+                        setResult(RESULT_OK, getIntent());
+                        dlgCheck.dismiss();
+                        dialog.dismiss();
+                        Intent intent = new Intent(FetchService.ACTION_UPDATE_FORCE);
+                        intent.putExtra(Names.ID, car_id);
+                        sendBroadcast(intent);
+                        if (!pointer) {
+                            boolean c1 = preferences.getBoolean(Names.Car.SHOW_PHOTO + car_id, false);
+                            boolean c2 = preferences.getBoolean(Names.Car.SHOW_PHOTO + car_id, true);
+                            if (!c1 && c2) {
+                                HttpTask photo = new HttpTask() {
+                                    @Override
+                                    void result(JsonObject res) throws ParseException {
+                                        JsonArray array = res.get("photos").asArray();
+                                        SharedPreferences.Editor ed = preferences.edit();
+                                        ed.putBoolean(Names.Car.SHOW_PHOTO + car_id, array.size() > 0);
+                                        ed.commit();
+                                        Intent intent = new Intent(FetchService.ACTION_UPDATE_FORCE);
+                                        intent.putExtra(Names.ID, car_id);
+                                        sendBroadcast(intent);
+                                    }
+
+                                    @Override
+                                    void error() {
+
+                                    }
+                                };
+                                Date now = new Date();
+                                photo.execute(URL_PHOTOS, key, now.getTime() - 86400 * 3);
+                            }
+                        }
+                        if (!show_phone && State.hasTelephony(AuthDialog.this) && preferences.getString(Names.Car.CAR_PHONE, "").equals("")) {
+                            Intent i = new Intent(AuthDialog.this, AuthDialog.class);
+                            i.putExtra(Names.ID, car_id);
+                            i.putExtra(Names.Car.CAR_PHONE, true);
+                            startActivityForResult(i, 1000);
+                        }
+                    }
+
+                    @Override
+                    void error() {
+                        tvError.setText(R.string.auth_error);
+                        tvError.setVisibility(View.VISIBLE);
+                        dlgCheck.dismiss();
+                        dialog.dismiss();
+                    }
+                };
+                version.execute(URL_PROFILE, key);
+            }
+
+            @Override
+            void error() {
+                try {
+                    Toast toast = Toast.makeText(AuthDialog.this, getString(R.string.auth_error), Toast.LENGTH_LONG);
+                    toast.show();
+                    tvError.setText(R.string.auth_error);
+                    tvError.setVisibility(View.VISIBLE);
+                    dlgCheck.dismiss();
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+        };
+
+        apiTask.execute(URL_KEY, login, pass);
+        return;
     }
 
     @Override
