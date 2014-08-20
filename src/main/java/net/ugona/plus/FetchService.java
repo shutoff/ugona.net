@@ -267,6 +267,10 @@ public class FetchService extends Service {
                 ex.printStackTrace();
             }
         }
+        if (id == preferences.getInt(Names.Car.LOST_NOTIFY + car_id, 0)) {
+            State.appendLog("Clear lost notification " + id);
+            ed.remove(Names.Car.LOST_NOTIFY + car_id);
+        }
 
         if (res == null) {
             ed.remove(Names.Car.N_IDS + car_id);
@@ -436,6 +440,7 @@ public class FetchService extends Service {
             ed.putLong(Names.Car.EVENT_TIME + car_id, time.asLong());
             if (time.asLong() > preferences.getLong(Names.Car.LOST + car_id, 0)) {
                 int id = preferences.getInt(Names.Car.LOST_NOTIFY + car_id, 0);
+                State.appendLog("Channel restore by event " + id);
                 if (id > 0) {
                     ed.remove(Names.Car.LOST_NOTIFY + car_id);
                     Alarm.removeNotification(FetchService.this, car_id, id);

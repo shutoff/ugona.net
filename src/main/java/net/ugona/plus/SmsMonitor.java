@@ -317,6 +317,7 @@ public class SmsMonitor extends BroadcastReceiver {
                         if (restore) {
                             ed.remove(Names.Car.LOST + car);
                             int id = preferences.getInt(Names.Car.LOST_NOTIFY + car, 0);
+                            State.appendLog("Restore by SMS " + id);
                             if (id > 0) {
                                 ed.remove(Names.Car.LOST_NOTIFY + car);
                                 Alarm.removeNotification(context, car, id);
@@ -332,6 +333,7 @@ public class SmsMonitor extends BroadcastReceiver {
                             }
                             id = Alarm.createNotification(context, context.getString(R.string.lost), R.drawable.gsm_lost, car, Names.Car.LOST_SOUND, time.toDate().getTime(), true);
                             ed.putInt(Names.Car.LOST_NOTIFY + car, id);
+                            State.appendLog("Lost channel " + id);
                         }
                         ed.commit();
                         Intent i = new Intent(FetchService.ACTION_UPDATE_FORCE);
