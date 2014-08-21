@@ -347,7 +347,7 @@ public class Alarm extends Activity {
                 volumeTask = new VolumeTask(this);
                 player = new MediaPlayer();
                 player.setDataSource(this, uri);
-                player.setAudioStreamType(AudioManager.STREAM_RING);
+                player.setAudioStreamType(AudioManager.STREAM_ALARM);
                 player.setLooping(true);
                 player.prepare();
                 player.start();
