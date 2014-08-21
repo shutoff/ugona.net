@@ -13,11 +13,14 @@ import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
 import java.util.Date;
 
-abstract public class GpsActivity extends WebViewActivity {
+abstract public class MapActivity extends WebViewActivity {
+
+    static final String TRAFFIC = "traffic";
 
     static final int TWO_MINUTES = 1000 * 60 * 2;
     Menu topSubMenu;
@@ -27,9 +30,15 @@ abstract public class GpsActivity extends WebViewActivity {
     LocationListener netListener;
     LocationListener gpsListener;
 
-    abstract String getURL();
-
     abstract int menuId();
+
+    abstract JsInterface js();
+
+    @Override
+    String loadURL() {
+        webView.addJavascriptInterface(js(), "android");
+        return getUrl();
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,15 +52,30 @@ abstract public class GpsActivity extends WebViewActivity {
 
     @Override
     protected void onStop() {
-        if (netListener != null)
-            locationManager.removeUpdates(netListener);
-        if (gpsListener != null)
-            locationManager.removeUpdates(gpsListener);
+        stopListener();
         super.onStop();
     }
 
     @Override
     protected void onStart() {
+        startListener();
+        super.onStart();
+    }
+
+    String getUrl() {
+        if (preferences.getString("map_type", "").equals("OSM"))
+            return "file:///android_asset/html/osm.html";
+        return "file:///android_asset/html/google.html";
+    }
+
+    void startListener() {
+        if (netListener != null)
+            locationManager.removeUpdates(netListener);
+        if (gpsListener != null)
+            locationManager.removeUpdates(gpsListener);
+    }
+
+    void stopListener() {
         netListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
@@ -74,41 +98,41 @@ abstract public class GpsActivity extends WebViewActivity {
             }
         };
 
-        gpsListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                locationChanged(location);
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-
-            }
-        };
-
-        try {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, gpsListener);
-        } catch (Exception ex) {
-            gpsListener = null;
-        }
-
         try {
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 10, netListener);
         } catch (Exception ex) {
             netListener = null;
         }
 
-        super.onStart();
+        if (preferences.getBoolean(Names.USE_GPS, false)) {
+            gpsListener = new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    locationChanged(location);
+                }
+
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+
+                }
+
+                @Override
+                public void onProviderEnabled(String provider) {
+
+                }
+
+                @Override
+                public void onProviderDisabled(String provider) {
+
+                }
+            };
+
+            try {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, gpsListener);
+            } catch (Exception ex) {
+                gpsListener = null;
+            }
+        }
     }
 
     @Override
@@ -116,9 +140,20 @@ abstract public class GpsActivity extends WebViewActivity {
         topSubMenu = menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(menuId(), menu);
-        boolean isOSM = preferences.getString("map_type", "").equals("OSM");
-        menu.findItem(R.id.google).setTitle(getCheckedText(R.string.google, !isOSM));
-        menu.findItem(R.id.osm).setTitle(getCheckedText(R.string.osm, isOSM));
+        if (preferences.getString("map_type", "OSM").equals("OSM")) {
+            menu.findItem(R.id.osm).setChecked(true);
+        } else {
+            menu.findItem(R.id.google).setChecked(true);
+        }
+        MenuItem item = menu.findItem(R.id.traffic);
+        if (item != null)
+            item.setChecked(preferences.getBoolean(TRAFFIC, true));
+        item = menu.findItem(R.id.traffic_layer);
+        if (item != null)
+            item.setChecked(preferences.getBoolean(Names.SHOW_TRAFFIC, false));
+        item = menu.findItem(R.id.gps);
+        if (item != null)
+            item.setChecked(preferences.getBoolean(Names.USE_GPS, true));
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -126,12 +161,6 @@ abstract public class GpsActivity extends WebViewActivity {
         topSubMenu.clear();
         onCreateOptionsMenu(topSubMenu);
     }
-
-    String getCheckedText(int id, boolean check) {
-        String check_mark = check ? "\u2714" : "";
-        return check_mark + getString(id);
-    }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -174,7 +203,7 @@ abstract public class GpsActivity extends WebViewActivity {
                 ed.putString(Names.MAP_TYPE, "Google");
                 ed.commit();
                 updateMenu();
-                webView.loadUrl(getURL());
+                webView.loadUrl(getUrl());
                 break;
             }
             case R.id.osm: {
@@ -182,7 +211,26 @@ abstract public class GpsActivity extends WebViewActivity {
                 ed.putString(Names.MAP_TYPE, "OSM");
                 ed.commit();
                 updateMenu();
-                webView.loadUrl(getURL());
+                webView.loadUrl(getUrl());
+                break;
+            }
+            case R.id.traffic_layer: {
+                boolean traffic = !preferences.getBoolean(Names.SHOW_TRAFFIC, false);
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putBoolean(Names.SHOW_TRAFFIC, traffic);
+                ed.commit();
+                updateMenu();
+                webView.loadUrl("javascript:showTraffic()");
+                break;
+            }
+            case R.id.gps: {
+                boolean gps = !preferences.getBoolean(Names.USE_GPS, false);
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putBoolean(Names.USE_GPS, gps);
+                ed.commit();
+                updateMenu();
+                stopListener();
+                startListener();
                 break;
             }
         }
@@ -278,6 +326,37 @@ abstract public class GpsActivity extends WebViewActivity {
         if (provider1 == null)
             return provider2 == null;
         return provider1.equals(provider2);
+    }
+
+    class JsInterface {
+
+        @JavascriptInterface
+        public String init() {
+            loaded = true;
+            return "";
+        }
+
+        @JavascriptInterface
+        public String getLocation() {
+            if (currentBestLocation == null)
+                return "";
+            String res = currentBestLocation.getLatitude() + ",";
+            res += currentBestLocation.getLongitude() + ",";
+            res += currentBestLocation.getAccuracy();
+            if (currentBestLocation.hasBearing())
+                res += currentBestLocation.getBearing();
+            return res;
+        }
+
+        @JavascriptInterface
+        public String kmh() {
+            return getString(R.string.kmh);
+        }
+
+        @JavascriptInterface
+        public String traffic() {
+            return preferences.getBoolean(TRAFFIC, true) ? "1" : "";
+        }
     }
 
 }
