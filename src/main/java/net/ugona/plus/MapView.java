@@ -1,202 +1,467 @@
 package net.ugona.plus;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Paint;
-import android.os.Build;
-import android.os.Handler;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.MotionEvent;
+import android.support.v7.app.ActionBar;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.webkit.JavascriptInterface;
+import android.widget.BaseAdapter;
+import android.widget.TextView;
 
-import org.osmdroid.ResourceProxy;
-import org.osmdroid.api.IGeoPoint;
-import org.osmdroid.tileprovider.BitmapPool;
-import org.osmdroid.tileprovider.MapTile;
-import org.osmdroid.tileprovider.MapTileProviderBase;
-import org.osmdroid.tileprovider.modules.TileWriter;
-import org.osmdroid.tileprovider.tilesource.ITileSource;
-import org.osmdroid.tileprovider.tilesource.XYTileSource;
-import org.osmdroid.util.BoundingBoxE6;
-import org.osmdroid.util.ResourceProxyImpl;
-import org.osmdroid.views.overlay.Overlay;
-import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
 
-import java.lang.reflect.Method;
+import org.joda.time.LocalDateTime;
 
-public class MapView extends org.osmdroid.views.MapView {
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-    private static final int IGNORE_MOVE_COUNT = 2;
-    SharedPreferences preferences;
-    MyLocationNewOverlay mLocationOverlay;
-    Overlay mTrafficOverlay;
-    Overlay mTrackOverlay;
-    Overlay mPointsOverlay;
-    Runnable mAfterLayout;
-    int layout_count;
-    private int moveCount = 0;
+public class MapView extends GpsActivity {
 
-    public MapView(Context context, final MapTileProviderBase tileProvider, boolean enableLocation) {
-        super(context, (int) (256 * context.getResources().getDisplayMetrics().density), new ResourceProxyImpl(context.getApplicationContext()), tileProvider);
+    static final int REQUEST_ALARM = 4000;
+    static final int UPDATE_INTERVAL = 30 * 1000;
 
-        TileWriter.TILE_PATH_BASE = context.getCacheDir();
+    final static String URL_TRACKS = "https://car-online.ugona.net/tracks?skey=$1&begin=$2&end=$3";
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(context);
+    static String TRAFFIC = "traffic";
 
-        setMaxZoomLevel(17);
-        setUseSafeCanvas(true);
+    BroadcastReceiver br;
+    String car_id;
+    String point_data;
+    Map<String, String> times;
+    AlarmManager alarmMgr;
+    PendingIntent pi;
+    boolean active;
+    Cars.Car[] cars;
+    DateFormat df;
+    DateFormat tf;
 
-        mTrafficOverlay = new TrafficOverlay(this, context);
-        mTrafficOverlay.setEnabled(preferences.getBoolean(Names.SHOW_TRAFFIC, false));
-        getOverlays().add(mTrafficOverlay);
+    TrackView.Track track;
+    HttpTask trackTask;
 
-        if (enableLocation) {
-            mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(context), this, getResourceProxy());
-            getOverlays().add(mLocationOverlay);
-        }
+    @Override
+    String loadURL() {
+        webView.addJavascriptInterface(new JsInterface(), "android");
+        return getURL();
+    }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            try {
-                Method m = View.class.getMethod("setLayerType", int.class, Paint.class);
-                m.invoke(this, 0x01, null);
-            } catch (Throwable t) {
-                t.printStackTrace();
+    String getURL() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (preferences.getString("map_type", "").equals("OSM"))
+            return "file:///android_asset/html/omaps.html";
+        return "file:///android_asset/html/maps.html";
+    }
+
+    @Override
+    int menuId() {
+        return R.menu.map;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+
+        car_id = getIntent().getStringExtra(Names.ID);
+        point_data = getIntent().getStringExtra(Names.POINT_DATA);
+        times = new HashMap<String, String>();
+        if (savedInstanceState != null) {
+            String car_data = savedInstanceState.getString(Names.CARS);
+            if (car_data != null) {
+                String[] data = car_data.split("\\|");
+                for (String d : data) {
+                    String[] p = d.split(";");
+                    times.put(p[0], p[1]);
+                }
             }
         }
-    }
 
-    static ITileSource createTileSource(Context ctx, SharedPreferences preferences) {
-        if (preferences.getString("map_type", "OSM").equals("OSM")) {
-            final String[] tiles_urls = {
-                    "http://otile1.mqcdn.com/tiles/1.0.0/osm/"
-            };
-            return new XYTileSource("mqcdn", ResourceProxy.string.mapnik, 1, 18, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
-        }
-        String locale = ctx.getResources().getConfiguration().locale.getLanguage();
-        final String[] tiles_urls = {
-                "https://mt0.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo",
-                "https://mt1.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo",
-                "https://mt2.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo",
-                "https://mt3.google.com/vt/lyrs=m&hl=" + locale + "&x=%x&y=%y&z=%z&s=Galileo"
+        df = android.text.format.DateFormat.getDateFormat(this);
+        tf = android.text.format.DateFormat.getTimeFormat(this);
+        super.onCreate(savedInstanceState);
+
+        alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        pi = createPendingResult(REQUEST_ALARM, new Intent(), 0);
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (loaded)
+                    webView.loadUrl("javascript:update()");
+                updateTrack();
+                stopTimer();
+                startTimer(false);
+            }
         };
-        return new myTileSource("google_" + locale, ResourceProxy.string.mapnik, 1, 18, (int) (256 * ctx.getResources().getDisplayMetrics().density), ".png", tiles_urls);
+        registerReceiver(br, new IntentFilter(FetchService.ACTION_UPDATE));
+        updateTrack();
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_MOVE:
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(br);
+    }
 
-                if (moveCount > 0) {
-                    moveCount--;
+    @Override
+    protected void onStart() {
+        super.onStart();
+        active = true;
+        startTimer(true);
+        setActionBar();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        active = false;
+        stopTimer();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_ALARM) {
+            Intent intent = new Intent(this, FetchService.class);
+            intent.putExtra(Names.ID, car_id);
+            startService(intent);
+        }
+    }
+
+    void updateTrack() {
+        if (trackTask != null)
+            return;
+        boolean engine = preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false);
+        boolean az = preferences.getBoolean(Names.Car.AZ + car_id, false);
+        if (!engine || az) {
+            track = null;
+            return;
+        }
+
+        trackTask = new HttpTask() {
+            @Override
+            void result(JsonObject res) throws ParseException {
+                JsonArray list = res.get("tracks").asArray();
+                track = null;
+                if (list.size() > 0) {
+                    JsonObject v = list.get(list.size() - 1).asObject();
+                    track = new TrackView.Track();
+                    track.track = v.get("track").asString();
+                    track.mileage = v.get("mileage").asDouble();
+                    track.max_speed = v.get("max_speed").asDouble();
+                    track.begin = v.get("begin").asLong();
+                    track.end = v.get("end").asLong();
+                    track.avg_speed = v.get("avg_speed").asDouble();
+                    track.day_mileage = v.get("day_mileage").asDouble();
+                    track.day_max_speed = v.get("day_max_speed").asDouble();
+                }
+                trackTask = null;
+                if (loaded)
+                    webView.loadUrl("javascript:update()");
+            }
+
+            @Override
+            void error() {
+                trackTask = null;
+            }
+        };
+        long end = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
+        trackTask.execute(URL_TRACKS, preferences.getString(Names.Car.CAR_KEY + car_id, ""), end - 86400000, end);
+    }
+
+    void setActionBar() {
+        ActionBar actionBar = getSupportActionBar();
+        cars = Cars.getCars(this);
+        boolean found = false;
+        for (Cars.Car car : cars) {
+            if (car.id.equals(car_id)) {
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+            cars = new Cars.Car[0];
+        if (cars.length > 1) {
+            String save_point_data = point_data;
+            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+            actionBar.setDisplayShowHomeEnabled(false);
+            actionBar.setDisplayUseLogoEnabled(false);
+            actionBar.setListNavigationCallbacks(new CarsAdapter(), new ActionBar.OnNavigationListener() {
+                @Override
+                public boolean onNavigationItemSelected(int i, long l) {
+                    if (cars[i].id.equals(car_id))
+                        return true;
+                    if (!loaded)
+                        return true;
+                    point_data = null;
+                    car_id = cars[i].id;
+                    track = null;
+                    trackTask = null;
+                    updateTrack();
+                    webView.loadUrl("javascript:update()");
+                    webView.loadUrl("javascript:center()");
                     return true;
                 }
-
-                break;
-
-            case MotionEvent.ACTION_POINTER_UP:
-                moveCount = IGNORE_MOVE_COUNT;
-                break;
+            });
+            for (int i = 0; i < cars.length; i++) {
+                if (cars[i].id.equals(car_id)) {
+                    actionBar.setSelectedNavigationItem(i);
+                    break;
+                }
+            }
+            point_data = save_point_data;
+            setTitle("");
+        } else {
+            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+            actionBar.setDisplayShowHomeEnabled(true);
+            actionBar.setDisplayUseLogoEnabled(false);
+            setTitle(getString(R.string.app_name));
         }
-        return super.onTouchEvent(event);
     }
 
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed, l, t, r, b);
-        if (mAfterLayout == null)
+    void startTimer(boolean now) {
+        if (!active)
             return;
-        if (--layout_count > 0)
-            return;
-        Runnable afterLayout = mAfterLayout;
-        mAfterLayout = null;
-        Handler handler = new Handler();
-        handler.postDelayed(afterLayout, 500);
+        alarmMgr.setInexactRepeating(AlarmManager.RTC,
+                System.currentTimeMillis() + (now ? 0 : UPDATE_INTERVAL), UPDATE_INTERVAL, pi);
+    }
+
+    void stopTimer() {
+        alarmMgr.cancel(pi);
     }
 
     @Override
-    public void setTileSource(ITileSource aTileSource) {
-        IGeoPoint center = getMapCenter();
-        super.setTileSource(aTileSource);
-        getController().setCenter(center);
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        String data = null;
+        for (Map.Entry<String, String> v : times.entrySet()) {
+            String p = v.getKey() + ";" + v.getValue();
+            if (data == null) {
+                data = p;
+            } else {
+                data += "|" + p;
+            }
+        }
+        if (data != null)
+            outState.putString(Names.CARS, data);
     }
 
-    void setAfterLayout(Runnable afterLayout) {
-        mAfterLayout = afterLayout;
-        layout_count = 2;
-    }
+    class JsInterface {
 
-    void onResume() {
-        if (mLocationOverlay != null)
-            mLocationOverlay.enableMyLocation(preferences.getBoolean(Names.USE_GPS, true), true);
-        setBuiltInZoomControls(true);
-        setMultiTouchControls(true);
-    }
-
-    void onPause() {
-        if (mLocationOverlay != null)
-            mLocationOverlay.disableMyLocation();
-        setBuiltInZoomControls(false);
-        setMultiTouchControls(false);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        BitmapPool.getInstance().clearBitmapPool();
-    }
-
-    IGeoPoint getMyLocation() {
-        if (mLocationOverlay == null)
-            return null;
-        return mLocationOverlay.getMyLocation();
-    }
-
-    void fitToRect(IGeoPoint p1, IGeoPoint p2, double k) {
-        int lat1 = p1.getLatitudeE6();
-        int lat2 = p2.getLatitudeE6();
-        if (lat1 > lat2) {
-            int r = lat1;
-            lat1 = lat2;
-            lat2 = r;
+        @JavascriptInterface
+        public void done() {
+            loaded = true;
         }
 
-        int lon1 = p1.getLongitudeE6();
-        int lon2 = p2.getLongitudeE6();
-        if (lon1 > lon2) {
-            int r = lon1;
-            lon1 = lon2;
-            lon2 = r;
+        @JavascriptInterface
+        public String getLocation() {
+            if (currentBestLocation == null)
+                return "";
+            String res = currentBestLocation.getLatitude() + ",";
+            res += currentBestLocation.getLongitude() + ",";
+            res += currentBestLocation.getAccuracy();
+            if (currentBestLocation.hasBearing())
+                res += currentBestLocation.getBearing();
+            return res;
         }
-        int lat = (lat1 + lat2) / 2;
-        int lon = (lon1 + lon2) / 2;
-        int dlat = lat - lat1;
-        dlat = (int) (dlat / k);
-        int dlon = lon - lon1;
-        dlon = (int) (dlon / k);
 
-        try {
-            zoomToBoundingBox(new BoundingBoxE6(lat + dlat, lon - dlon, lat - dlat, lon + dlon));
-        } catch (Exception ex) {
-            // ignore
+        @JavascriptInterface
+        String createData(String id) {
+            double lat = preferences.getFloat(Names.Car.LAT + id, 0);
+            double lng = preferences.getFloat(Names.Car.LNG + id, 0);
+            String zone = "";
+            if ((lat == 0) && (lng == 0)) {
+                zone = preferences.getString(Names.Car.GSM_ZONE + id, "");
+                String points[] = zone.split("_");
+                double min_lat = 180;
+                double max_lat = -180;
+                double min_lon = 180;
+                double max_lon = -180;
+                for (String point : points) {
+                    try {
+                        String[] p = point.split(",");
+                        double p_lat = Double.parseDouble(p[0]);
+                        double p_lon = Double.parseDouble(p[1]);
+                        if (p_lat > max_lat)
+                            max_lat = p_lat;
+                        if (p_lat < min_lat)
+                            min_lat = p_lat;
+                        if (p_lon > max_lon)
+                            max_lon = p_lon;
+                        if (p_lon < min_lon)
+                            min_lon = p_lon;
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                }
+                lat = ((min_lat + max_lat) / 2);
+                lng = ((min_lon + max_lon) / 2);
+            }
+            String data = id + ";" +
+                    lat + ";" +
+                    lng + ";" +
+                    preferences.getInt(Names.Car.COURSE + id, 0) + ";";
+            if (cars.length > 1) {
+                String name = preferences.getString(Names.Car.CAR_NAME + id, "");
+                if (name.length() == 0) {
+                    name = getString(R.string.car);
+                    if (id.length() > 0)
+                        name += " " + id;
+                }
+                data += name + "<br/>";
+            }
+
+            if (preferences.getBoolean(Names.Car.POINTER + car_id, false)) {
+                long last_stand = preferences.getLong(Names.Car.EVENT_TIME + id, 0);
+                if (last_stand > 0) {
+                    data += "<b>";
+                    data += df.format(last_stand) + " " + tf.format(last_stand);
+                    data += "</b> ";
+                }
+            } else {
+                long last_stand = preferences.getLong(Names.Car.LAST_STAND + id, 0);
+                if (last_stand > 0) {
+                    LocalDateTime stand = new LocalDateTime(last_stand);
+                    LocalDateTime now = new LocalDateTime();
+                    data += "<b>";
+                    if (stand.toLocalDate().equals(now.toLocalDate())) {
+                        data += tf.format(last_stand);
+                    } else {
+                        data += df.format(last_stand) + " " + tf.format(last_stand);
+                    }
+                    data += "</b> ";
+                } else if (last_stand < 0) {
+                    double speed = preferences.getFloat(Names.Car.SPEED + id, 0);
+                    if (speed > 0) {
+                        data += String.format(getString(R.string.speed), speed);
+                        data += "<br/>";
+                    }
+                }
+            }
+            if (zone.equals("")) {
+                data += Math.round(lat * 10000) / 10000. + "," + Math.round(lng * 10000) / 10000. + "<br/>";
+                String address = Address.getAddress(getBaseContext(), lat, lng);
+                if (address != null) {
+                    String[] parts = address.split(", ");
+                    if (parts.length >= 3) {
+                        address = parts[0] + ", " + parts[1];
+                        for (int n = 2; n < parts.length; n++)
+                            address += "<br/>" + parts[n];
+                    }
+                    data += address;
+                }
+                data += ";";
+            } else {
+                String address = Address.getAddress(MapView.this, lat, lng);
+                if (address != null) {
+                    String[] parts = address.split(", ");
+                    if (parts.length >= 3) {
+                        address = parts[0] + ", " + parts[1];
+                        for (int n = 2; n < parts.length; n++)
+                            address += "<br/>" + parts[n];
+                    }
+                    data += address;
+                }
+                data += ";" + zone;
+            }
+            if (times.containsKey(id))
+                data += ";" + times.get(id);
+            return data;
+        }
+
+        @JavascriptInterface
+        public String getData() {
+            Cars.Car[] cars = Cars.getCars(MapView.this);
+
+            String id = null;
+
+            String data = point_data;
+
+            if (data == null) {
+                data = createData(car_id);
+                id = car_id;
+            }
+
+            for (Cars.Car car : cars) {
+                if ((id != null) && id.equals(car.id))
+                    continue;
+                data += "|" + createData(car.id);
+            }
+            return data;
+        }
+
+        @JavascriptInterface
+        public String getTrack() {
+            if (track == null)
+                return "";
+            String res = track.track;
+            Date now = new Date();
+            res += "|" + preferences.getFloat(Names.Car.LAT + car_id, 0) + "," + preferences.getFloat(Names.Car.LNG + car_id, 0) + "," + preferences.getFloat(Names.Car.SPEED + car_id, 0) + "," + now.getTime();
+            return res;
+        }
+
+        @JavascriptInterface
+        public String kmh() {
+            return getString(R.string.kmh);
+        }
+
+        @JavascriptInterface
+        public String traffic() {
+            return preferences.getBoolean(TRAFFIC, true) ? "1" : "";
         }
     }
 
-    static public class myTileSource extends XYTileSource {
+    class CarsAdapter extends BaseAdapter {
 
-        public myTileSource(String aName, ResourceProxy.string aResourceId, int aZoomMinLevel, int aZoomMaxLevel, int aTileSizePixels, String aImageFilenameEnding, String[] aBaseUrl) {
-            super(aName, aResourceId, aZoomMinLevel, aZoomMaxLevel, aTileSizePixels, aImageFilenameEnding, aBaseUrl);
+        @Override
+        public int getCount() {
+            return cars.length;
         }
 
         @Override
-        public String getTileURLString(MapTile aTile) {
-            return getBaseUrl()
-                    .replace("%x", aTile.getX() + "")
-                    .replace("%y", aTile.getY() + "")
-                    .replace("%z", aTile.getZoomLevel() + "");
+        public Object getItem(int position) {
+            return cars[position];
         }
 
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View v = convertView;
+            if (v == null) {
+                LayoutInflater inflater = (LayoutInflater) getBaseContext()
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                v = inflater.inflate(R.layout.car_list_item, null);
+            }
+            TextView tv = (TextView) v.findViewById(R.id.name);
+            tv.setText(cars[position].name);
+            return v;
+        }
+
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            View v = convertView;
+            if (v == null) {
+                LayoutInflater inflater = (LayoutInflater) getBaseContext()
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                v = inflater.inflate(R.layout.car_list_dropdown_item, null);
+            }
+            TextView tv = (TextView) v.findViewById(R.id.name);
+            tv.setText(cars[position].name);
+            return v;
+        }
     }
 
 }

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="../leaflet/leaflet.css"/>
+    <script src="../leaflet/leaflet.js"></script>
+    <script src="../leaflet/Marker.Rotate.js"></script>
+    <script src="../leaflet/Leaflet.draw.js"></script>
+    <script src="../leaflet/Edit.SimpleShape.js"></script>
+    <script src="../leaflet/Edit.Rectangle.js"></script>
+    <style>
+        html, body, #map-canvas {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        }
+    </style>
+    <script src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>
+    <script src="../leaflet/Google.js"></script>
+    <script>
+
+var my_location;
+var my_marker;
+var my_icon;
+var my_arrow;
+
+function initialize() {
+
+    var zone = (android.getZone() + '').split(',');
+
+    var lat1 = parseFloat(zone[0]);
+    var lng1 = parseFloat(zone[1]);
+    var lat2 = parseFloat(zone[2]);
+    var lng2 = parseFloat(zone[3]);
+
+    var lat = (lat1 + lat2) / 2;
+    var lng = (lng1 + lng2) / 2;
+
+    var d_lat = lat2 - lat;
+    var d_lng = lng2 - lng;
+
+    map = L.map('map', {
+        center: [lat, lng],
+        zoom: 15
+    });
+
+    var zoom = map.getBoundsZoom([[lat1 - d_lat, lng1 - d_lng], [lat2 + d_lat, lng2 + d_lng]]);
+    map.setZoom(zoom);
+    
+    var gmap_layer = new L.Google('ROADMAP');
+    map.addLayer(gmap_layer);
+
+    var rectangle = L.rectangle([[lat1, lng1], [lat2, lng2]], {
+        color: '#FF0000',
+        ppacity: 0.8,
+        weight: 2,
+        fillColor: '#FF0000',
+        fillOpacity: 0.35
+    });
+    map.addLayer(rectangle);
+    rectangle.editing.options.resizeIcon = new L.DivIcon({
+            iconSize: new L.Point(16, 16),
+            className: 'leaflet-div-icon leaflet-editing-icon leaflet-edit-resize'
+    });
+    rectangle.editing.options.moveIcon = new L.DivIcon({
+            iconSize: new L.Point(20, 20),
+            className: 'leaflet-div-icon leaflet-editing-icon leaflet-edit-resize'
+    });
+    rectangle.editing.enable();
+
+    rectangle.on('edit', function() {
+        var z = rectangle.getBounds();
+        android.setZone(z.getNorth() + ',' + z.getWest() + ',' + z.getSouth() + ',' + z.getEast());
+    });
+
+    my_icon = L.icon({
+        iconUrl: '../img/i.png',
+        iconSize: [ 10, 10 ],
+        iconAnchor: [ 5, 5 ]
+    });
+
+    my_arrow = L.icon({
+        iconUrl: '../img/i_arrow.png',
+        iconSize: [ 16, 16 ],
+        iconAnchor: [ 8, 0 ]
+    });
+
+    myLocation();
+}
+
+function myLocation() {
+    if (map == null)
+        return;
+    var location = android.getLocation().split(',');
+    if (location.length < 3)
+        return;
+    var lat = location[0];
+    var lng = location[1];
+    var radius = parseFloat(location[2]);
+    if (my_location == null){
+        my_location = new L.Circle([lat, lng], radius, {
+            stroke: true,
+            color: '#0000FF',
+            weight: 2,
+            opacity: 0.1,
+            fill: true,
+            fillColor: '#0000FF',
+            fillOpacity: 0.05
+        });
+        map.addLayer(my_location);
+        if (location.length > 3){
+            my_marker = new L.Marker([ lat, lng ], {
+                icon: my_arrow,
+                iconAngle: parseInt(location[3])
+            });
+            map.addLayer(my_marker);
+        }else{
+            my_marker = new L.Marker([ lat, lng ], {
+                icon: my_icon
+            });
+            map.addLayer(my_marker);
+        }
+    }else{
+        my_location.setLatLng([lat, lng]);
+        my_location.setRadius(radius);
+        my_marker.setLatLng([lat, lng]);
+        if (location.length > 3){
+            my_marker.setIcon(my_arrow);
+            my_marker.setIconAngle(location[3]);
+        }else{
+            my_marker.setIcon(my_icon);
+        }
+    }
+}
+
+function setPosition() {
+    if (map == null)
+        return;
+    
+    var zone = android.getZone().split(',');
+
+    var min_lat = parseFloat(zone[0]);
+    var min_lng = parseFloat(zone[1]);
+    var max_lat = parseFloat(zone[2]);
+    var max_lng = parseFloat(zone[3]);
+
+    var pos = android.getLocation().split(',');
+    if (pos.length < 3)
+        return;
+    var lat = parseFloat(pos[0]);
+    var lng = parseFloat(pos[1]);
+    if (lat > max_lat)
+        max_lat = lat;
+    if (lat < min_lat)
+        min_lat = lat;
+    if (lng > max_lng)
+        max_lng = lng;
+    if (lng < min_lng)
+        min_lng = lng;
+    var d_lat = (max_lat - max_lat) / 8;
+    var d_lng = (max_lng - max_lng) / 8;
+    map.fitBounds([ [min_lat - d_lat, min_lng - d_lng], [max_lat + d_lat, max_lng + d_lng]]);
+}
+
+function center() {
+    if (map == null)
+        return;
+    var zone = android.getZone().split(',');
+
+    var lat1 = parseFloat(zone[0]);
+    var lng1 = parseFloat(zone[1]);
+    var lat2 = parseFloat(zone[2]);
+    var lng2 = parseFloat(zone[3]);
+
+    var lat = (lat1 + lat2) / 2;
+    var lng = (lng1 + lng2) / 2;
+
+    var d_lat = lat2 - lat;
+    var d_lng = lng2 - lng;
+    
+    map.fitBounds([ [lat1 - d_lat, lng1 - d_lng], [lat2 + d_lat, lng2 + d_lng]]);
+}
+
+
+
+
+
+
+    </script>
+</head>
+<body onload="initialize()">
+<div id="map" style="height: 100%"></div>
+</body>
+</html>

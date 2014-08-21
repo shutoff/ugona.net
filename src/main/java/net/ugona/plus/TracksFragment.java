@@ -252,7 +252,7 @@ public class TracksFragment extends Fragment
     }
 
     void showTrack(int index) {
-        Intent intent = new Intent(getActivity(), TrackActivity.class);
+        Intent intent = new Intent(getActivity(), TrackView.class);
         Track track = tracks.get(index);
         Vector<Track> track1 = new Vector<Track>();
         track1.add(track);
@@ -267,7 +267,7 @@ public class TracksFragment extends Fragment
     void showDay() {
         if (tracks.size() == 0)
             return;
-        Intent intent = new Intent(getActivity(), TrackActivity.class);
+        Intent intent = new Intent(getActivity(), TrackView.class);
         if (!setTrack(tracks, intent))
             return;
         DateFormat df = android.text.format.DateFormat.getMediumDateFormat(getActivity());

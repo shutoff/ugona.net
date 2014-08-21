@@ -1,30 +1,20 @@
 package net.ugona.plus;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Point;
-import android.graphics.Rect;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.JavascriptInterface;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import org.osmdroid.api.IGeoPoint;
-import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.overlay.SafeDrawOverlay;
-import org.osmdroid.views.safecanvas.ISafeCanvas;
-import org.osmdroid.views.safecanvas.SafePaint;
-import org.osmdroid.views.safecanvas.SafeTranslatedPath;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -35,7 +25,7 @@ import java.io.ObjectOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ZoneEdit extends MapActivity {
+public class ZoneEdit extends GpsActivity {
 
     static Pattern zonePat = Pattern.compile("[A-Za-z0-9]+");
     EditText etName;
@@ -43,6 +33,19 @@ public class ZoneEdit extends MapActivity {
     SettingActivity.Zone zone;
     boolean clear_zone;
     boolean confirm;
+
+    @Override
+    String loadURL() {
+        webView.addJavascriptInterface(new JsInterface(), "android");
+        return getURL();
+    }
+
+    String getURL() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (preferences.getString("map_type", "").equals("OSM"))
+            return "file:///android_asset/html/ozone.html";
+        return "file:///android_asset/html/zone.html";
+    }
 
     @Override
     int menuId() {
@@ -117,37 +120,12 @@ public class ZoneEdit extends MapActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.delete:
-                clear_zone = true;
-                finish();
-                return true;
-            case R.id.map:
-                MapView mapView = getMapView();
-                mapView.getController().setZoom(16);
-                mapView.fitToRect(new GeoPoint(zone.lat1, zone.lng1), new GeoPoint(zone.lat2, zone.lng2), 0.5);
-                return true;
+        if (item.getItemId() == R.id.delete) {
+            clear_zone = true;
+            finish();
+            return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    void initMap(MapView mapView) {
-        GeoPoint center = new GeoPoint((zone.lat1 + zone.lat2) / 2, (zone.lng1 + zone.lng2) / 2);
-        mapView.getController().setCenter(center);
-        mapView.getController().setZoom(16);
-        mapView.fitToRect(new GeoPoint(zone.lat1, zone.lng1), new GeoPoint(zone.lat2, zone.lng2), 0.5);
-        mapView.mPointsOverlay = new RectOverlay(this, zone);
-        mapView.getOverlays().add(mapView.mPointsOverlay);
-    }
-
-    @Override
-    void initUI() {
-        super.initUI();
-        if (getMapView().mPointsOverlay != null) {
-            RectOverlay rectOverlay = (RectOverlay) getMapView().mPointsOverlay;
-            rectOverlay.m_zone = zone;
-        }
     }
 
     @Override
@@ -208,164 +186,41 @@ public class ZoneEdit extends MapActivity {
         zone.sms = chkSms.isChecked();
     }
 
-    @Override
-    void updateLocation(Rect rc) {
-        double lat1 = zone.lat1;
-        double lat2 = zone.lat2;
-        if (lat2 > lat1) {
-            lat1 = zone.lat2;
-            lat2 = zone.lat1;
-        }
-        double lon1 = zone.lng1;
-        double lon2 = zone.lng2;
-        if (lon2 > lon1) {
-            lon1 = zone.lng2;
-            lon2 = zone.lng1;
-        }
-        int x1 = (int) (lat1 * 1000000);
-        int x2 = (int) (lat2 * 1000000);
-        int y1 = (int) (lon1 * 1000000);
-        int y2 = (int) (lon2 * 1000000);
-        if (rc.left > x1)
-            rc.left = x1;
-        if (rc.right < x2)
-            rc.right = x2;
-        if (rc.bottom > y1)
-            rc.bottom = y1;
-        if (rc.top < y2)
-            rc.top = y2;
-    }
+    class JsInterface {
 
-    static class RectOverlay extends SafeDrawOverlay {
-
-        SafePaint mPaint = new SafePaint();
-        SafeTranslatedPath mPath = new SafeTranslatedPath();
-        int width;
-
-        float x1;
-        float y1;
-        float x2;
-        float y2;
-        int x_state;
-        int y_state;
-
-        SettingActivity.Zone m_zone;
-
-        public RectOverlay(Context ctx, SettingActivity.Zone zone) {
-            super(ctx);
-            m_zone = zone;
-            mPaint.setColor(Color.rgb(255, 0, 0));
-            mPaint.setStrokeWidth(2);
-            width = (int) (ctx.getResources().getDisplayMetrics().density * 6);
+        @JavascriptInterface
+        void done() {
+            loaded = true;
         }
 
-        @Override
-        protected void drawSafe(ISafeCanvas c, org.osmdroid.views.MapView osmv, boolean shadow) {
-            if (shadow)
-                return;
-            final org.osmdroid.views.MapView.Projection pj = osmv.getProjection();
-            Rect screenRect = pj.getScreenRect();
-            Point p0 = new Point();
-            pj.toPixels(new GeoPoint(m_zone.lat1, m_zone.lng1), p0);
-            Point p1 = new Point();
-            pj.toPixels(new GeoPoint(m_zone.lat2, m_zone.lng2), p1);
-            int x1 = p0.x - screenRect.left;
-            int y1 = p0.y - screenRect.top;
-            int x2 = p1.x - screenRect.left;
-            int y2 = p1.y - screenRect.top;
-            mPath.rewind();
-            mPath.moveTo(x1, y1);
-            mPath.lineTo(x2, y1);
-            mPath.lineTo(x2, y2);
-            mPath.lineTo(x1, y2);
-            mPath.close();
-            mPaint.setStrokeWidth(4);
-            mPaint.setAlpha(20);
-            mPaint.setStyle(Paint.Style.FILL);
-            c.drawPath(mPath, mPaint);
-            mPaint.setAlpha(80);
-            mPaint.setStyle(Paint.Style.STROKE);
-            c.drawPath(mPath, mPaint);
+        @JavascriptInterface
+        public String getLocation() {
+            if (currentBestLocation == null)
+                return "";
+            String res = currentBestLocation.getLatitude() + ",";
+            res += currentBestLocation.getLongitude() + ",";
+            res += currentBestLocation.getAccuracy();
+            if (currentBestLocation.hasBearing())
+                res += currentBestLocation.getBearing();
+            return res;
         }
 
-        @Override
-        public boolean onDown(MotionEvent e, org.osmdroid.views.MapView mapView) {
-            float x = e.getX();
-            float y = e.getY();
-            final org.osmdroid.views.MapView.Projection pj = mapView.getProjection();
-            double min_lat = m_zone.lat1;
-            double max_lat = m_zone.lat2;
-            if (max_lat < min_lat) {
-                min_lat = m_zone.lat2;
-                max_lat = m_zone.lat1;
-            }
-            double min_lng = m_zone.lng1;
-            double max_lng = m_zone.lng2;
-            if (max_lng < min_lng) {
-                min_lng = m_zone.lng2;
-                max_lng = m_zone.lng1;
-            }
-            Rect screenRect = pj.getScreenRect();
-            Point p0 = new Point();
-            pj.toPixels(new GeoPoint(min_lat, min_lng), p0);
-            Point p1 = new Point();
-            pj.toPixels(new GeoPoint(max_lat, max_lng), p1);
-            x1 = p0.x - screenRect.left;
-            y1 = p1.y - screenRect.top;
-            x2 = p1.x - screenRect.left;
-            y2 = p0.y - screenRect.top;
-            if ((x < x1 - width) || (x > x2 + width)) {
-                x_state = 0;
-            } else if (x < x1 + width * 2) {
-                x_state = 1;
-            } else if (x > x2 - width * 2) {
-                x_state = 2;
-            } else {
-                x_state = 3;
-            }
-            if ((y < y1 - width) || (y > y2 + width)) {
-                y_state = 0;
-            } else if (y < y1 + width * 2) {
-                y_state = 1;
-            } else if (y > y2 - width * 2) {
-                y_state = 2;
-            } else {
-                y_state = 3;
-            }
-            if ((x_state == 0) || (y_state == 0))
-                return false;
-            return true;
+        @JavascriptInterface
+        public String getZone() {
+            return zone.lat1 + "," + zone.lng1 + "," + zone.lat2 + "," + zone.lng2;
         }
 
-        @Override
-        public boolean onScroll(MotionEvent pEvent1, MotionEvent pEvent2, float pDistanceX, float pDistanceY, org.osmdroid.views.MapView pMapView) {
-            if ((x_state == 0) || (y_state == 0))
-                return false;
-            final org.osmdroid.views.MapView.Projection pj = pMapView.getProjection();
-            if (x_state == 1) {
-                x1 -= pDistanceX;
-            } else if (x_state == 2) {
-                x2 -= pDistanceX;
-            } else if (x_state == 3) {
-                x1 -= pDistanceX;
-                x2 -= pDistanceX;
+        @JavascriptInterface
+        public void setZone(String data) {
+            String[] val = data.split(",");
+            try {
+                zone.lat1 = Double.parseDouble(val[0]);
+                zone.lng1 = Double.parseDouble(val[1]);
+                zone.lat2 = Double.parseDouble(val[2]);
+                zone.lng2 = Double.parseDouble(val[3]);
+            } catch (Exception ex) {
+                // ignore
             }
-            if (y_state == 1) {
-                y1 -= pDistanceY;
-            } else if (y_state == 2) {
-                y2 -= pDistanceY;
-            } else if (y_state == 3) {
-                y1 -= pDistanceY;
-                y2 -= pDistanceY;
-            }
-            IGeoPoint r = pj.fromPixels(x1, y1);
-            m_zone.lat2 = r.getLatitude();
-            m_zone.lng1 = r.getLongitude();
-            r = pj.fromPixels(x2, y2);
-            m_zone.lat1 = r.getLatitude();
-            m_zone.lng2 = r.getLongitude();
-            pMapView.postInvalidate();
-            return true;
         }
     }
 
