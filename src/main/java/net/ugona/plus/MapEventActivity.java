@@ -27,9 +27,13 @@ public class MapEventActivity extends MapActivity {
 
         @JavascriptInterface
         public String getData() {
-            return getString(R.string.kmh);
+            return data;
         }
 
+        @Override
+        public String init() {
+            return super.init() + "\nshowPoints()\nshowPopup()";
+        }
     }
 
 }

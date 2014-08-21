@@ -22,6 +22,7 @@
     <script src="../leaflet/Location.js"></script>
     <script src="../leaflet/Zone.js"></script>
     <script src="../leaflet/Traffic.js"></script>
+    <script src="../leaflet/Points.js"></script>
     <script src="../../../../android.js"></script>
     <script>
 
@@ -49,7 +50,7 @@ function initialize() {
     });
 
     var zoom = map.getBoundsZoom([[lat1 - d_lat, lng1 - d_lng], [lat2 + d_lat, lng2 + d_lng]]);
-    if (zoome > 18)
+    if (zoom > 18)
         zoom = 18;
     map.setZoom(zoom);
     
@@ -58,6 +59,7 @@ function initialize() {
 
     eval(android.init() + "");
 }
+
 
 
     </script>

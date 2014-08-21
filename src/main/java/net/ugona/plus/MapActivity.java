@@ -333,7 +333,7 @@ abstract public class MapActivity extends WebViewActivity {
         @JavascriptInterface
         public String init() {
             loaded = true;
-            return "";
+            return "showTraffic()\nmyLocation()";
         }
 
         @JavascriptInterface

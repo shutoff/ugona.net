@@ -440,8 +440,8 @@ public class FetchService extends Service {
             ed.putLong(Names.Car.EVENT_TIME + car_id, time.asLong());
             if (time.asLong() > preferences.getLong(Names.Car.LOST + car_id, 0)) {
                 int id = preferences.getInt(Names.Car.LOST_NOTIFY + car_id, 0);
-                State.appendLog("Channel restore by event " + id);
                 if (id > 0) {
+                    State.appendLog("Channel restore by event " + id);
                     ed.remove(Names.Car.LOST_NOTIFY + car_id);
                     Alarm.removeNotification(FetchService.this, car_id, id);
                     id = Alarm.createNotification(FetchService.this, getString(R.string.restore), R.drawable.gsm_restore, car_id, Names.Car.RESTORE_SOUND, 0);

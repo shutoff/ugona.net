@@ -85,14 +85,22 @@ var Points = {
 			this.markers[i].on('click', function() {
 				info.addTo(map);
 			});
+			this.info[i] = info;
 		}
+	},
+
+	showPopup: function() {
+		this.info[0].addTo(map)
 	},
 
 	text: function(i) {
 		var data = this.data[i];
-		var res = data[4];
-		if (data[6])
-			res += '<br/>' + data[6];
+		var lines = data[3].split('\n');
+		var words = lines[0].split(' ');
+		lines[0] = '<b>' + words.shift() + '</b> ' + words.join(' ');
+		var res = lines.join('<br>');
+		if (data[5])
+			res += '<br/>' + data[5];
 		return res;
 	}
 }
@@ -119,8 +127,8 @@ function getBounds() {
 		var bounds = [
 			[parseFloat(Points.data[0][0]), parseFloat(Points.data[0][1])]
 		];
-		if (Points.data[0][5]) {
-			var points = Points.data[5].split('|');
+		if (Points.data[0][4]) {
+			var points = Points.data[0][4].split('|');
 			var min_lat = 180;
 			var max_lat = -180;
 			var min_lon = 180;
@@ -136,4 +144,8 @@ function getBounds() {
 
 function showPoints() {
 	Points.update();
+}
+
+function showPopup() {
+	Points.showPopup();
 }
