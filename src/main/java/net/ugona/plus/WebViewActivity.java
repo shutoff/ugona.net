@@ -53,7 +53,7 @@ abstract public class WebViewActivity extends ActionBarActivity {
 
                 @Override
                 public boolean onConsoleMessage(ConsoleMessage cm) {
-                    log(cm.message());
+                    log(cm.sourceId() + ":" + cm.lineNumber() + ":" + cm.message());
                     return true;
                 }
             };

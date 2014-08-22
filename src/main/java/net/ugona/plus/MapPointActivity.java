@@ -146,7 +146,7 @@ public class MapPointActivity extends MapActivity {
                         return true;
                     point_data = null;
                     car_id = cars[i].id;
-                    webView.loadUrl("javascript:update()");
+                    webView.loadUrl("javascript:showPoints()");
                     webView.loadUrl("javascript:center()");
                     return true;
                 }
@@ -190,7 +190,7 @@ public class MapPointActivity extends MapActivity {
 
     class JsInterface extends MapActivity.JsInterface {
 
-        @Override
+        @JavascriptInterface
         public String init() {
             return super.init() + "\nshowPoints()\nshowPopup()";
         }

@@ -1,15 +1,11 @@
 package net.ugona.plus;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.SpannedString;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.ViewConfiguration;
 import android.webkit.JavascriptInterface;
@@ -25,20 +21,36 @@ import java.io.FileOutputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.OutputStreamWriter;
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.util.Vector;
 
-public class TrackView extends WebViewActivity {
+public class TrackView extends MapActivity {
 
-    static String TRAFFIC = "traffic";
-    SharedPreferences preferences;
     Vector<Track> tracks;
-    Menu topSubMenu;
 
     @Override
-    String loadURL() {
+    int menuId() {
+        return R.menu.track;
+    }
+
+    @Override
+    MapActivity.JsInterface js() {
+        return new JsInterface();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        try {
+            ViewConfiguration config = ViewConfiguration.get(this);
+            Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
+            if (menuKeyField != null) {
+                menuKeyField.setAccessible(true);
+                menuKeyField.setBoolean(config, false);
+            }
+        } catch (Exception ex) {
+            // Ignore
+        }
         try {
             byte[] track_data;
             String file_name = getIntent().getStringExtra(Names.TRACK_FILE);
@@ -60,42 +72,8 @@ public class TrackView extends WebViewActivity {
         } catch (Exception ex) {
             finish();
         }
-        webView.addJavascriptInterface(new JsInterface(), "android");
-        return getURL();
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        try {
-            ViewConfiguration config = ViewConfiguration.get(this);
-            Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
-            if (menuKeyField != null) {
-                menuKeyField.setAccessible(true);
-                menuKeyField.setBoolean(config, false);
-            }
-        } catch (Exception ex) {
-            // Ignore
-        }
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
         super.onCreate(savedInstanceState);
         setTitle(getIntent().getStringExtra(Names.TITLE));
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        topSubMenu = menu;
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.track, menu);
-        menu.findItem(R.id.traffic).setTitle(getCheckedText(R.string.traffic, preferences.getBoolean(TRAFFIC, true)));
-        boolean isOSM = preferences.getString(Names.MAP_TYPE, "").equals("OSM");
-        menu.findItem(R.id.google).setTitle(getCheckedText(R.string.google, !isOSM));
-        menu.findItem(R.id.osm).setTitle(getCheckedText(R.string.osm, isOSM));
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    String getCheckedText(int id, boolean check) {
-        String check_mark = check ? "\u2714" : "";
-        return check_mark + getString(id);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -106,37 +84,8 @@ public class TrackView extends WebViewActivity {
             case R.id.share:
                 webView.loadUrl("javascript:shareTrack()");
                 break;
-            case R.id.traffic: {
-                SharedPreferences.Editor ed = preferences.edit();
-                ed.putBoolean(TRAFFIC, !preferences.getBoolean(TRAFFIC, true));
-                ed.commit();
-                updateMenu();
-                webView.loadUrl(getURL());
-                break;
-            }
-            case R.id.google: {
-                SharedPreferences.Editor ed = preferences.edit();
-                ed.putString(Names.MAP_TYPE, "Google");
-                ed.commit();
-                updateMenu();
-                webView.loadUrl(getURL());
-                break;
-            }
-            case R.id.osm: {
-                SharedPreferences.Editor ed = preferences.edit();
-                ed.putString(Names.MAP_TYPE, "OSM");
-                ed.commit();
-                updateMenu();
-                webView.loadUrl(getURL());
-                break;
-            }
         }
         return false;
-    }
-
-    void updateMenu() {
-        topSubMenu.clear();
-        onCreateOptionsMenu(topSubMenu);
     }
 
     File saveTrack(double min_lat, double max_lat, double min_lon, double max_lon, boolean show_toast) {
@@ -152,7 +101,7 @@ public class TrackView extends WebViewActivity {
             for (Track track : tracks) {
                 String[] points = track.track.split("\\|");
                 for (String point : points) {
-                    Point p = new Point(point);
+                    Track.Point p = new Track.Point(point);
                     if ((p.latitude < min_lat) || (p.latitude > max_lat) || (p.longitude < min_lon) || (p.longitude > max_lon))
                         continue;
                     if (begin == 0)
@@ -188,7 +137,7 @@ public class TrackView extends WebViewActivity {
             for (Track track : tracks) {
                 String[] points = track.track.split("\\|");
                 for (String point : points) {
-                    Point p = new Point(point);
+                    Track.Point p = new Track.Point(point);
                     if ((p.latitude < min_lat) || (p.latitude > max_lat) || (p.longitude < min_lon) || (p.longitude > max_lon)) {
                         if (trk) {
                             trk = false;
@@ -223,12 +172,6 @@ public class TrackView extends WebViewActivity {
         return null;
     }
 
-    String getURL() {
-        if (preferences.getString(Names.MAP_TYPE, "").equals("OSM"))
-            return "file:///android_asset/html/otrack.html";
-        return "file:///android_asset/html/track.html";
-    }
-
     void shareTrack(double min_lat, double max_lat, double min_lon, double max_lon) {
         File out = saveTrack(min_lat, max_lat, min_lon, max_lon, false);
         if (out == null)
@@ -240,65 +183,27 @@ public class TrackView extends WebViewActivity {
         startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.share)));
     }
 
-    public static class Track implements Serializable {
-        long begin;
-        long end;
-        double mileage;
-        double day_mileage;
-        double avg_speed;
-        double max_speed;
-        double day_max_speed;
-        String start;
-        String finish;
-        String track;
-    }
-
-    public static class Point {
-        double latitude;
-        double longitude;
-        long time;
-
-        Point(String data) {
-            String[] p = data.split(",");
-            latitude = Double.parseDouble(p[0]);
-            longitude = Double.parseDouble(p[1]);
-            time = Long.parseLong(p[3]);
-        }
-    }
-
-    static class TimeInterval {
-        long begin;
-        long end;
-    }
-
-    static class Marker {
-        double latitude;
-        double longitude;
-        String address;
-        Vector<TimeInterval> times;
-    }
-
-    class JsInterface {
+    class JsInterface extends MapActivity.JsInterface {
 
         @JavascriptInterface
-        void done() {
-            loaded = true;
+        public String init() {
+            return super.init() + "\nshowTracks()";
         }
 
         @JavascriptInterface
-        public String getTrack() {
-            Vector<Marker> markers = new Vector<Marker>();
+        public String getTracks() {
+            Vector<Track.Marker> markers = new Vector<Track.Marker>();
             StringBuilder track_data = new StringBuilder();
             try {
                 for (int i = 0; i < tracks.size(); i++) {
                     Track track = tracks.get(i);
                     String[] points = track.track.split("\\|");
-                    Point start = new Point(points[0]);
-                    Point finish = new Point(points[points.length - 1]);
+                    Track.Point start = new Track.Point(points[0]);
+                    Track.Point finish = new Track.Point(points[points.length - 1]);
                     int n_start = markers.size();
                     double d_best = 200.;
                     for (int n = 0; n < markers.size(); n++) {
-                        Marker marker = markers.get(n);
+                        Track.Marker marker = markers.get(n);
                         double delta = Address.calc_distance(start.latitude, start.longitude, marker.latitude, marker.longitude);
                         if (delta < d_best) {
                             d_best = delta;
@@ -306,16 +211,16 @@ public class TrackView extends WebViewActivity {
                         }
                     }
                     if (n_start >= markers.size()) {
-                        Marker marker = new Marker();
+                        Track.Marker marker = new Track.Marker();
                         marker.latitude = start.latitude;
                         marker.longitude = start.longitude;
                         marker.address = track.start;
-                        marker.times = new Vector<TimeInterval>();
+                        marker.times = new Vector<Track.TimeInterval>();
                         markers.add(marker);
                     }
-                    Marker marker = markers.get(n_start);
+                    Track.Marker marker = markers.get(n_start);
                     if ((marker.times.size() == 0) || (marker.times.get(marker.times.size() - 1).end > 0)) {
-                        TimeInterval interval = new TimeInterval();
+                        Track.TimeInterval interval = new Track.TimeInterval();
                         marker.times.add(interval);
                     }
                     marker.times.get(marker.times.size() - 1).end = track.begin;
@@ -323,7 +228,7 @@ public class TrackView extends WebViewActivity {
                     if (i > 0) {
                         Track prev = tracks.get(i - 1);
                         points = prev.track.split("\\|");
-                        Point last = new Point(points[points.length - 1]);
+                        Track.Point last = new Track.Point(points[points.length - 1]);
                         double delta = Address.calc_distance(start.latitude, start.longitude, last.latitude, last.longitude);
                         if (delta > 200)
                             track_data.append("|");
@@ -343,26 +248,26 @@ public class TrackView extends WebViewActivity {
                         }
                     }
                     if (n_finish >= markers.size()) {
-                        marker = new Marker();
+                        marker = new Track.Marker();
                         marker.latitude = finish.latitude;
                         marker.longitude = finish.longitude;
                         marker.address = track.finish;
-                        marker.times = new Vector<TimeInterval>();
+                        marker.times = new Vector<Track.TimeInterval>();
                         markers.add(marker);
                     }
                     marker = markers.get(n_finish);
-                    TimeInterval interval = new TimeInterval();
+                    Track.TimeInterval interval = new Track.TimeInterval();
                     interval.begin = track.end;
                     marker.times.add(interval);
                 }
                 track_data.append("|");
-                for (Marker marker : markers) {
+                for (Track.Marker marker : markers) {
                     track_data.append("|");
                     track_data.append(marker.latitude);
                     track_data.append(",");
                     track_data.append(marker.longitude);
                     track_data.append(",<b>");
-                    for (TimeInterval interval : marker.times) {
+                    for (Track.TimeInterval interval : marker.times) {
                         if (interval.begin > 0) {
                             DateFormat tf = android.text.format.DateFormat.getTimeFormat(TrackView.this);
                             track_data.append(tf.format(interval.begin));
@@ -397,15 +302,6 @@ public class TrackView extends WebViewActivity {
             shareTrack(min_lat, max_lat, min_lon, max_lon);
         }
 
-        @JavascriptInterface
-        public String kmh() {
-            return getString(R.string.kmh);
-        }
-
-        @JavascriptInterface
-        public String traffic() {
-            return preferences.getBoolean(TRAFFIC, true) ? "1" : "";
-        }
     }
 
 }

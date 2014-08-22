@@ -110,7 +110,7 @@
         </activity>
 
         <activity
-            android:name=".TrackActivity"
+            android:name=".TrackView"
             android:uiOptions="splitActionBarWhenNarrow">
             <meta-data
                 android:name="android.support.UI_OPTIONS"

@@ -68,14 +68,21 @@ abstract public class MapActivity extends WebViewActivity {
         return "file:///android_asset/html/google.html";
     }
 
-    void startListener() {
+    void stopListener() {
         if (netListener != null)
             locationManager.removeUpdates(netListener);
         if (gpsListener != null)
             locationManager.removeUpdates(gpsListener);
     }
 
-    void stopListener() {
+    void startListener() {
+
+        if (topSubMenu != null) {
+            MenuItem item = topSubMenu.findItem(R.id.gps);
+            if (item == null)
+                return;
+        }
+
         netListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {

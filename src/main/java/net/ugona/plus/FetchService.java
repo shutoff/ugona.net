@@ -1035,6 +1035,7 @@ public class FetchService extends Service {
                 ed.putLong(Names.Car.GUARD_TIME + car_id, v.asLong());
                 ed.commit();
             }
+            State.appendLog("Card request");
             v = res.get("card");
             if (v != null) {
                 long card_t = v.asLong();
@@ -1057,6 +1058,7 @@ public class FetchService extends Service {
 
         @Override
         void exec(String api_key) {
+            State.appendLog("Time: " + preferences.getLong(Names.Car.GUARD_TIME, 0));
             execute(URL_CARD, api_key, preferences.getLong(Names.Car.GUARD_TIME, 0));
         }
     }
