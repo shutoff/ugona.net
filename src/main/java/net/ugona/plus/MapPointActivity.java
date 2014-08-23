@@ -15,6 +15,10 @@ import android.webkit.JavascriptInterface;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
+
 import org.joda.time.LocalDateTime;
 
 import java.text.DateFormat;
@@ -25,6 +29,9 @@ public class MapPointActivity extends MapActivity {
 
     static final int REQUEST_ALARM = 4000;
     static final int UPDATE_INTERVAL = 30 * 1000;
+
+    final static String URL_TRACKS = "https://car-online.ugona.net/tracks?skey=$1&begin=$2&end=$3";
+
     String car_id;
     BroadcastReceiver br;
     PendingIntent pi;
@@ -38,6 +45,9 @@ public class MapPointActivity extends MapActivity {
     DateFormat tf;
 
     Map<String, String> times;
+
+    HttpTask trackTask;
+    String track_data;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,8 +74,8 @@ public class MapPointActivity extends MapActivity {
         br = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (loaded)
-                    webView.loadUrl("javascript:showPoints()");
+                update();
+                updateTrack();
                 stopTimer();
                 startTimer(false);
             }
@@ -165,6 +175,7 @@ public class MapPointActivity extends MapActivity {
             actionBar.setDisplayUseLogoEnabled(false);
             setTitle(getString(R.string.app_name));
         }
+        updateTrack();
     }
 
     void startTimer(boolean now) {
@@ -176,6 +187,47 @@ public class MapPointActivity extends MapActivity {
 
     void stopTimer() {
         alarmMgr.cancel(pi);
+    }
+
+    void update() {
+        if (loaded)
+            webView.loadUrl("javascript:showPoints()");
+    }
+
+    void updateTrack() {
+        if (trackTask != null)
+            return;
+
+        boolean engine = preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false);
+        boolean az = preferences.getBoolean(Names.Car.AZ + car_id, false);
+        if (!engine || az) {
+            if (track_data == null)
+                return;
+            track_data = null;
+            update();
+            return;
+        }
+
+        trackTask = new HttpTask() {
+            @Override
+            void result(JsonObject res) throws ParseException {
+                JsonArray list = res.get("tracks").asArray();
+                if (list.size() > 0) {
+                    JsonObject v = list.get(list.size() - 1).asObject();
+                    track_data = v.get("track").asString();
+                }
+                trackTask = null;
+                update();
+            }
+
+            @Override
+            void error() {
+                trackTask = null;
+            }
+        };
+        long end = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
+        trackTask.execute(URL_TRACKS, preferences.getString(Names.Car.CAR_KEY + car_id, ""), end - 86400000, end);
+
     }
 
     @Override
@@ -318,6 +370,24 @@ public class MapPointActivity extends MapActivity {
 
             if (data == null) {
                 data = createData(car_id);
+                if (track_data != null) {
+                    data += ";";
+                    long last_time = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
+                    String[] points = track_data.split("\\|");
+                    for (String point : points) {
+                        String[] p = point.split(",");
+                        if (p.length != 4)
+                            continue;
+                        long time = Long.parseLong(p[3]);
+                        if (time > last_time)
+                            continue;
+                        data += point + "_";
+                    }
+                    data += preferences.getFloat(Names.Car.LAT + car_id, 0) + ",";
+                    data += preferences.getFloat(Names.Car.LNG + car_id, 0) + ",";
+                    data += preferences.getFloat(Names.Car.SPEED + car_id, 0) + ",";
+                    data += last_time;
+                }
                 id = car_id;
             }
 

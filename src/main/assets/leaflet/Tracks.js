@@ -47,7 +47,11 @@ var Tracks = {
 	init: function() {
 		var track_data = android.getTracks();
 		this.parts = (track_data + "").split('|');
+		this.initTracks();
+	},
 
+
+	initTracks: function() {
 		this.points = [];
 		this.markers = [];
 
@@ -140,8 +144,9 @@ function showPointInfo(event) {
 		}
 		var cax = ep.x - point0.x;
 		var cay = ep.y - point0.y;
-		var bax = point.x - point.x;
-		var bay = point.y - point.y;
+		var bax = point.x - point0.x;
+		var bay = point.y - point0.y;
+
 		var pp = cax * bax + cay * bay;
 
 		var dist;
@@ -153,8 +158,8 @@ function showPointInfo(event) {
 		} else {
 			var l = bax * bax + bay * bay;
 			if (pp >= l) {
-				var cbx = x - bx;
-				var cby = y - by;
+				var cbx = ep.x - point.x;
+				var cby = ep.y - point.y;
 				dist = cbx * cbx + cby * cby;
 				pos = 1000;
 			} else {
@@ -166,7 +171,6 @@ function showPointInfo(event) {
 				dist = cax * cax + cay * cay;
 			}
 		}
-
 		if (dist < best_dist) {
 			best_p = p;
 			best_p0 = p0;
@@ -177,6 +181,7 @@ function showPointInfo(event) {
 	}
 	if (best_p == null)
 		return;
+
 	var lat0 = parseFloat(best_p0[0]);
 	var lon0 = parseFloat(best_p0[1]);
 	var speed0 = parseFloat(best_p0[2]);

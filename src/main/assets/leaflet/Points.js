@@ -105,6 +105,12 @@ var Points = {
 			}
 			this.setInfo(i);
 		}
+		Tracks.parts = [];
+		if (this.data[0][5]){
+			Tracks.parts = this.data[0][5].split('_');
+			Tracks.initTracks();
+		}
+		Tracks.update();
 	},
 
 	setInfo: function(i) {
