@@ -150,7 +150,7 @@ public class Alarm extends Activity {
         }
         SharedPreferences.Editor ed = preferences.edit();
         if (!silent) {
-            zone_notify = createNotification(context, message, R.drawable.warning, car_id, in_zone ? Names.Car.ZONE_IN_SOUND : Names.Car.ZONE_OUT_SOUND, when);
+            zone_notify = createNotification(context, message, R.drawable.white_zone, car_id, in_zone ? Names.Car.ZONE_IN_SOUND : Names.Car.ZONE_OUT_SOUND, when);
             ed.putInt(Names.Notify.ZONE + car_id, zone_notify);
         }
         if (in_zone) {
