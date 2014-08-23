@@ -192,7 +192,7 @@ public class MapPointActivity extends MapActivity {
 
         @JavascriptInterface
         public String init() {
-            return super.init() + "\nshowPoints()\nshowPopup()";
+            return super.init() + "\nshowPoints()\ncenter()";
         }
 
         @JavascriptInterface

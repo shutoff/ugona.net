@@ -1,11 +1,13 @@
 package net.ugona.plus;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Html;
 import android.text.SpannedString;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewConfiguration;
 import android.webkit.JavascriptInterface;
@@ -76,16 +78,34 @@ public class TrackView extends MapActivity {
         setTitle(getIntent().getStringExtra(Names.TITLE));
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        boolean res = super.onCreateOptionsMenu(menu);
+        MenuItem item = menu.findItem(R.id.traffic);
+        if (item != null)
+            item.setChecked(preferences.getBoolean(Names.SHOW_SPEED, true));
+        return res;
+    }
+
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.save:
                 webView.loadUrl("javascript:saveTrack()");
-                break;
+                return true;
             case R.id.share:
                 webView.loadUrl("javascript:shareTrack()");
+                return true;
+            case R.id.traffic: {
+                boolean speed = !preferences.getBoolean(Names.SHOW_SPEED, false);
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putBoolean(Names.SHOW_SPEED, speed);
+                ed.commit();
+                updateMenu();
+                webView.loadUrl("javascript:showTracks()");
                 break;
+            }
         }
-        return false;
+        return super.onOptionsItemSelected(item);
     }
 
     File saveTrack(double min_lat, double max_lat, double min_lon, double max_lon, boolean show_toast) {
@@ -300,6 +320,11 @@ public class TrackView extends MapActivity {
         @JavascriptInterface
         public void share(double min_lat, double max_lat, double min_lon, double max_lon) {
             shareTrack(min_lat, max_lat, min_lon, max_lon);
+        }
+
+        @JavascriptInterface
+        public String speed() {
+            return preferences.getBoolean(Names.SHOW_SPEED, true) ? "1" : "";
         }
 
     }

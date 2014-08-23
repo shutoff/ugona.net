@@ -3,7 +3,6 @@ var Points = {
 		getData();
 		if (this.markers == null) {
 			this.markers = [];
-			this.info = [];
 			this.zones = [];
 		}
 		if (this.markers.length != this.data.length) {
@@ -13,7 +12,7 @@ var Points = {
 			this.markers = [];
 			this.info = [];
 		}
-		for (var i = 0; i < this.data.length; i++) {	
+		for (var i = 0; i < this.data.length; i++) {
 			var p = this.data[i];
 			var lat = parseFloat(p[0]);
 			var lng = parseFloat(p[1]);
@@ -114,18 +113,20 @@ var Points = {
 			var p = this.data[i];
 			var lat = parseFloat(p[0]);
 			var lng = parseFloat(p[1]);
-			var info = L.popup()
-				.setLatLng([lat, lng])
-				.setContent(text);
 			this.markers[i].on('click', function() {
-				info.addTo(map);
+				showPopup(lat, lng, text)
 			});
-			this.info[i] = info;
 		}
 	},
 
 	showPopup: function() {
-		this.info[0].addTo(map)
+		var text = this.text(0);
+		if (text != "") {
+			var p = this.data[0];
+			var lat = parseFloat(p[0]);
+			var lng = parseFloat(p[1]);
+			showPopup(lat, lng, text);
+		}
 	},
 
 	text: function(i) {
@@ -157,7 +158,7 @@ function getBounds() {
 			[parseFloat(bounds[2]), parseFloat(bounds[3])]
 		];
 	}
-	if (android.getTracks) 
+	if (android.getTracks)
 		return Tracks.getBounds();
 	if (android.getData) {
 		getData();
@@ -182,8 +183,4 @@ function getBounds() {
 
 function showPoints() {
 	Points.update();
-}
-
-function showPopup() {
-	Points.showPopup();
 }

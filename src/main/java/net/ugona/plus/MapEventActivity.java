@@ -32,7 +32,7 @@ public class MapEventActivity extends MapActivity {
 
         @JavascriptInterface
         public String init() {
-            return super.init() + "\nshowPoints()\nshowPopup()";
+            return super.init() + "\nshowPoints();center()";
         }
     }
 

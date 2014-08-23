@@ -3,9 +3,7 @@ package net.ugona.plus;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.view.MenuItem;
@@ -33,19 +31,6 @@ public class ZoneEdit extends MapActivity {
     SettingActivity.Zone zone;
     boolean clear_zone;
     boolean confirm;
-
-    @Override
-    String loadURL() {
-        webView.addJavascriptInterface(new JsInterface(), "android");
-        return getURL();
-    }
-
-    String getURL() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (preferences.getString("map_type", "").equals("OSM"))
-            return "file:///android_asset/html/ozone.html";
-        return "file:///android_asset/html/zone.html";
-    }
 
     @Override
     int menuId() {
@@ -192,6 +177,11 @@ public class ZoneEdit extends MapActivity {
     }
 
     class JsInterface extends MapActivity.JsInterface {
+
+        @JavascriptInterface
+        public String init() {
+            return super.init() + "\nshowZone()";
+        }
 
         @JavascriptInterface
         public String getZone() {

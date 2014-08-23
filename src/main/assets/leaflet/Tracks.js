@@ -20,10 +20,7 @@ var Tracks = {
 				var mark = L.marker([lat, lon]);
 				map.addLayer(mark);
 				mark.on('click', function() {
-					L.popup()
-						.setLatLng([lat, lon])
-						.setContent(p[2])
-						.openOn(map)
+					showPopup(lat, lon, p[2])
 				});
 			})(this.markers[i]);
 		}
@@ -33,7 +30,7 @@ var Tracks = {
 			}
 		}
 		this.tracks = [];
-		var traffic = android.traffic();
+		var traffic = android.speed();
 		for (var i in this.points) {
 			var p = this.points[i];
 			var line = L.polyline(p.points, {
@@ -43,8 +40,8 @@ var Tracks = {
 				})
 				.addTo(map);
 			this.tracks.push(line);
-			line.on('click', showPointInfo);
 		}
+		map.on('click', showPointInfo)
 	},
 
 	init: function() {
@@ -103,7 +100,6 @@ var Tracks = {
 				last_mark = true;
 			}
 		}
-
 	},
 
 	getBounds: function() {
@@ -118,35 +114,109 @@ var Tracks = {
 }
 
 function showPointInfo(event) {
-	var delta = 1000;
-	var best_index = null;
+	var best_p0 = null;
+	var best_p = null;
+	var best_dist = 1024;
+	var best_pos = 0;
+	var ep = map.latLngToLayerPoint(event.latlng);
+	var p0 = null;
 	for (var i in Tracks.parts) {
 		var p = Tracks.parts[i].split(',');
 		if (p.length != 4)
 			continue;
 		var lat = parseFloat(p[0]);
 		var lon = parseFloat(p[1]);
-		var d = Math.abs(lat - event.latlng.lat) + Math.abs(lon - event.latlng.lng);
-		if (d < delta) {
-			best_index = i;
-			delta = d;
+		var point = map.latLngToLayerPoint(L.latLng(lat, lon));
+		if (p0 == null) {
+			p0 = p;
+			continue;
 		}
+		var lat0 = parseFloat(p0[0]);
+		var lon0 = parseFloat(p0[1]);
+		var point0 = map.latLngToLayerPoint(L.latLng(lat0, lon0));
+		if ((point0.x == point.x) && (point0.y == point.y)) {
+			p0 = p;
+			continue;
+		}
+		var cax = ep.x - point0.x;
+		var cay = ep.y - point0.y;
+		var bax = point.x - point.x;
+		var bay = point.y - point.y;
+		var pp = cax * bax + cay * bay;
+
+		var dist;
+		var pos;
+
+		if (pp <= 0) {
+			dist = cax * cax + cay * cay;
+			pos = 0;
+		} else {
+			var l = bax * bax + bay * bay;
+			if (pp >= l) {
+				var cbx = x - bx;
+				var cby = y - by;
+				dist = cbx * cbx + cby * cby;
+				pos = 1000;
+			} else {
+				pos = 1000 * pp / l;
+				bax = bax * pp / l;
+				bay = bay * pp / l;
+				cax -= bax;
+				cay -= bay;
+				dist = cax * cax + cay * cay;
+			}
+		}
+
+		if (dist < best_dist) {
+			best_p = p;
+			best_p0 = p0;
+			best_pos = pos;
+			best_dist = dist;
+		}
+		p0 = p;
 	}
-	if (best_index == null)
+	if (best_p == null)
 		return;
-	var p = Tracks.parts[best_index].split(',');
-	var d = new Date(parseInt(p[3]));
-	var lat = parseFloat(p[0]);
-	var lon = parseFloat(p[1]);
+	var lat0 = parseFloat(best_p0[0]);
+	var lon0 = parseFloat(best_p0[1]);
+	var speed0 = parseFloat(best_p0[2]);
+	var time0 = parseFloat(best_p0[3]);
+
+	var lat = parseFloat(best_p[0]);
+	var lon = parseFloat(best_p[1]);
+	var speed = parseFloat(best_p[2]);
+	var time = parseFloat(best_p[3]);
+
+	var lat = lat0 + (lat - lat0) * best_pos / 1000;
+	var lon = lon0 + (lon - lon0) * best_pos / 1000;
+	var speed = Math.ceil(speed0 + (speed - speed0) / 1000);
+	var d = new Date(time0 + (time - time0) / 1000);
+	showPopup(lat, lon, d.toLocaleTimeString() + '<br/>' + speed + ' ' + android.kmh());
+}
+
+function showPopup(lat, lon, text) {
 	if (Tracks.point_info == null)
 		Tracks.point_info = L.popup();
 	Tracks.point_info
 		.setLatLng([lat, lon])
-		.setContent(d.toLocaleTimeString() + '<br/>' + p[2] + ' ' + android.kmh())
+		.setContent(text)
 		.addTo(map);
 }
 
-
 function showTracks() {
 	return Tracks.update();
+}
+
+function saveTrack() {
+	var bounds = map.getBounds();
+	var ne = bounds.getNorthEast();
+	var sw = bounds.getSouthWest();
+	android.save(sw.lat, ne.lat, sw.lng, ne.lng);
+}
+
+function shareTrack() {
+	var bounds = map.getBounds();
+	var ne = bounds.getNorthEast();
+	var sw = bounds.getSouthWest();
+	android.share(sw.lat, ne.lat, sw.lng, ne.lng);
 }

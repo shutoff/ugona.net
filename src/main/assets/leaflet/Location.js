@@ -104,4 +104,5 @@ function center() {
 	if (map == null)
 		return;
 	fitBounds(getBounds(), 0.125);
+	Points.showPopup();
 }

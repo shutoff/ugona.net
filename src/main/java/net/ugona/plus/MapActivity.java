@@ -20,8 +20,6 @@ import java.util.Date;
 
 abstract public class MapActivity extends WebViewActivity {
 
-    static final String TRAFFIC = "traffic";
-
     static final int TWO_MINUTES = 1000 * 60 * 2;
     Menu topSubMenu;
     SharedPreferences preferences;
@@ -152,10 +150,7 @@ abstract public class MapActivity extends WebViewActivity {
         } else {
             menu.findItem(R.id.google).setChecked(true);
         }
-        MenuItem item = menu.findItem(R.id.traffic);
-        if (item != null)
-            item.setChecked(preferences.getBoolean(TRAFFIC, true));
-        item = menu.findItem(R.id.traffic_layer);
+        MenuItem item = menu.findItem(R.id.traffic_layer);
         if (item != null)
             item.setChecked(preferences.getBoolean(Names.SHOW_TRAFFIC, false));
         item = menu.findItem(R.id.gps);
@@ -362,8 +357,9 @@ abstract public class MapActivity extends WebViewActivity {
 
         @JavascriptInterface
         public String traffic() {
-            return preferences.getBoolean(TRAFFIC, true) ? "1" : "";
+            return preferences.getBoolean(Names.SHOW_TRAFFIC, true) ? "1" : "";
         }
+
     }
 
 }
