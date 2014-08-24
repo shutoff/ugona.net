@@ -23,6 +23,8 @@ android = {
 			"showPoints()",
 			"showZone()",
 //			"showTracks()"
+			"center()",
+			"showPoints()"
 		].join("\n");
 	},
 

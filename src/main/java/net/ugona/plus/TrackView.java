@@ -322,11 +322,6 @@ public class TrackView extends MapActivity {
             shareTrack(min_lat, max_lat, min_lon, max_lon);
         }
 
-        @JavascriptInterface
-        public String speed() {
-            return preferences.getBoolean(Names.SHOW_SPEED, true) ? "1" : "";
-        }
-
     }
 
 }

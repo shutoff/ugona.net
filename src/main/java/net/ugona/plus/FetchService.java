@@ -267,10 +267,8 @@ public class FetchService extends Service {
                 ex.printStackTrace();
             }
         }
-        if (id == preferences.getInt(Names.Car.LOST_NOTIFY + car_id, 0)) {
-            State.appendLog("Clear lost notification " + id);
+        if (id == preferences.getInt(Names.Car.LOST_NOTIFY + car_id, 0))
             ed.remove(Names.Car.LOST_NOTIFY + car_id);
-        }
 
         if (res == null) {
             ed.remove(Names.Car.N_IDS + car_id);
@@ -441,7 +439,6 @@ public class FetchService extends Service {
             if (time.asLong() > preferences.getLong(Names.Car.LOST + car_id, 0)) {
                 int id = preferences.getInt(Names.Car.LOST_NOTIFY + car_id, 0);
                 if (id > 0) {
-                    State.appendLog("Channel restore by event " + id);
                     ed.remove(Names.Car.LOST_NOTIFY + car_id);
                     Alarm.removeNotification(FetchService.this, car_id, id);
                     id = preferences.getInt(Names.Notify.RESTORE + car_id, 0);
@@ -1038,7 +1035,6 @@ public class FetchService extends Service {
                 ed.putLong(Names.Car.GUARD_TIME + car_id, v.asLong());
                 ed.commit();
             }
-            State.appendLog("Card request");
             v = res.get("card");
             if (v != null) {
                 long card_t = v.asLong();
@@ -1061,7 +1057,6 @@ public class FetchService extends Service {
 
         @Override
         void exec(String api_key) {
-            State.appendLog("Time: " + preferences.getLong(Names.Car.GUARD_TIME, 0));
             execute(URL_CARD, api_key, preferences.getLong(Names.Car.GUARD_TIME, 0));
         }
     }

@@ -106,11 +106,21 @@ var Points = {
 			this.setInfo(i);
 		}
 		Tracks.parts = [];
-		if (this.data[0][5]){
+		if (this.data[0][5]) {
 			Tracks.parts = this.data[0][5].split('_');
 			Tracks.initTracks();
 		}
 		Tracks.update();
+		if (Tracks.popup != null) {
+			var text = this.text(Tracks.popup);
+			if (text != "") {
+				var p = this.data[Tracks.popup];
+				var lat = parseFloat(p[0]);
+				var lng = parseFloat(p[1]);
+				showPopup(lat, lng, text, Tracks.popup);
+			}
+		}
+
 	},
 
 	setInfo: function(i) {
@@ -120,7 +130,7 @@ var Points = {
 			var lat = parseFloat(p[0]);
 			var lng = parseFloat(p[1]);
 			this.markers[i].on('click', function() {
-				showPopup(lat, lng, text)
+				showPopup(lat, lng, text, i)
 			});
 		}
 	},
@@ -131,7 +141,7 @@ var Points = {
 			var p = this.data[0];
 			var lat = parseFloat(p[0]);
 			var lng = parseFloat(p[1]);
-			showPopup(lat, lng, text);
+			showPopup(lat, lng, text, 0);
 		}
 	},
 
@@ -141,8 +151,6 @@ var Points = {
 		var words = lines[0].split(' ');
 		lines[0] = '<b>' + words.shift() + '</b> ' + words.join(' ');
 		var res = lines.join('<br>');
-		if (data[5])
-			res += '<br/>' + data[5];
 		return res;
 	}
 }

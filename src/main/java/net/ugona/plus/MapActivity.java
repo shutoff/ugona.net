@@ -360,6 +360,10 @@ abstract public class MapActivity extends WebViewActivity {
             return preferences.getBoolean(Names.SHOW_TRAFFIC, true) ? "1" : "";
         }
 
+        @JavascriptInterface
+        public String speed() {
+            return preferences.getBoolean(Names.SHOW_SPEED, true) ? "1" : "";
+        }
     }
 
 }

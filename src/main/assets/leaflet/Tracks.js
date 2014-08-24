@@ -199,13 +199,17 @@ function showPointInfo(event) {
 	showPopup(lat, lon, d.toLocaleTimeString() + '<br/>' + speed + ' ' + android.kmh());
 }
 
-function showPopup(lat, lon, text) {
+function showPopup(lat, lon, text, point) {
 	if (Tracks.point_info == null)
 		Tracks.point_info = L.popup();
+	Tracks.popup = point;
 	Tracks.point_info
 		.setLatLng([lat, lon])
 		.setContent(text)
 		.addTo(map);
+	Tracks.point_info.on('close', function(){
+		Tracks.popup = null;
+	})
 }
 
 function showTracks() {
