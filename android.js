@@ -38,6 +38,10 @@ android = {
 
 	speed: function() {
 		return true;
+	},
+
+	language: function() {
+		return 'ru'
 	}
 
 
