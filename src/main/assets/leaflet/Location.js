@@ -79,10 +79,16 @@ function fitBounds(bounds, k) {
 	var max_lng = max_point[1];
 	var d_lat = (max_lat - min_lat) * k;
 	var d_lng = (max_lng - min_lng) * k;
+	var zoom = map.getZoom();
+	if (zoom < 12)
+		zoom = 12;
 	map.fitBounds([
 		[min_lat - d_lat, min_lng - d_lng],
 		[max_lat + d_lat, max_lng + d_lng]
-	]);
+	], {
+		maxZoom: zoom,
+		animate: true
+	});
 }
 
 

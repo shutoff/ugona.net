@@ -51,8 +51,8 @@ function initialize() {
     });
 
     var zoom = map.getBoundsZoom([[lat1 - d_lat, lng1 - d_lng], [lat2 + d_lat, lng2 + d_lng]]);
-    if (zoom > 17)
-        zoom = 17;
+    if (zoom > 16)
+        zoom = 16;
     map.setZoom(zoom);
     
     var gmap_layer = new L.Google('ROADMAP');
@@ -60,6 +60,7 @@ function initialize() {
 
     eval(android.init() + "");
 }
+
 
 
 

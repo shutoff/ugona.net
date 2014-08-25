@@ -49,8 +49,8 @@ function initialize() {
     });
 
     var zoom = map.getBoundsZoom([[lat1 - d_lat, lng1 - d_lng], [lat2 + d_lat, lng2 + d_lng]]);
-    if (zoom > 17)
-        zoom = 17;
+    if (zoom > 16)
+        zoom = 16;
     map.setZoom(zoom);
 
     L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {
@@ -59,6 +59,7 @@ function initialize() {
 
     eval(android.init() + "");
 }
+
 
 
 
