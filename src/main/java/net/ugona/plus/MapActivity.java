@@ -63,6 +63,8 @@ abstract public class MapActivity extends WebViewActivity {
     String getUrl() {
         if (preferences.getString("map_type", "").equals("OSM"))
             return "file:///android_asset/html/osm.html";
+        if (preferences.getString("map_type", "").equals("Yandex"))
+            return "file:///android_asset/html/yandex.html";
         return "file:///android_asset/html/google.html";
     }
 
@@ -147,6 +149,8 @@ abstract public class MapActivity extends WebViewActivity {
         inflater.inflate(menuId(), menu);
         if (preferences.getString("map_type", "OSM").equals("OSM")) {
             menu.findItem(R.id.osm).setChecked(true);
+        } else if (preferences.getString("map_type", "OSM").equals("Yandex")) {
+            menu.findItem(R.id.osm).setChecked(true);
         } else {
             menu.findItem(R.id.google).setChecked(true);
         }
@@ -203,6 +207,14 @@ abstract public class MapActivity extends WebViewActivity {
             case R.id.google: {
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putString(Names.MAP_TYPE, "Google");
+                ed.commit();
+                updateMenu();
+                webView.loadUrl(getUrl());
+                break;
+            }
+            case R.id.yandex: {
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putString(Names.MAP_TYPE, "Yandex");
                 ed.commit();
                 updateMenu();
                 webView.loadUrl(getUrl());
