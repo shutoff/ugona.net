@@ -630,4 +630,5 @@
     <string name="demo_mode">Demo mode</string>
     <string name="ccode_ok">C-code changed</string>
     <string name="ccode_failed">Change C-code failed</string>
+    <string name="yandex">Yandex</string>
 </resources>

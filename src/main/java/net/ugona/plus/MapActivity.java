@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -17,6 +18,7 @@ import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
 import java.util.Date;
+import java.util.Locale;
 
 abstract public class MapActivity extends WebViewActivity {
 
@@ -27,6 +29,7 @@ abstract public class MapActivity extends WebViewActivity {
     Location currentBestLocation;
     LocationListener netListener;
     LocationListener gpsListener;
+    String language;
 
     abstract int menuId();
 
@@ -44,6 +47,7 @@ abstract public class MapActivity extends WebViewActivity {
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         currentBestLocation = getLastBestLocation();
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        language = Locale.getDefault().getLanguage();
 
         super.onCreate(savedInstanceState);
     }
@@ -63,6 +67,8 @@ abstract public class MapActivity extends WebViewActivity {
     String getUrl() {
         if (preferences.getString("map_type", "").equals("OSM"))
             return "file:///android_asset/html/osm.html";
+        if (preferences.getString("map_type", "").equals("Yandex"))
+            return "file:///android_asset/html/yandex.html";
         return "file:///android_asset/html/google.html";
     }
 
@@ -147,6 +153,8 @@ abstract public class MapActivity extends WebViewActivity {
         inflater.inflate(menuId(), menu);
         if (preferences.getString("map_type", "OSM").equals("OSM")) {
             menu.findItem(R.id.osm).setChecked(true);
+        } else if (preferences.getString("map_type", "OSM").equals("Yandex")) {
+            menu.findItem(R.id.yandex).setChecked(true);
         } else {
             menu.findItem(R.id.google).setChecked(true);
         }
@@ -203,6 +211,14 @@ abstract public class MapActivity extends WebViewActivity {
             case R.id.google: {
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putString(Names.MAP_TYPE, "Google");
+                ed.commit();
+                updateMenu();
+                webView.loadUrl(getUrl());
+                break;
+            }
+            case R.id.yandex: {
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putString(Names.MAP_TYPE, "Yandex");
                 ed.commit();
                 updateMenu();
                 webView.loadUrl(getUrl());
@@ -330,6 +346,16 @@ abstract public class MapActivity extends WebViewActivity {
         return provider1.equals(provider2);
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        String new_language = Locale.getDefault().getLanguage();
+        if (language.equals(new_language))
+            return;
+        language = new_language;
+        webView.loadUrl(loadURL());
+    }
+
     class JsInterface {
 
         @JavascriptInterface
@@ -363,6 +389,11 @@ abstract public class MapActivity extends WebViewActivity {
         @JavascriptInterface
         public String speed() {
             return preferences.getBoolean(Names.SHOW_SPEED, true) ? "1" : "";
+        }
+
+        @JavascriptInterface
+        public String language() {
+            return language;
         }
     }
 

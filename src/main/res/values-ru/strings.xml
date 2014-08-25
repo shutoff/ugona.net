@@ -629,4 +629,5 @@
     <string name="demo_mode">Демо режим</string>
     <string name="ccode_ok">C-код изменен</string>
     <string name="ccode_failed">Ошибка изменения C-кода</string>
+    <string name="yandex">Yandex</string>
 </resources>
