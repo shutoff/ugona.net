@@ -12,6 +12,8 @@ abstract public class AddressRequest {
 
     static final String GOOGLE_URL = "https://maps.googleapis.com/maps/api/geocode/json?latlng=$1,$2&sensor=false&language=$3";
     static final String OSM_URL = "https://nominatim.openstreetmap.org/reverse?lat=$1&lon=$2&osm_type=N&format=json&address_details=0&accept-language=$3";
+    static final String BING_URL = "http://dev.virtualearth.net/REST/v1/Locations/$1,$2?o=json&key=Avl_WlFuKVJbmBFOcG3s4A2xUY1DM2LFYbvKTcNfvIhJF7LqbVW-VsIE4IJQB0Nc&culture=$3";
+    static final String YANDEX_URL = "http://geocode-maps.yandex.ru/1.x/?geocode=$2,$1&format=json&lang=$3";
     Request request;
 
     abstract void addressResult(String address);
@@ -19,6 +21,16 @@ abstract public class AddressRequest {
     void getAddress(SharedPreferences preferences, double lat, double lng) {
         if (preferences.getString("map_type", "").equals("OSM")) {
             request = new OsmRequest();
+            request.exec(lat, lng);
+            return;
+        }
+        if (preferences.getString("map_type", "").equals("Bing")) {
+            request = new BingRequest();
+            request.exec(lat, lng);
+            return;
+        }
+        if (preferences.getString("map_type", "").equals("Yandex")) {
+            request = new YandexRequest();
             request.exec(lat, lng);
             return;
         }
@@ -145,6 +157,56 @@ abstract public class AddressRequest {
                 result += ", " + parts[i];
             }
             addressResult(result);
+        }
+
+        @Override
+        void error() {
+            addressResult(null);
+        }
+    }
+
+    class BingRequest extends Request {
+
+        @Override
+        void exec(double lat, double lon) {
+            execute(BING_URL, lat, lon, Locale.getDefault().getLanguage());
+        }
+
+        @Override
+        void result(JsonObject res) throws ParseException {
+            String addr = res.get("resourceSets").asObject()
+                    .get("resources").asArray()
+                    .get(0).asObject()
+                    .get("address").asObject()
+                    .get("formattedAddress").asString();
+            addressResult(addr);
+        }
+
+        @Override
+        void error() {
+            addressResult(null);
+        }
+    }
+
+    class YandexRequest extends Request {
+
+        @Override
+        void exec(double lat, double lon) {
+            execute(YANDEX_URL, lat, lon, Locale.getDefault().getLanguage());
+        }
+
+        @Override
+        void result(JsonObject res) throws ParseException {
+            String addr = res.get("response").asObject()
+                    .get("GeoObjectCollection").asObject()
+                    .get("featureMember").asArray()
+                    .get(0).asObject()
+                    .get("GeoObject").asObject()
+                    .get("metaDataProperty").asObject()
+                    .get("GeocoderMetaData").asObject()
+                    .get("AddressDetails").asObject()
+                    .get("AddressLine").asString();
+            addressResult(addr);
         }
 
         @Override

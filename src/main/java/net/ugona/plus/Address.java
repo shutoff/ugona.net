@@ -24,6 +24,10 @@ public abstract class Address {
         String p = Locale.getDefault().getLanguage();
         if (preferences.getString(Names.MAP_TYPE, "").equals("OSM"))
             p += "_";
+        if (preferences.getString(Names.MAP_TYPE, "").equals("Bing"))
+            p += "b";
+        if (preferences.getString(Names.MAP_TYPE, "").equals("Yandex"))
+            p += "y";
         final String param = p;
         final String[] columns = {
                 "Lat",
@@ -101,6 +105,10 @@ public abstract class Address {
         String p = Locale.getDefault().getLanguage();
         if (preferences.getString(Names.MAP_TYPE, "").equals("OSM"))
             p += "_";
+        if (preferences.getString(Names.MAP_TYPE, "").equals("Bing"))
+            p += "b";
+        if (preferences.getString(Names.MAP_TYPE, "").equals("Yandex"))
+            p += "y";
         final String param = p;
         final String[] columns = {
                 "Lat",

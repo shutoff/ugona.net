@@ -31,9 +31,9 @@ L.BingLayer = L.TileLayer.extend({
 	getTileUrl: function(p, z) {
 		var zoom = this._getZoomForUrl();
 		var subdomains = this.options.subdomains,
-			s = this.options.subdomains[Math.abs((p.x + p.y) % subdomains.length)];
-		console.log(this._url);
-		return this._url.replace('{subdomain}', s)
+		s = this.options.subdomains[Math.abs((p.x + p.y) % subdomains.length)];
+    var url = 'http://ak.dynamic.{subdomain}.tiles.virtualearth.net/comp/ch/{quadkey}?mkt={culture}&it=G,VE,BX,L,LA&shading=hill&og=56&n=z';
+		return url.replace('{subdomain}', s)
 			.replace('{quadkey}', this.tile2quad(p.x, p.y, zoom))
 			.replace('{culture}', this.options.culture);
 	},
