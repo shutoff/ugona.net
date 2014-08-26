@@ -631,4 +631,5 @@
     <string name="ccode_ok">C-code changed</string>
     <string name="ccode_failed">Change C-code failed</string>
     <string name="yandex">Yandex</string>
+    <string name="bing">Bing</string>
 </resources>
