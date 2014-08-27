@@ -8,14 +8,17 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.support.v7.app.ActionBarActivity;
+import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -73,26 +76,6 @@ public class Phones extends ActionBarActivity {
         lvPhones = (ListView) findViewById(R.id.list);
         vMsg = findViewById(R.id.msg);
         vProgress = findViewById(R.id.progress);
-
-        if (savedInstanceState != null)
-            phones = savedInstanceState.getStringArray(Names.Car.CAR_PHONE);
-        if (phones == null) {
-            if (!SmsMonitor.isProcessed(car_id, R.string.phones)) {
-                SmsMonitor.sendSMS(this, car_id, passwd, new SmsMonitor.Sms(R.string.phones, "USERS?", "USERS? ") {
-                    @Override
-                    boolean process_answer(Context context, String car_id, String text) {
-                        Intent i = new Intent(USERS);
-                        i.putExtra(Names.Car.CAR_PHONE, text);
-                        i.putExtra(Names.ID, car_id);
-                        context.sendBroadcast(i);
-                        return true;
-                    }
-                });
-            }
-            showProgress();
-        } else {
-            showList();
-        }
 
         lvPhones.setAdapter(new BaseAdapter() {
             @Override
@@ -184,6 +167,44 @@ public class Phones extends ActionBarActivity {
         };
         IntentFilter filter = new IntentFilter(USERS);
         registerReceiver(br, filter);
+
+        if (savedInstanceState != null)
+            phones = savedInstanceState.getStringArray(Names.Car.CAR_PHONE);
+        if (phones == null) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            if (preferences.getString(Names.Car.CAR_KEY + car_id, "").equals("demo")) {
+                try {
+                    TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+                    phones = new String[0];
+                    String number = telephonyManager.getLine1Number();
+                    if (!number.equals("")) {
+                        phones = new String[1];
+                        phones[0] = number;
+                    }
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+            showList();
+            return;
+        }
+        if (phones == null) {
+            if (!SmsMonitor.isProcessed(car_id, R.string.phones)) {
+                SmsMonitor.sendSMS(this, car_id, passwd, new SmsMonitor.Sms(R.string.phones, "USERS?", "USERS? ") {
+                    @Override
+                    boolean process_answer(Context context, String car_id, String text) {
+                        Intent i = new Intent(USERS);
+                        i.putExtra(Names.Car.CAR_PHONE, text);
+                        i.putExtra(Names.ID, car_id);
+                        context.sendBroadcast(i);
+                        return true;
+                    }
+                });
+            }
+            showProgress();
+        } else {
+            showList();
+        }
     }
 
     @Override
@@ -260,6 +281,16 @@ public class Phones extends ActionBarActivity {
             }
 
             final String r = result;
+
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            if (preferences.getString(Names.Car.CAR_KEY + car_id, "").equals("demo")) {
+                phones = r.split(",");
+                BaseAdapter adapter = (BaseAdapter) lvPhones.getAdapter();
+                adapter.notifyDataSetChanged();
+                showList();
+                return;
+            }
+
             SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.add_phone, "NEW USER " + number, "NEW USER OK") {
                 @Override
                 boolean process_answer(Context context, String car_id, String text) {

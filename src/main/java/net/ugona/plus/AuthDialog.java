@@ -189,9 +189,6 @@ public class AuthDialog extends Activity {
     }
 
     void auth(final String login, final String pass, String phone) {
-        final ProgressDialog dlgCheck = new ProgressDialog(AuthDialog.this);
-        dlgCheck.setMessage(getString(R.string.check_auth));
-        dlgCheck.show();
 
         Intent i = getIntent();
         if (phone != null) {
@@ -209,8 +206,13 @@ public class AuthDialog extends Activity {
 
         if ((login == null) || (pass == null)) {
             setResult(RESULT_OK, i);
+            dialog.dismiss();
             return;
         }
+
+        final ProgressDialog dlgCheck = new ProgressDialog(AuthDialog.this);
+        dlgCheck.setMessage(getString(R.string.check_auth));
+        dlgCheck.show();
 
         HttpTask apiTask = new HttpTask() {
             @Override

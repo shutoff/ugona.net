@@ -226,6 +226,16 @@ public class AuthFragment extends SettingsFragment {
 
                                 dialog.dismiss();
 
+                                if (preferences.getString(Names.Car.CAR_KEY + car_id, "").equals("demo")) {
+                                    AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                                            .setTitle(R.string.error)
+                                            .setMessage(R.string.ccode_fail)
+                                            .setNegativeButton(R.string.cancel, null)
+                                            .create();
+                                    dialog.show();
+                                    return;
+                                }
+
                                 final ProgressDialog progressDialog = new ProgressDialog(getActivity());
                                 progressDialog.setMessage(getString(R.string.ccode_change));
                                 progressDialog.show();

@@ -1029,6 +1029,16 @@ public class Actions {
         requestCCode(context, car_id, R.string.init_phone, 0, new Actions.Answer() {
             @Override
             void answer(String ccode) {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                if (preferences.getString(Names.Car.CAR_KEY + car_id, "").equals("demo")) {
+                    AlertDialog dialog = new AlertDialog.Builder(context)
+                            .setTitle(R.string.error)
+                            .setMessage(R.string.ccode_fail)
+                            .setNegativeButton(R.string.cancel, null)
+                            .create();
+                    dialog.show();
+                    return;
+                }
                 SmsMonitor.sendSMS(context, car_id, null, new SmsMonitor.Sms(R.string.valet_off, ccode, null, INCORRECT_MESSAGE, R.string.invalid_ccode) {
                     @Override
                     boolean process_answer(Context context, String car_id, String body) {
