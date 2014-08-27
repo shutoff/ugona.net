@@ -213,35 +213,19 @@ abstract public class MapActivity extends WebViewActivity {
                 break;
             }
             case R.id.google: {
-                SharedPreferences.Editor ed = preferences.edit();
-                ed.putString(Names.MAP_TYPE, "Google");
-                ed.commit();
-                updateMenu();
-                webView.loadUrl(getUrl());
+                setMapType("Google");
                 break;
             }
             case R.id.yandex: {
-                SharedPreferences.Editor ed = preferences.edit();
-                ed.putString(Names.MAP_TYPE, "Yandex");
-                ed.commit();
-                updateMenu();
-                webView.loadUrl(getUrl());
+                setMapType("Yandex");
                 break;
             }
             case R.id.bing: {
-                SharedPreferences.Editor ed = preferences.edit();
-                ed.putString(Names.MAP_TYPE, "Bing");
-                ed.commit();
-                updateMenu();
-                webView.loadUrl(getUrl());
+                setMapType("Bing");
                 break;
             }
             case R.id.osm: {
-                SharedPreferences.Editor ed = preferences.edit();
-                ed.putString(Names.MAP_TYPE, "OSM");
-                ed.commit();
-                updateMenu();
-                webView.loadUrl(getUrl());
+                setMapType("OSM");
                 break;
             }
             case R.id.traffic_layer: {
@@ -265,6 +249,16 @@ abstract public class MapActivity extends WebViewActivity {
             }
         }
         return false;
+    }
+
+    void setMapType(String type) {
+        SharedPreferences.Editor ed = preferences.edit();
+        ed.putString(Names.MAP_TYPE, type);
+        ed.commit();
+        updateMenu();
+        webView.loadUrl(getUrl());
+        Intent i = new Intent(FetchService.ACTION_UPDATE_FORCE);
+        sendBroadcast(i);
     }
 
     Location getLastBestLocation() {

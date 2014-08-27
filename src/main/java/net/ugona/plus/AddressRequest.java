@@ -174,12 +174,19 @@ abstract public class AddressRequest {
 
         @Override
         void result(JsonObject res) throws ParseException {
-            String addr = res.get("resourceSets").asObject()
-                    .get("resources").asArray()
-                    .get(0).asObject()
-                    .get("address").asObject()
-                    .get("formattedAddress").asString();
-            addressResult(addr);
+            try {
+                String addr = res.get("resourceSets").asArray()
+                        .get(0).asObject()
+                        .get("resources").asArray()
+                        .get(0).asObject()
+                        .get("address").asObject()
+                        .get("formattedAddress").asString();
+                addr = addr.replace(", [0-9]{6}", "");
+                addressResult(addr);
+            } catch (Exception ex) {
+                State.print(ex);
+                State.appendLog(res.toString());
+            }
         }
 
         @Override
@@ -205,6 +212,7 @@ abstract public class AddressRequest {
                     .get("metaDataProperty").asObject()
                     .get("GeocoderMetaData").asObject()
                     .get("AddressDetails").asObject()
+                    .get("Country").asObject()
                     .get("AddressLine").asString();
             addressResult(addr);
         }

@@ -25,7 +25,7 @@ public abstract class Address {
         if (preferences.getString(Names.MAP_TYPE, "").equals("OSM"))
             p += "_";
         if (preferences.getString(Names.MAP_TYPE, "").equals("Bing"))
-            p += "b";
+            p += "a";
         if (preferences.getString(Names.MAP_TYPE, "").equals("Yandex"))
             p += "y";
         final String param = p;
@@ -106,7 +106,7 @@ public abstract class Address {
         if (preferences.getString(Names.MAP_TYPE, "").equals("OSM"))
             p += "_";
         if (preferences.getString(Names.MAP_TYPE, "").equals("Bing"))
-            p += "b";
+            p += "a";
         if (preferences.getString(Names.MAP_TYPE, "").equals("Yandex"))
             p += "y";
         final String param = p;

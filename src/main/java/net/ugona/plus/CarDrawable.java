@@ -98,8 +98,11 @@ public class CarDrawable {
 
             boolean az = preferences.getBoolean(Names.Car.AZ + car_id, false);
             if (az) {
-                if (engine)
+                if (engine) {
                     upd |= setLayer(4, "engine1", !white);
+                } else {
+                    upd |= setLayer(4);
+                }
             } else if (Preferences.getRele(preferences, car_id)) {
                 upd |= setLayer(4, "heater", !white);
             } else {
