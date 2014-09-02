@@ -65,13 +65,7 @@ abstract public class MapActivity extends WebViewActivity {
     }
 
     String getUrl() {
-        if (preferences.getString("map_type", "").equals("OSM"))
-            return "file:///android_asset/html/osm.html";
-        if (preferences.getString("map_type", "").equals("Yandex"))
-            return "file:///android_asset/html/yandex.html";
-        if (preferences.getString("map_type", "").equals("Bing"))
-            return "file:///android_asset/html/bing.html";
-        return "file:///android_asset/html/google.html";
+        return "file:///android_asset/html/map.html";
     }
 
     void stopListener() {
@@ -259,7 +253,7 @@ abstract public class MapActivity extends WebViewActivity {
         ed.putString(Names.MAP_TYPE, type);
         ed.commit();
         updateMenu();
-        webView.loadUrl(getUrl());
+        webView.loadUrl("javascript:updateType()");
         Intent i = new Intent(FetchService.ACTION_UPDATE_FORCE);
         sendBroadcast(i);
     }
@@ -368,9 +362,8 @@ abstract public class MapActivity extends WebViewActivity {
     class JsInterface {
 
         @JavascriptInterface
-        public String init() {
+        public void init() {
             loaded = true;
-            return "showTraffic()\nmyLocation()";
         }
 
         @JavascriptInterface
@@ -383,6 +376,11 @@ abstract public class MapActivity extends WebViewActivity {
             if (currentBestLocation.hasBearing())
                 res += currentBestLocation.getBearing();
             return res;
+        }
+
+        @JavascriptInterface
+        public String getTupe() {
+            return preferences.getString("map_type", "OSM");
         }
 
         @JavascriptInterface

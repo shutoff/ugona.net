@@ -558,29 +558,18 @@ public class MainActivity extends ActionBarActivity {
         final String id = Preferences.getCar(preferences, new_id);
         if (id.equals(car_id))
             return;
-        AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                try {
-                    int current_id = getPageId(mViewPager.getCurrentItem());
-                    car_id = id;
-                    setActionBar();
-                    update();
-                    updateMenu();
-                    int current = getPagePosition(current_id);
-                    mViewPager.setCurrentItem(current);
-                    setShowDate(current);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-        };
-        task.execute();
+        try {
+            int current_id = getPageId(mViewPager.getCurrentItem());
+            car_id = id;
+            setActionBar();
+            update();
+            updateMenu();
+            int current = getPagePosition(current_id);
+            mViewPager.setCurrentItem(current);
+            setShowDate(current);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     void startTimer(boolean now) {
@@ -1153,7 +1142,7 @@ public class MainActivity extends ActionBarActivity {
                     fragment.car_id = car_id;
                     fragment.current = current;
                     return fragment;
-                }
+            }
                 case PAGE_ACTIONS: {
                     ActionFragment fragment = new ActionFragment();
                     fragment.car_id = car_id;
@@ -1183,7 +1172,7 @@ public class MainActivity extends ActionBarActivity {
                     stat_fragment = fragment;
                     return fragment;
                 }
-            }
+        }
             return null;
         }
 
@@ -1207,9 +1196,9 @@ public class MainActivity extends ActionBarActivity {
                     return getString(R.string.tracks);
                 case PAGE_STAT:
                     return getString(R.string.stat);
-            }
-            return super.getPageTitle(position);
         }
+            return super.getPageTitle(position);
+    }
     }
 
     class CarsAdapter extends BaseAdapter {
@@ -1236,7 +1225,7 @@ public class MainActivity extends ActionBarActivity {
                 LayoutInflater inflater = (LayoutInflater) getBaseContext()
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 v = inflater.inflate(R.layout.car_list_item, null);
-            }
+        }
             TextView tv = (TextView) v.findViewById(R.id.name);
             tv.setText(cars[position].name);
             return v;
@@ -1249,11 +1238,11 @@ public class MainActivity extends ActionBarActivity {
                 LayoutInflater inflater = (LayoutInflater) getBaseContext()
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 v = inflater.inflate(R.layout.car_list_dropdown_item, null);
-            }
+        }
             TextView tv = (TextView) v.findViewById(R.id.name);
             tv.setText(cars[position].name);
             return v;
-        }
+    }
     }
 
 }

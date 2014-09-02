@@ -30,10 +30,6 @@ public class MapEventActivity extends MapActivity {
             return data;
         }
 
-        @JavascriptInterface
-        public String init() {
-            return super.init() + "\nshowPoints();center()";
-        }
     }
 
 }

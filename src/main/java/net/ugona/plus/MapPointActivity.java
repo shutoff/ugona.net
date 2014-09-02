@@ -243,11 +243,6 @@ public class MapPointActivity extends MapActivity {
     class JsInterface extends MapActivity.JsInterface {
 
         @JavascriptInterface
-        public String init() {
-            return super.init() + "\nshowPoints()\ncenter()";
-        }
-
-        @JavascriptInterface
         String createData(String id) {
             double lat = preferences.getFloat(Names.Car.LAT + id, 0);
             double lng = preferences.getFloat(Names.Car.LNG + id, 0);

@@ -206,11 +206,6 @@ public class TrackView extends MapActivity {
     class JsInterface extends MapActivity.JsInterface {
 
         @JavascriptInterface
-        public String init() {
-            return super.init() + "\nshowTracks()";
-        }
-
-        @JavascriptInterface
         public String getTracks() {
             Vector<Track.Marker> markers = new Vector<Track.Marker>();
             StringBuilder track_data = new StringBuilder();

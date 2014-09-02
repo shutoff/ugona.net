@@ -179,11 +179,6 @@ public class ZoneEdit extends MapActivity {
     class JsInterface extends MapActivity.JsInterface {
 
         @JavascriptInterface
-        public String init() {
-            return super.init() + "\nshowZone()";
-        }
-
-        @JavascriptInterface
         public String getZone() {
             return zone.lat1 + "," + zone.lng1 + "," + zone.lat2 + "," + zone.lng2;
         }
