@@ -184,8 +184,7 @@ abstract public class AddressRequest {
                 addr = addr.replace(", [0-9]{6}", "");
                 addressResult(addr);
             } catch (Exception ex) {
-                State.print(ex);
-                State.appendLog(res.toString());
+                // ignore
             }
         }
 

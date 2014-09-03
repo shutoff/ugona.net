@@ -43,6 +43,7 @@ public class TrackView extends MapActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        noLocation = true;
         try {
             ViewConfiguration config = ViewConfiguration.get(this);
             Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
@@ -108,7 +109,12 @@ public class TrackView extends MapActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    File saveTrack(double min_lat, double max_lat, double min_lon, double max_lon, boolean show_toast) {
+    File saveTrack(String data, boolean show_toast) {
+        String[] d = data.split(",");
+        double min_lat = Double.parseDouble(d[0]);
+        double min_lon = Double.parseDouble(d[1]);
+        double max_lat = Double.parseDouble(d[2]);
+        double max_lon = Double.parseDouble(d[3]);
         try {
             File path = Environment.getExternalStorageDirectory();
             if (path == null)
@@ -192,8 +198,8 @@ public class TrackView extends MapActivity {
         return null;
     }
 
-    void shareTrack(double min_lat, double max_lat, double min_lon, double max_lon) {
-        File out = saveTrack(min_lat, max_lat, min_lon, max_lon, false);
+    void shareTrack(String data) {
+        File out = saveTrack(data, false);
         if (out == null)
             return;
         Intent shareIntent = new Intent();
@@ -308,13 +314,13 @@ public class TrackView extends MapActivity {
         }
 
         @JavascriptInterface
-        public void save(double min_lat, double max_lat, double min_lon, double max_lon) {
-            saveTrack(min_lat, max_lat, min_lon, max_lon, true);
+        public void save(String data) {
+            saveTrack(data, true);
         }
 
         @JavascriptInterface
-        public void share(double min_lat, double max_lat, double min_lon, double max_lon) {
-            shareTrack(min_lat, max_lat, min_lon, max_lon);
+        public void share(String data) {
+            shareTrack(data);
         }
 
     }

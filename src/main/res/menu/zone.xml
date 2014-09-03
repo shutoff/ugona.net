@@ -23,6 +23,14 @@
             android:title="@string/google"
             car:showAsAction="never" />
         <item
+            android:id="@+id/yandex"
+            android:title="@string/yandex"
+            car:showAsAction="never" />
+        <item
+            android:id="@+id/bing"
+            android:title="@string/bing"
+            car:showAsAction="never" />
+        <item
             android:id="@+id/osm"
             android:title="@string/osm"
             car:showAsAction="never" />

@@ -19,7 +19,9 @@ public abstract class Address {
     static final double e2 = 0.006739496742337; // Квадрат эксцентричности эллипсоида
     static SQLiteDatabase address_db;
 
-    static String getAddress(Context context, final double lat, final double lng) {
+    static String getAddress(Context context, final double v_lat, final double v_lng) {
+        if ((v_lat == 0) && (v_lng == 0))
+            return null;
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String p = Locale.getDefault().getLanguage();
         if (preferences.getString(Names.MAP_TYPE, "").equals("OSM"))
@@ -36,6 +38,9 @@ public abstract class Address {
                 "Param",
         };
 
+        final double lat = Math.round(v_lat * 100000.) / 100000.;
+        final double lng = Math.round(v_lng * 100000.) / 100000.;
+
         String[] conditions = {
                 param,
                 (lat - 0.001) + "",
@@ -45,23 +50,24 @@ public abstract class Address {
         };
         if (address_db == null)
             return null;
+        String result = null;
         Cursor cursor = address_db.query(TABLE_NAME, columns, "(Param = ?) AND (Lat BETWEEN ? AND ?) AND (Lng BETWEEN ? AND ?)", conditions, null, null, null, null);
         if (cursor.moveToFirst()) {
+            double best = 100;
             for (; ; ) {
                 double db_lat = cursor.getDouble(0);
                 double db_lon = cursor.getDouble(1);
                 double distance = calc_distance(lat, lng, db_lat, db_lon);
-                if (distance < 80) {
-                    String address = cursor.getString(2);
-                    cursor.close();
-                    return address;
+                if (distance < best) {
+                    result = cursor.getString(2);
+                    best = distance;
                 }
                 if (!cursor.moveToNext())
                     break;
             }
         }
         cursor.close();
-        return null;
+        return result;
     }
 
     static double calc_distance(double lat1, double lon1, double lat2, double lon2) {
@@ -129,28 +135,29 @@ public abstract class Address {
                         (lng + 0.001) + ""
                 };
 
+                String result = null;
                 Cursor cursor = address_db.query(TABLE_NAME, columns, "(Param = ?) AND (Lat BETWEEN ? AND ?) AND (Lng BETWEEN ? AND ?)", conditions, null, null, null, null);
                 if (cursor.moveToFirst()) {
+                    double best = 100;
                     for (; ; ) {
                         double db_lat = cursor.getDouble(0);
                         double db_lon = cursor.getDouble(1);
                         double distance = calc_distance(lat, lng, db_lat, db_lon);
-                        if (distance < 80) {
-                            String address = cursor.getString(2);
-                            cursor.close();
-                            return address;
+                        if (distance < best) {
+                            best = distance;
+                            result = cursor.getString(2);
                         }
                         if (!cursor.moveToNext())
                             break;
                     }
                 }
                 cursor.close();
-                return null;
+                return result;
             }
 
             @Override
             protected void onPostExecute(String s) {
-                if (s != null) {
+                if ((s != null) || ((lat == 0) && (lng == 0))) {
                     result(s);
                     return;
                 }

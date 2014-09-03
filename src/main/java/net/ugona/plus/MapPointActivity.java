@@ -330,8 +330,9 @@ public class MapPointActivity extends MapActivity {
                     Address req = new Address() {
                         @Override
                         void result(String addr) {
-                            if (loaded)
+                            if (loaded) {
                                 webView.loadUrl("javascript:showPoints()");
+                            }
                         }
                     };
                     req.get(MapPointActivity.this, lat, lng);

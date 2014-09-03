@@ -30,6 +30,7 @@ abstract public class MapActivity extends WebViewActivity {
     LocationListener netListener;
     LocationListener gpsListener;
     String language;
+    boolean noLocation;
 
     abstract int menuId();
 
@@ -77,11 +78,8 @@ abstract public class MapActivity extends WebViewActivity {
 
     void startListener() {
 
-        if (topSubMenu != null) {
-            MenuItem item = topSubMenu.findItem(R.id.gps);
-            if (item == null)
-                return;
-        }
+        if (noLocation)
+            return;
 
         netListener = new LocationListener() {
             @Override
@@ -300,8 +298,9 @@ abstract public class MapActivity extends WebViewActivity {
             currentBestLocation = location;
         if (currentBestLocation == null)
             return;
-        if (loaded)
+        if (loaded && !noLocation) {
             webView.loadUrl("javascript:myLocation()");
+        }
     }
 
     protected boolean isBetterLocation(Location location, Location currentBestLocation) {
@@ -362,7 +361,7 @@ abstract public class MapActivity extends WebViewActivity {
     class JsInterface {
 
         @JavascriptInterface
-        public void init() {
+        public void init(String data) {
             loaded = true;
         }
 
@@ -379,7 +378,7 @@ abstract public class MapActivity extends WebViewActivity {
         }
 
         @JavascriptInterface
-        public String getTupe() {
+        public String getType() {
             return preferences.getString("map_type", "OSM");
         }
 
