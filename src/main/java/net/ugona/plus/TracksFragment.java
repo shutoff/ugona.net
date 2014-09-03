@@ -446,7 +446,7 @@ public class TracksFragment extends Fragment
         }
     }
 
-    abstract class TrackPositionFetcher extends Address {
+    abstract class TrackPositionFetcher implements Address.Answer {
 
         int pos;
 
@@ -459,7 +459,7 @@ public class TracksFragment extends Fragment
         abstract void done();
 
         @Override
-        void result(String address) {
+        public void result(String address) {
             if (getActivity() == null)
                 return;
             if (address == null) {
@@ -485,7 +485,7 @@ public class TracksFragment extends Fragment
             Track.Point p = getPoint(track);
             if (getActivity() == null)
                 return;
-            get(getActivity(), p.latitude, p.longitude);
+            Address.get(getActivity(), p.latitude, p.longitude, this);
         }
 
     }

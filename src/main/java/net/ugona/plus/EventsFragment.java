@@ -776,9 +776,9 @@ public class EventsFragment extends Fragment
                 final double lat = gps.get("lat").asDouble();
                 final double lng = gps.get("lng").asDouble();
                 final JsonValue course_value = gps.get("course");
-                Address request = new Address() {
+                Address.Answer answer = new Address.Answer() {
                     @Override
-                    void result(String res) {
+                    public void result(String res) {
                         String addr = event_data;
                         if (text != null)
                             addr = text.asString() + "\n\n";
@@ -791,7 +791,7 @@ public class EventsFragment extends Fragment
                         setAddress(addr, lat + ";" + lng, course);
                     }
                 };
-                request.get(getActivity(), lat, lng);
+                Address.get(getActivity(), lat, lng, answer);
                 return;
             }
             value = res.get("gsm");
@@ -799,9 +799,9 @@ public class EventsFragment extends Fragment
                 final JsonObject gsm = value.asObject();
                 final double lat = gsm.get("lat").asDouble();
                 final double lng = gsm.get("lng").asDouble();
-                Address request = new Address() {
+                Address.get(getActivity(), lat, lng, new Address.Answer() {
                     @Override
-                    void result(String res) {
+                    public void result(String res) {
                         String addr = event_data;
                         if (text != null)
                             addr = text.asString() + "\n\n";
@@ -813,8 +813,7 @@ public class EventsFragment extends Fragment
                             addr += "\n" + res;
                         setAddress(addr, lat + ";" + lng + ";" + gsm.get("sector").asString(), null);
                     }
-                };
-                request.get(getActivity(), lat, lng);
+                });
                 return;
             }
             String addr = event_data;

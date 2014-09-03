@@ -315,42 +315,26 @@ public class MapPointActivity extends MapActivity {
                     }
                 }
             }
-            if (zone.equals("")) {
-                data += Math.round(lat * 10000) / 10000. + "," + Math.round(lng * 10000) / 10000. + "<br/>";
-                String address = Address.getAddress(getBaseContext(), lat, lng);
-                if (address != null) {
-                    String[] parts = address.split(", ");
-                    if (parts.length >= 3) {
-                        address = parts[0] + ", " + parts[1];
-                        for (int n = 2; n < parts.length; n++)
-                            address += "<br/>" + parts[n];
-                    }
-                    data += address;
-                } else {
-                    Address req = new Address() {
-                        @Override
-                        void result(String addr) {
-                            if (loaded) {
-                                webView.loadUrl("javascript:showPoints()");
-                            }
-                        }
-                    };
-                    req.get(MapPointActivity.this, lat, lng);
+            data += Math.round(lat * 10000) / 10000. + "," + Math.round(lng * 10000) / 10000. + "<br/>";
+            String address = Address.get(getBaseContext(), lat, lng, new Address.Answer() {
+                @Override
+                public void result(String address) {
+                    if (loaded)
+                        webView.loadUrl("javascript:showPoints()");
                 }
-                data += ";";
-            } else {
-                String address = Address.getAddress(MapPointActivity.this, lat, lng);
-                if (address != null) {
-                    String[] parts = address.split(", ");
-                    if (parts.length >= 3) {
-                        address = parts[0] + ", " + parts[1];
-                        for (int n = 2; n < parts.length; n++)
-                            address += "<br/>" + parts[n];
-                    }
-                    data += address;
+            });
+            if (address != null) {
+                String[] parts = address.split(", ");
+                if (parts.length >= 3) {
+                    address = parts[0] + ", " + parts[1];
+                    for (int n = 2; n < parts.length; n++)
+                        address += "<br/>" + parts[n];
                 }
-                data += ";" + zone;
+                data += address;
             }
+            data += ";";
+            if (!zone.equals(""))
+                data += ";" + zone;
             if (times.containsKey(id))
                 data += ";" + times.get(id);
             return data;

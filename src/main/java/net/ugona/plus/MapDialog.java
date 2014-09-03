@@ -39,7 +39,7 @@ public class MapDialog extends Activity {
                 double lng = preferences.getFloat(Names.Car.LNG + car_id, 0);
                 String data = lat + ";" + lng + ";-1;";
                 data += fmt(lat) + " " + fmt(lng) + "\n";
-                String address = Address.getAddress(MapDialog.this, lat, lng);
+                String address = Address.get(MapDialog.this, lat, lng, null);
                 if (address != null)
                     data += address;
                 i.putExtra(Names.POINT_DATA, data);
@@ -63,14 +63,16 @@ public class MapDialog extends Activity {
         TextView tvState = (TextView) dialog.findViewById(R.id.state);
         tvState.setText(fmt(lat) + "," + fmt(lng));
 
-        Address request = new Address() {
+        Address.get(this, lat, lng, new Address.Answer() {
             @Override
-            void result(String res) {
+            public void result(String address) {
+                if (address == null)
+                    return;
                 TextView tvAddr = (TextView) dialog.findViewById(R.id.sms);
-                tvAddr.setText(res);
+                tvAddr.setText(address);
             }
-        };
-        request.get(this, lat, lng);
+        });
     }
+
 
 }

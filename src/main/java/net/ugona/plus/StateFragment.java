@@ -482,13 +482,7 @@ public class StateFragment extends Fragment
         } else {
             location = preferences.getFloat(Names.Car.LAT + car_id, 0) + " ";
             location += preferences.getFloat(Names.Car.LNG + car_id, 0);
-            Address req = new Address() {
-                @Override
-                void result(String addr) {
-                    updateAddress(addr);
-                }
-            };
-            req.get(getActivity(), lat, lon);
+            updateAddress(lat, lon);
         }
 
         String balance = preferences.getString(Names.Car.BALANCE + car_id, "");
@@ -530,7 +524,6 @@ public class StateFragment extends Fragment
                 }
                 time += " ";
             }
-            updateAddress(null);
             return;
         }
 
@@ -635,7 +628,6 @@ public class StateFragment extends Fragment
             if (speed > 0)
                 time += " " + speed + " " + getString(R.string.kmh) + " ";
         }
-        updateAddress(null);
 
         int commands = State.getCommands(preferences, car_id);
         boolean block = !preferences.getBoolean(Names.Car.GUARD0 + car_id, false) && preferences.getBoolean(Names.Car.GUARD1 + car_id, false);
@@ -805,6 +797,16 @@ public class StateFragment extends Fragment
         setPointer(vPointer2, tvPointer2, 1);
     }
 
+    void updateAddress(double lat, double lon) {
+
+        Address.get(getActivity(), lat, lon, new Address.Answer() {
+            @Override
+            public void result(String addr) {
+                updateAddress(addr);
+            }
+        });
+
+    }
 
     void updateAddress(String addr) {
         try {
@@ -876,13 +878,7 @@ public class StateFragment extends Fragment
                 // ignore
             }
         }
-        Address req = new Address() {
-            @Override
-            void result(String addr) {
-                updateAddress(addr);
-            }
-        };
-        req.get(getActivity(), (min_lat + max_lat) / 2, (min_lon + max_lon) / 2);
+        updateAddress((min_lat + max_lat) / 2, (min_lon + max_lon) / 2);
     }
 
     void updateReserveVoltage(TextView tv, boolean normal) {
@@ -966,7 +962,7 @@ public class StateFragment extends Fragment
                 data += df.format(last) + " " + tf.format(last);
             }
             data += "\n";
-            data += Address.getAddress(getActivity(), preferences.getFloat(Names.Car.LAT + car_id, 0), preferences.getFloat(Names.Car.LNG + car_id, 0));
+            data += Address.get(getActivity(), preferences.getFloat(Names.Car.LAT + car_id, 0), preferences.getFloat(Names.Car.LNG + car_id, 0), null);
             String zone = preferences.getString(Names.Car.GSM_ZONE + car_id, "");
             if (!zone.equals(""))
                 data += ";" + zone;
