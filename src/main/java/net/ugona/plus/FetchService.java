@@ -555,7 +555,8 @@ public class FetchService extends Service {
                     gsm_str += gsm.get("nc").asInt() + " ";
                     gsm_str += gsm.get("lac").asInt() + " ";
                     gsm_str += gsm.get("cid").asInt();
-                    if (!preferences.getString(Names.Car.GSM_SECTOR + car_id, "").equals(gsm_str)) {
+                    String old_gsm = preferences.getString(Names.Car.GSM_SECTOR + car_id, "");
+                    if (!old_gsm.equals(gsm_str)) {
                         ed.putString(Names.Car.GSM_SECTOR + car_id, gsm_str);
                         ed.remove(Names.Car.GSM_ZONE + car_id);
                         ed.remove(Names.Car.LAT + car_id);

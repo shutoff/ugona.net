@@ -156,8 +156,8 @@ public class MapPointActivity extends MapActivity {
                         return true;
                     point_data = null;
                     car_id = cars[i].id;
-                    webView.loadUrl("javascript:showPoints()");
-                    webView.loadUrl("javascript:center()");
+                    callJs("showPoints()");
+                    callJs("center()");
                     return true;
                 }
             });
@@ -191,7 +191,7 @@ public class MapPointActivity extends MapActivity {
 
     void update() {
         if (loaded)
-            webView.loadUrl("javascript:showPoints()");
+            callJs("showPoints()");
     }
 
     void updateTrack() {
@@ -247,6 +247,7 @@ public class MapPointActivity extends MapActivity {
             double lat = preferences.getFloat(Names.Car.LAT + id, 0);
             double lng = preferences.getFloat(Names.Car.LNG + id, 0);
             String zone = "";
+            String location = Math.round(lat * 10000) / 10000. + "," + Math.round(lng * 10000) / 10000.;
             if ((lat == 0) && (lng == 0)) {
                 zone = preferences.getString(Names.Car.GSM_ZONE + id, "");
                 String points[] = zone.split("_");
@@ -273,11 +274,15 @@ public class MapPointActivity extends MapActivity {
                 }
                 lat = ((min_lat + max_lat) / 2);
                 lng = ((min_lon + max_lon) / 2);
+                location = "";
+                String gsm_sector = preferences.getString(Names.Car.GSM_SECTOR + car_id, "");
+                if (!gsm_sector.equals("")) {
+                    String[] parts = gsm_sector.split(" ");
+                    if (parts.length == 4)
+                        location = "LAC: " + parts[2] + " CID: " + parts[3];
+                }
             }
-            String data =
-                    lat + ";" +
-                            lng + ";" +
-                            preferences.getInt(Names.Car.COURSE + id, 0) + ";";
+            String data = lat + ";" + lng + ";" + preferences.getInt(Names.Car.COURSE + id, 0) + ";";
             if (cars.length > 1) {
                 String name = preferences.getString(Names.Car.CAR_NAME + id, "");
                 if (name.length() == 0) {
@@ -315,14 +320,8 @@ public class MapPointActivity extends MapActivity {
                     }
                 }
             }
-            data += Math.round(lat * 10000) / 10000. + "," + Math.round(lng * 10000) / 10000. + "<br/>";
-            String address = Address.get(getBaseContext(), lat, lng, new Address.Answer() {
-                @Override
-                public void result(String address) {
-                    if (loaded)
-                        webView.loadUrl("javascript:showPoints()");
-                }
-            });
+            data += location + "<br/>";
+            String address = Address.get(getBaseContext(), lat, lng, null);
             if (address != null) {
                 String[] parts = address.split(", ");
                 if (parts.length >= 3) {
@@ -331,8 +330,20 @@ public class MapPointActivity extends MapActivity {
                         address += "<br/>" + parts[n];
                 }
                 data += address;
+            } else {
+                Address.get(getBaseContext(), lat, lng, new Address.Answer() {
+                    @Override
+                    public void result(String address) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (loaded)
+                                    callJs("showPoints()");
+                            }
+                        });
+                    }
+                });
             }
-            data += ";";
             if (!zone.equals(""))
                 data += ";" + zone;
             if (times.containsKey(id))

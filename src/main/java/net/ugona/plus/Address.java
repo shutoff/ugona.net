@@ -47,8 +47,11 @@ public abstract class Address {
                 (lng - 0.001) + "",
                 (lng + 0.001) + ""
         };
-        if (address_db == null)
-            return null;
+        if (address_db == null) {
+            OpenHelper helper = new OpenHelper(context);
+            address_db = helper.getWritableDatabase();
+        }
+
         String result = null;
         Cursor cursor = address_db.query(TABLE_NAME, columns, "(Param = ?) AND (Lat BETWEEN ? AND ?) AND (Lng BETWEEN ? AND ?)", conditions, null, null, null, null);
         double best = 400;
@@ -83,7 +86,8 @@ public abstract class Address {
             };
             request.getAddress(preferences, lat, lng);
         }
-        answer.result(result);
+        if (answer != null)
+            answer.result(result);
         return result;
     }
 
@@ -116,7 +120,7 @@ public abstract class Address {
         abstract void result(String address);
     }
 
-    class OpenHelper extends SQLiteOpenHelper {
+    static class OpenHelper extends SQLiteOpenHelper {
 
         final static String DB_NAME = "address.db";
 

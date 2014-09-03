@@ -37,7 +37,7 @@ public class TrackView extends MapActivity {
     }
 
     @Override
-    MapActivity.JsInterface js() {
+    Js js() {
         return new JsInterface();
     }
 
@@ -91,10 +91,10 @@ public class TrackView extends MapActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.save:
-                webView.loadUrl("javascript:saveTrack()");
+                callJs("saveTrack()");
                 return true;
             case R.id.share:
-                webView.loadUrl("javascript:shareTrack()");
+                callJs("shareTrack()");
                 return true;
             case R.id.traffic: {
                 boolean speed = !preferences.getBoolean(Names.SHOW_SPEED, false);
@@ -102,7 +102,7 @@ public class TrackView extends MapActivity {
                 ed.putBoolean(Names.SHOW_SPEED, speed);
                 ed.commit();
                 updateMenu();
-                webView.loadUrl("javascript:showTracks()");
+                callJs("showTracks()");
                 break;
             }
         }

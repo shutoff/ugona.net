@@ -468,23 +468,6 @@ public class StateFragment extends Fragment
         double lat = preferences.getFloat(Names.Car.LAT + car_id, 0);
         double lon = preferences.getFloat(Names.Car.LNG + car_id, 0);
 
-        location = "";
-        if ((lat == 0) && (lon == 0)) {
-            String gsm_sector = preferences.getString(Names.Car.GSM_SECTOR + car_id, "");
-            if (!gsm_sector.equals("")) {
-                String[] parts = gsm_sector.split(" ");
-                if (parts.length == 4)
-                    location = "LAC: " + parts[2] + " CID: " + parts[3];
-            }
-            String gsm_zone = preferences.getString(Names.Car.GSM_ZONE + car_id, "");
-            if (!gsm_zone.equals(""))
-                updateZone(gsm_zone);
-        } else {
-            location = preferences.getFloat(Names.Car.LAT + car_id, 0) + " ";
-            location += preferences.getFloat(Names.Car.LNG + car_id, 0);
-            updateAddress(lat, lon);
-        }
-
         String balance = preferences.getString(Names.Car.BALANCE + car_id, "");
         if (!balance.equals("") && preferences.getBoolean(Names.Car.SHOW_BALANCE + car_id, true)) {
             int balance_limit = 50;
@@ -524,8 +507,50 @@ public class StateFragment extends Fragment
                 }
                 time += " ";
             }
-            return;
+        } else {
+            time = "";
+            long last_stand = preferences.getLong(Names.Car.LAST_STAND + car_id, 0);
+            if (last_stand > 0) {
+                LocalDateTime stand = new LocalDateTime(last_stand);
+                LocalDateTime now = new LocalDateTime();
+                if (stand.toLocalDate().equals(now.toLocalDate())) {
+                    DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
+                    time = tf.format(last_stand);
+                } else {
+                    DateFormat df = android.text.format.DateFormat.getDateFormat(context);
+                    DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
+                    time = df.format(last_stand) + " " + tf.format(last_stand);
+                }
+                time += " ";
+            } else if (last_stand < 0) {
+                double speed = preferences.getFloat(Names.Car.SPEED + car_id, 0);
+                if (speed > 0)
+                    time += " " + speed + " " + getString(R.string.kmh) + " ";
+            }
         }
+
+        location = "";
+        if ((lat == 0) && (lon == 0)) {
+            String gsm_sector = preferences.getString(Names.Car.GSM_SECTOR + car_id, "");
+            if (!gsm_sector.equals("")) {
+                String[] parts = gsm_sector.split(" ");
+                if (parts.length == 4)
+                    location = "LAC: " + parts[2] + " CID: " + parts[3];
+            }
+            String gsm_zone = preferences.getString(Names.Car.GSM_ZONE + car_id, "");
+            if (!gsm_zone.equals("")) {
+                updateZone(gsm_zone);
+            } else {
+                updateAddress(null);
+            }
+        } else {
+            location = preferences.getFloat(Names.Car.LAT + car_id, 0) + " ";
+            location += preferences.getFloat(Names.Car.LNG + car_id, 0);
+            updateAddress(lat, lon);
+        }
+
+        if (pointer)
+            return;
 
         int level = preferences.getInt(Names.Car.GSM_DB + car_id, 0);
         if (level == 0) {
@@ -609,25 +634,6 @@ public class StateFragment extends Fragment
         }
 
         vCar.setDrawable(drawable.getDrawable(context, car_id));
-        time = "";
-        long last_stand = preferences.getLong(Names.Car.LAST_STAND + car_id, 0);
-        if (last_stand > 0) {
-            LocalDateTime stand = new LocalDateTime(last_stand);
-            LocalDateTime now = new LocalDateTime();
-            if (stand.toLocalDate().equals(now.toLocalDate())) {
-                DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
-                time = tf.format(last_stand);
-            } else {
-                DateFormat df = android.text.format.DateFormat.getDateFormat(context);
-                DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
-                time = df.format(last_stand) + " " + tf.format(last_stand);
-            }
-            time += " ";
-        } else if (last_stand < 0) {
-            double speed = preferences.getFloat(Names.Car.SPEED + car_id, 0);
-            if (speed > 0)
-                time += " " + speed + " " + getString(R.string.kmh) + " ";
-        }
 
         int commands = State.getCommands(preferences, car_id);
         boolean block = !preferences.getBoolean(Names.Car.GUARD0 + car_id, false) && preferences.getBoolean(Names.Car.GUARD1 + car_id, false);

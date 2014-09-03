@@ -34,14 +34,6 @@ abstract public class MapActivity extends WebViewActivity {
 
     abstract int menuId();
 
-    abstract JsInterface js();
-
-    @Override
-    String loadURL() {
-        webView.addJavascriptInterface(js(), "android");
-        return getUrl();
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
@@ -172,7 +164,7 @@ abstract public class MapActivity extends WebViewActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.map:
-                webView.loadUrl("javascript:center()");
+                callJs("center()");
                 break;
             case R.id.my: {
                 if (preferences.getBoolean(Names.USE_GPS, false)) {
@@ -204,7 +196,7 @@ abstract public class MapActivity extends WebViewActivity {
                     toast.show();
                     return true;
                 }
-                webView.loadUrl("javascript:setPosition()");
+                callJs("setPosition()");
                 break;
             }
             case R.id.google: {
@@ -229,7 +221,7 @@ abstract public class MapActivity extends WebViewActivity {
                 ed.putBoolean(Names.SHOW_TRAFFIC, traffic);
                 ed.commit();
                 updateMenu();
-                webView.loadUrl("javascript:showTraffic()");
+                callJs("showTraffic()");
                 break;
             }
             case R.id.gps: {
@@ -251,7 +243,7 @@ abstract public class MapActivity extends WebViewActivity {
         ed.putString(Names.MAP_TYPE, type);
         ed.commit();
         updateMenu();
-        webView.loadUrl("javascript:updateType()");
+        callJs("updateType()");
         Intent i = new Intent(FetchService.ACTION_UPDATE_FORCE);
         sendBroadcast(i);
     }
@@ -299,7 +291,7 @@ abstract public class MapActivity extends WebViewActivity {
         if (currentBestLocation == null)
             return;
         if (loaded && !noLocation) {
-            webView.loadUrl("javascript:myLocation()");
+            callJs("myLocation()");
         }
     }
 
@@ -355,10 +347,10 @@ abstract public class MapActivity extends WebViewActivity {
         if (language.equals(new_language))
             return;
         language = new_language;
-        webView.loadUrl(loadURL());
+        loadUrl(getUrl());
     }
 
-    class JsInterface {
+    class JsInterface extends Js {
 
         @JavascriptInterface
         public void init(String data) {

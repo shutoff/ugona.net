@@ -19,7 +19,7 @@ public class MapEventActivity extends MapActivity {
     }
 
     @Override
-    JsInterface js() {
+    Js js() {
         return new JsInterface();
     }
 

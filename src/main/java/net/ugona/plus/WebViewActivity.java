@@ -11,11 +11,13 @@ import android.widget.FrameLayout;
 
 abstract public class WebViewActivity extends ActionBarActivity {
 
-    FrameLayout holder;
-    WebView webView;
     boolean loaded;
+    private FrameLayout holder;
+    private WebView webView;
 
-    abstract String loadURL();
+    abstract Js js();
+
+    abstract String getUrl();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,7 +60,8 @@ abstract public class WebViewActivity extends ActionBarActivity {
                 }
             };
             webView.setWebChromeClient(mChromeClient);
-            webView.loadUrl(loadURL());
+            webView.addJavascriptInterface(js(), "android");
+            webView.loadUrl(getUrl());
         }
         holder.addView(webView);
     }
@@ -70,7 +73,20 @@ abstract public class WebViewActivity extends ActionBarActivity {
         return webView;
     }
 
+    void loadUrl(String url) {
+        webView.loadUrl(url);
+    }
+
+    void callJs(String func) {
+        log("call " + func);
+        webView.loadUrl("javascript:" + func);
+    }
+
     void log(String text) {
         /* State.appendLog("webview: " + text); */
+    }
+
+    class Js {
+
     }
 }
