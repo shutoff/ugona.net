@@ -112,8 +112,8 @@ public class TrackView extends MapActivity {
     File saveTrack(String data, boolean show_toast) {
         String[] d = data.split(",");
         double min_lat = Double.parseDouble(d[0]);
-        double min_lon = Double.parseDouble(d[1]);
-        double max_lat = Double.parseDouble(d[2]);
+        double max_lat = Double.parseDouble(d[1]);
+        double min_lon = Double.parseDouble(d[2]);
         double max_lon = Double.parseDouble(d[3]);
         try {
             File path = Environment.getExternalStorageDirectory();
@@ -135,6 +135,12 @@ public class TrackView extends MapActivity {
                     end = p.time;
                 }
             }
+            if (begin >= end) {
+                Toast toast = Toast.makeText(this, R.string.no_data, Toast.LENGTH_LONG);
+                toast.show();
+                return null;
+            }
+
             LocalDateTime d2 = new LocalDateTime(begin);
             LocalDateTime d1 = new LocalDateTime(end);
 
