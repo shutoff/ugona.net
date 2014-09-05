@@ -113,12 +113,13 @@ public class FetchService extends Service {
                 }
                 if (action.equals(ACTION_NOTIFICATION)) {
                     String sound = intent.getStringExtra(Names.Car.NOTIFY);
-                    String text = intent.getStringExtra(Names.TITLE);
+                    String text = intent.getStringExtra(Names.MESSAGE);
+                    String title = intent.getStringExtra(Names.TITLE);
                     int pictId = intent.getIntExtra(Names.Car.ALARM, 0);
                     int max_id = intent.getIntExtra(Names.Car.EVENT_ID, 0);
                     long when = intent.getLongExtra(Names.Car.EVENT_TIME, 0);
                     boolean outgoing = intent.getBooleanExtra(Names.Car.ALARM_MODE, false);
-                    showNotification(car_id, text, pictId, max_id, sound, when, outgoing);
+                    showNotification(car_id, text, title, pictId, max_id, sound, when, outgoing);
                 }
                 if (action.equals(ACTION_RELE_OFF))
                     Actions.rele_off(this, car_id, intent.getStringExtra(Names.Car.AUTH), intent.getStringExtra(Names.PASSWORD));
@@ -131,15 +132,17 @@ public class FetchService extends Service {
         return START_NOT_STICKY;
     }
 
-    void showNotification(String car_id, String text, int pictId, int max_id, String sound, long when, boolean outgoing) {
-        String title = getString(R.string.app_name);
-        String[] cars = preferences.getString(Names.CARS, "").split(",");
-        if (cars.length > 1) {
-            title = preferences.getString(Names.Car.CAR_NAME + car_id, "");
-            if (title.length() == 0) {
-                title = getString(R.string.car);
-                if (car_id.length() > 0)
-                    title += " " + car_id;
+    void showNotification(String car_id, String text, String title, int pictId, int max_id, String sound, long when, boolean outgoing) {
+        if (title == null) {
+            title = getString(R.string.app_name);
+            String[] cars = preferences.getString(Names.CARS, "").split(",");
+            if (cars.length > 1) {
+                title = preferences.getString(Names.Car.CAR_NAME + car_id, "");
+                if (title.length() == 0) {
+                    title = getString(R.string.car);
+                    if (car_id.length() > 0)
+                        title += " " + car_id;
+                }
             }
         }
 
@@ -168,13 +171,19 @@ public class FetchService extends Service {
                 new NotificationCompat.Builder(this)
                         .setDefaults(defs)
                         .setSmallIcon(pictId)
-                        .setContentTitle(title)
-                        .setContentText(text);
+                        .setContentTitle(title);
         if (when != 0)
             builder.setWhen(when);
 
         if (uri != null)
             builder.setSound(uri);
+
+        builder.setContentTitle(title);
+        if (text.length() > 80) {
+            builder.setStyle(new NotificationCompat.BigTextStyle().bigText(text));
+        } else {
+            builder.setContentText(text);
+        }
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -200,6 +209,7 @@ public class FetchService extends Service {
         Notification notification = builder.build();
         if (outgoing)
             notification.flags = Notification.FLAG_ONGOING_EVENT;
+
         manager.notify(max_id, notification);
     }
 

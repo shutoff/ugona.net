@@ -631,4 +631,5 @@
     <string name="ccode_failed">Ошибка изменения C-кода</string>
     <string name="yandex">Yandex</string>
     <string name="bing">Bing</string>
+    <string name="more">Подробнее</string>
 </resources>

@@ -34,6 +34,8 @@ public final class Names {
     static final String SHOW_TRAFFIC = "show_traffic";
     static final String SHOW_SPEED = "show_speed";
     static final String USE_GPS = "use_gps";
+    static final String MESSAGE = "message";
+    static final String URL = "url";
 
     public final class Car {
         static final String ENGINE = "Engine";
@@ -174,6 +176,7 @@ public final class Names {
         static final String LOST_NOTIFY = "lost_notify_";
         static final String LIGHT_SHOCK = "light_shock_";
         static final String BALANCE_SOUND = ".balance";
+
     }
 
     public final class Notify {

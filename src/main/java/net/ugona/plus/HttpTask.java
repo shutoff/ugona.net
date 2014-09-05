@@ -88,13 +88,13 @@ public abstract class HttpTask {
                     background(result);
                     return result;
                 } catch (Exception ex) {
-                    error_text = ex.toString();
+                    error_text = ex.getLocalizedMessage();
                     if (error_text != null) {
                         int pos = error_text.indexOf(":");
                         if (pos > 0)
                             error_text = error_text.substring(0, pos);
                     }
-                    ex.printStackTrace();
+                    State.print(ex);
                 } finally {
                     if (reader != null) {
                         try {

@@ -4,9 +4,17 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Environment;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -27,7 +35,6 @@ public class State {
     static final int CMD_TRUNK = 1 << 12;
     static int telephony_state = 0;
 
-/*
     static public void appendLog(String text) {
         Log.v("v", text);
 
@@ -63,7 +70,6 @@ public class State {
         String s = sw.toString();
         appendLog(s);
     }
-*/
 
     static boolean isDebug() {
         return Build.FINGERPRINT.startsWith("generic");

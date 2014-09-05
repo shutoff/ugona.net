@@ -48,14 +48,14 @@ public class Alarm extends Activity {
     boolean show_main;
 
     static void createNotification(Context context, String text, String car_id) {
-        createNotification(context, text, R.drawable.warning, car_id, null, 0, false);
+        createNotification(context, text, R.drawable.warning, car_id, null, 0, false, null);
     }
 
     static int createNotification(Context context, String text, int pictId, String car_id, String sound, long when) {
-        return createNotification(context, text, pictId, car_id, sound, when, false);
+        return createNotification(context, text, pictId, car_id, sound, when, false, null);
     }
 
-    static int createNotification(Context context, String text, int pictId, String car_id, String sound, long when, boolean outgoing) {
+    static int createNotification(Context context, String text, int pictId, String car_id, String sound, long when, boolean outgoing, String title) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         int max_id = 0;
         String[] cars = preferences.getString(Names.CARS, "").split(",");
@@ -84,7 +84,8 @@ public class Alarm extends Activity {
         iNotification.putExtra(Names.ID, car_id);
         if (sound != null)
             iNotification.putExtra(Names.Car.NOTIFY, sound);
-        iNotification.putExtra(Names.TITLE, text);
+        iNotification.putExtra(Names.MESSAGE, text);
+        iNotification.putExtra(Names.TITLE, title);
         iNotification.putExtra(Names.Car.ALARM, pictId);
         iNotification.putExtra(Names.Car.EVENT_ID, max_id);
         iNotification.putExtra(Names.Car.ALARM_MODE, outgoing);

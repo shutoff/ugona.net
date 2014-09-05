@@ -106,7 +106,7 @@ public class Actions {
         id = preferences.getInt(Names.Notify.VALET_OFF + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
-        id = Alarm.createNotification(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet, car_id, "valet_on", 0, true);
+        id = Alarm.createNotification(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet, car_id, "valet_on", 0, true, null);
         ed.putInt(Names.Car.VALET_ON_NOTIFY + car_id, id);
         ed.remove(Names.Notify.VALET_OFF + car_id);
         ed.commit();

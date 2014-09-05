@@ -246,7 +246,7 @@ public class MainActivity extends ActionBarActivity {
             pager.setOnPageChangeListener(pageChangeListener);
         }
 
-        if (savedInstanceState == null) {
+        if ((savedInstanceState == null) && !preferences.getString(Names.MESSAGE, "").equals("")) {
             String phone = preferences.getString(Names.Car.CAR_PHONE + car_id, "");
             String auth = preferences.getString(Names.Car.AUTH + car_id, "");
 
@@ -351,6 +351,46 @@ public class MainActivity extends ActionBarActivity {
         super.onResume();
         registerGCM();
         removeNotifications();
+        String message = preferences.getString(Names.MESSAGE, "");
+        if (!message.equals("")) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                    .setMessage(message)
+                    .setNegativeButton(R.string.cancel, null);
+            String title = preferences.getString(Names.TITLE, "");
+            if (!title.equals(""))
+                builder = builder.setTitle(title);
+
+            try {
+                final Uri uri = Uri.parse(preferences.getString(Names.URL, ""));
+                builder = builder.setPositiveButton(R.string.more, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.remove(Names.MESSAGE);
+                        ed.remove(Names.TITLE);
+                        ed.remove(Names.URL);
+                        ed.commit();
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, uri);
+                        startActivity(browserIntent);
+                    }
+                });
+            } catch (Exception ex) {
+                // ignore
+            }
+            AlertDialog dialog = builder.create();
+            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialogInterface) {
+                    SharedPreferences.Editor ed = preferences.edit();
+                    ed.remove(Names.MESSAGE);
+                    ed.remove(Names.TITLE);
+                    ed.remove(Names.URL);
+                    ed.commit();
+                }
+            });
+            dialog.show();
+
+        }
     }
 
     @Override

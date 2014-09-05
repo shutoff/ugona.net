@@ -26,8 +26,18 @@ public class GcmService extends IntentService {
             i.putExtra(Names.ID, car_id);
             startService(i);
             String message = extras.getString("message");
-            if (message != null)
-                Alarm.createNotification(this, message, car_id);
+            if (message != null) {
+                String title = extras.getString("title");
+                String url = extras.getString("url");
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putString(Names.MESSAGE, message);
+                if (title != null)
+                    ed.putString(Names.TITLE, title);
+                if (url != null)
+                    ed.putString(Names.URL, url);
+                ed.commit();
+                Alarm.createNotification(this, message, R.drawable.info, car_id, null, 0, false, title);
+            }
         }
         GcmReceiver.completeWakefulIntent(intent);
     }

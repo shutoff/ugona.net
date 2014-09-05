@@ -632,4 +632,5 @@
     <string name="ccode_failed">Change C-code failed</string>
     <string name="yandex">Yandex</string>
     <string name="bing">Bing</string>
+    <string name="more">More info</string>
 </resources>
