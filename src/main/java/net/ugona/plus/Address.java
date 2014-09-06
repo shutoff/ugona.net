@@ -16,9 +16,19 @@ public abstract class Address {
     static final double D2R = 0.017453; // Константа для преобразования градусов в радианы
     static final double a = 6378137.0; // Основные полуоси
     static final double e2 = 0.006739496742337; // Квадрат эксцентричности эллипсоида
+    static final String[] columns = {
+            "Lat",
+            "Lng",
+            "Address",
+            "Param",
+    };
     static SQLiteDatabase address_db;
 
     static String get(Context context, final double v_lat, final double v_lng, final Answer answer) {
+        return get(context, v_lat, v_lng, answer);
+    }
+
+    static String get(Context context, final double v_lat, final double v_lng, final Answer answer, final boolean async) {
         if ((v_lat == 0) && (v_lng == 0))
             return null;
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -30,12 +40,6 @@ public abstract class Address {
         if (preferences.getString(Names.MAP_TYPE, "").equals("Yandex"))
             p += "y";
         final String param = p;
-        final String[] columns = {
-                "Lat",
-                "Lng",
-                "Address",
-                "Param",
-        };
 
         final double lat = Math.round(v_lat * 100000.) / 100000.;
         final double lng = Math.round(v_lng * 100000.) / 100000.;
@@ -69,7 +73,7 @@ public abstract class Address {
             }
         }
         cursor.close();
-        if ((answer != null) && (best > 80)) {
+        if (best > 80) {
             AddressRequest request = new AddressRequest() {
                 @Override
                 void addressResult(String address) {
@@ -81,10 +85,15 @@ public abstract class Address {
                         values.put(columns[3], param);
                         address_db.insert(TABLE_NAME, null, values);
                         answer.result(address);
+                        return;
                     }
+                    if (async)
+                        answer.result(null);
                 }
             };
             request.getAddress(preferences, lat, lng);
+            if (async)
+                return null;
         }
         if (answer != null)
             answer.result(result);

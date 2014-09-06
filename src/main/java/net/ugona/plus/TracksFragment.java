@@ -423,8 +423,10 @@ public class TracksFragment extends Fragment
         void error() {
             if (getActivity() == null)
                 return;
-            if (!no_reload)
+            if (!no_reload) {
                 showError();
+                return;
+            }
             done();
         }
 
@@ -485,7 +487,7 @@ public class TracksFragment extends Fragment
             Track.Point p = getPoint(track);
             if (getActivity() == null)
                 return;
-            Address.get(getActivity(), p.latitude, p.longitude, this);
+            Address.get(getActivity(), p.latitude, p.longitude, this, true);
         }
 
     }

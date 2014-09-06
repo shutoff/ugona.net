@@ -208,6 +208,7 @@ public class Cars extends ActionBarActivity {
             ((BaseAdapter) lvCars.getAdapter()).notifyDataSetChanged();
         }
         if ((requestCode == NEW_CAR) && (resultCode == RESULT_OK)) {
+            setupCars();
             final String car_id = data.getStringExtra(Names.ID);
             if (checkPointer(car_id))
                 return;
@@ -376,6 +377,8 @@ public class Cars extends ActionBarActivity {
     void setupCar(String car_id) {
         String[] cars = preferences.getString(Names.CARS, "").split(",");
         for (String car : cars) {
+            if (car.equals(car_id))
+                continue;
             if (preferences.getString(Names.Car.CAR_KEY + car, "").equals("demo")) {
                 deleteCar(car_id);
                 break;
