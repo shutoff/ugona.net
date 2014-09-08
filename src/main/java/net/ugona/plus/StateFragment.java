@@ -40,8 +40,6 @@ import org.joda.time.LocalDateTime;
 
 import java.text.DateFormat;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
@@ -49,8 +47,6 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 public class StateFragment extends Fragment
         implements View.OnTouchListener, OnRefreshListener {
-
-    static Pattern number_pattern = Pattern.compile("^[0-9]+ ?");
 
     final int AUTH_REQUEST = 1;
     String car_id;
@@ -826,22 +822,14 @@ public class StateFragment extends Fragment
                 span_start = str.length();
                 String parts[] = addr.split(", ");
                 str += parts[0];
-                int start = 2;
-                if (parts.length > 1)
-                    str += ", " + parts[1];
-                if (parts.length > 2) {
-                    Matcher matcher = number_pattern.matcher(parts[2]);
-                    if (matcher.matches()) {
-                        str += ", " + parts[2];
-                        start++;
-                    }
-                }
                 span_end = str.length();
-                str += "\n";
-                for (int i = start; i < parts.length; i++) {
-                    if (i != start)
+                str += '\n';
+                if (parts.length > 1) {
+                    str += parts[1];
+                    for (int i = 2; i < parts.length; i++) {
                         str += ", ";
-                    str += parts[i];
+                        str += parts[i];
+                    }
                 }
             } else {
                 str += "\n";

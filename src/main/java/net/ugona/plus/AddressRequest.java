@@ -7,6 +7,7 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
 import java.util.Locale;
+import java.util.regex.Matcher;
 
 abstract public class AddressRequest {
 
@@ -110,6 +111,8 @@ abstract public class AddressRequest {
             for (i = 0; i < parts.length; i++) {
                 if (parts[i] == null)
                     continue;
+                if (parts[i].equals("Unnamed Road"))
+                    continue;
                 if (p == null) {
                     p = parts[i];
                     continue;
@@ -175,13 +178,24 @@ abstract public class AddressRequest {
         @Override
         void result(JsonObject res) throws ParseException {
             try {
-                String addr = res.get("resourceSets").asArray()
+                JsonArray resources = res.get("resourceSets").asArray()
                         .get(0).asObject()
-                        .get("resources").asArray()
-                        .get(0).asObject()
-                        .get("address").asObject()
-                        .get("formattedAddress").asString();
-                addr = addr.replace(", [0-9]{6}", "");
+                        .get("resources").asArray();
+                String addr = null;
+                for (int i = 0; i < resources.size(); i++) {
+                    String a = resources.get(i)
+                            .asObject()
+                            .get("address").asObject()
+                            .get("formattedAddress").asString();
+                    if (addr == null) {
+                        addr = a;
+                        continue;
+                    }
+                    if (a.length() > addr.length())
+                        addr = a;
+                }
+                if (addr != null)
+                    addr = addr.replace(", [0-9]{6}", "");
                 addressResult(addr);
             } catch (Exception ex) {
                 // ignore
@@ -203,17 +217,40 @@ abstract public class AddressRequest {
 
         @Override
         void result(JsonObject res) throws ParseException {
-            String addr = res.get("response").asObject()
-                    .get("GeoObjectCollection").asObject()
-                    .get("featureMember").asArray()
-                    .get(0).asObject()
-                    .get("GeoObject").asObject()
-                    .get("metaDataProperty").asObject()
-                    .get("GeocoderMetaData").asObject()
-                    .get("AddressDetails").asObject()
-                    .get("Country").asObject()
-                    .get("AddressLine").asString();
-            addressResult(addr);
+            try {
+                String[] parts = res.get("response").asObject()
+                        .get("GeoObjectCollection").asObject()
+                        .get("featureMember").asArray()
+                        .get(0).asObject()
+                        .get("GeoObject").asObject()
+                        .get("metaDataProperty").asObject()
+                        .get("GeocoderMetaData").asObject()
+                        .get("AddressDetails").asObject()
+                        .get("Country").asObject()
+                        .get("AddressLine").asString().split(", ");
+                String addr = null;
+                if (parts.length > 2) {
+                    String first = parts[0];
+                    Matcher matcher = Address.number_pattern.matcher(first);
+                    if (matcher.matches()) {
+                        parts[0] = parts[1];
+                        parts[1] = first;
+                    }
+                }
+                for (int i = parts.length - 1; i >= 0; i--) {
+                    String part = parts[i];
+                    if (addr == null) {
+                        addr = part;
+                        continue;
+                    }
+                    addr += ", ";
+                    addr += part;
+                }
+                addressResult(addr);
+            } catch (Exception ex) {
+                // ignore
+            }
+            addressResult(null);
         }
 
         @Override

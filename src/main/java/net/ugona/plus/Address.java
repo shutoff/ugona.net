@@ -9,6 +9,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.preference.PreferenceManager;
 
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class Address {
 
@@ -22,10 +24,13 @@ public abstract class Address {
             "Address",
             "Param",
     };
+
+    static Pattern number_pattern = Pattern.compile("^[0-9]+(/[0-9])?(([ |\u00a0]).*)?$");
+
     static SQLiteDatabase address_db;
 
     static String get(Context context, final double v_lat, final double v_lng, final Answer answer) {
-        return get(context, v_lat, v_lng, answer);
+        return get(context, v_lat, v_lng, answer, false);
     }
 
     static String get(Context context, final double v_lat, final double v_lng, final Answer answer, final boolean async) {
@@ -78,6 +83,22 @@ public abstract class Address {
                 @Override
                 void addressResult(String address) {
                     if (address != null) {
+                        String[] parts = address.split(", ");
+                        String addr = address;
+                        address = parts[0];
+                        for (int i = 1; i < parts.length; i++) {
+                            address += ",";
+                            if (parts.equals(""))
+                                continue;
+                            if (i <= 2) {
+                                Matcher matcher = Address.number_pattern.matcher(parts[i]);
+                                if (matcher.matches()) {
+                                    address += "\u00A0" + parts[i].replace(' ', '\u00A0');
+                                    continue;
+                                }
+                            }
+                            address += " " + setA0(parts[i]);
+                        }
                         ContentValues values = new ContentValues();
                         values.put(columns[0], lat);
                         values.put(columns[1], lng);
@@ -98,6 +119,37 @@ public abstract class Address {
         if (answer != null)
             answer.result(result);
         return result;
+    }
+
+    static String setA0(String str) {
+        String[] parts = str.split(" ");
+        String res = null;
+        String prev = null;
+        for (String part : parts) {
+            if (res == null) {
+                res = part;
+                continue;
+            }
+            if ((prev != null) && (prev.length() < 3)) {
+                res += '\u00A0';
+            } else if (part.length() < 3) {
+                res += '\u00A0';
+            } else if (part.charAt(0) == '\u2116') {
+                res += '\u00A0';
+            } else if (part.equals("No") || parts.equals("No.") || parts.equals("Nr")) {
+                res += '\u00A0';
+            } else {
+                Matcher matcher = Address.number_pattern.matcher(part);
+                if (matcher.matches()) {
+                    res += '\u00A0';
+                } else {
+                    res += ' ';
+                }
+            }
+            res += part;
+            prev = part;
+        }
+        return res;
     }
 
     static double calc_distance(double lat1, double lon1, double lat2, double lon2) {
@@ -134,7 +186,7 @@ public abstract class Address {
         final static String DB_NAME = "address.db";
 
         public OpenHelper(Context context) {
-            super(context, DB_NAME, null, 2);
+            super(context, DB_NAME, null, 13);
         }
 
         @Override

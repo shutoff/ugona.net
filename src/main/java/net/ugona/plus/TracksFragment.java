@@ -543,7 +543,7 @@ public class TracksFragment extends Fragment
             int s = start_parts.length - 1;
             int f = finish_parts.length - 1;
 
-            while ((s > 2) && (f > 2)) {
+            while ((s > 1) && (f > 1)) {
                 if (!start_parts[s].equals(finish_parts[f]))
                     break;
                 s--;
