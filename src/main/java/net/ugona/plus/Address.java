@@ -25,7 +25,7 @@ public abstract class Address {
             "Param",
     };
 
-    static Pattern number_pattern = Pattern.compile("^[0-9]+(/[0-9])?(([ |\u00a0]).*)?$");
+    static Pattern number_pattern = Pattern.compile("^[0-9]+(/[0-9])?((([ |\u00a0]).*)?|.?.?.?.?.?)$");
 
     static SQLiteDatabase address_db;
 
@@ -186,7 +186,7 @@ public abstract class Address {
         final static String DB_NAME = "address.db";
 
         public OpenHelper(Context context) {
-            super(context, DB_NAME, null, 13);
+            super(context, DB_NAME, null, 14);
         }
 
         @Override
