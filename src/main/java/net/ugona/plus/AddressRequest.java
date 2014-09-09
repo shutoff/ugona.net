@@ -14,7 +14,8 @@ abstract public class AddressRequest {
     static final String GOOGLE_URL = "https://maps.googleapis.com/maps/api/geocode/json?latlng=$1,$2&sensor=false&language=$3";
     static final String OSM_URL = "https://nominatim.openstreetmap.org/reverse?lat=$1&lon=$2&osm_type=N&format=json&address_details=0&accept-language=$3";
     static final String BING_URL = "http://dev.virtualearth.net/REST/v1/Locations/$1,$2?o=json&key=Avl_WlFuKVJbmBFOcG3s4A2xUY1DM2LFYbvKTcNfvIhJF7LqbVW-VsIE4IJQB0Nc&culture=$3";
-    static final String YANDEX_URL = "http://geocode-maps.yandex.ru/1.x/?geocode=$2,$1&format=json&lang=$3";
+    static final String YANDEX_URL = "http://geocode-maps.yandex.ru/1.x/?geocode=$2,$1&format=json&lang=$3&kind=house";
+    static final String YANDEX1_URL = "http://geocode-maps.yandex.ru/1.x/?geocode=$2,$1&format=json&lang=$3";
     Request request;
 
     abstract void addressResult(String address);
@@ -182,20 +183,34 @@ abstract public class AddressRequest {
                         .get(0).asObject()
                         .get("resources").asArray();
                 String addr = null;
+                String postalCode = null;
                 for (int i = 0; i < resources.size(); i++) {
-                    String a = resources.get(i)
+                    JsonObject address = resources.get(i)
                             .asObject()
-                            .get("address").asObject()
-                            .get("formattedAddress").asString();
+                            .get("address").asObject();
+                    String a = address.get("formattedAddress").asString();
                     if (addr == null) {
                         addr = a;
                         continue;
                     }
-                    if (a.length() > addr.length())
+                    if (a.length() > addr.length()) {
                         addr = a;
+                        postalCode = address.get("postalCode").asString();
+                    }
                 }
-                if (addr != null)
-                    addr = addr.replace(", [0-9]{6}", "");
+                if ((postalCode != null) && (addr != null)) {
+                    String[] parts = addr.split(", ");
+                    addr = null;
+                    for (String part : parts) {
+                        if (part.equals(postalCode))
+                            continue;
+                        if (addr == null) {
+                            addr = part;
+                            continue;
+                        }
+                        addr += ", " + part;
+                    }
+                }
                 addressResult(addr);
             } catch (Exception ex) {
                 // ignore
@@ -210,6 +225,18 @@ abstract public class AddressRequest {
 
     class YandexRequest extends Request {
 
+        String url;
+        double latitude;
+        double longitude;
+
+        YandexRequest() {
+            url = YANDEX_URL;
+        }
+
+        YandexRequest(String url_) {
+            url = url_;
+        }
+
         @Override
         void exec(double lat, double lon) {
             execute(YANDEX_URL, lat, lon, Locale.getDefault().getLanguage());
@@ -218,10 +245,15 @@ abstract public class AddressRequest {
         @Override
         void result(JsonObject res) throws ParseException {
             try {
-                String[] parts = res.get("response").asObject()
+                JsonArray results = res.get("response").asObject()
                         .get("GeoObjectCollection").asObject()
-                        .get("featureMember").asArray()
-                        .get(0).asObject()
+                        .get("featureMember").asArray();
+                if (results.size() == 0) {
+                    request = new YandexRequest(YANDEX1_URL);
+                    request.exec(latitude, longitude);
+                    return;
+                }
+                String[] parts = results.get(0).asObject()
                         .get("GeoObject").asObject()
                         .get("metaDataProperty").asObject()
                         .get("GeocoderMetaData").asObject()
