@@ -94,7 +94,6 @@ public abstract class HttpTask {
                         if (pos > 0)
                             error_text = error_text.substring(0, pos);
                     }
-                    State.print(ex);
                 } finally {
                     if (reader != null) {
                         try {
@@ -116,7 +115,6 @@ public abstract class HttpTask {
                         return;
                     } catch (Exception ex) {
                         // ignore
-                        ex.printStackTrace();
                     }
                 }
                 error();

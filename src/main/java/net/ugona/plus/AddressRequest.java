@@ -7,7 +7,6 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
 import java.util.Locale;
-import java.util.regex.Matcher;
 
 abstract public class AddressRequest {
 
@@ -92,27 +91,39 @@ abstract public class AddressRequest {
             JsonObject addr = res.get(i).asObject();
             String[] parts = addr.get("formatted_address").asString().split(", ");
             JsonArray components = addr.get("address_components").asArray();
+            String house = null;
+            String postalCode = null;
             for (i = 0; i < components.size(); i++) {
+                int n;
                 JsonObject component = components.get(i).asObject();
                 JsonArray types = component.get("types").asArray();
-                int n;
                 for (n = 0; n < types.size(); n++) {
-                    if (types.get(n).asString().equals("postal_code"))
-                        break;
+                    String type = types.get(n).asString();
+                    if (type.equals("postal_code"))
+                        postalCode = component.get("long_name").asString();
+                    if (type.equals("street_number"))
+                        house = component.get("long_name").asString();
                 }
-                if (n >= types.size())
+            }
+            for (i = 0; i < parts.length; i++) {
+                String part = parts[i];
+                if (part.equals(postalCode)) {
+                    parts[i] = null;
                     continue;
-                String name = component.get("long_name").asString();
-                for (n = 0; n < parts.length; n++) {
-                    if (name.equals(parts[n]))
-                        parts[n] = null;
+                }
+                if (part.equals(house)) {
+                    parts[i] = null;
+                    parts[i - 1] += ",\u00A0" + house;
+                    continue;
+                }
+                if (part.equals("Unnamed Road")) {
+                    parts[i] = null;
+                    continue;
                 }
             }
             String p = null;
             for (i = 0; i < parts.length; i++) {
                 if (parts[i] == null)
-                    continue;
-                if (parts[i].equals("Unnamed Road"))
                     continue;
                 if (p == null) {
                     p = parts[i];
@@ -144,8 +155,8 @@ abstract public class AddressRequest {
                 String house_number = address.get("house_number").asString();
                 for (int i = 0; i < parts.length - 1; i++) {
                     if (parts[i].equals(house_number)) {
-                        parts[i] = parts[i + 1];
-                        parts[i + 1] = house_number;
+                        parts[i + 1] += ",\u00A0" + house_number;
+                        parts[i] = null;
                         break;
                     }
                 }
@@ -154,6 +165,8 @@ abstract public class AddressRequest {
             }
             String result = null;
             for (int i = 0; i < parts.length - 2; i++) {
+                if (parts[i] == null)
+                    continue;
                 if (result == null) {
                     result = parts[i];
                     continue;
@@ -178,43 +191,49 @@ abstract public class AddressRequest {
 
         @Override
         void result(JsonObject res) throws ParseException {
-            try {
-                JsonArray resources = res.get("resourceSets").asArray()
-                        .get(0).asObject()
-                        .get("resources").asArray();
-                String addr = null;
-                String postalCode = null;
-                for (int i = 0; i < resources.size(); i++) {
-                    JsonObject address = resources.get(i)
-                            .asObject()
-                            .get("address").asObject();
-                    String a = address.get("formattedAddress").asString();
+            JsonArray resources = res.get("resourceSets").asArray()
+                    .get(0).asObject()
+                    .get("resources").asArray();
+            String addr = null;
+            String postalCode = null;
+            for (int i = 0; i < resources.size(); i++) {
+                JsonObject address = resources.get(i)
+                        .asObject()
+                        .get("address").asObject();
+                String a = address.get("formattedAddress").asString();
+                if (addr == null) {
+                    addr = a;
+                    try {
+                        postalCode = address.get("postalCode").asString();
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                    continue;
+                }
+                if (a.length() > addr.length()) {
+                    addr = a;
+                    postalCode = null;
+                    try {
+                        postalCode = address.get("postalCode").asString();
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                }
+            }
+            if ((postalCode != null) && (addr != null)) {
+                String[] parts = addr.split(", ");
+                addr = null;
+                for (String part : parts) {
+                    if (part.equals(postalCode))
+                        continue;
                     if (addr == null) {
-                        addr = a;
+                        addr = part;
                         continue;
                     }
-                    if (a.length() > addr.length()) {
-                        addr = a;
-                        postalCode = address.get("postalCode").asString();
-                    }
+                    addr += ", " + part;
                 }
-                if ((postalCode != null) && (addr != null)) {
-                    String[] parts = addr.split(", ");
-                    addr = null;
-                    for (String part : parts) {
-                        if (part.equals(postalCode))
-                            continue;
-                        if (addr == null) {
-                            addr = part;
-                            continue;
-                        }
-                        addr += ", " + part;
-                    }
-                }
-                addressResult(addr);
-            } catch (Exception ex) {
-                // ignore
             }
+            addressResult(addr);
         }
 
         @Override
@@ -239,50 +258,62 @@ abstract public class AddressRequest {
 
         @Override
         void exec(double lat, double lon) {
-            execute(YANDEX_URL, lat, lon, Locale.getDefault().getLanguage());
+            latitude = lat;
+            longitude = lon;
+            execute(url, lat, lon, Locale.getDefault().getLanguage());
         }
 
         @Override
         void result(JsonObject res) throws ParseException {
-            try {
-                JsonArray results = res.get("response").asObject()
-                        .get("GeoObjectCollection").asObject()
-                        .get("featureMember").asArray();
-                if (results.size() == 0) {
-                    request = new YandexRequest(YANDEX1_URL);
-                    request.exec(latitude, longitude);
+            JsonArray results = res.get("response").asObject()
+                    .get("GeoObjectCollection").asObject()
+                    .get("featureMember").asArray();
+            if (results.size() == 0) {
+                if (url.equals(YANDEX1_URL)) {
+                    addressResult(null);
                     return;
                 }
-                String[] parts = results.get(0).asObject()
-                        .get("GeoObject").asObject()
-                        .get("metaDataProperty").asObject()
-                        .get("GeocoderMetaData").asObject()
-                        .get("AddressDetails").asObject()
-                        .get("Country").asObject()
-                        .get("AddressLine").asString().split(", ");
-                String addr = null;
-                if (parts.length > 2) {
-                    String first = parts[0];
-                    Matcher matcher = Address.number_pattern.matcher(first);
-                    if (matcher.matches()) {
-                        parts[0] = parts[1];
-                        parts[1] = first;
-                    }
-                }
-                for (int i = parts.length - 1; i >= 0; i--) {
-                    String part = parts[i];
-                    if (addr == null) {
-                        addr = part;
-                        continue;
-                    }
-                    addr += ", ";
-                    addr += part;
-                }
-                addressResult(addr);
-            } catch (Exception ex) {
-                // ignore
+                request = new YandexRequest(YANDEX1_URL);
+                request.exec(latitude, longitude);
+                return;
             }
-            addressResult(null);
+            JsonObject data = results.get(0).asObject()
+                    .get("GeoObject").asObject()
+                    .get("metaDataProperty").asObject()
+                    .get("GeocoderMetaData").asObject()
+                    .get("AddressDetails").asObject()
+                    .get("Country").asObject();
+            String[] parts = data.get("AddressLine").asString().split(", ");
+            String addr = null;
+            if (parts.length > 2) {
+                try {
+                    String house = data.get("AdministrativeArea").asObject()
+                            .get("SubAdministrativeArea").asObject()
+                            .get("Locality").asObject()
+                            .get("Thoroughfare").asObject()
+                            .get("Premise").asObject()
+                            .get("PremiseNumber").asString();
+                    int i = parts.length - 1;
+                    if (parts[i].equals(house)) {
+                        parts[i - 1] += ",\u00A0" + house;
+                        parts[i] = null;
+                    }
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+            for (int i = parts.length - 1; i >= 0; i--) {
+                String part = parts[i];
+                if (part == null)
+                    continue;
+                if (addr == null) {
+                    addr = part;
+                    continue;
+                }
+                addr += ", ";
+                addr += part;
+            }
+            addressResult(addr);
         }
 
         @Override

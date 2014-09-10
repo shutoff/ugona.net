@@ -9,8 +9,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.preference.PreferenceManager;
 
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public abstract class Address {
 
@@ -24,8 +22,6 @@ public abstract class Address {
             "Address",
             "Param",
     };
-
-    static Pattern number_pattern = Pattern.compile("^[0-9]+(/[0-9])?((([ |\u00a0]).*)?|.?.?.?.?.?)$");
 
     static SQLiteDatabase address_db;
 
@@ -84,20 +80,19 @@ public abstract class Address {
                 void addressResult(String address) {
                     if (address != null) {
                         String[] parts = address.split(", ");
-                        String addr = address;
                         address = parts[0];
                         for (int i = 1; i < parts.length; i++) {
-                            address += ",";
-                            if (parts.equals(""))
+                            String p = parts[i];
+                            if (p.equals(""))
                                 continue;
-                            if (i <= 2) {
-                                Matcher matcher = Address.number_pattern.matcher(parts[i]);
-                                if (matcher.matches()) {
-                                    address += "\u00A0" + parts[i].replace(' ', '\u00A0');
-                                    continue;
-                                }
+                            address += ",";
+                            p = setA0(p);
+                            if ((i > 1) && (p.length() < 6)) {
+                                address += "\u00A0";
+                                address += p.replaceAll(" ", "\u00A0");
+                                continue;
                             }
-                            address += " " + setA0(parts[i]);
+                            address += " " + p;
                         }
                         ContentValues values = new ContentValues();
                         values.put(columns[0], lat);
@@ -105,7 +100,8 @@ public abstract class Address {
                         values.put(columns[2], address);
                         values.put(columns[3], param);
                         address_db.insert(TABLE_NAME, null, values);
-                        answer.result(address);
+                        if (answer != null)
+                            answer.result(address);
                         return;
                     }
                     if (async)
@@ -121,33 +117,16 @@ public abstract class Address {
         return result;
     }
 
-    static String setA0(String str) {
-        String[] parts = str.split(" ");
-        String res = null;
-        String prev = null;
-        for (String part : parts) {
-            if (res == null) {
-                res = part;
-                continue;
-            }
-            if ((prev != null) && (prev.length() < 3)) {
-                res += '\u00A0';
-            } else if (part.length() < 3) {
-                res += '\u00A0';
-            } else if (part.charAt(0) == '\u2116') {
-                res += '\u00A0';
-            } else if (part.equals("No") || parts.equals("No.") || parts.equals("Nr")) {
-                res += '\u00A0';
+    static String setA0(String s) {
+        String[] parts = s.split(" ");
+        String res = parts[0];
+        for (int i = 1; i < parts.length; i++) {
+            if (parts[i - 1].length() < 5) {
+                res += "\u00A0";
             } else {
-                Matcher matcher = Address.number_pattern.matcher(part);
-                if (matcher.matches()) {
-                    res += '\u00A0';
-                } else {
-                    res += ' ';
-                }
+                res += " ";
             }
-            res += part;
-            prev = part;
+            res += parts[i];
         }
         return res;
     }
@@ -186,7 +165,7 @@ public abstract class Address {
         final static String DB_NAME = "address.db";
 
         public OpenHelper(Context context) {
-            super(context, DB_NAME, null, 14);
+            super(context, DB_NAME, null, 32);
         }
 
         @Override

@@ -465,8 +465,9 @@ public class TracksFragment extends Fragment
             if (getActivity() == null)
                 return;
             if (address == null) {
-                showError();
-                return;
+                Track track = tracks.get(pos);
+                Track.Point p = getPoint(track);
+                address = p.latitude + "," + p.longitude;
             }
 
             process(address);
@@ -543,7 +544,7 @@ public class TracksFragment extends Fragment
             int s = start_parts.length - 1;
             int f = finish_parts.length - 1;
 
-            while ((s > 1) && (f > 1)) {
+            while ((s > 0) && (f > 0)) {
                 if (!start_parts[s].equals(finish_parts[f]))
                     break;
                 s--;
@@ -551,16 +552,25 @@ public class TracksFragment extends Fragment
             }
 
             String address = start_parts[0];
-            for (int i = 1; i < s; i++) {
+            for (int i = 1; i <= s; i++) {
                 address += ", " + start_parts[i];
             }
             track.start = address;
 
             address = finish_parts[0];
-            for (int i = 1; i < f; i++) {
+            for (int i = 1; i <= f; i++) {
                 address += ", " + finish_parts[i];
             }
             track.finish = address;
+
+            while ((track.start.length() < 15) || (track.finish.length() < 15)) {
+                f++;
+                if (f >= finish_parts.length)
+                    break;
+                String p = finish_parts[f];
+                track.start += ", " + p;
+                track.finish += ", " + p;
+            }
         }
 
         @Override
