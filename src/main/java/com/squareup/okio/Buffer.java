@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okio;
+package com.squareup.okio;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -26,8 +26,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static okio.Util.checkOffsetAndCount;
-import static okio.Util.reverseBytesLong;
+import static com.squareup.okio.Util.checkOffsetAndCount;
+import static com.squareup.okio.Util.reverseBytesLong;
 
 /**
  * A collection of bytes in memory.
@@ -423,10 +423,10 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
     Segment head = this.head;
     if (head.pos + byteCount > head.limit) {
       // If the string spans multiple segments, delegate to readBytes().
-      return new String(readByteArray(byteCount), charset);
+        return new String(readByteArray(byteCount));
     }
 
-    String result = new String(head.data, head.pos, (int) byteCount, charset);
+      String result = new String(head.data, head.pos, (int) byteCount);
     head.pos += byteCount;
     size -= byteCount;
 
@@ -564,7 +564,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
   @Override public Buffer writeString(String string, Charset charset) {
     if (string == null) throw new IllegalArgumentException("string == null");
     if (charset == null) throw new IllegalArgumentException("charset == null");
-    byte[] data = string.getBytes(charset);
+      byte[] data = string.getBytes();
     return write(data, 0, data.length);
   }
 
@@ -854,7 +854,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
   /** For testing. This returns the sizes of the segments in this buffer. */
   List<Integer> segmentSizes() {
     if (head == null) return Collections.emptyList();
-    List<Integer> result = new ArrayList<>();
+      List<Integer> result = new ArrayList<Integer>();
     result.add(head.limit - head.pos);
     for (Segment s = head.next; s != head; s = s.next) {
       result.add(s.limit - s.pos);

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okio;
+package com.squareup.okio;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -23,56 +23,59 @@ import java.io.IOException;
  * it's located: from the network, storage, or a buffer in memory. Sources may
  * be layered to transform supplied data, such as to decompress, decrypt, or
  * remove protocol framing.
- *
+ * <p/>
  * <p>Most applications shouldn't operate on a source directly, but rather
  * {@link BufferedSource} which is both more efficient and more convenient. Use
  * {@link Okio#buffer(Source)} to wrap any source with a buffer.
- *
+ * <p/>
  * <p>Sources are easy to test: just use an {@link Buffer} in your tests, and
  * fill it with the data your application is to read.
- *
+ * <p/>
  * <h3>Comparison with InputStream</h3>
  * This interface is functionally equivalent to {@link java.io.InputStream}.
- *
+ * <p/>
  * <p>{@code InputStream} requires multiple layers when consumed data is
  * heterogeneous: a {@code DataInputStream} for primitive values, a {@code
  * BufferedInputStream} for buffering, and {@code InputStreamReader} for
  * strings. This class uses {@code BufferedSource} for all of the above.
- *
+ * <p/>
  * <p>Source avoids the impossible-to-implement {@linkplain
  * java.io.InputStream#available available()} method. Instead callers specify
  * how many bytes they {@link BufferedSource#require require}.
- *
+ * <p/>
  * <p>Source omits the unsafe-to-compose {@linkplain java.io.InputStream#mark
  * mark and reset} state that's tracked by {@code InputStream}; callers instead
  * just buffer what they need.
- *
+ * <p/>
  * <p>When implementing a source, you need not worry about the {@linkplain
  * java.io.InputStream#read single-byte read} method that is awkward to
  * implement efficiently and that returns one of 257 possible values.
- *
+ * <p/>
  * <p>And source has a stronger {@code skip} method: {@link BufferedSource#skip}
  * won't return prematurely.
- *
+ * <p/>
  * <h3>Interop with InputStream</h3>
  * Use {@link Okio#source} to adapt an {@code InputStream} to a source. Use
  * {@link BufferedSource#inputStream} to adapt a source to an {@code
  * InputStream}.
  */
 public interface Source extends Closeable {
-  /**
-   * Removes at least 1, and up to {@code byteCount} bytes from this and appends
-   * them to {@code sink}. Returns the number of bytes read, or -1 if this
-   * source is exhausted.
-   */
-  long read(Buffer sink, long byteCount) throws IOException;
+    /**
+     * Removes at least 1, and up to {@code byteCount} bytes from this and appends
+     * them to {@code sink}. Returns the number of bytes read, or -1 if this
+     * source is exhausted.
+     */
+    long read(Buffer sink, long byteCount) throws IOException;
 
-  /** Returns the timeout for this source. */
-  Timeout timeout();
+    /**
+     * Returns the timeout for this source.
+     */
+    Timeout timeout();
 
-  /**
-   * Closes this source and releases the resources held by this source. It is an
-   * error to read a closed source. It is safe to close a source more than once.
-   */
-  @Override void close() throws IOException;
+    /**
+     * Closes this source and releases the resources held by this source. It is an
+     * error to read a closed source. It is safe to close a source more than once.
+     */
+    @Override
+    void close() throws IOException;
 }

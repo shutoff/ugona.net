@@ -16,24 +16,28 @@
 package com.squareup.okhttp.internal.spdy;
 
 import com.squareup.okhttp.Protocol;
-import okio.BufferedSink;
-import okio.BufferedSource;
+import com.squareup.okio.BufferedSink;
+import com.squareup.okio.BufferedSource;
 
-/** A version and dialect of the framed socket protocol. */
+/**
+ * A version and dialect of the framed socket protocol.
+ */
 public interface Variant {
 
-  /** The protocol as selected using NPN or ALPN. */
-  Protocol getProtocol();
+    /**
+     * The protocol as selected using NPN or ALPN.
+     */
+    Protocol getProtocol();
 
-  /**
-   * @param client true if this is the HTTP client's reader, reading frames from a server.
-   */
-  FrameReader newReader(BufferedSource source, boolean client);
+    /**
+     * @param client true if this is the HTTP client's reader, reading frames from a server.
+     */
+    FrameReader newReader(BufferedSource source, boolean client);
 
-  /**
-   * @param client true if this is the HTTP client's writer, writing frames to a server.
-   */
-  FrameWriter newWriter(BufferedSink sink, boolean client);
+    /**
+     * @param client true if this is the HTTP client's writer, writing frames to a server.
+     */
+    FrameWriter newWriter(BufferedSink sink, boolean client);
 
-  int maxFrameSize();
+    int maxFrameSize();
 }

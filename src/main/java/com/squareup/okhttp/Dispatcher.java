@@ -18,9 +18,10 @@ package com.squareup.okhttp;
 import com.squareup.okhttp.Call.AsyncCall;
 import com.squareup.okhttp.internal.Util;
 import com.squareup.okhttp.internal.http.HttpEngine;
-import java.util.ArrayDeque;
-import java.util.Deque;
+
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -34,17 +35,18 @@ import java.util.concurrent.TimeUnit;
  * configured maximum} number of calls concurrently.
  */
 public final class Dispatcher {
+    /**
+     * Ready calls in the order they'll be run.
+     */
+    private final Set<AsyncCall> readyCalls = new HashSet<AsyncCall>();
+    /**
+     * Running calls. Includes canceled calls that haven't finished yet.
+     */
+    private final Set<AsyncCall> runningCalls = new HashSet<AsyncCall>();
   private int maxRequests = 64;
   private int maxRequestsPerHost = 5;
-
   /** Executes calls. Created lazily. */
   private ExecutorService executorService;
-
-  /** Ready calls in the order they'll be run. */
-  private final Deque<AsyncCall> readyCalls = new ArrayDeque<>();
-
-  /** Running calls. Includes canceled calls that haven't finished yet. */
-  private final Deque<AsyncCall> runningCalls = new ArrayDeque<>();
 
   public Dispatcher(ExecutorService executorService) {
     this.executorService = executorService;
@@ -61,44 +63,44 @@ public final class Dispatcher {
     return executorService;
   }
 
-  /**
-   * Set the maximum number of requests to execute concurrently. Above this
-   * requests queue in memory, waiting for the running calls to complete.
-   *
-   * <p>If more than {@code maxRequests} requests are in flight when this is
-   * invoked, those requests will remain in flight.
-   */
-  public synchronized void setMaxRequests(int maxRequests) {
-    if (maxRequests < 1) {
-      throw new IllegalArgumentException("max < 1: " + maxRequests);
-    }
-    this.maxRequests = maxRequests;
-    promoteCalls();
-  }
-
-  public synchronized int getMaxRequests() {
+    public synchronized int getMaxRequests() {
     return maxRequests;
-  }
-
-  /**
-   * Set the maximum number of requests for each host to execute concurrently.
-   * This limits requests by the URL's host name. Note that concurrent requests
-   * to a single IP address may still exceed this limit: multiple hostnames may
-   * share an IP address or be routed through the same HTTP proxy.
-   *
-   * <p>If more than {@code maxRequestsPerHost} requests are in flight when this
-   * is invoked, those requests will remain in flight.
-   */
-  public synchronized void setMaxRequestsPerHost(int maxRequestsPerHost) {
-    if (maxRequestsPerHost < 1) {
-      throw new IllegalArgumentException("max < 1: " + maxRequestsPerHost);
     }
-    this.maxRequestsPerHost = maxRequestsPerHost;
-    promoteCalls();
-  }
 
-  public synchronized int getMaxRequestsPerHost() {
-    return maxRequestsPerHost;
+    /**
+     * Set the maximum number of requests to execute concurrently. Above this
+     * requests queue in memory, waiting for the running calls to complete.
+     * <p/>
+     * <p>If more than {@code maxRequests} requests are in flight when this is
+     * invoked, those requests will remain in flight.
+     */
+    public synchronized void setMaxRequests(int maxRequests) {
+        if (maxRequests < 1) {
+            throw new IllegalArgumentException("max < 1: " + maxRequests);
+        }
+        this.maxRequests = maxRequests;
+        promoteCalls();
+    }
+
+    public synchronized int getMaxRequestsPerHost() {
+        return maxRequestsPerHost;
+    }
+
+    /**
+     * Set the maximum number of requests for each host to execute concurrently.
+     * This limits requests by the URL's host name. Note that concurrent requests
+     * to a single IP address may still exceed this limit: multiple hostnames may
+     * share an IP address or be routed through the same HTTP proxy.
+     * <p/>
+     * <p>If more than {@code maxRequestsPerHost} requests are in flight when this
+     * is invoked, those requests will remain in flight.
+     */
+    public synchronized void setMaxRequestsPerHost(int maxRequestsPerHost) {
+        if (maxRequestsPerHost < 1) {
+            throw new IllegalArgumentException("max < 1: " + maxRequestsPerHost);
+        }
+        this.maxRequestsPerHost = maxRequestsPerHost;
+    promoteCalls();
   }
 
   synchronized void enqueue(AsyncCall call) {
