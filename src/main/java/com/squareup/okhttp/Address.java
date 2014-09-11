@@ -16,10 +16,8 @@
 package com.squareup.okhttp;
 
 import com.squareup.okhttp.internal.Util;
-
 import java.net.Proxy;
 import java.util.List;
-
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
@@ -32,123 +30,117 @@ import static com.squareup.okhttp.internal.Util.equal;
  * {@linkplain Proxy#NO_PROXY no proxy} is explicitly requested), this also includes
  * that proxy information. For secure connections the address also includes the
  * SSL socket factory and hostname verifier.
- * <p/>
+ *
  * <p>HTTP requests that share the same {@code Address} may also share the same
  * {@link Connection}.
  */
 public final class Address {
-    final Proxy proxy;
-    final String uriHost;
-    final int uriPort;
-    final SocketFactory socketFactory;
-    final SSLSocketFactory sslSocketFactory;
-    final HostnameVerifier hostnameVerifier;
-    final Authenticator authenticator;
-    final List<Protocol> protocols;
+  final Proxy proxy;
+  final String uriHost;
+  final int uriPort;
+  final SocketFactory socketFactory;
+  final SSLSocketFactory sslSocketFactory;
+  final HostnameVerifier hostnameVerifier;
+  final Authenticator authenticator;
+  final List<Protocol> protocols;
 
-    public Address(String uriHost, int uriPort, SocketFactory socketFactory,
-                   SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier,
-                   Authenticator authenticator, Proxy proxy, List<Protocol> protocols) {
-        if (uriHost == null) throw new NullPointerException("uriHost == null");
-        if (uriPort <= 0) throw new IllegalArgumentException("uriPort <= 0: " + uriPort);
-        if (authenticator == null) throw new IllegalArgumentException("authenticator == null");
-        if (protocols == null) throw new IllegalArgumentException("protocols == null");
-        this.proxy = proxy;
-        this.uriHost = uriHost;
-        this.uriPort = uriPort;
-        this.socketFactory = socketFactory;
-        this.sslSocketFactory = sslSocketFactory;
-        this.hostnameVerifier = hostnameVerifier;
-        this.authenticator = authenticator;
-        this.protocols = Util.immutableList(protocols);
-    }
+  public Address(String uriHost, int uriPort, SocketFactory socketFactory,
+      SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier,
+      Authenticator authenticator, Proxy proxy, List<Protocol> protocols) {
+    if (uriHost == null) throw new NullPointerException("uriHost == null");
+    if (uriPort <= 0) throw new IllegalArgumentException("uriPort <= 0: " + uriPort);
+    if (authenticator == null) throw new IllegalArgumentException("authenticator == null");
+    if (protocols == null) throw new IllegalArgumentException("protocols == null");
+    this.proxy = proxy;
+    this.uriHost = uriHost;
+    this.uriPort = uriPort;
+    this.socketFactory = socketFactory;
+    this.sslSocketFactory = sslSocketFactory;
+    this.hostnameVerifier = hostnameVerifier;
+    this.authenticator = authenticator;
+    this.protocols = Util.immutableList(protocols);
+  }
 
-    /**
-     * Returns the hostname of the origin server.
-     */
-    public String getUriHost() {
-        return uriHost;
-    }
+  /** Returns the hostname of the origin server. */
+  public String getUriHost() {
+    return uriHost;
+  }
 
-    /**
-     * Returns the port of the origin server; typically 80 or 443. Unlike
-     * may {@code getPort()} accessors, this method never returns -1.
-     */
-    public int getUriPort() {
-        return uriPort;
-    }
+  /**
+   * Returns the port of the origin server; typically 80 or 443. Unlike
+   * may {@code getPort()} accessors, this method never returns -1.
+   */
+  public int getUriPort() {
+    return uriPort;
+  }
 
-    /**
-     * Returns the socket factory for new connections.
-     */
-    public SocketFactory getSocketFactory() {
-        return socketFactory;
-    }
+  /** Returns the socket factory for new connections. */
+  public SocketFactory getSocketFactory() {
+    return socketFactory;
+  }
 
-    /**
-     * Returns the SSL socket factory, or null if this is not an HTTPS
-     * address.
-     */
-    public SSLSocketFactory getSslSocketFactory() {
-        return sslSocketFactory;
-    }
+  /**
+   * Returns the SSL socket factory, or null if this is not an HTTPS
+   * address.
+   */
+  public SSLSocketFactory getSslSocketFactory() {
+    return sslSocketFactory;
+  }
 
-    /**
-     * Returns the hostname verifier, or null if this is not an HTTPS
-     * address.
-     */
-    public HostnameVerifier getHostnameVerifier() {
-        return hostnameVerifier;
-    }
+  /**
+   * Returns the hostname verifier, or null if this is not an HTTPS
+   * address.
+   */
+  public HostnameVerifier getHostnameVerifier() {
+    return hostnameVerifier;
+  }
 
-    /**
-     * Returns the client's authenticator. This method never returns null.
-     */
-    public Authenticator getAuthenticator() {
-        return authenticator;
-    }
+  /**
+   * Returns the client's authenticator. This method never returns null.
+   */
+  public Authenticator getAuthenticator() {
+    return authenticator;
+  }
 
-    /**
-     * Returns the protocols the client supports. This method always returns a
-     * non-null list that contains minimally {@link Protocol#HTTP_1_1}.
-     */
-    public List<Protocol> getProtocols() {
-        return protocols;
-    }
+  /**
+   * Returns the protocols the client supports. This method always returns a
+   * non-null list that contains minimally {@link Protocol#HTTP_1_1}.
+   */
+  public List<Protocol> getProtocols() {
+    return protocols;
+  }
 
-    /**
-     * Returns this address's explicitly-specified HTTP proxy, or null to
-     * delegate to the HTTP client's proxy selector.
-     */
-    public Proxy getProxy() {
-        return proxy;
-    }
+  /**
+   * Returns this address's explicitly-specified HTTP proxy, or null to
+   * delegate to the HTTP client's proxy selector.
+   */
+  public Proxy getProxy() {
+    return proxy;
+  }
 
-    @Override
-    public boolean equals(Object other) {
-        if (other instanceof Address) {
-            Address that = (Address) other;
-            return equal(this.proxy, that.proxy)
-                    && this.uriHost.equals(that.uriHost)
-                    && this.uriPort == that.uriPort
-                    && equal(this.sslSocketFactory, that.sslSocketFactory)
-                    && equal(this.hostnameVerifier, that.hostnameVerifier)
-                    && equal(this.authenticator, that.authenticator)
-                    && equal(this.protocols, that.protocols);
-        }
-        return false;
+  @Override public boolean equals(Object other) {
+    if (other instanceof Address) {
+      Address that = (Address) other;
+      return equal(this.proxy, that.proxy)
+          && this.uriHost.equals(that.uriHost)
+          && this.uriPort == that.uriPort
+          && equal(this.sslSocketFactory, that.sslSocketFactory)
+          && equal(this.hostnameVerifier, that.hostnameVerifier)
+          && equal(this.authenticator, that.authenticator)
+          && equal(this.protocols, that.protocols);
     }
+    return false;
+  }
 
-    @Override
-    public int hashCode() {
-        int result = 17;
-        result = 31 * result + uriHost.hashCode();
-        result = 31 * result + uriPort;
-        result = 31 * result + (sslSocketFactory != null ? sslSocketFactory.hashCode() : 0);
-        result = 31 * result + (hostnameVerifier != null ? hostnameVerifier.hashCode() : 0);
-        result = 31 * result + authenticator.hashCode();
-        result = 31 * result + (proxy != null ? proxy.hashCode() : 0);
-        result = 31 * result + protocols.hashCode();
-        return result;
-    }
+  @Override public int hashCode() {
+    int result = 17;
+    result = 31 * result + uriHost.hashCode();
+    result = 31 * result + uriPort;
+    result = 31 * result + (sslSocketFactory != null ? sslSocketFactory.hashCode() : 0);
+    result = 31 * result + (hostnameVerifier != null ? hostnameVerifier.hashCode() : 0);
+    result = 31 * result + authenticator.hashCode();
+    result = 31 * result + (proxy != null ? proxy.hashCode() : 0);
+    result = 31 * result + protocols.hashCode();
+    return result;
+  }
 }

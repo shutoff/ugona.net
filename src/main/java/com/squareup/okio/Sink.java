@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.okio;
+package okio;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -23,51 +23,44 @@ import java.io.IOException;
  * needed: to the network, storage, or a buffer in memory. Sinks may be layered
  * to transform received data, such as to compress, encrypt, throttle, or add
  * protocol framing.
- * <p/>
+ *
  * <p>Most application code shouldn't operate on a sink directly, but rather
  * {@link BufferedSink} which is both more efficient and more convenient. Use
  * {@link Okio#buffer(Sink)} to wrap any sink with a buffer.
- * <p/>
+ *
  * <p>Sinks are easy to test: just use an {@link Buffer} in your tests, and
  * read from it to confirm it received the data that was expected.
- * <p/>
+ *
  * <h3>Comparison with OutputStream</h3>
  * This interface is functionally equivalent to {@link java.io.OutputStream}.
- * <p/>
+ *
  * <p>{@code OutputStream} requires multiple layers when emitted data is
  * heterogeneous: a {@code DataOutputStream} for primitive values, a {@code
  * BufferedOutputStream} for buffering, and {@code OutputStreamWriter} for
  * charset encoding. This class uses {@code BufferedSink} for all of the above.
- * <p/>
+ *
  * <p>Sink is also easier to layer: there is no {@linkplain
  * java.io.OutputStream#write(int) single-byte write} method that is awkward to
  * implement efficiently.
- * <p/>
+ *
  * <h3>Interop with OutputStream</h3>
  * Use {@link Okio#sink} to adapt an {@code OutputStream} to a sink. Use {@link
  * BufferedSink#outputStream} to adapt a sink to an {@code OutputStream}.
  */
 public interface Sink extends Closeable {
-    /**
-     * Removes {@code byteCount} bytes from {@code source} and appends them to this.
-     */
-    void write(Buffer source, long byteCount) throws IOException;
+  /** Removes {@code byteCount} bytes from {@code source} and appends them to this. */
+  void write(Buffer source, long byteCount) throws IOException;
 
-    /**
-     * Pushes all buffered bytes to their final destination.
-     */
-    void flush() throws IOException;
+  /** Pushes all buffered bytes to their final destination. */
+  void flush() throws IOException;
 
-    /**
-     * Returns the timeout for this sink.
-     */
-    Timeout timeout();
+  /** Returns the timeout for this sink. */
+  Timeout timeout();
 
-    /**
-     * Pushes all buffered bytes to their final destination and releases the
-     * resources held by this sink. It is an error to write a closed sink. It is
-     * safe to close a sink more than once.
-     */
-    @Override
-    void close() throws IOException;
+  /**
+   * Pushes all buffered bytes to their final destination and releases the
+   * resources held by this sink. It is an error to write a closed sink. It is
+   * safe to close a sink more than once.
+   */
+  @Override void close() throws IOException;
 }

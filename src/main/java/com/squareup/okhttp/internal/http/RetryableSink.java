@@ -16,13 +16,12 @@
 
 package com.squareup.okhttp.internal.http;
 
-import com.squareup.okio.Buffer;
-import com.squareup.okio.BufferedSink;
-import com.squareup.okio.Sink;
-import com.squareup.okio.Timeout;
-
 import java.io.IOException;
 import java.net.ProtocolException;
+import okio.Buffer;
+import okio.BufferedSink;
+import okio.Sink;
+import okio.Timeout;
 
 import static com.squareup.okhttp.internal.Util.checkOffsetAndCount;
 
@@ -32,53 +31,49 @@ import static com.squareup.okhttp.internal.Util.checkOffsetAndCount;
  * sent multiple times.
  */
 public final class RetryableSink implements Sink {
-    private final int limit;
-    private final Buffer content = new Buffer();
-    private boolean closed;
+  private boolean closed;
+  private final int limit;
+  private final Buffer content = new Buffer();
 
-    public RetryableSink(int limit) {
-        this.limit = limit;
-    }
+  public RetryableSink(int limit) {
+    this.limit = limit;
+  }
 
-    public RetryableSink() {
-        this(-1);
-    }
+  public RetryableSink() {
+    this(-1);
+  }
 
-    @Override
-    public void close() throws IOException {
-        if (closed) return;
-        closed = true;
-        if (content.size() < limit) {
-            throw new ProtocolException(
-                    "content-length promised " + limit + " bytes, but received " + content.size());
-        }
+  @Override public void close() throws IOException {
+    if (closed) return;
+    closed = true;
+    if (content.size() < limit) {
+      throw new ProtocolException(
+          "content-length promised " + limit + " bytes, but received " + content.size());
     }
+  }
 
-    @Override
-    public void write(Buffer source, long byteCount) throws IOException {
-        if (closed) throw new IllegalStateException("closed");
-        checkOffsetAndCount(source.size(), 0, byteCount);
-        if (limit != -1 && content.size() > limit - byteCount) {
-            throw new ProtocolException("exceeded content-length limit of " + limit + " bytes");
-        }
-        content.write(source, byteCount);
+  @Override public void write(Buffer source, long byteCount) throws IOException {
+    if (closed) throw new IllegalStateException("closed");
+    checkOffsetAndCount(source.size(), 0, byteCount);
+    if (limit != -1 && content.size() > limit - byteCount) {
+      throw new ProtocolException("exceeded content-length limit of " + limit + " bytes");
     }
+    content.write(source, byteCount);
+  }
 
-    @Override
-    public void flush() throws IOException {
-    }
+  @Override public void flush() throws IOException {
+  }
 
-    @Override
-    public Timeout timeout() {
-        return Timeout.NONE;
-    }
+  @Override public Timeout timeout() {
+    return Timeout.NONE;
+  }
 
-    public long contentLength() throws IOException {
-        return content.size();
-    }
+  public long contentLength() throws IOException {
+    return content.size();
+  }
 
-    public void writeToSocket(BufferedSink socketOut) throws IOException {
-        // Clone the content; otherwise we won't have data to retry.
-        socketOut.writeAll(content.clone());
-    }
+  public void writeToSocket(BufferedSink socketOut) throws IOException {
+    // Clone the content; otherwise we won't have data to retry.
+    socketOut.writeAll(content.clone());
+  }
 }
