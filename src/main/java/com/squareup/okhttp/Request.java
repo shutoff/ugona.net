@@ -17,6 +17,7 @@ package com.squareup.okhttp;
 
 import com.squareup.okhttp.internal.Platform;
 import com.squareup.okhttp.internal.http.HttpMethod;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -29,6 +30,8 @@ import java.util.List;
  * is null or itself immutable.
  */
 public final class Request {
+    private final static String USER_AGENT = "User-Agent";
+
   private final String urlString;
   private final String method;
   private final Headers headers;
@@ -132,6 +135,7 @@ public final class Request {
     public Builder() {
       this.method = "GET";
       this.headers = new Headers.Builder();
+        addHeader(USER_AGENT, System.getProperty("http.agent"));
     }
 
     private Builder(Request request) {
@@ -141,6 +145,8 @@ public final class Request {
       this.body = request.body;
       this.tag = request.tag;
       this.headers = request.headers.newBuilder();
+        if (this.headers.get(USER_AGENT) == null)
+            addHeader(USER_AGENT, System.getProperty("http.agent"));
     }
 
     public Builder url(String url) {
