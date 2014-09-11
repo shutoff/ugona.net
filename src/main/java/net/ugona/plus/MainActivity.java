@@ -13,6 +13,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -89,7 +91,7 @@ public class MainActivity extends ActionBarActivity {
     static final int PAGE_TRACK = 4;
     static final int PAGE_STAT = 5;
 
-    static final int VERSION = 5;
+    static final int VERSION = 6;
     static final String SENDER_ID = "915289471784";
     final static String URL_KEY = "https://car-online.ugona.net/key?login=$1&password=$2";
     final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
@@ -898,14 +900,20 @@ public class MainActivity extends ActionBarActivity {
                             d = key;
                         }
                         d += ";" + car.id;
-                        String phone = preferences.getString(Names.Car.CAR_PHONE + car.id, "");
-                        if (!phone.equals(""))
-                            d += ";" + phone;
+                        d += ";" + preferences.getString(Names.Car.CAR_PHONE + car.id, "");
+                        d += ";" + preferences.getString(Names.Car.AUTH + car.id, "");
                     }
                     data.add("cars", d);
                     Calendar cal = Calendar.getInstance();
                     TimeZone tz = cal.getTimeZone();
                     data.add("tz", tz.getID());
+                    try {
+                        PackageManager pkgManager = getPackageManager();
+                        PackageInfo info = pkgManager.getPackageInfo("net.ugona.plus", 0);
+                        data.add("version", info.versionName);
+                    } catch (Exception ex) {
+                        // ignore
+                    }
                     String phone = "";
                     TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
                     try {
