@@ -482,22 +482,22 @@ public class Actions {
                                 int cmd = 0;
                                 switch (cmd_id) {
                                     case R.string.rele1_on:
-                                        cmd = 514;
-                                        break;
-                                    case R.string.rele1_off:
-                                        cmd = 512;
-                                        break;
-                                    case R.string.rele1i:
-                                        cmd = 513;
-                                        break;
-                                    case R.string.rele2_on:
-                                        cmd = 258;
-                                        break;
-                                    case R.string.rele2_off:
                                         cmd = 256;
                                         break;
-                                    case R.string.rele2i:
+                                    case R.string.rele1_off:
                                         cmd = 257;
+                                        break;
+                                    case R.string.rele1i:
+                                        cmd = 258;
+                                        break;
+                                    case R.string.rele2_on:
+                                        cmd = 512;
+                                        break;
+                                    case R.string.rele2_off:
+                                        cmd = 513;
+                                        break;
+                                    case R.string.rele2i:
+                                        cmd = 514;
                                         break;
                                 }
 

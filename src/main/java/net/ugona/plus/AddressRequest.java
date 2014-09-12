@@ -287,12 +287,23 @@ abstract public class AddressRequest {
             String addr = null;
             if (parts.length > 2) {
                 try {
-                    String house = data.get("AdministrativeArea").asObject()
-                            .get("SubAdministrativeArea").asObject()
-                            .get("Locality").asObject()
-                            .get("Thoroughfare").asObject()
-                            .get("Premise").asObject()
-                            .get("PremiseNumber").asString();
+                    String house = null;
+                    try {
+                        house = data.get("AdministrativeArea").asObject()
+                                .get("SubAdministrativeArea").asObject()
+                                .get("Locality").asObject()
+                                .get("Thoroughfare").asObject()
+                                .get("Premise").asObject()
+                                .get("PremiseNumber").asString();
+                    } catch (Exception ex) {
+                        house = data.get("AdministrativeArea").asObject()
+                                .get("SubAdministrativeArea").asObject()
+                                .get("Locality").asObject()
+                                .get("DependentLocality").asObject()
+                                .get("Thoroughfare").asObject()
+                                .get("Premise").asObject()
+                                .get("PremiseNumber").asString();
+                    }
                     int i = parts.length - 1;
                     if (parts[i].equals(house)) {
                         parts[i - 1] += ",\u00A0" + house;

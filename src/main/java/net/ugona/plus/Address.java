@@ -165,7 +165,7 @@ public abstract class Address {
         final static String DB_NAME = "address.db";
 
         public OpenHelper(Context context) {
-            super(context, DB_NAME, null, 33);
+            super(context, DB_NAME, null, 35);
         }
 
         @Override
