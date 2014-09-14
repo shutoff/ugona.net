@@ -27,7 +27,7 @@ public class State {
     static final int CMD_TRUNK = 1 << 12;
     static int telephony_state = 0;
 
-    /*
+/*
     static public void appendLog(String text) {
         Log.v("v", text);
 
@@ -63,7 +63,7 @@ public class State {
         String s = sw.toString();
         appendLog(s);
     }
-    */
+*/
 
     static boolean isDebug() {
         return Build.FINGERPRINT.startsWith("generic");

@@ -633,4 +633,7 @@
     <string name="yandex">Yandex</string>
     <string name="bing">Bing</string>
     <string name="more">More info</string>
+    <string name="show_password">Show password</string>
+    <string name="auth_message">You can send message to support team about authorization problems</string>
+    <string name="send_msg">Send message</string>
 </resources>

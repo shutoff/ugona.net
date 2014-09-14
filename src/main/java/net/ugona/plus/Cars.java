@@ -191,6 +191,7 @@ public class Cars extends ActionBarActivity {
                         Intent intent = new Intent(this, AuthDialog.class);
                         intent.putExtra(Names.ID, i + "");
                         intent.putExtra(Names.Car.AUTH, true);
+                        intent.putExtra(Names.Car.CAR_PHONE, true);
                         startActivityForResult(intent, NEW_CAR);
                         break;
                     }
@@ -209,6 +210,8 @@ public class Cars extends ActionBarActivity {
         }
         if ((requestCode == NEW_CAR) && (resultCode == RESULT_OK)) {
             setupCars();
+            fillCarsId();
+            ((BaseAdapter) lvCars.getAdapter()).notifyDataSetChanged();
             final String car_id = data.getStringExtra(Names.ID);
             if (checkPointer(car_id))
                 return;
@@ -380,7 +383,7 @@ public class Cars extends ActionBarActivity {
             if (car.equals(car_id))
                 continue;
             if (preferences.getString(Names.Car.CAR_KEY + car, "").equals("demo")) {
-                deleteCar(car_id);
+                deleteCar(car);
                 break;
             }
         }

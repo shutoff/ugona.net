@@ -632,4 +632,7 @@
     <string name="yandex">Yandex</string>
     <string name="bing">Bing</string>
     <string name="more">Подробнее</string>
+    <string name="show_password">Показать пароль</string>
+    <string name="auth_message">Если у вас проблемы с авторизацией на сервисе, вы можете обратиться в службу поддержки</string>
+    <string name="send_msg">Отправить сообщение</string>
 </resources>

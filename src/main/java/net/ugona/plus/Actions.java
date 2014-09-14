@@ -513,6 +513,9 @@ public class Actions {
 
                                     }
 
+                                    @Override
+                                    void addRequest() {
+                                    }
                                 };
                             }
                         });
@@ -1575,15 +1578,9 @@ public class Actions {
                             return;
                         }
                     }
-                    if (inet_requests == null)
-                        inet_requests = new HashMap<String, Set<InetRequest>>();
-                    Set<InetRequest> requests = inet_requests.get(car_id);
-                    if (requests == null) {
-                        requests = new HashSet<InetRequest>();
-                        inet_requests.put(car_id, requests);
-                    }
+                    addRequest();
+
                     time = new Date().getTime() + (wait_time + 1) * 60000;
-                    requests.add(InetRequest.this);
 
                     final Context context = ctx;
                     progressDialog.dismiss();
@@ -1665,6 +1662,17 @@ public class Actions {
         abstract void error();
 
         abstract void ok(Context context, long when);
+
+        void addRequest() {
+            if (inet_requests == null)
+                inet_requests = new HashMap<String, Set<InetRequest>>();
+            Set<InetRequest> requests = inet_requests.get(car_id);
+            if (requests == null) {
+                requests = new HashSet<InetRequest>();
+                inet_requests.put(car_id, requests);
+            }
+            requests.add(InetRequest.this);
+        }
 
         void sent(Context context) {
         }

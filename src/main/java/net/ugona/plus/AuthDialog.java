@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +22,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -51,6 +54,8 @@ public class AuthDialog extends Activity {
     String car_id;
     SharedPreferences preferences;
     AlertDialog dialog;
+    int bad_count;
+    int max_count;
 
     static boolean isValidPhoneNumber(String number) {
         if (State.isDebug())
@@ -77,6 +82,7 @@ public class AuthDialog extends Activity {
 
         if (show_auth || show_phone) {
             car_id = getIntent().getStringExtra(Names.ID);
+            max_count = getIntent().getIntExtra(Names.ERROR, 0);
         } else {
             show_phone = true;
         }
@@ -109,6 +115,31 @@ public class AuthDialog extends Activity {
             @Override
             public void onDismiss(DialogInterface dialog) {
                 is_show = false;
+                if ((max_count > 0) && (bad_count > max_count)) {
+                    AlertDialog bad = new AlertDialog.Builder(AuthDialog.this)
+                            .setTitle(R.string.auth_error)
+                            .setMessage(R.string.auth_message)
+                            .setNegativeButton(R.string.cancel, null)
+                            .setPositiveButton(R.string.send_msg, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent intent = new Intent(Intent.ACTION_SEND);
+                                    intent.setType("text/html");
+                                    intent.putExtra(Intent.EXTRA_EMAIL, "info@ugona.net");
+                                    intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.auth_error));
+                                    startActivity(Intent.createChooser(intent, getString(R.string.send_msg)));
+                                }
+                            })
+                            .create();
+                    bad.show();
+                    bad.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            finish();
+                        }
+                    });
+                    return;
+                }
                 finish();
             }
         });
@@ -128,6 +159,21 @@ public class AuthDialog extends Activity {
                     phone = edNumber.getText().toString();
                 }
                 auth(login, pass, phone);
+            }
+        });
+
+        final CheckBox chkPswd = (CheckBox) dialog.findViewById(R.id.show_password);
+        final int initial_type = chkPswd.getInputType();
+        chkPswd.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                int type = initial_type;
+                if (isChecked) {
+                    type |= InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
+                    chkPswd.setVisibility(View.GONE);
+                }
+                edPasswd.setInputType(type);
+                edPasswd.setSelection(edPasswd.getText().length());
             }
         });
 
@@ -310,9 +356,18 @@ public class AuthDialog extends Activity {
                 try {
                     Toast toast = Toast.makeText(AuthDialog.this, getString(R.string.auth_error), Toast.LENGTH_LONG);
                     toast.show();
-                    tvError.setText(R.string.auth_error);
+                    if (error_text.equals("Auth error")) {
+                        bad_count++;
+                        tvError.setText(R.string.auth_error);
+                        edPasswd.setText("");
+                        if ((max_count > 0) && (bad_count > max_count))
+                            dialog.dismiss();
+                    } else {
+                        tvError.setText(getString(R.string.error) + "\n" + error_text);
+                    }
                     tvError.setVisibility(View.VISIBLE);
                     dlgCheck.dismiss();
+
                 } catch (Exception ex) {
                     // ignore
                 }

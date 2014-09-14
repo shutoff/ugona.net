@@ -50,6 +50,12 @@
 
     </TableLayout>
 
+    <CheckBox
+        android:id="@+id/show_password"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/show_password" />
+
     <LinearLayout
         android:id="@+id/phone_row"
         android:layout_width="match_parent"

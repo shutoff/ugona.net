@@ -248,19 +248,21 @@ public class MainActivity extends ActionBarActivity {
             pager.setOnPageChangeListener(pageChangeListener);
         }
 
-        if ((savedInstanceState == null) && !preferences.getString(Names.MESSAGE, "").equals("")) {
+        if ((savedInstanceState == null) && preferences.getString(Names.MESSAGE, "").equals("")) {
             String phone = preferences.getString(Names.Car.CAR_PHONE + car_id, "");
             String auth = preferences.getString(Names.Car.AUTH + car_id, "");
+            String key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
 
             if (preferences.getString(Names.CARS, "").equals("") && (auth.equals(""))) {
                 firstSetup();
-            } else if (auth.equals("") || preferences.getString(Names.Car.CAR_KEY + car_id, "").equals("demo")) {
+            } else if (auth.equals("") || key.equals("demo") || key.equals("")) {
                 Intent i = new Intent(this, AuthDialog.class);
                 i.putExtra(Names.ID, car_id);
                 i.putExtra(Names.Car.AUTH, true);
                 i.putExtra(Names.Car.CAR_NAME, true);
                 if (State.hasTelephony(this) && (phone.length() == 0))
                     i.putExtra(Names.Car.CAR_PHONE, true);
+                i.putExtra(Names.ERROR, 5);
                 startActivityForResult(i, CAR_SETUP);
             } else if (State.hasTelephony(this) && (phone.length() == 0) && !preferences.getString(Names.Car.CAR_KEY + car_id, "").equals("demo")) {
                 Intent i = new Intent(this, AuthDialog.class);
@@ -996,6 +998,7 @@ public class MainActivity extends ActionBarActivity {
                     i.putExtra(Names.ID, car_id);
                     i.putExtra(Names.Car.AUTH, true);
                     i.putExtra(Names.Car.CAR_NAME, true);
+                    i.putExtra(Names.ERROR, 5);
                     if (State.hasTelephony(MainActivity.this) && (phone.length() == 0))
                         i.putExtra(Names.Car.CAR_PHONE, true);
                     startActivityForResult(i, CAR_SETUP);
