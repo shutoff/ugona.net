@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.eclipsesource.json.JsonArray;
@@ -44,7 +43,7 @@ public class StatFragment extends Fragment implements OnRefreshListener {
     View vLoading;
     View vSpace;
     TextView tvSummary;
-    ListView lvStat;
+    HoursList vStat;
 
     Vector<Day> days;
     Vector<Day> stat;
@@ -78,7 +77,7 @@ public class StatFragment extends Fragment implements OnRefreshListener {
             }
         });
         tvSummary = (TextView) v.findViewById(R.id.summary);
-        lvStat = (ListView) v.findViewById(R.id.tracks);
+        vStat = (HoursList) v.findViewById(R.id.tracks);
         getData(null);
         return v;
     }
@@ -188,7 +187,7 @@ public class StatFragment extends Fragment implements OnRefreshListener {
         vProgress.setVisibility(View.VISIBLE);
         vLoading.setVisibility(View.VISIBLE);
         vError.setVisibility(View.GONE);
-        lvStat.setVisibility(View.GONE);
+        vStat.setVisibility(View.GONE);
         vSpace.setVisibility(View.VISIBLE);
         tvSummary.setText("");
     }
@@ -363,7 +362,7 @@ public class StatFragment extends Fragment implements OnRefreshListener {
             vLoading.setVisibility(View.GONE);
             vError.setVisibility(View.GONE);
             vSpace.setVisibility(View.GONE);
-            lvStat.setAdapter(new BaseAdapter() {
+            vStat.setAdapter(new BaseAdapter() {
                 @Override
                 public int getCount() {
                     return stat.size();
@@ -419,8 +418,8 @@ public class StatFragment extends Fragment implements OnRefreshListener {
                     return v;
                 }
             });
-            lvStat.setVisibility(View.VISIBLE);
-            lvStat.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            vStat.setVisibility(View.VISIBLE);
+            vStat.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Day d = stat.get(position++);
@@ -431,13 +430,11 @@ public class StatFragment extends Fragment implements OnRefreshListener {
                                     break;
                                 stat.remove(position);
                             }
-                            BaseAdapter adapter = (BaseAdapter) lvStat.getAdapter();
-                            adapter.notifyDataSetChanged();
+                            vStat.notifyChanges();
                             return;
                         }
                         openMonth(d, position);
-                        BaseAdapter adapter = (BaseAdapter) lvStat.getAdapter();
-                        adapter.notifyDataSetChanged();
+                        vStat.notifyChanges();
                     }
                     if (d.level == 1) {
                         if ((position < stat.size()) && (stat.get(position).level == 2)) {
@@ -446,13 +443,11 @@ public class StatFragment extends Fragment implements OnRefreshListener {
                                     break;
                                 stat.remove(position);
                             }
-                            BaseAdapter adapter = (BaseAdapter) lvStat.getAdapter();
-                            adapter.notifyDataSetChanged();
+                            vStat.notifyChanges();
                             return;
                         }
                         openWeek(d, position);
-                        BaseAdapter adapter = (BaseAdapter) lvStat.getAdapter();
-                        adapter.notifyDataSetChanged();
+                        vStat.notifyChanges();
                     }
                 }
             });

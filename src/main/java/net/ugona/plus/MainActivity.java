@@ -260,7 +260,8 @@ public class MainActivity extends ActionBarActivity {
                 Intent i = new Intent(this, AuthDialog.class);
                 i.putExtra(Names.ID, car_id);
                 i.putExtra(Names.Car.AUTH, true);
-                i.putExtra(Names.Car.CAR_NAME, true);
+                if (key.equals("demo") || key.equals(""))
+                    i.putExtra(Names.Car.CAR_NAME, true);
                 if (State.hasTelephony(this) && (phone.length() == 0))
                     i.putExtra(Names.Car.CAR_PHONE, true);
                 i.putExtra(Names.ERROR, 5);

@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/error"
-        android:orientation="horizontal"
-        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="horizontal"
         android:padding="10dp"
         android:visibility="gone">
 
@@ -24,18 +24,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="@string/error_load"
-            android:paddingLeft="10dp" />
+            android:paddingLeft="10dp"
+            android:text="@string/error_load" />
 
     </LinearLayout>
 
     <ProgressBar
         android:id="@+id/first_progress"
         style="?android:attr/progressBarStyleLarge"
-        android:padding="10dp"
-        android:layout_gravity="center"
         android:layout_width="40dp"
-        android:layout_height="40dp" />
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:padding="10dp" />
 
     <TextView
         android:id="@+id/loading"
@@ -50,12 +50,12 @@
         android:layout_width="match_parent"
         android:layout_height="40dp" />
 
-    <ListView
+    <net.ugona.plus.HoursList
         android:id="@+id/tracks"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
         android:layout_marginTop="10dp"
+        android:layout_weight="1"
         android:visibility="invisible" />
 
     <TextView
@@ -66,10 +66,10 @@
 
     <TextView
         android:id="@+id/summary"
-        android:background="@drawable/map_bg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:gravity="center_vertical"/>
+        android:background="@drawable/map_bg"
+        android:gravity="center_vertical"
+        android:padding="10dp" />
 
 </LinearLayout>

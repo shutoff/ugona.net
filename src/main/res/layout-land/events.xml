@@ -9,7 +9,7 @@
         android:layout_height="match_parent"
         android:orientation="horizontal">
 
-        <ListView
+        <net.ugona.plus.HoursList
             android:id="@+id/events"
             android:layout_width="0dp"
             android:layout_height="match_parent"

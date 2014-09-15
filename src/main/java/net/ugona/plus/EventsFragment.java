@@ -16,7 +16,6 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.eclipsesource.json.JsonArray;
@@ -257,7 +256,7 @@ public class EventsFragment extends Fragment
     boolean loaded;
     boolean no_events;
     boolean pointer;
-    ListView lvEvents;
+    HoursList vEvents;
     TextView tvNoEvents;
     View vProgress;
     View vError;
@@ -293,9 +292,26 @@ public class EventsFragment extends Fragment
 
         }
 
-        lvEvents = (ListView) v.findViewById(R.id.events);
-        lvEvents.setClickable(true);
-        lvEvents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        vEvents = (HoursList) v.findViewById(R.id.events);
+        if (!pointer) {
+            vEvents.setListener(new HoursList.Listener() {
+                @Override
+                public int setHour(int h) {
+                    int i;
+                    for (i = 0; i < filtered.size(); i++) {
+                        Event e = filtered.get(i);
+                        LocalTime time = new LocalTime(e.time);
+                        if (time.getHourOfDay() < h)
+                            break;
+                    }
+                    i--;
+                    if (i < 0)
+                        i = 0;
+                    return i;
+                }
+            });
+        }
+        vEvents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Event e = filtered.get(position);
@@ -326,8 +342,7 @@ public class EventsFragment extends Fragment
                     return;
                 }
                 current_id = e.id;
-                EventsAdapter adapter = (EventsAdapter) lvEvents.getAdapter();
-                adapter.notifyDataSetChanged();
+                vEvents.notifyChanges();
                 new EventRequest(e.id, e.time, e.type);
             }
         });
@@ -473,7 +488,7 @@ public class EventsFragment extends Fragment
     public void dateChanged(LocalDate date) {
         current = date;
         vProgress.setVisibility(View.VISIBLE);
-        lvEvents.setVisibility(View.GONE);
+        vEvents.setVisibility(View.GONE);
         tvNoEvents.setVisibility(View.GONE);
         vError.setVisibility(View.GONE);
         fetcher = new DataFetcher();
@@ -537,19 +552,17 @@ public class EventsFragment extends Fragment
         if (filtered.size() > 0) {
             if (no_events || !no_reload) {
                 current_id = 0;
-                lvEvents.setAdapter(new EventsAdapter());
-                lvEvents.setVisibility(View.VISIBLE);
+                vEvents.setAdapter(new EventsAdapter());
+                vEvents.setVisibility(View.VISIBLE);
                 tvNoEvents.setVisibility(View.GONE);
             } else {
-                EventsAdapter adapter = (EventsAdapter) lvEvents.getAdapter();
-                if (adapter != null)
-                    adapter.notifyDataSetChanged();
+                vEvents.notifyChanges();
             }
             no_events = false;
         } else {
             tvNoEvents.setText(getString(R.string.no_events));
             tvNoEvents.setVisibility(View.VISIBLE);
-            lvEvents.setVisibility(View.GONE);
+            vEvents.setVisibility(View.GONE);
             no_events = true;
         }
     }
@@ -863,8 +876,7 @@ public class EventsFragment extends Fragment
             }
             if (event_id != current_id)
                 return;
-            EventsAdapter adapter = (EventsAdapter) lvEvents.getAdapter();
-            adapter.notifyDataSetChanged();
+            vEvents.notifyChanges();
         }
     }
 

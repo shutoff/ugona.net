@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -64,7 +63,7 @@ public class TracksFragment extends Fragment
     ProgressBar prgFirst;
     ProgressBar prgMain;
     TextView tvLoading;
-    ListView lvTracks;
+    HoursList vTracks;
     BroadcastReceiver br;
     PullToRefreshLayout mPullToRefreshLayout;
     TracksFetcher fetcher;
@@ -98,7 +97,7 @@ public class TracksFragment extends Fragment
         api_key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
 
         tvSummary = (TextView) v.findViewById(R.id.summary);
-        lvTracks = (ListView) v.findViewById(R.id.tracks);
+        vTracks = (HoursList) v.findViewById(R.id.tracks);
         prgFirst = (ProgressBar) v.findViewById(R.id.first_progress);
         prgMain = (ProgressBar) v.findViewById(R.id.progress);
         tvLoading = (TextView) v.findViewById(R.id.loading);
@@ -122,17 +121,31 @@ public class TracksFragment extends Fragment
             }
         });
 
-        lvTracks.setClickable(true);
-        lvTracks.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        vTracks.setListener(new HoursList.Listener() {
+            @Override
+            public int setHour(int h) {
+                int i;
+                for (i = tracks.size() - 1; i >= 0; i--) {
+                    Track t = tracks.get(i);
+                    LocalTime time = new LocalTime(t.begin);
+                    int th = time.getHourOfDay();
+                    if (th <= h)
+                        break;
+                }
+                if (i < 0)
+                    i = 0;
+                return i;
+            }
+        });
+        vTracks.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                TracksAdapter adapter = (TracksAdapter) lvTracks.getAdapter();
                 if (selected == position) {
                     showTrack(position);
                     return;
                 }
                 selected = position;
-                adapter.notifyDataSetChanged();
+                vTracks.notifyChanges();
             }
         });
 
@@ -222,7 +235,7 @@ public class TracksFragment extends Fragment
         current = date;
         tvSummary.setText("");
         vError.setVisibility(View.GONE);
-        lvTracks.setVisibility(View.GONE);
+        vTracks.setVisibility(View.GONE);
         vSpace.setVisibility(View.VISIBLE);
         tvLoading.setVisibility(View.VISIBLE);
         prgFirst.setVisibility(View.VISIBLE);
@@ -242,7 +255,7 @@ public class TracksFragment extends Fragment
             @Override
             public void run() {
                 vError.setVisibility(View.VISIBLE);
-                lvTracks.setVisibility(View.GONE);
+                vTracks.setVisibility(View.GONE);
                 vSpace.setVisibility(View.VISIBLE);
                 tvLoading.setVisibility(View.GONE);
                 prgFirst.setVisibility(View.GONE);
@@ -351,8 +364,8 @@ public class TracksFragment extends Fragment
         tvLoading.setVisibility(View.GONE);
         prgMain.setVisibility(View.GONE);
         vSpace.setVisibility(View.GONE);
-        lvTracks.setVisibility(View.VISIBLE);
-        lvTracks.setAdapter(new TracksAdapter());
+        vTracks.setVisibility(View.VISIBLE);
+        vTracks.setAdapter(new TracksAdapter());
         loaded = true;
     }
 

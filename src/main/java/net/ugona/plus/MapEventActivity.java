@@ -27,7 +27,6 @@ public class MapEventActivity extends MapActivity {
 
         @JavascriptInterface
         public String getData() {
-            State.appendLog("event: " + data);
             return data;
         }
 

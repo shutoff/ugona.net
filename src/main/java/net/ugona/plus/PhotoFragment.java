@@ -14,13 +14,11 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.eclipsesource.json.JsonArray;
@@ -60,8 +58,7 @@ public class PhotoFragment extends Fragment
     View vProgress;
     View vNoPhotos;
     View vError;
-    View vPhotos;
-    ListView list;
+    HoursList vPhotos;
 
     boolean error;
     boolean loaded;
@@ -91,12 +88,29 @@ public class PhotoFragment extends Fragment
         }
         vProgress = v.findViewById(R.id.progress);
         vNoPhotos = v.findViewById(R.id.no_photos);
-        vPhotos = v.findViewById(R.id.photos);
+        vPhotos = (HoursList) v.findViewById(R.id.photos);
         vError = v.findViewById(R.id.error);
-        list = (ListView) v.findViewById(R.id.list);
+
+        vPhotos.setListener(new HoursList.Listener() {
+            @Override
+            public int setHour(int h) {
+                int i;
+                for (i = 0; i < photos.size(); i++) {
+                    Photo p = photos.get(i);
+                    LocalTime time = new LocalTime(p.time);
+                    if (time.getHourOfDay() < h)
+                        break;
+                }
+                i--;
+                if (i < 0)
+                    i = 0;
+                return i;
+            }
+        });
+
         cacheDir = getActivity().getCacheDir();
 
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        vPhotos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Photo photo = photos.get(position);
@@ -143,11 +157,8 @@ public class PhotoFragment extends Fragment
                 if (intent.getAction().equals(ROTATE)) {
                     int camera = intent.getIntExtra(Names.CAMERA, 0);
                     String id = intent.getStringExtra(Names.ID);
-                    if (car_id.equals(id)) {
-                        BaseAdapter adapter = (BaseAdapter) list.getAdapter();
-                        if (adapter != null)
-                            adapter.notifyDataSetChanged();
-                    }
+                    if (car_id.equals(id))
+                        vPhotos.notifyChanges();
                 }
                 if (!car_id.equals(intent.getStringExtra(Names.ID)))
                     return;
@@ -158,46 +169,6 @@ public class PhotoFragment extends Fragment
         IntentFilter intFilter = new IntentFilter(FetchService.ACTION_UPDATE_FORCE);
         intFilter.addAction(ROTATE);
         getActivity().registerReceiver(br, intFilter);
-
-        View.OnTouchListener touchListener = new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                TextView tv = (TextView) v;
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        tv.setTextColor(getResources().getColor(R.color.hour_active));
-                        return true;
-                    case MotionEvent.ACTION_UP: {
-                        int h = 0;
-                        try {
-                            h = Integer.parseInt(tv.getText().toString());
-                        } catch (Exception ex) {
-                            // ignore
-                        }
-                        int i;
-                        for (i = 0; i < photos.size(); i++) {
-                            Photo p = photos.get(i);
-                            LocalTime time = new LocalTime(p.time);
-                            if (time.getHourOfDay() < h)
-                                break;
-                        }
-                        i--;
-                        if (i < 0)
-                            i = 0;
-                        list.setSelection(i);
-                    }
-                    case MotionEvent.ACTION_CANCEL:
-                        tv.setTextColor(getResources().getColor(R.color.hour));
-                        return true;
-                }
-                return false;
-            }
-        };
-
-        ViewGroup vHours = (ViewGroup) v.findViewById(R.id.hours);
-        for (int i = 0; i < vHours.getChildCount(); i++) {
-            vHours.getChildAt(i).setOnTouchListener(touchListener);
-        }
 
         return v;
     }
@@ -317,7 +288,7 @@ public class PhotoFragment extends Fragment
                 vNoPhotos.setVisibility(View.VISIBLE);
             } else {
                 vPhotos.setVisibility(View.VISIBLE);
-                list.setAdapter(new BaseAdapter() {
+                vPhotos.setAdapter(new BaseAdapter() {
                     @Override
                     public int getCount() {
                         return photos.size();
@@ -440,9 +411,7 @@ public class PhotoFragment extends Fragment
 
         @Override
         protected void onPostExecute(Boolean changed) {
-            BaseAdapter adapter = (BaseAdapter) list.getAdapter();
-            if (adapter != null)
-                adapter.notifyDataSetChanged();
+            vPhotos.notifyChanges();
         }
     }
 
@@ -482,8 +451,7 @@ public class PhotoFragment extends Fragment
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            BaseAdapter adapter = (BaseAdapter) list.getAdapter();
-            adapter.notifyDataSetChanged();
+            vPhotos.notifyChanges();
             fetcher = null;
             startLoading();
         }
