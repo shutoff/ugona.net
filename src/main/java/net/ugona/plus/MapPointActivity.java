@@ -387,6 +387,7 @@ public class MapPointActivity extends MapActivity {
                     continue;
                 data += "|" + createData(car.id);
             }
+            State.appendLog("points: " + data);
             return data;
         }
     }

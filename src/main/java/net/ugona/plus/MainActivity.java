@@ -21,6 +21,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -91,7 +92,7 @@ public class MainActivity extends ActionBarActivity {
     static final int PAGE_TRACK = 4;
     static final int PAGE_STAT = 5;
 
-    static final int VERSION = 6;
+    static final int VERSION = 11;
     static final String SENDER_ID = "915289471784";
     final static String URL_KEY = "https://car-online.ugona.net/key?login=$1&password=$2";
     final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
@@ -916,8 +917,23 @@ public class MainActivity extends ActionBarActivity {
                     } catch (Exception ex) {
                         // ignore
                     }
-                    String phone = "";
                     TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                    String id = "";
+                    try {
+                        id = tm.getDeviceId();
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                    if (id.equals("")) {
+                        try {
+                            id = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+                        } catch (Exception ex) {
+                            // ignore
+                        }
+                    }
+                    if (!id.equals(""))
+                        data.add("id", id);
+                    String phone = "";
                     try {
                         phone = tm.getLine1Number();
                     } catch (Exception ex) {
