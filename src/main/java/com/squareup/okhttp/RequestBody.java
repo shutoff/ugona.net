@@ -38,7 +38,7 @@ public abstract class RequestBody {
                 contentType = MediaType.parse(contentType + "; charset=utf-8");
             }
         }
-        byte[] bytes = content.getBytes(charset);
+        byte[] bytes = content.getBytes();
         return create(contentType, bytes);
     }
 

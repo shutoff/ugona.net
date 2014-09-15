@@ -166,7 +166,11 @@ public class CarDrawable {
         for (String part : parts_id) {
             if (part == null)
                 continue;
-            parts[n++] = getResource(ctx, part);
+            try {
+                parts[n++] = getResource(ctx, part);
+            } catch (Exception ex) {
+                // ignore
+            }
         }
         return new LayerDrawable(parts);
     }

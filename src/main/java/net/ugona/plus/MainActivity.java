@@ -36,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -410,6 +411,16 @@ public class MainActivity extends ActionBarActivity {
         super.onSaveInstanceState(outState);
         outState.putString(Names.ID, car_id);
         outState.putLong(DATE, current.toDate().getTime());
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        try {
+            return super.dispatchTouchEvent(ev);
+        } catch (Exception ex) {
+            // ignore
+        }
+        return false;
     }
 
     int menuId() {
