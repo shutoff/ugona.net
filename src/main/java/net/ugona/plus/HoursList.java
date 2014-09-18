@@ -5,17 +5,17 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 public class HoursList extends FrameLayout {
 
     ListView list;
-    ViewGroup vHours;
+    LinearLayout vHours;
     Listener listener;
 
     public HoursList(Context context) {
@@ -47,6 +47,7 @@ public class HoursList extends FrameLayout {
     void init(Context context) {
         View view = LayoutInflater.from(context).inflate(R.layout.hours_list, null);
         addView(view);
+
         list = (ListView) view.findViewById(R.id.list);
         View.OnTouchListener touchListener = new View.OnTouchListener() {
             @Override
@@ -74,9 +75,14 @@ public class HoursList extends FrameLayout {
             }
         };
 
-        vHours = (ViewGroup) view.findViewById(R.id.hours);
-        for (int i = 0; i < vHours.getChildCount(); i++) {
-            vHours.getChildAt(i).setOnTouchListener(touchListener);
+        vHours = (LinearLayout) view.findViewById(R.id.hours);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LayoutParams.MATCH_PARENT, 0, 1f);
+        for (int i = 22; i > 0; i -= 2) {
+            TextView tView = (TextView) LayoutInflater.from(context).inflate(R.layout.hours_item, null);
+            tView.setText(i + "");
+            vHours.addView(tView, params);
+            tView.setOnTouchListener(touchListener);
         }
     }
 

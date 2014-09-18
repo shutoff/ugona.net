@@ -296,13 +296,15 @@
     <string name="map_req">Запрос местоположения</string>
     <string name="map_sum">Однократный запрос местоположения</string>
     <string name="mode_a">Режим A</string>
-    <string name="mode_a_sum">Передача GSM координат каждые 6 часов</string>
+    <string name="mode_a_sum">Передача GSM координат каждые 6 часов\n1 год работы</string>
     <string name="mode_b">Режим B</string>
-    <string name="mode_b_sum">Передача GSM координат каждые 12 часов</string>
+    <string name="mode_b_sum">Передача GSM координат каждые 12 часов и GPS координат каждые 24 часа\n1.5 года работы</string>
     <string name="mode_c">Режим C</string>
-    <string name="mode_c_sum">Передача GPS координат каждые 24 часа</string>
+    <string name="mode_c_sum">Передача GPS координат каждые 24 часа\n2 года работы</string>
     <string name="mode_d">Режим D</string>
-    <string name="mode_d_sum">Ожидание команды каждые 12 часов</string>
+    <string name="mode_d_sum">Ожидание команды по СМС каждые 12 часов\n3 года работы</string>
+    <string name="pointer_sms">Режим уведомления по СМС</string>
+    <string name="pointer_sms_sum">Отправлять СМС при невозможности передать данные на сайт</string>
     <string name="commands">Команды управления</string>
     <string name="commands_sum">Выбор команд на главном экране</string>
     <string name="valet_cmd">Режим АВТОСЕРВИС</string>
@@ -635,4 +637,9 @@
     <string name="show_password">Показать пароль</string>
     <string name="auth_message">Если у вас проблемы с авторизацией на сервисе, вы можете обратиться в службу поддержки</string>
     <string name="send_msg">Отправить сообщение</string>
+    <string name="find_req_sum">Передача GPS и GSM координат каждые 10 минут в течении 3 часов</string>
+    <string name="map_req_sum">Разовый запрос координат с отправкой ответа по СМС</string>
+    <string name="pointer_inet_error">При отправке команды произошла ошибка.\nОтправить команду как СМС?</string>
+    <string name="pointer_ok">Команда успешно поставлено в очередь и будет выполнена, когда устройство выйдет на связь</string>
+    <string name="pointer_err">При отправке команды произошла ошибка</string>
 </resources>

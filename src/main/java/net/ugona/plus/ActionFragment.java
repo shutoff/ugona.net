@@ -1,8 +1,11 @@
 package net.ugona.plus;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -15,9 +18,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
 
 import org.joda.time.LocalDate;
 
@@ -26,75 +34,16 @@ import java.util.Vector;
 public class ActionFragment extends Fragment
         implements MainActivity.DateChangeListener {
 
+    final static String URL_MODE = "https://car-online.ugona.net/mode?auth=$1";
     static Action[] pointer_actions = {
-            new Action(R.drawable.icon_turbo_on, R.string.find) {
-                @Override
-                void action(final Context context, final String car_id, boolean longTap) {
-                    Actions.requestPassword(context, car_id, R.string.find, R.string.find_sum, new Actions.Answer() {
-                        @Override
-                        void answer(String pswd) {
-                            SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.find, "FIND", null));
-                        }
-                    });
-                }
-            },
-            new Action(R.drawable.icon_status, R.string.map_req) {
-                @Override
-                void action(final Context context, final String car_id, boolean longTap) {
-                    Actions.requestPassword(context, car_id, R.string.map_req, R.string.map_sum, new Actions.Answer() {
-                        @Override
-                        void answer(String pswd) {
-                            SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.map_req, "MAP", null));
-                        }
-                    });
-                }
-            },
-            new Action(0, R.string.mode_a, R.string.mode_a_sum) {
-                @Override
-                void action(final Context context, final String car_id, boolean longTap) {
-                    Actions.requestPassword(context, car_id, R.string.mode_a, R.string.mode_a_sum, new Actions.Answer() {
-                        @Override
-                        void answer(String pswd) {
-                            SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.mode_a, "MODE A", null));
-                        }
-                    });
-                }
-            },
-            new Action(0, R.string.mode_b, R.string.mode_b_sum) {
-                @Override
-                void action(final Context context, final String car_id, boolean longTap) {
-                    Actions.requestPassword(context, car_id, R.string.mode_b, R.string.mode_b_sum, new Actions.Answer() {
-                        @Override
-                        void answer(String pswd) {
-                            SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.mode_b, "MODE B", null));
-                        }
-                    });
-                }
-            },
-            new Action(0, R.string.mode_c, R.string.mode_c_sum) {
-                @Override
-                void action(final Context context, final String car_id, boolean longTap) {
-                    Actions.requestPassword(context, car_id, R.string.mode_c, R.string.mode_c_sum, new Actions.Answer() {
-                        @Override
-                        void answer(String pswd) {
-                            SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.mode_c, "MODE C", null));
-                        }
-                    });
-                }
-            },
-            new Action(0, R.string.mode_d, R.string.mode_d_sum) {
-                @Override
-                void action(final Context context, final String car_id, boolean longTap) {
-                    Actions.requestPassword(context, car_id, R.string.mode_d, R.string.mode_d_sum, new Actions.Answer() {
-                        @Override
-                        void answer(String pswd) {
-                            SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.mode_d, "MODE D", null));
-                        }
-                    });
-                }
-            },
+            new PointerAction(R.drawable.icon_turbo_on, R.string.find, R.string.find_req_sum, "FIND", "find"),
+            new PointerAction(R.drawable.icon_status, R.string.map_req, R.string.map_req_sum, "MAP", "map"),
+            new PointerModeAction(R.string.mode_a, R.string.mode_a_sum, "a"),
+            new PointerModeAction(R.string.mode_b, R.string.mode_b_sum, "b"),
+            new PointerModeAction(R.string.mode_c, R.string.mode_c_sum, "c"),
+            new PointerModeAction(R.string.mode_d, R.string.mode_d_sum, "d"),
+            new PointerCheckAcion(R.string.pointer_sms, R.string.pointer_sms_sum)
     };
-
     static Action[] def_actions = {
             new Action(R.drawable.icon_phone, R.string.call) {
                 @Override
@@ -268,7 +217,6 @@ public class ActionFragment extends Fragment
                 }
             },
     };
-
     static Action[] pandora_actions = {
             new Action(R.drawable.icon_phone, R.string.call) {
                 @Override
@@ -340,7 +288,6 @@ public class ActionFragment extends Fragment
                 }
             },
     };
-
     String car_id;
     ActionAdapter adapter;
 
@@ -532,10 +479,8 @@ public class ActionFragment extends Fragment
                 }
             } else {
                 v.findViewById(R.id.icon).setVisibility(View.GONE);
-                TextView ts = (TextView) v.findViewById(R.id.sum);
-                ts.setVisibility(View.VISIBLE);
-                ts.setText(action.flags);
             }
+            action.draw(inflater.getContext(), v, car_id);
             View ip = v.findViewById(R.id.progress);
             ip.setVisibility(SmsMonitor.isProcessed(car_id, action.text) ? View.VISIBLE : View.GONE);
             return v;
@@ -547,6 +492,7 @@ public class ActionFragment extends Fragment
         int icon;
         int text;
         int flags;
+
         boolean internet;
         String name_key;
 
@@ -580,6 +526,208 @@ public class ActionFragment extends Fragment
         }
 
         abstract void action(Context context, String car_id, boolean longTap);
+
+        void draw(Context context, View v, String car_id) {
+            v.findViewById(R.id.check).setVisibility(View.GONE);
+        }
+    }
+
+    static class PointerAction extends Action {
+
+        String sms;
+        int sum;
+        String param;
+        String value;
+        ProgressDialog progress;
+
+        PointerAction(int icon_, int text_, int sum_, String sms_, String param_) {
+            super(icon_, text_);
+            sms = sms_;
+            sum = sum_;
+            param = param_;
+            value = "";
+        }
+
+        @Override
+        void action(final Context context, final String car_id, boolean longTap) {
+            Actions.requestPassword(context, car_id, text, sum, new Actions.Answer() {
+                @Override
+                void answer(String pswd) {
+                    do_action(context, car_id);
+                }
+            });
+        }
+
+        @Override
+        void draw(Context context, View v, String car_id) {
+            super.draw(context, v, car_id);
+            TextView ts = (TextView) v.findViewById(R.id.sum);
+            ts.setVisibility(View.VISIBLE);
+            ts.setText(sum);
+        }
+
+        void do_action(final Context context, final String car_id) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            if (preferences.getString(Names.Car.POINTER_MODE, "").equals("d")) {
+                send_sms(context, car_id);
+                return;
+            }
+            progress = new ProgressDialog(context);
+            progress.setMessage(context.getString(text));
+            progress.show();
+            progress.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    progress = null;
+                }
+            });
+
+            HttpTask task = new HttpTask() {
+                @Override
+                void result(JsonObject res) throws ParseException {
+                    comand_ok(context, car_id);
+                }
+
+                @Override
+                void error() {
+                    if (progress == null)
+                        return;
+                    progress.dismiss();
+                    AlertDialog dialog = new AlertDialog.Builder(context)
+                            .setTitle(text)
+                            .setMessage(R.string.pointer_inet_error)
+                            .setNegativeButton(R.string.cancel, null)
+                            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    send_sms(context, car_id);
+                                }
+                            }).create();
+                    dialog.show();
+                }
+            };
+            task.execute(URL_MODE, preferences.getString(Names.Car.AUTH + car_id, ""), param, value);
+        }
+
+        void send_sms(final Context context, String car_id) {
+            SmsMonitor.sendSMS(context, car_id, null, new SmsMonitor.Sms(text, sms, null) {
+                @Override
+                boolean process_answer(Context context, String car_id, String text) {
+                    comand_ok(context, car_id);
+                    return true;
+                }
+            });
+        }
+
+        void message(Context context, int id) {
+            AlertDialog dialog = new AlertDialog.Builder(context)
+                    .setTitle(text)
+                    .setMessage(id)
+                    .setNegativeButton(R.string.ok, null)
+                    .create();
+            dialog.show();
+        }
+
+        void comand_ok(Context context, String car_id) {
+            if (progress == null)
+                return;
+            progress.dismiss();
+            message(context, R.string.pointer_ok);
+        }
+    }
+
+    static class PointerModeAction extends PointerAction {
+
+        PointerModeAction(int text, int sum, String mode_) {
+            super(0, text, sum, "", "mode");
+            value = mode_;
+            sms = "MODE " + value.toUpperCase();
+        }
+
+        @Override
+        void draw(Context context, View v, String car_id) {
+            super.draw(context, v, car_id);
+            TextView tv = (TextView) v.findViewById(R.id.name);
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            String pointer_mode = preferences.getString(Names.Car.POINTER_MODE + car_id, "");
+            int color = context.getResources().getColor(android.R.color.secondary_text_dark);
+            if (pointer_mode.equals(value)) {
+                color = context.getResources().getColor(R.color.caldroid_holo_blue_light);
+                if (preferences.getLong(Names.Car.POINTER_MODE_TIME + car_id, -1) > preferences.getLong(Names.Car.LAST_EVENT + car_id, 0))
+                    color = context.getResources().getColor(R.color.changed);
+            }
+            tv.setTextColor(color);
+        }
+
+        @Override
+        void comand_ok(Context context, String car_id) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences.Editor ed = preferences.edit();
+            ed.putLong(Names.Car.POINTER_MODE_TIME + car_id, preferences.getLong(Names.Car.EVENT_TIME + car_id, 0) + 1);
+            ed.putString(Names.Car.POINTER_MODE + car_id, value);
+            ed.commit();
+            try {
+                Intent intent = new Intent(FetchService.ACTION_UPDATE);
+                intent.putExtra(Names.ID, car_id);
+                context.sendBroadcast(intent);
+            } catch (Exception e) {
+                // ignore
+            }
+            super.comand_ok(context, car_id);
+        }
+    }
+
+    static class PointerCheckAcion extends PointerAction {
+
+        boolean sms_on;
+
+        PointerCheckAcion(int text, int sum) {
+            super(0, text, sum, "", "sms");
+        }
+
+        @Override
+        void draw(final Context context, View v, final String car_id) {
+            super.draw(context, v, car_id);
+            v.findViewById(R.id.name).setVisibility(View.GONE);
+            final CheckBox check = (CheckBox) v.findViewById(R.id.check);
+            check.setText(text);
+            check.setVisibility(View.VISIBLE);
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            sms_on = preferences.getBoolean(Names.Car.POINTER_SMS + car_id, true);
+            check.setChecked(sms_on);
+            if (sms_on) {
+                sms = "SMS_OFF?";
+                value = "0";
+            } else {
+                sms = "SMS_ON?";
+                value = "1";
+            }
+            if (preferences.getLong(Names.Car.POINTER_SMS_TIME + car_id, -1) > preferences.getLong(Names.Car.LAST_EVENT + car_id, 0))
+                check.setTextColor(context.getResources().getColor(R.color.changed));
+            check.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    action(context, car_id, false);
+                }
+            });
+        }
+
+        @Override
+        void comand_ok(Context context, String car_id) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences.Editor ed = preferences.edit();
+            ed.putLong(Names.Car.POINTER_SMS_TIME + car_id, preferences.getLong(Names.Car.EVENT_TIME + car_id, 0) + 1);
+            ed.putBoolean(Names.Car.POINTER_SMS + car_id, !sms_on);
+            ed.commit();
+            try {
+                Intent intent = new Intent(FetchService.ACTION_UPDATE);
+                intent.putExtra(Names.ID, car_id);
+                context.sendBroadcast(intent);
+            } catch (Exception e) {
+                // ignore
+            }
+            super.comand_ok(context, car_id);
+        }
     }
 
 }

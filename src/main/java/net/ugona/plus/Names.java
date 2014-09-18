@@ -177,6 +177,10 @@ public final class Names {
         static final String LIGHT_SHOCK = "light_shock_";
         static final String BALANCE_SOUND = ".balance";
 
+        static final String POINTER_MODE = "pointer_mode";
+        static final String POINTER_SMS = "pointer_sms";
+        static final String POINTER_MODE_TIME = "pointer_mode_time";
+        static final String POINTER_SMS_TIME = "pointer_sms_time";
     }
 
     public final class Notify {

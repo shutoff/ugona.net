@@ -293,24 +293,6 @@ public class EventsFragment extends Fragment
         }
 
         vEvents = (HoursList) v.findViewById(R.id.events);
-        if (!pointer) {
-            vEvents.setListener(new HoursList.Listener() {
-                @Override
-                public int setHour(int h) {
-                    int i;
-                    for (i = 0; i < filtered.size(); i++) {
-                        Event e = filtered.get(i);
-                        LocalTime time = new LocalTime(e.time);
-                        if (time.getHourOfDay() < h)
-                            break;
-                    }
-                    i--;
-                    if (i < 0)
-                        i = 0;
-                    return i;
-                }
-            });
-        }
         vEvents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -387,6 +369,22 @@ public class EventsFragment extends Fragment
             setupButton(v, R.id.actions, 1);
             setupButton(v, R.id.contacts, 2);
             setupButton(v, R.id.system, 4);
+            vEvents.setListener(new HoursList.Listener() {
+                @Override
+                public int setHour(int h) {
+                    int i;
+                    for (i = 0; i < filtered.size(); i++) {
+                        Event e = filtered.get(i);
+                        LocalTime time = new LocalTime(e.time);
+                        if (time.getHourOfDay() < h)
+                            break;
+                    }
+                    i--;
+                    if (i < 0)
+                        i = 0;
+                    return i;
+                }
+            });
         }
 
         if (loaded) {

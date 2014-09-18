@@ -128,6 +128,16 @@ public class State {
             return preferences.getBoolean(Names.Car.OFFLINE + car_id, false);
         long last_event = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
         long interval = preferences.getInt(Names.Car.CAR_TIMER + car_id, 10) + 1;
+        if (preferences.getBoolean(Names.Car.POINTER + car_id, false)) {
+            interval = 60 * 25;
+            String mode = preferences.getString(Names.Car.POINTER_MODE + car_id, "");
+            if (mode.equals("a"))
+                interval = 60 * 7;
+            if (mode.equals("b"))
+                interval = 60 * 13;
+            if (mode.equals("d"))
+                interval = 0;
+        }
         last_event += interval * 60000;
         Date now = new Date();
         long now_time = now.getTime();

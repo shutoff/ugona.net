@@ -242,7 +242,16 @@ public class Cars extends ActionBarActivity {
     boolean checkPointer(final String car_id) {
         if (!preferences.getBoolean(Names.Car.POINTER + car_id, false))
             return false;
-        if (preferences.getString(Names.CARS, "").split(",").length < 2)
+        Cars.Car[] full_cars = Cars.getCars(this);
+        final Vector<Cars.Car> tmp_cars = new Vector<Cars.Car>();
+        for (Cars.Car car : cars) {
+            if (car.id.equals(car_id))
+                continue;
+            if (preferences.getString(Names.Car.CAR_KEY + car_id, "demo").equals("demo"))
+                continue;
+            tmp_cars.add(car);
+        }
+        if (tmp_cars.size() == 0)
             return false;
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -254,25 +263,17 @@ public class Cars extends ActionBarActivity {
                 .setView(inflater.inflate(R.layout.cars, null))
                 .create();
         dialog.show();
-        Cars.Car[] full_cars = Cars.getCars(this);
-        Cars.Car[] tmp_cars = new Cars.Car[full_cars.length - 1];
-        int n = 0;
-        for (Cars.Car c : full_cars) {
-            if (c.id.equals(car_id))
-                continue;
-            tmp_cars[n++] = c;
-        }
-        final Cars.Car[] cars = tmp_cars;
+
         final Spinner spinner = (Spinner) dialog.findViewById(R.id.cars);
         spinner.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
-                return cars.length;
+                return tmp_cars.size();
             }
 
             @Override
             public Object getItem(int position) {
-                return cars[position];
+                return tmp_cars.get(position);
             }
 
             @Override
@@ -288,7 +289,7 @@ public class Cars extends ActionBarActivity {
                     v = inflater.inflate(R.layout.list_item, null);
                 }
                 TextView tv = (TextView) v.findViewById(R.id.name);
-                tv.setText(cars[position].name);
+                tv.setText(tmp_cars.get(position).name);
                 return v;
             }
 
@@ -300,11 +301,11 @@ public class Cars extends ActionBarActivity {
                     v = inflater.inflate(R.layout.list_dropdown_item, null);
                 }
                 TextView tv = (TextView) v.findViewById(R.id.name);
-                tv.setText(cars[position].name);
+                tv.setText(tmp_cars.get(position).name);
                 return v;
             }
         });
-        if (cars.length < 2)
+        if (tmp_cars.size() < 2)
             spinner.setVisibility(View.GONE);
         dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -312,7 +313,7 @@ public class Cars extends ActionBarActivity {
                 SharedPreferences.Editor ed = preferences.edit();
                 String id = cars[spinner.getSelectedItemPosition()].id;
                 String new_cars = null;
-                for (Cars.Car car : cars) {
+                for (Cars.Car car : tmp_cars) {
                     if (new_cars == null) {
                         new_cars = car.id;
                         continue;

@@ -36,6 +36,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
+
 import org.joda.time.LocalDateTime;
 
 import java.text.DateFormat;
@@ -47,6 +50,8 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 public class StateFragment extends Fragment
         implements View.OnTouchListener, OnRefreshListener {
+
+    final static String URL_MODE = "https://car-online.ugona.net/mode?auth=$1";
 
     final int AUTH_REQUEST = 1;
     String car_id;
@@ -389,6 +394,7 @@ public class StateFragment extends Fragment
                 adapter.actions.add(action);
             }
             adapter.attach(getActivity(), lvActions);
+            updatePointer();
         }
         startUpdate(getActivity(), false);
 
@@ -502,6 +508,12 @@ public class StateFragment extends Fragment
                     time = df.format(last_time) + " " + tf.format(last_time);
                 }
                 time += " ";
+            }
+            if (getView() != null) {
+                ListView lvActions = (ListView) getView().findViewById(R.id.actions);
+                BaseAdapter adapter = (BaseAdapter) lvActions.getAdapter();
+                if (adapter != null)
+                    adapter.notifyDataSetChanged();
             }
         } else {
             time = "";
@@ -1272,5 +1284,28 @@ public class StateFragment extends Fragment
         intent.putExtra(Names.ID, car_id);
         intent.putExtra(Names.STATE, type);
         startActivity(intent);
+    }
+
+    void updatePointer() {
+        HttpTask task = new HttpTask() {
+            @Override
+            void result(JsonObject res) throws ParseException {
+                SharedPreferences.Editor ed = preferences.edit();
+                if (preferences.getLong(Names.Car.POINTER_MODE_TIME + car_id, -1) < preferences.getLong(Names.Car.LAST_EVENT + car_id, 0))
+                    ed.putString(Names.Car.POINTER_MODE + car_id, res.get("mode").asString());
+                if (preferences.getLong(Names.Car.POINTER_SMS_TIME + car_id, -1) < preferences.getLong(Names.Car.LAST_EVENT + car_id, 0))
+                    ed.putBoolean(Names.Car.POINTER_SMS + car_id, res.get("sms").asBoolean());
+                ed.commit();
+                ListView lvActions = (ListView) getView().findViewById(R.id.actions);
+                BaseAdapter adapter = (BaseAdapter) lvActions.getAdapter();
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            void error() {
+
+            }
+        };
+        task.execute(URL_MODE, preferences.getString(Names.Car.AUTH + car_id, ""));
     }
 }

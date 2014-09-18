@@ -373,6 +373,9 @@ public class SmsMonitor extends BroadcastReceiver {
         }
     }
 
+//    Pattern gps_pat = Pattern.compile("\\&LAT=(-?[0-9]+\\.[0-9]+)\\&LON=(-?[0-9]+\\.[0-9]+)");
+//    Pattern gsm_pat = Pattern.compile("\\&mcc=([0-9]+)\\&mnc=([0-9]+)\\&lac=([0-9]+)\\&cid=([0-9]+)");
+
     boolean processCarMessage(Context context, String body, String car_id) {
         SmsQueues queues = null;
         if (processed != null)
@@ -442,6 +445,24 @@ public class SmsMonitor extends BroadcastReceiver {
             Alarm.zoneNotify(context, car_id, false, body.substring(11), true, false, 0);
             return true;
         }
+
+/*
+        Matcher matcher = gps_pat.matcher(body);
+        if (matcher.find()) {
+            double lat = Actions.toWGS(Double.parseDouble(matcher.group(1)));
+            double lng = Actions.toWGS(Double.parseDouble(matcher.group(2)));
+            return true;
+        }
+        matcher = gsm_pat.matcher(body);
+        if (matcher.find()) {
+            int mc = Integer.parseInt(matcher.group(1));
+            int nc = Integer.parseInt(matcher.group(1));
+            int lac = Integer.parseInt(matcher.group(1));
+            int cid = Integer.parseInt(matcher.group(1));
+            return true;
+        }
+*/
+
         return false;
     }
 
