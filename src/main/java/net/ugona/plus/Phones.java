@@ -184,9 +184,9 @@ public class Phones extends ActionBarActivity {
                 } catch (Exception ex) {
                     // ignore
                 }
+                showList();
+                return;
             }
-            showList();
-            return;
         }
         if (phones == null) {
             if (!SmsMonitor.isProcessed(car_id, R.string.phones)) {
