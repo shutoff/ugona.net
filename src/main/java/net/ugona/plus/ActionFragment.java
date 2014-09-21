@@ -653,7 +653,7 @@ public class ActionFragment extends Fragment
             int color = context.getResources().getColor(android.R.color.secondary_text_dark);
             if (pointer_mode.equals(value)) {
                 color = context.getResources().getColor(R.color.caldroid_holo_blue_light);
-                if (preferences.getLong(Names.Car.POINTER_MODE_TIME + car_id, -1) > preferences.getLong(Names.Car.LAST_EVENT + car_id, 0))
+                if (preferences.getLong(Names.Car.POINTER_MODE_TIME + car_id, -1) > preferences.getLong(Names.Car.EVENT_TIME + car_id, 0))
                     color = context.getResources().getColor(R.color.changed);
             }
             tv.setTextColor(color);
@@ -702,7 +702,7 @@ public class ActionFragment extends Fragment
                 sms = "SMS_ON?";
                 value = "1";
             }
-            if (preferences.getLong(Names.Car.POINTER_SMS_TIME + car_id, -1) > preferences.getLong(Names.Car.LAST_EVENT + car_id, 0))
+            if (preferences.getLong(Names.Car.POINTER_SMS_TIME + car_id, -1) > preferences.getLong(Names.Car.EVENT_TIME + car_id, 0))
                 check.setTextColor(context.getResources().getColor(R.color.changed));
             check.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
