@@ -438,6 +438,7 @@ public class Actions {
         });
     }
 
+
     static void balance(final Context context, final String car_id) {
         requestPassword(context, car_id, R.string.balance, R.string.balance_request, new Answer() {
             @Override
@@ -445,11 +446,9 @@ public class Actions {
                 SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.balance, "BALANCE?", "") {
                     @Override
                     boolean process_answer(Context context, String car_id, String text) {
-                        Pattern balancePattern = Pattern.compile("-?[0-9]+[.,][0-9][0-9]");
-                        Matcher matcher = balancePattern.matcher(text);
-                        if (!matcher.find())
+                        String balance = State.parseBalance(text);
+                        if (balance == null)
                             return false;
-                        String balance = matcher.group(0).replaceAll(",", ".");
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                         SharedPreferences.Editor ed = preferences.edit();
                         ed.putLong(Names.Car.BALANCE_TIME + car_id, new Date().getTime());
