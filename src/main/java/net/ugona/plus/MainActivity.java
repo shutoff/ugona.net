@@ -368,19 +368,22 @@ public class MainActivity extends ActionBarActivity {
                 builder = builder.setTitle(title);
 
             try {
-                final Uri uri = Uri.parse(preferences.getString(Names.URL, ""));
-                builder = builder.setPositiveButton(R.string.more, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        SharedPreferences.Editor ed = preferences.edit();
-                        ed.remove(Names.MESSAGE);
-                        ed.remove(Names.TITLE);
-                        ed.remove(Names.URL);
-                        ed.commit();
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, uri);
-                        startActivity(browserIntent);
-                    }
-                });
+                String url = preferences.getString(Names.URL, "");
+                if (!url.equals("")) {
+                    final Uri uri = Uri.parse(url);
+                    builder = builder.setPositiveButton(R.string.more, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            SharedPreferences.Editor ed = preferences.edit();
+                            ed.remove(Names.MESSAGE);
+                            ed.remove(Names.TITLE);
+                            ed.remove(Names.URL);
+                            ed.commit();
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, uri);
+                            startActivity(browserIntent);
+                        }
+                    });
+                }
             } catch (Exception ex) {
                 // ignore
             }
