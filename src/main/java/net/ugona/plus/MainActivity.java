@@ -93,7 +93,7 @@ public class MainActivity extends ActionBarActivity {
     static final int PAGE_TRACK = 4;
     static final int PAGE_STAT = 5;
 
-    static final int VERSION = 11;
+    static final int VERSION = 12;
     static final String SENDER_ID = "915289471784";
     final static String URL_KEY = "https://car-online.ugona.net/key?login=$1&password=$2";
     final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
@@ -907,21 +907,21 @@ public class MainActivity extends ActionBarActivity {
                     data.add("reg", reg);
                     Cars.Car[] cars = Cars.getCars(MainActivity.this);
                     String d = null;
+                    JsonArray jCars = new JsonArray();
                     for (Cars.Car car : cars) {
                         String key = preferences.getString(Names.Car.CAR_KEY + car.id, "");
-                        if (key.equals(""))
+                        if (key.equals("") || (key.equals("demo")))
                             continue;
                         JsonObject c = new JsonObject();
-                        if (d != null) {
-                            d += "|" + key;
-                        } else {
-                            d = key;
-                        }
-                        d += ";" + car.id;
-                        d += ";" + preferences.getString(Names.Car.CAR_PHONE + car.id, "");
-                        d += ";" + preferences.getString(Names.Car.AUTH + car.id, "");
+                        c.add("key", key);
+                        c.add("id", car.id);
+                        c.add("phone", preferences.getString(Names.Car.CAR_PHONE + car.id, ""));
+                        c.add("auth", preferences.getString(Names.Car.AUTH + car.id, ""));
+                        c.add("limit", preferences.getInt(Names.Car.LIMIT + car.id, 50));
+                        c.add("guard", preferences.getString(Names.Car.GUARD_MODE + car.id, ""));
+                        jCars.add(c);
                     }
-                    data.add("cars", d);
+                    data.add("car_data", jCars);
                     Calendar cal = Calendar.getInstance();
                     TimeZone tz = cal.getTimeZone();
                     data.add("tz", tz.getID());
