@@ -9,6 +9,8 @@ import android.telephony.TelephonyManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class State {
 
@@ -64,6 +66,10 @@ public class State {
         appendLog(s);
     }
     */
+    static Pattern balancePat1 = Pattern.compile("minus[^0-9]*([0-9]+([\\.,][0-9][0-9])?)");
+    static Pattern balancePat2 = Pattern.compile("balans: ?(-[0-9]+([\\.,][0-9][0-9])?)");
+    static Pattern balancePat3 = Pattern.compile("-?[0-9]+[\\.,][0-9][0-9]");
+    static Pattern balancePat4 = Pattern.compile("(-?[0-9]+) ?R(\\. ?([0-9][0-9]))?");
 
     static boolean isDebug() {
         return Build.FINGERPRINT.startsWith("generic");
@@ -142,6 +148,51 @@ public class State {
         Date now = new Date();
         long now_time = now.getTime();
         return last_event < now_time;
+    }
+
+    static String parseBalance(String source) {
+        Matcher matcher = balancePat1.matcher(source);
+        if (matcher.find()) {
+            try {
+                double v = Double.parseDouble(matcher.group(1));
+                return -v + "";
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+        matcher = balancePat2.matcher(source);
+        if (matcher.find()) {
+            try {
+                double v = Double.parseDouble(matcher.group(1));
+                return v + "";
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+        matcher = balancePat3.matcher(source);
+        if (matcher.find()) {
+            try {
+                double v = Double.parseDouble(matcher.group(1));
+                return v + "";
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+        matcher = balancePat3.matcher(source);
+        if (matcher.find()) {
+            try {
+                double v = Double.parseDouble(matcher.group(1));
+                if (v >= 0) {
+                    v += Double.parseDouble(matcher.group(3)) / 100.;
+                } else {
+                    v -= Double.parseDouble(matcher.group(3)) / 100;
+                }
+                return v + "";
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+        return null;
     }
 
 }
