@@ -483,7 +483,7 @@ public class StateFragment extends Fragment
                 tvBalance.setTextColor(getResources().getColor(android.R.color.secondary_text_dark));
                 if ((b <= balance_limit) && (balance_limit > 0))
                     tvBalance.setTextColor(getResources().getColor(R.color.error));
-                balance = String.format("%.2f", b);
+                balance = State.formatBalance(b);
             } catch (Exception ex) {
                 // ignore
             }

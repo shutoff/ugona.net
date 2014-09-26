@@ -30,41 +30,41 @@ public class State {
     static int telephony_state = 0;
 
     /*
-    static public void appendLog(String text) {
-        Log.v("v", text);
+        static public void appendLog(String text) {
+            Log.v("v", text);
 
-        File logFile = Environment.getExternalStorageDirectory();
-        logFile = new File(logFile, "car.log");
-        if (!logFile.exists()) {
+            File logFile = Environment.getExternalStorageDirectory();
+            logFile = new File(logFile, "car.log");
+            if (!logFile.exists()) {
+                try {
+                    if (!logFile.createNewFile())
+                        return;
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
             try {
-                if (!logFile.createNewFile())
-                    return;
+                //BufferedWriter for performance, true to set append to file flag
+                BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+                Date d = new Date();
+                buf.append(d.toLocaleString());
+                buf.append(" ");
+                buf.append(text);
+                buf.newLine();
+                buf.close();
             } catch (IOException e) {
                 // ignore
             }
         }
-        try {
-            //BufferedWriter for performance, true to set append to file flag
-            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
-            Date d = new Date();
-            buf.append(d.toLocaleString());
-            buf.append(" ");
-            buf.append(text);
-            buf.newLine();
-            buf.close();
-        } catch (IOException e) {
-            // ignore
-        }
-    }
 
-    static public void print(Throwable ex) {
-        ex.printStackTrace();
-        appendLog("Error: " + ex.toString());
-        StringWriter sw = new StringWriter();
-        ex.printStackTrace(new PrintWriter(sw));
-        String s = sw.toString();
-        appendLog(s);
-    }
+        static public void print(Throwable ex) {
+            ex.printStackTrace();
+            appendLog("Error: " + ex.toString());
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+            String s = sw.toString();
+            appendLog(s);
+        }
     */
     static Pattern balancePat1 = Pattern.compile("minus[^0-9]*([0-9]+([\\.,][0-9][0-9])?)");
     static Pattern balancePat2 = Pattern.compile("balans: ?(-[0-9]+([\\.,][0-9][0-9])?)");
@@ -148,6 +148,12 @@ public class State {
         Date now = new Date();
         long now_time = now.getTime();
         return last_event < now_time;
+    }
+
+    static String formatBalance(double b) {
+        if ((int) b == b)
+            return String.format("%,d", (int) b);
+        return String.format("%,.2f", b);
     }
 
     static String parseBalance(String source) {
