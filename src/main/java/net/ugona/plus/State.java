@@ -4,9 +4,17 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Environment;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -28,8 +36,11 @@ public class State {
     static final int CMD_GUARD = 1 << 11;
     static final int CMD_TRUNK = 1 << 12;
     static int telephony_state = 0;
+    static Pattern balancePat1 = Pattern.compile("minus[^0-9]*([0-9]+([\\.,][0-9][0-9])?)");
+    static Pattern balancePat2 = Pattern.compile("balans: ?(-[0-9]+([\\.,][0-9][0-9])?)");
+    static Pattern balancePat3 = Pattern.compile("-?[0-9]+[\\.,][0-9][0-9]");
+    static Pattern balancePat4 = Pattern.compile("(-?[0-9]+) ?R(\\. ?([0-9][0-9]))?");
 
-    /*
     static public void appendLog(String text) {
         Log.v("v", text);
 
@@ -65,11 +76,6 @@ public class State {
         String s = sw.toString();
         appendLog(s);
     }
-    */
-    static Pattern balancePat1 = Pattern.compile("minus[^0-9]*([0-9]+([\\.,][0-9][0-9])?)");
-    static Pattern balancePat2 = Pattern.compile("balans: ?(-[0-9]+([\\.,][0-9][0-9])?)");
-    static Pattern balancePat3 = Pattern.compile("-?[0-9]+[\\.,][0-9][0-9]");
-    static Pattern balancePat4 = Pattern.compile("(-?[0-9]+) ?R(\\. ?([0-9][0-9]))?");
 
     static boolean isDebug() {
         return Build.FINGERPRINT.startsWith("generic");

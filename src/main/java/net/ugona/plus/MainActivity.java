@@ -69,6 +69,7 @@ import java.net.HttpURLConnection;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
@@ -907,19 +908,18 @@ public class MainActivity extends ActionBarActivity {
                     data.add("reg", reg);
                     Cars.Car[] cars = Cars.getCars(MainActivity.this);
                     String d = null;
-                    JsonArray jCars = new JsonArray();
+                    JsonObject jCars = new JsonObject();
                     for (Cars.Car car : cars) {
                         String key = preferences.getString(Names.Car.CAR_KEY + car.id, "");
                         if (key.equals("") || (key.equals("demo")))
                             continue;
                         JsonObject c = new JsonObject();
-                        c.add("key", key);
                         c.add("id", car.id);
                         c.add("phone", preferences.getString(Names.Car.CAR_PHONE + car.id, ""));
                         c.add("auth", preferences.getString(Names.Car.AUTH + car.id, ""));
                         c.add("limit", preferences.getInt(Names.Car.LIMIT + car.id, 50));
                         c.add("guard", preferences.getString(Names.Car.GUARD_MODE + car.id, ""));
-                        jCars.add(c);
+                        jCars.add(key, c);
                     }
                     data.add("car_data", jCars);
                     Calendar cal = Calendar.getInstance();
@@ -947,7 +947,8 @@ public class MainActivity extends ActionBarActivity {
                         }
                     }
                     if (!id.equals(""))
-                        data.add("id", id);
+                        data.add("uid", id);
+                    data.add("lang", Locale.getDefault().getLanguage());
                     String phone = "";
                     try {
                         phone = tm.getLine1Number();
@@ -1224,7 +1225,7 @@ public class MainActivity extends ActionBarActivity {
                     fragment.car_id = car_id;
                     fragment.current = current;
                     return fragment;
-            }
+                }
                 case PAGE_ACTIONS: {
                     ActionFragment fragment = new ActionFragment();
                     fragment.car_id = car_id;
@@ -1254,7 +1255,7 @@ public class MainActivity extends ActionBarActivity {
                     stat_fragment = fragment;
                     return fragment;
                 }
-        }
+            }
             return null;
         }
 
@@ -1278,9 +1279,9 @@ public class MainActivity extends ActionBarActivity {
                     return getString(R.string.tracks);
                 case PAGE_STAT:
                     return getString(R.string.stat);
-        }
+            }
             return super.getPageTitle(position);
-    }
+        }
     }
 
     class CarsAdapter extends BaseAdapter {
@@ -1307,7 +1308,7 @@ public class MainActivity extends ActionBarActivity {
                 LayoutInflater inflater = (LayoutInflater) getBaseContext()
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 v = inflater.inflate(R.layout.car_list_item, null);
-        }
+            }
             TextView tv = (TextView) v.findViewById(R.id.name);
             tv.setText(cars[position].name);
             return v;
@@ -1320,11 +1321,11 @@ public class MainActivity extends ActionBarActivity {
                 LayoutInflater inflater = (LayoutInflater) getBaseContext()
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 v = inflater.inflate(R.layout.car_list_dropdown_item, null);
-        }
+            }
             TextView tv = (TextView) v.findViewById(R.id.name);
             tv.setText(cars[position].name);
             return v;
-    }
+        }
     }
 
 }

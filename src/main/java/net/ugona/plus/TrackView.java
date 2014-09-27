@@ -316,6 +316,7 @@ public class TrackView extends MapActivity {
                 ex.printStackTrace();
             }
             String res = track_data.toString();
+            State.appendLog(res);
             return res;
         }
 
