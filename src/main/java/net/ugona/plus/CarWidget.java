@@ -337,7 +337,7 @@ public class CarWidget extends AppWidgetProvider {
                     double value = Double.parseDouble(preferences.getString(Names.Car.BALANCE + car_id, ""));
                     if ((value <= balance_limit) && (balance_limit >= 0))
                         widgetView.setInt(R.id.balance, "setTextColor", context.getResources().getColor(R.color.error));
-                    b = String.format("%.2f", value);
+                    b = State.formatBalance(value);
                 } catch (Exception ex) {
                     // ignore
                 }

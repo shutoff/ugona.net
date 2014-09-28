@@ -156,6 +156,8 @@ public class MapPointActivity extends MapActivity {
                         return true;
                     point_data = null;
                     car_id = cars[i].id;
+                    trackTask = null;
+                    updateTrack();
                     callJs("showPoints()");
                     callJs("center()");
                     return true;
@@ -344,8 +346,7 @@ public class MapPointActivity extends MapActivity {
                     }
                 });
             }
-            if (!zone.equals(""))
-                data += ";" + zone;
+            data += ";" + zone;
             if (times.containsKey(id))
                 data += ";" + times.get(id);
             return data;

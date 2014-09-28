@@ -100,6 +100,12 @@ public class State {
         return telephony_state > 0;
     }
 
+    static String formatBalance(double d){
+        if ((int)d == d)
+            return String.format("%,d", (int)d);
+        return String.format("%,.2f", d);
+    }
+
     static String formatTime(Context context, long time) {
         try {
             if (Settings.System.getInt(context.getContentResolver(), Settings.System.TIME_12_24) == 12) {
