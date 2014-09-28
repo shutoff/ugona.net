@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+   Copyright 2012 Hai Bison
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
+<resources>
+
+    <string name="alp_42447968_cmd_confirm">Подтверждение</string>
+    <string name="alp_42447968_cmd_continue">Продолжить</string>
+    <string name="alp_42447968_cmd_forgot_pattern">Забыли ключ?</string>
+    <string name="alp_42447968_cmd_retry">Повторение</string>
+    <string name="alp_42447968_loading">Зарузка…</string>
+    <string name="alp_42447968_lockscreen_access_pattern_cell_added">Колонка добавлена</string>
+    <string name="alp_42447968_lockscreen_access_pattern_cleared">Ключ очищен</string>
+    <string name="alp_42447968_lockscreen_access_pattern_detected">Ключ закончен</string>
+    <string name="alp_42447968_lockscreen_access_pattern_start">Ключ начат</string>
+    <string name="alp_42447968_msg_connect_4dots">Соедините от 4 до 7 точек.\nПопробуйте еще раз…</string>
+    <string name="alp_42447968_msg_draw_an_unlock_pattern">Нарисуйте клч:</string>
+    <string name="alp_42447968_msg_draw_pattern_to_unlock">Нарисуйте ключ:</string>
+    <string name="alp_42447968_msg_pattern_recorded">Ключ сохранен!</string>
+    <string name="alp_42447968_msg_redraw_pattern_to_confirm">Повторите ключ еще раз:</string>
+    <string name="alp_42447968_msg_release_finger_when_done"></string>
+    <string name="alp_42447968_msg_try_again">Повторите еще раз</string>
+    <string name="alp_42447968_msg_your_new_unlock_pattern">Надо ввести новый ключ:</string>
+
+    <plurals name="alp_42447968_pmsg_connect_x_dots">
+        <item quantity="one">Соедините %1$d точка.\nПопробуйте еще раз…</item>
+        <item quantity="many">Соедините %1$d точки.\nПопробуйте еще раз…</item>
+        <item quantity="other">Соедините %1$d точек.\nПопробуйте еще раз…</item>
+    </plurals>
+
+</resources>

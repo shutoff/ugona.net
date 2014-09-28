@@ -173,6 +173,14 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="Actions"
+            android:theme="@style/Alp.42447968.Theme.Dark" />
+
+        <activity
+            android:name="com.haibison.android.lockpattern.LockPatternActivity"
+            android:theme="@style/Alp.42447968.Theme.Dark" />
+
         <receiver android:name=".SmsMonitor">
             <intent-filter android:priority="7000">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />

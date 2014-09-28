@@ -36,6 +36,7 @@ public final class Names {
     static final String USE_GPS = "use_gps";
     static final String MESSAGE = "message";
     static final String URL = "url";
+    static final String PATTERN = "pattern";
 
     public final class Car {
         static final String ENGINE = "Engine";

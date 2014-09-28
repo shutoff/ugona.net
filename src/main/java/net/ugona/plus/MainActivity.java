@@ -53,6 +53,7 @@ import com.eclipsesource.json.ParseException;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.haibison.android.lockpattern.LockPatternActivity;
 import com.romorama.caldroid.CaldroidFragment;
 import com.romorama.caldroid.CaldroidListener;
 import com.squareup.okhttp.MediaType;
@@ -81,6 +82,8 @@ public class MainActivity extends ActionBarActivity {
 
     static final int REQUEST_ALARM = 4000;
     static final int CAR_SETUP = 4001;
+    static final int REQUEST_PATTERN = 4002;
+    static final int REQUEST_CHECK_PATTERN = 4003;
 
     static final int UPDATE_INTERVAL = 30 * 1000;
 
@@ -490,9 +493,18 @@ public class MainActivity extends ActionBarActivity {
                 startActivity(intent);
                 return true;
             }
-            case R.id.passwd:
-                setPassword();
+            case R.id.passwd: {
+                String pattern = preferences.getString(Names.PATTERN, "");
+                if (pattern.equals("")) {
+                    setPassword();
+                    return true;
+                }
+                Intent intent = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null,
+                        this, LockPatternActivity.class);
+                intent.putExtra(LockPatternActivity.EXTRA_PATTERN, pattern.toCharArray());
+                startActivityForResult(intent, REQUEST_CHECK_PATTERN);
                 return true;
+            }
             case R.id.recalc: {
                 final AlertDialog dialog = new AlertDialog.Builder(this)
                         .setTitle(R.string.recalc_stat)
@@ -604,6 +616,19 @@ public class MainActivity extends ActionBarActivity {
             intent.putExtra(Names.ID, car_id);
             startService(intent);
             return;
+        }
+        if (requestCode == REQUEST_PATTERN) {
+            if (resultCode == RESULT_OK) {
+                char[] pattern = data.getCharArrayExtra(LockPatternActivity.EXTRA_PATTERN);
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.remove(Names.PASSWORD);
+                ed.putString(Names.PATTERN, String.copyValueOf(pattern));
+                ed.commit();
+            }
+        }
+        if (requestCode == REQUEST_CHECK_PATTERN) {
+            if (resultCode == RESULT_OK)
+                setPassword();
         }
     }
 
@@ -841,6 +866,7 @@ public class MainActivity extends ActionBarActivity {
         final EditText etPasswd1 = (EditText) dialog.findViewById(R.id.password);
         final EditText etPasswd2 = (EditText) dialog.findViewById(R.id.password1);
         final TextView tvConfrim = (TextView) dialog.findViewById(R.id.invalid_confirm);
+        final Button btnGraph = (Button) dialog.findViewById(R.id.graphic);
         final Button btnSave = dialog.getButton(Dialog.BUTTON_POSITIVE);
         final Context context = this;
 
@@ -879,8 +905,23 @@ public class MainActivity extends ActionBarActivity {
                 }
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putString(Names.PASSWORD, etPasswd1.getText().toString());
+                ed.remove(Names.PATTERN);
                 ed.commit();
                 dialog.dismiss();
+            }
+        });
+
+        btnGraph.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!password.equals(etOldPswd.getText().toString())) {
+                    Actions.showMessage(context, R.string.password, R.string.invalid_password);
+                    return;
+                }
+                dialog.dismiss();
+                Intent intent = new Intent(LockPatternActivity.ACTION_CREATE_PATTERN, null,
+                        MainActivity.this, LockPatternActivity.class);
+                startActivityForResult(intent, REQUEST_PATTERN);
             }
         });
     }

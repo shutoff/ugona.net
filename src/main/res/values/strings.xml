@@ -640,4 +640,5 @@
     <string name="pointer_sms_sum">Send SMS on error transfer data to service</string>
     <string name="find_req_sum">Send GPS и GSM location every 10 minutes in 3 hours</string>
     <string name="map_req_sum">Request location for SMS answer</string>
+    <string name="graphics_code">Графический пароль</string>
 </resources>

@@ -28,6 +28,7 @@ import android.widget.TextView;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
+import com.haibison.android.lockpattern.LockPatternActivity;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -37,13 +38,14 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Actions {
+public class Actions extends LockPatternActivity {
 
     static final String INCORRECT_MESSAGE = "Incorrect message";
     static final String COMMAND_URL = "https://car-online.ugona.net/command?auth=$1&command=$2";
     final static String URL_SET = "https://car-online.ugona.net/set?auth=$1&v=$2";
     final static String URL_SETTINGS = "https://car-online.ugona.net/settings?auth=$1";
     static final String URL_CMD = "https://car-online.ugona.net/command?skey=$1&cmd=$2";
+    static Answer passwdActions = null;
     static Pattern location;
     static String[] alarms = {
             "Heavy shock",
@@ -437,7 +439,6 @@ public class Actions {
             }
         });
     }
-
 
     static void balance(final Context context, final String car_id) {
         requestPassword(context, car_id, R.string.balance, R.string.balance_request, new Answer() {
@@ -1216,6 +1217,7 @@ public class Actions {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         final String password = preferences.getString(Names.PASSWORD, "");
+        final String key = preferences.getString(Names.PATTERN, "");
         if (device_password || (password.length() > 0)) {
             int id = R.layout.password;
             if (!device_password) {
@@ -1226,6 +1228,14 @@ public class Actions {
             }
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
             builder.setView(inflater.inflate(id, null));
+        } else if (!key.equals("")) {
+            passwdActions = action;
+            Intent intent = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null,
+                    context, Actions.class);
+            intent.putExtra(LockPatternActivity.EXTRA_PATTERN, key.toCharArray());
+            context.startActivity(intent);
+            return;
+
         } else if (message == null) {
             action.answer(null);
             return;
@@ -1529,6 +1539,15 @@ public class Actions {
                 task.execute(URL_CMD, preferences.getString(Names.Car.CAR_KEY + car_id, ""), cmd);
             }
         });
+    }
+
+    @Override
+    protected void finishWithResultOk(char[] pattern) {
+        finish();
+        if (passwdActions != null) {
+            passwdActions.answer(null);
+            passwdActions = null;
+        }
     }
 
     static class Ccode {

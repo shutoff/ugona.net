@@ -37,7 +37,6 @@
         <item name="android:buttonStyle">@style/ThemeAction</item>
     </style>
 
-
     <style name="Theme.Transparent" parent="android:Theme.Holo.Dialog">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>

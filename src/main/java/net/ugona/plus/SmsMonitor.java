@@ -139,6 +139,8 @@ public class SmsMonitor extends BroadcastReceiver {
             i.putExtra(Names.ID, car_id);
             context.sendBroadcast(i);
         } catch (Exception ex) {
+            Toast toast = Toast.makeText(context, ex.getLocalizedMessage(), Toast.LENGTH_LONG);
+            toast.show();
             ex.printStackTrace();
             return false;
         }
