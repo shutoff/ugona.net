@@ -6,3 +6,4 @@
 local.properties
 Thumbs.db
 /src/main/java/com/squareup/okio/package-info.java
+/src/main/assets/leaflet.min.js

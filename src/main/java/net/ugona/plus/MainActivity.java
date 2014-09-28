@@ -18,6 +18,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
@@ -94,7 +95,7 @@ public class MainActivity extends ActionBarActivity {
     static final int PAGE_TRACK = 4;
     static final int PAGE_STAT = 5;
 
-    static final int VERSION = 12;
+    static final int VERSION = 13;
     static final String SENDER_ID = "915289471784";
     final static String URL_KEY = "https://car-online.ugona.net/key?login=$1&password=$2";
     final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
@@ -919,6 +920,8 @@ public class MainActivity extends ActionBarActivity {
                         c.add("auth", preferences.getString(Names.Car.AUTH + car.id, ""));
                         c.add("limit", preferences.getInt(Names.Car.LIMIT + car.id, 50));
                         c.add("guard", preferences.getString(Names.Car.GUARD_MODE + car.id, ""));
+                        c.add("os", Build.VERSION.RELEASE);
+                        c.add("model", Build.MODEL);
                         jCars.add(key, c);
                     }
                     data.add("car_data", jCars);

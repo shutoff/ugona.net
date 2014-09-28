@@ -353,7 +353,7 @@ abstract public class MapActivity extends WebViewActivity {
     class JsInterface extends Js {
 
         @JavascriptInterface
-        public void init(String data) {
+        public void init() {
             loaded = true;
         }
 
