@@ -31,7 +31,7 @@
     <string name="alp_42447968_msg_pattern_recorded">Ключ сохранен!</string>
     <string name="alp_42447968_msg_redraw_pattern_to_confirm">Повторите ключ еще раз:</string>
     <string name="alp_42447968_msg_release_finger_when_done"></string>
-    <string name="alp_42447968_msg_try_again">Повторите еще раз</string>
+    <string name="alp_42447968_msg_try_again">Попробуйте еще раз</string>
     <string name="alp_42447968_msg_your_new_unlock_pattern">Надо ввести новый ключ:</string>
 
     <plurals name="alp_42447968_pmsg_connect_x_dots">

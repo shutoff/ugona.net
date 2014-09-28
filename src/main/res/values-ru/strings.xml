@@ -642,4 +642,5 @@
     <string name="pointer_inet_error">При отправке команды произошла ошибка.\nОтправить команду как СМС?</string>
     <string name="pointer_ok">Команда успешно поставлено в очередь и будет выполнена, когда устройство выйдет на связь</string>
     <string name="pointer_err">При отправке команды произошла ошибка</string>
+    <string name="graphics_code">Графический пароль</string>
 </resources>
