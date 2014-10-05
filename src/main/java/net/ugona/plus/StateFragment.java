@@ -361,7 +361,7 @@ public class StateFragment extends Fragment
                     String error_text = intent.getStringExtra(Names.ERROR);
                     if (error_text == null)
                         error_text = getString(R.string.data_error);
-                    if (error_text.equals("Auth error")) {
+                    if (error_text.equals("Auth error") || error_text.equals("Login or password error")) {
                         showAuth();
                         return;
                     }

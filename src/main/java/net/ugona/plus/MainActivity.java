@@ -523,6 +523,12 @@ public class MainActivity extends ActionBarActivity {
                 });
                 return true;
             }
+            case R.id.maintenance: {
+                Intent intent = new Intent(this, MaintenanceActivity.class);
+                intent.putExtra(Names.ID, car_id);
+                startActivity(intent);
+                return true;
+            }
 
 /*
             case R.id.log: {

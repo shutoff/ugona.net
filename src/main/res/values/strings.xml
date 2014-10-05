@@ -641,4 +641,26 @@
     <string name="find_req_sum">Send GPS и GSM location every 10 minutes in 3 hours</string>
     <string name="map_req_sum">Request location for SMS answer</string>
     <string name="graphics_code">Set graphic pattern</string>
+    <string name="maintenance">Maintenance</string>
+    <string name="or">or</string>
+    <plurals name="years">
+        <item quantity="one">%d year</item>
+        <item quantity="other">%d years</item>
+    </plurals>
+    <plurals name="months">
+        <item quantity="one">%d month</item>
+        <item quantity="other">%d years</item>
+    </plurals>
+    <plurals name="days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <string name="mileage_str">Mileage</string>
+    <string name="period">Period</string>
+    <string name="date">Date</string>
+    <string name="save_data">Data saving...</string>
+    <string name="save_data_error">Save data error</string>
+    <string name="left">Left</string>
+    <string name="rerun">Rerun</string>
+    <string name="delay">Delay</string>
 </resources>
