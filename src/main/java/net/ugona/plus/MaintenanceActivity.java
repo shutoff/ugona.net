@@ -298,6 +298,9 @@ public class MaintenanceActivity extends ActionBarActivity {
                                     toast.show();
                                 }
                             };
+                            SharedPreferences.Editor ed = preferences.edit();
+                            ed.remove(Names.Car.MAINTENANCE_TIME + car_id);
+                            ed.commit();
                             task.execute(URL_MAINTENANCE, preferences.getString(Names.Car.CAR_KEY + car_id, ""), Locale.getDefault().getLanguage(),
                                     "set", id);
                         }
@@ -329,6 +332,9 @@ public class MaintenanceActivity extends ActionBarActivity {
                                 toast.show();
                             }
                         };
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.remove(Names.Car.MAINTENANCE_TIME + car_id);
+                        ed.commit();
                         task.execute(URL_MAINTENANCE, preferences.getString(Names.Car.CAR_KEY + car_id, ""), Locale.getDefault().getLanguage(),
                                 "name", vName.getText(),
                                 "mileage", vMileage.getText(),
@@ -435,8 +441,13 @@ public class MaintenanceActivity extends ActionBarActivity {
                                     delta = -delta;
                                     s = getString(R.string.rerun);
                                 }
-                                double k = Math.pow(10, Math.floor(Math.log10(delta)) - 2);
-                                delta = Math.round(Math.round(delta / k) * k);
+                                if (delta > 10) {
+                                    double k = Math.floor(Math.log10(delta));
+                                    if (k < 2)
+                                        k = 2;
+                                    k = Math.pow(10, k) / 2;
+                                    delta = Math.round(Math.round(delta / k) * k);
+                                }
                                 s += " " + String.format("%,d", (long) delta) + " " + getString(R.string.km);
                                 vMileageLeft.setText(s);
                                 vMileageLeft.setVisibility(View.VISIBLE);

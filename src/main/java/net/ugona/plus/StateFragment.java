@@ -42,6 +42,7 @@ import com.eclipsesource.json.ParseException;
 import org.joda.time.LocalDateTime;
 
 import java.text.DateFormat;
+import java.util.Date;
 import java.util.Vector;
 
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
@@ -122,6 +123,7 @@ public class StateFragment extends Fragment
     ImageView ivLevel;
 
     TextView tvValet;
+    TextView tvMaintenance;
 
     View mNet;
     View balanceBlock;
@@ -143,7 +145,7 @@ public class StateFragment extends Fragment
     boolean pointer;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         final Context context = getActivity();
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -278,6 +280,16 @@ public class StateFragment extends Fragment
         prgUpdate.setVisibility(View.GONE);
 
         vTime = v.findViewById(R.id.time);
+        tvMaintenance = (TextView) v.findViewById(R.id.maintenance);
+        if (tvMaintenance != null)
+            tvMaintenance.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(getActivity(), MaintenanceActivity.class);
+                    intent.putExtra(Names.ID, car_id);
+                    startActivity(intent);
+                }
+            });
 
         tvAddress.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -402,6 +414,18 @@ public class StateFragment extends Fragment
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        Date now = new Date();
+        if (now.getTime() > preferences.getLong(Names.Car.MAINTENANCE_TIME + car_id, 0) + 4 * 3600 * 1000) {
+            Intent intent = new Intent(getActivity(), FetchService.class);
+            intent.setAction(FetchService.ACTION_MAINTENANCE);
+            intent.putExtra(Names.ID, car_id);
+            getActivity().startService(intent);
+        }
+    }
+
+    @Override
     public void onDestroyView() {
         if (adapter != null)
             adapter.detach(getActivity());
@@ -450,6 +474,50 @@ public class StateFragment extends Fragment
 
         if (getActivity() == null)
             return;
+
+        if (tvMaintenance != null) {
+            String s = null;
+            int days = preferences.getInt(Names.Car.LEFT_DAYS + car_id, 16);
+            int mileage = preferences.getInt(Names.Car.LEFT_MILEAGE + car_id, 550);
+            if (days < 16) {
+                s = preferences.getString(Names.Car.MAINTENANCE + car_id, "") + "\n";
+                tvMaintenance.setTextColor(getResources().getColor((days < 1) ? R.color.error : R.color.changed));
+                if (days >= 0) {
+                    s += getString(R.string.left);
+                } else {
+                    s += getString(R.string.delay);
+                    days = -days;
+                }
+                s += " ";
+                if (days < 30) {
+                    s += getResources().getQuantityString(R.plurals.days, days, days);
+                } else {
+                    int month = (int) Math.round(days / 30.);
+                    if (month < 12) {
+                        s += getResources().getQuantityString(R.plurals.months, month, month);
+                    } else {
+                        int year = (int) Math.round(days / 365.25);
+                        s += getResources().getQuantityString(R.plurals.years, year, year);
+                    }
+                }
+                tvMaintenance.setText(s);
+                tvMaintenance.setVisibility(View.VISIBLE);
+            } else if (mileage <= 500) {
+                s = preferences.getString(Names.Car.MAINTENANCE + car_id, "") + "\n";
+                tvMaintenance.setTextColor(getResources().getColor((mileage < 50) ? R.color.error : R.color.changed));
+                if (mileage >= 0) {
+                    s += getString(R.string.left);
+                } else {
+                    s += getString(R.string.rerun);
+                    mileage = -mileage;
+                }
+                s += String.format(" %,d ", mileage) + getString(R.string.km);
+                tvMaintenance.setText(s);
+                tvMaintenance.setVisibility(View.VISIBLE);
+            } else {
+                tvMaintenance.setVisibility(View.GONE);
+            }
+        }
 
         long last = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
         if (last != 0) {

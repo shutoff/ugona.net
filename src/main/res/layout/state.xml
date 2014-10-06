@@ -116,6 +116,14 @@
                 android:minHeight="500px"
                 android:padding="15dp" />
 
+            <TextView
+                android:id="@+id/maintenance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="5dp"
+                android:visibility="gone" />
+
             <LinearLayout
                 android:id="@+id/pointers1"
                 android:layout_width="match_parent"

@@ -182,6 +182,11 @@ public final class Names {
         static final String POINTER_SMS = "pointer_sms";
         static final String POINTER_MODE_TIME = "pointer_mode_time";
         static final String POINTER_SMS_TIME = "pointer_sms_time";
+
+        static final String MAINTENANCE = "maintenance";
+        static final String MAINTENANCE_TIME = "maintenance_time";
+        static final String LEFT_DAYS = "left_days_";
+        static final String LEFT_MILEAGE = "left_mileage_";
     }
 
     public final class Notify {
@@ -195,5 +200,6 @@ public final class Names {
         static final String CARD = "card_notify";
         static final String ZONE = "zone_notify_";
         static final String RESTORE = "restore_notify_";
+        static final String MAINTENCE = "maintence_notify";
     }
 }

@@ -25,6 +25,13 @@ public class GcmService extends IntentService {
             Intent i = new Intent(this, FetchService.class);
             i.putExtra(Names.ID, car_id);
             startService(i);
+            if (extras.getString("maintenance") != null) {
+                i = new Intent(this, FetchService.class);
+                i.setAction(FetchService.ACTION_MAINTENANCE);
+                i.putExtra(Names.ID, car_id);
+                i.putExtra(Names.Car.MAINTENANCE, extras.getString("maintenance"));
+                startService(i);
+            }
             String message = extras.getString("message");
             if (message != null) {
                 String title = extras.getString("title");

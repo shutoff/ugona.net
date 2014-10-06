@@ -27,10 +27,12 @@ import com.eclipsesource.json.ParseException;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,6 +46,7 @@ public class FetchService extends Service {
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR";
     static final String ACTION_NOTIFICATION = "net.ugona.plus.NOTIFICATION";
     static final String ACTION_RELE_OFF = "net.ugona.plus.RELE_OFF";
+    static final String ACTION_MAINTENANCE = "net.ugona.plus.MAINTENANCE";
 
     static final String AUTH_ERROR = "Auth error";
 
@@ -53,6 +56,7 @@ public class FetchService extends Service {
     static final String URL_KEY = "https://car-online.ugona.net/key?auth=$1";
     static final String URL_CARD = "https://car-online.ugona.net/card?skey=$1&t=$2";
     static final String URL_EVENT = "https://car-online.ugona.net/event?skey=$1&auth=$2&type=$3&time=$4&id=$5";
+    static final String URL_MAINTENACE = "https://car-online.ugona.net/maintenance?skey=$1&lang=$2";
 
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;
@@ -123,6 +127,12 @@ public class FetchService extends Service {
                 }
                 if (action.equals(ACTION_RELE_OFF))
                     Actions.rele_off(this, car_id, intent.getStringExtra(Names.Car.AUTH), intent.getStringExtra(Names.PASSWORD));
+                if (action.equals(ACTION_MAINTENANCE)) {
+                    new MaintenanceRequest(Preferences.getCar(preferences, car_id), intent.getStringExtra(Names.Car.MAINTENANCE) != null);
+                    if (startRequest())
+                        return START_STICKY;
+                    return START_NOT_STICKY;
+                }
             }
             if (car_id != null)
                 new StatusRequest(Preferences.getCar(preferences, car_id));
@@ -400,6 +410,128 @@ public class FetchService extends Service {
         }
 
         abstract void exec(String api_key);
+    }
+
+    class MaintenanceRequest extends ServerRequest {
+
+        boolean notify_;
+
+        MaintenanceRequest(String id, boolean notify) {
+            super("M", id);
+            notify_ = notify;
+        }
+
+        @Override
+        void background(JsonObject res) throws ParseException {
+            JsonArray data = res.get("data").asArray();
+            long score = 550;
+            SharedPreferences.Editor ed = preferences.edit();
+            Date now = new Date();
+            int left_days = preferences.getInt(Names.Car.LEFT_DAYS + car_id, 1000);
+            int left_mileage = preferences.getInt(Names.Car.LEFT_MILEAGE + car_id, 1000);
+            ed.remove(Names.Car.LEFT_DAYS + car_id);
+            ed.remove(Names.Car.LEFT_MILEAGE + car_id);
+            for (int i = 0; i < data.size(); i++) {
+                JsonObject v = data.get(i).asObject();
+                JsonValue vPeriod = v.get("period");
+                JsonValue vLast = v.get("last");
+                if ((vPeriod != null) && (vLast != null)) {
+                    Date last = new Date(vLast.asLong() * 1000);
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(last);
+                    cal.add(Calendar.MONTH, vPeriod.asInt());
+                    long days = (cal.getTime().getTime() - now.getTime()) / 86400000;
+                    if (days * 30 < score) {
+                        score = days * 30;
+                        ed.putString(Names.Car.MAINTENANCE + car_id, v.get("name").asString());
+                        ed.putInt(Names.Car.LEFT_DAYS + car_id, (int) days);
+                        ed.remove(Names.Car.LEFT_MILEAGE + car_id);
+                    }
+                }
+                JsonValue vMileage = v.get("mileage");
+                JsonValue vCurrent = v.get("current");
+                if ((vMileage != null) && (vCurrent != null)) {
+                    double delta = vMileage.asLong() - vCurrent.asLong();
+                    if (delta < score) {
+                        score = (long) delta;
+                        boolean minus = false;
+                        if (delta < 0) {
+                            delta = -delta;
+                            minus = true;
+                        }
+                        if (delta > 10) {
+                            double k = Math.floor(Math.log10(delta));
+                            if (k < 2)
+                                k = 2;
+                            k = Math.pow(10, k) / 2;
+                            delta = Math.round(Math.round(delta / k) * k);
+                        }
+                        if (minus)
+                            delta = -delta;
+                        ed.putString(Names.Car.MAINTENANCE + car_id, v.get("name").asString());
+                        ed.remove(Names.Car.LEFT_DAYS + car_id);
+                        ed.putInt(Names.Car.LEFT_MILEAGE + car_id, (int) delta);
+                    }
+                }
+            }
+            ed.putLong(Names.Car.MAINTENANCE_TIME + car_id, now.getTime());
+            ed.commit();
+            if ((left_days != preferences.getInt(Names.Car.LEFT_DAYS + car_id, 1000)) ||
+                    (left_mileage != preferences.getInt(Names.Car.LEFT_MILEAGE + car_id, 1000)))
+                sendUpdate(ACTION_UPDATE, car_id);
+            if (!notify_)
+                return;
+            int prev = preferences.getInt(Names.Notify.MAINTENCE + car_id, 0);
+            if (prev > 0) {
+                Alarm.removeNotification(FetchService.this, car_id, prev);
+                ed.remove(Names.Notify.MAINTENCE + car_id);
+            }
+            String s = null;
+            left_days = preferences.getInt(Names.Car.LEFT_DAYS + car_id, 16);
+            left_mileage = preferences.getInt(Names.Car.LEFT_MILEAGE + car_id, 550);
+            if (left_days <= 15) {
+                s = preferences.getString(Names.Car.MAINTENANCE + car_id, "") + "\n";
+                if (left_days >= 0) {
+                    s += getString(R.string.left);
+                } else {
+                    left_days = -left_days;
+                    s += getString(R.string.delay);
+                }
+                s += " ";
+                if (left_days < 30) {
+                    s += getResources().getQuantityString(R.plurals.days, left_days, left_days);
+                } else {
+                    int month = (int) Math.round(left_days / 30.);
+                    if (month < 12) {
+                        s += getResources().getQuantityString(R.plurals.months, month, month);
+                    } else {
+                        int years = (int) Math.round(left_days / 265.25);
+                        s += getResources().getQuantityString(R.plurals.years, years, years);
+                    }
+                }
+            }
+            if (left_mileage <= 500) {
+                s = preferences.getString(Names.Car.MAINTENANCE + car_id, "") + "\n";
+                if (left_mileage >= 0) {
+                    s += getString(R.string.left);
+                } else {
+                    left_mileage = -left_mileage;
+                    s += getString(R.string.rerun);
+                }
+                s += String.format(" %,d ", left_mileage) + getString(R.string.km);
+            }
+            if (s != null) {
+                String[] p = s.split("\n");
+                int notify_id = Alarm.createNotification(FetchService.this, p[1], R.drawable.info, car_id, null, 0, false, p[0]);
+                ed.putInt(Names.Notify.MAINTENCE + car_id, notify_id);
+            }
+            ed.commit();
+        }
+
+        @Override
+        void exec(String api_key) {
+            execute(URL_MAINTENACE, api_key, Locale.getDefault().getLanguage());
+        }
     }
 
     class StatusRequest extends ServerRequest {
