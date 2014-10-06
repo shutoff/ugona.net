@@ -643,4 +643,29 @@
     <string name="pointer_ok">Команда успешно поставлено в очередь и будет выполнена, когда устройство выйдет на связь</string>
     <string name="pointer_err">При отправке команды произошла ошибка</string>
     <string name="graphics_code">Графический пароль</string>
+    <string name="maintenance">Обслуживание</string>
+    <string name="or">или</string>
+    <plurals name="years">
+        <item quantity="one">%d год</item>
+        <item quantity="many">%d лет</item>
+        <item quantity="other">%d года</item>
+    </plurals>
+    <plurals name="months">
+        <item quantity="one">%d месяц</item>
+        <item quantity="many">%d месяцев</item>
+        <item quantity="other">%d месяца</item>
+    </plurals>
+    <plurals name="days">
+        <item quantity="one">%d ень</item>
+        <item quantity="many">%d дней</item>
+        <item quantity="other">%d дня</item>
+    </plurals>
+    <string name="mileage_str">Пробег</string>
+    <string name="period">Период</string>
+    <string name="date">Дата</string>
+    <string name="save_data">Сохранение данных...</string>
+    <string name="save_data_error">Ошибка сохранения данных</string>
+    <string name="left">Осталось</string>
+    <string name="rerun">Перепробег</string>
+    <string name="delay">Просрочка</string>
 </resources>

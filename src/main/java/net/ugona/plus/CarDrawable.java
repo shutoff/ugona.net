@@ -147,7 +147,7 @@ public class CarDrawable {
                 return new BitmapDrawable(bitmap);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+//            ex.printStackTrace();
         }
         return null;
     }

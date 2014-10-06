@@ -24,6 +24,7 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 
+import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -223,7 +224,8 @@ public class CarWidget extends AppWidgetProvider {
             boolean bigPict = false;
             if (rows == 0) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    Bundle options = appWidgetManager.getAppWidgetOptions(widgetID);
+                    Method method = AppWidgetManager.class.getMethod("getAppWidgetOptions", int.class);
+                    Bundle options = (Bundle) method.invoke(appWidgetManager, widgetID);
                     int maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
                     if (maxHeight > 0) {
                         if (height_rows == null)
@@ -514,8 +516,14 @@ public class CarWidget extends AppWidgetProvider {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         if (appWidgetManager == null)
             return false;
-        Bundle options = appWidgetManager.getAppWidgetOptions(widgetID);
-        return options.getInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY, -1) == AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD;
+        try {
+            Method method = AppWidgetManager.class.getMethod("getAppWidgetOptions", int.class);
+            Bundle options = (Bundle) method.invoke(appWidgetManager, widgetID);
+            return options.getInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY, -1) == AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD;
+        } catch (Exception ex) {
+            // ignroe
+        }
+        return false;
     }
 
     void updateLockWidget(Context context, RemoteViews widgetView, int widgetID, String car_id) {
