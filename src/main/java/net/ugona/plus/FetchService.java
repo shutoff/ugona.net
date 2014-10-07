@@ -597,6 +597,7 @@ public class FetchService extends Service {
             JsonValue contact_value = res.get("contact");
             boolean gps_valid = false;
             boolean prev_valet = false;
+            boolean prev_az = preferences.getBoolean(Names.Car.AZ, false);
             int prev_guard_mode = 0;
             if (contact_value != null) {
                 JsonObject contact = contact_value.asObject();
@@ -965,6 +966,14 @@ public class FetchService extends Service {
                     Alarm.removeNotification(FetchService.this, car_id, card_id);
                     ed.remove(Names.Notify.CARD + car_id);
                     ed.commit();
+                }
+            }
+
+            if (preferences.getBoolean(Names.Car.AZ + car_id, false) != prev_az) {
+                if (preferences.getBoolean(Names.Car.AZ + car_id, false)) {
+                    Actions.done_motor_on(FetchService.this, car_id, preferences.getLong(Names.Car.AZ_START + car_id, 0));
+                } else {
+                    Actions.done_motor_off(FetchService.this, car_id, preferences.getLong(Names.Car.AZ_STOP + car_id, 0));
                 }
             }
 
