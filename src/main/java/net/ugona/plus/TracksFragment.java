@@ -45,7 +45,7 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 public class TracksFragment extends Fragment
         implements MainActivity.DateChangeListener, OnRefreshListener {
 
-    final static String URL_TRACKS = "https://car-online.ugona.net/tracks?skey=$1&begin=$2&end=$3";
+    final static String URL_TRACKS = "/tracks?skey=$1&begin=$2&end=$3";
     final String DATE = "tracks_date";
     final String TRACK = "track";
     final String SELECTED = "selected";

@@ -34,7 +34,7 @@ import java.util.Vector;
 public class ActionFragment extends Fragment
         implements MainActivity.DateChangeListener {
 
-    final static String URL_MODE = "https://car-online.ugona.net/mode?auth=$1";
+    final static String URL_MODE = "/mode?auth=$1";
     static Action[] pointer_actions = {
             new PointerAction(R.drawable.icon_turbo_on, R.string.find, R.string.find_req_sum, "FIND", "find"),
             new PointerAction(R.drawable.icon_status, R.string.map_req, R.string.map_req_sum, "MAP", "map"),

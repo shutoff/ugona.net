@@ -36,7 +36,7 @@ public class Cars extends ActionBarActivity {
     final static int CAR_SETUP = 4000;
     final static int NEW_CAR = 4001;
 
-    final static String URL_PHOTOS = "https://car-online.ugona.net/photos?skey=$1&begin=$2";
+    final static String URL_PHOTOS = "/photos?skey=$1&begin=$2";
 
     SharedPreferences preferences;
     Car[] cars;

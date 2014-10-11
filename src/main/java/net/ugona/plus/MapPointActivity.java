@@ -30,7 +30,7 @@ public class MapPointActivity extends MapActivity {
     static final int REQUEST_ALARM = 4000;
     static final int UPDATE_INTERVAL = 30 * 1000;
 
-    final static String URL_TRACKS = "https://car-online.ugona.net/tracks?skey=$1&begin=$2&end=$3";
+    final static String URL_TRACKS = "/tracks?skey=$1&begin=$2&end=$3";
 
     String car_id;
     BroadcastReceiver br;

@@ -42,7 +42,7 @@ import java.util.Vector;
 
 public class MaintenanceActivity extends ActionBarActivity {
 
-    final static String URL_MAINTENANCE = "https://car-online.ugona.net/maintenance?skey=$1&lang=$2";
+    final static String URL_MAINTENANCE = "/maintenance?skey=$1&lang=$2";
     static int[] periods = new int[]{
             0, 1, 3, 6, 12, 24, 36, 120
     };

@@ -46,8 +46,8 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 public class EventsFragment extends Fragment
         implements MainActivity.DateChangeListener, OnRefreshListener {
 
-    final static String URL_EVENTS = "https://car-online.ugona.net/events?skey=$1&begin=$2&end=$3&first=$4&pointer=$5&auth=$6";
-    final static String URL_EVENT = "https://car-online.ugona.net/event?skey=$1&id=$2&time=$3";
+    final static String URL_EVENTS = "/events?skey=$1&begin=$2&end=$3&first=$4&pointer=$5&auth=$6";
+    final static String URL_EVENT = "/event?skey=$1&id=$2&time=$3";
     static final String FILTER = "filter";
     static final String DATE = "events_date";
     static final String EVENTS_DATA = "events";

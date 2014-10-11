@@ -2,6 +2,8 @@ package net.ugona.plus;
 
 public final class Names {
 
+    static final String API_URL = "https://car-online.ugona.net";
+
     static final String CARS = "car_list";
     static final String ID = "id";
     static final String TITLE = "Car Alarm";

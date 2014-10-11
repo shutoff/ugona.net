@@ -41,9 +41,9 @@ import java.util.Vector;
 
 public class AuthDialog extends Activity {
 
-    final static String URL_KEY = "https://car-online.ugona.net/key?login=$1&password=$2";
-    final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
-    final static String URL_PHOTOS = "https://car-online.ugona.net/photos?skey=$1&begin=$2";
+    final static String URL_KEY = "/key?login=$1&password=$2";
+    final static String URL_PROFILE = "/version?skey=$1";
+    final static String URL_PHOTOS = "/photos?skey=$1&begin=$2";
     static boolean is_show;
     EditText edLogin;
     EditText edPasswd;

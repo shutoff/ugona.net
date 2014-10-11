@@ -41,10 +41,10 @@ import java.util.regex.Pattern;
 public class Actions extends LockPatternActivity {
 
     static final String INCORRECT_MESSAGE = "Incorrect message";
-    static final String COMMAND_URL = "https://car-online.ugona.net/command?auth=$1&command=$2";
-    final static String URL_SET = "https://car-online.ugona.net/set?auth=$1&v=$2";
-    final static String URL_SETTINGS = "https://car-online.ugona.net/settings?auth=$1";
-    static final String URL_CMD = "https://car-online.ugona.net/command?skey=$1&cmd=$2";
+    static final String COMMAND_URL = "/command?auth=$1&command=$2";
+    final static String URL_SET = "/set?auth=$1&v=$2";
+    final static String URL_SETTINGS = "/settings?auth=$1";
+    static final String URL_CMD = "/command?skey=$1&cmd=$2";
     static Answer passwdActions = null;
     static Pattern location;
     static String[] alarms = {
