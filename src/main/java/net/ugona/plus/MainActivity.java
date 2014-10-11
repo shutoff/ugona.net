@@ -578,7 +578,10 @@ public class MainActivity extends ActionBarActivity {
                 args.putInt(CaldroidFragment.MONTH, current.getMonthOfYear());
                 args.putInt(CaldroidFragment.YEAR, current.getYear());
                 Calendar calendar = Calendar.getInstance();
-                args.putInt(CaldroidFragment.START_DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+                int first_day = calendar.getFirstDayOfWeek() - 1;
+                if (first_day < 0)
+                    first_day += 7;
+                args.putInt(CaldroidFragment.START_DAY_OF_WEEK, first_day);
                 caldroidFragment.setArguments(args);
                 LocalDateTime now = new LocalDateTime();
                 caldroidFragment.setMaxDate(now.toDate());
