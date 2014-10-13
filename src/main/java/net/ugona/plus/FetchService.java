@@ -119,11 +119,12 @@ public class FetchService extends Service {
                     String sound = intent.getStringExtra(Names.Car.NOTIFY);
                     String text = intent.getStringExtra(Names.MESSAGE);
                     String title = intent.getStringExtra(Names.TITLE);
+                    String mode = intent.getStringExtra(Names.Car.AZ_MODE);
                     int pictId = intent.getIntExtra(Names.Car.ALARM, 0);
                     int max_id = intent.getIntExtra(Names.Car.EVENT_ID, 0);
                     long when = intent.getLongExtra(Names.Car.EVENT_TIME, 0);
                     boolean outgoing = intent.getBooleanExtra(Names.Car.ALARM_MODE, false);
-                    showNotification(car_id, text, title, pictId, max_id, sound, when, outgoing);
+                    showNotification(car_id, text, title, pictId, max_id, sound, when, outgoing, mode);
                 }
                 if (action.equals(ACTION_RELE_OFF))
                     Actions.rele_off(this, car_id, intent.getStringExtra(Names.Car.AUTH), intent.getStringExtra(Names.PASSWORD));
@@ -142,7 +143,7 @@ public class FetchService extends Service {
         return START_NOT_STICKY;
     }
 
-    void showNotification(String car_id, String text, String title, int pictId, int max_id, String sound, long when, boolean outgoing) {
+    void showNotification(String car_id, String text, String title, int pictId, int max_id, String sound, long when, boolean outgoing, String mode) {
         if (title == null) {
             title = getString(R.string.app_name);
             String[] cars = preferences.getString(Names.CARS, "").split(",");
@@ -156,8 +157,17 @@ public class FetchService extends Service {
             }
         }
 
-        int defs = Notification.DEFAULT_LIGHTS + Notification.DEFAULT_VIBRATE;
-        if (sound == null)
+        if (mode == null)
+            mode = "";
+
+        int defs = Notification.DEFAULT_LIGHTS;
+        if (!mode.equals("none"))
+            defs += Notification.DEFAULT_VIBRATE;
+
+        if (!mode.equals(""))
+            sound = null;
+
+        if ((sound == null) && mode.equals(""))
             defs |= Notification.DEFAULT_SOUND;
 
         Uri uri = null;
@@ -522,7 +532,7 @@ public class FetchService extends Service {
             }
             if (s != null) {
                 String[] p = s.split("\n");
-                int notify_id = Alarm.createNotification(FetchService.this, p[1], R.drawable.info, car_id, null, 0, false, p[0]);
+                int notify_id = Alarm.createNotification(FetchService.this, p[1], R.drawable.info, car_id, null, 0, false, p[0], null);
                 ed.putInt(Names.Notify.MAINTENCE + car_id, notify_id);
             }
             ed.commit();

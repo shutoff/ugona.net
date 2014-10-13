@@ -43,7 +43,7 @@ public class GcmService extends IntentService {
                 if (url != null)
                     ed.putString(Names.URL, url);
                 ed.commit();
-                Alarm.createNotification(this, message, R.drawable.info, car_id, null, 0, false, title);
+                Alarm.createNotification(this, message, R.drawable.info, car_id, null, 0, false, title, null);
             }
         }
         GcmReceiver.completeWakefulIntent(intent);

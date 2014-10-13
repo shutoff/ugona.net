@@ -187,6 +187,8 @@ public final class Names {
         static final String MAINTENANCE_TIME = "maintenance_time";
         static final String LEFT_DAYS = "left_days_";
         static final String LEFT_MILEAGE = "left_mileage_";
+
+        static final String AZ_MODE = "az_mode_";
     }
 
     public final class Notify {

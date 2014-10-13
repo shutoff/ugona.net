@@ -69,7 +69,8 @@ public class Actions extends LockPatternActivity {
         id = preferences.getInt(Names.Notify.MOTOR_OFF + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
-        id = Alarm.createNotification(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "start", when);
+        String mode = preferences.getString(Names.Car.AZ_MODE + car_id, "");
+        id = Alarm.createNotification(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "start", when, false, null, mode);
         SharedPreferences.Editor ed = preferences.edit();
         ed.putInt(Names.Notify.MOTOR_ON + car_id, id);
         ed.remove(Names.Notify.MOTOR_OFF + car_id);
@@ -92,7 +93,8 @@ public class Actions extends LockPatternActivity {
         long time = (az_stop - az_start) / 60000;
         if ((time > 0) && (time <= 20))
             msg += " " + context.getString(R.string.motor_time).replace("$1", time + "");
-        id = Alarm.createNotification(context, msg, R.drawable.white_motor_off, car_id, null, when);
+        String mode = preferences.getString(Names.Car.AZ_MODE + car_id, "");
+        id = Alarm.createNotification(context, msg, R.drawable.white_motor_off, car_id, null, when, false, null, mode);
         SharedPreferences.Editor ed = preferences.edit();
         ed.putInt(Names.Notify.MOTOR_OFF + car_id, id);
         ed.remove(Names.Notify.MOTOR_ON + car_id);
@@ -108,7 +110,7 @@ public class Actions extends LockPatternActivity {
         id = preferences.getInt(Names.Notify.VALET_OFF + car_id, 0);
         if (id != 0)
             Alarm.removeNotification(context, car_id, id);
-        id = Alarm.createNotification(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet, car_id, "valet_on", 0, true, null);
+        id = Alarm.createNotification(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet, car_id, "valet_on", 0, true, null, null);
         ed.putInt(Names.Car.VALET_ON_NOTIFY + car_id, id);
         ed.remove(Names.Notify.VALET_OFF + car_id);
         ed.commit();

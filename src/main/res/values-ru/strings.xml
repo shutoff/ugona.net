@@ -668,4 +668,15 @@
     <string name="left">Осталось</string>
     <string name="rerun">Перепробег</string>
     <string name="delay">Просрочка</string>
+    <string name="az_notify">Уведомления о запуске</string>
+    <string-array name="notify_entries">
+        <item>Звук</item>
+        <item>Вибрация</item>
+        <item>Неи</item>
+    </string-array>
+    <string-array name="notify_values">
+        <item></item>
+        <item>vibro</item>
+        <item>none</item>
+    </string-array>
 </resources>

@@ -80,6 +80,8 @@ public class AutoStartFragment extends DeviceFragment {
                 });
         }
 
+        items.add(new SettingsFragment.ListItem(R.string.az_notify, R.array.notify_entries, R.array.notify_values, Names.Car.AZ_MODE, ""));
+
         TimerCommands cmd = new TimerCommands();
         cmd.add(new TimerCommand(1, 0, R.string.motor_on));
         addTimers(cmd);
