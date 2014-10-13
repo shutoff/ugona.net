@@ -100,9 +100,9 @@ public class MainActivity extends ActionBarActivity {
 
     static final int VERSION = 16;
     static final String SENDER_ID = "915289471784";
-    final static String URL_KEY = "https://car-online.ugona.net/key?login=$1&password=$2";
-    final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
-    final static String URL_PHOTOS = "https://car-online.ugona.net/photos?skey=$1&begin=$2";
+    final static String URL_KEY = "/key?login=$1&password=$2";
+    final static String URL_PROFILE = "/version?skey=$1";
+    final static String URL_PHOTOS = "/photos?skey=$1&begin=$2";
     ViewPager mViewPager;
     SharedPreferences preferences;
     BroadcastReceiver br;
@@ -577,7 +577,11 @@ public class MainActivity extends ActionBarActivity {
                 args.putString(CaldroidFragment.DIALOG_TITLE, getString(R.string.day));
                 args.putInt(CaldroidFragment.MONTH, current.getMonthOfYear());
                 args.putInt(CaldroidFragment.YEAR, current.getYear());
-                args.putInt(CaldroidFragment.START_DAY_OF_WEEK, 1);
+                Calendar calendar = Calendar.getInstance();
+                int first_day = calendar.getFirstDayOfWeek() - 1;
+                if (first_day < 0)
+                    first_day += 7;
+                args.putInt(CaldroidFragment.START_DAY_OF_WEEK, first_day);
                 caldroidFragment.setArguments(args);
                 LocalDateTime now = new LocalDateTime();
                 caldroidFragment.setMaxDate(now.toDate());

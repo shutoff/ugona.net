@@ -44,6 +44,8 @@ public abstract class HttpTask {
             @Override
             protected JsonObject doInBackground(Object... params) {
                 String url = params[0].toString();
+                if (url.charAt(0) == '/')
+                    url = Names.API_URL + url;
                 Reader reader = null;
                 try {
                     int last_param = 1;

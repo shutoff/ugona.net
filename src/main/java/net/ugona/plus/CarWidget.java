@@ -37,7 +37,7 @@ public class CarWidget extends AppWidgetProvider {
 
     static final int STATE_UPDATE = 1;
     static final int STATE_ERROR = 2;
-    final static String URL_TRAFFIC = "https://car-online.ugona.net/level?lat=$1&lng=$2";
+    final static String URL_TRAFFIC = "/level?lat=$1&lng=$2";
     final static int[] trafic_pict = {
             R.drawable.p0,
             R.drawable.p1,

@@ -34,7 +34,7 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 public class StatFragment extends Fragment implements OnRefreshListener {
 
-    final static String STAT_URL = "https://car-online.ugona.net/stat?skey=$1&tz=$2";
+    final static String STAT_URL = "/stat?skey=$1&tz=$2";
 
     String car_id;
 

@@ -10,11 +10,9 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -36,7 +34,7 @@ public class Cars extends ActionBarActivity {
     final static int CAR_SETUP = 4000;
     final static int NEW_CAR = 4001;
 
-    final static String URL_PHOTOS = "https://car-online.ugona.net/photos?skey=$1&begin=$2";
+    final static String URL_PHOTOS = "/photos?skey=$1&begin=$2";
 
     SharedPreferences preferences;
     Car[] cars;
@@ -112,12 +110,14 @@ public class Cars extends ActionBarActivity {
         lvCars.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
-                return carsId.size();
+                return carsId.size() + 1;
             }
 
             @Override
             public Object getItem(int position) {
-                return carsId.get(position);
+                if (position < carsId.size())
+                    return carsId.get(position);
+                return null;
             }
 
             @Override
@@ -133,72 +133,71 @@ public class Cars extends ActionBarActivity {
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     v = inflater.inflate(R.layout.car_item, null);
                 }
-                TextView tvName = (TextView) v.findViewById(R.id.name);
-                CarId id = carsId.get(position);
-                tvName.setText(id.car.name);
-                tvName.setTag(id.car.id);
-                tvName.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        setupCar(v.getTag().toString());
-                    }
-                });
-                ImageView ivDelete = (ImageView) v.findViewById(R.id.del);
-                if (id.pointer || cars.length > 1) {
-                    ivDelete.setTag(id.car.id);
-                    ivDelete.setOnClickListener(new View.OnClickListener() {
+                if (position < carsId.size()) {
+                    TextView tvName = (TextView) v.findViewById(R.id.name);
+                    CarId id = carsId.get(position);
+                    tvName.setText(id.car.name);
+                    tvName.setTag(id.car.id);
+                    tvName.setOnClickListener(new View.OnClickListener() {
                         @Override
-                        public void onClick(final View v) {
-                            String id = v.getTag().toString();
-                            String message = getString(R.string.delete) + " " + preferences.getString(Names.Car.CAR_NAME + id, "") + "?";
-                            AlertDialog dialog = new AlertDialog.Builder(Cars.this)
-                                    .setTitle(R.string.delete)
-                                    .setMessage(message)
-                                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            deleteCar(v.getTag().toString());
-                                        }
-                                    })
-                                    .setNegativeButton(R.string.cancel, null)
-                                    .create();
-                            dialog.show();
+                        public void onClick(View v) {
+                            setupCar(v.getTag().toString());
                         }
                     });
-                    ivDelete.setVisibility(View.VISIBLE);
+                    ImageView ivDelete = (ImageView) v.findViewById(R.id.del);
+                    if (id.pointer || cars.length > 1) {
+                        ivDelete.setTag(id.car.id);
+                        ivDelete.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(final View v) {
+                                String id = v.getTag().toString();
+                                String message = getString(R.string.delete) + " " + preferences.getString(Names.Car.CAR_NAME + id, "") + "?";
+                                AlertDialog dialog = new AlertDialog.Builder(Cars.this)
+                                        .setTitle(R.string.delete)
+                                        .setMessage(message)
+                                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                deleteCar(v.getTag().toString());
+                                            }
+                                        })
+                                        .setNegativeButton(R.string.cancel, null)
+                                        .create();
+                                dialog.show();
+                            }
+                        });
+                        ivDelete.setVisibility(View.VISIBLE);
+                    } else {
+                        ivDelete.setVisibility(View.GONE);
+                    }
+                    v.findViewById(R.id.pointer).setVisibility(id.pointer ? View.VISIBLE : View.GONE);
+                    v.findViewById(R.id.block_add).setVisibility(View.GONE);
+                    v.findViewById(R.id.block_car).setVisibility(View.VISIBLE);
                 } else {
-                    ivDelete.setVisibility(View.GONE);
+                    v.findViewById(R.id.block_add).setVisibility(View.VISIBLE);
+                    v.findViewById(R.id.block_car).setVisibility(View.GONE);
                 }
-                v.findViewById(R.id.pointer).setVisibility(id.pointer ? View.VISIBLE : View.GONE);
                 return v;
             }
         });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.cars, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.add:
-                for (int i = 1; ; i++) {
-                    if (!isId(i + "")) {
-                        deleteCarKeys(this, i + "");
-                        Intent intent = new Intent(this, AuthDialog.class);
-                        intent.putExtra(Names.ID, i + "");
-                        intent.putExtra(Names.Car.AUTH, true);
-                        intent.putExtra(Names.Car.CAR_PHONE, true);
-                        startActivityForResult(intent, NEW_CAR);
-                        break;
+        lvCars.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                if (i >= carsId.size()) {
+                    for (i = 1; ; i++) {
+                        if (!isId(i + "")) {
+                            deleteCarKeys(Cars.this, i + "");
+                            Intent intent = new Intent(Cars.this, AuthDialog.class);
+                            intent.putExtra(Names.ID, i + "");
+                            intent.putExtra(Names.Car.AUTH, true);
+                            intent.putExtra(Names.Car.CAR_PHONE, true);
+                            startActivityForResult(intent, NEW_CAR);
+                            break;
+                        }
                     }
                 }
-                return true;
-        }
-        return false;
+            }
+        });
     }
 
     @Override

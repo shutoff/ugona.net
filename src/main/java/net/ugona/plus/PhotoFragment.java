@@ -45,8 +45,8 @@ public class PhotoFragment extends Fragment
 
     final static String ROTATE = "net.ugona.plus.ROTATE";
 
-    final static String URL_PHOTOS = "https://car-online.ugona.net/photos?skey=$1&begin=$2&end=$3";
-    final static String URL_PHOTO = "https://car-online.ugona.net/photo?skey=";
+    final static String URL_PHOTOS = "/photos?skey=$1&begin=$2&end=$3";
+    final static String URL_PHOTO = "/photo?skey=";
 
     final static String DATE = "date";
 
@@ -419,7 +419,7 @@ public class PhotoFragment extends Fragment
 
         @Override
         protected Void doInBackground(Photo... params) {
-            String url = URL_PHOTO + api_key;
+            String url = Names.API_URL + URL_PHOTO + api_key;
             url += "&id=" + params[0].id;
             Photo p = params[0];
             try {

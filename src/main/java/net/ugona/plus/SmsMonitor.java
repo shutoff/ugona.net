@@ -53,8 +53,8 @@ public class SmsMonitor extends BroadcastReceiver {
             "MOTOR OFF OK",
     };
 
-    static Pattern lostChannel = Pattern.compile("\\[(.*)\\] Lost control channel in ([0-9]{4})\\.([0-9]{2})\\.([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})");
-    static Pattern restoreChannel = Pattern.compile("\\[(.*)\\] Restored control channel in ([0-9]{4})\\.([0-9]{2})\\.([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})");
+    static Pattern lostChannel = Pattern.compile("\\[(.*)\\] Control channel.BAD lost in ([0-9]{4})\\.([0-9]{2})\\.([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})");
+    static Pattern restoreChannel = Pattern.compile("\\[(.*)\\] Control channel.GOOD in ([0-9]{4})\\.([0-9]{2})\\.([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})");
 
     static boolean compareNumbers(String config, String from) {
         if (config.length() == 4)

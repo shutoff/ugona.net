@@ -52,7 +52,7 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 public class StateFragment extends Fragment
         implements View.OnTouchListener, OnRefreshListener {
 
-    final static String URL_MODE = "https://car-online.ugona.net/mode?auth=$1";
+    final static String URL_MODE = "/mode?auth=$1";
 
     final int AUTH_REQUEST = 1;
     String car_id;

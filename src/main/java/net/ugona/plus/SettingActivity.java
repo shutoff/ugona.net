@@ -43,9 +43,9 @@ import java.util.Vector;
 public class SettingActivity extends ActionBarActivity {
 
     final static String UPDATE_SETTINGS = "net.ugona.plus.UPDATE_SETTINGS";
-    final static String URL_SETTINGS = "https://car-online.ugona.net/settings?auth=$1&skey=$2";
-    final static String URL_SET = "https://car-online.ugona.net/set?auth=$1&skey=$2&v=$3";
-    final static String URL_PROFILE = "https://car-online.ugona.net/version?skey=$1";
+    final static String URL_SETTINGS = "/settings?auth=$1&skey=$2";
+    final static String URL_SET = "/set?auth=$1&skey=$2&v=$3";
+    final static String URL_PROFILE = "/version?skey=$1";
 
     final static String ZONES = "zones";
     final static String ZONE_DELETED = "zone_deleted";
