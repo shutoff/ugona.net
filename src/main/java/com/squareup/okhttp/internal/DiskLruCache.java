@@ -16,6 +16,15 @@
 
 package com.squareup.okhttp.internal;
 
+import com.squareup.okio.Buffer;
+import com.squareup.okio.BufferedSink;
+import com.squareup.okio.BufferedSource;
+import com.squareup.okio.ForwardingSink;
+import com.squareup.okio.Okio;
+import com.squareup.okio.Sink;
+import com.squareup.okio.Source;
+import com.squareup.okio.Timeout;
+
 import java.io.Closeable;
 import java.io.EOFException;
 import java.io.File;
@@ -30,14 +39,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import okio.Buffer;
-import okio.BufferedSink;
-import okio.BufferedSource;
-import okio.ForwardingSink;
-import okio.Okio;
-import okio.Sink;
-import okio.Source;
-import okio.Timeout;
 
 /**
  * A cache that uses a bounded amount of space on a filesystem. Each cache
@@ -145,7 +146,7 @@ public final class DiskLruCache implements Closeable {
   private final int valueCount;
   private long size = 0;
   private BufferedSink journalWriter;
-  private final LinkedHashMap<String, Entry> lruEntries = new LinkedHashMap<>(0, 0.75f, true);
+  private final LinkedHashMap<String, Entry> lruEntries = new LinkedHashMap<String, Entry>(0, 0.75f, true);
   private int redundantOpCount;
 
   /**

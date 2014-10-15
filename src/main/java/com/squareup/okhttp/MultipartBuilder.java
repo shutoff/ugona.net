@@ -16,13 +16,14 @@
 package com.squareup.okhttp;
 
 import com.squareup.okhttp.internal.Util;
+import com.squareup.okio.Buffer;
+import com.squareup.okio.BufferedSink;
+import com.squareup.okio.ByteString;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import okio.Buffer;
-import okio.BufferedSink;
-import okio.ByteString;
 
 /**
  * Fluent API to build <a href="http://www.ietf.org/rfc/rfc2387.txt">RFC
@@ -76,8 +77,8 @@ public final class MultipartBuilder {
   private long length = 0;
 
   // Parallel lists of nullable headings (boundary + headers) and non-null bodies.
-  private final List<Buffer> partHeadings = new ArrayList<>();
-  private final List<RequestBody> partBodies = new ArrayList<>();
+  private final List<Buffer> partHeadings = new ArrayList<Buffer>();
+  private final List<RequestBody> partBodies = new ArrayList<RequestBody>();
 
   /** Creates a new multipart builder that uses a random boundary token. */
   public MultipartBuilder() {

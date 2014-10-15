@@ -16,6 +16,8 @@
 package com.squareup.okhttp;
 
 import com.squareup.okhttp.internal.Util;
+import com.squareup.okio.ByteString;
+
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -23,7 +25,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.net.ssl.SSLPeerUnverifiedException;
-import okio.ByteString;
 
 import static java.util.Collections.unmodifiableList;
 
@@ -162,7 +163,7 @@ public final class CertificatePinner {
 
   /** Builds a configured certificate pinner. */
   public static final class Builder {
-    private final Map<String, List<ByteString>> hostnameToPins = new LinkedHashMap<>();
+    private final Map<String, List<ByteString>> hostnameToPins = new LinkedHashMap<String, List<ByteString>>();
 
     /**
      * Pins certificates for {@code hostname}. Each pin is a SHA-1 hash of a
@@ -172,7 +173,7 @@ public final class CertificatePinner {
     public Builder add(String hostname, String... pins) {
       if (hostname == null) throw new IllegalArgumentException("hostname == null");
 
-      List<ByteString> hostPins = new ArrayList<>();
+      List<ByteString> hostPins = new ArrayList<ByteString>();
       List<ByteString> previousPins = hostnameToPins.put(hostname, unmodifiableList(hostPins));
       if (previousPins != null) {
         hostPins.addAll(previousPins);

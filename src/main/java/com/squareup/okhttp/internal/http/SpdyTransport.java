@@ -25,6 +25,12 @@ import com.squareup.okhttp.internal.spdy.ErrorCode;
 import com.squareup.okhttp.internal.spdy.Header;
 import com.squareup.okhttp.internal.spdy.SpdyConnection;
 import com.squareup.okhttp.internal.spdy.SpdyStream;
+import com.squareup.okio.Buffer;
+import com.squareup.okio.ByteString;
+import com.squareup.okio.Sink;
+import com.squareup.okio.Source;
+import com.squareup.okio.Timeout;
+
 import java.io.IOException;
 import java.net.ProtocolException;
 import java.util.ArrayList;
@@ -33,11 +39,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import okio.Buffer;
-import okio.ByteString;
-import okio.Sink;
-import okio.Source;
-import okio.Timeout;
 
 import static com.squareup.okhttp.internal.spdy.Header.RESPONSE_STATUS;
 import static com.squareup.okhttp.internal.spdy.Header.TARGET_AUTHORITY;
@@ -115,7 +116,7 @@ public final class SpdyTransport implements Transport {
   public static List<Header> writeNameValueBlock(Request request, Protocol protocol,
       String version) {
     Headers headers = request.headers();
-    List<Header> result = new ArrayList<>(headers.size() + 10);
+    List<Header> result = new ArrayList<Header>(headers.size() + 10);
     result.add(new Header(TARGET_METHOD, request.method()));
     result.add(new Header(TARGET_PATH, RequestLine.requestPath(request.url())));
     String host = HttpEngine.hostHeader(request.url());

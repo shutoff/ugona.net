@@ -76,7 +76,7 @@ public final class ConnectionPool {
   private final int maxIdleConnections;
   private final long keepAliveDurationNs;
 
-  private final LinkedList<Connection> connections = new LinkedList<>();
+  private final LinkedList<Connection> connections = new LinkedList<Connection>();
 
   /** We use a single background thread to cleanup expired connections. */
   private final ExecutorService executorService = new ThreadPoolExecutor(0, 1,
@@ -84,7 +84,7 @@ public final class ConnectionPool {
       Util.threadFactory("OkHttp ConnectionPool", true));
   private final Runnable connectionsCleanupRunnable = new Runnable() {
     @Override public void run() {
-      List<Connection> expiredConnections = new ArrayList<>(MAX_CONNECTIONS_TO_CLEANUP);
+      List<Connection> expiredConnections = new ArrayList<Connection>(MAX_CONNECTIONS_TO_CLEANUP);
       int idleConnectionCount = 0;
       synchronized (ConnectionPool.this) {
         for (ListIterator<Connection> i = connections.listIterator(connections.size());
@@ -127,7 +127,7 @@ public final class ConnectionPool {
   List<Connection> getConnections() {
     waitForCleanupCallableToRun();
     synchronized (this) {
-      return new ArrayList<>(connections);
+      return new ArrayList<Connection>(connections);
     }
   }
 
@@ -263,7 +263,7 @@ public final class ConnectionPool {
   public void evictAll() {
     List<Connection> connections;
     synchronized (this) {
-      connections = new ArrayList<>(this.connections);
+      connections = new ArrayList<Connection>(this.connections);
       this.connections.clear();
     }
 

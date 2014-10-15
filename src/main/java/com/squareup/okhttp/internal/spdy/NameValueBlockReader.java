@@ -15,18 +15,19 @@
  */
 package com.squareup.okhttp.internal.spdy;
 
+import com.squareup.okio.Buffer;
+import com.squareup.okio.BufferedSource;
+import com.squareup.okio.ByteString;
+import com.squareup.okio.ForwardingSource;
+import com.squareup.okio.InflaterSource;
+import com.squareup.okio.Okio;
+import com.squareup.okio.Source;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
-import okio.Buffer;
-import okio.BufferedSource;
-import okio.ByteString;
-import okio.ForwardingSource;
-import okio.InflaterSource;
-import okio.Okio;
-import okio.Source;
 
 /**
  * Reads a SPDY/3 Name/Value header block. This class is made complicated by the
@@ -85,7 +86,7 @@ class NameValueBlockReader {
     if (numberOfPairs < 0) throw new IOException("numberOfPairs < 0: " + numberOfPairs);
     if (numberOfPairs > 1024) throw new IOException("numberOfPairs > 1024: " + numberOfPairs);
 
-    List<Header> entries = new ArrayList<>(numberOfPairs);
+    List<Header> entries = new ArrayList<Header>(numberOfPairs);
     for (int i = 0; i < numberOfPairs; i++) {
       ByteString name = readByteString().toAsciiLowercase();
       ByteString values = readByteString();

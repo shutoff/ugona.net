@@ -16,17 +16,18 @@
 
 package com.squareup.okhttp.internal.spdy;
 
+import com.squareup.okio.AsyncTimeout;
+import com.squareup.okio.Buffer;
+import com.squareup.okio.BufferedSource;
+import com.squareup.okio.Sink;
+import com.squareup.okio.Source;
+import com.squareup.okio.Timeout;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.List;
-import okio.AsyncTimeout;
-import okio.Buffer;
-import okio.BufferedSource;
-import okio.Sink;
-import okio.Source;
-import okio.Timeout;
 
 import static com.squareup.okhttp.internal.spdy.Settings.DEFAULT_INITIAL_WINDOW_SIZE;
 
@@ -267,7 +268,7 @@ public final class SpdyStream {
         if (headersMode.failIfHeadersPresent()) {
           errorCode = ErrorCode.STREAM_IN_USE;
         } else {
-          List<Header> newHeaders = new ArrayList<>();
+          List<Header> newHeaders = new ArrayList<Header>();
           newHeaders.addAll(responseHeaders);
           newHeaders.addAll(headers);
           this.responseHeaders = newHeaders;

@@ -24,6 +24,15 @@ import com.squareup.okhttp.internal.http.CacheStrategy;
 import com.squareup.okhttp.internal.http.HttpMethod;
 import com.squareup.okhttp.internal.http.OkHeaders;
 import com.squareup.okhttp.internal.http.StatusLine;
+import com.squareup.okio.BufferedSink;
+import com.squareup.okio.BufferedSource;
+import com.squareup.okio.ByteString;
+import com.squareup.okio.ForwardingSink;
+import com.squareup.okio.ForwardingSource;
+import com.squareup.okio.Okio;
+import com.squareup.okio.Sink;
+import com.squareup.okio.Source;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -34,14 +43,6 @@ import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import okio.BufferedSink;
-import okio.BufferedSource;
-import okio.ByteString;
-import okio.ForwardingSink;
-import okio.ForwardingSource;
-import okio.Okio;
-import okio.Sink;
-import okio.Source;
 
 /**
  * Caches HTTP and HTTPS responses to the filesystem so they may be reused,
@@ -513,7 +514,7 @@ public final class Cache {
 
       try {
         CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-        List<Certificate> result = new ArrayList<>(length);
+        List<Certificate> result = new ArrayList<Certificate>(length);
         for (int i = 0; i < length; i++) {
           String line = source.readUtf8LineStrict();
           byte[] bytes = ByteString.decodeBase64(line).toByteArray();

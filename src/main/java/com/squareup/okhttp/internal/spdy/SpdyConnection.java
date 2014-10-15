@@ -18,6 +18,11 @@ package com.squareup.okhttp.internal.spdy;
 import com.squareup.okhttp.Protocol;
 import com.squareup.okhttp.internal.NamedRunnable;
 import com.squareup.okhttp.internal.Util;
+import com.squareup.okio.Buffer;
+import com.squareup.okio.BufferedSource;
+import com.squareup.okio.ByteString;
+import com.squareup.okio.Okio;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -34,10 +39,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import okio.Buffer;
-import okio.BufferedSource;
-import okio.ByteString;
-import okio.Okio;
 
 import static com.squareup.okhttp.internal.spdy.Settings.DEFAULT_INITIAL_WINDOW_SIZE;
 
@@ -79,7 +80,7 @@ public final class SpdyConnection implements Closeable {
    * run on the callback executor.
    */
   private final IncomingStreamHandler handler;
-  private final Map<Integer, SpdyStream> streams = new HashMap<>();
+  private final Map<Integer, SpdyStream> streams = new HashMap<Integer, SpdyStream>();
   private final String hostName;
   private int lastGoodStreamId;
   private int nextStreamId;
@@ -376,7 +377,7 @@ public final class SpdyConnection implements Closeable {
       }
       pingId = nextPingId;
       nextPingId += 2;
-      if (pings == null) pings = new HashMap<>();
+      if (pings == null) pings = new HashMap<Integer, Ping>();
       pings.put(pingId, ping);
     }
     writePing(false, pingId, 0x4f4b6f6b /* ASCII "OKok" */, ping);
@@ -788,7 +789,7 @@ public final class SpdyConnection implements Closeable {
   }
 
   // Guarded by this.
-  private final Set<Integer> currentPushRequests = new LinkedHashSet<>();
+  private final Set<Integer> currentPushRequests = new LinkedHashSet<Integer>();
 
   private void pushRequestLater(final int streamId, final List<Header> requestHeaders) {
     synchronized (this) {

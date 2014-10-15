@@ -15,9 +15,10 @@
  */
 package com.squareup.okhttp.internal.spdy;
 
+import com.squareup.okio.BufferedSource;
+
 import java.io.IOException;
 import java.util.List;
-import okio.BufferedSource;
 
 /**
  * {@link com.squareup.okhttp.Protocol#HTTP_2 HTTP/2} only.

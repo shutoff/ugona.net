@@ -15,6 +15,12 @@
  */
 package com.squareup.okhttp.internal.spdy;
 
+import com.squareup.okio.Buffer;
+import com.squareup.okio.BufferedSource;
+import com.squareup.okio.ByteString;
+import com.squareup.okio.Okio;
+import com.squareup.okio.Source;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,11 +28,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import okio.Buffer;
-import okio.BufferedSource;
-import okio.ByteString;
-import okio.Okio;
-import okio.Source;
 
 /**
  * Read and write HPACK v09.
@@ -113,7 +114,7 @@ final class HpackDraft09 {
   // http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-09#section-3.2
   static final class Reader {
 
-    private final List<Header> headerList = new ArrayList<>();
+    private final List<Header> headerList = new ArrayList<Header>();
     private final BufferedSource source;
 
     private int maxHeaderTableByteCountSetting;
@@ -218,7 +219,7 @@ final class HpackDraft09 {
     }
 
     public List<Header> getAndResetHeaderList() {
-      List<Header> result = new ArrayList<>(headerList);
+      List<Header> result = new ArrayList<Header>(headerList);
       headerList.clear();
       return result;
     }
@@ -357,7 +358,7 @@ final class HpackDraft09 {
   private static final Map<ByteString, Integer> NAME_TO_FIRST_INDEX = nameToFirstIndex();
 
   private static Map<ByteString, Integer> nameToFirstIndex() {
-    Map<ByteString, Integer> result = new LinkedHashMap<>(STATIC_HEADER_TABLE.length);
+    Map<ByteString, Integer> result = new LinkedHashMap<ByteString, Integer>(STATIC_HEADER_TABLE.length);
     for (int i = 0; i < STATIC_HEADER_TABLE.length; i++) {
       if (!result.containsKey(STATIC_HEADER_TABLE[i].name)) {
         result.put(STATIC_HEADER_TABLE[i].name, i);

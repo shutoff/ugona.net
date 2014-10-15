@@ -20,7 +20,9 @@ import com.squareup.okhttp.internal.Util;
 import com.squareup.okhttp.internal.http.HttpEngine;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -41,13 +43,13 @@ public final class Dispatcher {
   private ExecutorService executorService;
 
   /** Ready calls in the order they'll be run. */
-  private final Deque<AsyncCall> readyCalls = new ArrayDeque<>();
+  private final Set<AsyncCall> readyCalls = new HashSet<AsyncCall>();
 
   /** Running calls. Includes canceled calls that haven't finished yet. */
-  private final Deque<AsyncCall> runningCalls = new ArrayDeque<>();
+  private final Set<AsyncCall> runningCalls = new HashSet<AsyncCall>();
 
   /** In-flight synchronous calls. Includes canceled calls that haven't finished yet. */
-  private final Deque<Call> executedCalls = new ArrayDeque<>();
+  private final Set<Call> executedCalls = new HashSet<Call>();
 
   public Dispatcher(ExecutorService executorService) {
     this.executorService = executorService;

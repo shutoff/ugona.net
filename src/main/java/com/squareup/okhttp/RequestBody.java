@@ -16,12 +16,13 @@
 package com.squareup.okhttp;
 
 import com.squareup.okhttp.internal.Util;
+import com.squareup.okio.BufferedSink;
+import com.squareup.okio.Okio;
+import com.squareup.okio.Source;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import okio.BufferedSink;
-import okio.Okio;
-import okio.Source;
 
 public abstract class RequestBody {
   /** Returns the Content-Type header for this body. */

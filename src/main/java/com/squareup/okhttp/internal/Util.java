@@ -18,6 +18,10 @@ package com.squareup.okhttp.internal;
 
 import com.squareup.okhttp.internal.http.RetryableSink;
 import com.squareup.okhttp.internal.spdy.Header;
+import com.squareup.okio.Buffer;
+import com.squareup.okio.ByteString;
+import com.squareup.okio.Source;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -37,9 +41,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
-import okio.Buffer;
-import okio.ByteString;
-import okio.Source;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
@@ -212,7 +213,7 @@ public final class Util {
 
   /** Returns an immutable copy of {@code list}. */
   public static <T> List<T> immutableList(List<T> list) {
-    return Collections.unmodifiableList(new ArrayList<>(list));
+    return Collections.unmodifiableList(new ArrayList<T>(list));
   }
 
   /** Returns an immutable list containing {@code elements}. */
@@ -222,7 +223,7 @@ public final class Util {
 
   /** Returns an immutable copy of {@code map}. */
   public static <K, V> Map<K, V> immutableMap(Map<K, V> map) {
-    return Collections.unmodifiableMap(new LinkedHashMap<>(map));
+    return Collections.unmodifiableMap(new LinkedHashMap<K, V>(map));
   }
 
   public static ThreadFactory threadFactory(final String name, final boolean daemon) {
@@ -236,7 +237,7 @@ public final class Util {
   }
 
   public static List<Header> headerEntries(String... elements) {
-    List<Header> result = new ArrayList<>(elements.length / 2);
+    List<Header> result = new ArrayList<Header>(elements.length / 2);
     for (int i = 0; i < elements.length; i += 2) {
       result.add(new Header(elements[i], elements[i + 1]));
     }
@@ -254,7 +255,7 @@ public final class Util {
    * are in the same order as in {@code a}.
    */
   public static <T> List<T> intersect(Collection<T> a, Collection<T> b) {
-    List<T> result = new ArrayList<>();
+    List<T> result = new ArrayList<T>();
     for (T t : a) {
       if (b.contains(t)) {
         result.add(t);

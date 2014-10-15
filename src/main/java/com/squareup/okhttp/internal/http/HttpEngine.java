@@ -29,7 +29,16 @@ import com.squareup.okhttp.Route;
 import com.squareup.okhttp.internal.Internal;
 import com.squareup.okhttp.internal.InternalCache;
 import com.squareup.okhttp.internal.Util;
-import com.squareup.okhttp.internal.Version;
+import com.squareup.okio.Buffer;
+import com.squareup.okio.BufferedSink;
+import com.squareup.okio.BufferedSource;
+import com.squareup.okio.GzipSource;
+import com.squareup.okio.Okio;
+import com.squareup.okio.Sink;
+import com.squareup.okio.Source;
+
+import junit.runner.Version;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.CookieHandler;
@@ -42,13 +51,6 @@ import java.util.List;
 import java.util.Map;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLPeerUnverifiedException;
-import okio.Buffer;
-import okio.BufferedSink;
-import okio.BufferedSource;
-import okio.GzipSource;
-import okio.Okio;
-import okio.Sink;
-import okio.Source;
 
 import static com.squareup.okhttp.internal.Util.closeQuietly;
 import static com.squareup.okhttp.internal.Util.getDefaultPort;
@@ -583,10 +585,10 @@ public final class HttpEngine {
 
       // Add any new cookies to the request.
       OkHeaders.addCookies(result, cookies);
-    }
 
-    if (request.header("User-Agent") == null) {
-      result.header("User-Agent", Version.userAgent());
+        if (request.header("User-Agent") == null) {
+            result.header("User-Agent", System.getProperty("http.agent"));
+        }
     }
 
     return result.build();

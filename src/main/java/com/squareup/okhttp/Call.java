@@ -21,10 +21,12 @@ import com.squareup.okhttp.internal.http.HttpEngine;
 import com.squareup.okhttp.internal.http.HttpMethod;
 import com.squareup.okhttp.internal.http.OkHeaders;
 import com.squareup.okhttp.internal.http.RetryableSink;
+import com.squareup.okio.BufferedSink;
+import com.squareup.okio.BufferedSource;
+
 import java.io.IOException;
 import java.net.ProtocolException;
-import okio.BufferedSink;
-import okio.BufferedSource;
+
 
 import static com.squareup.okhttp.internal.http.HttpEngine.MAX_REDIRECTS;
 

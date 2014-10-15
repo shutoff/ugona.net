@@ -17,6 +17,8 @@
 package com.squareup.okhttp.internal;
 
 import com.squareup.okhttp.Protocol;
+import com.squareup.okio.Buffer;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -33,7 +35,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.SSLSocket;
-import okio.Buffer;
 
 /**
  * Access to Platform-specific features necessary for SPDY and advanced TLS.
@@ -305,7 +306,7 @@ public class Platform {
 
     @Override public void configureTlsExtensions(
         SSLSocket sslSocket, String hostname, List<Protocol> protocols) {
-      List<String> names = new ArrayList<>(protocols.size());
+      List<String> names = new ArrayList<String>(protocols.size());
       for (int i = 0, size = protocols.size(); i < size; i++) {
         Protocol protocol = protocols.get(i);
         if (protocol == Protocol.HTTP_1_0) continue; // No HTTP/1.0 for NPN or ALPN.

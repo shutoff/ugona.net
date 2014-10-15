@@ -18,9 +18,10 @@ package com.squareup.okhttp.internal.http;
 
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
+import com.squareup.okio.Sink;
+import com.squareup.okio.Source;
+
 import java.io.IOException;
-import okio.Sink;
-import okio.Source;
 
 public final class HttpTransport implements Transport {
   private final HttpEngine httpEngine;
