@@ -17,8 +17,10 @@ package com.squareup.okhttp;
 
 import com.squareup.okhttp.internal.Platform;
 import com.squareup.okhttp.internal.Util;
+
 import java.util.Arrays;
 import java.util.List;
+
 import javax.net.ssl.SSLSocket;
 
 /**
@@ -27,6 +29,11 @@ import javax.net.ssl.SSLSocket;
  * when negotiating a secure connection.
  */
 public final class ConnectionConfiguration {
+    /**
+     * Unencrypted, unauthenticated connections for {@code http:} URLs.
+     */
+    public static final ConnectionConfiguration CLEARTEXT = new ConnectionConfiguration(
+            false, new String[0], new String[0], false);
   /**
    * This is a subset of the cipher suites supported in Chrome 37, current as of 2014-10-5. All of
    * these suites are available on Android L; earlier releases support a subset of these suites.
@@ -52,24 +59,16 @@ public final class ConnectionConfiguration {
       "SSL_RSA_WITH_RC4_128_SHA",                // 0x00,0x05  Android 2.3
       "SSL_RSA_WITH_RC4_128_MD5"                 // 0x00,0x04  Android 2.3  (Deprecated in L)
   };
-
   private static final String TLS_1_2 = "TLSv1.2"; // 2008.
   private static final String TLS_1_1 = "TLSv1.1"; // 2006.
   private static final String TLS_1_0 = "TLSv1";   // 1999.
   private static final String SSL_3_0 = "SSLv3";   // 1996.
-
   /** A modern TLS configuration with extensions like SNI and ALPN available. */
   public static final ConnectionConfiguration MODERN_TLS = new ConnectionConfiguration(
       true, CIPHER_SUITES, new String[] { TLS_1_2, TLS_1_1, TLS_1_0, SSL_3_0 }, true);
-
   /** A backwards-compatible fallback configuration for interop with obsolete servers. */
   public static final ConnectionConfiguration COMPATIBLE_TLS = new ConnectionConfiguration(
       true, CIPHER_SUITES, new String[] { SSL_3_0 }, true);
-
-  /** Unencrypted, unauthenticated connections for {@code http:} URLs. */
-  public static final ConnectionConfiguration CLEARTEXT = new ConnectionConfiguration(
-      false, new String[0], new String[0], false);
-
   private final boolean tls;
   private final String[] cipherSuites;
   private final String[] tlsVersions;
@@ -89,7 +88,7 @@ public final class ConnectionConfiguration {
     this.tlsVersions = tlsVersions;
     this.supportsTlsExtensions = supportsTlsExtensions;
 
-    if (tls && (cipherSuites.length == 0 || tlsVersions.length == 0)) {
+      if (tls && (tlsVersions.length == 0)) {
       throw new IllegalArgumentException("Unexpected configuration: " + this);
     }
     if (!tls && (cipherSuites.length != 0 || tlsVersions.length != 0 || supportsTlsExtensions)) {
@@ -122,6 +121,7 @@ public final class ConnectionConfiguration {
     }
 
     sslSocket.setEnabledProtocols(configurationToApply.tlsVersions);
+      if (configurationToApply.cipherSuites.length > 0)
     sslSocket.setEnabledCipherSuites(configurationToApply.cipherSuites);
 
     Platform platform = Platform.get();

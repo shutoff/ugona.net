@@ -93,6 +93,7 @@ public abstract class HttpTask {
                     background(result);
                     return result;
                 } catch (Exception ex) {
+                    ex.printStackTrace();
                     error_text = ex.getLocalizedMessage();
                     if (error_text != null) {
                         int pos = error_text.indexOf(":");

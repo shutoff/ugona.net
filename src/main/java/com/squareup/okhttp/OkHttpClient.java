@@ -15,6 +15,8 @@
  */
 package com.squareup.okhttp;
 
+import android.os.Build;
+
 import com.squareup.okhttp.internal.Internal;
 import com.squareup.okhttp.internal.InternalCache;
 import com.squareup.okhttp.internal.Network;
@@ -24,6 +26,7 @@ import com.squareup.okhttp.internal.http.AuthenticatorAdapter;
 import com.squareup.okhttp.internal.http.HttpEngine;
 import com.squareup.okhttp.internal.http.Transport;
 import com.squareup.okhttp.internal.tls.OkHostnameVerifier;
+
 import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.Proxy;
@@ -32,6 +35,7 @@ import java.net.URLConnection;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -231,53 +235,53 @@ public class OkHttpClient implements Cloneable {
     return writeTimeout;
   }
 
-  /**
-   * Sets the HTTP proxy that will be used by connections created by this
-   * client. This takes precedence over {@link #setProxySelector}, which is
-   * only honored when this proxy is null (which it is by default). To disable
-   * proxy use completely, call {@code setProxy(Proxy.NO_PROXY)}.
-   */
-  public final OkHttpClient setProxy(Proxy proxy) {
-    this.proxy = proxy;
+    public final Proxy getProxy() {
+        return proxy;
+  }
+
+    /**
+     * Sets the HTTP proxy that will be used by connections created by this
+     * client. This takes precedence over {@link #setProxySelector}, which is
+     * only honored when this proxy is null (which it is by default). To disable
+     * proxy use completely, call {@code setProxy(Proxy.NO_PROXY)}.
+     */
+    public final OkHttpClient setProxy(Proxy proxy) {
+        this.proxy = proxy;
+        return this;
+    }
+
+    public final ProxySelector getProxySelector() {
+        return proxySelector;
+    }
+
+    /**
+     * Sets the proxy selection policy to be used if no {@link #setProxy proxy}
+     * is specified explicitly. The proxy selector may return multiple proxies;
+     * in that case they will be tried in sequence until a successful connection
+     * is established.
+     * <p/>
+     * <p>If unset, the {@link ProxySelector#getDefault() system-wide default}
+     * proxy selector will be used.
+     */
+    public final OkHttpClient setProxySelector(ProxySelector proxySelector) {
+        this.proxySelector = proxySelector;
+        return this;
+    }
+
+    public final CookieHandler getCookieHandler() {
+        return cookieHandler;
+    }
+
+    /**
+     * Sets the cookie handler to be used to read outgoing cookies and write
+     * incoming cookies.
+     * <p/>
+     * <p>If unset, the {@link CookieHandler#getDefault() system-wide default}
+     * cookie handler will be used.
+     */
+    public final OkHttpClient setCookieHandler(CookieHandler cookieHandler) {
+        this.cookieHandler = cookieHandler;
     return this;
-  }
-
-  public final Proxy getProxy() {
-    return proxy;
-  }
-
-  /**
-   * Sets the proxy selection policy to be used if no {@link #setProxy proxy}
-   * is specified explicitly. The proxy selector may return multiple proxies;
-   * in that case they will be tried in sequence until a successful connection
-   * is established.
-   *
-   * <p>If unset, the {@link ProxySelector#getDefault() system-wide default}
-   * proxy selector will be used.
-   */
-  public final OkHttpClient setProxySelector(ProxySelector proxySelector) {
-    this.proxySelector = proxySelector;
-    return this;
-  }
-
-  public final ProxySelector getProxySelector() {
-    return proxySelector;
-  }
-
-  /**
-   * Sets the cookie handler to be used to read outgoing cookies and write
-   * incoming cookies.
-   *
-   * <p>If unset, the {@link CookieHandler#getDefault() system-wide default}
-   * cookie handler will be used.
-   */
-  public final OkHttpClient setCookieHandler(CookieHandler cookieHandler) {
-    this.cookieHandler = cookieHandler;
-    return this;
-  }
-
-  public final CookieHandler getCookieHandler() {
-    return cookieHandler;
   }
 
   /** Sets the response cache to be used to read and write cached responses. */
@@ -287,215 +291,215 @@ public class OkHttpClient implements Cloneable {
   }
 
   final InternalCache internalCache() {
-    return internalCache;
+      return internalCache;
   }
 
-  public final OkHttpClient setCache(Cache cache) {
-    this.cache = cache;
+    public final Cache getCache() {
+        return cache;
+    }
+
+    public final OkHttpClient setCache(Cache cache) {
+        this.cache = cache;
     this.internalCache = null;
-    return this;
-  }
+        return this;
+    }
 
-  public final Cache getCache() {
-    return cache;
-  }
+    public final SocketFactory getSocketFactory() {
+        return socketFactory;
+    }
 
-  /**
-   * Sets the socket factory used to create connections.
-   *
-   * <p>If unset, the {@link SocketFactory#getDefault() system-wide default}
-   * socket factory will be used.
-   */
-  public final OkHttpClient setSocketFactory(SocketFactory socketFactory) {
-    this.socketFactory = socketFactory;
-    return this;
-  }
+    /**
+     * Sets the socket factory used to create connections.
+     * <p/>
+     * <p>If unset, the {@link SocketFactory#getDefault() system-wide default}
+     * socket factory will be used.
+     */
+    public final OkHttpClient setSocketFactory(SocketFactory socketFactory) {
+        this.socketFactory = socketFactory;
+        return this;
+    }
 
-  public final SocketFactory getSocketFactory() {
-    return socketFactory;
-  }
+    public final SSLSocketFactory getSslSocketFactory() {
+        return sslSocketFactory;
+    }
 
-  /**
-   * Sets the socket factory used to secure HTTPS connections.
-   *
-   * <p>If unset, a lazily created SSL socket factory will be used.
-   */
-  public final OkHttpClient setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
-    this.sslSocketFactory = sslSocketFactory;
-    return this;
-  }
+    /**
+     * Sets the socket factory used to secure HTTPS connections.
+     * <p/>
+     * <p>If unset, a lazily created SSL socket factory will be used.
+     */
+    public final OkHttpClient setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
+        this.sslSocketFactory = sslSocketFactory;
+        return this;
+    }
 
-  public final SSLSocketFactory getSslSocketFactory() {
-    return sslSocketFactory;
-  }
+    public final HostnameVerifier getHostnameVerifier() {
+        return hostnameVerifier;
+    }
 
-  /**
-   * Sets the verifier used to confirm that response certificates apply to
-   * requested hostnames for HTTPS connections.
-   *
-   * <p>If unset, a default hostname verifier will be used.
-   */
-  public final OkHttpClient setHostnameVerifier(HostnameVerifier hostnameVerifier) {
-    this.hostnameVerifier = hostnameVerifier;
-    return this;
-  }
+    /**
+     * Sets the verifier used to confirm that response certificates apply to
+     * requested hostnames for HTTPS connections.
+     * <p/>
+     * <p>If unset, a default hostname verifier will be used.
+     */
+    public final OkHttpClient setHostnameVerifier(HostnameVerifier hostnameVerifier) {
+        this.hostnameVerifier = hostnameVerifier;
+        return this;
+    }
 
-  public final HostnameVerifier getHostnameVerifier() {
-    return hostnameVerifier;
-  }
+    public final CertificatePinner getCertificatePinner() {
+        return certificatePinner;
+    }
 
-  /**
-   * Sets the certificate pinner that constrains which certificates are trusted.
-   * By default HTTPS connections rely on only the {@link #setSslSocketFactory
-   * SSL socket factory} to establish trust. Pinning certificates avoids the
-   * need to trust certificate authorities.
-   */
-  public final OkHttpClient setCertificatePinner(CertificatePinner certificatePinner) {
-    this.certificatePinner = certificatePinner;
-    return this;
-  }
+    /**
+     * Sets the certificate pinner that constrains which certificates are trusted.
+     * By default HTTPS connections rely on only the {@link #setSslSocketFactory
+     * SSL socket factory} to establish trust. Pinning certificates avoids the
+     * need to trust certificate authorities.
+     */
+    public final OkHttpClient setCertificatePinner(CertificatePinner certificatePinner) {
+        this.certificatePinner = certificatePinner;
+        return this;
+    }
 
-  public final CertificatePinner getCertificatePinner() {
-    return certificatePinner;
-  }
+    public final Authenticator getAuthenticator() {
+        return authenticator;
+    }
 
-  /**
-   * Sets the authenticator used to respond to challenges from the remote web
-   * server or proxy server.
-   *
-   * <p>If unset, the {@link java.net.Authenticator#setDefault system-wide default}
-   * authenticator will be used.
-   */
-  public final OkHttpClient setAuthenticator(Authenticator authenticator) {
-    this.authenticator = authenticator;
-    return this;
-  }
+    /**
+     * Sets the authenticator used to respond to challenges from the remote web
+     * server or proxy server.
+     * <p/>
+     * <p>If unset, the {@link java.net.Authenticator#setDefault system-wide default}
+     * authenticator will be used.
+     */
+    public final OkHttpClient setAuthenticator(Authenticator authenticator) {
+        this.authenticator = authenticator;
+        return this;
+    }
 
-  public final Authenticator getAuthenticator() {
-    return authenticator;
-  }
+    public final ConnectionPool getConnectionPool() {
+        return connectionPool;
+    }
 
-  /**
-   * Sets the connection pool used to recycle HTTP and HTTPS connections.
-   *
-   * <p>If unset, the {@link ConnectionPool#getDefault() system-wide
-   * default} connection pool will be used.
-   */
-  public final OkHttpClient setConnectionPool(ConnectionPool connectionPool) {
-    this.connectionPool = connectionPool;
-    return this;
-  }
+    /**
+     * Sets the connection pool used to recycle HTTP and HTTPS connections.
+     * <p/>
+     * <p>If unset, the {@link ConnectionPool#getDefault() system-wide
+     * default} connection pool will be used.
+     */
+    public final OkHttpClient setConnectionPool(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
+        return this;
+    }
 
-  public final ConnectionPool getConnectionPool() {
-    return connectionPool;
-  }
+    public final boolean getFollowSslRedirects() {
+        return followSslRedirects;
+    }
 
-  /**
-   * Configure this client to follow redirects from HTTPS to HTTP and from HTTP
-   * to HTTPS.
-   *
-   * <p>If unset, protocol redirects will be followed. This is different than
-   * the built-in {@code HttpURLConnection}'s default.
-   */
-  public final OkHttpClient setFollowSslRedirects(boolean followProtocolRedirects) {
-    this.followSslRedirects = followProtocolRedirects;
-    return this;
-  }
+    /**
+     * Configure this client to follow redirects from HTTPS to HTTP and from HTTP
+     * to HTTPS.
+     * <p/>
+     * <p>If unset, protocol redirects will be followed. This is different than
+     * the built-in {@code HttpURLConnection}'s default.
+     */
+    public final OkHttpClient setFollowSslRedirects(boolean followProtocolRedirects) {
+        this.followSslRedirects = followProtocolRedirects;
+        return this;
+    }
 
-  public final boolean getFollowSslRedirects() {
-    return followSslRedirects;
-  }
+    public final boolean getFollowRedirects() {
+        return followRedirects;
+    }
 
-  /**
-   * Configure this client to follow redirects.
-   *
-   * <p>If unset, redirects will not be followed. This is the equivalent as the
-   * built-in {@code HttpURLConnection}'s default.
+    /**
+     * Configure this client to follow redirects.
+     *
+     * <p>If unset, redirects will not be followed. This is the equivalent as the
+     * built-in {@code HttpURLConnection}'s default.
    */
   public final void setFollowRedirects(boolean followRedirects) {
-    this.followRedirects = followRedirects;
+      this.followRedirects = followRedirects;
   }
 
-  public final boolean getFollowRedirects() {
-    return followRedirects;
-  }
-
-  final RouteDatabase routeDatabase() {
-    return routeDatabase;
-  }
-
-  /**
-   * Sets the dispatcher used to set policy and execute asynchronous requests.
-   * Must not be null.
-   */
-  public final OkHttpClient setDispatcher(Dispatcher dispatcher) {
-    if (dispatcher == null) throw new IllegalArgumentException("dispatcher == null");
-    this.dispatcher = dispatcher;
-    return this;
-  }
-
-  public final Dispatcher getDispatcher() {
-    return dispatcher;
-  }
-
-  /**
-   * Configure the protocols used by this client to communicate with remote
-   * servers. By default this client will prefer the most efficient transport
-   * available, falling back to more ubiquitous protocols. Applications should
-   * only call this method to avoid specific compatibility problems, such as web
-   * servers that behave incorrectly when SPDY is enabled.
-   *
-   * <p>The following protocols are currently supported:
-   * <ul>
-   *   <li><a href="http://www.w3.org/Protocols/rfc2616/rfc2616.html">http/1.1</a>
-   *   <li><a href="http://www.chromium.org/spdy/spdy-protocol/spdy-protocol-draft3-1">spdy/3.1</a>
-   *   <li><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-14">h2-14</a>
-   * </ul>
-   *
-   * <p><strong>This is an evolving set.</strong> Future releases may drop
-   * support for transitional protocols (like h2-14), in favor of their
-   * successors (h2). The http/1.1 transport will never be dropped.
-   *
-   * <p>If multiple protocols are specified, <a
-   * href="https://technotes.googlecode.com/git/nextprotoneg.html">NPN</a> or
-   * <a href="http://tools.ietf.org/html/draft-ietf-tls-applayerprotoneg">ALPN</a>
-   * will be used to negotiate a transport.
-   *
-   * <p>{@link Protocol#HTTP_1_0} is not supported in this set. Requests are
-   * initiated with {@code HTTP/1.1} only. If the server responds with {@code
-   * HTTP/1.0}, that will be exposed by {@link Response#protocol()}.
-   *
-   * @param protocols the protocols to use, in order of preference. The list
-   *     must contain {@link Protocol#HTTP_1_1}. It must not contain null or
-   *     {@link Protocol#HTTP_1_0}.
-   */
-  public final OkHttpClient setProtocols(List<Protocol> protocols) {
-    protocols = Util.immutableList(protocols);
-    if (!protocols.contains(Protocol.HTTP_1_1)) {
-      throw new IllegalArgumentException("protocols doesn't contain http/1.1: " + protocols);
+    final RouteDatabase routeDatabase() {
+        return routeDatabase;
     }
-    if (protocols.contains(Protocol.HTTP_1_0)) {
-      throw new IllegalArgumentException("protocols must not contain http/1.0: " + protocols);
-    }
-    if (protocols.contains(null)) {
-      throw new IllegalArgumentException("protocols must not contain null");
-    }
-    this.protocols = Util.immutableList(protocols);
-    return this;
-  }
 
-  public final List<Protocol> getProtocols() {
-    return protocols;
+    public final Dispatcher getDispatcher() {
+        return dispatcher;
+    }
+
+    /**
+     * Sets the dispatcher used to set policy and execute asynchronous requests.
+     * Must not be null.
+     */
+    public final OkHttpClient setDispatcher(Dispatcher dispatcher) {
+        if (dispatcher == null) throw new IllegalArgumentException("dispatcher == null");
+        this.dispatcher = dispatcher;
+        return this;
+    }
+
+    public final List<Protocol> getProtocols() {
+        return protocols;
+    }
+
+    /**
+     * Configure the protocols used by this client to communicate with remote
+     * servers. By default this client will prefer the most efficient transport
+     * available, falling back to more ubiquitous protocols. Applications should
+     * only call this method to avoid specific compatibility problems, such as web
+     * servers that behave incorrectly when SPDY is enabled.
+     * <p/>
+     * <p>The following protocols are currently supported:
+     * <ul>
+     * <li><a href="http://www.w3.org/Protocols/rfc2616/rfc2616.html">http/1.1</a>
+     * <li><a href="http://www.chromium.org/spdy/spdy-protocol/spdy-protocol-draft3-1">spdy/3.1</a>
+     * <li><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-14">h2-14</a>
+     * </ul>
+     * <p/>
+     * <p><strong>This is an evolving set.</strong> Future releases may drop
+     * support for transitional protocols (like h2-14), in favor of their
+     * successors (h2). The http/1.1 transport will never be dropped.
+     * <p/>
+     * <p>If multiple protocols are specified, <a
+     * href="https://technotes.googlecode.com/git/nextprotoneg.html">NPN</a> or
+     * <a href="http://tools.ietf.org/html/draft-ietf-tls-applayerprotoneg">ALPN</a>
+     * will be used to negotiate a transport.
+     * <p/>
+     * <p>{@link Protocol#HTTP_1_0} is not supported in this set. Requests are
+     * initiated with {@code HTTP/1.1} only. If the server responds with {@code
+     * HTTP/1.0}, that will be exposed by {@link Response#protocol()}.
+     *
+     * @param protocols the protocols to use, in order of preference. The list
+     *                  must contain {@link Protocol#HTTP_1_1}. It must not contain null or
+     *                  {@link Protocol#HTTP_1_0}.
+     */
+    public final OkHttpClient setProtocols(List<Protocol> protocols) {
+        protocols = Util.immutableList(protocols);
+        if (!protocols.contains(Protocol.HTTP_1_1)) {
+            throw new IllegalArgumentException("protocols doesn't contain http/1.1: " + protocols);
+        }
+        if (protocols.contains(Protocol.HTTP_1_0)) {
+            throw new IllegalArgumentException("protocols must not contain http/1.0: " + protocols);
+        }
+        if (protocols.contains(null)) {
+            throw new IllegalArgumentException("protocols must not contain null");
+        }
+        this.protocols = Util.immutableList(protocols);
+        return this;
+    }
+
+    public final List<ConnectionConfiguration> getConnectionConfigurations() {
+        return connectionConfigurations;
   }
 
   public final OkHttpClient setConnectionConfigurations(
       List<ConnectionConfiguration> connectionConfigurations) {
     this.connectionConfigurations = Util.immutableList(connectionConfigurations);
     return this;
-  }
-
-  public final List<ConnectionConfiguration> getConnectionConfigurations() {
-    return connectionConfigurations;
   }
 
   /**
@@ -571,6 +575,8 @@ public class OkHttpClient implements Cloneable {
     if (defaultSslSocketFactory == null) {
       try {
         SSLContext sslContext = SSLContext.getInstance("TLS");
+        if (Build.VERSION.SDK_INT >= 16)
+            sslContext = SSLContext.getInstance("TLSv1.2");
         sslContext.init(null, null, null);
         defaultSslSocketFactory = sslContext.getSocketFactory();
       } catch (GeneralSecurityException e) {
