@@ -227,12 +227,9 @@ public final class Connection {
     socket = route.address.sslSocketFactory
         .createSocket(socket, route.address.uriHost, route.address.uriPort, true /* autoClose */);
     SSLSocket sslSocket = (SSLSocket) socket;
-    platform.configureTls(sslSocket, route.address.uriHost, route.tlsVersion);
 
-    boolean useNpn = route.supportsNpn();
-    if (useNpn) {
-      platform.setProtocols(sslSocket, route.address.protocols);
-    }
+    // Configure the socket's ciphers, TLS versions, and extensions.
+    route.connectionConfiguration.apply(sslSocket, route);
 
     // Force handshake. This can throw!
     sslSocket.startHandshake();
@@ -242,10 +239,15 @@ public final class Connection {
       throw new IOException("Hostname '" + route.address.uriHost + "' was not verified");
     }
 
+    // Check that the certificate pinner is satisfied by the certificates presented.
+    route.address.certificatePinner.check(route.address.uriHost,
+        sslSocket.getSession().getPeerCertificates());
+
     handshake = Handshake.get(sslSocket.getSession());
 
     String maybeProtocol;
-    if (useNpn && (maybeProtocol = platform.getSelectedProtocol(sslSocket)) != null) {
+    if (route.connectionConfiguration.supportsTlsExtensions()
+        && (maybeProtocol = platform.getSelectedProtocol(sslSocket)) != null) {
       protocol = Protocol.get(maybeProtocol); // Throws IOE on unknown.
     }
 

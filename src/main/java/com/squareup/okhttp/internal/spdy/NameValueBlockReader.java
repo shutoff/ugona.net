@@ -15,19 +15,18 @@
  */
 package com.squareup.okhttp.internal.spdy;
 
-import com.squareup.okio.Buffer;
-import com.squareup.okio.BufferedSource;
-import com.squareup.okio.ByteString;
-import com.squareup.okio.ForwardingSource;
-import com.squareup.okio.InflaterSource;
-import com.squareup.okio.Okio;
-import com.squareup.okio.Source;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
+import okio.Buffer;
+import okio.BufferedSource;
+import okio.ByteString;
+import okio.ForwardingSource;
+import okio.InflaterSource;
+import okio.Okio;
+import okio.Source;
 
 /**
  * Reads a SPDY/3 Name/Value header block. This class is made complicated by the
@@ -36,89 +35,84 @@ import java.util.zip.Inflater;
  * bytes.
  */
 class NameValueBlockReader {
-    /**
-     * This source transforms compressed bytes into uncompressed bytes.
-     */
-    private final InflaterSource inflaterSource;
-    /**
-     * This source holds inflated bytes.
-     */
-    private final BufferedSource source;
-    /**
-     * How many compressed bytes must be read into inflaterSource before
-     * {@link #readNameValueBlock} returns.
-     */
-    private int compressedLimit;
+  /** This source transforms compressed bytes into uncompressed bytes. */
+  private final InflaterSource inflaterSource;
 
-    public NameValueBlockReader(BufferedSource source) {
-        // Limit the inflater input stream to only those bytes in the Name/Value
-        // block. We cut the inflater off at its source because we can't predict the
-        // ratio of compressed bytes to uncompressed bytes.
-        Source throttleSource = new ForwardingSource(source) {
-            @Override
-            public long read(Buffer sink, long byteCount) throws IOException {
-                if (compressedLimit == 0) return -1; // Out of data for the current block.
-                long read = super.read(sink, Math.min(byteCount, compressedLimit));
-                if (read == -1) return -1;
-                compressedLimit -= read;
-                return read;
-            }
-        };
+  /**
+   * How many compressed bytes must be read into inflaterSource before
+   * {@link #readNameValueBlock} returns.
+   */
+  private int compressedLimit;
 
-        // Subclass inflater to install a dictionary when it's needed.
-        Inflater inflater = new Inflater() {
-            @Override
-            public int inflate(byte[] buffer, int offset, int count)
-                    throws DataFormatException {
-                int result = super.inflate(buffer, offset, count);
-                if (result == 0 && needsDictionary()) {
-                    setDictionary(Spdy3.DICTIONARY);
-                    result = super.inflate(buffer, offset, count);
-                }
-                return result;
-            }
-        };
+  /** This source holds inflated bytes. */
+  private final BufferedSource source;
 
-        this.inflaterSource = new InflaterSource(throttleSource, inflater);
-        this.source = Okio.buffer(inflaterSource);
-    }
+  public NameValueBlockReader(BufferedSource source) {
+    // Limit the inflater input stream to only those bytes in the Name/Value
+    // block. We cut the inflater off at its source because we can't predict the
+    // ratio of compressed bytes to uncompressed bytes.
+    Source throttleSource = new ForwardingSource(source) {
+      @Override public long read(Buffer sink, long byteCount) throws IOException {
+        if (compressedLimit == 0) return -1; // Out of data for the current block.
+        long read = super.read(sink, Math.min(byteCount, compressedLimit));
+        if (read == -1) return -1;
+        compressedLimit -= read;
+        return read;
+      }
+    };
 
-    public List<Header> readNameValueBlock(int length) throws IOException {
-        this.compressedLimit += length;
-
-        int numberOfPairs = source.readInt();
-        if (numberOfPairs < 0) throw new IOException("numberOfPairs < 0: " + numberOfPairs);
-        if (numberOfPairs > 1024) throw new IOException("numberOfPairs > 1024: " + numberOfPairs);
-
-        List<Header> entries = new ArrayList<Header>(numberOfPairs);
-        for (int i = 0; i < numberOfPairs; i++) {
-            ByteString name = readByteString().toAsciiLowercase();
-            ByteString values = readByteString();
-            if (name.size() == 0) throw new IOException("name.size == 0");
-            entries.add(new Header(name, values));
+    // Subclass inflater to install a dictionary when it's needed.
+    Inflater inflater = new Inflater() {
+      @Override public int inflate(byte[] buffer, int offset, int count)
+          throws DataFormatException {
+        int result = super.inflate(buffer, offset, count);
+        if (result == 0 && needsDictionary()) {
+          setDictionary(Spdy3.DICTIONARY);
+          result = super.inflate(buffer, offset, count);
         }
+        return result;
+      }
+    };
 
-        doneReading();
-        return entries;
+    this.inflaterSource = new InflaterSource(throttleSource, inflater);
+    this.source = Okio.buffer(inflaterSource);
+  }
+
+  public List<Header> readNameValueBlock(int length) throws IOException {
+    this.compressedLimit += length;
+
+    int numberOfPairs = source.readInt();
+    if (numberOfPairs < 0) throw new IOException("numberOfPairs < 0: " + numberOfPairs);
+    if (numberOfPairs > 1024) throw new IOException("numberOfPairs > 1024: " + numberOfPairs);
+
+    List<Header> entries = new ArrayList<>(numberOfPairs);
+    for (int i = 0; i < numberOfPairs; i++) {
+      ByteString name = readByteString().toAsciiLowercase();
+      ByteString values = readByteString();
+      if (name.size() == 0) throw new IOException("name.size == 0");
+      entries.add(new Header(name, values));
     }
 
-    private ByteString readByteString() throws IOException {
-        int length = source.readInt();
-        return source.readByteString(length);
-    }
+    doneReading();
+    return entries;
+  }
 
-    private void doneReading() throws IOException {
-        // Move any outstanding unread bytes into the inflater. One side-effect of
-        // deflate compression is that sometimes there are bytes remaining in the
-        // stream after we've consumed all of the content.
-        if (compressedLimit > 0) {
-            inflaterSource.refill();
-            if (compressedLimit != 0)
-                throw new IOException("compressedLimit > 0: " + compressedLimit);
-        }
-    }
+  private ByteString readByteString() throws IOException {
+    int length = source.readInt();
+    return source.readByteString(length);
+  }
 
-    public void close() throws IOException {
-        source.close();
+  private void doneReading() throws IOException {
+    // Move any outstanding unread bytes into the inflater. One side-effect of
+    // deflate compression is that sometimes there are bytes remaining in the
+    // stream after we've consumed all of the content.
+    if (compressedLimit > 0) {
+      inflaterSource.refill();
+      if (compressedLimit != 0) throw new IOException("compressedLimit > 0: " + compressedLimit);
     }
+  }
+
+  public void close() throws IOException {
+    source.close();
+  }
 }
