@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -463,7 +464,13 @@ public class TracksFragment extends Fragment
 
     abstract class TrackPositionFetcher implements Address.Answer {
 
+        Handler handler;
+
         int pos;
+
+        TrackPositionFetcher() {
+            handler = new Handler();
+        }
 
         abstract Track.Point getPoint(Track track);
 
@@ -474,7 +481,16 @@ public class TracksFragment extends Fragment
         abstract void done();
 
         @Override
-        public void result(String address) {
+        public void result(final String address) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    process_address(address);
+                }
+            });
+        }
+
+        public void process_address(String address) {
             if (getActivity() == null)
                 return;
             if (address == null) {
@@ -494,6 +510,7 @@ public class TracksFragment extends Fragment
             TrackPositionFetcher fetcher = create();
             fetcher.update(pos);
         }
+
 
         void update(int track_pos) {
             pos = track_pos;
