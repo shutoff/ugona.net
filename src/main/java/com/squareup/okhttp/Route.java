@@ -15,7 +15,6 @@
  */
 package com.squareup.okhttp;
 
-import com.squareup.okhttp.internal.http.RouteSelector;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 
@@ -29,8 +28,8 @@ import java.net.Proxy;
  *   <li><strong>IP address:</strong> whether connecting directly to an origin
  *       server or a proxy, opening a socket requires an IP address. The DNS
  *       server may return multiple IP addresses to attempt.
- *   <li><strong>TLS version:</strong> which TLS version to attempt with the
- *       HTTPS connection.
+ *   <li><strong>TLS configuration:</strong> which cipher suites and TLS
+ *       versions to attempt with the HTTPS connection.
  * </ul>
  * Each route is a specific selection of these options.
  */
@@ -38,18 +37,26 @@ public final class Route {
   final Address address;
   final Proxy proxy;
   final InetSocketAddress inetSocketAddress;
-  final String tlsVersion;
+  final ConnectionConfiguration connectionConfiguration;
 
   public Route(Address address, Proxy proxy, InetSocketAddress inetSocketAddress,
-      String tlsVersion) {
-    if (address == null) throw new NullPointerException("address == null");
-    if (proxy == null) throw new NullPointerException("proxy == null");
-    if (inetSocketAddress == null) throw new NullPointerException("inetSocketAddress == null");
-    if (tlsVersion == null) throw new NullPointerException("tlsVersion == null");
+      ConnectionConfiguration connectionConfiguration) {
+    if (address == null) {
+      throw new NullPointerException("address == null");
+    }
+    if (proxy == null) {
+      throw new NullPointerException("proxy == null");
+    }
+    if (inetSocketAddress == null) {
+      throw new NullPointerException("inetSocketAddress == null");
+    }
+    if (connectionConfiguration == null) {
+      throw new NullPointerException("connectionConfiguration == null");
+    }
     this.address = address;
     this.proxy = proxy;
     this.inetSocketAddress = inetSocketAddress;
-    this.tlsVersion = tlsVersion;
+    this.connectionConfiguration = connectionConfiguration;
   }
 
   public Address getAddress() {
@@ -71,12 +78,8 @@ public final class Route {
     return inetSocketAddress;
   }
 
-  public String getTlsVersion() {
-    return tlsVersion;
-  }
-
-  boolean supportsNpn() {
-    return !tlsVersion.equals(RouteSelector.SSL_V3);
+  public ConnectionConfiguration getConnectionConfiguration() {
+    return connectionConfiguration;
   }
 
   /**
@@ -93,7 +96,7 @@ public final class Route {
       return address.equals(other.address)
           && proxy.equals(other.proxy)
           && inetSocketAddress.equals(other.inetSocketAddress)
-          && tlsVersion.equals(other.tlsVersion);
+          && connectionConfiguration.equals(other.connectionConfiguration);
     }
     return false;
   }
@@ -103,7 +106,7 @@ public final class Route {
     result = 31 * result + address.hashCode();
     result = 31 * result + proxy.hashCode();
     result = 31 * result + inetSocketAddress.hashCode();
-    result = 31 * result + tlsVersion.hashCode();
+    result = 31 * result + connectionConfiguration.hashCode();
     return result;
   }
 }
