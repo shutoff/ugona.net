@@ -126,8 +126,11 @@ public class FetchService extends Service {
                     boolean outgoing = intent.getBooleanExtra(Names.Car.ALARM_MODE, false);
                     showNotification(car_id, text, title, pictId, max_id, sound, when, outgoing, mode);
                 }
-                if (action.equals(ACTION_RELE_OFF))
+                if (action.equals(ACTION_RELE_OFF)) {
+                    State.appendLog("Action rele OFF");
                     Actions.rele_off(this, car_id, intent.getStringExtra(Names.Car.AUTH), intent.getStringExtra(Names.PASSWORD));
+                }
+
                 if (action.equals(ACTION_MAINTENANCE)) {
                     new MaintenanceRequest(Preferences.getCar(preferences, car_id), intent.getStringExtra(Names.Car.MAINTENANCE) != null);
                     if (startRequest())

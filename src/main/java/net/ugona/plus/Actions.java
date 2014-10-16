@@ -663,12 +663,15 @@ public class Actions extends LockPatternActivity {
                                 final boolean rele_on = preferences.getLong(Names.Car.RELE_START + car_id, 0) > 0;
                                 final boolean rele2 = preferences.getString(Names.Car.CAR_RELE + car_id, "").equals("2");
 
+                                State.appendLog("RELE impulse=" + impulse + ", on=" + rele_on + ", rele2" + rele2);
+
                                 int cmd = rele2 ? 514 : 258;
                                 if (!impulse) {
                                     cmd--;
                                     if (!rele_on)
                                         cmd--;
                                 }
+                                State.appendLog("send cmd " + cmd);
 
                                 new InetRequest(context, car_id, ccode, cmd, R.string.rele) {
 
@@ -693,6 +696,7 @@ public class Actions extends LockPatternActivity {
                                             PendingIntent pi = PendingIntent.getService(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
                                             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
                                             int timeout = preferences.getInt(Names.Car.RELE_TIME + car_id, 0) * 60000;
+                                            State.appendLog("Set RELE OFF after " + timeout);
                                             alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + timeout, pi);
                                         }
                                     }
@@ -723,11 +727,13 @@ public class Actions extends LockPatternActivity {
 
     static void rele_off(final Context context, final String car_id, String ccode, String pswd) {
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        State.appendLog("rele OFF");
         if (preferences.getLong(Names.Car.RELE_START + car_id, 0) == 0)
             return;
         final boolean rele2 = preferences.getString(Names.Car.CAR_RELE + car_id, "").equals("2");
         if (ccode != null) {
             int cmd = rele2 ? 513 : 257;
+            State.appendLog("cmd " + cmd);
             new InetRequest(context, car_id, ccode, cmd, R.string.rele) {
 
                 @Override
