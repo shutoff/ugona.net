@@ -28,6 +28,7 @@ public final class Names {
     static final String ROTATE = "rotate";
     static final String CAMERA = "camera";
     static final String INIT_POINTER = "init_pointer";
+    static final String INIT_MAINTENANCE = "init_maintenance";
     static final String SHOW_NAME = "show_name";
     static final String TRAFIC_TIME = "trafic_time";
     static final String TRAFIC_LEVEL = "trefic_level";

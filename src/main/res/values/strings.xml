@@ -674,4 +674,5 @@
         <item>vibro</item>
         <item>none</item>
     </string-array>
+    <string name="maintenance_msg">You can setup notification about maintenance based on time or mileage</string>
 </resources>

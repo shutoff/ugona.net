@@ -277,7 +277,7 @@ public class MainActivity extends ActionBarActivity {
                 i.putExtra(Names.ID, car_id);
                 i.putExtra(Names.Car.CAR_PHONE, true);
                 startActivityForResult(i, CAR_SETUP);
-            } else if (!preferences.getBoolean(Names.INIT_POINTER, false) && preferences.getString(Names.Car.CAR_KEY + car_id, "").equals("demo")) {
+            } else if (!preferences.getBoolean(Names.INIT_POINTER, false) && !preferences.getString(Names.Car.CAR_KEY + car_id, "").equals("demo")) {
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putBoolean(Names.INIT_POINTER, true);
                 ed.commit();
@@ -300,6 +300,24 @@ public class MainActivity extends ActionBarActivity {
                                         break;
                                     }
                                 }
+                            }
+                        })
+                        .create();
+                dialog.show();
+            } else if (!preferences.getBoolean(Names.INIT_MAINTENANCE, false) && !preferences.getString(Names.Car.CAR_KEY + car_id, "").equals("demo")) {
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putBoolean(Names.INIT_MAINTENANCE, true);
+                ed.commit();
+                AlertDialog dialog = new AlertDialog.Builder(this)
+                        .setTitle(R.string.maintenance)
+                        .setMessage(R.string.maintenance_msg)
+                        .setNegativeButton(R.string.cancel, null)
+                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent intent = new Intent(MainActivity.this, MaintenanceActivity.class);
+                                intent.putExtra(Names.ID, car_id);
+                                startActivity(intent);
                             }
                         })
                         .create();

@@ -672,11 +672,12 @@
     <string-array name="notify_entries">
         <item>Звук</item>
         <item>Вибрация</item>
-        <item>Неи</item>
+        <item>Нет</item>
     </string-array>
     <string-array name="notify_values">
         <item></item>
         <item>vibro</item>
         <item>none</item>
     </string-array>
+    <string name="maintenance_msg">Вы можете настроить напоминания о техническом обслуживании автомибиля основанные на пробеге и времени</string>
 </resources>
