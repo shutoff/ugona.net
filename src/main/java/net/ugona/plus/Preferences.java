@@ -48,8 +48,12 @@ public class Preferences {
             if (sensor >= 0)
                 return null;
             String[] data = temp.split(";");
-            String[] res = data[-sensor - 1].split(":");
-            return res[1] + " \u00B0C";
+            try {
+                String[] res = data[-sensor - 1].split(":");
+                return res[1] + " \u00B0C";
+            } catch (Exception ex) {
+                return null;
+            }
         }
 
         Map<Integer, TempConfig> config = new HashMap<Integer, TempConfig>();

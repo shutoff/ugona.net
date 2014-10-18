@@ -446,7 +446,7 @@ public class Actions extends LockPatternActivity {
         requestPassword(context, car_id, R.string.balance, R.string.balance_request, new Answer() {
             @Override
             void answer(String pswd) {
-                SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.balance, "BALANCE?", "") {
+                SmsMonitor.Sms sms = new SmsMonitor.Sms(R.string.balance, "BALANCE?", "") {
                     @Override
                     boolean process_answer(Context context, String car_id, String text) {
                         String balance = State.parseBalance(text);
@@ -469,7 +469,8 @@ public class Actions extends LockPatternActivity {
                         Preferences.checkBalance(context, car_id);
                         return true;
                     }
-                });
+                };
+                SmsMonitor.sendSMS(context, car_id, pswd, sms);
             }
         });
     }

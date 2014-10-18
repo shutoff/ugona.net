@@ -464,7 +464,11 @@ public class StatFragment extends Fragment implements OnRefreshListener {
             if (fetcher != this)
                 return;
             fetcher = null;
-            mPullToRefreshLayout.setRefreshComplete();
+            try {
+                mPullToRefreshLayout.setRefreshComplete();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
 
     }

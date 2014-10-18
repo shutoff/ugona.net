@@ -160,7 +160,7 @@ public class State {
         Matcher matcher = balancePat1.matcher(source);
         if (matcher.find()) {
             try {
-                double v = Double.parseDouble(matcher.group(1));
+                double v = Double.parseDouble(matcher.group(1).replace(",", "."));
                 return -v + "";
             } catch (Exception ex) {
                 // ignore
@@ -169,7 +169,7 @@ public class State {
         matcher = balancePat2.matcher(source);
         if (matcher.find()) {
             try {
-                double v = Double.parseDouble(matcher.group(1));
+                double v = Double.parseDouble(matcher.group(1).replace(",", "."));
                 return v + "";
             } catch (Exception ex) {
                 // ignore
@@ -178,20 +178,24 @@ public class State {
         matcher = balancePat3.matcher(source);
         if (matcher.find()) {
             try {
-                double v = Double.parseDouble(matcher.group(1));
+                double v = Double.parseDouble(matcher.group(0).replace(",", "."));
                 return v + "";
             } catch (Exception ex) {
                 // ignore
             }
         }
-        matcher = balancePat3.matcher(source);
+        matcher = balancePat4.matcher(source);
         if (matcher.find()) {
             try {
                 double v = Double.parseDouble(matcher.group(1));
-                if (v >= 0) {
-                    v += Double.parseDouble(matcher.group(3)) / 100.;
-                } else {
-                    v -= Double.parseDouble(matcher.group(3)) / 100;
+                try {
+                    if (v >= 0) {
+                        v += Double.parseDouble(matcher.group(3)) / 100.;
+                    } else {
+                        v -= Double.parseDouble(matcher.group(3)) / 100;
+                    }
+                } catch (Exception e) {
+                    // ignore
                 }
                 return v + "";
             } catch (Exception ex) {

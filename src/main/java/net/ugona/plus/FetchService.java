@@ -235,7 +235,7 @@ public class FetchService extends Service {
         manager.notify(max_id, notification);
     }
 
-    boolean startRequest() {
+    synchronized boolean startRequest() {
         for (Map.Entry<String, ServerRequest> entry : requests.entrySet()) {
             if (entry.getValue().started)
                 continue;

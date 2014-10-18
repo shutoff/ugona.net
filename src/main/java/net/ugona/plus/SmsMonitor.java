@@ -214,6 +214,112 @@ public class SmsMonitor extends BroadcastReceiver {
 
     }
 
+    static boolean processCarMessage(Context context, String body, String car_id) {
+        SmsQueues queues = null;
+        if (processed != null)
+            queues = processed.get(car_id);
+        SmsQueue wait = null;
+        if (queues != null)
+            wait = queues.wait;
+        if (wait != null) {
+            Set<Map.Entry<Integer, Sms>> entries = wait.entrySet();
+            for (Map.Entry<Integer, Sms> entry : entries) {
+                String answer = entry.getValue().answer;
+                if (compare(body, answer)) {
+                    if (entry.getValue().process_answer(context, car_id, body.substring(answer.length()))) {
+                        wait.remove(entry.getKey());
+                        Intent i = new Intent(SMS_ANSWER);
+                        i.putExtra(Names.ANSWER, Activity.RESULT_OK);
+                        i.putExtra(Names.SMS_TEXT, body.substring(answer.length()));
+                        i.putExtra(Names.ID, car_id);
+                        context.sendBroadcast(i);
+                        return true;
+                    }
+                }
+                String sound = entry.getValue().process_error(body);
+                if (sound != null) {
+                    wait.remove(entry.getKey());
+                    Intent i = new Intent(SMS_ANSWER);
+                    i.putExtra(Names.ANSWER, Activity.RESULT_CANCELED);
+                    i.putExtra(Names.ID, car_id);
+                    context.sendBroadcast(i);
+                    showNotification(context, context.getString(entry.getValue().error_msg), R.drawable.warning, car_id, sound);
+                    return true;
+                }
+            }
+        }
+        for (int i = 0; i < notifications.length; i++) {
+            if (compare(body, notifications[i])) {
+                String[] msg = context.getString(R.string.notification).split("\\|");
+                showNotification(context, msg[i], car_id);
+                return true;
+            }
+        }
+        for (int i = 0; i < alarms.length; i++) {
+            if (compare(body, alarms[i])) {
+                String[] msg = context.getString(R.string.alarm).split("\\|");
+                showAlarm(context, msg[i], car_id);
+                return true;
+            }
+        }
+        if (compare(body, "ALARM Light shock")) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            if (preferences.getBoolean(Names.Car.LIGHT_SHOCK, true)) {
+                showAlarm(context, context.getString(R.string.light_shock), car_id);
+            } else {
+                showNotification(context, context.getString(R.string.light_shock), car_id);
+            }
+            return true;
+        }
+        for (int i = 0; i < msg.length; i++) {
+            if (compare(body, msg[i]))
+                return true;
+        }
+        if (compare(body, "InGPSZone:")) {
+            Alarm.zoneNotify(context, car_id, true, body.substring(10), true, false, 0);
+            return true;
+        }
+        if (compare(body, "OutGPSZone:")) {
+            Alarm.zoneNotify(context, car_id, false, body.substring(11), true, false, 0);
+            return true;
+        }
+
+/*
+        Matcher matcher = gps_pat.matcher(body);
+        if (matcher.find()) {
+            double lat = Actions.toWGS(Double.parseDouble(matcher.group(1)));
+            double lng = Actions.toWGS(Double.parseDouble(matcher.group(2)));
+            return true;
+        }
+        matcher = gsm_pat.matcher(body);
+        if (matcher.find()) {
+            int mc = Integer.parseInt(matcher.group(1));
+            int nc = Integer.parseInt(matcher.group(1));
+            int lac = Integer.parseInt(matcher.group(1));
+            int cid = Integer.parseInt(matcher.group(1));
+            return true;
+        }
+*/
+
+        return false;
+    }
+
+//    Pattern gps_pat = Pattern.compile("\\&LAT=(-?[0-9]+\\.[0-9]+)\\&LON=(-?[0-9]+\\.[0-9]+)");
+//    Pattern gsm_pat = Pattern.compile("\\&mcc=([0-9]+)\\&mnc=([0-9]+)\\&lac=([0-9]+)\\&cid=([0-9]+)");
+
+    static private void showAlarm(Context context, String text, String car_id) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor ed = preferences.edit();
+        ed.putBoolean(Names.SMS_ALARM, true);
+        ed.commit();
+        Intent alarmIntent = new Intent(context, Alarm.class);
+        alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        alarmIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        alarmIntent.putExtra(Names.Car.ALARM, text);
+        alarmIntent.putExtra(Names.ID, car_id);
+        context.startActivity(alarmIntent);
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent == null)
@@ -373,112 +479,6 @@ public class SmsMonitor extends BroadcastReceiver {
                 context.startService(i);
             }
         }
-    }
-
-//    Pattern gps_pat = Pattern.compile("\\&LAT=(-?[0-9]+\\.[0-9]+)\\&LON=(-?[0-9]+\\.[0-9]+)");
-//    Pattern gsm_pat = Pattern.compile("\\&mcc=([0-9]+)\\&mnc=([0-9]+)\\&lac=([0-9]+)\\&cid=([0-9]+)");
-
-    boolean processCarMessage(Context context, String body, String car_id) {
-        SmsQueues queues = null;
-        if (processed != null)
-            queues = processed.get(car_id);
-        SmsQueue wait = null;
-        if (queues != null)
-            wait = queues.wait;
-        if (wait != null) {
-            Set<Map.Entry<Integer, Sms>> entries = wait.entrySet();
-            for (Map.Entry<Integer, Sms> entry : entries) {
-                String answer = entry.getValue().answer;
-                if (compare(body, answer)) {
-                    if (entry.getValue().process_answer(context, car_id, body.substring(answer.length()))) {
-                        wait.remove(entry.getKey());
-                        Intent i = new Intent(SMS_ANSWER);
-                        i.putExtra(Names.ANSWER, Activity.RESULT_OK);
-                        i.putExtra(Names.SMS_TEXT, body.substring(answer.length()));
-                        i.putExtra(Names.ID, car_id);
-                        context.sendBroadcast(i);
-                        return true;
-                    }
-                }
-                String sound = entry.getValue().process_error(body);
-                if (sound != null) {
-                    wait.remove(entry.getKey());
-                    Intent i = new Intent(SMS_ANSWER);
-                    i.putExtra(Names.ANSWER, Activity.RESULT_CANCELED);
-                    i.putExtra(Names.ID, car_id);
-                    context.sendBroadcast(i);
-                    showNotification(context, context.getString(entry.getValue().error_msg), R.drawable.warning, car_id, sound);
-                    return true;
-                }
-            }
-        }
-        for (int i = 0; i < notifications.length; i++) {
-            if (compare(body, notifications[i])) {
-                String[] msg = context.getString(R.string.notification).split("\\|");
-                showNotification(context, msg[i], car_id);
-                return true;
-            }
-        }
-        for (int i = 0; i < alarms.length; i++) {
-            if (compare(body, alarms[i])) {
-                String[] msg = context.getString(R.string.alarm).split("\\|");
-                showAlarm(context, msg[i], car_id);
-                return true;
-            }
-        }
-        if (compare(body, "ALARM Light shock")) {
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-            if (preferences.getBoolean(Names.Car.LIGHT_SHOCK, true)) {
-                showAlarm(context, context.getString(R.string.light_shock), car_id);
-            } else {
-                showNotification(context, context.getString(R.string.light_shock), car_id);
-            }
-            return true;
-        }
-        for (int i = 0; i < msg.length; i++) {
-            if (compare(body, msg[i]))
-                return true;
-        }
-        if (compare(body, "InGPSZone:")) {
-            Alarm.zoneNotify(context, car_id, true, body.substring(10), true, false, 0);
-            return true;
-        }
-        if (compare(body, "OutGPSZone:")) {
-            Alarm.zoneNotify(context, car_id, false, body.substring(11), true, false, 0);
-            return true;
-        }
-
-/*
-        Matcher matcher = gps_pat.matcher(body);
-        if (matcher.find()) {
-            double lat = Actions.toWGS(Double.parseDouble(matcher.group(1)));
-            double lng = Actions.toWGS(Double.parseDouble(matcher.group(2)));
-            return true;
-        }
-        matcher = gsm_pat.matcher(body);
-        if (matcher.find()) {
-            int mc = Integer.parseInt(matcher.group(1));
-            int nc = Integer.parseInt(matcher.group(1));
-            int lac = Integer.parseInt(matcher.group(1));
-            int cid = Integer.parseInt(matcher.group(1));
-            return true;
-        }
-*/
-
-        return false;
-    }
-
-    private void showAlarm(Context context, String text, String car_id) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor ed = preferences.edit();
-        ed.putBoolean(Names.SMS_ALARM, true);
-        ed.commit();
-        Intent alarmIntent = new Intent(context, Alarm.class);
-        alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        alarmIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        alarmIntent.putExtra(Names.Car.ALARM, text);
-        alarmIntent.putExtra(Names.ID, car_id);
-        context.startActivity(alarmIntent);
     }
 
     static class Sms {
