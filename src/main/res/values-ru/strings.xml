@@ -411,7 +411,7 @@
     <string name="retry">Повторить</string>
     <string name="phone">Телефон:</string>
     <string name="changed">Настройки изменены</string>
-    <string name="changed_msg">У вас есть несохраненные настрйоки.\nВы действительно хотите выйти?</string>
+    <string name="changed_msg">У вас есть несохраненные настройки.\nВы действительно хотите выйти?</string>
     <string name="exit">Выход</string>
     <string name="notify_msg">Уведомления приходят с некоторой задержкой в зависимости от настроек таймаута устройства и соединения телефона с сетью</string>
     <string name="command_name">Имя команды:</string>
@@ -680,4 +680,5 @@
         <item>none</item>
     </string-array>
     <string name="maintenance_msg">Вы можете настроить напоминания о техническом обслуживании автомибиля основанные на пробеге и времени</string>
+    <string name="maintenance_date">Дата последнего обслуживания</string>
 </resources>

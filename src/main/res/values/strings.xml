@@ -675,4 +675,5 @@
         <item>none</item>
     </string-array>
     <string name="maintenance_msg">You can setup notification about maintenance based on time or mileage</string>
+    <string name="maintenance_date">Last maintenance date</string>
 </resources>

@@ -2,7 +2,9 @@ package com.romorama.caldroid;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -14,8 +16,10 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.antonyt.infiniteviewpager.InfinitePagerAdapter;
@@ -68,31 +72,7 @@ import java.util.HashMap;
 @SuppressLint("DefaultLocale")
 public class CaldroidFragment extends DialogFragment {
 
-    /**
-     * To customize the selected background drawable and text color
-     */
-    public static int selectedBackgroundDrawable = -1;
-    public static int selectedTextColor = Color.BLACK;
-
     public final static int NUMBER_OF_PAGES = 4;
-
-    /**
-     * To customize the disabled background drawable and text color
-     */
-    public static int disabledBackgroundDrawable = -1;
-    public static int disabledTextColor = Color.GRAY;
-
-    /**
-     * Caldroid view components
-     */
-    private Button leftArrowButton;
-    private Button rightArrowButton;
-    private TextView monthTitleTextView;
-    private GridView weekdayGridView;
-    private InfiniteViewPager dateViewPager;
-    private DatePageChangeListener pageChangeListener;
-    private ArrayList<DateGridFragment> fragments;
-
     /**
      * Initial params key
      */
@@ -107,7 +87,6 @@ public class CaldroidFragment extends DialogFragment {
     public final static String ENABLE_SWIPE = "enableSwipe";
     public final static String START_DAY_OF_WEEK = "startDayOfWeek";
     public final static String FIT_ALL_MONTHS = "fitAllMonths";
-
     /**
      * For internal use
      */
@@ -115,7 +94,18 @@ public class CaldroidFragment extends DialogFragment {
     public final static String _MAX_DATE_TIME = "_maxDateTime";
     public final static String _BACKGROUND_FOR_DATETIME_MAP = "_backgroundForDateTimeMap";
     public final static String _TEXT_COLOR_FOR_DATETIME_MAP = "_textColorForDateTimeMap";
-
+    final static int YEARS_IN_SPINNER = 10;
+    /**
+     * To customize the selected background drawable and text color
+     */
+    public static int selectedBackgroundDrawable = -1;
+    public static int selectedTextColor = Color.BLACK;
+    /**
+     * To customize the disabled background drawable and text color
+     */
+    public static int disabledBackgroundDrawable = -1;
+    public static int disabledTextColor = Color.GRAY;
+    public int year_start = 0;
     /**
      * Initial data
      */
@@ -127,49 +117,51 @@ public class CaldroidFragment extends DialogFragment {
     protected DateTime minDateTime;
     protected DateTime maxDateTime;
     protected ArrayList<DateTime> dateInMonthsList;
-
     /**
      * caldroidData belongs to Caldroid
      */
     protected HashMap<String, Object> caldroidData = new HashMap<String, Object>();
-
     /**
      * extraData belongs to client
      */
     protected HashMap<String, Object> extraData = new HashMap<String, Object>();
-
     /**
      * backgroundForDateMap holds background resource for each date
      */
     protected HashMap<DateTime, Integer> backgroundForDateTimeMap = new HashMap<DateTime, Integer>();
-
     /**
      * textColorForDateMap holds color for text for each date
      */
     protected HashMap<DateTime, Integer> textColorForDateTimeMap = new HashMap<DateTime, Integer>();
-
     /**
      * First column of calendar is Sunday
      */
     protected int startDayOfWeek = DateTimeConstants.SUNDAY;
-
-    /**
-     * A calendar height is not fixed, it may have 5 or 6 rows. Set fitAllMonths
-     * to true so that the calendar will always have 6 rows
-     */
-    private boolean fitAllMonths = true;
-
     /**
      * datePagerAdapters hold 4 adapters, meant to be reused
      */
     protected ArrayList<CaldroidGridAdapter> datePagerAdapters = new ArrayList<CaldroidGridAdapter>();
-
     /**
      * To control the navigation
      */
     protected boolean enableSwipe = true;
     protected boolean showNavigationArrows = true;
-
+    /**
+     * Caldroid view components
+     */
+    private Button leftArrowButton;
+    private Button rightArrowButton;
+    private Spinner monthSpinner;
+    private Spinner yearSpinner;
+    private GridView weekdayGridView;
+    private InfiniteViewPager dateViewPager;
+    private DatePageChangeListener pageChangeListener;
+    private ArrayList<DateGridFragment> fragments;
+    /**
+     * A calendar height is not fixed, it may have 5 or 6 rows. Set fitAllMonths
+     * to true so that the calendar will always have 6 rows
+     */
+    private boolean fitAllMonths = true;
     /**
      * dateItemClickListener is fired when user click on the date cell
      */
@@ -180,6 +172,36 @@ public class CaldroidFragment extends DialogFragment {
      * Caldroid
      */
     private CaldroidListener caldroidListener;
+
+    static String monthText(int month) {
+        String s = new DateTime(2000, month + 1, 1, 0, 0, 0, 0)
+                .monthOfYear().getAsText().toUpperCase();
+        s = s.replaceAll("\u0410\u042F$", "\u0410\u0419").replaceAll("\u042F$", "\u042C").replaceAll("\u0410$", "");
+        return s;
+    }
+
+    /**
+     * To support faster init
+     *
+     * @param dialogTitle
+     * @param month
+     * @param year
+     * @return
+     */
+    public static CaldroidFragment newInstance(String dialogTitle, int month,
+                                               int year) {
+        CaldroidFragment f = new CaldroidFragment();
+
+        // Supply num input as an argument.
+        Bundle args = new Bundle();
+        args.putString(DIALOG_TITLE, dialogTitle);
+        args.putInt(MONTH, month);
+        args.putInt(YEAR, year);
+
+        f.setArguments(args);
+
+        return f;
+    }
 
     /**
      * Meant to be subclassed. User who wants to provide custom view, need to
@@ -208,17 +230,6 @@ public class CaldroidFragment extends DialogFragment {
 
     public Button getRightArrowButton() {
         return rightArrowButton;
-    }
-
-    /**
-     * To let client customize month title textview
-     */
-    public TextView getMonthTitleTextView() {
-        return monthTitleTextView;
-    }
-
-    public void setMonthTitleTextView(TextView monthTitleTextView) {
-        this.monthTitleTextView = monthTitleTextView;
     }
 
     /**
@@ -780,20 +791,23 @@ public class CaldroidFragment extends DialogFragment {
         return dateItemClickListener;
     }
 
-    static String monthYear(int year, int month) {
-        String s = new DateTime(year, month, 1, 0, 0, 0, 0)
-                .monthOfYear().getAsText().toUpperCase();
-        s = s.replaceAll("\u0410\u042F$", "\u0410\u0419").replaceAll("\u042F$", "\u042C").replaceAll("\u0410$", "");
-        return s + " " + year;
-    }
-
     /**
      * Refresh view when parameter changes. You should always change all
      * parameters first, then call this method.
      */
     public void refreshView() {
         // Refresh title view
-        monthTitleTextView.setText(monthYear(year, month));
+        monthSpinner.setSelection(month - 1);
+        int max_year = maxDateTime.getYear();
+        year_start = year - YEARS_IN_SPINNER / 2;
+        if (year_start + YEARS_IN_SPINNER > max_year)
+            year_start = max_year - YEARS_IN_SPINNER + 1;
+
+        yearSpinner.setSelection(year - year_start);
+        BaseAdapter baseAdapter = (BaseAdapter) yearSpinner.getAdapter();
+        baseAdapter.notifyDataSetChanged();
+        baseAdapter = (BaseAdapter) monthSpinner.getAdapter();
+        baseAdapter.notifyDataSetChanged();
 
         // Refresh the date grid views
         for (CaldroidGridAdapter adapter : datePagerAdapters) {
@@ -894,29 +908,6 @@ public class CaldroidFragment extends DialogFragment {
     }
 
     /**
-     * To support faster init
-     *
-     * @param dialogTitle
-     * @param month
-     * @param year
-     * @return
-     */
-    public static CaldroidFragment newInstance(String dialogTitle, int month,
-                                               int year) {
-        CaldroidFragment f = new CaldroidFragment();
-
-        // Supply num input as an argument.
-        Bundle args = new Bundle();
-        args.putString(DIALOG_TITLE, dialogTitle);
-        args.putInt(MONTH, month);
-        args.putInt(YEAR, year);
-
-        f.setArguments(args);
-
-        return f;
-    }
-
-    /**
      * Below code fixed the issue viewpager disappears in dialog mode on
      * orientation change
      * <p/>
@@ -948,8 +939,127 @@ public class CaldroidFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.calendar_view, container, false);
 
         // For the monthTitleTextView
-        monthTitleTextView = (TextView) view
-                .findViewById(R.id.calendar_month_year_textview);
+        monthSpinner = (Spinner) view
+                .findViewById(R.id.calendar_month);
+        yearSpinner = (Spinner) view
+                .findViewById(R.id.calendar_year);
+
+        monthSpinner.setAdapter(new BaseAdapter() {
+            @Override
+            public int getCount() {
+                if (year < maxDateTime.getYear())
+                    return 12;
+                return maxDateTime.getMonthOfYear();
+            }
+
+            @Override
+            public Object getItem(int i) {
+                return null;
+            }
+
+            @Override
+            public long getItemId(int i) {
+                return i;
+            }
+
+            @Override
+            public View getView(int i, View view, ViewGroup viewGroup) {
+                View v = view;
+                if (v == null) {
+                    LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = inflater.inflate(R.layout.calendar_item, null);
+                }
+                TextView tv = (TextView) v.findViewById(R.id.name);
+                tv.setText(monthText(i));
+                boolean is_current = (i + 1) == month;
+                tv.setTypeface(tv.getTypeface(), is_current ? Typeface.BOLD : Typeface.NORMAL);
+                return v;
+            }
+
+            @Override
+            public View getDropDownView(int i, View view, ViewGroup viewGroup) {
+                View v = view;
+                if (v == null) {
+                    LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = inflater.inflate(R.layout.calendar_dropdown_item, null);
+                }
+                TextView tv = (TextView) v.findViewById(R.id.name);
+                tv.setText(monthText(i));
+                boolean is_current = (i + 1) == month;
+                tv.setTypeface(tv.getTypeface(), is_current ? Typeface.BOLD : Typeface.NORMAL);
+                return v;
+            }
+        });
+
+        yearSpinner.setAdapter(new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return YEARS_IN_SPINNER;
+            }
+
+            @Override
+            public Object getItem(int i) {
+                return null;
+            }
+
+            @Override
+            public long getItemId(int i) {
+                return year_start + i;
+            }
+
+            @Override
+            public View getView(int i, View view, ViewGroup viewGroup) {
+                View v = view;
+                if (v == null) {
+                    LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = inflater.inflate(R.layout.calendar_item, null);
+                }
+                TextView tv = (TextView) v.findViewById(R.id.name);
+                tv.setText((year_start + i) + "");
+                boolean is_current = (year_start + i) == year;
+                tv.setTypeface(tv.getTypeface(), is_current ? Typeface.BOLD : Typeface.NORMAL);
+                return v;
+            }
+
+            @Override
+            public View getDropDownView(int i, View view, ViewGroup viewGroup) {
+                View v = view;
+                if (v == null) {
+                    LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = inflater.inflate(R.layout.calendar_dropdown_item, null);
+                }
+                TextView tv = (TextView) v.findViewById(R.id.name);
+                tv.setText((year_start + i) + "");
+                boolean is_current = (year_start + i) == year;
+                tv.setTypeface(tv.getTypeface(), is_current ? Typeface.BOLD : Typeface.NORMAL);
+                return v;
+            }
+        });
+
+        monthSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                setMonthYear(i + 1, year);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+
+        yearSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                setMonthYear(month, year_start + i);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
         // For the left arrow button
         leftArrowButton = (Button) view.findViewById(R.id.calendar_left_arrow);
@@ -991,6 +1101,12 @@ public class CaldroidFragment extends DialogFragment {
         refreshView();
 
         return view;
+    }
+
+    void setMonthYear(int m, int y) {
+        if ((m == month) && (y == year))
+            return;
+        moveToDate(new Date(y - 1900, m - 1, 1));
     }
 
     /**
