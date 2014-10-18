@@ -127,7 +127,6 @@ public class FetchService extends Service {
                     showNotification(car_id, text, title, pictId, max_id, sound, when, outgoing, mode);
                 }
                 if (action.equals(ACTION_RELE_OFF)) {
-                    State.appendLog("Action rele OFF");
                     Actions.rele_off(this, car_id, intent.getStringExtra(Names.Car.AUTH), intent.getStringExtra(Names.PASSWORD));
                 }
 

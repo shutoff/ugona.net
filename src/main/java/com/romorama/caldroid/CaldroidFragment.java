@@ -105,7 +105,6 @@ public class CaldroidFragment extends DialogFragment {
      */
     public static int disabledBackgroundDrawable = -1;
     public static int disabledTextColor = Color.GRAY;
-    public int year_start = 0;
     /**
      * Initial data
      */
@@ -146,6 +145,10 @@ public class CaldroidFragment extends DialogFragment {
      */
     protected boolean enableSwipe = true;
     protected boolean showNavigationArrows = true;
+    int year_start;
+    int year_end;
+    int month_start;
+    int month_end;
     /**
      * Caldroid view components
      */
@@ -174,7 +177,7 @@ public class CaldroidFragment extends DialogFragment {
     private CaldroidListener caldroidListener;
 
     static String monthText(int month) {
-        String s = new DateTime(2000, month + 1, 1, 0, 0, 0, 0)
+        String s = new DateTime(2000, month, 1, 0, 0, 0, 0)
                 .monthOfYear().getAsText().toUpperCase();
         s = s.replaceAll("\u0410\u042F$", "\u0410\u0419").replaceAll("\u042F$", "\u042C").replaceAll("\u0410$", "");
         return s;
@@ -797,17 +800,26 @@ public class CaldroidFragment extends DialogFragment {
      */
     public void refreshView() {
         // Refresh title view
-        monthSpinner.setSelection(month - 1);
-        int max_year = maxDateTime.getYear();
-        year_start = year - YEARS_IN_SPINNER / 2;
-        if (year_start + YEARS_IN_SPINNER > max_year)
-            year_start = max_year - YEARS_IN_SPINNER + 1;
+        year_end = year + YEARS_IN_SPINNER / 2;
+        if ((maxDateTime != null) && (year_end > maxDateTime.getYear()))
+            year_end = maxDateTime.getYear();
+        year_start = year_end - YEARS_IN_SPINNER;
+        if ((minDateTime != null) && (year_start < minDateTime.getYear()))
+            year_start = minDateTime.getYear();
+        month_start = 1;
+        month_end = 12;
+        if ((maxDateTime != null) && (year == maxDateTime.getYear()))
+            month_end = maxDateTime.getMonthOfYear();
+        if ((minDateTime != null) && (year == minDateTime.getYear()))
+            month_start = minDateTime.getMonthOfYear();
 
-        yearSpinner.setSelection(year - year_start);
         BaseAdapter baseAdapter = (BaseAdapter) yearSpinner.getAdapter();
         baseAdapter.notifyDataSetChanged();
         baseAdapter = (BaseAdapter) monthSpinner.getAdapter();
         baseAdapter.notifyDataSetChanged();
+
+        yearSpinner.setSelection(year - year_start);
+        monthSpinner.setSelection(month - month_start);
 
         // Refresh the date grid views
         for (CaldroidGridAdapter adapter : datePagerAdapters) {
@@ -947,9 +959,7 @@ public class CaldroidFragment extends DialogFragment {
         monthSpinner.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
-                if (year < maxDateTime.getYear())
-                    return 12;
-                return maxDateTime.getMonthOfYear();
+                return month_end - month_start + 1;
             }
 
             @Override
@@ -959,7 +969,7 @@ public class CaldroidFragment extends DialogFragment {
 
             @Override
             public long getItemId(int i) {
-                return i;
+                return month_start + i;
             }
 
             @Override
@@ -970,8 +980,8 @@ public class CaldroidFragment extends DialogFragment {
                     v = inflater.inflate(R.layout.calendar_item, null);
                 }
                 TextView tv = (TextView) v.findViewById(R.id.name);
-                tv.setText(monthText(i));
-                boolean is_current = (i + 1) == month;
+                tv.setText(monthText(month_start + i));
+                boolean is_current = (month_start + i) == month;
                 tv.setTypeface(tv.getTypeface(), is_current ? Typeface.BOLD : Typeface.NORMAL);
                 return v;
             }
@@ -984,8 +994,8 @@ public class CaldroidFragment extends DialogFragment {
                     v = inflater.inflate(R.layout.calendar_dropdown_item, null);
                 }
                 TextView tv = (TextView) v.findViewById(R.id.name);
-                tv.setText(monthText(i));
-                boolean is_current = (i + 1) == month;
+                tv.setText(monthText(month_start + i));
+                boolean is_current = (month_start + i) == month;
                 tv.setTypeface(tv.getTypeface(), is_current ? Typeface.BOLD : Typeface.NORMAL);
                 return v;
             }
@@ -994,7 +1004,7 @@ public class CaldroidFragment extends DialogFragment {
         yearSpinner.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
-                return YEARS_IN_SPINNER;
+                return year_end - year_start + 1;
             }
 
             @Override
@@ -1039,7 +1049,7 @@ public class CaldroidFragment extends DialogFragment {
         monthSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                setMonthYear(i + 1, year);
+                setMonthYear(month_start + i, year);
             }
 
             @Override

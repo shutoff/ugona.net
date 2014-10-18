@@ -98,7 +98,7 @@ public class MainActivity extends ActionBarActivity {
     static final int PAGE_TRACK = 4;
     static final int PAGE_STAT = 5;
 
-    static final int VERSION = 16;
+    static final int VERSION = 17;
     static final String SENDER_ID = "915289471784";
     final static String URL_KEY = "/key?login=$1&password=$2";
     final static String URL_PROFILE = "/version?skey=$1";
