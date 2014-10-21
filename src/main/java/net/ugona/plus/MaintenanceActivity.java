@@ -223,7 +223,10 @@ public class MaintenanceActivity extends ActionBarActivity {
                         Bundle args = new Bundle();
                         args.putString(CaldroidFragment.DIALOG_TITLE, getString(R.string.day));
                         Calendar calendar = Calendar.getInstance();
-                        args.putInt(CaldroidFragment.START_DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+                        int first_day = calendar.getFirstDayOfWeek() - 1;
+                        if (first_day <= 0)
+                            first_day += 7;
+                        args.putInt(CaldroidFragment.START_DAY_OF_WEEK, first_day);
                         if (current != null) {
                             args.putInt(CaldroidFragment.MONTH, current.getMonth() + 1);
                             args.putInt(CaldroidFragment.YEAR, current.getYear() + 1900);

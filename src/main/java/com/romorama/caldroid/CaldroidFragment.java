@@ -818,8 +818,15 @@ public class CaldroidFragment extends DialogFragment {
         baseAdapter = (BaseAdapter) monthSpinner.getAdapter();
         baseAdapter.notifyDataSetChanged();
 
-        yearSpinner.setSelection(year - year_start);
-        monthSpinner.setSelection(month - month_start);
+        int selection = 0;
+        if ((year >= year_start) && (year <= year_end))
+            selection = year - year_start + 1;
+        yearSpinner.setSelection(selection);
+
+        selection = 0;
+        if ((month >= month_start) && (month <= month_end))
+            selection = month - month_start + 1;
+        monthSpinner.setSelection(selection);
 
         // Refresh the date grid views
         for (CaldroidGridAdapter adapter : datePagerAdapters) {
@@ -959,7 +966,7 @@ public class CaldroidFragment extends DialogFragment {
         monthSpinner.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
-                return month_end - month_start + 1;
+                return month_end - month_start + 2;
             }
 
             @Override
@@ -980,8 +987,11 @@ public class CaldroidFragment extends DialogFragment {
                     v = inflater.inflate(R.layout.calendar_item, null);
                 }
                 TextView tv = (TextView) v.findViewById(R.id.name);
-                tv.setText(monthText(month_start + i));
-                boolean is_current = (month_start + i) == month;
+                int m = month;
+                if (i > 0)
+                    m = month_start + i - 1;
+                tv.setText(monthText(m));
+                boolean is_current = (m == month);
                 tv.setTypeface(tv.getTypeface(), is_current ? Typeface.BOLD : Typeface.NORMAL);
                 return v;
             }
@@ -994,8 +1004,12 @@ public class CaldroidFragment extends DialogFragment {
                     v = inflater.inflate(R.layout.calendar_dropdown_item, null);
                 }
                 TextView tv = (TextView) v.findViewById(R.id.name);
-                tv.setText(monthText(month_start + i));
-                boolean is_current = (month_start + i) == month;
+                int m = month;
+                if (i > 0)
+                    m = month_start + i - 1;
+                tv.setText(monthText(m));
+                boolean is_current = (m == month);
+                tv.setVisibility((i > 0) ? View.VISIBLE : View.GONE);
                 tv.setTypeface(tv.getTypeface(), is_current ? Typeface.BOLD : Typeface.NORMAL);
                 return v;
             }
@@ -1004,7 +1018,7 @@ public class CaldroidFragment extends DialogFragment {
         yearSpinner.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
-                return year_end - year_start + 1;
+                return year_end - year_start + 2;
             }
 
             @Override
@@ -1025,8 +1039,11 @@ public class CaldroidFragment extends DialogFragment {
                     v = inflater.inflate(R.layout.calendar_item, null);
                 }
                 TextView tv = (TextView) v.findViewById(R.id.name);
-                tv.setText((year_start + i) + "");
-                boolean is_current = (year_start + i) == year;
+                int y = year;
+                if (i > 0)
+                    y = year_start + i - 1;
+                tv.setText(y + "");
+                boolean is_current = (y == year);
                 tv.setTypeface(tv.getTypeface(), is_current ? Typeface.BOLD : Typeface.NORMAL);
                 return v;
             }
@@ -1039,8 +1056,12 @@ public class CaldroidFragment extends DialogFragment {
                     v = inflater.inflate(R.layout.calendar_dropdown_item, null);
                 }
                 TextView tv = (TextView) v.findViewById(R.id.name);
-                tv.setText((year_start + i) + "");
-                boolean is_current = (year_start + i) == year;
+                int y = year;
+                if (i > 0)
+                    y = year_start + i - 1;
+                tv.setText(y + "");
+                boolean is_current = (y == year);
+                tv.setVisibility((i > 0) ? View.VISIBLE : View.GONE);
                 tv.setTypeface(tv.getTypeface(), is_current ? Typeface.BOLD : Typeface.NORMAL);
                 return v;
             }
@@ -1049,7 +1070,8 @@ public class CaldroidFragment extends DialogFragment {
         monthSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                setMonthYear(month_start + i, year);
+                if (i > 0)
+                    setMonthYear(month_start + i - 1, year);
             }
 
             @Override
@@ -1062,7 +1084,8 @@ public class CaldroidFragment extends DialogFragment {
         yearSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                setMonthYear(month, year_start + i);
+                if (i > 0)
+                    setMonthYear(month, year_start + i - 1);
             }
 
             @Override
