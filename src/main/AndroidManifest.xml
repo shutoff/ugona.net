@@ -2,9 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.ugona.plus"
     android:versionCode="13"
-    android:versionName="1.7.1">
+    android:versionName="1.7.2 RC1">
 
-<uses-sdk
+    <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="19" />
 
@@ -58,12 +58,14 @@
 
     <application
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/Theme.ugona_net">
 
         <activity
             android:name=".MainActivity"
+            android:hardwareAccelerated="true"
             android:label="@string/app_name"
             android:launchMode="singleTop">
             <intent-filter>
@@ -136,7 +138,9 @@
 
         <activity android:name=".HistoryActivity" />
 
-        <activity android:name=".MaintenanceActivity" />
+        <activity
+            android:name=".MaintenanceActivity"
+            android:hardwareAccelerated="true" />
 
         <activity
             android:name=".AuthDialog"

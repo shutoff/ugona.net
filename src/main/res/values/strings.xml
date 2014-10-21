@@ -649,7 +649,7 @@
     </plurals>
     <plurals name="months">
         <item quantity="one">%d month</item>
-        <item quantity="other">%d years</item>
+        <item quantity="other">%d months</item>
     </plurals>
     <plurals name="days">
         <item quantity="one">%d day</item>
