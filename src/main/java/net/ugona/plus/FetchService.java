@@ -882,14 +882,6 @@ public class FetchService extends Service {
                     processed = SmsMonitor.processMessageFromApi(FetchService.this, car_id, R.string.motor_off, when);
                     SmsMonitor.cancelSMS(FetchService.this, car_id, R.string.motor_on);
                 }
-                if (!processed &&
-                        ((preferences.getInt(Names.Notify.MOTOR_ON + car_id, 0) != 0) || (preferences.getInt(Names.Notify.MOTOR_OFF + car_id, 0) != 0))) {
-                    if (az.asBoolean()) {
-                        Actions.done_motor_on(FetchService.this, car_id, 0);
-                    } else {
-                        Actions.done_motor_off(FetchService.this, car_id, 0);
-                    }
-                }
             } else if (!preferences.getBoolean(Names.Car.AZ + car_id, false) && preferences.getBoolean(Names.Car.GUARD + car_id, false) &&
                     (preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false)) &&
                     SmsMonitor.isProcessed(car_id, R.string.motor_on)) {
