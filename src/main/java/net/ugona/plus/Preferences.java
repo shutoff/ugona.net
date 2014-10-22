@@ -39,6 +39,85 @@ public class Preferences {
         return car_id;
     }
 
+    static TempConfig getTemperatureConfig(SharedPreferences preferences, String car_id, int sensor) {
+        String temp = preferences.getString(Names.Car.TEMPERATURE + car_id, "");
+        if (temp.equals(""))
+            return null;
+
+        if (State.isPandora(preferences, car_id)) {
+            if (sensor >= 0)
+                return null;
+            String[] data = temp.split(";");
+            try {
+                TempConfig c = new TempConfig();
+                c.where = -sensor - 1;
+                return c;
+            } catch (Exception ex) {
+                return null;
+            }
+        }
+
+        Map<Integer, TempConfig> config = new HashMap<Integer, TempConfig>();
+        String[] temp_config = preferences.getString(Names.Car.TEMP_SETTINGS + car_id, "").split(",");
+        for (String s : temp_config) {
+            String[] data = s.split(":");
+            if (data.length != 3)
+                continue;
+            try {
+                int id = Integer.parseInt(data[0]);
+                TempConfig c = new TempConfig();
+                c.shift = Integer.parseInt(data[1]);
+                c.where = Integer.parseInt(data[2]);
+                config.put(id, c);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        String[] data = temp.split(";");
+        if (sensor < 0) {
+            sensor = -sensor;
+            for (String s : data) {
+                try {
+                    String[] d = s.split(":");
+                    int id = Integer.parseInt(d[0]);
+                    TempConfig c = config.get(id);
+                    if (c == null)
+                        continue;
+                    if (c.where != sensor)
+                        continue;
+                    c.where = Integer.parseInt(d[0]);
+                    return c;
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            return null;
+        }
+        for (String s : data) {
+            try {
+                String[] d = s.split(":");
+                int id = Integer.parseInt(d[0]);
+                TempConfig c = config.get(id);
+                if ((c != null) && (c.where > 0))
+                    continue;
+                if (--sensor > 0)
+                    continue;
+                TempConfig res = new TempConfig();
+                if (id == 1) {
+                    res.shift = preferences.getInt(Names.Car.TEMP_SIFT + car_id, 0);
+                } else if (c != null) {
+                    res.shift += c.shift;
+                }
+                res.where = Integer.parseInt(d[0]);
+                return res;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return null;
+    }
+
     static String getTemperature(SharedPreferences preferences, String car_id, int sensor) {
         String temp = preferences.getString(Names.Car.TEMPERATURE + car_id, "");
         if (temp.equals(""))

@@ -281,11 +281,20 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         String m_id;
         String m_type;
         LocalDate m_date;
+        double delta;
 
         FetchTask() {
             m_id = car_id;
             m_type = type;
             m_date = current;
+
+            if (type.substring(0, 1).equals("t")) {
+                Preferences.TempConfig config = Preferences.getTemperatureConfig(preferences, car_id, Integer.parseInt(type.substring(1)));
+                if (config != null) {
+                    delta = config.shift;
+                    type = "t" + config.where;
+                }
+            }
 
             long end = current.toDate().getTime() + 86400000;
             long begin = end - LOAD_INTERVAL;
@@ -298,12 +307,8 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
             if (!m_id.equals(car_id) || !m_type.equals(type) || !m_date.equals(current))
                 return;
 
-            double delta = 0;
-            if (type.equals("voltage")) {
+            if (type.equals("voltage"))
                 delta = preferences.getInt(Names.Car.VOLTAGE_SHIFT + car_id, 0) / 20.;
-            } else if (type.equals("t1")) {
-                delta = preferences.getInt(Names.Car.TEMP_SIFT + car_id, 0);
-            }
 
             final JsonArray data_array = res.get("res").asArray();
             final Vector<Data> data = new Vector<Data>();

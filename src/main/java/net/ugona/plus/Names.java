@@ -16,7 +16,7 @@ public final class Names {
     static final String PASSWORD = "Password";
     static final String ANSWER = "Answer";
     static final String WIDGET = "Widget";
-    static final String GCM_VERSION = "gcm_version";
+    static final String GCM_VER = "gcm_ver";
     static final String GCM_ID = "gcm_id";
     static final String GCM_TIME = "gcm_time";
     static final String SHOCK = "shock_";

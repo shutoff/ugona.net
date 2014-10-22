@@ -305,26 +305,26 @@ public class HistoryActivity extends ActionBarActivity {
             }
             if (preferences.getBoolean(Names.Car.SHOW_BALANCE + car_id, true))
                 types.add(new Type("balance", title + getString(R.string.balance)));
-            if (!preferences.getString(Names.Car.TEMPERATURE + car_id, "").equals(""))
-                types.add(new Type("t1", title + getString(R.string.temperature)));
 
-            String[] temp_config = preferences.getString(Names.Car.TEMP_SETTINGS + car_id, "").split(",");
-            int n = 2;
-            for (String s : temp_config) {
-                String[] data = s.split(":");
-                if (data.length != 3)
-                    continue;
-                try {
-                    int id = Integer.parseInt(data[0]);
-                    int where = Integer.parseInt(data[2]);
-                    if (where >= 0) {
-                        String name = getString(R.string.temperature) + " (" + getString(R.string.sensor) + ": " + id + ")";
-                        types.add(new Type("t" + n, title + name));
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
+            Preferences.TempConfig config = Preferences.getTemperatureConfig(preferences, car_id, 1);
+            if (config != null)
+                types.add(new Type("t1", title + getString(R.string.temperature)));
+            config = Preferences.getTemperatureConfig(preferences, car_id, 2);
+            if (config != null)
+                types.add(new Type("t2", title + getString(R.string.temperature) + " (" + getString(R.string.sensor) + ": " + config.where + ")"));
+            config = Preferences.getTemperatureConfig(preferences, car_id, 3);
+            if (config != null)
+                types.add(new Type("t3", title + getString(R.string.temperature) + " (" + getString(R.string.sensor) + ": " + config.where + ")"));
+            config = Preferences.getTemperatureConfig(preferences, car_id, -1);
+            if (config != null)
+                types.add(new Type("t-1", title + getString(R.string.temperature) + " (" + getString(R.string.sensor) + ": " + config.where + ")"));
+            config = Preferences.getTemperatureConfig(preferences, car_id, -2);
+            if (config != null)
+                types.add(new Type("t-2", title + getString(R.string.temperature) + " (" + getString(R.string.sensor) + ": " + config.where + ")"));
+            config = Preferences.getTemperatureConfig(preferences, car_id, -3);
+            if (config != null)
+                types.add(new Type("t-3", title + getString(R.string.temperature) + " (" + getString(R.string.sensor) + ": " + config.where + ")"));
+
         }
     }
 

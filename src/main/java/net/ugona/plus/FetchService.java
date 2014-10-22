@@ -609,7 +609,7 @@ public class FetchService extends Service {
             JsonValue contact_value = res.get("contact");
             boolean gps_valid = false;
             boolean prev_valet = false;
-            boolean prev_az = preferences.getBoolean(Names.Car.AZ, false);
+            boolean prev_az = preferences.getBoolean(Names.Car.AZ + car_id, false);
             int prev_guard_mode = 0;
             if (contact_value != null) {
                 JsonObject contact = contact_value.asObject();

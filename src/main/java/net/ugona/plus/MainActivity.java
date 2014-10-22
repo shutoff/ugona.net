@@ -98,7 +98,6 @@ public class MainActivity extends ActionBarActivity {
     static final int PAGE_TRACK = 4;
     static final int PAGE_STAT = 5;
 
-    static final int VERSION = 17;
     static final String SENDER_ID = "915289471784";
     final static String URL_KEY = "/key?login=$1&password=$2";
     final static String URL_PROFILE = "/version?skey=$1";
@@ -954,13 +953,27 @@ public class MainActivity extends ActionBarActivity {
         });
     }
 
+    String getAppVer() {
+        try {
+            PackageManager pkgManager = getPackageManager();
+            PackageInfo info = pkgManager.getPackageInfo("net.ugona.plus", 0);
+            return info.versionName;
+        } catch (Exception ex) {
+            // ignore
+        }
+        return null;
+    }
+
     void registerGCM() {
         if (!checkPlayServices())
+            return;
+        final String appVer = getAppVer();
+        if (appVer == null)
             return;
         gcm = GoogleCloudMessaging.getInstance(this);
         String reg_id = preferences.getString(Names.GCM_ID, "");
         long gcm_time = preferences.getLong(Names.GCM_TIME, 0);
-        if (preferences.getInt(Names.GCM_VERSION, 0) != VERSION)
+        if (!preferences.getString(Names.GCM_VER, "").equals(appVer))
             reg_id = "";
         if (!reg_id.equals("") && (gcm_time > new Date().getTime() - 86400 * 1000))
             return;
@@ -995,13 +1008,7 @@ public class MainActivity extends ActionBarActivity {
                     Calendar cal = Calendar.getInstance();
                     TimeZone tz = cal.getTimeZone();
                     data.add("tz", tz.getID());
-                    try {
-                        PackageManager pkgManager = getPackageManager();
-                        PackageInfo info = pkgManager.getPackageInfo("net.ugona.plus", 0);
-                        data.add("version", info.versionName);
-                    } catch (Exception ex) {
-                        // ignore
-                    }
+                    data.add("version", appVer);
                     TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
                     String id = "";
                     try {
@@ -1062,7 +1069,7 @@ public class MainActivity extends ActionBarActivity {
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putString(Names.GCM_ID, s);
                 ed.putLong(Names.GCM_TIME, new Date().getTime());
-                ed.putInt(Names.GCM_VERSION, VERSION);
+                ed.putString(Names.GCM_VER, appVer);
                 ed.commit();
             }
 
