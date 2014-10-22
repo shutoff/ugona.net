@@ -273,7 +273,7 @@ public class AuthDialog extends Activity {
                     ed.putString(Names.Car.CAR_NAME + car_id, "Demo");
                 }
                 ed.remove(Names.GCM_TIME);
-                ed.remove(Names.Car.EVENT_TIME);
+                ed.remove(Names.Car.EVENT_TIME + car_id);
                 final String[] cars = preferences.getString(Names.CARS, "").split(",");
                 boolean is_new = true;
                 for (String car : cars) {
