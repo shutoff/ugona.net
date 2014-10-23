@@ -239,6 +239,7 @@ abstract public class MapActivity extends WebViewActivity {
     }
 
     void setMapType(String type) {
+        State.appendLog("set map " + type);
         SharedPreferences.Editor ed = preferences.edit();
         ed.putString(Names.MAP_TYPE, type);
         ed.commit();
@@ -354,6 +355,7 @@ abstract public class MapActivity extends WebViewActivity {
 
         @JavascriptInterface
         public void init() {
+            State.appendLog("android.init");
             loaded = true;
         }
 
@@ -371,6 +373,7 @@ abstract public class MapActivity extends WebViewActivity {
 
         @JavascriptInterface
         public String getType() {
+            State.appendLog("get type " + preferences.getString("map_type", "OSM"));
             return preferences.getString("map_type", "OSM");
         }
 

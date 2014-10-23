@@ -172,7 +172,7 @@
     <string name="alarm_input4">Alarm input 4</string>
     <string name="sos">SOS</string>
     <string name="error_read">Error read memory</string>
-    <string name="incomming_sms">Incomming SMS</string>
+    <string name="incomming_sms">Incoming SMS</string>
     <string name="no_events">No events</string>
     <string name="unknown">unknown</string>
     <string name="cars">Cars</string>
@@ -189,7 +189,7 @@
     <string name="low_battery">Low card battery</string>
     <string name="download_settings">Download settings</string>
     <string name="lan_change">LAN devices changed</string>
-    <string name="command">Comannd from buttons</string>
+    <string name="command">Command from buttons</string>
     <string name="brake">Brake</string>
     <string name="guard2_on">Guard mode 2 on</string>
     <string name="guard2_off">Guard mode 2 off</string>
@@ -209,9 +209,9 @@
     <string name="no_gps_title">GPS disabled</string>
     <string name="no_gps_message">GPS disabled is system.\nFor detect location you must turn on it in Settings</string>
     <string name="net_gps_message">Your location detected by network.\nFor more accuracy you can turn on GPS is Settings</string>
-    <string name="no_location">Unknown localtion</string>
+    <string name="no_location">Unknown location</string>
     <string name="shock_sens">Shock sensitivity</string>
-    <string name="shock_sens_msg">Setup shock sensitivity level. Wroks only for SuperAgent</string>
+    <string name="shock_sens_msg">Setup shock sensitivity level. Works only for SuperAgent</string>
     <string-array name="levels">
         <item>Maximal</item>
         <item>High</item>
@@ -283,7 +283,7 @@
     <string name="background">Background</string>
     <string name="rotate">Rotate</string>
     <string name="rele1_action">Send impulse on RELE1</string>
-    <string name="rele2_action">Send impules on RELE2</string>
+    <string name="rele2_action">Send impulse on RELE2</string>
     <string name="gsm_register_fail">GSM register failed</string>
     <string name="widget_config">Widget configuration</string>
     <string-array name="themes">
@@ -396,7 +396,7 @@
     <string name="device_settings">Device settings</string>
     <string name="notifications">Notifications</string>
     <string name="guard_sound">Sound on guard ON/OFF</string>
-    <string name="tilt_low">Low sensitivy of tilt sensor</string>
+    <string name="tilt_low">Low sensitivity of tilt sensor</string>
     <string name="guard_partial">Permanent partial guard</string>
     <string name="comfort_enable">Enable comfort function</string>
     <string name="tilt_level">Tilt sensor level</string>
@@ -438,7 +438,7 @@
         <item>ThermoCode</item>
     </string-array>
     <string name="error">Error</string>
-    <string name="no_network">Netwrok is not available</string>
+    <string name="no_network">Network is not available</string>
     <string name="retry">Retry</string>
     <string name="phone">Phone:</string>
     <string name="changed">Settings changed</string>
@@ -524,7 +524,7 @@
     <string name="recalc_stat">Recalc statistic</string>
     <string name="recalc_message">Process of statics require some minutes</string>
     <string name="e0101">Guard on charm</string>
-    <string name="e0102">Gaurd on auto</string>
+    <string name="e0102">Guard on auto</string>
     <string name="e0103">Guard on VALET button</string>
     <string name="e0104">Guard on by Hands-Free</string>
     <string name="e0105">Guard on with phone</string>
@@ -564,7 +564,7 @@
     <string name="e0504">Engine stop by temperature</string>
     <string name="e0505">Engine stop by internet</string>
     <string name="e0506">Emergency engine stop</string>
-    <string name="e0507">Automaticaly engine stop</string>
+    <string name="e0507">Automatically engine stop</string>
     <string name="e0601">Engine blocked by internet</string>
     <string name="e0602">Engine blocked by phone</string>
     <string name="e0603">Engine blocked automatically</string>
@@ -581,10 +581,10 @@
     <string name="e1001">Crash</string>
     <string name="e1101">GSM failed</string>
     <string name="e1102">GSM restored</string>
-    <string name="e1103">Incomming call</string>
+    <string name="e1103">Incoming call</string>
     <string name="e1201">Call from charm</string>
     <string name="e1301">Engine start failed - no neutral</string>
-    <string name="e1302">Engine start failed - no gaurd</string>
+    <string name="e1302">Engine start failed - no guard</string>
     <string name="e1303">Engine start failed - technical problems</string>
     <string name="e1304">Engine start failed - blocked</string>
     <string name="e1401">Tracking on by charm</string>
@@ -592,7 +592,7 @@
     <string name="e1403">Tracking on by internet</string>
     <string name="e1501">Tracking off by charm</string>
     <string name="e1502">Tracking off by phone</string>
-    <string name="e1503">Trackingoff by internet</string>
+    <string name="e1503">Tracking off by internet</string>
     <string name="e1601">Power off</string>
     <string name="e1701">Trunk open by charm</string>
     <string name="e1702">Trunk open by phone</string>
