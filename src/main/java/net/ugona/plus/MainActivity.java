@@ -128,6 +128,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+/*
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
@@ -135,6 +136,7 @@ public class MainActivity extends ActionBarActivity {
                 System.exit(1);
             }
         });
+*/
 
         Thread.currentThread().setContextClassLoader(this.getClassLoader());
         try {
