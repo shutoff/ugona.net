@@ -40,6 +40,7 @@ public final class Names {
     static final String MESSAGE = "message";
     static final String URL = "url";
     static final String PATTERN = "pattern";
+    static final String TIME_DELTA = "time_delta";
 
     public final class Car {
         static final String ENGINE = "Engine";

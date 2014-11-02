@@ -603,6 +603,13 @@ public class FetchService extends Service {
                 }
             }
 
+            JsonValue server_time = res.get("server_time");
+            if (server_time != null) {
+                Date now = new Date();
+                long delta = server_time.asLong() - now.getTime();
+                ed.putLong(Names.TIME_DELTA, delta);
+            }
+
             JsonValue first_time = res.get("first_time");
             if (first_time != null)
                 ed.putLong(Names.Car.FIRST_TIME + car_id, first_time.asLong());

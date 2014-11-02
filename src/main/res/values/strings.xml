@@ -676,4 +676,5 @@
     </string-array>
     <string name="maintenance_msg">You can setup notification about maintenance based on time or mileage</string>
     <string name="maintenance_date">Last maintenance date</string>
+    <string name="time_error">Not correctly time on the phone</string>
 </resources>

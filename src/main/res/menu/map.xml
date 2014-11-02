@@ -12,6 +12,11 @@
         android:icon="@android:drawable/ic_menu_mylocation"
         android:title="@string/map"
         car:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/share"
+        android:icon="@android:drawable/ic_menu_share"
+        android:title="@string/share"
+        car:showAsAction="ifRoom" />
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/google"

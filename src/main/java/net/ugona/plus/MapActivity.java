@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Locale;
 
@@ -163,6 +164,9 @@ abstract public class MapActivity extends WebViewActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.share:
+                share();
+                break;
             case R.id.map:
                 callJs("center()");
                 break;
@@ -236,6 +240,28 @@ abstract public class MapActivity extends WebViewActivity {
             }
         }
         return false;
+    }
+
+    void share() {
+        try {
+            Js s = js();
+            Class c = s.getClass();
+            Class[] params = new Class[]{};
+            Method m = c.getMethod("getData", params);
+            String data = m.invoke(s).toString().split("\\|")[0].split(";")[3];
+            data = data.replace("<b>", "").replace("</b>", "").replace("<br/>", "\n");
+            String subj = "";
+            int pos = data.indexOf("\n");
+            if (pos > 0)
+                subj = data.substring(0, pos);
+            Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(android.content.Intent.EXTRA_SUBJECT, subj);
+            intent.putExtra(android.content.Intent.EXTRA_TEXT, data);
+            startActivity(Intent.createChooser(intent, getResources().getString(R.string.share)));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     void setMapType(String type) {

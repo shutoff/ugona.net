@@ -65,6 +65,16 @@
             </LinearLayout>
 
             <TextView
+                android:id="@+id/time_error"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/time_error"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/error"
+                android:visibility="gone" />
+
+            <TextView
                 android:id="@+id/valet_warning"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
