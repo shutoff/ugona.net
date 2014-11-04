@@ -248,12 +248,14 @@ abstract public class MapActivity extends WebViewActivity {
             Class c = s.getClass();
             Class[] params = new Class[]{};
             Method m = c.getMethod("getData", params);
-            String data = m.invoke(s).toString().split("\\|")[0].split(";")[3];
+            String[] parts = m.invoke(s).toString().split("\\|")[0].split(";");
+            String data = parts[3];
             data = data.replace("<b>", "").replace("</b>", "").replace("<br/>", "\n");
             String subj = "";
             int pos = data.indexOf("\n");
             if (pos > 0)
                 subj = data.substring(0, pos);
+            data += "\nhttp://maps.google.com/maps/place/" + parts[0] + "," + parts[1] + "/@" + parts[0] + "," + parts[1] + ",15z";
             Intent intent = new Intent(android.content.Intent.ACTION_SEND);
             intent.setType("text/plain");
             intent.putExtra(android.content.Intent.EXTRA_SUBJECT, subj);
