@@ -479,13 +479,13 @@ public class MaintenanceActivity extends ActionBarActivity {
                                 double month = delta / 30;
                                 if (month >= 12) {
                                     int years = (int) Math.round(delta / 365.25);
-                                    s += getResources().getQuantityString(R.plurals.years, years, years);
+                                    s += State.getPlural(MaintenanceActivity.this, R.plurals.years, years);
                                 } else if (month < 1) {
                                     int days = (int) Math.round(delta);
-                                    s += getResources().getQuantityString(R.plurals.days, days, days);
+                                    s += State.getPlural(MaintenanceActivity.this, R.plurals.days, days);
                                 } else {
                                     int months = (int) Math.round(delta / 30);
-                                    s += getResources().getQuantityString(R.plurals.months, months, months);
+                                    s += State.getPlural(MaintenanceActivity.this, R.plurals.months, months);
                                 }
                                 vTimeLeft.setText(s);
                                 vTimeLeft.setVisibility(View.VISIBLE);

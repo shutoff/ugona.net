@@ -1384,7 +1384,7 @@ public class MainActivity extends ActionBarActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
             View v = convertView;
             if (v == null) {
-                LayoutInflater inflater = (LayoutInflater) getBaseContext()
+                LayoutInflater inflater = (LayoutInflater) getSupportActionBar().getThemedContext()
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 v = inflater.inflate(R.layout.car_list_item, null);
             }
@@ -1397,7 +1397,7 @@ public class MainActivity extends ActionBarActivity {
         public View getDropDownView(int position, View convertView, ViewGroup parent) {
             View v = convertView;
             if (v == null) {
-                LayoutInflater inflater = (LayoutInflater) getBaseContext()
+                LayoutInflater inflater = (LayoutInflater) getSupportActionBar().getThemedContext()
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 v = inflater.inflate(R.layout.car_list_dropdown_item, null);
             }

@@ -504,14 +504,14 @@ public class StateFragment extends Fragment
                 }
                 s += " ";
                 if (days < 30) {
-                    s += getResources().getQuantityString(R.plurals.days, days, days);
+                    s += State.getPlural(getActivity(), R.plurals.days, days);
                 } else {
                     int month = (int) Math.round(days / 30.);
                     if (month < 12) {
-                        s += getResources().getQuantityString(R.plurals.months, month, month);
+                        s += State.getPlural(getActivity(), R.plurals.months, month);
                     } else {
                         int year = (int) Math.round(days / 365.25);
-                        s += getResources().getQuantityString(R.plurals.years, year, year);
+                        s += State.getPlural(getActivity(), R.plurals.years, year);
                     }
                 }
                 tvMaintenance.setText(s);

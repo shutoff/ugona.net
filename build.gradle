@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.12.+'
+        classpath 'com.android.tools.build:gradle:0.13.+'
     }
 }
 apply plugin: 'android'
@@ -13,9 +13,8 @@ repositories {
 }
 
 android {
-    compileSdkVersion 20
-    buildToolsVersion "20"
-    aaptOptions.useAaptPngCruncher = true
+    compileSdkVersion 21
+    buildToolsVersion "21.1"
 
     defaultConfig {
         minSdkVersion 8

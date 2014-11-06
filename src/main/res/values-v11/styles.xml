@@ -8,8 +8,22 @@
         <!-- API 11 theme customizations can go here. -->
     </style>
 
-    <style name="spinnerItemStyle" parent="android:Widget.Holo" />
-
     <style name="spinnerDropDownItemStyle" parent="android:Widget.Holo" />
+
+    <style name="ThemeButton" parent="android:Theme.Holo.Dialog">
+        <item name="android:background">@drawable/button</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">7dp</item>
+        <item name="android:textColor">#ff34b4e3</item>
+    </style>
+
+    <style name="Theme.Transparent" parent="android:Theme.Holo.Dialog">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
 
 </resources>

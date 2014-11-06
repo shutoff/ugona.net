@@ -511,14 +511,14 @@ public class FetchService extends Service {
                 }
                 s += " ";
                 if (left_days < 30) {
-                    s += getResources().getQuantityString(R.plurals.days, left_days, left_days);
+                    s += State.getPlural(FetchService.this, R.plurals.days, left_days);
                 } else {
                     int month = (int) Math.round(left_days / 30.);
                     if (month < 12) {
-                        s += getResources().getQuantityString(R.plurals.months, month, month);
+                        s += State.getPlural(FetchService.this, R.plurals.months, month);
                     } else {
                         int years = (int) Math.round(left_days / 265.25);
-                        s += getResources().getQuantityString(R.plurals.years, years, years);
+                        s += State.getPlural(FetchService.this, R.plurals.years, years);
                     }
                 }
             }

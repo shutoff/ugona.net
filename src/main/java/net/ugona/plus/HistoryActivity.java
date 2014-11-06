@@ -257,7 +257,7 @@ public class HistoryActivity extends ActionBarActivity {
         public View getView(int i, View convertView, ViewGroup viewGroup) {
             View v = convertView;
             if (v == null) {
-                LayoutInflater inflater = (LayoutInflater) getBaseContext()
+                LayoutInflater inflater = (LayoutInflater) getSupportActionBar().getThemedContext()
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 v = inflater.inflate(R.layout.car_list_item, null);
             }
@@ -270,7 +270,7 @@ public class HistoryActivity extends ActionBarActivity {
         public View getDropDownView(int i, View convertView, ViewGroup parent) {
             View v = convertView;
             if (v == null) {
-                LayoutInflater inflater = (LayoutInflater) getBaseContext()
+                LayoutInflater inflater = (LayoutInflater) getSupportActionBar().getThemedContext()
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 v = inflater.inflate(R.layout.car_list_dropdown_item, null);
             }

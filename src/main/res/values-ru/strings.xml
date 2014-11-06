@@ -648,17 +648,20 @@
     <plurals name="years">
         <item quantity="one">%d год</item>
         <item quantity="many">%d лет</item>
-        <item quantity="other">%d года</item>
+        <item quantity="other">%d лет</item>
+        <item quantity="few">%d года</item>
     </plurals>
     <plurals name="months">
         <item quantity="one">%d месяц</item>
         <item quantity="many">%d месяцев</item>
         <item quantity="other">%d месяца</item>
+        <item quantity="few">%d месяца</item>
     </plurals>
     <plurals name="days">
         <item quantity="one">%d ень</item>
         <item quantity="many">%d дней</item>
-        <item quantity="other">%d дня</item>
+        <item quantity="other">%d дней</item>
+        <item quantity="few">%d дня</item>
     </plurals>
     <string name="mileage_str">Пробег</string>
     <string name="period">Период</string>

@@ -6,6 +6,8 @@ import android.os.Build;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 
+import com.seppius.i18n.plurals.PluralResources;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -69,6 +71,17 @@ public class State {
         appendLog(s);
     }
 */
+
+    static String getPlural(Context context, int id, int n) {
+        if (android.os.Build.VERSION.SDK_INT < 11) {
+            try {
+                PluralResources pluralizer = new PluralResources(context.getResources());
+                return pluralizer.getQuantityString(id, n, n);
+            } catch (Throwable t) {
+            }
+        }
+        return context.getResources().getQuantityString(id, n, n);
+    }
 
     static boolean isDebug() {
         return Build.FINGERPRINT.startsWith("generic");
