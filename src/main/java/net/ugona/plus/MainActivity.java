@@ -29,6 +29,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -41,9 +42,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.eclipsesource.json.JsonArray;
@@ -157,6 +160,9 @@ public class MainActivity extends ActionBarActivity {
         alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
         setContentView(R.layout.main);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -742,33 +748,40 @@ public class MainActivity extends ActionBarActivity {
         ActionBar actionBar = getSupportActionBar();
         cars = getCars();
         setCar(car_id);
+        Spinner spinner = (Spinner) findViewById(R.id.spinner_nav);
         if (cars.length > 1) {
-            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-            actionBar.setListNavigationCallbacks(new CarsAdapter(), new ActionBar.OnNavigationListener() {
+            spinner.setVisibility(View.VISIBLE);
+            spinner.setAdapter(new CarsAdapter());
+            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
-                public boolean onNavigationItemSelected(int i, long l) {
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                     String id = Preferences.getCar(preferences, cars[i].id);
                     if (id.equals(car_id))
-                        return true;
+                        return;
                     SharedPreferences.Editor ed = preferences.edit();
                     ed.putString(Names.LAST, id);
                     ed.commit();
                     setCar(id);
                     removeNotifications();
-                    return true;
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
                 }
             });
+
             actionBar.setDisplayShowHomeEnabled(false);
             actionBar.setDisplayUseLogoEnabled(false);
             for (int i = 0; i < cars.length; i++) {
                 if (cars[i].id.equals(car_id)) {
-                    actionBar.setSelectedNavigationItem(i);
+                    spinner.setSelection(i);
                     break;
                 }
             }
             setTitle("");
         } else {
-            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+            spinner.setVisibility(View.GONE);
             actionBar.setDisplayShowHomeEnabled(true);
             actionBar.setDisplayUseLogoEnabled(false);
             setTitle(getString(R.string.app_name));

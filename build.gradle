@@ -18,14 +18,14 @@ android {
 
     defaultConfig {
         minSdkVersion 8
-        targetSdkVersion 20
+        targetSdkVersion 21
     }
 
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:20.+'
-    compile 'com.android.support:appcompat-v7:20.+'
+    compile 'com.android.support:support-v4:21.+'
+    compile 'com.android.support:appcompat-v7:21.+'
     compile 'com.google.android.gms:play-services:3.2.65'
     compile group: 'com.googlecode.libphonenumber', name: 'libphonenumber', version: '6.2.2'
     compile group: 'com.github.chrisbanes.photoview', name: 'library', version: '1.2.3'

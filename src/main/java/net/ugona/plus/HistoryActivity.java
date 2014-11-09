@@ -7,15 +7,18 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.romorama.caldroid.CaldroidFragment;
@@ -33,17 +36,43 @@ public class HistoryActivity extends ActionBarActivity {
     History mPlot;
     Menu topSubMenu;
     CaldroidFragment caldroidFragment;
-    TypesAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.webview);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowHomeEnabled(false);
+        actionBar.setDisplayUseLogoEnabled(false);
+        setTitle("");
+
         mPlot = (History) getLastCustomNonConfigurationInstance();
         initUI();
-        adapter = new TypesAdapter();
-    }
+        final TypesAdapter adapter = new TypesAdapter();
+        Spinner spinner = (Spinner) findViewById(R.id.spinner_nav);
+        spinner.setVisibility(View.VISIBLE);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                mPlot.setType(adapter.types.get(i).type);
+            }
 
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+        for (int i = 0; i < adapter.types.size(); i++) {
+            if (adapter.types.get(i).type.equals(mPlot.mHistory.type)) {
+                spinner.setSelection(i);
+                break;
+            }
+        }
+    }
 
     @Override
     public Object onRetainCustomNonConfigurationInstance() {
@@ -53,12 +82,6 @@ public class HistoryActivity extends ActionBarActivity {
             mPlot = null;
         }
         return res;
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        setActionBar();
     }
 
     void initUI() {
@@ -85,6 +108,9 @@ public class HistoryActivity extends ActionBarActivity {
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
             case R.id.date: {
                 caldroidFragment = new CaldroidFragment() {
 
@@ -131,28 +157,6 @@ public class HistoryActivity extends ActionBarActivity {
             return;
         topSubMenu.clear();
         onCreateOptionsMenu(topSubMenu);
-    }
-
-    void setActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-
-        actionBar.setListNavigationCallbacks(adapter, new ActionBar.OnNavigationListener() {
-            @Override
-            public boolean onNavigationItemSelected(int i, long l) {
-                mPlot.setType(adapter.types.get(i).type);
-                return true;
-            }
-        });
-        actionBar.setDisplayShowHomeEnabled(false);
-        actionBar.setDisplayUseLogoEnabled(false);
-        for (int i = 0; i < adapter.types.size(); i++) {
-            if (adapter.types.get(i).type.equals(mPlot.mHistory.type)) {
-                actionBar.setSelectedNavigationItem(i);
-                break;
-            }
-        }
-        setTitle("");
     }
 
     static class Type {
@@ -276,6 +280,7 @@ public class HistoryActivity extends ActionBarActivity {
             }
             TextView tv = (TextView) v.findViewById(R.id.name);
             tv.setText(types.get(i).name);
+            ;
             return v;
         }
 

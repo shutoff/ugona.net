@@ -16,7 +16,7 @@
 
 <resources>
 
-    <style name="Alp.42447968.BaseTheme.Dark" parent="@android:style/Theme" />
+    <style name="Alp.42447968.BaseTheme.Dark" parent="Theme.AppCompat" />
 
     <style name="Alp.42447968.BaseThemeHelper.Dark" parent="@style/Alp.42447968.BaseTheme.Dark" />
 

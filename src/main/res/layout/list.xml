@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_horizontal">
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize" />
 
     <ListView
         android:id="@+id/list"
@@ -16,8 +23,8 @@
         android:id="@+id/control_block"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/button_normal"
         android:layout_margin="5dp"
+        android:background="@drawable/button_normal"
         android:gravity="center"
         android:orientation="horizontal"
         android:visibility="gone">
@@ -26,8 +33,8 @@
             android:id="@+id/control_img"
             android:layout_width="44dp"
             android:layout_height="44dp"
-            android:src="@android:drawable/stat_notify_sync"
             android:padding="5dp"
+            android:src="@android:drawable/stat_notify_sync"
             android:visibility="gone" />
 
         <ProgressBar
@@ -40,8 +47,8 @@
             android:id="@+id/control_label"
             android:layout_width="wrap_content"
             android:layout_height="44dp"
-            android:padding="5dp"
-            android:gravity="center" />
+            android:gravity="center"
+            android:padding="5dp" />
 
     </LinearLayout>
 

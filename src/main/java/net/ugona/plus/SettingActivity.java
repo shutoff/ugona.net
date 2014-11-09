@@ -16,14 +16,16 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.astuetz.PagerSlidingTabStrip;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
@@ -36,8 +38,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Vector;
 
 public class SettingActivity extends ActionBarActivity {
@@ -60,7 +60,7 @@ public class SettingActivity extends ActionBarActivity {
     boolean values_error;
     boolean az;
     boolean rele;
-    ActionBar.TabListener tabListener;
+    PagerSlidingTabStrip tabs;
     Vector<Zone> zones;
     Vector<Timer> timers;
     boolean zone_deleted;
@@ -72,6 +72,10 @@ public class SettingActivity extends ActionBarActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pager);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if (savedInstanceState != null) {
             car_id = savedInstanceState.getString(Names.ID);
@@ -97,7 +101,7 @@ public class SettingActivity extends ActionBarActivity {
                 car_id = preferences.getString(Names.LAST, "");
         }
         Cars.Car[] cars = Cars.getCars(this);
-        String title = "";
+        String title = getString(R.string.preferences);
         if (cars.length > 1)
             title = preferences.getString(Names.Car.CAR_NAME + car_id, "");
         if (!title.equals(""))
@@ -107,48 +111,8 @@ public class SettingActivity extends ActionBarActivity {
         final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager());
         pager.setAdapter(adapter);
 
-        final ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-        tabListener = new ActionBar.TabListener() {
-            @Override
-            public void onTabSelected(ActionBar.Tab tab, android.support.v4.app.FragmentTransaction fragmentTransaction) {
-                pager.setCurrentItem(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(ActionBar.Tab tab, android.support.v4.app.FragmentTransaction fragmentTransaction) {
-
-            }
-
-            @Override
-            public void onTabReselected(ActionBar.Tab tab, android.support.v4.app.FragmentTransaction fragmentTransaction) {
-
-            }
-        };
-
-        pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-            @Override
-            public void onPageSelected(int pos) {
-                ActionBar b = getSupportActionBar();
-                try {
-                    b.setSelectedNavigationItem(pos);
-                    View action_bar_view = findViewById(getResources().getIdentifier("action_bar", "id", "android"));
-                    Class<?> action_bar_class = action_bar_view.getClass();
-                    Field tab_scroll_view_prop = action_bar_class.getDeclaredField("mTabScrollView");
-                    tab_scroll_view_prop.setAccessible(true);
-                    Object tab_scroll_view = tab_scroll_view_prop.get(action_bar_view);
-                    if (tab_scroll_view == null) return;
-                    Field spinner_prop = tab_scroll_view.getClass().getDeclaredField("mTabSpinner");
-                    spinner_prop.setAccessible(true);
-                    Object tab_spinner = spinner_prop.get(tab_scroll_view);
-                    if (tab_spinner == null) return;
-                    Method set_selection_method = tab_spinner.getClass().getSuperclass().getDeclaredMethod("setSelection", Integer.TYPE, Boolean.TYPE);
-                    set_selection_method.invoke(tab_spinner, pos, true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+        tabs.setViewPager(pager);
 
         int commands = State.getCommands(preferences, car_id);
         if ((commands & State.CMD_AZ) != 0)
@@ -156,13 +120,6 @@ public class SettingActivity extends ActionBarActivity {
         if ((commands & State.CMD_RELE) != 0)
             rele = true;
 
-        for (int i = 0; i < adapter.getCount(); i++) {
-            actionBar.addTab(
-                    actionBar.newTab()
-                            .setText(adapter.getPageTitle(i))
-                            .setTabListener(tabListener)
-            );
-        }
         setResult(RESULT_CANCELED);
 
         if (savedInstanceState != null) {
@@ -183,32 +140,9 @@ public class SettingActivity extends ActionBarActivity {
                     if ((az == new_az) && (rele == new_rele))
                         return;
                     adapter.notifyDataSetChanged();
-                    if (az != new_az) {
-                        int index = adapter.fromID(5);
-                        if (new_az) {
-                            actionBar.addTab(
-                                    actionBar.newTab()
-                                            .setText(adapter.getPageTitle(index))
-                                            .setTabListener(tabListener), index
-                            );
-                        } else {
-                            actionBar.removeTabAt(index);
-                        }
-                        az = new_az;
-                    }
-                    if (rele != new_rele) {
-                        int index = adapter.fromID(6);
-                        if (new_rele) {
-                            actionBar.addTab(
-                                    actionBar.newTab()
-                                            .setText(adapter.getPageTitle(index))
-                                            .setTabListener(tabListener), index
-                            );
-                        } else {
-                            actionBar.removeTabAt(index);
-                        }
-                        rele = new_rele;
-                    }
+                    tabs.notifyDataSetChanged();
+                    az = new_az;
+                    rele = new_rele;
                 }
             }
         };
@@ -483,6 +417,14 @@ public class SettingActivity extends ActionBarActivity {
         };
         version.execute(URL_PROFILE, preferences.getString(Names.Car.CAR_KEY + car_id, ""));
         sendUpdate();
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     void sendUpdate() {

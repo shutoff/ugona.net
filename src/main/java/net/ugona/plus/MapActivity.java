@@ -42,7 +42,6 @@ abstract public class MapActivity extends WebViewActivity {
         currentBestLocation = getLastBestLocation();
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         language = Locale.getDefault().getLanguage();
-
         super.onCreate(savedInstanceState);
     }
 
@@ -239,7 +238,7 @@ abstract public class MapActivity extends WebViewActivity {
                 break;
             }
         }
-        return false;
+        return super.onOptionsItemSelected(item);
     }
 
     void share() {

@@ -12,7 +12,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.eclipsesource.json.JsonArray;
@@ -132,6 +134,8 @@ public class MapPointActivity extends MapActivity {
 
     void setActionBar() {
         ActionBar actionBar = getSupportActionBar();
+        Spinner spinner = (Spinner) findViewById(R.id.spinner_nav);
+
         cars = Cars.getCars(this);
         boolean found = false;
         for (Cars.Car car : cars) {
@@ -144,28 +148,34 @@ public class MapPointActivity extends MapActivity {
             cars = new Cars.Car[0];
         if (cars.length > 1) {
             String save_point_data = point_data;
-            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
             actionBar.setDisplayShowHomeEnabled(false);
             actionBar.setDisplayUseLogoEnabled(false);
-            actionBar.setListNavigationCallbacks(new CarsAdapter(), new ActionBar.OnNavigationListener() {
+            spinner.setVisibility(View.VISIBLE);
+            spinner.setAdapter(new CarsAdapter());
+            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
-                public boolean onNavigationItemSelected(int i, long l) {
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                     if (cars[i].id.equals(car_id))
-                        return true;
+                        return;
                     if (!loaded)
-                        return true;
+                        return;
                     point_data = null;
                     car_id = cars[i].id;
                     trackTask = null;
                     updateTrack();
                     callJs("showPoints()");
                     callJs("center()");
-                    return true;
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
                 }
             });
+
             for (int i = 0; i < cars.length; i++) {
                 if (cars[i].id.equals(car_id)) {
-                    actionBar.setSelectedNavigationItem(i);
+                    spinner.setSelection(i);
                     break;
                 }
             }

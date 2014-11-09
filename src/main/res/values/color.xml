@@ -18,5 +18,6 @@
     <color name="hour">#20FFFFFF</color>
     <color name="hour_active">#FFFFFFFF</color>
     <color name="changed">#FFFFFF80</color>
+    <color name="background_tab_pressed">#6633B5E5</color>
 
 </resources>
