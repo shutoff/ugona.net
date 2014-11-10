@@ -317,7 +317,7 @@ public class AuthFragment extends SettingsFragment {
             Intent intent = new Intent(activity, FetchService.class);
             intent.putExtra(Names.ID, car_id);
             activity.startService(intent);
-            activity.updateSettings();
+            // activity.updateSettings();
         }
         if (requestCode == REQUEST_PHONE) {
             items.get(1).setValue(preferences.getString(Names.Car.CAR_PHONE + car_id, ""));

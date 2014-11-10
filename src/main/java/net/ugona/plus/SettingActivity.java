@@ -140,7 +140,7 @@ public class SettingActivity extends ActionBarActivity {
                     if ((az == new_az) && (rele == new_rele))
                         return;
                     adapter.notifyDataSetChanged();
-                    tabs.notifyDataSetChanged();
+//                    tabs.notifyDataSetChanged();
                     az = new_az;
                     rele = new_rele;
                 }

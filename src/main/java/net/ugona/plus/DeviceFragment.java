@@ -49,7 +49,7 @@ public class DeviceFragment extends SettingsFragment {
             @Override
             public void onClick(View v) {
                 SettingActivity activity = (SettingActivity) getActivity();
-                activity.update();
+                //              activity.update();
             }
         });
 

@@ -49,6 +49,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.astuetz.PagerSlidingTabStrip;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
@@ -63,7 +64,6 @@ import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
-import com.viewpagerindicator.TitlePageIndicator;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -127,6 +127,7 @@ public class MainActivity extends ActionBarActivity {
     PowerManager powerMgr;
     ProgressDialog auth_progress;
     Vector<AuthData> auth_data;
+    PagerSlidingTabStrip tabs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -249,16 +250,8 @@ public class MainActivity extends ActionBarActivity {
             }
         };
 
-        TitlePageIndicator titleIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
-        if (titleIndicator != null) {
-            titleIndicator.setViewPager(mViewPager);
-            titleIndicator.setFooterIndicatorStyle(TitlePageIndicator.IndicatorStyle.Triangle);
-            titleIndicator.setOnPageChangeListener(pageChangeListener);
-        } else {
-            MenuPager pager = (MenuPager) findViewById(R.id.menu);
-            pager.setPager(mViewPager);
-            pager.setOnPageChangeListener(pageChangeListener);
-        }
+        tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+        tabs.setViewPager(mViewPager);
 
         if ((savedInstanceState == null) && preferences.getString(Names.MESSAGE, "").equals("")) {
             String phone = preferences.getString(Names.Car.CAR_PHONE + car_id, "");

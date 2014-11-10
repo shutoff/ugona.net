@@ -4,7 +4,7 @@
     android:versionCode="15"
     android:versionName="1.7.4 RC1">
 
-<uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -74,8 +74,7 @@
         <activity
             android:name=".SettingActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTop"
-            android:title="@string/preferences" />
+            android:launchMode="singleTop" />
 
         <activity
             android:name=".Cars"
@@ -90,46 +89,15 @@
             android:name=".Phones"
             android:label="@string/phones" />
 
-        <activity
-            android:name=".MapPointActivity"
-            android:uiOptions="splitActionBarWhenNarrow">
-            <meta-data
-                android:name="android.support.UI_OPTIONS"
-                android:value="splitActionBarWhenNarrow" />
-        </activity>
+        <activity android:name=".MapPointActivity" />
 
-        <activity
-            android:name=".MapEventActivity"
-            android:uiOptions="splitActionBarWhenNarrow">
-            <meta-data
-                android:name="android.support.UI_OPTIONS"
-                android:value="splitActionBarWhenNarrow" />
-        </activity>
+        <activity android:name=".MapEventActivity" />
 
-        <activity
-            android:name=".TrackView"
-            android:uiOptions="splitActionBarWhenNarrow">
-            <meta-data
-                android:name="android.support.UI_OPTIONS"
-                android:value="splitActionBarWhenNarrow" />
-        </activity>
+        <activity android:name=".TrackView" />
 
-        <activity
-            android:name=".ZoneEdit"
-            android:uiOptions="splitActionBarWhenNarrow">
-            <meta-data
-                android:name="android.support.UI_OPTIONS"
-                android:value="splitActionBarWhenNarrow" />
-        </activity>
+        <activity android:name=".ZoneEdit" />
 
-        <activity
-            android:name=".TimerEdit"
-            android:title="@string/timer_set"
-            android:uiOptions="splitActionBarWhenNarrow">
-            <meta-data
-                android:name="android.support.UI_OPTIONS"
-                android:value="splitActionBarWhenNarrow" />
-        </activity>
+        <activity android:name=".TimerEdit" />
 
         <activity android:name=".HistoryActivity" />
 
