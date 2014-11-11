@@ -680,4 +680,5 @@
     <string name="pointer_inet_error">Command send error.\nSend command as SMS?</string>
     <string name="pointer_ok">Command send success</string>
     <string name="pointer_err">Send command error</string>
+    <string name="refresh">Refresh</string>
 </resources>

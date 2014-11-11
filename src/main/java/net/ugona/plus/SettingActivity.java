@@ -19,9 +19,15 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,7 +66,12 @@ public class SettingActivity extends ActionBarActivity {
     boolean values_error;
     boolean az;
     boolean rele;
+    Menu topSubMenu;
+
     PagerSlidingTabStrip tabs;
+    Spinner spinner;
+    ViewPager pager;
+
     Vector<Zone> zones;
     Vector<Timer> timers;
     boolean zone_deleted;
@@ -107,12 +118,64 @@ public class SettingActivity extends ActionBarActivity {
         if (!title.equals(""))
             setTitle(title);
 
-        final ViewPager pager = (ViewPager) findViewById(R.id.pager);
+        pager = (ViewPager) findViewById(R.id.pager);
         final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager());
         pager.setAdapter(adapter);
 
         tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
-        tabs.setViewPager(pager);
+        if (tabs != null) {
+            tabs.setViewPager(pager);
+            tabs.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int i, float v, int i2) {
+
+                }
+
+                @Override
+                public void onPageSelected(int i) {
+                    updateMenu();
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int i) {
+
+                }
+            });
+        } else {
+            spinner = (Spinner) findViewById(R.id.spinner_nav);
+            spinner.setAdapter(new ItemsAdapter());
+            spinner.setVisibility(View.VISIBLE);
+            setTitle("");
+            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    if (i != pager.getCurrentItem())
+                        pager.setCurrentItem(i, true);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+                    pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                        @Override
+                        public void onPageScrolled(int i, float v, int i2) {
+
+                        }
+
+                        @Override
+                        public void onPageSelected(int i) {
+                            if (spinner != null)
+                                spinner.setSelection(i);
+                            updateMenu();
+                        }
+
+                        @Override
+                        public void onPageScrollStateChanged(int i) {
+
+                        }
+                    });
+                }
+            });
+        }
 
         int commands = State.getCommands(preferences, car_id);
         if ((commands & State.CMD_AZ) != 0)
@@ -140,7 +203,13 @@ public class SettingActivity extends ActionBarActivity {
                     if ((az == new_az) && (rele == new_rele))
                         return;
                     adapter.notifyDataSetChanged();
-//                    tabs.notifyDataSetChanged();
+                    if (tabs != null) {
+                        tabs.notifyDataSetChanged();
+                    } else {
+                        BaseAdapter adapter = (BaseAdapter) spinner.getAdapter();
+                        adapter.notifyDataSetChanged();
+                    }
+
                     az = new_az;
                     rele = new_rele;
                 }
@@ -194,6 +263,34 @@ public class SettingActivity extends ActionBarActivity {
         }
         outState.putBoolean(ZONE_DELETED, zone_deleted);
         outState.putBoolean(TIMER_DELETED, timers_deleted);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        topSubMenu = menu;
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.settings, menu);
+        boolean refresh = false;
+        boolean setup = false;
+        if (pager.getCurrentItem() > 3) {
+            if (values != null) {
+                setup = true;
+            } else if (values_error) {
+                refresh = true;
+            }
+        }
+        if (!setup)
+            menu.removeItem(R.id.set);
+        if (!refresh)
+            menu.removeItem(R.id.refresh);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    void updateMenu() {
+        if (topSubMenu == null)
+            return;
+        topSubMenu.clear();
+        onCreateOptionsMenu(topSubMenu);
     }
 
     @Override
@@ -420,14 +517,22 @@ public class SettingActivity extends ActionBarActivity {
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+            case R.id.set:
+                update();
+                return true;
+            case R.id.refresh:
+                update();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
     void sendUpdate() {
+        updateMenu();
         Intent i = new Intent(UPDATE_SETTINGS);
         i.putExtra(Names.ID, car_id);
         sendBroadcast(i);
@@ -869,6 +974,51 @@ public class SettingActivity extends ActionBarActivity {
                     return getString(R.string.zones);
             }
             return null;
+        }
+    }
+
+
+    class ItemsAdapter extends BaseAdapter {
+
+        @Override
+        public int getCount() {
+            return pager.getAdapter().getCount();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return position;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View v = convertView;
+            if (v == null) {
+                LayoutInflater inflater = (LayoutInflater) getSupportActionBar().getThemedContext()
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                v = inflater.inflate(R.layout.car_list_item, null);
+            }
+            TextView tv = (TextView) v.findViewById(R.id.name);
+            tv.setText(pager.getAdapter().getPageTitle(position));
+            return v;
+        }
+
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            View v = convertView;
+            if (v == null) {
+                LayoutInflater inflater = (LayoutInflater) getSupportActionBar().getThemedContext()
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                v = inflater.inflate(R.layout.car_list_dropdown_item, null);
+            }
+            TextView tv = (TextView) v.findViewById(R.id.name);
+            tv.setText(pager.getAdapter().getPageTitle(position));
+            return v;
         }
     }
 

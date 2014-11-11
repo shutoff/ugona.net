@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.ByteArrayInputStream;
@@ -30,28 +31,18 @@ public class DeviceFragment extends SettingsFragment {
     static final int TIMER_SETUP = 1000;
     static int period_values[] = null;
     BroadcastReceiver br;
-    TextView tvLabel;
-    View prgUpdate;
-    View imgUpdate;
+
+    View progress;
+    View error;
+    ListView listView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
-        View control_block = v.findViewById(R.id.control_block);
-        control_block.setVisibility(View.VISIBLE);
-
-        tvLabel = (TextView) v.findViewById(R.id.control_label);
-        prgUpdate = v.findViewById(R.id.control_prg);
-        imgUpdate = v.findViewById(R.id.control_img);
-
-        control_block.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SettingActivity activity = (SettingActivity) getActivity();
-                //              activity.update();
-            }
-        });
+        listView = (ListView) v.findViewById(R.id.list);
+        progress = v.findViewById(R.id.progress);
+        error = v.findViewById(R.id.error);
 
         br = new BroadcastReceiver() {
             @Override
@@ -78,20 +69,20 @@ public class DeviceFragment extends SettingsFragment {
         if (activity == null)
             return;
         if (activity.values != null) {
-            prgUpdate.setVisibility(View.GONE);
-            imgUpdate.setVisibility(View.GONE);
-            tvLabel.setText(R.string.setup);
+            progress.setVisibility(View.GONE);
+            error.setVisibility(View.GONE);
+            listView.setVisibility(View.VISIBLE);
             return;
         }
         if (activity.values_error) {
-            prgUpdate.setVisibility(View.GONE);
-            imgUpdate.setVisibility(View.VISIBLE);
-            tvLabel.setText(R.string.error_load);
+            progress.setVisibility(View.GONE);
+            error.setVisibility(View.VISIBLE);
+            listView.setVisibility(View.GONE);
             return;
         }
-        prgUpdate.setVisibility(View.VISIBLE);
-        imgUpdate.setVisibility(View.GONE);
-        tvLabel.setText(R.string.loading);
+        progress.setVisibility(View.VISIBLE);
+        error.setVisibility(View.GONE);
+        listView.setVisibility(View.GONE);
     }
 
     int getVal(int index) {
