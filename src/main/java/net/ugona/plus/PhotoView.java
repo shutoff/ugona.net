@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -34,6 +35,11 @@ public class PhotoView extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photo);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         iv = (ImageView) findViewById(R.id.photo);
         long time = getIntent().getLongExtra(Names.TITLE, 0);
         car_id = getIntent().getStringExtra(Names.ID);
@@ -67,10 +73,15 @@ public class PhotoView extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
             case R.id.share: {
                 if (bmpPhoto == null)
                     return true;
                 String bmp = MediaStore.Images.Media.insertImage(getContentResolver(), bmpPhoto, title, null);
+                if (bmp == null)
+                    return true;
                 Uri bmpUri = Uri.parse(bmp);
                 final Intent share = new Intent(android.content.Intent.ACTION_SEND);
                 share.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

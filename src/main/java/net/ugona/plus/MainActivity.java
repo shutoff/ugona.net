@@ -251,7 +251,11 @@ public class MainActivity extends ActionBarActivity {
         };
 
         tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
-        tabs.setViewPager(mViewPager);
+        if (tabs != null)
+            tabs.setViewPager(mViewPager);
+        MenuPager pager = (MenuPager) findViewById(R.id.menu);
+        if (pager != null)
+            pager.setPager(mViewPager);
 
         if ((savedInstanceState == null) && preferences.getString(Names.MESSAGE, "").equals("")) {
             String phone = preferences.getString(Names.Car.CAR_PHONE + car_id, "");
@@ -858,6 +862,8 @@ public class MainActivity extends ActionBarActivity {
         setShowTracks();
         mViewPager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
         mViewPager.setCurrentItem(cur);
+        if (tabs != null)
+            tabs.notifyDataSetChanged();
         Intent intent = new Intent(MainActivity.this, FetchService.class);
         intent.putExtra(Names.ID, car_id);
         startService(intent);
