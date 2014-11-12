@@ -251,11 +251,15 @@ public class MainActivity extends ActionBarActivity {
         };
 
         tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
-        if (tabs != null)
+        if (tabs != null) {
             tabs.setViewPager(mViewPager);
+            tabs.setOnPageChangeListener(pageChangeListener);
+        }
         MenuPager pager = (MenuPager) findViewById(R.id.menu);
-        if (pager != null)
+        if (pager != null) {
             pager.setPager(mViewPager);
+            pager.setOnPageChangeListener(pageChangeListener);
+        }
 
         if ((savedInstanceState == null) && preferences.getString(Names.MESSAGE, "").equals("")) {
             String phone = preferences.getString(Names.Car.CAR_PHONE + car_id, "");

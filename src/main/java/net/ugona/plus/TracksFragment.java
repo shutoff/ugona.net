@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 
 import org.joda.time.DateTime;
@@ -68,6 +69,7 @@ public class TracksFragment extends Fragment
     BroadcastReceiver br;
     PullToRefreshLayout mPullToRefreshLayout;
     TracksFetcher fetcher;
+    long engine_time;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -355,6 +357,12 @@ public class TracksFragment extends Fragment
         formatter.setMinimumFractionDigits(2);
         String s = formatter.format(mileage);
         status = String.format(status, s, timeFormat((int) (time / 60000)), (float) avg_speed, max_speed);
+        if (engine_time >= 60) {
+            status += "\n";
+            status += getString(R.string.engine_time);
+            status += ": ";
+            status += timeFormat((int) (engine_time / 60));
+        }
         tvSummary.setText(status);
     }
 
@@ -418,6 +426,10 @@ public class TracksFragment extends Fragment
                 track.day_max_speed = v.get("day_max_speed").asInt();
                 tracks.add(track);
             }
+            engine_time = 0;
+            JsonValue engine = res.get("engine_time");
+            if (engine != null)
+                engine_time = engine.asLong();
 
             prgMain.setProgress(++progress);
             if (tracks.size() == 0) {

@@ -34,7 +34,7 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 public class StatFragment extends Fragment implements OnRefreshListener {
 
-    final static String STAT_URL = "/stat?skey=$1&tz=$2";
+    final static String STAT_URL = "/stat?skey=$1&tz=$2&engine=1";
 
     String car_id;
 
@@ -50,6 +50,8 @@ public class StatFragment extends Fragment implements OnRefreshListener {
 
     PullToRefreshLayout mPullToRefreshLayout;
     DataFetcher fetcher;
+
+    long engine_time;
 
     static String monthYear(int year, int month) {
         String s = new DateTime(year, month + 1, 1, 0, 0, 0, 0)
@@ -139,6 +141,7 @@ public class StatFragment extends Fragment implements OnRefreshListener {
             }
             cur.dist += dd.dist;
             cur.time += dd.time;
+            cur.engine_time += dd.engine_time;
             if (dd.speed > cur.speed)
                 cur.speed = dd.speed;
             if (d.month == dd.month)
@@ -173,6 +176,7 @@ public class StatFragment extends Fragment implements OnRefreshListener {
             cur.dist = dd.dist;
             cur.time = dd.time;
             cur.speed = dd.speed;
+            cur.engine_time = dd.engine_time;
             stat.insertElementAt(cur, position);
         }
     }
@@ -240,6 +244,7 @@ public class StatFragment extends Fragment implements OnRefreshListener {
         long dist;
         long time;
         int speed;
+        long engine_time;
         int level;
 
         int compare(LocalDate d) {
@@ -290,9 +295,13 @@ public class StatFragment extends Fragment implements OnRefreshListener {
                             d.year = year;
                             d.month = month;
                             d.day = data.get("d").asInt();
-                            d.dist = data.get("s").asLong();
-                            d.time = data.get("t").asLong();
-                            d.speed = data.get("v").asInt();
+                            if (data.get("s") != null) {
+                                d.dist = data.get("s").asLong();
+                                d.time = data.get("t").asLong();
+                                d.speed = data.get("v").asInt();
+                            }
+                            if (data.get("engine") != null)
+                                d.engine_time = data.get("engine").asLong();
                             days.add(d);
                         }
                     }
@@ -318,6 +327,7 @@ public class StatFragment extends Fragment implements OnRefreshListener {
             Day cur = null;
             double dist = 0;
             long time = 0;
+            long engine_time = 0;
             int speed = 0;
             for (Day d : days) {
                 if ((cur != null) && ((cur.year != d.year) || (cur.month != d.month))) {
@@ -331,10 +341,12 @@ public class StatFragment extends Fragment implements OnRefreshListener {
                 }
                 cur.dist += d.dist;
                 cur.time += d.time;
+                cur.engine_time += d.engine_time;
                 if (d.speed > cur.speed)
                     cur.speed = d.speed;
                 dist += d.dist;
                 time += d.time;
+                engine_time += d.engine_time;
                 if (d.speed > speed)
                     speed = d.speed;
             }
@@ -357,7 +369,14 @@ public class StatFragment extends Fragment implements OnRefreshListener {
             formatter.setMaximumFractionDigits(2);
             formatter.setMinimumFractionDigits(2);
             String s = formatter.format(dist / 1000.);
-            tvSummary.setText(String.format(status, s, timeFormat((int) (time / 60)), (float) v, speed));
+            String status_text = String.format(status, s, timeFormat((int) (time / 60)), (float) v, speed);
+            if (engine_time >= 60) {
+                status_text += "\n";
+                status_text += getString(R.string.engine_time);
+                status_text += ": ";
+                status_text += timeFormat((int) (engine_time / 60));
+            }
+            tvSummary.setText(status_text);
             vProgress.setVisibility(View.GONE);
             vLoading.setVisibility(View.GONE);
             vError.setVisibility(View.GONE);
@@ -407,10 +426,20 @@ public class StatFragment extends Fragment implements OnRefreshListener {
                     formatter.setMinimumFractionDigits(2);
                     String s = formatter.format(d.dist / 1000.) + " " + getString(R.string.km);
                     tvMileage.setText(s);
-                    float speed = (float) (d.dist * 3.6 / d.time);
                     String status = getString(R.string.short_status);
                     TextView text = (TextView) v.findViewById(R.id.address);
-                    text.setText(String.format(status, timeFormat((int) (d.time / 60)), speed, d.speed));
+                    String status_text = "";
+                    if (d.time > 0) {
+                        float speed = (float) (d.dist * 3.6 / d.time);
+                        status_text = String.format(status, timeFormat((int) (d.time / 60)), speed, d.speed);
+                    }
+                    if (d.engine_time >= 60) {
+                        status_text += getString(R.string.engine_time);
+                        status_text += ": ";
+                        status_text += timeFormat((int) (d.engine_time / 60));
+                        status_text += "\n";
+                    }
+                    text.setText(status_text);
                     int p = text.getPaddingRight();
                     text.setPadding(p * (2 * d.level + 1), 0, p, 0);
                     text = (TextView) v.findViewById(R.id.status);

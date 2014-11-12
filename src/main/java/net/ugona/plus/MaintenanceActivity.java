@@ -14,6 +14,8 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,10 +51,8 @@ public class MaintenanceActivity extends ActionBarActivity {
             0, 1, 3, 6, 12, 24, 36, 120
     };
     ListView vList;
-    View vControl;
     View vProgress;
-    TextView vText;
-    View vRefresh;
+    View vError;
     SharedPreferences preferences;
     String car_id;
     Vector<Preset> preset;
@@ -60,23 +60,23 @@ public class MaintenanceActivity extends ActionBarActivity {
     Handler handler;
     CaldroidFragment caldroidFragment;
     Date current;
+    Menu topSubMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.maintenance);
+        setContentView(R.layout.list);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setVisibility(View.VISIBLE);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         car_id = getIntent().getStringExtra(Names.ID);
         vList = (ListView) findViewById(R.id.list);
-        vControl = findViewById(R.id.control_block);
-        vProgress = findViewById(R.id.control_prg);
-        vText = (TextView) findViewById(R.id.control_label);
-        vRefresh = findViewById(R.id.control_img);
+        vProgress = findViewById(R.id.progress);
+        vError = findViewById(R.id.error);
         setTitle(R.string.maintenance);
         handler = new Handler();
         load();
@@ -366,12 +366,29 @@ public class MaintenanceActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        topSubMenu = menu;
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.settings, menu);
+        menu.removeItem(R.id.set);
+        if (vError.getVisibility() != View.VISIBLE)
+            menu.removeItem(R.id.refresh);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    void updateMenu() {
+        if (topSubMenu == null)
+            return;
+        topSubMenu.clear();
+        onCreateOptionsMenu(topSubMenu);
+    }
+
     void load() {
         vList.setVisibility(View.GONE);
-        vControl.setVisibility(View.VISIBLE);
-        vRefresh.setVisibility(View.GONE);
-        vText.setText(R.string.loading);
+        vError.setVisibility(View.GONE);
         vProgress.setVisibility(View.VISIBLE);
+        updateMenu();
         HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
@@ -392,7 +409,10 @@ public class MaintenanceActivity extends ActionBarActivity {
                 }
                 loadData(res.get("data").asArray());
                 vList.setVisibility(View.VISIBLE);
-                vControl.setVisibility(View.GONE);
+                vError.setVisibility(View.GONE);
+                vProgress.setVisibility(View.GONE);
+                updateMenu();
+
                 vList.setAdapter(new BaseAdapter() {
                     @Override
                     public int getCount() {
@@ -518,10 +538,9 @@ public class MaintenanceActivity extends ActionBarActivity {
             @Override
             void error() {
                 vList.setVisibility(View.GONE);
-                vControl.setVisibility(View.VISIBLE);
-                vRefresh.setVisibility(View.VISIBLE);
-                vText.setText(R.string.error_load);
                 vProgress.setVisibility(View.GONE);
+                vError.setVisibility(View.VISIBLE);
+                updateMenu();
             }
         };
         task.execute(URL_MAINTENANCE, preferences.getString(Names.Car.CAR_KEY + car_id, ""), Locale.getDefault().getLanguage());

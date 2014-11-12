@@ -49,7 +49,7 @@
     <string name="alarm_test_sum">Click for test alarm</string>
     <string name="map">Map</string>
     <string name="tracks">Tracks</string>
-    <string name="status" formatted="false">Mileage: %s km\nEngine time: %s\nAverage speed: %.2f
+    <string name="status" formatted="false">Mileage: %s km\nRoute time: %s\nAverage speed: %.2f
         kmh\nMax speed: %d kmh
     </string>
     <string name="m_format" formatted="false">%d min</string>
@@ -681,4 +681,5 @@
     <string name="pointer_ok">Command send success</string>
     <string name="pointer_err">Send command error</string>
     <string name="refresh">Refresh</string>
+    <string name="engine_time">Engine time</string>
 </resources>
