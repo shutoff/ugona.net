@@ -38,8 +38,12 @@
         <item name="android:paddingBottom">8dip</item>
     </style>
 
-    <style name="spinnerItemStyle" parent="android:Widget.DropDownItem.Spinner" />
+    <style name="spinnerItemStyle" parent="android:Widget.DropDownItem.Spinner">
+        <item name="android:textColor">@color/caldroid_white</item>
+    </style>
 
-    <style name="spinnerDropDownItemStyle" parent="android:TextAppearance.Widget.TextView.SpinnerItem" />
+    <style name="spinnerDropDownItemStyle" parent="android:TextAppearance.Widget.TextView.SpinnerItem">
+        <item name="android:textColor">@color/caldroid_black</item>
+    </style>
 
 </resources>
