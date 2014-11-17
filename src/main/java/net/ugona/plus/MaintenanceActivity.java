@@ -195,8 +195,8 @@ public class MaintenanceActivity extends ActionBarActivity {
                     @Override
                     public void run() {
                         boolean ok = (vName.getText().length() > 0) &&
-                                ((vPeriod.getSelectedItemPosition() > 0) || (vMileage.getText().length() > 0));
-                        if ((vMileage.getText().length() == 0) && (current == null))
+                                ((vPeriod.getSelectedItemPosition() > 0) || (vMileage.getText().length() > 0) || (vMotoTime.getText().length() > 0));
+                        if ((vMileage.getText().length() == 0) && (vMotoTime.getText().length() == 0) && (current == null))
                             ok = false;
                         okButton.setEnabled(ok);
                     }
@@ -273,6 +273,7 @@ public class MaintenanceActivity extends ActionBarActivity {
                 };
                 vName.addTextChangedListener(textWatcher);
                 vMileage.addTextChangedListener(textWatcher);
+                vMotoTime.addTextChangedListener(textWatcher);
                 vPeriod.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -452,6 +453,7 @@ public class MaintenanceActivity extends ActionBarActivity {
                         if (i >= items.size()) {
                             vName.setVisibility(View.GONE);
                             vInfo.setVisibility(View.GONE);
+                            vMotoTimeLeft.setVisibility(View.GONE);
                             vMileageLeft.setVisibility(View.GONE);
                             vTimeLeft.setVisibility(View.GONE);
                             vAdd.setVisibility(View.VISIBLE);
@@ -462,6 +464,14 @@ public class MaintenanceActivity extends ActionBarActivity {
                             String info = null;
                             if (item.mileage > 0)
                                 info = String.format("%,d", item.mileage) + " " + getString(R.string.km);
+                            if (item.moto_time > 0) {
+                                String s = getString(R.string.mototime) + " " + State.getPlural(MaintenanceActivity.this, R.plurals.hours, item.moto_time);
+                                if (info != null) {
+                                    info += " " + getString(R.string.or) + " " + s;
+                                } else {
+                                    info = s;
+                                }
+                            }
                             if (item.period > 0) {
                                 if (info != null) {
                                     info += " " + getString(R.string.or) + " " + period(item.period);
