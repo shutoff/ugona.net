@@ -101,6 +101,7 @@ public class MaintenanceActivity extends ActionBarActivity {
                 dialog.show();
                 final AutoCompleteTextView vName = (AutoCompleteTextView) dialog.findViewById(R.id.name);
                 final EditText vMileage = (EditText) dialog.findViewById(R.id.mileage);
+                final EditText vMotoTime = (EditText) dialog.findViewById(R.id.mototime);
                 final Spinner vPeriod = (Spinner) dialog.findViewById(R.id.period);
                 vPeriod.setAdapter(new BaseAdapter() {
                     @Override
@@ -145,6 +146,8 @@ public class MaintenanceActivity extends ActionBarActivity {
                 });
                 if (m.mileage > 0)
                     vMileage.setText(String.format("%,d", m.mileage));
+                if (m.moto_time > 0)
+                    vMotoTime.setText(String.format("%,d", m.moto_time));
                 for (int n = 0; n < periods.length; n++) {
                     if (periods[n] == m.period) {
                         vPeriod.setSelection(n);
@@ -348,6 +351,7 @@ public class MaintenanceActivity extends ActionBarActivity {
                         task.execute(URL_MAINTENANCE, preferences.getString(Names.Car.CAR_KEY + car_id, ""), Locale.getDefault().getLanguage(),
                                 "name", vName.getText(),
                                 "mileage", vMileage.getText(),
+                                "mototime", vMotoTime.getText(),
                                 "period", periods[vPeriod.getSelectedItemPosition()],
                                 "last", (current != null) ? current.getTime() / 1000 : null,
                                 "set", (id > 0) ? id : null);
@@ -442,6 +446,7 @@ public class MaintenanceActivity extends ActionBarActivity {
                         TextView vName = (TextView) v.findViewById(R.id.name);
                         TextView vInfo = (TextView) v.findViewById(R.id.info);
                         TextView vMileageLeft = (TextView) v.findViewById(R.id.mileage_left);
+                        TextView vMotoTimeLeft = (TextView) v.findViewById(R.id.mototime_left);
                         TextView vTimeLeft = (TextView) v.findViewById(R.id.time_left);
                         View vAdd = v.findViewById(R.id.block_add);
                         if (i >= items.size()) {
@@ -492,6 +497,27 @@ public class MaintenanceActivity extends ActionBarActivity {
                                 vMileageLeft.setVisibility(View.VISIBLE);
                             } else {
                                 vMileageLeft.setVisibility(View.GONE);
+                            }
+                            if (item.moto_time > 0) {
+                                int delta = item.moto_time - item.current_time;
+                                String s = getString(R.string.left);
+                                if (delta < 2) {
+                                    vMotoTimeLeft.setTextColor(getResources().getColor(R.color.error));
+                                } else if (delta < 50) {
+                                    vMotoTimeLeft.setTextColor(getResources().getColor(R.color.changed));
+                                } else {
+                                    vMotoTimeLeft.setTextColor(getResources().getColor(android.R.color.secondary_text_dark));
+                                }
+                                if (delta < 0) {
+                                    delta = -delta;
+                                    s = getString(R.string.rerun);
+                                }
+                                s += " ";
+                                s += State.getPlural(MaintenanceActivity.this, R.plurals.hours, delta);
+                                vMotoTimeLeft.setText(s);
+                                vMotoTimeLeft.setVisibility(View.VISIBLE);
+                            } else {
+                                vMotoTimeLeft.setVisibility(View.GONE);
                             }
                             if ((item.period > 0) && (item.date != null)) {
                                 Calendar cal = Calendar.getInstance();
@@ -567,9 +593,16 @@ public class MaintenanceActivity extends ActionBarActivity {
             v = d.get("mileage");
             if (v != null)
                 m.mileage = v.asInt();
+            v = d.get("mototime");
+            if (v != null)
+                m.moto_time = v.asInt();
             v = d.get("current");
             if (v != null)
                 m.current = v.asInt();
+            v = d.get("current_time");
+            if (v != null)
+                m.current_time = v.asInt();
+
             v = d.get("last");
             if (v != null)
                 m.date = new Date(v.asLong() * 1000);
@@ -589,7 +622,9 @@ public class MaintenanceActivity extends ActionBarActivity {
         String name;
         int period;
         int mileage;
+        int moto_time;
         int current;
+        int current_time;
         Date date;
     }
 

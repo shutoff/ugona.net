@@ -658,10 +658,16 @@
         <item quantity="few">%d месяца</item>
     </plurals>
     <plurals name="days">
-        <item quantity="one">%d ень</item>
+        <item quantity="one">%d день</item>
         <item quantity="many">%d дней</item>
         <item quantity="other">%d дней</item>
         <item quantity="few">%d дня</item>
+    </plurals>
+    <plurals name="hours">
+        <item quantity="one">%d час</item>
+        <item quantity="many">%d часов</item>
+        <item quantity="other">%d часов</item>
+        <item quantity="few">%d часа</item>
     </plurals>
     <string name="mileage_str">Пробег</string>
     <string name="period">Период</string>
@@ -687,4 +693,5 @@
     <string name="time_error">Время на телефоне установлено неправильно</string>
     <string name="refresh">Обновить</string>
     <string name="engine_time">Время работы двигателя</string>
+    <string name="mototime">Моточасы</string>
 </resources>
