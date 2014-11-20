@@ -84,7 +84,7 @@ public class StateFragment extends Fragment
     View vCard;
 
     View vError;
-    View vTimeError;
+    TextView tvTimeError;
     ImageView imgRefresh;
     ProgressBar prgUpdate;
     View vMotor;
@@ -234,8 +234,8 @@ public class StateFragment extends Fragment
         tvValet = (TextView) v.findViewById(R.id.valet_warning);
         mNet = v.findViewById(R.id.net_warning);
 
-        vTimeError = v.findViewById(R.id.time_error);
-        vTimeError.setOnClickListener(new View.OnClickListener() {
+        tvTimeError = (TextView) v.findViewById(R.id.time_error);
+        tvTimeError.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(android.provider.Settings.ACTION_DATE_SETTINGS));
@@ -487,7 +487,13 @@ public class StateFragment extends Fragment
         long delta = preferences.getLong(Names.TIME_DELTA, 0);
         if (delta < 0)
             delta = -delta;
-        vTimeError.setVisibility((delta < 180000) ? View.GONE : View.VISIBLE);
+        if (delta < 180000) {
+            tvTimeError.setVisibility(View.GONE);
+        } else {
+            tvTimeError.setVisibility(View.VISIBLE);
+            delta = delta % 3600000;
+            tvTimeError.setText((delta < 180000) ? R.string.time_zone_error : R.string.time_error);
+        }
 
         if (tvMaintenance != null) {
             String s = null;
