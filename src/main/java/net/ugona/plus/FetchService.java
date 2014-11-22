@@ -613,6 +613,11 @@ public class FetchService extends Service {
             JsonValue first_time = res.get("first_time");
             if (first_time != null)
                 ed.putLong(Names.Car.FIRST_TIME + car_id, first_time.asLong());
+
+            JsonValue fuel_value = res.get("fuel");
+            if (fuel_value != null)
+                ed.putInt(Names.Car.FUEL + car_id, fuel_value.asInt());
+
             JsonValue contact_value = res.get("contact");
             boolean gps_valid = false;
             boolean prev_valet = false;
@@ -1169,6 +1174,12 @@ public class FetchService extends Service {
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putInt(Names.Car.CARD_LEVEL + car_id, vLevel.asInt());
                 ed.putFloat(Names.Car.CARD_VOLTAGE + car_id, vVoltage.asFloat());
+                ed.commit();
+                sendUpdate(ACTION_UPDATE, car_id);
+            } else if (preferences.getFloat(Names.Car.CARD_VOLTAGE + car_id, 0) != 0) {
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.remove(Names.Car.CARD_VOLTAGE + car_id);
+                ed.remove(Names.Car.CARD_LEVEL + car_id);
                 ed.commit();
                 sendUpdate(ACTION_UPDATE, car_id);
             }

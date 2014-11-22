@@ -310,6 +310,8 @@ public class HistoryActivity extends ActionBarActivity {
             }
             if (preferences.getBoolean(Names.Car.SHOW_BALANCE + car_id, true))
                 types.add(new Type("balance", title + getString(R.string.balance)));
+            if (preferences.getInt(Names.Car.FUEL + car_id, 0) != 0)
+                types.add(new Type("fuel", title + getString(R.string.fuel)));
 
             Preferences.TempConfig config = Preferences.getTemperatureConfig(preferences, car_id, 1);
             if (config != null)

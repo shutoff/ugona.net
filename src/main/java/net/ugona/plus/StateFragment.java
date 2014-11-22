@@ -74,6 +74,7 @@ public class StateFragment extends Fragment
     TextView tvTemperature5;
     TextView tvTemperature6;
     TextView tvCard;
+    TextView tvFuel;
 
     View vTemperature;
     View vTemperature2;
@@ -82,6 +83,7 @@ public class StateFragment extends Fragment
     View vTemperature5;
     View vTemperature6;
     View vCard;
+    View vFuel;
 
     View vError;
     TextView tvTimeError;
@@ -192,6 +194,8 @@ public class StateFragment extends Fragment
         vTemperature6 = v.findViewById(R.id.temperature6_block);
         tvCard = (TextView) v.findViewById(R.id.card);
         vCard = v.findViewById(R.id.card_block);
+        tvFuel = (TextView) v.findViewById(R.id.fuel);
+        vFuel = v.findViewById(R.id.fuel_block);
 
         vMotor = v.findViewById(R.id.motor);
         vRele = v.findViewById(R.id.rele);
@@ -261,6 +265,8 @@ public class StateFragment extends Fragment
             vMain.setOnClickListener(clickListener);
             vReserve.setTag("reserved");
             vReserve.setOnClickListener(clickListener);
+            vFuel.setTag("fuel");
+            vFuel.setOnClickListener(clickListener);
             vTemperature.setTag("t1");
             vTemperature.setOnClickListener(clickListener);
             vTemperature2.setTag("t2");
@@ -579,6 +585,14 @@ public class StateFragment extends Fragment
             balanceBlock.setVisibility(View.VISIBLE);
         } else {
             balanceBlock.setVisibility(View.GONE);
+        }
+
+        int fuel = preferences.getInt(Names.Car.FUEL + car_id, 0);
+        if (fuel != 0) {
+            vFuel.setVisibility(View.VISIBLE);
+            tvFuel.setText(String.format("%,d", fuel / 100));
+        } else {
+            vFuel.setVisibility(View.GONE);
         }
 
         if (pointer) {

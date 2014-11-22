@@ -193,6 +193,7 @@ public final class Names {
         static final String LEFT_MILEAGE = "left_mileage_";
 
         static final String AZ_MODE = "az_mode_";
+        static final String FUEL = "fuel_";
     }
 
     public final class Notify {

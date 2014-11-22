@@ -695,4 +695,5 @@
     <string name="refresh">Обновить</string>
     <string name="engine_time">Время работы двигателя</string>
     <string name="mototime">Моточасы</string>
+    <string name="fuel">Топливо</string>
 </resources>
