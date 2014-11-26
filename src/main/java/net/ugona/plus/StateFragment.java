@@ -587,12 +587,14 @@ public class StateFragment extends Fragment
             balanceBlock.setVisibility(View.GONE);
         }
 
-        int fuel = preferences.getInt(Names.Car.FUEL + car_id, 0);
-        if (fuel != 0) {
-            vFuel.setVisibility(View.VISIBLE);
-            tvFuel.setText(String.format("%,d", fuel / 100));
-        } else {
-            vFuel.setVisibility(View.GONE);
+        if (vFuel != null) {
+            int fuel = preferences.getInt(Names.Car.FUEL + car_id, 0);
+            if (fuel != 0) {
+                vFuel.setVisibility(View.VISIBLE);
+                tvFuel.setText(String.format("%,d", fuel / 100));
+            } else {
+                vFuel.setVisibility(View.GONE);
+            }
         }
 
         if (pointer) {

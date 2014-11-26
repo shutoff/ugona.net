@@ -94,9 +94,10 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="5dp">
+                android:padding="5dp"
+                android:paddingLeft="15dp">
 
-                <ProgressBar
+            <ProgressBar
                     android:id="@+id/update"
                     android:layout_width="24dp"
                     android:layout_height="24dp" />
