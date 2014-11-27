@@ -934,44 +934,51 @@ public class FetchService extends Service {
             } else {
                 long card_t = preferences.getLong(Names.Car.CARD + car_id, 0);
                 long guard_t = preferences.getLong(Names.Car.GUARD_TIME + car_id, 0);
-                if ((card_t > 0) && (guard_t > 0) && (card_t < guard_t)) {
-                    long event_t = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
-                    new CardRequest(car_id);
-                    if (event_t - guard_t > CARD_TIME) {
-                        if (preferences.getLong(Names.Car.CARD_EVENT + car_id, 0) != card_t) {
-                            ed.putLong(Names.Car.CARD_EVENT + car_id, card_t);
-                            int card_id = preferences.getInt(Names.Notify.CARD + car_id, 0);
-                            if (card_id != 0) {
-                                if (event_t - guard_t >= (preferences.getLong(Names.Car.CARD_TIME + car_id, 0) - guard_t) * 2) {
-                                    Alarm.removeNotification(FetchService.this, car_id, card_id);
-                                    card_id = 0;
+                if (card_t != 0) {
+                    if (State.isCard(preferences, car_id)) {
+                        if ((card_t > 0) && (guard_t > 0) && (card_t < guard_t)) {
+                            long event_t = preferences.getLong(Names.Car.EVENT_TIME + car_id, 0);
+                            new CardRequest(car_id);
+                            if (event_t - guard_t > CARD_TIME) {
+                                if (preferences.getLong(Names.Car.CARD_EVENT + car_id, 0) != card_t) {
+                                    ed.putLong(Names.Car.CARD_EVENT + car_id, card_t);
+                                    int card_id = preferences.getInt(Names.Notify.CARD + car_id, 0);
+                                    if (card_id != 0) {
+                                        if (event_t - guard_t >= (preferences.getLong(Names.Car.CARD_TIME + car_id, 0) - guard_t) * 2) {
+                                            Alarm.removeNotification(FetchService.this, car_id, card_id);
+                                            card_id = 0;
+                                        }
+                                        Intent iUpdate = new Intent(FetchService.this, FetchService.class);
+                                        iUpdate.setAction(ACTION_START);
+                                        iUpdate.putExtra(Names.ID, car_id);
+                                        Uri data = Uri.withAppendedPath(Uri.parse("http://service/update/"), car_id);
+                                        iUpdate.setData(data);
+                                        PendingIntent pi = PendingIntent.getService(FetchService.this, 0, iUpdate, 0);
+                                        alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + (preferences.getLong(Names.Car.CARD_TIME + car_id, 0) - guard_t) * 2 - (event_t - guard_t), pi);
+                                    }
+                                    if (card_id == 0) {
+                                        card_id = Alarm.createNotification(FetchService.this, getString(R.string.card_message), R.drawable.warning, car_id, null, 0);
+                                        ed.putInt(Names.Notify.CARD + car_id, card_id);
+                                        ed.putLong(Names.Car.CARD_TIME + car_id, event_t);
+                                    }
+                                    ed.commit();
                                 }
+                            } else {
                                 Intent iUpdate = new Intent(FetchService.this, FetchService.class);
                                 iUpdate.setAction(ACTION_START);
                                 iUpdate.putExtra(Names.ID, car_id);
                                 Uri data = Uri.withAppendedPath(Uri.parse("http://service/update/"), car_id);
                                 iUpdate.setData(data);
                                 PendingIntent pi = PendingIntent.getService(FetchService.this, 0, iUpdate, 0);
-                                alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + (preferences.getLong(Names.Car.CARD_TIME + car_id, 0) - guard_t) * 2 - (event_t - guard_t), pi);
+                                alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + CARD_TIME - (event_t - guard_t), pi);
                             }
-                            if (card_id == 0) {
-                                card_id = Alarm.createNotification(FetchService.this, getString(R.string.card_message), R.drawable.warning, car_id, null, 0);
-                                ed.putInt(Names.Notify.CARD + car_id, card_id);
-                                ed.putLong(Names.Car.CARD_TIME + car_id, event_t);
-                            }
-                            ed.commit();
+                        } else if (guard_t < 0) {
+                            new CardRequest(car_id);
                         }
                     } else {
-                        Intent iUpdate = new Intent(FetchService.this, FetchService.class);
-                        iUpdate.setAction(ACTION_START);
-                        iUpdate.putExtra(Names.ID, car_id);
-                        Uri data = Uri.withAppendedPath(Uri.parse("http://service/update/"), car_id);
-                        iUpdate.setData(data);
-                        PendingIntent pi = PendingIntent.getService(FetchService.this, 0, iUpdate, 0);
-                        alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + CARD_TIME - (event_t - guard_t), pi);
+                        ed.remove(Names.Car.CARD + car_id);
+                        ed.commit();
                     }
-                } else if (guard_t < 0) {
-                    new CardRequest(car_id);
                 }
             }
 

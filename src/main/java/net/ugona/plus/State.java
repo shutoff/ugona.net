@@ -124,6 +124,11 @@ public class State {
         return sf.format(time);
     }
 
+    static boolean isCard(SharedPreferences preferences, String car_id) {
+        String ver = preferences.getString(Names.Car.VERSION + car_id, "");
+        return ver.indexOf("Logistic") < 0;
+    }
+
     static int getCommands(SharedPreferences preferences, String car_id) {
         int res = preferences.getInt(Names.Car.COMMANDS + car_id, -1);
         if (res != -1)
