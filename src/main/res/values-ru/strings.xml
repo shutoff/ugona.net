@@ -696,4 +696,9 @@
     <string name="engine_time">Время работы двигателя</string>
     <string name="mototime">Моточасы</string>
     <string name="fuel">Топливо</string>
+    <string name="bad_tz">Неверный часовой пояс</string>
+    <string name="bad_tz_warn">Похоже на Вашем устройстве установлен неправильный часовой пояс.\n
+        Укажите в настройках времени правильный часовой пояс.\n
+        Обновить базу часовых поясов Вам поможет приложение ClockSync</string>
+    <string name="clock_sync">ClockSync</string>
 </resources>

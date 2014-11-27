@@ -53,27 +53,32 @@ public abstract class Address {
                 (lng + 0.001) + ""
         };
         if (address_db == null) {
-            OpenHelper helper = new OpenHelper(context);
-            address_db = helper.getWritableDatabase();
+            try {
+                OpenHelper helper = new OpenHelper(context);
+                address_db = helper.getWritableDatabase();
+            } catch (Exception ex) {
+            }
         }
 
         String result = null;
-        Cursor cursor = address_db.query(TABLE_NAME, columns, "(Param = ?) AND (Lat BETWEEN ? AND ?) AND (Lng BETWEEN ? AND ?)", conditions, null, null, null, null);
         double best = 400;
-        if (cursor.moveToFirst()) {
-            for (; ; ) {
-                double db_lat = cursor.getDouble(0);
-                double db_lon = cursor.getDouble(1);
-                double distance = calc_distance(lat, lng, db_lat, db_lon);
-                if (distance < best) {
-                    result = cursor.getString(2);
-                    best = distance;
+        if (address_db != null) {
+            Cursor cursor = address_db.query(TABLE_NAME, columns, "(Param = ?) AND (Lat BETWEEN ? AND ?) AND (Lng BETWEEN ? AND ?)", conditions, null, null, null, null);
+            if (cursor.moveToFirst()) {
+                for (; ; ) {
+                    double db_lat = cursor.getDouble(0);
+                    double db_lon = cursor.getDouble(1);
+                    double distance = calc_distance(lat, lng, db_lat, db_lon);
+                    if (distance < best) {
+                        result = cursor.getString(2);
+                        best = distance;
+                    }
+                    if (!cursor.moveToNext())
+                        break;
                 }
-                if (!cursor.moveToNext())
-                    break;
             }
+            cursor.close();
         }
-        cursor.close();
         if (best > 80) {
             AddressRequest request = new AddressRequest() {
                 @Override
@@ -94,12 +99,14 @@ public abstract class Address {
                             }
                             address += " " + p;
                         }
-                        ContentValues values = new ContentValues();
-                        values.put(columns[0], lat);
-                        values.put(columns[1], lng);
-                        values.put(columns[2], address);
-                        values.put(columns[3], param);
-                        address_db.insert(TABLE_NAME, null, values);
+                        if (address_db != null) {
+                            ContentValues values = new ContentValues();
+                            values.put(columns[0], lat);
+                            values.put(columns[1], lng);
+                            values.put(columns[2], address);
+                            values.put(columns[3], param);
+                            address_db.insert(TABLE_NAME, null, values);
+                        }
                         if (answer != null)
                             answer.result(address);
                         return;

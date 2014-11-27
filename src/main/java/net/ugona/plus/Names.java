@@ -41,6 +41,7 @@ public final class Names {
     static final String URL = "url";
     static final String PATTERN = "pattern";
     static final String TIME_DELTA = "time_delta";
+    static final String TZ_WARN = "tz_warn";
 
     public final class Car {
         static final String ENGINE = "Engine";

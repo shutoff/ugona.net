@@ -763,8 +763,6 @@ public class Actions extends LockPatternActivity {
             boolean process_answer(Context context, String car_id, String text) {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
                 SharedPreferences.Editor ed = preferences.edit();
-                ed.putLong(Names.Car.RELE_START + car_id, new Date().getTime());
-                ed.commit();
                 ed.remove(Names.Car.RELE_START + car_id);
                 ed.putBoolean((rele2 ? Names.Car.RELAY2 : Names.Car.RELAY1) + car_id, false);
                 ed.commit();

@@ -242,6 +242,9 @@ public class StateFragment extends Fragment
         tvTimeError.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.remove(Names.TIME_DELTA);
+                ed.commit();
                 startActivity(new Intent(android.provider.Settings.ACTION_DATE_SETTINGS));
             }
         });
@@ -493,12 +496,12 @@ public class StateFragment extends Fragment
         long delta = preferences.getLong(Names.TIME_DELTA, 0);
         if (delta < 0)
             delta = -delta;
-        if (delta < 180000) {
+        if (delta < 150000) {
             tvTimeError.setVisibility(View.GONE);
         } else {
             tvTimeError.setVisibility(View.VISIBLE);
-            delta = delta % 3600000;
-            tvTimeError.setText((delta < 180000) ? R.string.time_zone_error : R.string.time_error);
+            delta = (delta + 150000) % 3600000L;
+            tvTimeError.setText((delta < 300000) ? R.string.time_zone_error : R.string.time_error);
         }
 
         if (tvMaintenance != null) {

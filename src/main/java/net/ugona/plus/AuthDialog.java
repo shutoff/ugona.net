@@ -228,8 +228,11 @@ public class AuthDialog extends Activity {
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
-                startActivityForResult(intent, 1);
+                try {
+                    Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+                    startActivityForResult(intent, 1);
+                } catch (Exception ex) {
+                }
             }
         });
     }
@@ -257,8 +260,11 @@ public class AuthDialog extends Activity {
         }
 
         final ProgressDialog dlgCheck = new ProgressDialog(AuthDialog.this);
-        dlgCheck.setMessage(getString(R.string.check_auth));
-        dlgCheck.show();
+        try {
+            dlgCheck.setMessage(getString(R.string.check_auth));
+            dlgCheck.show();
+        } catch (Exception ex) {
+        }
 
         HttpTask apiTask = new HttpTask() {
             @Override

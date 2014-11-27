@@ -266,6 +266,11 @@ public class MainActivity extends ActionBarActivity {
             String auth = preferences.getString(Names.Car.AUTH + car_id, "");
             String key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
 
+            long delta = preferences.getLong(Names.TIME_DELTA, 0);
+            if (delta < 0)
+                delta = -delta;
+            boolean bad_tz = (delta > 150000) && ((delta + 150000) % 3600000 < 300000);
+
             if (preferences.getString(Names.CARS, "").equals("") && (auth.equals(""))) {
                 firstSetup();
             } else if (auth.equals("") || key.equals("demo") || key.equals("")) {
@@ -283,6 +288,37 @@ public class MainActivity extends ActionBarActivity {
                 i.putExtra(Names.ID, car_id);
                 i.putExtra(Names.Car.CAR_PHONE, true);
                 startActivityForResult(i, CAR_SETUP);
+            } else if (!preferences.getBoolean(Names.TZ_WARN, false) && bad_tz) {
+                AlertDialog dialog = new AlertDialog.Builder(this)
+                        .setTitle(R.string.bad_tz)
+                        .setMessage(R.string.bad_tz_warn)
+                        .setNegativeButton(R.string.cancel, null)
+                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SharedPreferences.Editor ed = preferences.edit();
+                                ed.putBoolean(Names.TZ_WARN, true);
+                                ed.remove(Names.TIME_DELTA);
+                                ed.commit();
+                                startActivity(new Intent(android.provider.Settings.ACTION_DATE_SETTINGS));
+                            }
+                        })
+                        .setNeutralButton(R.string.clock_sync, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SharedPreferences.Editor ed = preferences.edit();
+                                ed.remove(Names.TIME_DELTA);
+                                ed.commit();
+                                String appPackageName = "ru.org.amip.ClockSync";
+                                try {
+                                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                                } catch (android.content.ActivityNotFoundException anfe) {
+                                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=" + appPackageName)));
+                                }
+                            }
+                        })
+                        .create();
+                dialog.show();
             } else if (!preferences.getBoolean(Names.INIT_POINTER, false) && !preferences.getString(Names.Car.CAR_KEY + car_id, "").equals("demo")) {
                 SharedPreferences.Editor ed = preferences.edit();
                 ed.putBoolean(Names.INIT_POINTER, true);
