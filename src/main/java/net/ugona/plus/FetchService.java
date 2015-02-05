@@ -74,9 +74,9 @@ public class FetchService extends Service {
     private AlarmManager alarmMgr;
 
     static boolean isProcessed(String id) {
+        if (requests == null)
+            return false;
         synchronized (requests) {
-            if (requests == null)
-                return false;
             return requests.containsKey("S" + id);
         }
     }

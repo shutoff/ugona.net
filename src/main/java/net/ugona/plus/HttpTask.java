@@ -120,7 +120,7 @@ public abstract class HttpTask {
                         result(res);
                         return;
                     } catch (Exception ex) {
-                        // ignore
+                        ex.printStackTrace();
                     }
                 }
                 error();

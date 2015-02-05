@@ -694,4 +694,7 @@
         Change time zone in time setup.\n
         Application ClockSync can help update time zones.</string>
     <string name="clock_sync">ClockSync</string>
+    <string name="az_temp">Temperature limit for autostart</string>
+    <string name="temp_unit">°C</string>
+    <string name="az_with_t">Autostart on temepature</string>
 </resources>

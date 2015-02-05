@@ -298,11 +298,11 @@ public class SettingActivity extends ActionBarActivity {
         boolean changed = zone_deleted | timers_deleted;
         if (!changed && (values != null)) {
             int i;
-            for (i = 0; i < 24; i++) {
+            for (i = 0; i < 25; i++) {
                 if (values[i] != old_values[i])
                     break;
             }
-            if (i < 24)
+            if (i < 25)
                 changed = true;
         }
         if (!changed && (zones != null)) {
@@ -400,11 +400,11 @@ public class SettingActivity extends ActionBarActivity {
             @Override
             void result(JsonObject res) throws ParseException {
                 SharedPreferences.Editor ed = preferences.edit();
-                values = new int[24];
-                old_values = new int[24];
-                for (int i = 0; i < 24; i++) {
+                values = new int[25];
+                old_values = new int[25];
+                for (int i = 0; i < 25; i++) {
                     int v = preferences.getInt("V_" + i + "_" + car_id, 0);
-                    if (i < 20) {
+                    if ((i < 20) || (i == 24)) {
                         JsonValue val = res.get("v" + i);
                         if (val != null) {
                             v = val.asInt();
@@ -554,7 +554,7 @@ public class SettingActivity extends ActionBarActivity {
         for (int i = 0; i < values.length; i++) {
             if (values[i] == old_values[i])
                 continue;
-            if (i < 22) {
+            if ((i < 22) || (i == 24)) {
                 if (!val.equals(""))
                     val += ",";
                 val += i + "." + values[i];
@@ -740,6 +740,7 @@ public class SettingActivity extends ActionBarActivity {
                         ed.putInt(Names.Car.CAR_TIMER + car_id, set_values[i]);
                 }
                 ed.commit();
+                sendUpdate();
             }
 
             @Override

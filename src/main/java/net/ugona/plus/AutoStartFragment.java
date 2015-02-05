@@ -57,6 +57,7 @@ public class AutoStartFragment extends DeviceFragment {
             }
         });
         if (!State.isPandora(preferences, car_id)) {
+            items.add(new SeekBarItem(R.string.az_temp, 24, -40, 70, R.string.temp_unit));
             items.add(new CheckBitItem(R.string.soft_start, 19, 1));
             if (State.hasTelephony(getActivity()))
                 items.add(new CheckBitItem(R.string.inf_sms, 23, 1) {
@@ -84,6 +85,7 @@ public class AutoStartFragment extends DeviceFragment {
 
         TimerCommands cmd = new TimerCommands();
         cmd.add(new TimerCommand(1, 0, R.string.motor_on));
+        cmd.add(new TimerCommand(10, 0, R.string.az_with_t));
         addTimers(cmd);
     }
 

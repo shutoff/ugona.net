@@ -701,4 +701,7 @@
         Укажите в настройках времени правильный часовой пояс.\n
         Обновить базу часовых поясов Вам поможет приложение ClockSync</string>
     <string name="clock_sync">ClockSync</string>
+    <string name="az_temp">Порог температуры для запуска по температуре</string>
+    <string name="temp_unit">°C</string>
+    <string name="az_with_t">Запуск с учетом температуры</string>
 </resources>
