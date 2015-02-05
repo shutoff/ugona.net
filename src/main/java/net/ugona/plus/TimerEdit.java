@@ -5,7 +5,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -39,7 +41,6 @@ public class TimerEdit extends ActionBarActivity {
     View vWeek;
     TextView tvTimes;
     DeviceFragment.TimerCommands cmd;
-    Spinner vCmd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +68,9 @@ public class TimerEdit extends ActionBarActivity {
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.timer);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         picker = (TimePicker) findViewById(R.id.time);
 
@@ -196,10 +200,11 @@ public class TimerEdit extends ActionBarActivity {
         picker.setCurrentHour(timer.hours);
         picker.setCurrentMinute(timer.minutes);
 
-        vCmd = (Spinner) findViewById(R.id.cmd);
+        ActionBar actionBar = getSupportActionBar();
+        Spinner spinner = (Spinner) findViewById(R.id.spinner_nav);
         if (cmd.size() > 1) {
-            vCmd.setVisibility(View.VISIBLE);
-            vCmd.setAdapter(new BaseAdapter() {
+            spinner.setVisibility(View.VISIBLE);
+            spinner.setAdapter(new BaseAdapter() {
                 @Override
                 public int getCount() {
                     return cmd.size();
@@ -239,7 +244,16 @@ public class TimerEdit extends ActionBarActivity {
                     return v;
                 }
             });
-            vCmd.setSelection(cmd.getPosition(timer.com));
+
+            actionBar.setDisplayShowHomeEnabled(false);
+            actionBar.setDisplayUseLogoEnabled(false);
+            spinner.setSelection(cmd.getPosition(timer.com));
+            setTitle("");
+        } else {
+            spinner.setVisibility(View.GONE);
+            actionBar.setDisplayShowHomeEnabled(true);
+            actionBar.setDisplayUseLogoEnabled(false);
+            setTitle(cmd.get(0).name);
         }
     }
 
@@ -309,8 +323,10 @@ public class TimerEdit extends ActionBarActivity {
         }
         timer.hours = picker.getCurrentHour();
         timer.minutes = picker.getCurrentMinute();
-        if (cmd.size() > 1)
-            timer.com = cmd.get(vCmd.getSelectedItemPosition()).id;
+        if (cmd.size() > 1) {
+            Spinner spinner = (Spinner) findViewById(R.id.spinner_nav);
+            timer.com = cmd.get(spinner.getSelectedItemPosition()).id;
+        }
         Intent i = getIntent();
         try {
             byte[] data = null;

@@ -76,7 +76,9 @@ public class FetchService extends Service {
     static boolean isProcessed(String id) {
         if (requests == null)
             return false;
-        return requests.containsKey("S" + id);
+        synchronized (requests) {
+            return requests.containsKey("S" + id);
+        }
     }
 
     @Override
@@ -236,13 +238,15 @@ public class FetchService extends Service {
     }
 
     synchronized boolean startRequest() {
-        for (Map.Entry<String, ServerRequest> entry : requests.entrySet()) {
-            if (entry.getValue().started)
-                continue;
-            entry.getValue().start();
+        synchronized (requests) {
+            for (Map.Entry<String, ServerRequest> entry : requests.entrySet()) {
+                if (entry.getValue().started)
+                    continue;
+                entry.getValue().start();
+            }
+            if (requests.size() > 0)
+                return true;
         }
-        if (requests.size() > 0)
-            return true;
         if (piUpdate == null) {
             Intent iUpdate = new Intent(this, FetchService.class);
             iUpdate.setAction(ACTION_UPDATE);
@@ -324,14 +328,18 @@ public class FetchService extends Service {
         ServerRequest(String type, String id) {
             key = type + id;
             car_id = id;
-            if (requests.get(key) != null)
-                return;
-            requests.put(key, this);
+            synchronized (requests) {
+                if (requests.get(key) != null)
+                    return;
+                requests.put(key, this);
+            }
         }
 
         @Override
         void result(JsonObject res) throws ParseException {
-            requests.remove(key);
+            synchronized (requests) {
+                requests.remove(key);
+            }
             startRequest();
         }
 
@@ -372,7 +380,9 @@ public class FetchService extends Service {
 
                         @Override
                         void error() {
-                            requests.remove(key);
+                            synchronized (requests) {
+                                requests.remove(key);
+                            }
                             new StatusRequest(car_id);
                             long timeout = (error_text != null) ? REPEAT_AFTER_500 : REPEAT_AFTER_ERROR;
                             alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + timeout, timeout, piTimer);
@@ -383,7 +393,9 @@ public class FetchService extends Service {
                     return;
                 }
             }
-            requests.remove(key);
+            synchronized (requests) {
+                requests.remove(key);
+            }
             new StatusRequest(car_id);
             long timeout = (error_text != null) ? REPEAT_AFTER_500 : REPEAT_AFTER_ERROR;
             alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + timeout, timeout, piTimer);
@@ -395,7 +407,9 @@ public class FetchService extends Service {
                 return;
             String api_key = preferences.getString(Names.Car.CAR_KEY + car_id, "");
             if (api_key.length() == 0) {
-                requests.remove(key);
+                synchronized (requests) {
+                    requests.remove(key);
+                }
                 return;
             }
             m_activeNetwork = conMgr.getActiveNetworkInfo();

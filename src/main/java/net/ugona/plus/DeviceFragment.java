@@ -439,6 +439,8 @@ public class DeviceFragment extends SettingsFragment {
             int p = cmd.getPosition(timer.com);
             if (p >= 0) {
                 TimerCommand c = cmd.get(p);
+                TextView tvCmd = (TextView) v.findViewById(R.id.command);
+                tvCmd.setText(c.name);
                 if (c.picture > 0) {
                     icon.setImageResource(c.picture);
                     icon.setVisibility(View.VISIBLE);
