@@ -228,6 +228,38 @@ public class DeviceFragment extends SettingsFragment {
 
     }
 
+    class USeekBarItem extends SeekItem {
+
+        int word;
+
+        USeekBarItem(int name, int word_, int min, int max, int unit) {
+            super(name, min, max, " " + getString(unit));
+            word = word_;
+        }
+
+        USeekBarItem(int name, int word_, int min, int max, int unit, double k) {
+            super(name, min, max, " " + getString(unit), k);
+            word = word_;
+        }
+
+        @Override
+        String getValue() {
+            return getVal(word) + "";
+        }
+
+        @Override
+        void setValue(String value) {
+            setVal(word, Integer.parseInt(value));
+            setChanged();
+        }
+
+        @Override
+        boolean changed() {
+            return getVal(word) != getOldVal(word);
+        }
+
+    }
+
     class SeekBarItem extends SeekItem {
 
         int word;
@@ -244,7 +276,10 @@ public class DeviceFragment extends SettingsFragment {
 
         @Override
         String getValue() {
-            return getVal(word) + "";
+            int v = getVal(word);
+            if ((v & 128) != 0)
+                v -= 256;
+            return v + "";
         }
 
         @Override

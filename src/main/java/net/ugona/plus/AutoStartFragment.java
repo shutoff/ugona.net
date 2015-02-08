@@ -26,7 +26,7 @@ public class AutoStartFragment extends DeviceFragment {
     void fill() {
         items = new Vector<Item>();
         items.add(new ListItem(R.string.start_time, 20, R.array.start_timer));
-        items.add(new SeekBarItem(R.string.voltage_limit, 18, 60, 93, R.string.v, 0.13) {
+        items.add(new USeekBarItem(R.string.voltage_limit, 18, 60, 93, R.string.v, 0.13) {
             @Override
             String textValue(int progress) {
                 if (progress <= 0)

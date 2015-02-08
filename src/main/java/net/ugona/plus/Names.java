@@ -195,6 +195,8 @@ public final class Names {
 
         static final String AZ_MODE = "az_mode_";
         static final String FUEL = "fuel_";
+
+        static final String SIM = "simcard_";
     }
 
     public final class Notify {

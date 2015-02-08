@@ -26,7 +26,7 @@ public class HeaterFragment extends DeviceFragment {
         items = new Vector<Item>();
         items.add(new SettingsFragment.ListItem(R.string.connection, R.array.heater_values, R.array.heater, Names.Car.CAR_RELE, "1"));
         items.add(new CheckBoxItem(R.string.impulse, Names.Car.RELE_IMPULSE, true));
-        items.add(new SeekBarItem(R.string.heater_time, 13, 0, 255, R.string.minutes));
+        items.add(new USeekBarItem(R.string.heater_time, 13, 0, 255, R.string.minutes));
         items.add(new CheckBitItem(R.string.heater_start, 12, 2));
 
         TimerCommands cmd = new TimerCommands();

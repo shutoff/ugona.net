@@ -697,4 +697,15 @@
     <string name="az_temp">Temperature limit for autostart</string>
     <string name="temp_unit">°C</string>
     <string name="az_with_t">Autostart on temepature</string>
+    <string name="sim_card">SIM card for sent SMS</string>
+    <string-array name="sim_entries">
+        <item>Default</item>
+        <item>SIM1</item>
+        <item>SIM2</item>
+    </string-array>
+    <string-array name="sim_values">
+        <item></item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
 </resources>

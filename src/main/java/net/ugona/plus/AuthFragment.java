@@ -91,6 +91,10 @@ public class AuthFragment extends SettingsFragment {
                 });
             }
         });
+
+        if (State.hasTelephony(getActivity()) && State.isDualSim(getActivity()))
+            items.add(new ListItem(R.string.sim_card, R.array.sim_entries, R.array.sim_values, Names.Car.SIM, ""));
+
         if (!preferences.getBoolean(Names.Car.POINTER + car_id, false) && !State.isPandora(preferences, car_id)) {
             if (State.hasTelephony(getActivity())) {
                 items.add(new Item(R.string.main_phone, R.string.init_phone) {
