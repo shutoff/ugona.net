@@ -518,7 +518,6 @@ public class SmsMonitor extends BroadcastReceiver {
         @Override
         protected String doInBackground(String... params) {
             String cmd = params[0];
-            State.appendLog("exec: " + cmd);
             try {
                 Process proc = Runtime.getRuntime().exec(cmd);
                 InputStream stderr = proc.getErrorStream();
@@ -541,7 +540,6 @@ public class SmsMonitor extends BroadcastReceiver {
                     return answer;
                 }
             } catch (Exception ex) {
-                State.print(ex);
                 return ex.getLocalizedMessage();
             }
             return null;
