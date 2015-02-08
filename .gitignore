@@ -12,3 +12,4 @@ Thumbs.db
 /src/main/assets/leaflet.min.js
 /gradle/wrapper/*.jar
 /gradle/wrapper/*.properties
+manifest-merger-release-report.txt

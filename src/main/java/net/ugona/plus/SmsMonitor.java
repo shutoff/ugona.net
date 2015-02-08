@@ -6,19 +6,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.widget.Toast;
 
+import com.mediatek.telephony.SmsManagerEx;
+
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDateTime;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -129,45 +127,51 @@ public class SmsMonitor extends BroadcastReceiver {
             return false;
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String sim = preferences.getString(Names.Car.SIM + car_id, "");
-        if (!State.isDualSim(context))
-            sim = "";
+        int sim_id = 0;
+        if (State.isDualSim(context)) {
+            try {
+                sim_id = Integer.parseInt(preferences.getString(Names.Car.SIM + car_id, ""));
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
         String phoneNumber = preferences.getString(Names.Car.CAR_PHONE + car_id, "");
         String text = sms.text;
         if (pswd != null)
             text = pswd + " " + text;
-        if (sim.equals("")) {
-            Intent intent = new Intent(SMS_SENT);
-            intent.putExtra(Names.ID, car_id);
-            intent.putExtra(Names.ANSWER, sms.id);
-            PendingIntent sendPI = PendingIntent.getBroadcast(context, sms.id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            SmsManager smsManager = SmsManager.getDefault();
+
+        Intent intent = new Intent(SMS_SENT);
+        intent.putExtra(Names.ID, car_id);
+        intent.putExtra(Names.ANSWER, sms.id);
+        PendingIntent sendPI = PendingIntent.getBroadcast(context, sms.id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        if (sim_id > 0) {
             try {
-                smsManager.sendTextMessage(phoneNumber, null, text, sendPI, null);
+                SmsManagerEx smsManagerEx = SmsManagerEx.getDefault();
+                smsManagerEx.sendTextMessage(phoneNumber, null, text, sendPI, null, sim_id - 1);
                 Intent i = new Intent(SMS_SEND);
                 i.putExtra(Names.ID, car_id);
                 context.sendBroadcast(i);
+                send.put(sms.id, sms);
             } catch (Exception ex) {
-                Toast toast = Toast.makeText(context, ex.getLocalizedMessage(), Toast.LENGTH_LONG);
-                toast.show();
-                ex.printStackTrace();
-                return false;
+                // ignore
             }
+        }
+
+        try {
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(phoneNumber, null, text, sendPI, null);
+            Intent i = new Intent(SMS_SEND);
+            i.putExtra(Names.ID, car_id);
+            context.sendBroadcast(i);
             send.put(sms.id, sms);
             return true;
+        } catch (Exception ex) {
+            Toast toast = Toast.makeText(context, ex.getLocalizedMessage(), Toast.LENGTH_LONG);
+            toast.show();
+            ex.printStackTrace();
         }
-        String cmd = "service call isms";
-        if (!sim.equals("1"))
-            cmd += sim;
-        cmd += " 5 s16 \"";
-        cmd += phoneNumber.replaceAll("[ \\-]", "");
-        cmd += "\" i32 0 i32 0 s16 \"";
-        cmd += text;
-        cmd += "\"";
-        SmsTask task = new SmsTask(context, sms, car_id);
-        task.execute(cmd);
-        send.put(sms.id, sms);
-        return true;
+        return false;
     }
 
     static boolean cancelSMS(Context context, String car_id, int id) {
@@ -500,87 +504,6 @@ public class SmsMonitor extends BroadcastReceiver {
                 i.setAction(FetchService.ACTION_UPDATE);
                 context.startService(i);
             }
-        }
-    }
-
-    static class SmsTask extends AsyncTask<String, Void, String> {
-
-        Context context;
-        Sms sms_;
-        String car_id;
-
-        SmsTask(Context context_, Sms sms, String id) {
-            context = context_;
-            sms_ = sms;
-            car_id = id;
-        }
-
-        @Override
-        protected String doInBackground(String... params) {
-            String cmd = params[0];
-            try {
-                Process proc = Runtime.getRuntime().exec(cmd);
-                InputStream stderr = proc.getErrorStream();
-                InputStreamReader osr = new InputStreamReader(stderr);
-                BufferedReader obr = new BufferedReader(osr);
-                String answer = null;
-                String line;
-                while ((line = obr.readLine()) != null) {
-                    if (answer != null) {
-                        answer += "\n";
-                        answer += line;
-                        continue;
-                    }
-                    answer = line;
-                }
-                int exit_code = proc.waitFor();
-                if (exit_code != 0) {
-                    if (answer == null)
-                        answer = "Exit code: " + exit_code;
-                    return answer;
-                }
-            } catch (Exception ex) {
-                return ex.getLocalizedMessage();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            if (processed == null)
-                return;
-            SmsQueues queues = processed.get(car_id);
-            if (queues == null)
-                return;
-            Sms sms = queues.send.get(sms_.id);
-            if (sms == null)
-                return;
-            queues.send.remove(sms_.id);
-            if (s != null) {
-                showNotification(context, s, car_id);
-                Intent i = new Intent(SMS_ANSWER);
-                i.putExtra(Names.ANSWER, 1);
-                i.putExtra(Names.ID, car_id);
-                context.sendBroadcast(i);
-                return;
-            }
-            if (sms.answer == null) {
-                sms.process_answer(context, car_id, null);
-                Intent i = new Intent(SMS_ANSWER);
-                i.putExtra(Names.ANSWER, Activity.RESULT_OK);
-                i.putExtra(Names.ID, car_id);
-                context.sendBroadcast(i);
-                return;
-            }
-            if (queues.wait == null)
-                queues.wait = new SmsQueue();
-            queues.wait.put(sms.id, sms);
-            Intent i = new Intent(context, FetchService.class);
-            i.putExtra(Names.ID, car_id);
-            context.startService(i);
-            Toast toast = Toast.makeText(context, context.getString(R.string.sms_sent), Toast.LENGTH_SHORT);
-            toast.show();
-
         }
     }
 
