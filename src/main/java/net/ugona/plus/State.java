@@ -3,11 +3,19 @@ package net.ugona.plus;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Environment;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.seppius.i18n.plurals.PluralResources;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -34,45 +42,43 @@ public class State {
     static Pattern balancePat2 = Pattern.compile("balans: ?(-[0-9]+([\\.,][0-9][0-9])?)");
     static Pattern balancePat3 = Pattern.compile("-?[0-9]+[\\.,][0-9][0-9]");
     static Pattern balancePat4 = Pattern.compile("(-?[0-9]+) ?R(\\. ?([0-9][0-9]))?");
+    static int dual_sim = -1;
 
-    /*
-        static public void appendLog(String text) {
-            Log.v("v", text);
+    static public void appendLog(String text) {
+        Log.v("v", text);
 
-            File logFile = Environment.getExternalStorageDirectory();
-            logFile = new File(logFile, "car.log");
-            if (!logFile.exists()) {
-                try {
-                    if (!logFile.createNewFile())
-                        return;
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
+        File logFile = Environment.getExternalStorageDirectory();
+        logFile = new File(logFile, "car.log");
+        if (!logFile.exists()) {
             try {
-                //BufferedWriter for performance, true to set append to file flag
-                BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
-                Date d = new Date();
-                buf.append(d.toLocaleString());
-                buf.append(" ");
-                buf.append(text);
-                buf.newLine();
-                buf.close();
+                if (!logFile.createNewFile())
+                    return;
             } catch (IOException e) {
                 // ignore
             }
         }
-
-        static public void print(Throwable ex) {
-            ex.printStackTrace();
-            appendLog("Error: " + ex.toString());
-            StringWriter sw = new StringWriter();
-            ex.printStackTrace(new PrintWriter(sw));
-            String s = sw.toString();
-            appendLog(s);
+        try {
+            //BufferedWriter for performance, true to set append to file flag
+            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            Date d = new Date();
+            buf.append(d.toLocaleString());
+            buf.append(" ");
+            buf.append(text);
+            buf.newLine();
+            buf.close();
+        } catch (IOException e) {
+            // ignore
         }
-    */
-    static int dual_sim = -1;
+    }
+
+    static public void print(Throwable ex) {
+        ex.printStackTrace();
+        appendLog("Error: " + ex.toString());
+        StringWriter sw = new StringWriter();
+        ex.printStackTrace(new PrintWriter(sw));
+        String s = sw.toString();
+        appendLog(s);
+    }
 
     static String getPlural(Context context, int id, int n) {
         if (android.os.Build.VERSION.SDK_INT < 11) {
@@ -109,7 +115,7 @@ public class State {
 
     static boolean isDualSim(Context context) {
         TelephonyInfo info = TelephonyInfo.getInstance(context);
-        return info.isSIM1Ready() && info.isSIM2Ready();
+        return info.isSIM1Ready(context) && info.isSIM2Ready(context);
     }
 
     static String formatBalance(double d) {
@@ -231,154 +237,92 @@ public class State {
     static public final class TelephonyInfo {
 
         private static TelephonyInfo telephonyInfo;
-        private String imeiSIM1;
-        private String imeiSIM2;
-        private boolean isSIM1Ready;
-        private boolean isSIM2Ready;
+        Object msim;
+        Method msim_getState;
 
         private TelephonyInfo() {
+            try {
+                Class msim_class = Class.forName("android.telephony.MSimTelephonyManager");
+                Method msim_default = msim_class.getDeclaredMethod("getDefault", new Class[0]);
+                msim = msim_default.invoke(null, new Object[0]);
+                Class aclass[] = new Class[1];
+                aclass[0] = Integer.TYPE;
+                msim_getState = msim_class.getDeclaredMethod("getSimState", aclass);
+            } catch (Exception ex) {
+                // ignore
+            }
         }
 
         public static TelephonyInfo getInstance(Context context) {
 
             if (telephonyInfo == null) {
-
                 telephonyInfo = new TelephonyInfo();
-
                 TelephonyManager telephonyManager = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
-
-                telephonyInfo.imeiSIM1 = telephonyManager.getDeviceId();
-                ;
-                telephonyInfo.imeiSIM2 = null;
-
-                try {
-                    telephonyInfo.imeiSIM1 = getDeviceIdBySlot(context, "getDeviceIdGemini", 0);
-                    telephonyInfo.imeiSIM2 = getDeviceIdBySlot(context, "getDeviceIdGemini", 1);
-                } catch (GeminiMethodNotFoundException e) {
-                    e.printStackTrace();
-
-                    try {
-                        telephonyInfo.imeiSIM1 = getDeviceIdBySlot(context, "getDeviceId", 0);
-                        telephonyInfo.imeiSIM2 = getDeviceIdBySlot(context, "getDeviceId", 1);
-                    } catch (GeminiMethodNotFoundException e1) {
-                        //Call here for next manufacturer's predicted method name if you wish
-                        e1.printStackTrace();
-                    }
-                }
-
-                telephonyInfo.isSIM1Ready = telephonyManager.getSimState() == TelephonyManager.SIM_STATE_READY;
-                telephonyInfo.isSIM2Ready = false;
-
-                try {
-                    telephonyInfo.isSIM1Ready = getSIMStateBySlot(context, "getSimStateGemini", 0);
-                    telephonyInfo.isSIM2Ready = getSIMStateBySlot(context, "getSimStateGemini", 1);
-                } catch (GeminiMethodNotFoundException e) {
-
-                    e.printStackTrace();
-
-                    try {
-                        telephonyInfo.isSIM1Ready = getSIMStateBySlot(context, "getSimState", 0);
-                        telephonyInfo.isSIM2Ready = getSIMStateBySlot(context, "getSimState", 1);
-                    } catch (GeminiMethodNotFoundException e1) {
-                        //Call here for next manufacturer's predicted method name if you wish
-                        e1.printStackTrace();
-                    }
-                }
             }
-
             return telephonyInfo;
         }
 
-        private static String getDeviceIdBySlot(Context context, String predictedMethodName, int slotID) throws GeminiMethodNotFoundException {
+        private boolean getSIMStateBySlot(Context context, String predictedMethodName, int slotID) throws Exception {
 
-            String imei = null;
+            if ((msim != null) && (msim_getState != null)) {
+                try {
+                    Object aobj[] = new Object[1];
+                    aobj[0] = Integer.valueOf(slotID);
+                    return ((Integer) msim_getState.invoke(msim, aobj)).intValue() == TelephonyManager.SIM_STATE_READY;
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
 
             TelephonyManager telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            Class<?> telephonyClass = Class.forName(telephony.getClass().getName());
 
+            Class<?>[] parameter = new Class[1];
+            parameter[0] = int.class;
+            Method getSimStateGemini = telephonyClass.getMethod(predictedMethodName, parameter);
+
+            Object[] obParameter = new Object[1];
+            obParameter[0] = slotID;
+            Object ob_phone = getSimStateGemini.invoke(telephony, obParameter);
+
+            if (ob_phone == null)
+                return false;
+
+            State.appendLog("State OK " + slotID + " " + predictedMethodName);
+            int simState = Integer.parseInt(ob_phone.toString());
+            return (simState == TelephonyManager.SIM_STATE_READY);
+        }
+
+        public boolean isSIM1Ready(Context context) {
             try {
-
-                Class<?> telephonyClass = Class.forName(telephony.getClass().getName());
-
-                Class<?>[] parameter = new Class[1];
-                parameter[0] = int.class;
-                Method getSimID = telephonyClass.getMethod(predictedMethodName, parameter);
-
-                Object[] obParameter = new Object[1];
-                obParameter[0] = slotID;
-                Object ob_phone = getSimID.invoke(telephony, obParameter);
-
-                if (ob_phone != null) {
-                    imei = ob_phone.toString();
-
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new GeminiMethodNotFoundException(predictedMethodName);
+                return getSIMStateBySlot(context, "getSimStateGemini", 0);
+            } catch (Exception ex) {
+                // ignore
             }
-
-            return imei;
-        }
-
-        private static boolean getSIMStateBySlot(Context context, String predictedMethodName, int slotID) throws GeminiMethodNotFoundException {
-
-            boolean isReady = false;
-
-            TelephonyManager telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-
             try {
-
-                Class<?> telephonyClass = Class.forName(telephony.getClass().getName());
-
-                Class<?>[] parameter = new Class[1];
-                parameter[0] = int.class;
-                Method getSimStateGemini = telephonyClass.getMethod(predictedMethodName, parameter);
-
-                Object[] obParameter = new Object[1];
-                obParameter[0] = slotID;
-                Object ob_phone = getSimStateGemini.invoke(telephony, obParameter);
-
-                if (ob_phone != null) {
-                    int simState = Integer.parseInt(ob_phone.toString());
-                    if (simState == TelephonyManager.SIM_STATE_READY) {
-                        isReady = true;
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new GeminiMethodNotFoundException(predictedMethodName);
+                return getSIMStateBySlot(context, "getSimState", 0);
+            } catch (Exception ex) {
+                // ignore
             }
 
-            return isReady;
+            TelephonyManager telephonyManager = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
+            return telephonyManager.getSimState() == TelephonyManager.SIM_STATE_READY;
         }
 
-        public String getImeiSIM1() {
-            return imeiSIM1;
-        }
-
-        public String getImeiSIM2() {
-            return imeiSIM2;
-        }
-
-        public boolean isSIM1Ready() {
-            return isSIM1Ready;
-        }
-
-        public boolean isSIM2Ready() {
-            return isSIM2Ready;
-        }
-
-        public boolean isDualSIM() {
-            return imeiSIM2 != null;
-        }
-
-        private static class GeminiMethodNotFoundException extends Exception {
-
-            private static final long serialVersionUID = -996812356902545308L;
-
-            public GeminiMethodNotFoundException(String info) {
-                super(info);
+        public boolean isSIM2Ready(Context context) {
+            try {
+                return getSIMStateBySlot(context, "getSimStateGemini", 1);
+            } catch (Exception ex) {
+                // ignore
             }
+            try {
+                return getSIMStateBySlot(context, "getSimState", 1);
+            } catch (Exception ex) {
+                // ignore
+            }
+            return false;
         }
+
     }
 
 }

@@ -19,9 +19,13 @@ public class About extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.about);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        try {
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        } catch (Exception ex) {
+            // ignore
+        }
 
         TextView tvVersion = (TextView) findViewById(R.id.version);
         try {

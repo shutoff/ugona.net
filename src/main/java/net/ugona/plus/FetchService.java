@@ -111,9 +111,9 @@ public class FetchService extends Service {
                 if (action.equals(ACTION_UPDATE) && (car_id == null)) {
                     Cars.Car[] cars = Cars.getCars(this);
                     for (Cars.Car car : cars) {
-                        new StatusRequest(Preferences.getCar(preferences, car.id));
+                        new StatusRequest(Preferences.getCar(preferences, car.id), false);
                         for (String p : car.pointers) {
-                            new StatusRequest(p);
+                            new StatusRequest(p, false);
                         }
                     }
                 }
@@ -140,7 +140,7 @@ public class FetchService extends Service {
                 }
             }
             if (car_id != null)
-                new StatusRequest(Preferences.getCar(preferences, car_id));
+                new StatusRequest(Preferences.getCar(preferences, car_id), intent.getExtras().containsKey(Names.Car.OFFLINE));
         }
         if (startRequest())
             return START_STICKY;
@@ -383,7 +383,7 @@ public class FetchService extends Service {
                             synchronized (requests) {
                                 requests.remove(key);
                             }
-                            new StatusRequest(car_id);
+                            new StatusRequest(car_id, false);
                             long timeout = (error_text != null) ? REPEAT_AFTER_500 : REPEAT_AFTER_ERROR;
                             alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + timeout, timeout, piTimer);
                             sendError(error_text, car_id);
@@ -396,7 +396,7 @@ public class FetchService extends Service {
             synchronized (requests) {
                 requests.remove(key);
             }
-            new StatusRequest(car_id);
+            new StatusRequest(car_id, false);
             long timeout = (error_text != null) ? REPEAT_AFTER_500 : REPEAT_AFTER_ERROR;
             alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + timeout, timeout, piTimer);
             sendError(error_text, car_id);
@@ -564,9 +564,11 @@ public class FetchService extends Service {
 
         SharedPreferences.Editor ed;
         int msg_id;
+        boolean connect;
 
-        StatusRequest(String id) {
+        StatusRequest(String id, boolean refresh) {
             super("S", id);
+            connect = refresh;
         }
 
         @Override
@@ -1151,7 +1153,10 @@ public class FetchService extends Service {
         @Override
         void exec(String api_key) {
             sendUpdate(ACTION_START, car_id);
-            execute(URL_STATUS, api_key, preferences.getLong(Names.Car.EVENT_TIME + car_id, 0));
+            String refresh = null;
+            if (connect)
+                refresh = "1";
+            execute(URL_STATUS, api_key, preferences.getLong(Names.Car.EVENT_TIME + car_id, 0), "connect", refresh);
         }
 
         void setDoor(String id, JsonObject contact, String key) throws ParseException {

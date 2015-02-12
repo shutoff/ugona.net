@@ -6,6 +6,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
@@ -156,6 +159,16 @@ public class SmsMonitor extends BroadcastReceiver {
         intent.putExtra(Names.ANSWER, sms.id);
         PendingIntent sendPI = PendingIntent.getBroadcast(context, sms.id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+        String ver = "";
+        try {
+            PackageManager pkgManager = context.getPackageManager();
+            PackageInfo info = pkgManager.getPackageInfo("net.ugona.plus", 0);
+            ver = info.versionName;
+        } catch (Exception ex) {
+            // ignore
+        }
+
+        State.appendLog(sim_id + ": " + Build.MANUFACTURER + " " + Build.MODEL + " " + Build.VERSION.RELEASE + " " + ver);
         if (sim_id > 0) {
             try {
                 // MediaTek
@@ -165,81 +178,84 @@ public class SmsMonitor extends BroadcastReceiver {
                 i.putExtra(Names.ID, car_id);
                 context.sendBroadcast(i);
                 send.put(sms.id, sms);
+                State.appendLog("MediaTek OK");
                 return true;
             } catch (Exception ex) {
                 // ignore
             }
 
             try {
-                // GalaxyNote2
-                SmsManager smsManager = SmsManager.getDefault();
-                try {
-                    Class aclass1[] = new Class[11];
-                    aclass1[0] = String.class;
-                    aclass1[1] = String.class;
-                    aclass1[2] = ArrayList.class;
-                    aclass1[3] = ArrayList.class;
-                    aclass1[4] = ArrayList.class;
-                    aclass1[5] = Boolean.TYPE;
-                    aclass1[6] = Integer.TYPE;
-                    aclass1[7] = Integer.TYPE;
-                    aclass1[8] = Integer.TYPE;
-                    aclass1[9] = Integer.TYPE;
-                    aclass1[10] = Boolean.TYPE;
-                    Method sendMultipartTextMessage = SmsManager.class.getMethod("sendMultipartTextMessage", aclass1);
-                    ArrayList<PendingIntent> pis = new ArrayList<PendingIntent>();
-                    pis.add(sendPI);
-                    Object aobj1[] = new Object[11];
-                    aobj1[0] = phoneNumber;
-                    aobj1[2] = smsManager.divideMessage(text);
-                    aobj1[3] = pis;
-                    aobj1[4] = null;
-                    aobj1[5] = Boolean.valueOf(false);
-                    aobj1[6] = Integer.valueOf(255);
-                    aobj1[7] = Integer.valueOf(0);
-                    aobj1[8] = Integer.valueOf(2);
-                    aobj1[9] = Integer.valueOf(sim_id - 1);
-                    aobj1[10] = Boolean.valueOf(true);
-                    sendMultipartTextMessage.invoke(smsManager, aobj1);
-                    Intent i = new Intent(SMS_SEND);
-                    i.putExtra(Names.ID, car_id);
-                    context.sendBroadcast(i);
-                    send.put(sms.id, sms);
-                    return true;
-                } catch (Exception ex) {
-                    // ignore
-                }
-
-                try {
-                    Class[] aclass = new Class[6];
-                    aclass[0] = String.class;
-                    aclass[1] = String.class;
-                    aclass[2] = ArrayList.class;
-                    aclass[3] = ArrayList.class;
-                    aclass[4] = ArrayList.class;
-                    aclass[5] = Integer.TYPE;
-                    Method sendMultipartTextMessage = SmsManager.class.getMethod("sendMultipartTextMessage", aclass);
-                    ArrayList<PendingIntent> pis = new ArrayList<PendingIntent>();
-                    pis.add(sendPI);
-                    Object aobj[] = new Object[6];
-                    aobj[0] = phoneNumber;
-                    aobj[1] = null;
-                    aobj[2] = smsManager.divideMessage(text);
-                    aobj[3] = pis;
-                    aobj[4] = null;
-                    aobj[5] = Integer.valueOf(sim_id - 1);
-                    sendMultipartTextMessage.invoke(smsManager, aobj);
-                    Intent i = new Intent(SMS_SEND);
-                    i.putExtra(Names.ID, car_id);
-                    context.sendBroadcast(i);
-                    send.put(sms.id, sms);
-                    return true;
-                } catch (Exception ex) {
-                    // ignore
-                }
-
+                Class msm = ClassLoader.getSystemClassLoader().loadClass("android.telephony.MultiSimSmsManager");
+                Class[] aclass = new Class[1];
+                aclass[0] = Integer.TYPE;
+                Method sms_get_default = msm.getMethod("getDefault", aclass);
+                Object[] aobj = new Object[1];
+                aobj[0] = Integer.valueOf(sim_id - 1);
+                SmsManager smsManager = (SmsManager) sms_get_default.invoke(null, aobj);
+                ArrayList<PendingIntent> pis = new ArrayList<PendingIntent>();
+                pis.add(sendPI);
+                smsManager.sendMultipartTextMessage(phoneNumber, null, smsManager.divideMessage(text), pis, null);
+                Intent i = new Intent(SMS_SEND);
+                i.putExtra(Names.ID, car_id);
+                context.sendBroadcast(i);
+                send.put(sms.id, sms);
+                State.appendLog("GrandDuos OK");
+                return true;
             } catch (Exception ex) {
                 // ignore
+            }
+
+            try {
+                Class msm = ClassLoader.getSystemClassLoader().loadClass("com.samsung.android.telephony.MultiSimManager");
+                Class[] aclass = new Class[1];
+                aclass[0] = Integer.TYPE;
+                Method msm_phone_id = msm.getMethod("getMultiSimPhoneId", aclass);
+                Object[] aobj = new Object[1];
+                aobj[0] = Integer.valueOf(sim_id - 1);
+                int phone_id = (Integer) msm_phone_id.invoke(null, aobj);
+                State.appendLog("phone_id=" + phone_id);
+                Method msm_sub_id = msm.getMethod("getSubId", aclass);
+                long sub_id = ((long[]) msm_sub_id.invoke(null, aobj))[0];
+                State.appendLog("state_id=" + sub_id);
+                aclass = new Class[2];
+                aclass[1] = Integer.TYPE;
+                aclass[2] = Long.TYPE;
+                Method msm_set_id = msm.getMethod("setDefaultSubId", aclass);
+                msm_set_id.invoke(null, 2, msm_set_id);
+                State.appendLog("Set ID OK");
+
+                SmsManager smsManager = SmsManager.getDefault();
+                ArrayList<PendingIntent> pis = new ArrayList<PendingIntent>();
+                pis.add(sendPI);
+
+                Class aclass2[] = new Class[9];
+                aclass2[0] = String.class;
+                aclass2[1] = String.class;
+                aclass2[2] = ArrayList.class;
+                aclass2[3] = ArrayList.class;
+                aclass2[4] = ArrayList.class;
+                aclass2[5] = Boolean.TYPE;
+                aclass2[6] = Integer.TYPE;
+                aclass2[7] = Integer.TYPE;
+                aclass2[8] = Integer.TYPE;
+                Class sms_class = Class.forName("android.telephony.SmsManager");
+                Method send_sms = sms_class.getMethod("sendMultipartTextMessage", aclass2);
+                aobj = new Object[9];
+                aobj[0] = phoneNumber;
+                aobj[1] = null;
+                aobj[2] = smsManager.divideMessage(text);
+                aobj[3] = pis;
+                aobj[4] = null;
+                aobj[5] = Boolean.valueOf(true);
+                aobj[6] = Integer.valueOf(0);
+                aobj[7] = Integer.valueOf(0);
+                aobj[8] = Integer.valueOf(0);
+                send_sms.invoke(smsManager, aobj);
+
+                State.appendLog("getSmsManagerForSubscriber OK");
+                return true;
+            } catch (Exception ex) {
+                State.print(ex);
             }
 
             try {
@@ -261,10 +277,12 @@ public class SmsMonitor extends BroadcastReceiver {
                 i.putExtra(Names.ID, car_id);
                 context.sendBroadcast(i);
                 send.put(sms.id, sms);
+                State.appendLog("Galaxy Duos OK");
                 return true;
             } catch (Exception ex) {
                 // ignore
             }
+            State.appendLog("Sent default " + sim_id);
         }
 
         try {
