@@ -221,7 +221,10 @@ public class SmsMonitor extends BroadcastReceiver {
                 aclass[1] = Integer.TYPE;
                 aclass[2] = Long.TYPE;
                 Method msm_set_id = msm.getMethod("setDefaultSubId", aclass);
-                msm_set_id.invoke(null, 2, msm_set_id);
+                aobj = new Object[2];
+                aobj[0] = Integer.valueOf(2);
+                aobj[1] = Long.valueOf(sub_id);
+                msm_set_id.invoke(null, aobj);
                 State.appendLog("Set ID OK");
 
                 SmsManager smsManager = SmsManager.getDefault();
