@@ -36,6 +36,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
 
@@ -46,205 +47,11 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 public class EventsFragment extends Fragment
         implements MainActivity.DateChangeListener, OnRefreshListener {
 
-    final static String URL_EVENTS = "/events?skey=$1&begin=$2&end=$3&first=$4&pointer=$5&auth=$6";
+    final static String URL_EVENTS = "/events?skey=$1&begin=$2&end=$3&first=$4&pointer=$5&auth=$6&lang=$7";
     final static String URL_EVENT = "/event?skey=$1&id=$2&time=$3";
     static final String FILTER = "filter";
     static final String DATE = "events_date";
     static final String EVENTS_DATA = "events";
-    static EventType[] event_types = {
-            new EventType(1, R.string.light_shock, R.drawable.e_light_shock, 0),
-            new EventType(2, R.string.ext_zone, R.drawable.e_exit_zone, 0),
-            new EventType(3, R.string.heavy_shock, R.drawable.e_heavy_shock, 0),
-            new EventType(4, R.string.inner_zone, R.drawable.e_inner_zone, 0),
-            new EventType(5, R.string.trunk_open, R.drawable.e_boot_open, 2),
-            new EventType(6, R.string.hood_open, R.drawable.e_hood_open, 2),
-            new EventType(7, R.string.door_open, R.drawable.e_doors_open, 2),
-            new EventType(8, R.string.tilt, R.drawable.e_tilt, 0),
-            new EventType(9, R.string.ignition_on, R.drawable.e_ignition_on, 2),
-            new EventType(10, R.string.access_on, R.drawable.e_access_on, 2),
-            new EventType(11, R.string.input1_on, R.drawable.e_input1_on, 2),
-            new EventType(12, R.string.input2_on, R.drawable.e_input2_on, 2),
-            new EventType(13, R.string.input3_on, R.drawable.e_input3_on, 2),
-            new EventType(14, R.string.input4_on, R.drawable.e_input4_on, 2),
-            new EventType(15, R.string.trunk_close, R.drawable.e_boot_close, 2),
-            new EventType(16, R.string.hood_close, R.drawable.e_hood_close, 2),
-            new EventType(17, R.string.door_close, R.drawable.e_doors_close, 2),
-            new EventType(18, R.string.ignition_off, R.drawable.e_ignition_off, 2),
-            new EventType(19, R.string.access_off, R.drawable.e_access_off, 2),
-            new EventType(20, R.string.input1_off, R.drawable.e_input1_off, 2),
-            new EventType(21, R.string.input2_off, R.drawable.e_input2_off, 2),
-            new EventType(22, R.string.input3_off, R.drawable.e_input3_off, 2),
-            new EventType(23, R.string.input4_off, R.drawable.e_input4_off, 2),
-            new EventType(24, R.string.guard_on, R.drawable.e_guard_on, 1),
-            new EventType(25, R.string.guard_off, R.drawable.e_guard_off, 1),
-            new EventType(26, R.string.reset, R.drawable.e_reset),
-            new EventType(27, R.string.main_power_on, R.drawable.e_main_power_off, 0),
-            new EventType(28, R.string.main_power_off, R.drawable.e_main_power_off, 0),
-            new EventType(29, R.string.reserve_power_on, R.drawable.e_reserve_power_off, 0),
-            new EventType(30, R.string.reserve_power_off, R.drawable.e_reserve_power_off, 0),
-            new EventType(31, R.string.gsm_recover, R.drawable.e_gsm_recover),
-            new EventType(32, R.string.gsm_fail, R.drawable.e_gsm_fail),
-            new EventType(33, R.string.gsm_new, R.drawable.e_gsm_recover),
-            new EventType(34, R.string.gps_recover, R.drawable.e_gps_recover),
-            new EventType(35, R.string.gps_fail, R.drawable.e_gps_fail),
-            new EventType(37, R.string.trace_start, R.drawable.e_trace_start),
-            new EventType(38, R.string.trace_stop, R.drawable.e_trace_stop),
-            new EventType(39, R.string.trace_point, R.drawable.e_trace_start),
-            new EventType(41, R.string.timer_event, R.drawable.e_timer),
-            new EventType(42, R.string.user_call, R.drawable.e_user_call, 1),
-            new EventType(43, R.string.rogue, R.drawable.e_rogue, 0),
-            new EventType(44, R.string.rogue_off, R.drawable.e_rogue, 0),
-            new EventType(45, R.string.motor_start_azd, R.drawable.e_motor_start, 1),
-            new EventType(46, R.string.motor_start, R.drawable.e_motor_start, 1),
-            new EventType(47, R.string.motor_stop, R.drawable.e_motor_stop, 1),
-            new EventType(48, R.string.motor_start_error, R.drawable.e_motor_error, 1),
-            new EventType(49, R.string.alarm_boot, R.drawable.e_alarm_boot, 0),
-            new EventType(50, R.string.alarm_hood, R.drawable.e_alarm_hood, 0),
-            new EventType(51, R.string.alarm_door, R.drawable.e_alarm_door, 0),
-            new EventType(52, R.string.ignition_lock, R.drawable.e_ignition_on, 0),
-            new EventType(53, R.string.alarm_accessories, R.drawable.e_alarm_accessories, 0),
-            new EventType(54, R.string.alarm_input1, R.drawable.e_alarm_input1, 0),
-            new EventType(55, R.string.alarm_input2, R.drawable.e_alarm_input2, 0),
-            new EventType(56, R.string.alarm_input3, R.drawable.e_alarm_input3, 0),
-            new EventType(57, R.string.alarm_input4, R.drawable.e_alarm_input4, 0),
-            new EventType(58, R.string.sms_request, R.drawable.e_user_sms, 1),
-            new EventType(59, R.string.reset_modem, R.drawable.e_reset_modem),
-            new EventType(60, R.string.gprs_on, R.drawable.e_gprs_on),
-            new EventType(61, R.string.gprs_off, R.drawable.e_gprs_off),
-            new EventType(65, R.string.reset, R.drawable.e_reset),
-            new EventType(66, R.string.gsm_register_fail, R.drawable.e_gsm_fail),
-            new EventType(68, R.string.net_error, R.drawable.e_system),
-            new EventType(71, R.string.sms_err, R.drawable.e_user_sms),
-            new EventType(72, R.string.net_error, R.drawable.e_system),
-            new EventType(74, R.string.error_read, R.drawable.e_system),
-            new EventType(75, R.string.net_error, R.drawable.e_network_error),
-            new EventType(76, R.string.reset_modem, R.drawable.e_reset_modem),
-            new EventType(77, R.string.reset_modem, R.drawable.e_reset_modem),
-            new EventType(78, R.string.reset_modem, R.drawable.e_reset_modem),
-            new EventType(79, R.string.reset_modem, R.drawable.e_reset_modem),
-            new EventType(80, R.string.reset_modem, R.drawable.e_reset_modem),
-            new EventType(85, R.string.sos, R.drawable.e_sos, 0),
-            new EventType(86, R.string.zone_in, R.drawable.e_zone_in, 1),
-            new EventType(87, R.string.zone_out, R.drawable.e_zone_out, 1),
-            new EventType(88, R.string.incomming_sms, R.drawable.e_user_sms, 1),
-            new EventType(89, R.string.request_photo, R.drawable.e_request_photo, 1),
-            new EventType(90, R.string.till_start, R.drawable.e_till_start),
-            new EventType(91, R.string.end_move, R.drawable.e_system),
-            new EventType(94, R.string.temp_change, R.drawable.e_temperature),
-            new EventType(98, R.string.data_transfer, R.drawable.e_transfer),
-            new EventType(100, R.string.reset, R.drawable.e_reset),
-            new EventType(101, R.string.reset, R.drawable.e_reset),
-            new EventType(105, R.string.reset_modem, R.drawable.e_reset_modem),
-            new EventType(106, R.string.reset_modem, R.drawable.e_reset_modem),
-            new EventType(107, R.string.reset_modem, R.drawable.e_reset_modem),
-            new EventType(108, R.string.reset_modem, R.drawable.e_reset_modem),
-            new EventType(110, R.string.valet_off, R.drawable.e_valet_off, 1),
-            new EventType(111, R.string.lock_off1, R.drawable.e_lockclose1, 1),
-            new EventType(112, R.string.lock_off2, R.drawable.e_lockclose2, 1),
-            new EventType(113, R.string.lock_off3, R.drawable.e_lockclose3, 1),
-            new EventType(114, R.string.lock_off4, R.drawable.e_lockclose4, 1),
-            new EventType(115, R.string.lock_off5, R.drawable.e_lockclose5, 1),
-            new EventType(-116, R.string.lan_change, R.drawable.e_lan, 0),
-            new EventType(120, R.string.valet_on, R.drawable.e_valet_on, 1),
-            new EventType(121, R.string.lock_on1, R.drawable.e_lockopen1, 1),
-            new EventType(122, R.string.lock_on2, R.drawable.e_lockopen2, 1),
-            new EventType(123, R.string.lock_on3, R.drawable.e_lockopen3, 1),
-            new EventType(124, R.string.lock_on4, R.drawable.e_lockopen4, 1),
-            new EventType(125, R.string.lock_on5, R.drawable.e_lockopen5, 1),
-            new EventType(127, R.string.brk_data, R.drawable.e_brk),
-            new EventType(128, R.string.input5_on, R.drawable.e_input5_on, 2),
-            new EventType(129, R.string.input5_off, R.drawable.e_input5_off, 2),
-            new EventType(130, R.string.voice, R.drawable.e_voice),
-            new EventType(131, R.string.download_events, R.drawable.e_settings, 1),
-            new EventType(132, R.string.can_on, R.drawable.e_can, 1),
-            new EventType(133, R.string.can_off, R.drawable.e_can, 1),
-            new EventType(134, R.string.input6_on, R.drawable.e_input6_on, 2),
-            new EventType(135, R.string.input6_off, R.drawable.e_input6_off, 2),
-            new EventType(136, R.string.low_battery, R.drawable.e_low, 0),
-            new EventType(137, R.string.download_settings, R.drawable.e_settings),
-            new EventType(138, R.string.guard2_on, R.drawable.e_guard_on, 1),
-            new EventType(139, R.string.guard2_off, R.drawable.e_guard_off, 1),
-            new EventType(140, R.string.lan_change, R.drawable.e_lan, 0),
-            new EventType(141, R.string.command, R.drawable.e_command, 1),
-            new EventType(142, R.string.brake, R.drawable.e_brake, 2),
-            new EventType(145, R.string.brake_on, R.drawable.e_brake, 2),
-            new EventType(146, R.string.brake_off, R.drawable.e_brake, 2),
-            new EventType(293, R.string.sos, R.drawable.e_sos, 0),
-            new EventType(10101, R.string.e0101, R.drawable.e_guard_on, 1),
-            new EventType(10102, R.string.e0102, R.drawable.e_guard_on, 1),
-            new EventType(10103, R.string.e0103, R.drawable.e_guard_on, 1),
-            new EventType(10104, R.string.e0104, R.drawable.e_guard_on, 1),
-            new EventType(10105, R.string.e0105, R.drawable.e_guard_on, 1),
-            new EventType(10106, R.string.e0106, R.drawable.e_guard_on, 1),
-            new EventType(10107, R.string.e0107, R.drawable.e_guard_on, 1),
-            new EventType(10201, R.string.e0201, R.drawable.e_guard_off, 1),
-            new EventType(10202, R.string.e0202, R.drawable.e_guard_off, 1),
-            new EventType(10203, R.string.e0203, R.drawable.e_guard_off, 1),
-            new EventType(10204, R.string.e0204, R.drawable.e_guard_off, 1),
-            new EventType(10205, R.string.e0205, R.drawable.e_guard_off, 1),
-            new EventType(10206, R.string.e0206, R.drawable.e_guard_off, 1),
-            new EventType(10301, R.string.e0301, R.drawable.e_alarm_accessories, 0),
-            new EventType(10302, R.string.e0302, R.drawable.e_alarm_accessories, 0),
-            new EventType(10303, R.string.e0303, R.drawable.e_alarm_accessories, 0),
-            new EventType(10304, R.string.e0304, R.drawable.e_light_shock, 0),
-            new EventType(10305, R.string.e0305, R.drawable.e_heavy_shock, 0),
-            new EventType(10306, R.string.e0306, R.drawable.e_brake, 0),
-            new EventType(10307, R.string.e0307, R.drawable.e_alarm_accessories, 0),
-            new EventType(10308, R.string.e0308, R.drawable.e_alarm_accessories, 0),
-            new EventType(10309, R.string.e0309, R.drawable.e_alarm_accessories, 0),
-            new EventType(10310, R.string.e0310, R.drawable.e_alarm_accessories, 0),
-            new EventType(10311, R.string.e0311, R.drawable.e_alarm_boot, 0),
-            new EventType(10312, R.string.e0312, R.drawable.e_alarm_door, 0),
-            new EventType(10313, R.string.e0313, R.drawable.e_alarm_door, 0),
-            new EventType(10314, R.string.e0314, R.drawable.e_alarm_door, 0),
-            new EventType(10315, R.string.e0315, R.drawable.e_alarm_door, 0),
-            new EventType(10316, R.string.e0316, R.drawable.e_alarm_hood, 0),
-            new EventType(10401, R.string.e0401, R.drawable.e_motor_start, 1),
-            new EventType(10402, R.string.e0402, R.drawable.e_motor_start, 1),
-            new EventType(10403, R.string.e0403, R.drawable.e_motor_start, 1),
-            new EventType(10404, R.string.e0404, R.drawable.e_motor_start, 1),
-            new EventType(10405, R.string.e0405, R.drawable.e_motor_start, 1),
-            new EventType(10406, R.string.e0406, R.drawable.e_motor_start, 1),
-            new EventType(10501, R.string.e0501, R.drawable.e_motor_stop, 1),
-            new EventType(10502, R.string.e0502, R.drawable.e_motor_stop, 1),
-            new EventType(10503, R.string.e0503, R.drawable.e_motor_stop, 1),
-            new EventType(10504, R.string.e0504, R.drawable.e_motor_stop, 1),
-            new EventType(10505, R.string.e0505, R.drawable.e_motor_stop, 1),
-            new EventType(10506, R.string.e0506, R.drawable.e_motor_stop, 1),
-            new EventType(10601, R.string.e0601, R.drawable.e_rogue, 1),
-            new EventType(10602, R.string.e0602, R.drawable.e_rogue, 1),
-            new EventType(10603, R.string.e0603, R.drawable.e_rogue, 1),
-            new EventType(10701, R.string.e0701, R.drawable.e_valet_on, 1),
-            new EventType(10801, R.string.e0801, R.drawable.e_system),
-            new EventType(10802, R.string.e0802, R.drawable.e_system),
-            new EventType(10803, R.string.e0803, R.drawable.e_system),
-            new EventType(10804, R.string.e0804, R.drawable.e_system),
-            new EventType(10805, R.string.e0805, R.drawable.e_system),
-            new EventType(10806, R.string.e0806, R.drawable.e_system),
-            new EventType(10807, R.string.e0807, R.drawable.e_system),
-            new EventType(10808, R.string.e0808, R.drawable.e_system),
-            new EventType(10901, R.string.e0901, R.drawable.e_system, 2),
-            new EventType(11001, R.string.e1001, R.drawable.e_sos, 0),
-            new EventType(11101, R.string.e1101, R.drawable.e_gsm_fail),
-            new EventType(11102, R.string.e1102, R.drawable.e_gsm_recover),
-            new EventType(11103, R.string.e1103, R.drawable.e_user_call, 2),
-            new EventType(11201, R.string.e1201, R.drawable.e_sos, 2),
-            new EventType(11301, R.string.e1301, R.drawable.e_motor_error, 2),
-            new EventType(11302, R.string.e1302, R.drawable.e_motor_error, 2),
-            new EventType(11303, R.string.e1303, R.drawable.e_motor_error, 2),
-            new EventType(11304, R.string.e1304, R.drawable.e_motor_error, 2),
-            new EventType(11401, R.string.e1401, R.drawable.e_trace_start, 2),
-            new EventType(11402, R.string.e1402, R.drawable.e_trace_start, 2),
-            new EventType(11403, R.string.e1403, R.drawable.e_trace_start, 2),
-            new EventType(11501, R.string.e1501, R.drawable.e_trace_stop, 2),
-            new EventType(11502, R.string.e1502, R.drawable.e_trace_stop, 2),
-            new EventType(11503, R.string.e1503, R.drawable.e_trace_stop, 2),
-            new EventType(11601, R.string.e1601, R.drawable.e_main_power_off, 2),
-            new EventType(11701, R.string.e1701, R.drawable.e_hood_open, 2),
-            new EventType(11702, R.string.e1702, R.drawable.e_hood_open, 2),
-            new EventType(11703, R.string.e1703, R.drawable.e_hood_open, 2),
-            new EventType(13700, R.string.e3700, R.drawable.e_tilt),
-    };
     String car_id;
     String api_key;
     Vector<Event> events;
@@ -265,6 +72,7 @@ public class EventsFragment extends Fragment
     BroadcastReceiver br;
     DataFetcher fetcher;
     PullToRefreshLayout mPullToRefreshLayout;
+    Map<Integer, EventType> event_types;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -272,6 +80,7 @@ public class EventsFragment extends Fragment
 
         if (current == null)
             current = new LocalDate();
+        event_types = new HashMap<Integer, EventType>();
         if (savedInstanceState != null) {
             car_id = savedInstanceState.getString(Names.ID);
             current = new LocalDate(savedInstanceState.getLong(DATE));
@@ -281,6 +90,7 @@ public class EventsFragment extends Fragment
                     ByteArrayInputStream bis = new ByteArrayInputStream(track_data);
                     ObjectInput in = new ObjectInputStream(bis);
                     events = (Vector<Event>) in.readObject();
+                    event_types = (HashMap<Integer, EventType>) in.readObject();
                     firstEvent = (Event) in.readObject();
                     in.close();
                     bis.close();
@@ -289,7 +99,6 @@ public class EventsFragment extends Fragment
                     ex.printStackTrace();
                 }
             }
-
         }
 
         vEvents = (HoursList) v.findViewById(R.id.events);
@@ -301,15 +110,14 @@ public class EventsFragment extends Fragment
                     if (e.point == null)
                         return;
                     String info = State.formatTime(getActivity(), e.time) + " ";
-                    boolean found = false;
-                    for (EventType et : event_types) {
-                        if (et.type == e.type) {
-                            found = true;
-                            info += getString(et.string);
-                        }
-                    }
-                    if (!found)
+                    EventType et = null;
+                    if (event_types.containsKey(e.type))
+                        et = event_types.get(e.type);
+                    if (et != null) {
+                        info += et.name;
+                    } else {
                         info += getString(R.string.event) + " #" + e.type;
+                    }
                     info += "\n";
                     Intent i = new Intent(getActivity(), MapEventActivity.class);
                     String[] point = e.point.split(";");
@@ -470,6 +278,7 @@ public class EventsFragment extends Fragment
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 ObjectOutput out = new ObjectOutputStream(bos);
                 out.writeObject(events);
+                out.writeObject(event_types);
                 out.writeObject(firstEvent);
                 data = bos.toByteArray();
                 out.close();
@@ -527,12 +336,9 @@ public class EventsFragment extends Fragment
     }
 
     boolean isShow(int type) {
-        for (EventType et : event_types) {
-            if (et.type == type) {
-                if (et.filter == 0)
-                    return true;
-                return (et.filter & filter) != 0;
-            }
+        if (event_types.containsKey(type)) {
+            EventType et = event_types.get(type);
+            return (et.level == 0) || ((et.level & filter) != 0);
         }
         return (filter & 4) != 0;
     }
@@ -589,27 +395,6 @@ public class EventsFragment extends Fragment
         fetcher.update();
     }
 
-    static class EventType {
-        int type;
-        int string;
-        int icon;
-        int filter;
-
-        EventType(int type_, int string_, int icon_) {
-            type = type_;
-            string = string_;
-            icon = icon_;
-            filter = 4;
-        }
-
-        EventType(int type_, int string_, int icon_, int filter_) {
-            type = type_;
-            string = string_;
-            icon = icon_;
-            filter = filter_;
-        }
-    }
-
     static class Event implements Serializable {
         int type;
         long time;
@@ -618,6 +403,12 @@ public class EventsFragment extends Fragment
         String point;
         String course;
         String address;
+    }
+
+    static class EventType {
+        String name;
+        String icon;
+        int level;
     }
 
     class DataFetcher extends HttpTask {
@@ -643,6 +434,21 @@ public class EventsFragment extends Fragment
                 eventData.put(firstEvent.id, firstEvent);
             }
             events.clear();
+            event_types = new HashMap<Integer, EventType>();
+            JsonArray types = data.get("types").asArray();
+            for (int i = 0; i < types.size(); i++) {
+                JsonObject type = types.get(i).asObject();
+                EventType et = new EventType();
+                et.name = type.get("name").asString();
+                JsonValue v = type.get("icon");
+                if (v != null)
+                    et.icon = v.asString();
+                int level = type.get("level").asInt();
+                if (level != 0)
+                    level = 1 << (level - 1);
+                et.level = level;
+                event_types.put(type.get("type").asInt(), et);
+            }
             JsonArray res = data.get("events").asArray();
             if (!first)
                 firstEvent = null;
@@ -708,7 +514,8 @@ public class EventsFragment extends Fragment
                     finish.toDate().getTime(),
                     first,
                     pointer,
-                    preferences.getString(Names.Car.AUTH + car_id, ""));
+                    preferences.getString(Names.Car.AUTH + car_id, ""),
+                    Locale.getDefault().getLanguage());
         }
     }
 
@@ -913,19 +720,24 @@ public class EventsFragment extends Fragment
             } else {
                 tvTime.setText(State.formatTime(getActivity(), e.time));
             }
-            boolean found = false;
-            for (EventType et : event_types) {
-                if (et.type == e.type) {
-                    found = true;
-                    String name = getString(et.string);
-                    if (e.zone != null)
-                        name += " " + e.zone;
-                    tvName.setText(name);
-                    icon.setVisibility(View.VISIBLE);
-                    icon.setImageResource(et.icon);
+            if (event_types.containsKey(e.type)) {
+                EventType et = event_types.get(e.type);
+                String name = et.name;
+                if (e.zone != null)
+                    name += " " + e.zone;
+                tvName.setText(name);
+                icon.setVisibility(View.VISIBLE);
+                if (et.icon != null) {
+                    try {
+                        Context context = getActivity();
+                        icon.setImageResource(context.getResources().getIdentifier("e_" + et.icon, "drawable", context.getPackageName()));
+                    } catch (Exception ex) {
+                        icon.setVisibility(View.GONE);
+                    }
+                } else {
+                    icon.setImageResource(R.drawable.e_system);
                 }
-            }
-            if (!found) {
+            } else {
                 tvName.setText(getString(R.string.event) + " #" + e.type);
                 icon.setVisibility(View.GONE);
             }

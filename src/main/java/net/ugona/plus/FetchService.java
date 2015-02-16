@@ -717,7 +717,8 @@ public class FetchService extends Service {
             JsonValue voltage_value = res.get("voltage");
             if (voltage_value != null) {
                 JsonObject voltage = voltage_value.asObject();
-                ed.putString(Names.Car.VOLTAGE_MAIN + car_id, voltage.get("main").asDouble() + "");
+                if (voltage.get("main") != null)
+                    ed.putString(Names.Car.VOLTAGE_MAIN + car_id, voltage.get("main").asDouble() + "");
                 if (voltage.get("reserved") != null)
                     ed.putString(Names.Car.VOLTAGE_RESERVED + car_id, voltage.get("reserved").asDouble() + "");
             }
@@ -727,27 +728,30 @@ public class FetchService extends Service {
                 JsonObject gps = gps_value.asObject();
                 ed.putFloat(Names.Car.LAT + car_id, gps.get("latitude").asFloat());
                 ed.putFloat(Names.Car.LNG + car_id, gps.get("longitude").asFloat());
-                ed.putFloat(Names.Car.SPEED + car_id, gps.get("speed").asFloat());
+                if (gps.get("speed") != null)
+                    ed.putFloat(Names.Car.SPEED + car_id, gps.get("speed").asFloat());
                 if (gps_valid && (gps.get("course") != null))
                     ed.putInt(Names.Car.COURSE + car_id, gps.get("course").asInt());
             } else {
                 JsonValue gsm_value = res.get("gsm");
                 if (gsm_value != null) {
                     JsonObject gsm = gsm_value.asObject();
-                    String gsm_str = gsm.get("cc").asInt() + " ";
-                    gsm_str += gsm.get("nc").asInt() + " ";
-                    gsm_str += gsm.get("lac").asInt() + " ";
-                    gsm_str += gsm.get("cid").asInt();
-                    String old_gsm = preferences.getString(Names.Car.GSM_SECTOR + car_id, "");
-                    if (!old_gsm.equals(gsm_str)) {
-                        ed.putString(Names.Car.GSM_SECTOR + car_id, gsm_str);
-                        ed.remove(Names.Car.GSM_ZONE + car_id);
-                        ed.remove(Names.Car.LAT + car_id);
-                        ed.remove(Names.Car.LNG + car_id);
-                    }
-                    if (preferences.getString(Names.Car.GSM_ZONE + car_id, "").equals("")) {
-                        ed.commit();
-                        new GsmZoneRequest(car_id);
+                    if (gsm.get("cc") != null) {
+                        String gsm_str = gsm.get("cc").asInt() + " ";
+                        gsm_str += gsm.get("nc").asInt() + " ";
+                        gsm_str += gsm.get("lac").asInt() + " ";
+                        gsm_str += gsm.get("cid").asInt();
+                        String old_gsm = preferences.getString(Names.Car.GSM_SECTOR + car_id, "");
+                        if (!old_gsm.equals(gsm_str)) {
+                            ed.putString(Names.Car.GSM_SECTOR + car_id, gsm_str);
+                            ed.remove(Names.Car.GSM_ZONE + car_id);
+                            ed.remove(Names.Car.LAT + car_id);
+                            ed.remove(Names.Car.LNG + car_id);
+                        }
+                        if (preferences.getString(Names.Car.GSM_ZONE + car_id, "").equals("")) {
+                            ed.commit();
+                            new GsmZoneRequest(car_id);
+                        }
                     }
                 }
             }
