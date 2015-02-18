@@ -72,7 +72,6 @@ public class EventsFragment extends Fragment
     BroadcastReceiver br;
     DataFetcher fetcher;
     PullToRefreshLayout mPullToRefreshLayout;
-    Map<Integer, EventType> event_types;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -80,7 +79,6 @@ public class EventsFragment extends Fragment
 
         if (current == null)
             current = new LocalDate();
-        event_types = new HashMap<Integer, EventType>();
         if (savedInstanceState != null) {
             car_id = savedInstanceState.getString(Names.ID);
             current = new LocalDate(savedInstanceState.getLong(DATE));
@@ -90,7 +88,6 @@ public class EventsFragment extends Fragment
                     ByteArrayInputStream bis = new ByteArrayInputStream(track_data);
                     ObjectInput in = new ObjectInputStream(bis);
                     events = (Vector<Event>) in.readObject();
-                    event_types = (HashMap<Integer, EventType>) in.readObject();
                     firstEvent = (Event) in.readObject();
                     in.close();
                     bis.close();
@@ -110,15 +107,10 @@ public class EventsFragment extends Fragment
                     if (e.point == null)
                         return;
                     String info = State.formatTime(getActivity(), e.time) + " ";
-                    EventType et = null;
-                    if (event_types.containsKey(e.type))
-                        et = event_types.get(e.type);
-                    if (et != null) {
-                        info += et.name;
-                    } else {
-                        info += getString(R.string.event) + " #" + e.type;
+                    info += e.title + "\n";
+                    if (e.text != null) {
+                        info += e.text + "\n";
                     }
-                    info += "\n";
                     Intent i = new Intent(getActivity(), MapEventActivity.class);
                     String[] point = e.point.split(";");
                     if (point.length < 2)
@@ -278,7 +270,6 @@ public class EventsFragment extends Fragment
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 ObjectOutput out = new ObjectOutputStream(bos);
                 out.writeObject(events);
-                out.writeObject(event_types);
                 out.writeObject(firstEvent);
                 data = bos.toByteArray();
                 out.close();
@@ -335,14 +326,6 @@ public class EventsFragment extends Fragment
             filterEvents(false);
     }
 
-    boolean isShow(int type) {
-        if (event_types.containsKey(type)) {
-            EventType et = event_types.get(type);
-            return (et.level == 0) || ((et.level & filter) != 0);
-        }
-        return (filter & 4) != 0;
-    }
-
     void filterEvents(boolean no_reload) {
         if (!loaded)
             return;
@@ -350,7 +333,7 @@ public class EventsFragment extends Fragment
         if (firstEvent != null)
             filtered.add(firstEvent);
         for (Event e : events) {
-            if (isShow(e.type))
+            if ((e.level == 0) || ((e.level & filter) != 0))
                 filtered.add(e);
         }
         if (filtered.size() > 0) {
@@ -396,10 +379,13 @@ public class EventsFragment extends Fragment
     }
 
     static class Event implements Serializable {
-        int type;
         long time;
         long id;
-        String zone;
+        int type;
+        int level;
+        int icon;
+        String title;
+        String text;
         String point;
         String course;
         String address;
@@ -407,7 +393,7 @@ public class EventsFragment extends Fragment
 
     static class EventType {
         String name;
-        String icon;
+        int icon;
         int level;
     }
 
@@ -434,15 +420,22 @@ public class EventsFragment extends Fragment
                 eventData.put(firstEvent.id, firstEvent);
             }
             events.clear();
-            event_types = new HashMap<Integer, EventType>();
+            Map<Integer, EventType> event_types = new HashMap<Integer, EventType>();
             JsonArray types = data.get("types").asArray();
             for (int i = 0; i < types.size(); i++) {
                 JsonObject type = types.get(i).asObject();
                 EventType et = new EventType();
                 et.name = type.get("name").asString();
+                et.icon = R.drawable.e_system;
                 JsonValue v = type.get("icon");
-                if (v != null)
-                    et.icon = v.asString();
+                if (v != null) {
+                    try {
+                        Context context = getActivity();
+                        et.icon = context.getResources().getIdentifier("e_" + v.asString(), "drawable", context.getPackageName());
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                }
                 int level = type.get("level").asInt();
                 if (level != 0)
                     level = 1 << (level - 1);
@@ -456,12 +449,40 @@ public class EventsFragment extends Fragment
                 JsonObject event = res.get(i).asObject();
                 long id = event.get("id").asLong();
                 Event e = new Event();
+                e.id = id;
                 e.type = event.get("type").asInt();
                 e.time = event.get("time").asLong();
-                JsonValue vZone = event.get("zone");
-                if (vZone != null)
-                    e.zone = vZone.asString();
-                e.id = id;
+                if (event_types.containsKey(e.type)) {
+                    String[] e_data = null;
+                    JsonValue vData = event.get("data");
+                    if (vData != null)
+                        e_data = vData.asString().split("\\|");
+                    EventType et = event_types.get(e.type);
+                    String text = et.name;
+                    for (int s = 0; ; s++) {
+                        String pat = "{" + s + "}";
+                        int pos = text.indexOf(pat);
+                        if (pos < 0)
+                            break;
+                        String subst = "";
+                        if ((e_data != null) && (s < e_data.length))
+                            subst = e_data[s];
+                        text = text.replace(pat, subst);
+                    }
+                    int pos = text.indexOf("\n");
+                    if (pos < 0) {
+                        e.title = text;
+                    } else {
+                        e.title = text.substring(0, pos);
+                        e.text = text.substring(pos + 1);
+                    }
+                    if (et.level > 0)
+                        e.level = 1 << (et.level - 1);
+                    e.icon = et.icon;
+                } else {
+                    e.title = getString(R.string.event) + " #" + e.type;
+                    e.level = 4;
+                }
                 Event ee = eventData.get(id);
                 if (ee != null) {
                     e.address = ee.address;
@@ -720,27 +741,13 @@ public class EventsFragment extends Fragment
             } else {
                 tvTime.setText(State.formatTime(getActivity(), e.time));
             }
-            if (event_types.containsKey(e.type)) {
-                EventType et = event_types.get(e.type);
-                String name = et.name;
-                if (e.zone != null)
-                    name += " " + e.zone;
-                tvName.setText(name);
+            if (e.icon != 0) {
+                icon.setImageResource(e.icon);
                 icon.setVisibility(View.VISIBLE);
-                if (et.icon != null) {
-                    try {
-                        Context context = getActivity();
-                        icon.setImageResource(context.getResources().getIdentifier("e_" + et.icon, "drawable", context.getPackageName()));
-                    } catch (Exception ex) {
-                        icon.setVisibility(View.GONE);
-                    }
-                } else {
-                    icon.setImageResource(R.drawable.e_system);
-                }
             } else {
-                tvName.setText(getString(R.string.event) + " #" + e.type);
                 icon.setVisibility(View.GONE);
             }
+            tvName.setText(e.title);
             View progress = v.findViewById(R.id.progress);
             TextView tvAddress = (TextView) v.findViewById(R.id.address);
             if (e.id == current_id) {

@@ -157,6 +157,8 @@ public class SmsMonitor extends BroadcastReceiver {
         Intent intent = new Intent(SMS_SENT);
         intent.putExtra(Names.ID, car_id);
         intent.putExtra(Names.ANSWER, sms.id);
+        if (sim_id > 0)
+            intent.putExtra("gear", (sim_id == 2));
         PendingIntent sendPI = PendingIntent.getBroadcast(context, sms.id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         String ver = "";
@@ -203,62 +205,6 @@ public class SmsMonitor extends BroadcastReceiver {
                 return true;
             } catch (Exception ex) {
                 // ignore
-            }
-
-            try {
-                Class msm = ClassLoader.getSystemClassLoader().loadClass("com.samsung.android.telephony.MultiSimManager");
-                Class[] aclass = new Class[1];
-                aclass[0] = Integer.TYPE;
-                Method msm_phone_id = msm.getMethod("getMultiSimPhoneId", aclass);
-                Object[] aobj = new Object[1];
-                aobj[0] = Integer.valueOf(sim_id - 1);
-                int phone_id = (Integer) msm_phone_id.invoke(null, aobj);
-                State.appendLog("phone_id=" + phone_id);
-                Method msm_sub_id = msm.getMethod("getSubId", aclass);
-                long sub_id = ((long[]) msm_sub_id.invoke(null, aobj))[0];
-                State.appendLog("state_id=" + sub_id);
-                aclass = new Class[2];
-                aclass[1] = Integer.TYPE;
-                aclass[2] = Long.TYPE;
-                Method msm_set_id = msm.getMethod("setDefaultSubId", aclass);
-                aobj = new Object[2];
-                aobj[0] = Integer.valueOf(2);
-                aobj[1] = Long.valueOf(sub_id);
-                msm_set_id.invoke(null, aobj);
-                State.appendLog("Set ID OK");
-
-                SmsManager smsManager = SmsManager.getDefault();
-                ArrayList<PendingIntent> pis = new ArrayList<PendingIntent>();
-                pis.add(sendPI);
-
-                Class aclass2[] = new Class[9];
-                aclass2[0] = String.class;
-                aclass2[1] = String.class;
-                aclass2[2] = ArrayList.class;
-                aclass2[3] = ArrayList.class;
-                aclass2[4] = ArrayList.class;
-                aclass2[5] = Boolean.TYPE;
-                aclass2[6] = Integer.TYPE;
-                aclass2[7] = Integer.TYPE;
-                aclass2[8] = Integer.TYPE;
-                Class sms_class = Class.forName("android.telephony.SmsManager");
-                Method send_sms = sms_class.getMethod("sendMultipartTextMessage", aclass2);
-                aobj = new Object[9];
-                aobj[0] = phoneNumber;
-                aobj[1] = null;
-                aobj[2] = smsManager.divideMessage(text);
-                aobj[3] = pis;
-                aobj[4] = null;
-                aobj[5] = Boolean.valueOf(true);
-                aobj[6] = Integer.valueOf(0);
-                aobj[7] = Integer.valueOf(0);
-                aobj[8] = Integer.valueOf(0);
-                send_sms.invoke(smsManager, aobj);
-
-                State.appendLog("getSmsManagerForSubscriber OK");
-                return true;
-            } catch (Exception ex) {
-                State.print(ex);
             }
 
             try {
