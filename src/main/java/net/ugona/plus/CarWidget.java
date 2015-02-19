@@ -293,26 +293,31 @@ public class CarWidget extends AppWidgetProvider {
             int show_count = 1;
 
             String voltage = preferences.getString(Names.Car.VOLTAGE_MAIN + car_id, "?");
-            boolean normal = false;
-            try {
-                double v = Double.parseDouble(voltage);
-                v += preferences.getInt(Names.Car.VOLTAGE_SHIFT + car_id, 0) / 20.;
-                voltage = String.format("%.2f", v);
-                if (v > 12.2)
-                    normal = true;
-            } catch (Exception ex) {
-                // ignore
-            }
-            widgetView.setTextViewText(R.id.voltage, voltage + " V");
-            if (!normal) {
-                boolean az = preferences.getBoolean(Names.Car.AZ + car_id, false);
-                boolean ignition = !az && (preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false));
-                if (az || ignition)
-                    normal = true;
-            }
+            if (voltage.equals("65.535")) {
+                widgetView.setTextViewText(R.id.voltage, context.getString(R.string.on));
+                widgetView.setInt(R.id.voltage, "setTextColor", context.getResources().getColor(id_color[theme]));
+            } else {
+                boolean normal = false;
+                try {
+                    double v = Double.parseDouble(voltage);
+                    v += preferences.getInt(Names.Car.VOLTAGE_SHIFT + car_id, 0) / 20.;
+                    voltage = String.format("%.2f", v);
+                    if (v > 12.2)
+                        normal = true;
+                } catch (Exception ex) {
+                    // ignore
+                }
+                widgetView.setTextViewText(R.id.voltage, voltage + " V");
+                if (!normal) {
+                    boolean az = preferences.getBoolean(Names.Car.AZ + car_id, false);
+                    boolean ignition = !az && (preferences.getBoolean(Names.Car.INPUT3 + car_id, false) || preferences.getBoolean(Names.Car.ZONE_IGNITION + car_id, false));
+                    if (az || ignition)
+                        normal = true;
+                }
 
-            int v_color = normal ? context.getResources().getColor(id_color[theme]) : context.getResources().getColor(R.color.error);
-            widgetView.setInt(R.id.voltage, "setTextColor", v_color);
+                int v_color = normal ? context.getResources().getColor(id_color[theme]) : context.getResources().getColor(R.color.error);
+                widgetView.setInt(R.id.voltage, "setTextColor", v_color);
+            }
 
             String temperature = Preferences.getTemperature(preferences, car_id, 1);
             if (temperature == null) {

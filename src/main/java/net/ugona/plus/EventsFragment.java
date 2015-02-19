@@ -463,10 +463,10 @@ public class EventsFragment extends Fragment
                 e.type = event.get("type").asLong();
                 e.time = event.get("time").asLong();
                 if (event_types.containsKey(e.type)) {
-                    String[] e_data = null;
                     JsonValue vData = event.get("data");
+                    JsonArray aData = null;
                     if (vData != null)
-                        e_data = vData.asString().split("\\|");
+                        aData = vData.asArray();
                     EventType et = event_types.get(e.type);
                     String text = et.name;
                     for (int s = 0; ; s++) {
@@ -475,10 +475,11 @@ public class EventsFragment extends Fragment
                         if (pos < 0)
                             break;
                         String subst = "";
-                        if ((e_data != null) && (s < e_data.length))
-                            subst = e_data[s];
+                        if ((aData != null) && (s < aData.size()))
+                            subst = aData.get(s).asString();
                         text = text.replace(pat, subst);
                     }
+                    text = text.replaceAll("\\|", "\n");
                     int pos = text.indexOf("\n");
                     if (pos < 0) {
                         e.title = text;
@@ -713,6 +714,7 @@ public class EventsFragment extends Fragment
             }
             if (event_id != current_id)
                 return;
+            current_state = 0;
             vEvents.notifyChanges();
         }
     }

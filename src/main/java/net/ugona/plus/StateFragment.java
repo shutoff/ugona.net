@@ -1015,18 +1015,23 @@ public class StateFragment extends Fragment
 
     void updateMainVoltage(TextView tv, double limit) {
         String val = preferences.getString(Names.Car.VOLTAGE_MAIN + car_id, "?");
-        boolean normal = false;
-        try {
-            double v = Double.parseDouble(val);
-            v += preferences.getInt(Names.Car.VOLTAGE_SHIFT + car_id, 0) / 20.;
-            val = String.format("%.2f", v);
-            if (v > limit)
-                normal = true;
-        } catch (Exception ex) {
-            // ignore
+        if (val.equals("65.535")) {
+            tv.setText(R.string.on);
+            tv.setTextColor(getResources().getColor(android.R.color.secondary_text_dark));
+        } else {
+            boolean normal = false;
+            try {
+                double v = Double.parseDouble(val);
+                v += preferences.getInt(Names.Car.VOLTAGE_SHIFT + car_id, 0) / 20.;
+                val = String.format("%.2f", v);
+                if (v > limit)
+                    normal = true;
+            } catch (Exception ex) {
+                // ignore
+            }
+            tv.setText(val + " V");
+            tv.setTextColor(normal ? getResources().getColor(android.R.color.secondary_text_dark) : getResources().getColor(R.color.error));
         }
-        tv.setText(val + " V");
-        tv.setTextColor(normal ? getResources().getColor(android.R.color.secondary_text_dark) : getResources().getColor(R.color.error));
     }
 
     void updateNetStatus(Context context) {
