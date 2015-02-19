@@ -48,7 +48,7 @@ public class EventsFragment extends Fragment
         implements MainActivity.DateChangeListener, OnRefreshListener {
 
     final static String URL_EVENTS = "/events?skey=$1&begin=$2&end=$3&first=$4&pointer=$5&auth=$6&lang=$7";
-    final static String URL_EVENT = "/event?skey=$1&id=$2&time=$3";
+    final static String URL_EVENT = "/event?skey=$1&id=$2&time=$3&lang=$4";
     static final String FILTER = "filter";
     static final String DATE = "events_date";
     static final String EVENTS_DATA = "events";
@@ -72,6 +72,7 @@ public class EventsFragment extends Fragment
     BroadcastReceiver br;
     DataFetcher fetcher;
     PullToRefreshLayout mPullToRefreshLayout;
+    int current_state;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -124,6 +125,12 @@ public class EventsFragment extends Fragment
                     return;
                 }
                 current_id = e.id;
+                if ((e.text != null) && (e.point != null) && (e.address != null)) {
+                    current_state = 0;
+                    vEvents.notifyChanges();
+                    return;
+                }
+                current_state = 1;
                 vEvents.notifyChanges();
                 new EventRequest(e.id, e.time, e.type);
             }
@@ -381,7 +388,7 @@ public class EventsFragment extends Fragment
     static class Event implements Serializable {
         long time;
         long id;
-        int type;
+        long type;
         int level;
         int icon;
         String title;
@@ -420,7 +427,7 @@ public class EventsFragment extends Fragment
                 eventData.put(firstEvent.id, firstEvent);
             }
             events.clear();
-            Map<Integer, EventType> event_types = new HashMap<Integer, EventType>();
+            Map<Long, EventType> event_types = new HashMap<Long, EventType>();
             JsonArray types = data.get("types").asArray();
             for (int i = 0; i < types.size(); i++) {
                 JsonObject type = types.get(i).asObject();
@@ -440,17 +447,20 @@ public class EventsFragment extends Fragment
                 if (level != 0)
                     level = 1 << (level - 1);
                 et.level = level;
-                event_types.put(type.get("type").asInt(), et);
+                event_types.put(type.get("type").asLong(), et);
             }
             JsonArray res = data.get("events").asArray();
             if (!first)
                 firstEvent = null;
             for (int i = 0; i < res.size(); i++) {
                 JsonObject event = res.get(i).asObject();
-                long id = event.get("id").asLong();
+                long id = i + 1;
+                JsonValue idValue = event.get("id");
+                if (idValue != null)
+                    id = idValue.asLong();
                 Event e = new Event();
                 e.id = id;
-                e.type = event.get("type").asInt();
+                e.type = event.get("type").asLong();
                 e.time = event.get("time").asLong();
                 if (event_types.containsKey(e.type)) {
                     String[] e_data = null;
@@ -476,8 +486,7 @@ public class EventsFragment extends Fragment
                         e.title = text.substring(0, pos);
                         e.text = text.substring(pos + 1);
                     }
-                    if (et.level > 0)
-                        e.level = 1 << (et.level - 1);
+                    e.level = et.level;
                     e.icon = et.icon;
                 } else {
                     e.title = getString(R.string.event) + " #" + e.type;
@@ -545,15 +554,15 @@ public class EventsFragment extends Fragment
         long event_id;
         long event_time;
 
-        EventRequest(long id, long time, int type) {
+        EventRequest(long id, long time, long type) {
             event_id = id;
             event_time = time;
             if ((type == 88) || (type == 140) || (type == -116) || (type == 121) || (type == 122) || (type == 123) || (type == 124) || (type == 125)) {
                 String auth = preferences.getString(Names.Car.AUTH + car_id, "");
-                execute(URL_EVENT, api_key, id, time, "type", type, "auth", auth);
+                execute(URL_EVENT, api_key, id, time, Locale.getDefault().getLanguage(), "type", type, "auth", auth);
                 return;
             }
-            execute(URL_EVENT, api_key, id, time);
+            execute(URL_EVENT, api_key, id, time, Locale.getDefault().getLanguage());
         }
 
         @Override
@@ -618,16 +627,13 @@ public class EventsFragment extends Fragment
                 Address.Answer answer = new Address.Answer() {
                     @Override
                     public void result(String res) {
-                        String addr = event_data;
-                        if (text != null)
-                            addr = text.asString() + "\n\n";
-                        addr += lat + "," + lng;
+                        String addr = lat + "," + lng;
                         if (res != null)
                             addr += "\n" + res;
                         String course = null;
                         if (course_value != null)
                             course = course_value.asInt() + "";
-                        setAddress(addr, lat + ";" + lng, course);
+                        setAddress(event_data, addr, lat + ";" + lng, course);
                     }
                 };
                 Address.get(getActivity(), lat, lng, answer);
@@ -641,22 +647,18 @@ public class EventsFragment extends Fragment
                 Address.get(getActivity(), lat, lng, new Address.Answer() {
                     @Override
                     public void result(String res) {
-                        String addr = event_data;
-                        if (text != null)
-                            addr = text.asString() + "\n\n";
-                        addr += "MCC: " + gsm.get("cc").asInt();
+                        String addr = "MCC: " + gsm.get("cc").asInt();
                         addr += " NC: " + gsm.get("nc").asInt();
                         addr += " LAC: " + gsm.get("lac").asInt();
                         addr += " CID: " + gsm.get("cid").asInt();
                         if (res != null)
                             addr += "\n" + res;
-                        setAddress(addr, lat + ";" + lng + ";" + gsm.get("sector").asString(), null);
+                        setAddress(event_data, addr, lat + ";" + lng + ";" + gsm.get("sector").asString(), null);
                     }
                 });
                 return;
             }
-            String addr = event_data;
-            setAddress(addr, "", null);
+            setAddress(event_data, "", "", null);
         }
 
         String temp(JsonObject t, int sensor) {
@@ -687,15 +689,24 @@ public class EventsFragment extends Fragment
 
         @Override
         void error() {
-            if (getActivity() == null)
-                return;
-            setAddress(getString(R.string.error_load), null, null);
+            if (event_id == current_id) {
+                current_state = 2;
+                vEvents.notifyChanges();
+            }
         }
 
-        void setAddress(String result, String point, String course) {
+        void setAddress(String text, String address, String point, String course) {
+            if (text.equals(""))
+                text = null;
             for (Event e : filtered) {
                 if (e.id == event_id) {
-                    e.address = result;
+                    if (text != null) {
+                        e.text = text;
+                    } else {
+                        if (e.text == null)
+                            e.text = "";
+                    }
+                    e.address = address;
                     e.point = point;
                     e.course = course;
                 }
@@ -751,11 +762,23 @@ public class EventsFragment extends Fragment
             View progress = v.findViewById(R.id.progress);
             TextView tvAddress = (TextView) v.findViewById(R.id.address);
             if (e.id == current_id) {
-                if (e.address == null) {
+                if (current_state == 1) {
                     progress.setVisibility(View.VISIBLE);
                     tvAddress.setVisibility(View.GONE);
+                } else if (current_state == 2) {
+                    tvAddress.setText(R.string.error_load);
+                    progress.setVisibility(View.GONE);
+                    tvAddress.setVisibility(View.VISIBLE);
                 } else {
-                    tvAddress.setText(e.address);
+                    String text = "";
+                    if (e.text != null)
+                        text += e.text;
+                    if (e.address != null) {
+                        if (!text.equals(""))
+                            text += "\n";
+                        text += e.address;
+                    }
+                    tvAddress.setText(text);
                     progress.setVisibility(View.GONE);
                     tvAddress.setVisibility(View.VISIBLE);
                 }

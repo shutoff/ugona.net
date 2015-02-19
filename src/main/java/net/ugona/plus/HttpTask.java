@@ -93,7 +93,6 @@ public abstract class HttpTask {
                     background(result);
                     return result;
                 } catch (Exception ex) {
-                    State.print(ex);
                     ex.printStackTrace();
                     error_text = ex.getLocalizedMessage();
                     if (error_text != null) {
