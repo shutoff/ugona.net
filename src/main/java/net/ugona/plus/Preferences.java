@@ -3,10 +3,9 @@ package net.ugona.plus;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.SparseArray;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Preferences {
 
@@ -57,7 +56,7 @@ public class Preferences {
             }
         }
 
-        Map<Integer, TempConfig> config = new HashMap<Integer, TempConfig>();
+        SparseArray<TempConfig> config = new SparseArray<TempConfig>();
         String[] temp_config = preferences.getString(Names.Car.TEMP_SETTINGS + car_id, "").split(",");
         for (String s : temp_config) {
             String[] data = s.split(":");
@@ -135,7 +134,7 @@ public class Preferences {
             }
         }
 
-        Map<Integer, TempConfig> config = new HashMap<Integer, TempConfig>();
+        SparseArray<TempConfig> config = new SparseArray<TempConfig>();
         String[] temp_config = preferences.getString(Names.Car.TEMP_SETTINGS + car_id, "").split(",");
         for (String s : temp_config) {
             String[] data = s.split(":");

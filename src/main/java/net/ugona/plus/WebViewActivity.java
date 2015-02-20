@@ -1,5 +1,6 @@
 package net.ugona.plus;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -38,6 +39,7 @@ abstract public class WebViewActivity extends ActionBarActivity {
         super.onPause();
     }
 
+    @SuppressLint("AddJavascriptInterface")
     void initUI() {
         holder = (FrameLayout) findViewById(R.id.webview);
         if (webView == null) {

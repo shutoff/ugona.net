@@ -17,6 +17,8 @@ public class HoursList extends FrameLayout {
     ListView list;
     LinearLayout vHours;
     Listener listener;
+    Runnable runnable;
+    Runnable runnable_visible;
 
     public HoursList(Context context) {
         super(context);
@@ -36,15 +38,31 @@ public class HoursList extends FrameLayout {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        list.post(new Runnable() {
+        list.post(runnable);
+    }
+
+    void init(Context context) {
+        runnable = new Runnable() {
             @Override
             public void run() {
                 setHoursVisible();
             }
-        });
-    }
+        };
 
-    void init(Context context) {
+        runnable_visible = new Runnable() {
+            @Override
+            public void run() {
+                BaseAdapter adapter = (BaseAdapter) list.getAdapter();
+                if (adapter == null) {
+                    vHours.setVisibility(GONE);
+                    return;
+                }
+                int first = list.getFirstVisiblePosition();
+                int last = list.getLastVisiblePosition();
+                vHours.setVisibility(((first > 0) || (last < adapter.getCount() - 1)) ? VISIBLE : GONE);
+            }
+        };
+
         View view = LayoutInflater.from(context).inflate(R.layout.hours_list, null);
         addView(view);
 
@@ -112,19 +130,7 @@ public class HoursList extends FrameLayout {
             vHours.setVisibility(GONE);
             return;
         }
-        list.post(new Runnable() {
-            @Override
-            public void run() {
-                BaseAdapter adapter = (BaseAdapter) list.getAdapter();
-                if (adapter == null) {
-                    vHours.setVisibility(GONE);
-                    return;
-                }
-                int first = list.getFirstVisiblePosition();
-                int last = list.getLastVisiblePosition();
-                vHours.setVisibility(((first > 0) || (last < adapter.getCount() - 1)) ? VISIBLE : GONE);
-            }
-        });
+        list.post(runnable_visible);
     }
 
     abstract static interface Listener {

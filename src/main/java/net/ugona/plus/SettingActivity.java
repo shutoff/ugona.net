@@ -623,9 +623,7 @@ public class SettingActivity extends ActionBarActivity {
             return;
         sendUpdate();
         final int[] set_values = new int[values.length];
-        for (int i = 0; i < values.length; i++) {
-            set_values[i] = values[i];
-        }
+        System.arraycopy(values, 0, set_values, 0, values.length);
         final String value = val;
         final String zones_data = zone_data;
         final String timers_data = timer_data;

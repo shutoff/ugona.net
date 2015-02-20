@@ -36,7 +36,8 @@
 
     <plurals name="alp_42447968_pmsg_connect_x_dots">
         <item quantity="one">Соедините %1$d точка.\nПопробуйте еще раз…</item>
-        <item quantity="many">Соедините %1$d точки.\nПопробуйте еще раз…</item>
+        <item quantity="few">Соедините %1$d точки.\nПопробуйте еще раз…</item>
+        <item quantity="many">Соедините %1$d точек.\nПопробуйте еще раз…</item>
         <item quantity="other">Соедините %1$d точек.\nПопробуйте еще раз…</item>
     </plurals>
 

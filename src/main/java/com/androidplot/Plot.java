@@ -585,6 +585,7 @@ public abstract class Plot<SeriesType extends Series, FormatterType extends Form
             keepRunning = false;
             renderSynch.notify();
         }
+        super.onDetachedFromWindow();
     }
 
     @Override

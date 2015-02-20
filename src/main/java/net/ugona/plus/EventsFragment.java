@@ -1,5 +1,6 @@
 package net.ugona.plus;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -417,7 +418,7 @@ public class EventsFragment extends Fragment
             done();
             if (!current.equals(date))
                 return;
-            Map<Long, Event> eventData = new HashMap<Long, Event>();
+            @SuppressLint("UseSparseArrays") Map<Long, Event> eventData = new HashMap<Long, Event>();
             for (Event e : events) {
                 if (e.address == null)
                     continue;

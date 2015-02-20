@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -52,21 +53,16 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
     public static final int PROGRESS_BAR_STYLE_INSIDE = 0;
     public static final int PROGRESS_BAR_STYLE_OUTSIDE = 1;
-
+    private final Interpolator mInterpolator = new AccelerateInterpolator();
     private View mHeaderView;
     private ViewGroup mContentLayout;
     private TextView mHeaderTextView;
     private SmoothProgressBar mHeaderProgressBar;
-
     private CharSequence mPullRefreshLabel, mRefreshingLabel, mReleaseLabel;
-
     private int mProgressDrawableColor;
-
     private long mAnimationDuration;
     private int mProgressBarStyle;
     private int mProgressBarHeight = RelativeLayout.LayoutParams.WRAP_CONTENT;
-
-    private final Interpolator mInterpolator = new AccelerateInterpolator();
 
     protected DefaultHeaderTransformer() {
         final int min = getMinimumApiLevel();
@@ -75,6 +71,17 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
                     + min
                     + "+. If using ActionBarSherlock or ActionBarCompat you should use the appropriate provided extra.");
         }
+    }
+
+    protected static TypedArray obtainStyledAttrsFromThemeAttr(Context context, int themeAttr,
+                                                               int[] styleAttrs) {
+        // Need to get resource id of style pointed to from the theme attr
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(themeAttr, outValue, true);
+        final int styleResId = outValue.resourceId;
+
+        // Now return the values (from styleAttrs) from the style
+        return context.obtainStyledAttributes(styleResId, styleAttrs);
     }
 
     @Override
@@ -166,6 +173,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     public void onRefreshMinimized() {
         // Here we fade out most of the header, leaving just the progress bar
@@ -178,6 +186,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         return mHeaderView;
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     public boolean showHeaderView() {
         final boolean changeVis = mHeaderView.getVisibility() != View.VISIBLE;
@@ -196,6 +205,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         return changeVis;
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     public boolean hideHeaderView() {
         final boolean changeVis = mHeaderView.getVisibility() != View.GONE;
@@ -428,6 +438,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         return Build.VERSION_CODES.ICE_CREAM_SANDWICH;
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     class HideAnimationCallback extends AnimatorListenerAdapter {
         @Override
         public void onAnimationEnd(Animator animation) {
@@ -437,16 +448,5 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
             }
             onReset();
         }
-    }
-
-    protected static TypedArray obtainStyledAttrsFromThemeAttr(Context context, int themeAttr,
-                                                               int[] styleAttrs) {
-        // Need to get resource id of style pointed to from the theme attr
-        TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(themeAttr, outValue, true);
-        final int styleResId = outValue.resourceId;
-
-        // Now return the values (from styleAttrs) from the style
-        return context.obtainStyledAttributes(styleResId, styleAttrs);
     }
 }

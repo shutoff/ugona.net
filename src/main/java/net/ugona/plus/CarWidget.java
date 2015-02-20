@@ -1,5 +1,6 @@
 package net.ugona.plus;
 
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -15,6 +16,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -93,7 +95,7 @@ public class CarWidget extends AppWidgetProvider {
     };
     static CarDrawable drawable;
     static Map<String, Integer> states;
-    static Map<Integer, Integer> height_rows;
+    static SparseIntArray height_rows;
     static TrafficRequest request;
 
     @Override
@@ -229,8 +231,9 @@ public class CarWidget extends AppWidgetProvider {
                     int maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
                     if (maxHeight > 0) {
                         if (height_rows == null)
-                            height_rows = new HashMap<Integer, Integer>();
-                        if (!height_rows.containsKey(maxHeight)) {
+                            height_rows = new SparseIntArray();
+                        rows = height_rows.get(maxHeight, -1);
+                        if (rows < 0) {
                             Intent intent = new Intent(Intent.ACTION_MAIN);
                             intent.addCategory(Intent.CATEGORY_HOME);
                             float density = context.getResources().getDisplayMetrics().density;
@@ -536,7 +539,7 @@ public class CarWidget extends AppWidgetProvider {
         Date now = new Date();
         widgetView.setTextViewText(R.id.time, tf.format(now));
         DateFormat df = android.text.format.DateFormat.getDateFormat(context);
-        SimpleDateFormat sf = new SimpleDateFormat("E");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sf = new SimpleDateFormat("E");
         widgetView.setTextViewText(R.id.date, sf.format(now) + " " + df.format(now));
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         int level = preferences.getInt(Names.TRAFIC_LEVEL + widgetID, 0);

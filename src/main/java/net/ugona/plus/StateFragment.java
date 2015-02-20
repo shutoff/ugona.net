@@ -42,6 +42,7 @@ import com.eclipsesource.json.ParseException;
 import org.joda.time.LocalDateTime;
 
 import java.text.DateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Vector;
 
@@ -112,7 +113,7 @@ public class StateFragment extends Fragment
     View pRele2i;
     View pSound;
     View pGuard;
-    View pTrunk;
+
     ImageView ivMotor;
     ImageView ivRele;
     ImageView ivValet;
@@ -221,7 +222,6 @@ public class StateFragment extends Fragment
         pRele2i = v.findViewById(R.id.rele2_impulse_prg);
         pSound = v.findViewById(R.id.sound_prg);
         pGuard = v.findViewById(R.id.guard_prg);
-        pTrunk = v.findViewById(R.id.trunk);
 
         ivMotor = (ImageView) v.findViewById(R.id.motor_img);
         ivValet = (ImageView) v.findViewById(R.id.valet_img);
@@ -420,9 +420,7 @@ public class StateFragment extends Fragment
             ListView lvActions = (ListView) v.findViewById(R.id.actions);
             adapter = new ActionFragment.ActionAdapter(getActivity(), car_id);
             adapter.actions = new Vector<ActionFragment.Action>();
-            for (ActionFragment.Action action : ActionFragment.pointer_actions) {
-                adapter.actions.add(action);
-            }
+            Collections.addAll(adapter.actions, ActionFragment.pointer_actions);
             adapter.attach(getActivity(), lvActions);
             updatePointer();
         }

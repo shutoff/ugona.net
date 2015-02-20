@@ -17,14 +17,18 @@
 package uk.co.senab.actionbarpulltorefresh.library.sdk;
 
 import android.animation.ValueAnimator;
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.view.View;
 
 class CompatV11 {
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     static void setAlpha(View view, float alpha) {
         view.setAlpha(alpha);
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     static void postOnAnimation(View view, Runnable runnable) {
         view.postDelayed(runnable, ValueAnimator.getFrameDelay());
     }

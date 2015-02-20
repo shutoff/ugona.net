@@ -1,5 +1,6 @@
 package net.ugona.plus;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -133,7 +134,7 @@ public class State {
         } catch (Exception ex) {
             // ignore
         }
-        SimpleDateFormat sf = new SimpleDateFormat("HH:mm:ss");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sf = new SimpleDateFormat("HH:mm:ss");
         return sf.format(time);
     }
 

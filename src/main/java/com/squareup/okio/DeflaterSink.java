@@ -15,6 +15,9 @@
  */
 package com.squareup.okio;
 
+import android.annotation.TargetApi;
+import android.os.Build;
+
 import java.io.IOException;
 import java.util.zip.Deflater;
 
@@ -80,6 +83,7 @@ public final class DeflaterSink implements Sink {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     private void deflate(boolean syncFlush) throws IOException {
         Buffer buffer = sink.buffer();
         while (true) {

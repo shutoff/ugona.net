@@ -181,9 +181,9 @@ public class TrackView extends MapActivity {
                         trk = true;
                         writer.append("<trkseg>\n");
                     }
-                    writer.append("<trkpt lat=\"" + p.latitude + "\" lon=\"" + p.longitude + "\">\n");
+                    writer.append("<trkpt lat=\"").append(p.latitude + "").append("\" lon=\"").append(p.longitude + "").append("\">\n");
                     LocalDateTime t = new LocalDateTime(p.time);
-                    writer.append("<time>" + t.toString("yyyy-MM-dd'T'HH:mm:ss'Z") + "</time>\n");
+                    writer.append("<time>").append(t.toString("yyyy-MM-dd'T'HH:mm:ss'Z")).append("</time>\n");
                     writer.append("</trkpt>\n");
                 }
                 if (trk)

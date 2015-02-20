@@ -1170,9 +1170,10 @@ public class MainActivity extends ActionBarActivity {
         AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
+                Cursor cur = null;
                 try {
                     Uri uri = Uri.parse("content://sms/inbox");
-                    Cursor cur = getContentResolver().query(uri, new String[]{"_id", "address", "body"}, null, null, null);
+                    cur = getContentResolver().query(uri, new String[]{"_id", "address", "body"}, null, null, null);
                     auth_data = new Vector<AuthData>();
                     if (cur.moveToFirst()) {
                         Pattern pat = Pattern.compile("www.car-online.ru \\(login:([A-Za-z0-9]+),password:([A-Za-z0-9]+)\\)");
@@ -1194,6 +1195,9 @@ public class MainActivity extends ActionBarActivity {
                     }
                 } catch (Exception ex) {
                     // ignore
+                } finally {
+                    if (cur != null)
+                        cur.close();
                 }
                 return null;
             }

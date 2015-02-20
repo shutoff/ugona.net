@@ -389,10 +389,11 @@ public class AuthDialog extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if ((resultCode == RESULT_OK) && (requestCode == 1)) {
             final Vector<PhoneWithType> allNumbers = new Vector<PhoneWithType>();
+            Cursor cursor = null;
             try {
                 Uri result = data.getData();
                 String id = result.getLastPathSegment();
-                Cursor cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=?", new String[]{id}, null);
+                cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=?", new String[]{id}, null);
                 int phoneIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA);
                 int typeIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA2);
 
@@ -407,6 +408,9 @@ public class AuthDialog extends Activity {
                 }
             } catch (Exception ex) {
                 // ignore
+            } finally {
+                if (cursor != null)
+                    cursor.close();
             }
             if (allNumbers.size() == 0) {
                 Toast toast = Toast.makeText(this, R.string.no_phone, Toast.LENGTH_SHORT);
