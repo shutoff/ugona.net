@@ -1,49 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!--
-        Base application theme, dependent on API level. This theme is replaced
-        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
-    -->
-    <style name="AppBaseTheme" parent="android:Theme">
-        <!--
-            Theme customizations available in newer API levels can go in
-            res/values-vXX/styles.xml, while customizations related to
-            backward-compatibility can go here.
-        -->
-    </style>
-
-    <!-- Application theme. -->
-    <style name="AppTheme" parent="AppBaseTheme">
-        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
-    </style>
-
-    <style name="Theme.ugona_net" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:buttonStyle">@style/ThemeButton</item>
-    </style>
-
-    <style name="ThemeAction" parent="ThemeButton">
-        <item name="android:layout_margin">5dp</item>
-        <item name="android:gravity">left</item>
-    </style>
-
-    <style name="Theme.action" parent="Theme.AppCompat">
-        <item name="android:buttonStyle">@style/ThemeAction</item>
-    </style>
-
-    <style name="ListItem">
-        <item name="android:minHeight">?android:attr/listPreferredItemHeight</item>
-        <item name="android:paddingLeft">10dip</item>
-        <item name="android:paddingRight">10dip</item>
-        <item name="android:paddingTop">8dip</item>
-        <item name="android:paddingBottom">8dip</item>
-    </style>
-
-    <style name="spinnerItemStyle" parent="android:Widget.DropDownItem.Spinner">
-        <item name="android:textColor">@color/caldroid_white</item>
-    </style>
-
-    <style name="spinnerDropDownItemStyle" parent="android:TextAppearance.Widget.TextView.SpinnerItem">
-        <item name="android:textColor">@color/caldroid_black</item>
-    </style>
-
+    <style name="Theme.ugona_net" parent="Theme.AppCompat.Light.NoActionBar"></style>
 </resources>

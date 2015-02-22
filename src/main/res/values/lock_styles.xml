@@ -22,10 +22,6 @@
 
     <style name="Alp.42447968.Theme.Dark" parent="@style/Alp.42447968.BaseThemeHelper.Dark">
 
-        <!-- AOSP -->
-
-        <item name="android:windowBackground">@drawable/aosp_background_holo_dark</item>
-
         <!-- android-lockpattern -->
 
         <item name="alp_42447968_theme_dialog">@style/Alp.42447968.Theme.Dialog.Dark</item>
@@ -52,10 +48,6 @@
     <style name="Alp.42447968.BaseThemeHelper.Light" parent="@style/Alp.42447968.BaseTheme.Light" />
 
     <style name="Alp.42447968.Theme.Light" parent="@style/Alp.42447968.BaseThemeHelper.Light">
-
-        <!-- AOSP -->
-
-        <item name="android:windowBackground">@drawable/aosp_background_holo_light</item>
 
         <!-- android-lockpattern -->
 
@@ -84,10 +76,6 @@
 
     <style name="Alp.42447968.Theme.Light.DarkActionBar" parent="@style/Alp.42447968.BaseThemeHelper.Light.DarkActionBar">
 
-        <!-- AOSP -->
-
-        <item name="android:windowBackground">@drawable/aosp_background_holo_light</item>
-
         <!-- android-lockpattern -->
 
         <item name="alp_42447968_theme_dialog">@style/Alp.42447968.Theme.Dialog.Light</item>
@@ -109,12 +97,7 @@
         </item>
     </style>
 
-    <style name="Alp.42447968.BaseTheme.Dialog.Dark" parent="@android:style/Theme.Dialog">
-
-        <!-- AOSP -->
-
-        <item name="android:windowBackground">@drawable/aosp_dialog_full_holo_dark</item>
-    </style>
+    <style name="Alp.42447968.BaseTheme.Dialog.Dark" parent="@android:style/Theme.Dialog"></style>
 
     <style name="Alp.42447968.BaseThemeHelper.Dialog.Dark" parent="@style/Alp.42447968.BaseTheme.Dialog.Dark" />
 
@@ -147,7 +130,6 @@
 
         <item name="android:windowFrame">@null</item>
         <item name="android:windowTitleStyle">@style/AOSP_DialogWindowTitle</item>
-        <item name="android:windowBackground">@drawable/aosp_dialog_full_holo_light</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>

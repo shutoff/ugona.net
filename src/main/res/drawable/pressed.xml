@@ -1,5 +1,0 @@
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/pressed_focused" android:state_focused="true"></item>
-    <item android:drawable="@drawable/pressed_pressed" android:state_pressed="true"></item>
-    <item android:drawable="@drawable/pressed_normal"></item>
-</selector>
