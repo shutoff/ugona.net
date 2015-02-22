@@ -882,21 +882,8 @@ public class Actions extends LockPatternActivity {
         );
     }
 
-    static void valet_on_sms(final Context context, final String car_id, final String ccode) {
-        if (Preferences.isDevicePasswd(context, car_id)) {
-            requestPassword(context, car_id, R.string.valet_on, R.string.valet_on, new Answer() {
-                @Override
-                void answer(String pswd) {
-                    valet_on_sms(context, car_id, ccode, pswd);
-                }
-            });
-            return;
-        }
-        valet_on_sms(context, car_id, ccode, null);
-    }
-
-    static void valet_on_sms(final Context context, final String car_id, String ccode, String pswd) {
-        SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.valet_on, ccode + " VALET", "Valet OK", INCORRECT_MESSAGE, R.string.invalid_ccode) {
+    static void valet_on_sms(final Context context, final String car_id, String ccode) {
+        SmsMonitor.sendSMS(context, car_id, null, new SmsMonitor.Sms(R.string.valet_on, ccode + " VALET", "Valet OK", INCORRECT_MESSAGE, R.string.invalid_ccode) {
             @Override
             boolean process_answer(Context context, String car_id, String text) {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -966,21 +953,8 @@ public class Actions extends LockPatternActivity {
 
     }
 
-    static void valet_off_sms(final Context context, final String car_id, final String ccode) {
-        if (Preferences.isDevicePasswd(context, car_id)) {
-            requestPassword(context, car_id, R.string.valet_on, R.string.valet_on, new Answer() {
-                @Override
-                void answer(String pswd) {
-                    valet_off_sms(context, car_id, ccode, pswd);
-                }
-            });
-            return;
-        }
-        valet_off_sms(context, car_id, ccode, null);
-    }
-
-    static void valet_off_sms(final Context context, final String car_id, String ccode, String pswd) {
-        SmsMonitor.sendSMS(context, car_id, pswd, new SmsMonitor.Sms(R.string.valet_off, ccode + " INIT", "Main user OK", INCORRECT_MESSAGE, R.string.invalid_ccode) {
+    static void valet_off_sms(final Context context, final String car_id, String ccode) {
+        SmsMonitor.sendSMS(context, car_id, null, new SmsMonitor.Sms(R.string.valet_off, ccode + " INIT", "Main user OK", INCORRECT_MESSAGE, R.string.invalid_ccode) {
             @Override
             boolean process_answer(Context context, String car_id, String text) {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
