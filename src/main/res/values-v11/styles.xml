@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.ugona_net" parent="Theme.AppCompat.Light.NoActionBar"></style>
-
-    <style name="Theme.Transparent" parent="android:Theme.Dialog">
+    <style name="Theme.Transparent" parent="android:Theme.Holo.Light.Dialog">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>
@@ -11,5 +9,4 @@
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimEnabled">false</item>
     </style>
-
 </resources>
