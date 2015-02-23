@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.ugona_net" parent="Theme.AppCompat.Light.NoActionBar"></style>
+    <style name="Theme.ugona_net" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/main</item>
+        <item name="colorPrimaryDark">@color/highlighted_main</item>
+    </style>
 
     <style name="Theme.Transparent" parent="android:Theme.Dialog">
         <item name="android:windowIsTranslucent">true</item>
