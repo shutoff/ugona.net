@@ -71,4 +71,8 @@ public class AppConfig extends Config {
         }
         return id;
     }
+
+    String[] getCars() {
+        return ids.split(",");
+    }
 }

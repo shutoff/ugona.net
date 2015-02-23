@@ -18,4 +18,12 @@
     <string name="phone_home">home</string>
     <string name="phone_work">work</string>
     <string name="phone_mobile">mobile</string>
+    <string name="car">Car</string>
+    <string name="copyright">© 2013–2015 Ugona.net, info@ugona.net</string>
+    <string name="photo">Photo</string>
+    <string name="control">Control</string>
+    <string name="state">State</string>
+    <string name="events">Events</string>
+    <string name="tracks">Tracks</string>
+    <string name="stat">Statistics</string>
 </resources>

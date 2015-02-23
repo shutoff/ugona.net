@@ -70,6 +70,19 @@ public class CarConfig extends Config {
         return name;
     }
 
+    public String getName(Context context, String id) {
+        if (!name.equals(""))
+            return name;
+        String res = context.getString(R.string.car);
+        int n = 0;
+        try {
+            n = Integer.parseInt(id);
+        } catch (Exception ex) {
+            // ignore
+        }
+        return res + " " + (n + 1);
+    }
+
     public String getKey() {
         return key;
     }

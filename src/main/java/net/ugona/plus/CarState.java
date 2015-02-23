@@ -40,6 +40,8 @@ public class CarState extends Config {
     private int guard_mode;
     private double fuel;
     private boolean use_phone;
+    private boolean show_photo;
+    private boolean show_tracks;
     private String phone;
 
     private CarState(Context context, String id) {
@@ -204,5 +206,13 @@ public class CarState extends Config {
             return;
         this.phone = phone;
         upd = true;
+    }
+
+    public boolean isShow_photo() {
+        return show_photo;
+    }
+
+    public boolean isShow_tracks() {
+        return show_tracks;
     }
 }
