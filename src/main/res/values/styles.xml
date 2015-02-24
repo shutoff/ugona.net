@@ -16,11 +16,11 @@
     </style>
 
     <style name="spinnerItemStyle" parent="android:Widget.DropDownItem.Spinner">
-        <item name="android:textColor">@color/caldroid_white</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="spinnerDropDownItemStyle" parent="android:TextAppearance.Widget.TextView.SpinnerItem">
-        <item name="android:textColor">@color/caldroid_black</item>
+        <item name="android:textColor">@android:color/black</item>
     </style>
 
 </resources>

@@ -15,6 +15,9 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -24,6 +27,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.astuetz.PagerSlidingTabStrip;
+import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.plus.Plus;
+
+import org.joda.time.LocalDate;
 
 import static android.view.Gravity.START;
 
@@ -42,6 +50,8 @@ public class MainActivity extends ActionBarActivity {
     CarState state;
     PagerSlidingTabStrip tabs;
     ViewPager vPager;
+    Menu topSubMenu;
+    LocalDate current;
     private ActionBarDrawerToggle toggle;
     private DrawerArrowDrawable drawerArrowDrawable;
     private float offset;
@@ -56,6 +66,7 @@ public class MainActivity extends ActionBarActivity {
         state = CarState.get(this, id);
 
         setContentView(R.layout.main);
+        current = new LocalDate();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -67,7 +78,7 @@ public class MainActivity extends ActionBarActivity {
         final Resources resources = getResources();
 
         drawerArrowDrawable = new DrawerArrowDrawable(resources);
-        drawerArrowDrawable.setStrokeColor(resources.getColor(R.color.caldroid_white));
+        drawerArrowDrawable.setStrokeColor(getResources().getColor(android.R.color.white));
         imageView.setImageDrawable(drawerArrowDrawable);
 
         drawer.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
@@ -114,7 +125,7 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             public void onPageSelected(int i) {
-                //               setShowDate(i);
+                updateMenu();
             }
 
             @Override
@@ -122,6 +133,24 @@ public class MainActivity extends ActionBarActivity {
 
             }
         });
+
+        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(Bundle bundle) {
+
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int i) {
+
+                    }
+                })
+                .addScope(Plus.SCOPE_PLUS_LOGIN)
+                .addScope(Plus.SCOPE_PLUS_PROFILE)
+                .addApi(Plus.API)
+                .build();
+        googleApiClient.connect();
 
         if (carConfig.getKey().equals("")) {
             Intent intent = new Intent(this, AuthDialog.class);
@@ -151,6 +180,40 @@ public class MainActivity extends ActionBarActivity {
                 return;
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        topSubMenu = menu;
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        MenuItem item = menu.findItem(R.id.date);
+        FragmentStatePagerAdapter adapter = (FragmentStatePagerAdapter) vPager.getAdapter();
+        MainFragment fragment = (MainFragment) adapter.instantiateItem(vPager, vPager.getCurrentItem());
+        if (fragment.isShowDate()) {
+            item.setTitle(current.toString("d MMMM"));
+        } else {
+            menu.removeItem(R.id.date);
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.date:
+                CalendarDatePickerDialog dialog = new CalendarDatePickerDialog();
+                dialog.show(getSupportFragmentManager(), "DATE_PICKER_TAG");
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    void updateMenu() {
+        if (topSubMenu == null)
+            return;
+        topSubMenu.clear();
+        onCreateOptionsMenu(topSubMenu);
     }
 
     boolean checkPhone() {
@@ -228,6 +291,14 @@ public class MainActivity extends ActionBarActivity {
         });
 
     }
+
+/*
+    void setShowDate(int position){
+        FragmentStatePagerAdapter adapter = (FragmentStatePagerAdapter) vPager.getAdapter();
+        MainFragment fragment = (MainFragment) adapter.instantiateItem(vPager, position);
+
+    }
+*/
 
     boolean isShowPage(int id) {
         switch (id) {

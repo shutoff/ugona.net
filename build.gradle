@@ -10,6 +10,10 @@ apply plugin: 'com.android.application'
 
 repositories {
     mavenCentral()
+
+    maven {
+        url "http://JRAF.org/static/maven/2"
+    }
 }
 
 android {
@@ -17,7 +21,7 @@ android {
     buildToolsVersion "21.1.2"
 
     defaultConfig {
-        minSdkVersion 8
+        minSdkVersion 9
         targetSdkVersion 21
     }
 
@@ -34,10 +38,13 @@ android {
 dependencies {
     compile 'com.android.support:support-v4:21.0.3'
     compile 'com.android.support:appcompat-v7:21.0.3'
-    compile 'com.google.android.gms:play-services:3.2.65'
+    compile 'com.google.android.gms:play-services:6.5.87'
     compile group: 'com.googlecode.libphonenumber', name: 'libphonenumber', version: '6.2.2'
     compile group: 'com.github.chrisbanes.photoview', name: 'library', version: '1.2.3'
     compile group: 'com.eclipsesource.minimal-json', name: 'minimal-json', version: '0.9.1'
     compile group: 'joda-time', name: 'joda-time', version: '2.7'
+    compile("com.doomonafireball.betterpickers:library:1.5.3") {
+        exclude group: 'com.android.support', module: 'support-v4'
+    }
     compile fileTree(dir: 'libs', include: '*.jar')
 }
