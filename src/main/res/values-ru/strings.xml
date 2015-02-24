@@ -1,4 +1,29 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0"?>
 <resources>
     <string name="app_name">Угона.Нет+</string>
+    <string name="ok">Продолжить</string>
+    <string name="cancel">Отменить</string>
+    <string name="auth">Авторизация</string>
+    <string name="login">Имя пользователя:</string>
+    <string name="passwd">Пароль:</string>
+    <string name="show_password">Показать пароль</string>
+    <string name="error">Ошибка</string>
+    <string name="auth_error">Ошибка авторизации</string>
+    <string name="auth_message">Если у вас проблемы с авторизацией на сервисе, вы можете обратиться в службу поддержки</string>
+    <string name="send_msg">Отправить сообщение</string>
+    <string name="device_phone_number">Номер телефона устройства</string>
+    <string name="phone_number">Номер телефона</string>
+    <string name="no_phone">Нет телефонного номера для контакта</string>
+    <string name="select_phone">Выберите номер</string>
+    <string name="phone_home">домашний</string>
+    <string name="phone_work">рабочий</string>
+    <string name="phone_mobile">мобильный</string>
+    <string name="car">Автомобиль</string>
+    <string name="copyright">© 2013–2014 Ugona.net, info@ugona.net</string>
+    <string name="photo">Фото</string>
+    <string name="control">Управление</string>
+    <string name="state">Состояние</string>
+    <string name="events">События</string>
+    <string name="tracks">Маршруты</string>
+    <string name="stat">Статистика</string>
 </resources>
