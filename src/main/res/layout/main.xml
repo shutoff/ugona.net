@@ -51,7 +51,10 @@
             android:layout_width="match_parent"
             android:layout_height="48dip"
             android:background="@color/main"
-            android:color="@color/caldroid_white" />
+            android:color="@color/caldroid_white"
+            app:pstsDividerColor="@color/main"
+            app:pstsIndicatorColor="@color/caldroid_white"
+            app:pstsUnderlineColor="@color/caldroid_white" />
 
         <android.support.v4.view.ViewPager
             android:id="@+id/pager"
