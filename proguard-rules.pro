@@ -51,3 +51,5 @@
 -dontwarn org.joda.convert.**
 -dontwarn sun.misc.**
 -dontwarn android.os.**
+-dontwarn okio.**
+

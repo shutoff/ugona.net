@@ -39,10 +39,11 @@ dependencies {
     compile 'com.android.support:support-v4:21.0.3'
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.google.android.gms:play-services:6.5.87'
-    compile group: 'com.googlecode.libphonenumber', name: 'libphonenumber', version: '6.2.2'
-    compile group: 'com.github.chrisbanes.photoview', name: 'library', version: '1.2.3'
-    compile group: 'com.eclipsesource.minimal-json', name: 'minimal-json', version: '0.9.1'
-    compile group: 'joda-time', name: 'joda-time', version: '2.7'
+    compile 'com.googlecode.libphonenumber:libphonenumber:6.2.2'
+    compile 'com.github.chrisbanes.photoview:library:1.2.3'
+    compile 'com.eclipsesource.minimal-json:minimal-json:0.9.1'
+    compile 'joda-time:joda-time:2.7'
+    compile 'com.squareup.okhttp:okhttp:2.2.0'
     compile("com.doomonafireball.betterpickers:library:1.5.3") {
         exclude group: 'com.android.support', module: 'support-v4'
     }
