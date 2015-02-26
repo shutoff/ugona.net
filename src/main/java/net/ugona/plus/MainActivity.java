@@ -11,7 +11,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,8 +27,6 @@ import android.widget.TextView;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.plus.Plus;
 
 import org.joda.time.LocalDate;
 
@@ -39,6 +36,7 @@ public class MainActivity extends ActionBarActivity {
 
     static final int DO_AUTH = 1;
     static final int DO_PHONE = 2;
+
     static final int PAGE_PHOTO = 0;
     static final int PAGE_ACTIONS = 1;
     static final int PAGE_STATE = 2;
@@ -52,7 +50,6 @@ public class MainActivity extends ActionBarActivity {
     ViewPager vPager;
     Menu topSubMenu;
     LocalDate current;
-    private ActionBarDrawerToggle toggle;
     private DrawerArrowDrawable drawerArrowDrawable;
     private float offset;
     private boolean flipped;
@@ -134,24 +131,6 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                    @Override
-                    public void onConnected(Bundle bundle) {
-
-                    }
-
-                    @Override
-                    public void onConnectionSuspended(int i) {
-
-                    }
-                })
-                .addScope(Plus.SCOPE_PLUS_LOGIN)
-                .addScope(Plus.SCOPE_PLUS_PROFILE)
-                .addApi(Plus.API)
-                .build();
-        googleApiClient.connect();
-
         if (carConfig.getKey().equals("")) {
             Intent intent = new Intent(this, AuthDialog.class);
             intent.putExtra(Names.ID, id);
@@ -203,11 +182,19 @@ public class MainActivity extends ActionBarActivity {
         switch (item.getItemId()) {
             case R.id.date:
                 CalendarDatePickerDialog dialog = new CalendarDatePickerDialog();
+                dialog.initialize(new CalendarDatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(CalendarDatePickerDialog calendarDatePickerDialog, int i, int i2, int i3) {
+                        current = new LocalDate(i, i2 + 1, i3);
+                        updateMenu();
+                    }
+                }, current.getYear(), current.getMonthOfYear() - 1, current.getDayOfMonth());
                 dialog.show(getSupportFragmentManager(), "DATE_PICKER_TAG");
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
 
     void updateMenu() {
         if (topSubMenu == null)
@@ -289,16 +276,8 @@ public class MainActivity extends ActionBarActivity {
 
             }
         });
-
     }
 
-/*
-    void setShowDate(int position){
-        FragmentStatePagerAdapter adapter = (FragmentStatePagerAdapter) vPager.getAdapter();
-        MainFragment fragment = (MainFragment) adapter.instantiateItem(vPager, position);
-
-    }
-*/
 
     boolean isShowPage(int id) {
         switch (id) {
