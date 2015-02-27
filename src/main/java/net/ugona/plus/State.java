@@ -1,6 +1,8 @@
 package net.ugona.plus;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.telephony.TelephonyManager;
 
@@ -60,6 +62,17 @@ public class State {
         if (isDebug())
             return number;
         return null;
+    }
+
+    static String getVersion(Context context) {
+        try {
+            PackageManager pkgManager = context.getPackageManager();
+            PackageInfo info = pkgManager.getPackageInfo("net.ugona.plus", 0);
+            return info.versionName;
+        } catch (Exception ex) {
+            // ignore
+        }
+        return "";
     }
 
 }

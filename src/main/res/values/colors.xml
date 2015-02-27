@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="main">#0000C0</color>
-    <color name="highlighted_main">#0000E0</color>
+    <color name="main">#0976ba</color>
+    <color name="highlighted_main">#0976ba</color>
     <color name="error">#FF4040</color>
 </resources>

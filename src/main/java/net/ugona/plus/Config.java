@@ -1,8 +1,10 @@
 package net.ugona.plus;
 
+import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 
@@ -22,6 +24,27 @@ public class Config {
                 if (v == null)
                     continue;
                 f.setAccessible(true);
+                Class<?> c = f.getType();
+                if (c.isArray()) {
+                    JsonArray arr = v.asArray();
+                    Class<?> cel = c.getComponentType();
+                    Object av = f.get(o);
+                    if ((av == null) || (Array.getLength(av) != arr.size())) {
+                        av = Array.newInstance(cel, arr.size());
+                        f.set(o, av);
+                        upd = true;
+                    }
+                    for (int i = 0; i < arr.size(); i++) {
+                        Object el = Array.get(av, i);
+                        if (el == null) {
+                            el = cel.newInstance();
+                            Array.set(av, i, el);
+                        }
+                        if (update(el, arr.get(i).asObject()))
+                            upd = true;
+                    }
+                    continue;
+                }
                 Type t = f.getGenericType();
                 if (t == int.class) {
                     int iv = v.asInt();
@@ -55,8 +78,8 @@ public class Config {
                     }
                 }
             }
-        } catch (IllegalAccessException ex) {
-            // ignore
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
         if (upd && (o instanceof Config)) {
             Config c = (Config) o;
@@ -65,7 +88,7 @@ public class Config {
         return upd;
     }
 
-    static public String save(Object o) {
+    static public JsonObject saveJson(Object o) {
         Field[] fields = o.getClass().getDeclaredFields();
         JsonObject res = new JsonObject();
         try {
@@ -74,6 +97,22 @@ public class Config {
                 if (name.equals("upd"))
                     continue;
                 f.setAccessible(true);
+                Class<?> c = f.getType();
+                if (c.isArray()) {
+                    Object v = f.get(o);
+                    if (v == null)
+                        continue;
+                    int length = Array.getLength(v);
+                    JsonArray arr = new JsonArray();
+                    for (int i = 0; i < length; i++) {
+                        Object el = Array.get(v, i);
+                        if (el == null)
+                            continue;
+                        arr.add(saveJson(el));
+                    }
+                    res.add(name, arr);
+                    continue;
+                }
                 Type t = f.getGenericType();
                 if (t == int.class) {
                     res.add(name, f.getInt(o));
@@ -96,6 +135,11 @@ public class Config {
             Config c = (Config) o;
             c.upd = false;
         }
+        return res;
+    }
+
+    static public String save(Object o) {
+        JsonObject res = saveJson(o);
         return res.toString();
     }
 

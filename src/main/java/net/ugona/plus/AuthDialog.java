@@ -142,7 +142,9 @@ public class AuthDialog extends Activity {
                         Config.update(config, res);
                         CarState state = CarState.get(AuthDialog.this, car_id);
                         CarState.update(state, res.get("state").asObject());
-                        CarState.update(state, res.get("caps").asObject());
+                        JsonObject caps = res.get("caps").asObject();
+                        CarState.update(state, caps.get("caps").asObject());
+                        CarState.update(config, caps);
                         config.setLogin(login);
                         setResult(RESULT_OK);
                         dialog.dismiss();

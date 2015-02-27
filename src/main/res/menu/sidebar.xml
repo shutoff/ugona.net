@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/preferences"
+        android:title="@string/preferences" />
+
+    <item
+        android:id="@+id/charts"
+        android:title="@string/charts" />
+
+    <item
+        android:id="@+id/maintenance"
+        android:title="@string/maintenance" />
+
+    <item
+        android:id="@+id/cars"
+        android:title="@string/cars" />
+
+    <item
+        android:id="@+id/passwd"
+        android:title="@string/password" />
+
+    <item
+        android:id="@+id/about"
+        android:title="@string/about" />
+</menu>

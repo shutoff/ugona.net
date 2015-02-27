@@ -43,6 +43,8 @@ public class CarState extends Config {
     private boolean show_photo;
     private boolean show_tracks;
     private String phone;
+    private long check_time;
+    private String version;
 
     private CarState(Context context, String id) {
 
@@ -50,6 +52,7 @@ public class CarState extends Config {
         gps = "";
         temperature = "";
         phone = "";
+        version = "";
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String s = preferences.getString(CAR_KEY + id, "");
@@ -214,5 +217,27 @@ public class CarState extends Config {
 
     public boolean isShow_tracks() {
         return show_tracks;
+    }
+
+    public long getCheck_time() {
+        return check_time;
+    }
+
+    public void setCheck_time(long check_time) {
+        if (this.check_time == check_time)
+            return;
+        this.check_time = check_time;
+        upd = true;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        if (this.version.equals(version))
+            return;
+        this.version = version;
+        upd = true;
     }
 }

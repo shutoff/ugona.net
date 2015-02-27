@@ -11,6 +11,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,13 +23,18 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
 
 import org.joda.time.LocalDate;
+
+import java.util.Date;
 
 import static android.view.Gravity.START;
 
@@ -43,13 +49,17 @@ public class MainActivity extends ActionBarActivity {
     static final int PAGE_EVENT = 3;
     static final int PAGE_TRACK = 4;
     static final int PAGE_STAT = 5;
+
     String id;
     AppConfig config;
     CarState state;
+    CarConfig car_config;
     PagerSlidingTabStrip tabs;
     ViewPager vPager;
     Menu topSubMenu;
+    Menu sideMenu;
     LocalDate current;
+    DrawerLayout drawer;
     private DrawerArrowDrawable drawerArrowDrawable;
     private float offset;
     private boolean flipped;
@@ -59,7 +69,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         config = AppConfig.get(this);
         id = config.getId(getIntent().getStringExtra(Names.ID));
-        CarConfig carConfig = CarConfig.get(this, id);
+        car_config = CarConfig.get(this, id);
         state = CarState.get(this, id);
 
         setContentView(R.layout.main);
@@ -70,7 +80,7 @@ public class MainActivity extends ActionBarActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setDisplayUseLogoEnabled(false);
-        final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         final ImageView imageView = (ImageView) findViewById(R.id.drawer_indicator);
         final Resources resources = getResources();
 
@@ -108,6 +118,7 @@ public class MainActivity extends ActionBarActivity {
         });
 
         setupActionBar();
+        setSideMenu();
 
         vPager = (ViewPager) findViewById(R.id.pager);
         vPager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
@@ -130,13 +141,15 @@ public class MainActivity extends ActionBarActivity {
 
             }
         });
+        vPager.setCurrentItem(getPagePosition(PAGE_STATE));
 
-        if (carConfig.getKey().equals("")) {
+        if (car_config.getKey().equals("")) {
             Intent intent = new Intent(this, AuthDialog.class);
             intent.putExtra(Names.ID, id);
             startActivityForResult(intent, DO_AUTH);
             return;
         }
+        checkCaps();
         if (checkPhone())
             return;
     }
@@ -155,6 +168,7 @@ public class MainActivity extends ActionBarActivity {
                 finish();
                 return;
             }
+            updatePages();
             if (checkPhone())
                 return;
         }
@@ -167,9 +181,7 @@ public class MainActivity extends ActionBarActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
         MenuItem item = menu.findItem(R.id.date);
-        FragmentStatePagerAdapter adapter = (FragmentStatePagerAdapter) vPager.getAdapter();
-        MainFragment fragment = (MainFragment) adapter.instantiateItem(vPager, vPager.getCurrentItem());
-        if (fragment.isShowDate()) {
+        if (getFragment(0).isShowDate()) {
             item.setTitle(current.toString("d MMMM"));
         } else {
             menu.removeItem(R.id.date);
@@ -180,21 +192,78 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.date:
+            case R.id.date: {
                 CalendarDatePickerDialog dialog = new CalendarDatePickerDialog();
                 dialog.initialize(new CalendarDatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(CalendarDatePickerDialog calendarDatePickerDialog, int i, int i2, int i3) {
                         current = new LocalDate(i, i2 + 1, i3);
                         updateMenu();
+                        MainFragment fragment = getFragment(-1);
+                        if (fragment != null)
+                            fragment.setDate(current);
+                        fragment = getFragment(0);
+                        if (fragment != null)
+                            fragment.setDate(current);
+                        fragment = getFragment(1);
+                        if (fragment != null)
+                            fragment.setDate(current);
+
                     }
                 }, current.getYear(), current.getMonthOfYear() - 1, current.getDayOfMonth());
                 dialog.show(getSupportFragmentManager(), "DATE_PICKER_TAG");
+                return true;
+            }
+            case R.id.about:
+                startActivity(new Intent(this, About.class));
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    void setSideMenu() {
+        PopupMenu p = new PopupMenu(this, null);
+        sideMenu = p.getMenu();
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.sidebar, sideMenu);
+        ListView lMenu = (ListView) findViewById(R.id.sidemenu);
+        lMenu.setAdapter(new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return sideMenu.size();
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return sideMenu.getItem(position);
+            }
+
+            @Override
+            public long getItemId(int position) {
+                return sideMenu.getItem(position).getItemId();
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View v = convertView;
+                if (v == null) {
+                    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v = inflater.inflate(R.layout.menu_item, null);
+                }
+                TextView tv = (TextView) v.findViewById(R.id.name);
+                tv.setText(sideMenu.getItem(position).getTitle());
+                return v;
+            }
+        });
+        lMenu.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                drawer.closeDrawer(START);
+                onOptionsItemSelected(sideMenu.getItem(position));
+            }
+        });
+    }
 
     void updateMenu() {
         if (topSubMenu == null)
@@ -211,6 +280,11 @@ public class MainActivity extends ActionBarActivity {
         intent.putExtra(Names.ID, id);
         startActivityForResult(intent, DO_PHONE);
         return true;
+    }
+
+    MainFragment getFragment(int position) {
+        FragmentStatePagerAdapter adapter = (FragmentStatePagerAdapter) vPager.getAdapter();
+        return (MainFragment) adapter.instantiateItem(vPager, vPager.getCurrentItem() + position);
     }
 
     void setupActionBar() {
@@ -316,6 +390,44 @@ public class MainActivity extends ActionBarActivity {
         return pos;
     }
 
+    void checkCaps() {
+        final String version = State.getVersion(this);
+        Date now = new Date();
+        final long time = now.getTime();
+        if (version.equals(state.getVersion()) && (state.getCheck_time() > time))
+            return;
+        HttpTask task = new HttpTask() {
+            @Override
+            void result(JsonObject res) throws ParseException {
+                if (CarState.update(state, res.get("caps").asObject()))
+                    updatePages();
+                car_config.update(car_config, res);
+                state.setCheck_time(time + 86400000);
+                state.setVersion(version);
+            }
+
+            @Override
+            void error() {
+
+            }
+        };
+        KeyParam skey = new KeyParam();
+        skey.skey = car_config.getKey();
+        task.execute("/caps", skey);
+    }
+
+    void updatePages() {
+        int id = getPageId(vPager.getCurrentItem());
+        vPager.getAdapter().notifyDataSetChanged();
+        if (tabs != null)
+            tabs.notifyDataSetChanged();
+        vPager.setCurrentItem(getPagePosition(id));
+    }
+
+    static class KeyParam {
+        String skey;
+    }
+
     class PagerAdapter extends FragmentStatePagerAdapter {
 
         public PagerAdapter(FragmentManager fm) {
@@ -348,6 +460,7 @@ public class MainActivity extends ActionBarActivity {
             }
             if (fragment != null) {
                 fragment.id = id;
+                fragment.setDate(current);
                 return fragment;
             }
             return null;

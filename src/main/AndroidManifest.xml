@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.ugona.plus"
     android:versionCode="16"
-    android:versionName="2.0">
+    android:versionName="2.0 beta2">
 
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
@@ -71,6 +71,10 @@
         <activity
             android:name=".PhoneDialog"
             android:theme="@style/Theme.Transparent" />
+
+        <activity
+            android:name=".About"
+            android:label="@string/about" />
 
     </application>
 

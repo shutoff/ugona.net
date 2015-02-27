@@ -26,4 +26,15 @@
     <string name="events">Events</string>
     <string name="tracks">Tracks</string>
     <string name="stat">Statistics</string>
+    <string name="preferences">Preferences</string>
+    <string name="charts">Charts</string>
+    <string name="maintenance">Maintenance</string>
+    <string name="cars">Cars</string>
+    <string name="password">Set password</string>
+    <string name="about">About</string>
+    <string name="version">Version:</string>
+    <string name="service">FEDERAL SERVICE</string>
+    <string name="application">Application UGONA.NET+ works with MS-PGSM devices</string>
+    <string name="service_btn">Service Ugona.net</string>
+    <string name="forum_btn">Support forum</string>
 </resources>

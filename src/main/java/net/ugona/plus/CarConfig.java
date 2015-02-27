@@ -18,6 +18,7 @@ public class CarConfig extends Config {
     private String key;
     private String auth;
     private String login;
+    private Command[] cmd;
 
     private CarConfig(Context context, String id) {
         name = "";
@@ -100,5 +101,15 @@ public class CarConfig extends Config {
             return;
         this.login = login;
         upd = true;
+    }
+
+    static class Command {
+        String name;
+        String icon;
+        String sms;
+        String call;
+        int inet;
+        boolean inet_ccode;
+        boolean custom_name;
     }
 }
