@@ -33,10 +33,10 @@ public class SetPassword extends ActionBarActivity {
         }
 
         config = AppConfig.get(this);
-        if (!config.pattern.equals("")) {
+        if (!config.getPattern().equals("")) {
             Intent intent = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null,
                     this, LockPatternActivity.class);
-            intent.putExtra(LockPatternActivity.EXTRA_PATTERN, config.pattern.toCharArray());
+            intent.putExtra(LockPatternActivity.EXTRA_PATTERN, config.getPattern().toCharArray());
             startActivityForResult(intent, REQUEST_CHECK_PATTERN);
         }
 
@@ -50,7 +50,7 @@ public class SetPassword extends ActionBarActivity {
         final View tvConfrim = findViewById(R.id.invalid_confirm);
         final View tvPassword = findViewById(R.id.invalid_password);
 
-        if (config.password.equals("")) {
+        if (config.getPassword().equals("")) {
             etPassword.setVisibility(View.GONE);
         } else {
             etPassword.addTextChangedListener(new TextWatcher() {
@@ -74,7 +74,7 @@ public class SetPassword extends ActionBarActivity {
         btnGraph.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!config.password.equals("") && !config.password.equals(etPassword.getText().toString())) {
+                if (!config.getPassword().equals("") && !config.getPassword().equals(etPassword.getText().toString())) {
                     tvPassword.setVisibility(View.VISIBLE);
                     etPassword.requestFocus();
                     return;
@@ -88,15 +88,15 @@ public class SetPassword extends ActionBarActivity {
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!config.password.equals("") && !config.password.equals(etPassword.getText().toString())) {
+                if (!config.getPassword().equals("") && !config.getPassword().equals(etPassword.getText().toString())) {
                     tvPassword.setVisibility(View.VISIBLE);
                     etPassword.requestFocus();
                     return;
                 }
                 if (!etPass1.getText().toString().equals(etPass2.getText().toString()))
                     return;
-                config.password = etPass1.getText().toString();
-                config.pattern = "";
+                config.setPassword(etPass1.getText().toString());
+                config.setPattern("");
                 finish();
             }
         });
@@ -136,8 +136,8 @@ public class SetPassword extends ActionBarActivity {
         if (requestCode == REQUEST_PATTERN) {
             if (resultCode == RESULT_OK) {
                 char[] pattern = data.getCharArrayExtra(LockPatternActivity.EXTRA_PATTERN);
-                config.pattern = String.copyValueOf(pattern);
-                config.password = "";
+                config.setPattern(String.copyValueOf(pattern));
+                config.setPassword("");
             }
             finish();
         }

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:car="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/save"
+        android:icon="@android:drawable/ic_menu_save"
+        android:title="@string/save"
+        car:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/share"
+        android:icon="@android:drawable/ic_menu_share"
+        android:title="@string/share"
+        car:showAsAction="ifRoom" />
+    <group
+        android:id="@+id/type"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/google"
+            android:title="@string/google"
+            car:showAsAction="never" />
+        <item
+            android:id="@+id/yandex"
+            android:title="@string/yandex"
+            car:showAsAction="never" />
+        <item
+            android:id="@+id/bing"
+            android:title="@string/bing"
+            car:showAsAction="never" />
+        <item
+            android:id="@+id/osm"
+            android:title="@string/osm"
+            car:showAsAction="never" />
+    </group>
+    <group
+        android:id="@+id/tr"
+        android:checkableBehavior="all">
+        <item
+            android:id="@+id/show_speed"
+            android:title="@string/show_speed"
+            car:showAsAction="never" />
+        <item
+            android:id="@+id/show_traffic"
+            android:title="@string/show_traffic"
+            car:showAsAction="never" />
+    </group>
+
+</menu>

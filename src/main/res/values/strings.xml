@@ -61,4 +61,25 @@
     <string name="km">km</string>
     <string name="recalc_stat">Recalc statistic</string>
     <string name="recalc_message">Process of statics require some minutes</string>
+    <string name="name">Name</string>
+    <string name="sms_notify">Notify as SMS</string>
+    <string name="save">Save</string>
+    <string name="share">Share</string>
+    <string name="google">Google</string>
+    <string name="osm">OSM</string>
+    <string name="yandex">Yandex</string>
+    <string name="bing">Bing</string>
+    <string name="show_speed">Show speed</string>
+    <string name="show_traffic">Show traffic</string>
+    <string name="settings">Settings</string>
+    <string name="no_gps_title">GPS disabled</string>
+    <string name="no_gps_message">GPS disabled is system.\nFor detect location you must turn on it in Settings</string>
+    <string name="net_gps_message">Your location detected by network.\nFor more accuracy you can turn on GPS is Settings</string>
+    <string name="no_location">Unknown location</string>
+    <string name="position">My position</string>
+    <string name="map">Map</string>
+    <string name="use_gps">Use GPS</string>
+    <string name="no_data">No data</string>
+    <string name="saved">Track saved</string>
+    <string name="mileage">%.2f km</string>
 </resources>
