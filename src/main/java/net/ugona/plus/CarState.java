@@ -42,6 +42,7 @@ public class CarState extends Config {
     private boolean use_phone;
     private boolean show_photo;
     private boolean show_tracks;
+    private boolean pointer;
     private String phone;
     private long check_time;
     private String version;
@@ -239,5 +240,9 @@ public class CarState extends Config {
             return;
         this.version = version;
         upd = true;
+    }
+
+    public boolean isPointer() {
+        return pointer;
     }
 }

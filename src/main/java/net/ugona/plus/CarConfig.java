@@ -19,12 +19,17 @@ public class CarConfig extends Config {
     private String auth;
     private String login;
     private Command[] cmd;
+    private int event_filter;
+    private int voltage_shift;
+    private String temp_settings;
 
     private CarConfig(Context context, String id) {
         name = "";
         key = "";
         auth = "";
         login = "";
+        event_filter = 3;
+        temp_settings = "";
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String s = preferences.getString(CAR_KEY + id, "");
         if (!s.equals("")) {
@@ -100,6 +105,39 @@ public class CarConfig extends Config {
         if (this.login.equals(login))
             return;
         this.login = login;
+        upd = true;
+    }
+
+    public int getEvent_filter() {
+        return event_filter;
+    }
+
+    public void setEvent_filter(int event_filter) {
+        if (this.event_filter == event_filter)
+            return;
+        this.event_filter = event_filter;
+        upd = true;
+    }
+
+    public int getVoltage_shift() {
+        return voltage_shift;
+    }
+
+    public void setVoltage_shift(int voltage_shift) {
+        if (this.voltage_shift == voltage_shift)
+            return;
+        this.voltage_shift = voltage_shift;
+        upd = true;
+    }
+
+    public String getTemp_settings() {
+        return temp_settings;
+    }
+
+    public void setTemp_settings(String temp_settings) {
+        if (this.temp_settings.equals(temp_settings))
+            return;
+        this.temp_settings = temp_settings;
         upd = true;
     }
 

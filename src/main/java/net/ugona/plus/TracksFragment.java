@@ -24,9 +24,12 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.text.DateFormat;
@@ -34,6 +37,10 @@ import java.text.NumberFormat;
 import java.util.Vector;
 
 public class TracksFragment extends MainFragment {
+
+    static final String DATE = "date";
+    static final String SELECTED = "selected";
+    static final String TRACK = "track";
 
     TextView tvSummary;
     View vError;
@@ -123,9 +130,57 @@ public class TracksFragment extends MainFragment {
             }
         });
 
-        refresh();
+        selected = -1;
+        if (savedInstanceState != null) {
+            long current = savedInstanceState.getLong(DATE);
+            if (current == date().toDate().getTime()) {
+                selected = savedInstanceState.getLong(SELECTED);
+                byte[] track_data = savedInstanceState.getByteArray(TRACK);
+                if (track_data != null) {
+                    try {
+                        ByteArrayInputStream bis = new ByteArrayInputStream(track_data);
+                        ObjectInput in = new ObjectInputStream(bis);
+                        tracks = (Vector<Track>) in.readObject();
+                        in.close();
+                        bis.close();
+                        loaded = true;
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        if (loaded) {
+            vTracks.notifyChanges();
+            all_done();
+        } else {
+            refresh();
+        }
 
         return v;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong(SELECTED, selected);
+        outState.putLong(DATE, date().toDate().getTime());
+        if (loaded) {
+            byte[] data = null;
+            try {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                ObjectOutput out = new ObjectOutputStream(bos);
+                out.writeObject(tracks);
+                data = bos.toByteArray();
+                out.close();
+                bos.close();
+            } catch (Exception ex) {
+                // ignore
+            }
+            if ((data != null) && (data.length < 500000))
+                outState.putByteArray(TRACK, data);
+        }
     }
 
     void showTrack(int index) {
@@ -247,6 +302,7 @@ public class TracksFragment extends MainFragment {
             status += timeFormat((int) (engine_time / 60));
         }
         tvSummary.setText(status);
+        refreshDone();
     }
 
     void all_done() {

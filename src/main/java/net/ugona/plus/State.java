@@ -1,14 +1,17 @@
 package net.ugona.plus;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 public class State {
@@ -73,6 +76,19 @@ public class State {
             // ignore
         }
         return "";
+    }
+
+    static String formatTime(Context context, long time) {
+        try {
+            if (Settings.System.getInt(context.getContentResolver(), Settings.System.TIME_12_24) == 12) {
+                SimpleDateFormat sf = new SimpleDateFormat("KK:mm:ss a");
+                return sf.format(time);
+            }
+        } catch (Exception ex) {
+            // ignore
+        }
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sf = new SimpleDateFormat("HH:mm:ss");
+        return sf.format(time);
     }
 
 }

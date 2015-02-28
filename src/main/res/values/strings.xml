@@ -82,4 +82,15 @@
     <string name="no_data">No data</string>
     <string name="saved">Track saved</string>
     <string name="mileage">%.2f km</string>
+    <string name="no_events">No events</string>
+    <string name="voltage">Voltage</string>
+    <string name="reserved">Reserved voltage</string>
+    <string name="temperature">Temperature</string>
+    <string name="balance">Balance</string>
+    <string name="sensor">Sensor</string>
+    <string name="card_info" formatted="false">Signal level: %d dB\nVoltage: %.2f V</string>
+    <string name="actions">Actions</string>
+    <string name="contacts">Contacts</string>
+    <string name="system">System</string>
+    <string name="event">Event</string>
 </resources>

@@ -85,6 +85,7 @@
             android:theme="@style/Alp.42447968.Theme.Light" />
 
         <activity android:name=".TrackView" />
+        <activity android:name=".MapEventActivity" />
 
     </application>
 
