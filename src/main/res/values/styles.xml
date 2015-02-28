@@ -3,7 +3,7 @@
 
     <style name="Theme.ugona_net" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/main</item>
-        <item name="colorPrimaryDark">@color/highlighted_main</item>
+        <item name="colorPrimaryDark">@color/highlighted</item>
     </style>
 
     <style name="Theme.Transparent" parent="android:Theme.Dialog">

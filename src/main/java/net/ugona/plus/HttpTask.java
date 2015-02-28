@@ -24,6 +24,7 @@ public abstract class HttpTask {
     AsyncTask<Object, Void, JsonObject> bgTask;
     int pause = 0;
     String error_text;
+    boolean canceled;
 
     static OkHttpClient createClient() {
         OkHttpClient client = new OkHttpClient();
@@ -123,6 +124,10 @@ public abstract class HttpTask {
             @Override
             protected void onPostExecute(JsonObject res) {
                 bgTask = null;
+                if (canceled) {
+                    canceled = false;
+                    return;
+                }
                 if (res != null) {
                     try {
                         result(res);
@@ -152,6 +157,10 @@ public abstract class HttpTask {
             ex.printStackTrace();
             error();
         }
+    }
+
+    void cancel() {
+        canceled = true;
     }
 
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="main">#0976ba</color>
-    <color name="highlighted_main">#0976ba</color>
+    <color name="highlighted">#0976ba</color>
     <color name="error">#FF4040</color>
     <color name="hour">#20000000</color>
     <color name="hour_active">#FF000000</color>

@@ -48,4 +48,15 @@
     <string name="password_summary">Set password for actions</string>
     <string name="error_load">Data loading error</string>
     <string name="loading">Loading data…</string>
+        <string name="status" formatted="false">Mileage: %s km\nRoute time: %s\nAverage speed: %.2f
+        kmh\nMax speed: %d kmh
+    </string>
+        <string name="short_status" formatted="false">Engine time: %s\nAverage speed: %.2f kmh\nMax
+        speed: %d kmh\n
+    </string>
+    <string name="m_format" formatted="false">%d min</string>
+    <string name="hm_format" formatted="false">%d h %02d min</string>
+    <string name="engine_time">Engine time</string>
+    <string name="kmh">kmh</string>
+    <string name="km">km</string>
 </resources>

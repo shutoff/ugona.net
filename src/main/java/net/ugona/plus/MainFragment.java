@@ -41,6 +41,9 @@ public abstract class MainFragment extends Fragment implements OnRefreshListener
         refreshDone();
     }
 
+    void changeDate() {
+    }
+
     void refreshDone() {
         try {
             mPullToRefreshLayout.setRefreshComplete();
@@ -77,5 +80,16 @@ public abstract class MainFragment extends Fragment implements OnRefreshListener
     @Override
     public void onRefreshStarted(View view) {
         refresh();
+    }
+
+    String timeFormat(int minutes) {
+        if (minutes < 60) {
+            String s = getString(R.string.m_format);
+            return String.format(s, minutes);
+        }
+        int hours = minutes / 60;
+        minutes -= hours * 60;
+        String s = getString(R.string.hm_format);
+        return String.format(s, hours, minutes);
     }
 }

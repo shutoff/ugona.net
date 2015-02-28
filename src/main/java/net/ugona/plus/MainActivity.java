@@ -201,13 +201,13 @@ public class MainActivity extends ActionBarActivity {
                         updateMenu();
                         MainFragment fragment = getFragment(-1);
                         if (fragment != null)
-                            fragment.refresh();
+                            fragment.changeDate();
                         fragment = getFragment(0);
                         if (fragment != null)
-                            fragment.refresh();
+                            fragment.changeDate();
                         fragment = getFragment(1);
                         if (fragment != null)
-                            fragment.refresh();
+                            fragment.changeDate();
 
                     }
                 }, current.getYear(), current.getMonthOfYear() - 1, current.getDayOfMonth());
