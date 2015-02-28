@@ -51,7 +51,7 @@
         <string name="status" formatted="false">Mileage: %s km\nRoute time: %s\nAverage speed: %.2f
         kmh\nMax speed: %d kmh
     </string>
-        <string name="short_status" formatted="false">Engine time: %s\nAverage speed: %.2f kmh\nMax
+        <string name="short_status" formatted="false">Route time: %s\nAverage speed: %.2f kmh\nMax
         speed: %d kmh\n
     </string>
     <string name="m_format" formatted="false">%d min</string>
@@ -59,4 +59,6 @@
     <string name="engine_time">Engine time</string>
     <string name="kmh">kmh</string>
     <string name="km">km</string>
+    <string name="recalc_stat">Recalc statistic</string>
+    <string name="recalc_message">Process of statics require some minutes</string>
 </resources>

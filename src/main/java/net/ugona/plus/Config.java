@@ -126,6 +126,10 @@ public class Config {
                     Object v = f.get(o);
                     if (v != null)
                         res.add(name, v.toString());
+                } else if (t == Integer.class) {
+                    Object v = f.get(o);
+                    if (v != null)
+                        res.add(name, (Integer) v);
                 }
             }
         } catch (IllegalAccessException ex) {

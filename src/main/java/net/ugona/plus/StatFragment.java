@@ -1,10 +1,16 @@
 package net.ugona.plus;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.PopupMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -38,6 +44,8 @@ public class StatFragment extends MainFragment {
     Vector<Day> days;
     Vector<Day> stat;
 
+    Menu stat_menu;
+
     static String monthYear(int year, int month) {
         String s = new DateTime(year, month + 1, 1, 0, 0, 0, 0)
                 .monthOfYear().getAsText().toUpperCase();
@@ -49,6 +57,17 @@ public class StatFragment extends MainFragment {
     @Override
     int layout() {
         return R.layout.tracks;
+    }
+
+    @Override
+    Menu menu() {
+        if (stat_menu == null) {
+            PopupMenu menu = new PopupMenu(getActivity(), null);
+            stat_menu = menu.getMenu();
+            MenuInflater inflater = getActivity().getMenuInflater();
+            inflater.inflate(R.menu.stat, stat_menu);
+        }
+        return stat_menu;
     }
 
     @Override
@@ -73,7 +92,30 @@ public class StatFragment extends MainFragment {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.recalc) {
+            final AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                    .setTitle(R.string.recalc_stat)
+                    .setMessage(R.string.recalc_message)
+                    .setNegativeButton(R.string.cancel, null)
+                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            refresh(true);
+                        }
+                    })
+                    .create();
+            dialog.show();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     void refresh() {
+        refresh(false);
+    }
+
+    void refresh(boolean recalc) {
         if (fetcher != null)
             fetcher.cancel();
         fetcher = new HttpTask() {
@@ -303,6 +345,8 @@ public class StatFragment extends MainFragment {
         param.skey = config.getKey();
         Calendar cal = Calendar.getInstance();
         param.tz = cal.getTimeZone().getID();
+        if (recalc)
+            param.recalc = 1;
         fetcher.execute("/stat", param);
     }
 
@@ -386,6 +430,7 @@ public class StatFragment extends MainFragment {
     static class StatParam {
         String skey;
         String tz;
+        Integer recalc;
     }
 
     static class Day {
@@ -422,4 +467,5 @@ public class StatFragment extends MainFragment {
             return res;
         }
     }
+
 }

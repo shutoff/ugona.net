@@ -181,16 +181,27 @@ public class MainActivity extends ActionBarActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
         MenuItem item = menu.findItem(R.id.date);
-        if (getFragment(0).isShowDate()) {
+        MainFragment fragment = getFragment(0);
+        if (fragment.isShowDate()) {
             item.setTitle(current.toString("d MMMM"));
         } else {
             menu.removeItem(R.id.date);
+        }
+        Menu sub_menu = fragment.menu();
+        if (sub_menu != null) {
+            for (int i = 0; i < sub_menu.size(); i++) {
+                MenuItem it = sub_menu.getItem(i);
+                menu.add(it.getGroupId(), it.getItemId(), it.getOrder(), it.getTitle());
+            }
         }
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        MainFragment fragment = getFragment(0);
+        if ((fragment != null) && fragment.onOptionsItemSelected(item))
+            return true;
         switch (item.getItemId()) {
             case R.id.date: {
                 CalendarDatePickerDialog dialog = new CalendarDatePickerDialog();
