@@ -217,6 +217,9 @@ public class MainActivity extends ActionBarActivity {
             case R.id.about:
                 startActivity(new Intent(this, About.class));
                 return true;
+            case R.id.passwd:
+                startActivity(new Intent(this, SetPassword.class));
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

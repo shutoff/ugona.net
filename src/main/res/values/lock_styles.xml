@@ -43,7 +43,7 @@
         </item>
     </style>
 
-    <style name="Alp.42447968.BaseTheme.Light" parent="@android:style/Theme.Light" />
+    <style name="Alp.42447968.BaseTheme.Light" parent="Theme.AppCompat.Light.NoActionBar" />
 
     <style name="Alp.42447968.BaseThemeHelper.Light" parent="@style/Alp.42447968.BaseTheme.Light" />
 

@@ -37,4 +37,13 @@
     <string name="application">Application UGONA.NET+ works with MS-PGSM devices</string>
     <string name="service_btn">Service Ugona.net</string>
     <string name="forum_btn">Support forum</string>
+    <string name="password_old">Old password</string>
+    <string name="password_text">Password</string>
+    <string name="password_confirm">Confirm</string>
+    <string name="password_set">Set password</string>
+    <string name="invalid_password">Invalid password</string>
+    <string name="invalid_confirm">Invalid confirm</string>
+    <string name="input_password">Input password</string>
+    <string name="graphics_code">Set graphic pattern</string>
+    <string name="password_summary">Set password for actions</string>
 </resources>

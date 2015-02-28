@@ -12,10 +12,14 @@ public class AppConfig extends Config {
     static private AppConfig config;
     String ids;
     String current_id;
+    String password;
+    String pattern;
 
     private AppConfig(Context context) {
         ids = "";
         current_id = "";
+        password = "";
+        pattern = "";
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String s = preferences.getString(CONFIG_KEY, "");
         if (!s.equals("")) {
