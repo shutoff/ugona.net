@@ -46,4 +46,6 @@
     <string name="input_password">Input password</string>
     <string name="graphics_code">Set graphic pattern</string>
     <string name="password_summary">Set password for actions</string>
+    <string name="error_load">Data loading error</string>
+    <string name="loading">Loading data…</string>
 </resources>

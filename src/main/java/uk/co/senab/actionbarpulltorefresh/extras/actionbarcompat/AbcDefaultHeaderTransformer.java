@@ -19,6 +19,7 @@ package uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.view.View;
@@ -34,6 +35,7 @@ import uk.co.senab.actionbarpulltorefresh.library.DefaultHeaderTransformer;
  */
 public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
 
+    static Drawable barBackgound;
     private Animation mHeaderInAnimation, mHeaderOutAnimation;
 
     @Override
@@ -55,6 +57,7 @@ public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
     @Override
     protected Drawable getActionBarBackground(Context context) {
         // Super handles ICS+ anyway...
+        /*
         if (Build.VERSION.SDK_INT >= super.getMinimumApiLevel()) {
             return super.getActionBarBackground(context);
         }
@@ -67,6 +70,10 @@ public class AbcDefaultHeaderTransformer extends DefaultHeaderTransformer {
         } finally {
             abStyle.recycle();
         }
+        */
+        if (barBackgound == null)
+            barBackgound = new ColorDrawable(context.getResources().getColor(R.color.main));
+        return barBackgound;
     }
 
     @Override

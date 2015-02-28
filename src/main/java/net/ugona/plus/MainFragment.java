@@ -1,18 +1,81 @@
 package net.ugona.plus;
 
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import org.joda.time.LocalDate;
 
-public class MainFragment extends Fragment {
+import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
-    String id;
+public abstract class MainFragment extends Fragment implements OnRefreshListener {
+
+    PullToRefreshLayout mPullToRefreshLayout;
+
+    abstract int layout();
 
     boolean isShowDate() {
         return false;
     }
 
-    void setDate(LocalDate date) {
+    String id() {
+        MainActivity mainActivity = (MainActivity) getActivity();
+        if (mainActivity == null)
+            return null;
+        return mainActivity.id;
+    }
 
+    LocalDate date() {
+        MainActivity mainActivity = (MainActivity) getActivity();
+        if (mainActivity == null)
+            return null;
+        return mainActivity.current;
+    }
+
+    void refresh() {
+        refreshDone();
+    }
+
+    void refreshDone() {
+        try {
+            mPullToRefreshLayout.setRefreshComplete();
+        } catch (Exception ex) {
+            // ignore
+        }
+    }
+
+    boolean canRefresh() {
+        return true;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (!canRefresh())
+            return;
+
+        ViewGroup viewGroup = (ViewGroup) view;
+        mPullToRefreshLayout = new PullToRefreshLayout(viewGroup.getContext());
+        ActionBarPullToRefresh.from(getActivity())
+                .insertLayoutInto(viewGroup)
+                .allChildrenArePullable()
+                .listener(this)
+                .setup(mPullToRefreshLayout);
+        mPullToRefreshLayout.setPullEnabled(true);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(layout(), container, false);
+    }
+
+    @Override
+    public void onRefreshStarted(View view) {
+        refresh();
     }
 }

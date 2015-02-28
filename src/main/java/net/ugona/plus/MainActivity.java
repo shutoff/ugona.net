@@ -201,13 +201,13 @@ public class MainActivity extends ActionBarActivity {
                         updateMenu();
                         MainFragment fragment = getFragment(-1);
                         if (fragment != null)
-                            fragment.setDate(current);
+                            fragment.refresh();
                         fragment = getFragment(0);
                         if (fragment != null)
-                            fragment.setDate(current);
+                            fragment.refresh();
                         fragment = getFragment(1);
                         if (fragment != null)
-                            fragment.setDate(current);
+                            fragment.refresh();
 
                     }
                 }, current.getYear(), current.getMonthOfYear() - 1, current.getDayOfMonth());
@@ -461,12 +461,7 @@ public class MainActivity extends ActionBarActivity {
                     fragment = new StatFragment();
                     break;
             }
-            if (fragment != null) {
-                fragment.id = id;
-                fragment.setDate(current);
-                return fragment;
-            }
-            return null;
+            return fragment;
         }
 
         @Override
