@@ -93,4 +93,5 @@
     <string name="contacts">Contacts</string>
     <string name="system">System</string>
     <string name="event">Event</string>
+    <string name="demo">Demo mode</string>
 </resources>

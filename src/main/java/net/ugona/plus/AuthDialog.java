@@ -30,6 +30,14 @@ public class AuthDialog extends Activity {
 
     AlertDialog dialog;
 
+    EditText etLogin;
+    EditText etPass;
+    Button btnOk;
+    Button btnDemo;
+    TextView tvError;
+    View vProgress;
+    TextWatcher watcher;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +47,12 @@ public class AuthDialog extends Activity {
         config = CarConfig.get(this, car_id);
 
         max_count = 8;
+        boolean canDemo = config.getAuth().equals("");
+        if (canDemo) {
+            AppConfig appConfig = AppConfig.get(this);
+            if (!appConfig.getIds().equals(""))
+                canDemo = false;
+        }
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
@@ -46,14 +60,20 @@ public class AuthDialog extends Activity {
                 .setPositiveButton(R.string.ok, null)
                 .setNegativeButton(R.string.cancel, null)
                 .setView(inflater.inflate(R.layout.apikeydialog, null));
+
+        if (canDemo)
+            builder = builder.setNeutralButton(R.string.demo, null);
+
         dialog = builder.create();
         dialog.show();
 
-        final EditText etLogin = (EditText) dialog.findViewById(R.id.login);
-        final EditText etPass = (EditText) dialog.findViewById(R.id.passwd);
-        final Button btnOk = dialog.getButton(Dialog.BUTTON_POSITIVE);
-        final TextView tvError = (TextView) dialog.findViewById(R.id.error);
-        final View vProgress = dialog.findViewById(R.id.progress);
+        etLogin = (EditText) dialog.findViewById(R.id.login);
+        etPass = (EditText) dialog.findViewById(R.id.passwd);
+        btnOk = dialog.getButton(Dialog.BUTTON_POSITIVE);
+        btnDemo = dialog.getButton(Dialog.BUTTON_NEUTRAL);
+        tvError = (TextView) dialog.findViewById(R.id.error);
+        vProgress = dialog.findViewById(R.id.progress);
+
         btnOk.setEnabled(false);
         etLogin.setText(config.getLogin());
 
@@ -90,7 +110,7 @@ public class AuthDialog extends Activity {
             }
         });
 
-        final TextWatcher watcher = new TextWatcher() {
+        watcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -130,50 +150,63 @@ public class AuthDialog extends Activity {
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                btnOk.setEnabled(false);
-                tvError.setVisibility(View.GONE);
-                vProgress.setVisibility(View.VISIBLE);
-                final String login = etLogin.getText().toString();
-                final HttpTask task = new HttpTask() {
-                    @Override
-                    void result(JsonObject res) throws ParseException {
-                        if (dialog == null)
-                            return;
-                        Config.update(config, res);
-                        CarState state = CarState.get(AuthDialog.this, car_id);
-                        CarState.update(state, res.get("state").asObject());
-                        JsonObject caps = res.get("caps").asObject();
-                        CarState.update(state, caps.get("caps").asObject());
-                        CarState.update(config, caps);
-                        config.setLogin(login);
-                        setResult(RESULT_OK);
-                        dialog.dismiss();
-                    }
-
-                    @Override
-                    void error() {
-                        if (dialog == null)
-                            return;
-                        if (Names.AUTH_ERROR.equals(error_text)) {
-                            bad_count++;
-                            tvError.setText(R.string.auth_error);
-                            etPass.setText("");
-                            if ((max_count > 0) && (bad_count > max_count))
-                                dialog.dismiss();
-                        } else {
-                            tvError.setText(getString(R.string.error) + "\n" + error_text);
-                        }
-                        tvError.setVisibility(View.VISIBLE);
-                        vProgress.setVisibility(View.GONE);
-                        watcher.afterTextChanged(null);
-                    }
-                };
-                AuthParam authParam = new AuthParam();
-                authParam.login = etLogin.getText().toString();
-                authParam.password = etPass.getText().toString();
-                task.execute("/key", authParam);
+                doLogin(etLogin.getText().toString(), etPass.getText().toString());
             }
         });
+        if (btnDemo != null) {
+            btnDemo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    doLogin("demo", "demo");
+                }
+            });
+        }
+    }
+
+    void doLogin(final String login, String password) {
+        btnOk.setEnabled(false);
+        btnDemo.setEnabled(false);
+        tvError.setVisibility(View.GONE);
+        vProgress.setVisibility(View.VISIBLE);
+        final HttpTask task = new HttpTask() {
+            @Override
+            void result(JsonObject res) throws ParseException {
+                if (dialog == null)
+                    return;
+                Config.update(config, res);
+                CarState state = CarState.get(AuthDialog.this, car_id);
+                CarState.update(state, res.get("state").asObject());
+                JsonObject caps = res.get("caps").asObject();
+                CarState.update(state, caps.get("caps").asObject());
+                CarState.update(config, caps);
+                config.setLogin(login);
+                setResult(RESULT_OK);
+                dialog.dismiss();
+            }
+
+            @Override
+            void error() {
+                if (dialog == null)
+                    return;
+                if (Names.AUTH_ERROR.equals(error_text)) {
+                    bad_count++;
+                    tvError.setText(R.string.auth_error);
+                    etPass.setText("");
+                    if ((max_count > 0) && (bad_count > max_count))
+                        dialog.dismiss();
+                } else {
+                    tvError.setText(getString(R.string.error) + "\n" + error_text);
+                }
+                tvError.setVisibility(View.VISIBLE);
+                vProgress.setVisibility(View.GONE);
+                btnDemo.setEnabled(true);
+                watcher.afterTextChanged(null);
+            }
+        };
+        AuthParam authParam = new AuthParam();
+        authParam.login = login;
+        authParam.password = password;
+        task.execute("/key", authParam);
     }
 
     static class AuthParam {

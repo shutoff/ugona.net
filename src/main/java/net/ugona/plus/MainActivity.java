@@ -152,7 +152,7 @@ public class MainActivity extends ActionBarActivity {
         });
         vPager.setCurrentItem(getPagePosition(PAGE_STATE));
 
-        if (car_config.getKey().equals("")) {
+        if (car_config.getAuth().equals("")) {
             Intent intent = new Intent(this, AuthDialog.class);
             intent.putExtra(Names.ID, id);
             startActivityForResult(intent, DO_AUTH);
