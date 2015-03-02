@@ -26,4 +26,67 @@
     <string name="events">События</string>
     <string name="tracks">Маршруты</string>
     <string name="stat">Статистика</string>
+    <string name="preferences">Настройки</string>
+    <string name="charts">Графики</string>
+    <string name="maintenance">Обслуживание</string>
+    <string name="cars">Список автомобилей</string>
+    <string name="password">Установить пароль</string>
+    <string name="about">О программе</string>
+    <string name="version">Версия:</string>
+    <string name="service">ФЕДЕРАЛЬНЫЙ СЕРВИС</string>
+    <string name="application">Приложение Угона.нет+ предназначено для контроля и управления автомобилями, оборудованными охранным мониторинговым комплексом серии MS-PGSM</string>
+    <string name="service_btn">Сервис Угона.нет</string>
+    <string name="forum_btn">Форум поддержки</string>
+    <string name="password_old">Старый пароль:</string>
+    <string name="password_text">Пароль:</string>
+    <string name="password_confirm">Подтверждение:</string>
+    <string name="password_set">Установить</string>
+    <string name="invalid_password">Неверный пароль</string>
+    <string name="invalid_confirm">Пароли не совпадают</string>
+    <string name="input_password">Введите пароль</string>
+    <string name="graphics_code">Графический пароль</string>
+    <string name="password_summary">Укажите пароль для управления устройством из приложения</string>
+    <string name="error_load">Ошибка загрузки данных</string>
+    <string name="loading">Загрузка данных…</string>
+    <string name="status" formatted="false">Расстояние: %s км\nВремя в пути: %s\nСредняя скорость: %.2f км/ч\nМаксимальная скорость: %d км/ч</string>
+    <string name="short_status" formatted="false">Время в пути: %s\nСредняя скорость: %.2f км/ч\nМаксимальная скорость: %d км/ч\n</string>
+    <string name="m_format" formatted="false">%d мин</string>
+    <string name="hm_format" formatted="false">%d ч %02d мин</string>
+    <string name="engine_time">Время работы двигателя</string>
+    <string name="kmh">км/ч</string>
+    <string name="km">км</string>
+    <string name="recalc_stat">Пересчитать статистику</string>
+    <string name="recalc_message">Процесс пересчета займет несколько минут</string>
+    <string name="name">Название</string>
+    <string name="sms_notify">Оповещать о въезде и выезде из зоны по СМС</string>
+    <string name="save">Сохранить</string>
+    <string name="share">Поделиться</string>
+    <string name="google">Google</string>
+    <string name="osm">OSM</string>
+    <string name="yandex">Yandex</string>
+    <string name="bing">Bing</string>
+    <string name="settings">Настройки</string>
+    <string name="no_gps_title">GPS выключен</string>
+    <string name="no_gps_message">GPS выключен в системе.\nДля определения местоположения надо включить GPS в настройках</string>
+    <string name="net_gps_message">Местоположение определено по сети.\nДля более точного определения положения надо включить GPS в настройках</string>
+    <string name="no_location">Неизвестное местоположение</string>
+    <string name="position">Мое положение</string>
+    <string name="map">Карта</string>
+    <string name="use_gps">Использовать GPS</string>
+    <string name="no_data">Нет данных</string>
+    <string name="saved">Трек сохранен</string>
+    <string name="mileage" formatted="false">%.2f км</string>
+    <string name="no_events">Нет событий</string>
+    <string name="voltage">Напряжение</string>
+    <string name="reserved">Резервный источник</string>
+    <string name="temperature">Температура</string>
+    <string name="balance">Баланс</string>
+    <string name="sensor">Датчик</string>
+    <string name="card_info" formatted="false">Уровень сигнала: %d dB\nЗаряд батареи: %.2f V</string>
+    <string name="actions">Действия</string>
+    <string name="contacts">Контакты</string>
+    <string name="system">Система</string>
+    <string name="event">Событие</string>
+    <string name="show_traffic">Показывать пробки</string>
+    <string name="show_speed">Показывать скорость</string>
 </resources>

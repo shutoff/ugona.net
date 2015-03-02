@@ -106,13 +106,14 @@ public class TracksFragment extends MainFragment {
             @Override
             public int setHour(int h) {
                 int i;
-                for (i = tracks.size() - 1; i >= 0; i--) {
+                for (i = 0; i < tracks.size(); i++) {
                     Track t = tracks.get(i);
                     LocalTime time = new LocalTime(t.begin);
                     int th = time.getHourOfDay();
-                    if (th <= h)
+                    if (th < h)
                         break;
                 }
+                i--;
                 if (i < 0)
                     i = 0;
                 return i;
@@ -331,7 +332,7 @@ public class TracksFragment extends MainFragment {
                 return;
             tracks = new Vector<Track>();
             JsonArray list = res.get("tracks").asArray();
-            for (int i = 0; i < list.size(); i++) {
+            for (int i = list.size() - 1; i >= 0; i--) {
                 JsonObject v = list.get(i).asObject();
                 Track track = new Track();
                 track.track = v.get("track").asString();

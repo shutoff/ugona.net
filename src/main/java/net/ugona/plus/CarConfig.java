@@ -141,7 +141,11 @@ public class CarConfig extends Config {
         upd = true;
     }
 
-    static class Command {
+    public Command[] getCmd() {
+        return cmd;
+    }
+
+    public static class Command {
         String name;
         String icon;
         String sms;

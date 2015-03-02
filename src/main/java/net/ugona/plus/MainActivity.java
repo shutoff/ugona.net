@@ -66,6 +66,15 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread thread, Throwable ex) {
+                State.print(ex);
+                System.exit(1);
+            }
+        });
+
         super.onCreate(savedInstanceState);
         config = AppConfig.get(this);
         id = config.getId(getIntent().getStringExtra(Names.ID));
@@ -204,7 +213,13 @@ public class MainActivity extends ActionBarActivity {
             return true;
         switch (item.getItemId()) {
             case R.id.date: {
-                CalendarDatePickerDialog dialog = new CalendarDatePickerDialog();
+                final CalendarDatePickerDialog dialog = new CalendarDatePickerDialog() {
+                    @Override
+                    public void onDayOfMonthSelected(int year, int month, int day) {
+                        super.onDayOfMonthSelected(year, month, day);
+                        getView().findViewById(R.id.done).performClick();
+                    }
+                };
                 dialog.initialize(new CalendarDatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(CalendarDatePickerDialog calendarDatePickerDialog, int i, int i2, int i3) {
