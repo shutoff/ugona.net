@@ -20,6 +20,8 @@ import android.widget.TextView;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
+import java.util.Locale;
+
 public class AuthDialog extends Activity {
 
     String car_id;
@@ -41,6 +43,7 @@ public class AuthDialog extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setResult(RESULT_CANCELED);
 
         car_id = AppConfig.get(this).getId(getIntent().getStringExtra(Names.ID));
@@ -75,7 +78,9 @@ public class AuthDialog extends Activity {
         vProgress = dialog.findViewById(R.id.progress);
 
         btnOk.setEnabled(false);
-        etLogin.setText(config.getLogin());
+        String login = config.getLogin();
+        if (!login.equals("demo"))
+            etLogin.setText(config.getLogin());
 
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
@@ -175,10 +180,19 @@ public class AuthDialog extends Activity {
                     return;
                 Config.update(config, res);
                 CarState state = CarState.get(AuthDialog.this, car_id);
-                CarState.update(state, res.get("state").asObject());
+                if (CarState.update(state, res.get("state").asObject())) {
+                    Intent intent = new Intent(Names.UPDATED);
+                    intent.putExtra(Names.ID, car_id);
+                    sendBroadcast(intent);
+                }
                 JsonObject caps = res.get("caps").asObject();
                 CarState.update(state, caps.get("caps").asObject());
-                CarState.update(config, caps);
+                if (CarState.update(config, caps)) {
+                    Intent intent = new Intent(Names.CONFIG_CHANGED);
+                    intent.putExtra(Names.ID, car_id);
+                    sendBroadcast(intent);
+                }
+                CarState.update(config, res);
                 config.setLogin(login);
                 setResult(RESULT_OK);
                 dialog.dismiss();
@@ -206,11 +220,13 @@ public class AuthDialog extends Activity {
         AuthParam authParam = new AuthParam();
         authParam.login = login;
         authParam.password = password;
+        authParam.lang = Locale.getDefault().getLanguage();
         task.execute("/key", authParam);
     }
 
     static class AuthParam {
         String login;
         String password;
+        String lang;
     }
 }

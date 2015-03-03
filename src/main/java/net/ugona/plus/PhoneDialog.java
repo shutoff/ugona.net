@@ -37,7 +37,7 @@ public class PhoneDialog extends Activity {
         setResult(RESULT_CANCELED);
 
         id = AppConfig.get(this).getId(getIntent().getStringExtra(Names.ID));
-        final CarState state = CarState.get(this, id);
+        final CarConfig config = CarConfig.get(this, id);
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
@@ -73,7 +73,7 @@ public class PhoneDialog extends Activity {
                 okButton.setEnabled(State.isValidPhoneNumber(s.toString()));
             }
         });
-        etPhone.setText(state.getPhone());
+        etPhone.setText(config.getPhone());
 
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,7 +81,7 @@ public class PhoneDialog extends Activity {
                 String number = State.formatPhoneNumber(etPhone.getText().toString());
                 if (number == null)
                     return;
-                state.setPhone(State.formatPhoneNumber(number));
+                config.setPhone(State.formatPhoneNumber(number));
                 setResult(RESULT_OK);
                 dialog.dismiss();
             }

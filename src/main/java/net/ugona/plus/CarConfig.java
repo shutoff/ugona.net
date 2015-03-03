@@ -18,28 +18,20 @@ public class CarConfig extends Config {
     private String key;
     private String auth;
     private String login;
+    private String phone;
     private Command[] cmd;
     private int event_filter;
     private int voltage_shift;
     private String temp_settings;
 
-    private CarConfig(Context context, String id) {
+    private CarConfig() {
         name = "";
         key = "";
         auth = "";
         login = "";
+        phone = "";
         event_filter = 3;
         temp_settings = "";
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String s = preferences.getString(CAR_KEY + id, "");
-        if (!s.equals("")) {
-            try {
-                update(this, JsonObject.readFrom(s));
-                return;
-            } catch (Exception ex) {
-                // ignore
-            }
-        }
     }
 
     public static CarConfig get(Context context, String car_id) {
@@ -48,7 +40,17 @@ public class CarConfig extends Config {
         CarConfig res = config.get(car_id);
         if (res != null)
             return res;
-        res = new CarConfig(context, car_id);
+        res = new CarConfig();
+        res.read(context, car_id);
+        config.put(car_id, res);
+        return res;
+    }
+
+    public static CarConfig clear(Context context, String car_id) {
+        if (config != null)
+            config.remove(car_id);
+        CarConfig res = new CarConfig();
+        res.reset(context, car_id);
         config.put(car_id, res);
         return res;
     }
@@ -70,6 +72,26 @@ public class CarConfig extends Config {
         }
         if (ed != null)
             ed.commit();
+    }
+
+    void read(Context context, String id) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String s = preferences.getString(CAR_KEY + id, "");
+        if (!s.equals("")) {
+            try {
+                update(this, JsonObject.readFrom(s));
+                return;
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+    }
+
+    void reset(Context context, String id) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor ed = preferences.edit();
+        ed.remove(CAR_KEY + id);
+        ed.commit();
     }
 
     public String getName() {
@@ -138,6 +160,17 @@ public class CarConfig extends Config {
         if (this.temp_settings.equals(temp_settings))
             return;
         this.temp_settings = temp_settings;
+        upd = true;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        if (this.phone.equals(phone))
+            return;
+        this.phone = phone;
         upd = true;
     }
 

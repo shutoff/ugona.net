@@ -154,6 +154,7 @@ public class TracksFragment extends MainFragment {
 
         if (loaded) {
             vTracks.notifyChanges();
+            tracks_done();
             all_done();
         } else {
             refresh();

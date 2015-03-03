@@ -153,7 +153,8 @@ public class MainActivity extends ActionBarActivity {
         vPager.setCurrentItem(getPagePosition(PAGE_STATE));
 
         if (car_config.getAuth().equals("")) {
-            Intent intent = new Intent(this, AuthDialog.class);
+            car_config = CarConfig.clear(this, id);
+            Intent intent = new Intent(this, SplashActivity.class);
             intent.putExtra(Names.ID, id);
             startActivityForResult(intent, DO_AUTH);
             return;
@@ -303,7 +304,7 @@ public class MainActivity extends ActionBarActivity {
 
     boolean checkPhone() {
         CarState state = CarState.get(this, id);
-        if (!state.isUse_phone() || !state.getPhone().equals("") || !State.hasTelephony(this))
+        if (!state.isUse_phone() || !car_config.getPhone().equals("") || !State.hasTelephony(this))
             return false;
         Intent intent = new Intent(this, PhoneDialog.class);
         intent.putExtra(Names.ID, id);

@@ -33,7 +33,7 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@android:drawable/stat_notify_sync" />
+            android:src="@drawable/update" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -72,7 +72,9 @@
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:layout_weight="1"
-            android:text="@string/actions" />
+            android:background="@drawable/button"
+            android:text="@string/actions"
+            android:textColor="@android:color/white" />
 
         <Button
             android:id="@+id/contacts"
@@ -80,7 +82,9 @@
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:layout_weight="1"
-            android:text="@string/contacts" />
+            android:background="@drawable/button"
+            android:text="@string/contacts"
+            android:textColor="@android:color/white" />
 
         <Button
             android:id="@+id/system"
@@ -88,7 +92,9 @@
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:layout_weight="1"
-            android:text="@string/system" />
+            android:background="@drawable/button"
+            android:text="@string/system"
+            android:textColor="@android:color/white" />
 
         <ImageView
             android:id="@+id/logo"

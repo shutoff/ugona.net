@@ -9,6 +9,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -110,6 +111,10 @@ public class HoursList extends FrameLayout {
 
     void setOnItemClickListener(AdapterView.OnItemClickListener listener) {
         list.setOnItemClickListener(listener);
+    }
+
+    ListAdapter getAdapter() {
+        return list.getAdapter();
     }
 
     void setAdapter(BaseAdapter adapter) {

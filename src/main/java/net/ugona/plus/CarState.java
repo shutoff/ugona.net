@@ -43,7 +43,6 @@ public class CarState extends Config {
     private boolean show_photo;
     private boolean show_tracks;
     private boolean pointer;
-    private String phone;
     private long check_time;
     private String version;
 
@@ -52,7 +51,6 @@ public class CarState extends Config {
         gsm = "";
         gps = "";
         temperature = "";
-        phone = "";
         version = "";
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -199,17 +197,6 @@ public class CarState extends Config {
 
     public boolean isUse_phone() {
         return use_phone;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        if (this.phone.equals(phone))
-            return;
-        this.phone = phone;
-        upd = true;
     }
 
     public boolean isShow_photo() {

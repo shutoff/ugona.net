@@ -73,6 +73,11 @@
         android:gravity="center"
         android:orientation="vertical">
 
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="130dp"
+            android:src="@drawable/sidebar" />
+
         <ListView
             android:id="@+id/sidemenu"
             android:layout_width="match_parent"

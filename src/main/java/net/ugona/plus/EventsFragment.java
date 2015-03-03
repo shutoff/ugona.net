@@ -2,8 +2,10 @@ package net.ugona.plus;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -46,7 +48,6 @@ public class EventsFragment extends MainFragment {
     long current_id;
     int current_state;
     int filter;
-    boolean no_events;
 
     Vector<Event> events;
     Vector<Event> filtered;
@@ -59,6 +60,7 @@ public class EventsFragment extends MainFragment {
 
     CarState state;
     DataFetcher fetcher;
+    BroadcastReceiver br;
 
     @Override
     int layout() {
@@ -200,7 +202,43 @@ public class EventsFragment extends MainFragment {
             fetcher.update();
         }
 
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent == null)
+                    return;
+                if (!id().equals(intent.getStringExtra(Names.ID)))
+                    return;
+                if (intent.getAction().equals(Names.UPDATED)) {
+                    LocalDate today = new LocalDate();
+                    if (!today.equals(date()) && loaded)
+                        return;
+                    if (fetcher != null)
+                        return;
+                    fetcher = new DataFetcher();
+                    fetcher.no_reload = true;
+                    fetcher.update();
+                }
+                if (intent.getAction().equals(Names.CONFIG_CHANGED)) {
+                    if (fetcher != null)
+                        fetcher.cancel();
+                    fetcher = new DataFetcher();
+                    fetcher.no_reload = true;
+                    fetcher.update();
+                }
+            }
+        };
+        IntentFilter intFilter = new IntentFilter(Names.UPDATED);
+        intFilter.addAction(Names.CONFIG_CHANGED);
+        getActivity().registerReceiver(br, intFilter);
+
         return v;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        getActivity().unregisterReceiver(br);
     }
 
     @Override
@@ -240,8 +278,10 @@ public class EventsFragment extends MainFragment {
 
     void setupButton(View v, int id, int mask) {
         Button btn = (Button) v.findViewById(id);
-        if ((mask & filter) != 0)
+        if ((mask & filter) != 0) {
             btn.setBackgroundResource(R.drawable.pressed);
+            btn.setTextColor(getResources().getColor(R.color.main));
+        }
         btn.setTag(mask);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -257,9 +297,11 @@ public class EventsFragment extends MainFragment {
         if ((filter & mask) == 0) {
             filter |= mask;
             btn.setBackgroundResource(R.drawable.pressed);
+            btn.setTextColor(getResources().getColor(R.color.main));
         } else {
             filter &= ~mask;
             btn.setBackgroundResource(R.drawable.button);
+            btn.setTextColor(getResources().getColor(android.R.color.white));
         }
         CarConfig config = CarConfig.get(getActivity(), id());
         config.setEvent_filter(filter);
@@ -278,20 +320,19 @@ public class EventsFragment extends MainFragment {
                 filtered.add(e);
         }
         if (filtered.size() > 0) {
-            if (no_events || !no_reload) {
+            if (!no_reload)
                 current_id = 0;
+            if (vEvents.getAdapter() == null) {
                 vEvents.setAdapter(new EventsAdapter());
-                vEvents.setVisibility(View.VISIBLE);
-                tvNoEvents.setVisibility(View.GONE);
             } else {
                 vEvents.notifyChanges();
             }
-            no_events = false;
+            vEvents.setVisibility(View.VISIBLE);
+            tvNoEvents.setVisibility(View.GONE);
         } else {
             tvNoEvents.setText(getString(R.string.no_events));
             tvNoEvents.setVisibility(View.VISIBLE);
             vEvents.setVisibility(View.GONE);
-            no_events = true;
         }
     }
 
@@ -476,6 +517,11 @@ public class EventsFragment extends MainFragment {
             params.skey = config.getKey();
             params.begin = start.toDate().getTime();
             params.end = finish.toDate().getTime();
+            if (params.skey.equals("")) {
+                fetcher = null;
+                refreshDone();
+                return;
+            }
             if (first)
                 params.first = 1;
             if (state.isPointer())
