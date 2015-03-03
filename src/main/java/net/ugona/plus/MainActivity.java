@@ -67,6 +67,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+/*
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
@@ -74,6 +75,7 @@ public class MainActivity extends ActionBarActivity {
                 System.exit(1);
             }
         });
+*/
 
         super.onCreate(savedInstanceState);
         config = AppConfig.get(this);
@@ -130,27 +132,8 @@ public class MainActivity extends ActionBarActivity {
         setSideMenu();
 
         vPager = (ViewPager) findViewById(R.id.pager);
-        vPager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
 
         tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
-        tabs.setViewPager(vPager);
-        tabs.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int i, float v, int i2) {
-
-            }
-
-            @Override
-            public void onPageSelected(int i) {
-                updateMenu();
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int i) {
-
-            }
-        });
-        vPager.setCurrentItem(getPagePosition(PAGE_STATE));
 
         if (car_config.getAuth().equals("")) {
             car_config = CarConfig.clear(this, id);
@@ -159,6 +142,9 @@ public class MainActivity extends ActionBarActivity {
             startActivityForResult(intent, DO_AUTH);
             return;
         }
+
+        setTabs();
+
         checkCaps();
         if (checkPhone())
             return;
@@ -178,6 +164,7 @@ public class MainActivity extends ActionBarActivity {
                 finish();
                 return;
             }
+            setTabs();
             updatePages();
             if (checkPhone())
                 return;
@@ -192,16 +179,18 @@ public class MainActivity extends ActionBarActivity {
         inflater.inflate(R.menu.main, menu);
         MenuItem item = menu.findItem(R.id.date);
         MainFragment fragment = getFragment(0);
-        if (fragment.isShowDate()) {
-            item.setTitle(current.toString("d MMMM"));
-        } else {
-            menu.removeItem(R.id.date);
-        }
-        Menu sub_menu = fragment.menu();
-        if (sub_menu != null) {
-            for (int i = 0; i < sub_menu.size(); i++) {
-                MenuItem it = sub_menu.getItem(i);
-                menu.add(it.getGroupId(), it.getItemId(), it.getOrder(), it.getTitle());
+        if (fragment != null) {
+            if (fragment.isShowDate()) {
+                item.setTitle(current.toString("d MMMM"));
+            } else {
+                menu.removeItem(R.id.date);
+            }
+            Menu sub_menu = fragment.menu();
+            if (sub_menu != null) {
+                for (int i = 0; i < sub_menu.size(); i++) {
+                    MenuItem it = sub_menu.getItem(i);
+                    menu.add(it.getGroupId(), it.getItemId(), it.getOrder(), it.getTitle());
+                }
             }
         }
         return super.onCreateOptionsMenu(menu);
@@ -249,6 +238,31 @@ public class MainActivity extends ActionBarActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    void setTabs() {
+        if (vPager.getAdapter() != null)
+            return;
+        vPager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
+        tabs.setViewPager(vPager);
+        tabs.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int i, float v, int i2) {
+
+            }
+
+            @Override
+            public void onPageSelected(int i) {
+                updateMenu();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {
+
+            }
+        });
+        vPager.setCurrentItem(getPagePosition(PAGE_STATE));
+
     }
 
     void setSideMenu() {
@@ -314,6 +328,8 @@ public class MainActivity extends ActionBarActivity {
 
     MainFragment getFragment(int position) {
         FragmentStatePagerAdapter adapter = (FragmentStatePagerAdapter) vPager.getAdapter();
+        if (adapter == null)
+            return null;
         return (MainFragment) adapter.instantiateItem(vPager, vPager.getCurrentItem() + position);
     }
 

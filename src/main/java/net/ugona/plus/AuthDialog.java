@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
+import java.io.Serializable;
 import java.util.Locale;
 
 public class AuthDialog extends Activity {
@@ -224,7 +225,7 @@ public class AuthDialog extends Activity {
         task.execute("/key", authParam);
     }
 
-    static class AuthParam {
+    static class AuthParam implements Serializable {
         String login;
         String password;
         String lang;

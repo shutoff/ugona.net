@@ -2,7 +2,6 @@ package net.ugona.plus;
 
 import android.os.AsyncTask;
 import android.os.Build;
-import android.util.Log;
 
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
@@ -67,12 +66,10 @@ public abstract class HttpTask {
                     }
                     if (pause > 0)
                         Thread.sleep(pause);
-                    Log.v("url", url);
 
                     Request.Builder builder = new Request.Builder().url(url);
                     if (last_param < params.length) {
                         String data = Config.save(params[params.length - 1]);
-                        Log.v("data", data);
                         RequestBody body = RequestBody.create(MediaType.parse("application/json"), data);
                         builder = builder.post(body);
                     }

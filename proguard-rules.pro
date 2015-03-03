@@ -48,6 +48,14 @@
    public static final ** CREATOR;
 }
 
+-keepclassmembers class * implements java.io.Serializable {
+   *;
+}
+
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+
 -dontwarn org.joda.convert.**
 -dontwarn sun.misc.**
 -dontwarn android.os.**

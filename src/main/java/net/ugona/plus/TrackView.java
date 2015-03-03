@@ -218,7 +218,7 @@ public class TrackView extends MapActivity {
             Vector<Track.Marker> markers = new Vector<Track.Marker>();
             StringBuilder track_data = new StringBuilder();
             try {
-                for (int i = 0; i < tracks.size(); i++) {
+                for (int i = tracks.size() - 1; i >= 0; i--) {
                     Track track = tracks.get(i);
                     String[] points = track.track.split("\\|");
                     Track.Point start = new Track.Point(points[0]);
@@ -248,9 +248,9 @@ public class TrackView extends MapActivity {
                     }
                     marker.times.get(marker.times.size() - 1).end = track.begin;
 
-                    if (i > 0) {
-                        Track prev = tracks.get(i - 1);
-                        points = prev.track.split("\\|");
+                    if (i + 1 < tracks.size()) {
+                        Track next = tracks.get(i + 1);
+                        points = next.track.split("\\|");
                         Track.Point last = new Track.Point(points[points.length - 1]);
                         double delta = Address.calc_distance(start.latitude, start.longitude, last.latitude, last.longitude);
                         if (delta > 200)

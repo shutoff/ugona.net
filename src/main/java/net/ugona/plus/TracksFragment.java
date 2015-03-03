@@ -32,6 +32,7 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.Vector;
@@ -319,7 +320,7 @@ public class TracksFragment extends MainFragment {
         loaded = true;
     }
 
-    static class TrackParams {
+    static class TrackParams implements Serializable {
         String skey;
         long begin;
         long end;

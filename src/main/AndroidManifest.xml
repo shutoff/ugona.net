@@ -82,9 +82,7 @@
 
         <activity android:name=".TrackView" />
         <activity android:name=".MapEventActivity" />
-        <activity
-            android:name=".SplashActivity"
-            android:theme="@style/Theme.Splash" />
+        <activity android:name=".SplashActivity" />
 
     </application>
 

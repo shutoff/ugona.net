@@ -355,7 +355,7 @@ public class EventsFragment extends MainFragment {
         int level;
     }
 
-    static class EventsParams {
+    static class EventsParams implements Serializable {
         String skey;
         long begin;
         long end;
@@ -364,7 +364,7 @@ public class EventsFragment extends MainFragment {
         String lang;
     }
 
-    static class EventParams {
+    static class EventParams implements Serializable {
         String skey;
         long id;
         long time;

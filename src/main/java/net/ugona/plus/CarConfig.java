@@ -6,11 +6,12 @@ import android.preference.PreferenceManager;
 
 import com.eclipsesource.json.JsonObject;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class CarConfig extends Config {
+public class CarConfig extends Config implements Serializable {
 
     static final String CAR_KEY = "car_";
     private static HashMap<String, CarConfig> config;
@@ -178,7 +179,7 @@ public class CarConfig extends Config {
         return cmd;
     }
 
-    public static class Command {
+    public static class Command implements Serializable {
         String name;
         String icon;
         String sms;

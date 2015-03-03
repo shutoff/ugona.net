@@ -89,4 +89,5 @@
     <string name="event">Событие</string>
     <string name="show_traffic">Показывать пробки</string>
     <string name="show_speed">Показывать скорость</string>
+    <string name="demo">Демо режим</string>
 </resources>

@@ -24,6 +24,7 @@ import com.eclipsesource.json.ParseException;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.Calendar;
@@ -427,7 +428,7 @@ public class StatFragment extends MainFragment {
         }
     }
 
-    static class StatParam {
+    static class StatParam implements Serializable {
         String skey;
         String tz;
         Integer recalc;
