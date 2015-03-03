@@ -12,7 +12,10 @@ public class Names {
     static final String TRACK = "track";
     static final String TITLE = "title";
     static final String POINT_DATA = "point_data";
+    static final String CAMERA = "camera";
+    static final String PHOTO = "photo";
 
     static final String UPDATED = "net.ugona.plus.updated";
     static final String CONFIG_CHANGED = "net.ugona.plus.changed";
+    static final String ROTATE = "net.ugona.plus.rotate";
 }

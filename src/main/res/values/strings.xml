@@ -94,4 +94,6 @@
     <string name="system">System</string>
     <string name="event">Event</string>
     <string name="demo">Demo mode</string>
+    <string name="rotate">Rotate</string>
+    <string name="photo_error">Loading image error</string>
 </resources>

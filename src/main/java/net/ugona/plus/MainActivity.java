@@ -330,6 +330,9 @@ public class MainActivity extends ActionBarActivity {
         FragmentStatePagerAdapter adapter = (FragmentStatePagerAdapter) vPager.getAdapter();
         if (adapter == null)
             return null;
+        int pos = vPager.getCurrentItem() + position;
+        if ((pos < 0) || (pos >= adapter.getCount()))
+            return null;
         return (MainFragment) adapter.instantiateItem(vPager, vPager.getCurrentItem() + position);
     }
 

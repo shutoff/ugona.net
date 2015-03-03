@@ -8,19 +8,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.Vector;
 
 public class ActionFragment extends MainFragment {
 
-    ListView vActions;
+    HoursList vActions;
     Vector<CarConfig.Command> commands;
 
     @Override
     int layout() {
-        return R.layout.actions;
+        return R.layout.tracks;
     }
 
     @Override
@@ -41,7 +40,13 @@ public class ActionFragment extends MainFragment {
                     commands.add(cmd);
             }
         }
-        vActions = (ListView) v.findViewById(R.id.actions);
+        v.findViewById(R.id.summary).setVisibility(View.GONE);
+        v.findViewById(R.id.first_progress).setVisibility(View.GONE);
+        v.findViewById(R.id.progress).setVisibility(View.GONE);
+        v.findViewById(R.id.loading).setVisibility(View.GONE);
+        v.findViewById(R.id.space).setVisibility(View.GONE);
+        vActions = (HoursList) v.findViewById(R.id.tracks);
+        vActions.setVisibility(View.VISIBLE);
         vActions.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
