@@ -157,7 +157,6 @@ public class EventsFragment extends MainFragment {
             v.findViewById(R.id.actions).setVisibility(View.GONE);
             v.findViewById(R.id.contacts).setVisibility(View.GONE);
             v.findViewById(R.id.system).setVisibility(View.GONE);
-            View vLogo = v.findViewById(R.id.logo);
         } else {
             CarConfig config = CarConfig.get(getActivity(), id());
             filter = config.getEvent_filter();

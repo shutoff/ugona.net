@@ -62,7 +62,7 @@ public class PrimaryFragment extends MainFragment {
     void setTabs() {
         if (vPager.getAdapter() != null)
             return;
-        vPager.setAdapter(new PagerAdapter(getActivity().getSupportFragmentManager()));
+        vPager.setAdapter(new PagerAdapter(getChildFragmentManager()));
         tabs.setViewPager(vPager);
         tabs.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override

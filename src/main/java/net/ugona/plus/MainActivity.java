@@ -54,6 +54,8 @@ public class MainActivity extends ActionBarActivity {
     DrawerLayout drawer;
     ActionBarDrawerToggle drawerToggle;
     PrimaryFragment primaryFragment;
+    View vLogo;
+    Spinner spinner;
 
     private FragmentManager.OnBackStackChangedListener
             mOnBackStackChangedListener = new FragmentManager.OnBackStackChangedListener() {
@@ -83,6 +85,9 @@ public class MainActivity extends ActionBarActivity {
         state = CarState.get(this, id);
 
         setContentView(R.layout.main);
+        vLogo = findViewById(R.id.logo);
+        spinner = (Spinner) findViewById(R.id.spinner_nav);
+
         current = new LocalDate();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -234,6 +239,7 @@ public class MainActivity extends ActionBarActivity {
             drawerToggle.setDrawerIndicatorEnabled(true);
         }
         updateMenu();
+        setupActionBar();
     }
 
     MainFragment getFragment() {
@@ -324,16 +330,34 @@ public class MainActivity extends ActionBarActivity {
     }
 
     void setupActionBar() {
-        Spinner spinner = (Spinner) findViewById(R.id.spinner_nav);
 
-        final String[] cars = config.getCars();
-
-        if (cars.length <= 1) {
-            getSupportActionBar().setDisplayShowTitleEnabled(true);
+        String title = "";
+        MainFragment fragment = getFragment();
+        if (fragment != null)
+            title = fragment.getTitle();
+        if (title != null) {
             spinner.setVisibility(View.GONE);
+            if (title.equals("")) {
+                getSupportActionBar().setDisplayShowTitleEnabled(false);
+                vLogo.setVisibility(View.VISIBLE);
+                return;
+            }
+            getSupportActionBar().setDisplayShowTitleEnabled(true);
+            vLogo.setVisibility(View.GONE);
+            setTitle(title);
             return;
         }
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+
+        final String[] cars = config.getCars();
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        if (cars.length <= 1) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+            spinner.setVisibility(View.GONE);
+            vLogo.setVisibility(View.VISIBLE);
+            return;
+        }
+        vLogo.setVisibility(View.GONE);
         spinner.setVisibility(View.VISIBLE);
         spinner.setAdapter(new BaseAdapter() {
             @Override

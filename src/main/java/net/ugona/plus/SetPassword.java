@@ -26,6 +26,11 @@ public class SetPassword extends MainFragment {
     }
 
     @Override
+    String getTitle() {
+        return getString(R.string.password_set);
+    }
+
+    @Override
     boolean canRefresh() {
         return false;
     }

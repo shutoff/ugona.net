@@ -96,14 +96,6 @@
             android:text="@string/system"
             android:textColor="@android:color/white" />
 
-        <ImageView
-            android:id="@+id/logo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="15dp"
-            android:src="@drawable/ugona_net"
-            android:visibility="gone" />
-
     </LinearLayout>
 
 </LinearLayout>
