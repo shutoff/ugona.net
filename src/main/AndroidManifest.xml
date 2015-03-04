@@ -69,14 +69,6 @@
             android:theme="@style/Theme.Transparent" />
 
         <activity
-            android:name=".About"
-            android:label="@string/about" />
-
-        <activity
-            android:name=".SetPassword"
-            android:label="@string/password" />
-
-        <activity
             android:name="com.haibison.android.lockpattern.LockPatternActivity"
             android:theme="@style/Alp.42447968.Theme.Light" />
 

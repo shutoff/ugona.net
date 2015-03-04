@@ -1,54 +1,55 @@
 package net.ugona.plus;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.Toolbar;
+import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.haibison.android.lockpattern.LockPatternActivity;
 
-public class SetPassword extends ActionBarActivity {
+public class SetPassword extends MainFragment {
 
-    static final int REQUEST_CHECK_PATTERN = 1;
-    static final int REQUEST_PATTERN = 2;
+    static final int REQUEST_CHECK_PATTERN = 101;
+    static final int REQUEST_PATTERN = 102;
 
     AppConfig config;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.setpassword);
+    int layout() {
+        return R.layout.setpassword;
+    }
 
-        try {
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        } catch (Exception ex) {
-            // ignore
-        }
+    @Override
+    boolean canRefresh() {
+        return false;
+    }
 
-        config = AppConfig.get(this);
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View v = super.onCreateView(inflater, container, savedInstanceState);
+        config = AppConfig.get(getActivity());
         if (!config.getPattern().equals("")) {
             Intent intent = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null,
-                    this, LockPatternActivity.class);
+                    getActivity(), LockPatternActivity.class);
             intent.putExtra(LockPatternActivity.EXTRA_PATTERN, config.getPattern().toCharArray());
             startActivityForResult(intent, REQUEST_CHECK_PATTERN);
         }
 
-        View btnGraph = findViewById(R.id.graphic);
-        final View btnSave = findViewById(R.id.set);
+        View btnGraph = v.findViewById(R.id.graphic);
+        final View btnSave = v.findViewById(R.id.set);
 
-        final EditText etPassword = (EditText) findViewById(R.id.old_password);
+        final EditText etPassword = (EditText) v.findViewById(R.id.old_password);
 
-        final EditText etPass1 = (EditText) findViewById(R.id.password);
-        final EditText etPass2 = (EditText) findViewById(R.id.password1);
-        final View tvConfrim = findViewById(R.id.invalid_confirm);
-        final View tvPassword = findViewById(R.id.invalid_password);
+        final EditText etPass1 = (EditText) v.findViewById(R.id.password);
+        final EditText etPass2 = (EditText) v.findViewById(R.id.password1);
+        final View tvConfrim = v.findViewById(R.id.invalid_confirm);
+        final View tvPassword = v.findViewById(R.id.invalid_password);
 
         if (config.getPassword().equals("")) {
             etPassword.setVisibility(View.GONE);
@@ -80,7 +81,7 @@ public class SetPassword extends ActionBarActivity {
                     return;
                 }
                 Intent intent = new Intent(LockPatternActivity.ACTION_CREATE_PATTERN, null,
-                        SetPassword.this, LockPatternActivity.class);
+                        getActivity(), LockPatternActivity.class);
                 startActivityForResult(intent, REQUEST_PATTERN);
             }
         });
@@ -97,7 +98,7 @@ public class SetPassword extends ActionBarActivity {
                     return;
                 config.setPassword(etPass1.getText().toString());
                 config.setPattern("");
-                finish();
+                getActivity().onBackPressed();
             }
         });
 
@@ -125,31 +126,25 @@ public class SetPassword extends ActionBarActivity {
         };
         etPass1.addTextChangedListener(watcher);
         etPass2.addTextChangedListener(watcher);
+
+        return v;
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CHECK_PATTERN) {
-            if (resultCode != RESULT_OK)
-                finish();
+            if (resultCode != Activity.RESULT_OK)
+                getActivity().onBackPressed();
         }
         if (requestCode == REQUEST_PATTERN) {
-            if (resultCode == RESULT_OK) {
+            if (resultCode == Activity.RESULT_OK) {
                 char[] pattern = data.getCharArrayExtra(LockPatternActivity.EXTRA_PATTERN);
                 config.setPattern(String.copyValueOf(pattern));
                 config.setPassword("");
             }
-            finish();
+            getActivity().onBackPressed();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 }

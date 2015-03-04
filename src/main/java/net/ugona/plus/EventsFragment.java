@@ -158,17 +158,6 @@ public class EventsFragment extends MainFragment {
             v.findViewById(R.id.contacts).setVisibility(View.GONE);
             v.findViewById(R.id.system).setVisibility(View.GONE);
             View vLogo = v.findViewById(R.id.logo);
-            if (vLogo != null) {
-                vLogo.setVisibility(View.VISIBLE);
-                vLogo.setClickable(true);
-                vLogo.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(getActivity(), About.class);
-                        startActivity(intent);
-                    }
-                });
-            }
         } else {
             CarConfig config = CarConfig.get(getActivity(), id());
             filter = config.getEvent_filter();

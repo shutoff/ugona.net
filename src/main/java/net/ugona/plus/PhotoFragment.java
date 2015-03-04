@@ -155,10 +155,11 @@ public class PhotoFragment extends MainFragment {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals(Names.ROTATE)) {
-                    int camera = intent.getIntExtra(Names.CAMERA, 0);
                     String car_id = intent.getStringExtra(Names.ID);
-                    if (id().equals(car_id))
+                    if (id().equals(car_id)) {
+                        memCache.clear();
                         vPhotos.notifyChanges();
+                    }
                 }
             }
         };

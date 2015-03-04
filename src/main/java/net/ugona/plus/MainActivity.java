@@ -2,18 +2,15 @@ package net.ugona.plus;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.ViewPager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,18 +19,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.astuetz.PagerSlidingTabStrip;
 import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
 import org.joda.time.LocalDate;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import static android.view.Gravity.START;
@@ -43,26 +39,29 @@ public class MainActivity extends ActionBarActivity {
     static final int DO_AUTH = 1;
     static final int DO_PHONE = 2;
 
-    static final int PAGE_PHOTO = 0;
-    static final int PAGE_ACTIONS = 1;
-    static final int PAGE_STATE = 2;
-    static final int PAGE_EVENT = 3;
-    static final int PAGE_TRACK = 4;
-    static final int PAGE_STAT = 5;
+    static final String TAG = "frag_tag";
 
     String id;
     AppConfig config;
     CarState state;
     CarConfig car_config;
-    PagerSlidingTabStrip tabs;
-    ViewPager vPager;
+
     Menu topSubMenu;
     Menu sideMenu;
+
     LocalDate current;
+
     DrawerLayout drawer;
-    private DrawerArrowDrawable drawerArrowDrawable;
-    private float offset;
-    private boolean flipped;
+    ActionBarDrawerToggle drawerToggle;
+    PrimaryFragment primaryFragment;
+
+    private FragmentManager.OnBackStackChangedListener
+            mOnBackStackChangedListener = new FragmentManager.OnBackStackChangedListener() {
+        @Override
+        public void onBackStackChanged() {
+            setActionBarArrowDependingOnFragmentsBackStack();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,51 +88,33 @@ public class MainActivity extends ActionBarActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayShowHomeEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayUseLogoEnabled(false);
+
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        final ImageView imageView = (ImageView) findViewById(R.id.drawer_indicator);
-        final Resources resources = getResources();
 
-        drawerArrowDrawable = new DrawerArrowDrawable(resources);
-        drawerArrowDrawable.setStrokeColor(getResources().getColor(android.R.color.white));
-        imageView.setImageDrawable(drawerArrowDrawable);
+        drawerToggle = new ActionBarDrawerToggle(
+                this,
+                drawer,
+                0,
+                0
+        ) {
 
-        drawer.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
-            @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
-                offset = slideOffset;
-
-                // Sometimes slideOffset ends up so close to but not quite 1 or 0.
-                if (slideOffset >= .995) {
-                    flipped = true;
-                    drawerArrowDrawable.setFlip(flipped);
-                } else if (slideOffset <= .005) {
-                    flipped = false;
-                    drawerArrowDrawable.setFlip(flipped);
-                }
-
-                drawerArrowDrawable.setParameter(offset);
+            public void onDrawerClosed(View view) {
+                setActionBarArrowDependingOnFragmentsBackStack();
             }
-        });
 
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (drawer.isDrawerVisible(START)) {
-                    drawer.closeDrawer(START);
-                } else {
-                    drawer.openDrawer(START);
-                }
+            public void onDrawerOpened(View drawerView) {
+                drawerToggle.setDrawerIndicatorEnabled(true);
             }
-        });
+        };
+        drawer.setDrawerListener(drawerToggle);
+        drawerToggle.setDrawerIndicatorEnabled(true);
+        getSupportFragmentManager().addOnBackStackChangedListener(mOnBackStackChangedListener);
 
         setupActionBar();
         setSideMenu();
-
-        vPager = (ViewPager) findViewById(R.id.pager);
-
-        tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
 
         if (car_config.getAuth().equals("")) {
             car_config = CarConfig.clear(this, id);
@@ -143,7 +124,7 @@ public class MainActivity extends ActionBarActivity {
             return;
         }
 
-        setTabs();
+        setPrimary();
 
         checkCaps();
         if (checkPhone())
@@ -152,8 +133,15 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onDestroy() {
+        getSupportFragmentManager().removeOnBackStackChangedListener(mOnBackStackChangedListener);
         AppConfig.save(this);
         super.onDestroy();
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        drawerToggle.syncState();
     }
 
     @Override
@@ -164,8 +152,7 @@ public class MainActivity extends ActionBarActivity {
                 finish();
                 return;
             }
-            setTabs();
-            updatePages();
+            setPrimary();
             if (checkPhone())
                 return;
         }
@@ -178,7 +165,7 @@ public class MainActivity extends ActionBarActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
         MenuItem item = menu.findItem(R.id.date);
-        MainFragment fragment = getFragment(0);
+        MainFragment fragment = getFragment();
         if (fragment != null) {
             if (fragment.isShowDate()) {
                 item.setTitle(current.toString("d MMMM"));
@@ -198,7 +185,13 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        MainFragment fragment = getFragment(0);
+        if (drawerToggle.isDrawerIndicatorEnabled() && drawerToggle.onOptionsItemSelected(item))
+            return true;
+        if (item.getItemId() == android.R.id.home &&
+                getSupportFragmentManager().popBackStackImmediate())
+            return true;
+
+        MainFragment fragment = getFragment();
         if ((fragment != null) && fragment.onOptionsItemSelected(item))
             return true;
         switch (item.getItemId()) {
@@ -215,54 +208,58 @@ public class MainActivity extends ActionBarActivity {
                     public void onDateSet(CalendarDatePickerDialog calendarDatePickerDialog, int i, int i2, int i3) {
                         current = new LocalDate(i, i2 + 1, i3);
                         updateMenu();
-                        MainFragment fragment = getFragment(-1);
+                        MainFragment fragment = getFragment();
                         if (fragment != null)
                             fragment.changeDate();
-                        fragment = getFragment(0);
-                        if (fragment != null)
-                            fragment.changeDate();
-                        fragment = getFragment(1);
-                        if (fragment != null)
-                            fragment.changeDate();
-
                     }
                 }, current.getYear(), current.getMonthOfYear() - 1, current.getDayOfMonth());
                 dialog.show(getSupportFragmentManager(), "DATE_PICKER_TAG");
                 return true;
             }
             case R.id.about:
-                startActivity(new Intent(this, About.class));
+                setFragment(new AboutFragment());
                 return true;
             case R.id.passwd:
-                startActivity(new Intent(this, SetPassword.class));
+                setFragment(new SetPassword());
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    void setTabs() {
-        if (vPager.getAdapter() != null)
+    private void setActionBarArrowDependingOnFragmentsBackStack() {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            drawerToggle.setDrawerIndicatorEnabled(false);
+        } else {
+            drawerToggle.setDrawerIndicatorEnabled(true);
+        }
+        updateMenu();
+    }
+
+    MainFragment getFragment() {
+        if (getSupportFragmentManager().getBackStackEntryCount() == 0)
+            return primaryFragment;
+        String tag = getSupportFragmentManager().getBackStackEntryAt(getSupportFragmentManager().getBackStackEntryCount() - 1).getName();
+        return (MainFragment) getSupportFragmentManager().findFragmentByTag(tag);
+    }
+
+    void setFragment(MainFragment fragment) {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        ft.replace(R.id.fragment, fragment, TAG);
+        ft.addToBackStack(TAG);
+        ft.commit();
+    }
+
+    void setPrimary() {
+        if (primaryFragment != null)
             return;
-        vPager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
-        tabs.setViewPager(vPager);
-        tabs.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int i, float v, int i2) {
 
-            }
-
-            @Override
-            public void onPageSelected(int i) {
-                updateMenu();
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int i) {
-
-            }
-        });
-        vPager.setCurrentItem(getPagePosition(PAGE_STATE));
-
+        primaryFragment = new PrimaryFragment();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setTransition(FragmentTransaction.TRANSIT_ENTER_MASK);
+        ft.add(R.id.fragment, primaryFragment, TAG);
+        ft.commitAllowingStateLoss();
     }
 
     void setSideMenu() {
@@ -326,29 +323,18 @@ public class MainActivity extends ActionBarActivity {
         return true;
     }
 
-    MainFragment getFragment(int position) {
-        FragmentStatePagerAdapter adapter = (FragmentStatePagerAdapter) vPager.getAdapter();
-        if (adapter == null)
-            return null;
-        int pos = vPager.getCurrentItem() + position;
-        if ((pos < 0) || (pos >= adapter.getCount()))
-            return null;
-        return (MainFragment) adapter.instantiateItem(vPager, vPager.getCurrentItem() + position);
-    }
-
     void setupActionBar() {
         Spinner spinner = (Spinner) findViewById(R.id.spinner_nav);
-        TextView title = (TextView) findViewById(R.id.title);
 
         final String[] cars = config.getCars();
 
         if (cars.length <= 1) {
+            getSupportActionBar().setDisplayShowTitleEnabled(true);
             spinner.setVisibility(View.GONE);
-            title.setVisibility(View.VISIBLE);
             return;
         }
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         spinner.setVisibility(View.VISIBLE);
-        title.setVisibility(View.GONE);
         spinner.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
@@ -401,44 +387,6 @@ public class MainActivity extends ActionBarActivity {
         });
     }
 
-
-    boolean isShowPage(int id) {
-        switch (id) {
-            case PAGE_PHOTO:
-                return state.isShow_photo();
-            case PAGE_ACTIONS:
-            case PAGE_STATE:
-            case PAGE_EVENT:
-                return true;
-            case PAGE_TRACK:
-            case PAGE_STAT:
-                return state.isShow_tracks();
-        }
-        return false;
-    }
-
-    int getPageId(int n) {
-        int last = 0;
-        for (int i = 0; i < 6; i++) {
-            if (!isShowPage(i))
-                continue;
-            last = i;
-            if (n == 0)
-                return i;
-            n--;
-        }
-        return last;
-    }
-
-    int getPagePosition(int id) {
-        int pos = 0;
-        for (int i = 0; i < id; i++) {
-            if (isShowPage(i))
-                pos++;
-        }
-        return pos;
-    }
-
     void checkCaps() {
         final String version = State.getVersion(this);
         Date now = new Date();
@@ -448,8 +396,11 @@ public class MainActivity extends ActionBarActivity {
         HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
-                if (CarState.update(state, res.get("caps").asObject()))
-                    updatePages();
+                if (CarState.update(state, res.get("caps").asObject())) {
+                    Intent intent = new Intent(Names.CONFIG_CHANGED);
+                    intent.putExtra(Names.ID, id);
+                    sendBroadcast(intent);
+                }
                 car_config.update(car_config, res);
                 state.setCheck_time(time + 86400000);
                 state.setVersion(version);
@@ -465,73 +416,8 @@ public class MainActivity extends ActionBarActivity {
         task.execute("/caps", skey);
     }
 
-    void updatePages() {
-        int id = getPageId(vPager.getCurrentItem());
-        vPager.getAdapter().notifyDataSetChanged();
-        if (tabs != null)
-            tabs.notifyDataSetChanged();
-        vPager.setCurrentItem(getPagePosition(id));
-    }
-
-    static class KeyParam {
+    static class KeyParam implements Serializable {
         String skey;
     }
 
-    class PagerAdapter extends FragmentStatePagerAdapter {
-
-        public PagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int i) {
-            Log.v("v", "getItem " + i + ", " + getPageId(i));
-            MainFragment fragment = null;
-            switch (getPageId(i)) {
-                case PAGE_PHOTO:
-                    fragment = new PhotoFragment();
-                    break;
-                case PAGE_ACTIONS:
-                    fragment = new ActionFragment();
-                    break;
-                case PAGE_STATE:
-                    fragment = new StateFragment();
-                    break;
-                case PAGE_EVENT:
-                    fragment = new EventsFragment();
-                    break;
-                case PAGE_TRACK:
-                    fragment = new TracksFragment();
-                    break;
-                case PAGE_STAT:
-                    fragment = new StatFragment();
-                    break;
-            }
-            return fragment;
-        }
-
-        @Override
-        public int getCount() {
-            return getPagePosition(6);
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (getPageId(position)) {
-                case PAGE_PHOTO:
-                    return getString(R.string.photo);
-                case PAGE_ACTIONS:
-                    return getString(R.string.control);
-                case PAGE_STATE:
-                    return getString(R.string.state);
-                case PAGE_EVENT:
-                    return getString(R.string.events);
-                case PAGE_TRACK:
-                    return getString(R.string.tracks);
-                case PAGE_STAT:
-                    return getString(R.string.stat);
-            }
-            return super.getPageTitle(position);
-        }
-    }
 }

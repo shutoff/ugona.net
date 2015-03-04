@@ -25,44 +25,20 @@
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-            <ImageView
-                android:id="@+id/drawer_indicator"
-                android:layout_width="@dimen/actionbar_dimen"
-                android:layout_height="@dimen/actionbar_dimen"
-                android:layout_gravity="start"
-                android:background="@drawable/drawer_selector"
-                android:scaleType="centerInside" />
-
             <Spinner
                 android:id="@+id/spinner_nav"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
 
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/app_name"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@android:color/white" />
         </android.support.v7.widget.Toolbar>
 
-        <com.astuetz.PagerSlidingTabStrip
-            android:id="@+id/tabs"
-            android:layout_width="match_parent"
-            android:layout_height="48dip"
-            android:background="@color/main"
-            android:color="@android:color/white"
-            app:pstsDividerColor="@color/main"
-            app:pstsIndicatorColor="@android:color/white"
-            app:pstsUnderlineColor="@android:color/white" />
-
-        <android.support.v4.view.ViewPager
-            android:id="@+id/pager"
+        <FrameLayout
+            android:id="@+id/fragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1" />
+
     </LinearLayout>
 
     <LinearLayout
