@@ -23,6 +23,8 @@ public class StateFragment extends MainFragment {
     Indicator iTemp1;
     Indicator iTemp2;
 
+    CarView vCar;
+
     BroadcastReceiver br;
 
     @Override
@@ -48,6 +50,7 @@ public class StateFragment extends MainFragment {
         iFuel = (Indicator) v.findViewById(R.id.fuel);
         iTemp1 = (Indicator) v.findViewById(R.id.temp1);
         iTemp2 = (Indicator) v.findViewById(R.id.temp2);
+        vCar = (CarView) v.findViewById(R.id.car);
         update();
         br = new BroadcastReceiver() {
             @Override
@@ -94,5 +97,6 @@ public class StateFragment extends MainFragment {
             iBalance.setVisibility(View.VISIBLE);
             iBalance.setText(balance);
         }
+        vCar.update(state);
     }
 }

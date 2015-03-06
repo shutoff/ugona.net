@@ -28,6 +28,7 @@ public class CarState extends Config implements Serializable {
     private boolean hood;
     private boolean trunk;
     private boolean ignition;
+    private boolean accessory;
     private int power_state;
     private int reserved_state;
     private double power;
@@ -163,6 +164,10 @@ public class CarState extends Config implements Serializable {
 
     public double getReserved() {
         return reserved;
+    }
+
+    public boolean isAccessory() {
+        return accessory;
     }
 
     public int getDsm_level() {

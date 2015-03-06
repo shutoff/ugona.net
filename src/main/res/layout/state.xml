@@ -5,19 +5,19 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
     <net.ugona.plus.IndicatorsView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:descendantFocusability="beforeDescendants"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -95,9 +95,12 @@
 
     </net.ugona.plus.IndicatorsView>
 
-    <TextView
-        android:layout_width="wrap_content"
+    <net.ugona.plus.CarView
+        android:id="@+id/car"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:minHeight="500px"
+        android:padding="15dp" />
 
 </LinearLayout>
