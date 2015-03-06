@@ -23,11 +23,6 @@ public class ActionFragment extends MainFragment {
     }
 
     @Override
-    boolean canRefresh() {
-        return false;
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
 

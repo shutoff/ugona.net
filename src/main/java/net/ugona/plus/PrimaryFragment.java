@@ -52,6 +52,19 @@ public class PrimaryFragment extends MainFragment {
     }
 
     @Override
+    void changeDate() {
+        MainFragment fragment = getFragment(0);
+        if (fragment != null)
+            fragment.changeDate();
+        fragment = getFragment(-1);
+        if (fragment != null)
+            fragment.changeDate();
+        fragment = getFragment(1);
+        if (fragment != null)
+            fragment.changeDate();
+    }
+
+    @Override
     Menu menu() {
         MainFragment fragment = getFragment(0);
         if (fragment == null)

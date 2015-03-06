@@ -68,6 +68,11 @@ public class EventsFragment extends MainFragment {
     }
 
     @Override
+    boolean canRefresh() {
+        return true;
+    }
+
+    @Override
     boolean isShowDate() {
         return true;
     }

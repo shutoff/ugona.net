@@ -61,6 +61,11 @@ public class StatFragment extends MainFragment {
     }
 
     @Override
+    boolean canRefresh() {
+        return true;
+    }
+
+    @Override
     Menu menu() {
         if (stat_menu == null) {
             PopupMenu menu = new PopupMenu(getActivity(), null);

@@ -62,7 +62,7 @@ public abstract class MainFragment extends Fragment implements OnRefreshListener
     }
 
     boolean canRefresh() {
-        return true;
+        return false;
     }
 
     @Override

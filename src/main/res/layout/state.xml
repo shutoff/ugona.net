@@ -1,13 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:text="State" />
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center">
+
+            <net.ugona.plus.Indicator
+                android:id="@+id/gsm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:src="@drawable/ind02_5" />
+
+            <net.ugona.plus.Indicator
+                android:id="@+id/voltage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:src="@drawable/ind01" />
+
+            <net.ugona.plus.Indicator
+                android:id="@+id/reserve"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:src="@drawable/ind03_5" />
+
+            <net.ugona.plus.Indicator
+                android:id="@+id/balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:src="@drawable/ind04" />
+
+            <net.ugona.plus.Indicator
+                android:id="@+id/temp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:src="@drawable/ind05" />
+
+            <net.ugona.plus.Indicator
+                android:id="@+id/temp_engine"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:src="@drawable/ind07" />
+
+            <net.ugona.plus.Indicator
+                android:id="@+id/temp_salon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:src="@drawable/ind08" />
+
+            <net.ugona.plus.Indicator
+                android:id="@+id/fuel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:src="@drawable/ind06" />
+
+            <net.ugona.plus.Indicator
+                android:id="@+id/temp1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:src="@drawable/ind05" />
+
+            <net.ugona.plus.Indicator
+                android:id="@+id/temp2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:src="@drawable/ind05" />
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </LinearLayout>

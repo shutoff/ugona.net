@@ -6,4 +6,9 @@ public class StateFragment extends MainFragment {
     int layout() {
         return R.layout.state;
     }
+
+    @Override
+    boolean canRefresh() {
+        return true;
+    }
 }

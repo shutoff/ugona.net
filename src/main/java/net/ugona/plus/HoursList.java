@@ -22,27 +22,15 @@ public class HoursList extends FrameLayout {
     Runnable runnable_visible;
 
     public HoursList(Context context) {
-        super(context);
-        init(context);
+        this(context, null, 0);
     }
 
     public HoursList(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init(context);
+        this(context, attrs, 0);
     }
 
     public HoursList(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        init(context);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        list.post(runnable);
-    }
-
-    void init(Context context) {
         runnable = new Runnable() {
             @Override
             public void run() {
@@ -103,6 +91,12 @@ public class HoursList extends FrameLayout {
             vHours.addView(tView, params);
             tView.setOnTouchListener(touchListener);
         }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        list.post(runnable);
     }
 
     void setListener(Listener l) {

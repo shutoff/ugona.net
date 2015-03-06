@@ -40,6 +40,7 @@ public class MainActivity extends ActionBarActivity {
     static final int DO_PHONE = 2;
 
     static final String TAG = "frag_tag";
+    static final String PRIMARY = "prim_tag";
 
     String id;
     AppConfig config;
@@ -53,7 +54,6 @@ public class MainActivity extends ActionBarActivity {
 
     DrawerLayout drawer;
     ActionBarDrawerToggle drawerToggle;
-    PrimaryFragment primaryFragment;
     View vLogo;
     Spinner spinner;
 
@@ -79,8 +79,17 @@ public class MainActivity extends ActionBarActivity {
 */
 
         super.onCreate(savedInstanceState);
+
+        id = getIntent().getStringExtra(Names.ID);
+        current = new LocalDate();
+
+        if (savedInstanceState != null) {
+            id = savedInstanceState.getString(Names.ID);
+            current = new LocalDate(savedInstanceState.getLong(Names.DATE));
+        }
+
         config = AppConfig.get(this);
-        id = config.getId(getIntent().getStringExtra(Names.ID));
+        id = config.getId(id);
         car_config = CarConfig.get(this, id);
         state = CarState.get(this, id);
 
@@ -88,7 +97,6 @@ public class MainActivity extends ActionBarActivity {
         vLogo = findViewById(R.id.logo);
         spinner = (Spinner) findViewById(R.id.spinner_nav);
 
-        current = new LocalDate();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -121,6 +129,9 @@ public class MainActivity extends ActionBarActivity {
         setupActionBar();
         setSideMenu();
 
+        if (savedInstanceState != null)
+            return;
+
         if (car_config.getAuth().equals("")) {
             car_config = CarConfig.clear(this, id);
             Intent intent = new Intent(this, SplashActivity.class);
@@ -144,9 +155,17 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(Names.ID, id);
+        outState.putLong(Names.DATE, current.toDate().getTime());
+    }
+
+    @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         drawerToggle.syncState();
+        setActionBarArrowDependingOnFragmentsBackStack();
     }
 
     @Override
@@ -244,7 +263,7 @@ public class MainActivity extends ActionBarActivity {
 
     MainFragment getFragment() {
         if (getSupportFragmentManager().getBackStackEntryCount() == 0)
-            return primaryFragment;
+            return (MainFragment) getSupportFragmentManager().findFragmentByTag(PRIMARY);
         String tag = getSupportFragmentManager().getBackStackEntryAt(getSupportFragmentManager().getBackStackEntryCount() - 1).getName();
         return (MainFragment) getSupportFragmentManager().findFragmentByTag(tag);
     }
@@ -258,13 +277,13 @@ public class MainActivity extends ActionBarActivity {
     }
 
     void setPrimary() {
-        if (primaryFragment != null)
+        if (getFragment() != null)
             return;
 
-        primaryFragment = new PrimaryFragment();
+        PrimaryFragment primaryFragment = new PrimaryFragment();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setTransition(FragmentTransaction.TRANSIT_ENTER_MASK);
-        ft.add(R.id.fragment, primaryFragment, TAG);
+        ft.add(R.id.fragment, primaryFragment, PRIMARY);
         ft.commitAllowingStateLoss();
     }
 
