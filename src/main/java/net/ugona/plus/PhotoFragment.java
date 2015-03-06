@@ -95,7 +95,7 @@ public class PhotoFragment extends MainFragment {
 
         vProgress = v.findViewById(R.id.first_progress);
 
-        v.findViewById(R.id.summary).setVisibility(View.GONE);
+        v.findViewById(R.id.footer).setVisibility(View.GONE);
         v.findViewById(R.id.progress).setVisibility(View.GONE);
         v.findViewById(R.id.loading).setVisibility(View.GONE);
         v.findViewById(R.id.space).setVisibility(View.GONE);

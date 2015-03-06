@@ -35,7 +35,7 @@ public class ActionFragment extends MainFragment {
                     commands.add(cmd);
             }
         }
-        v.findViewById(R.id.summary).setVisibility(View.GONE);
+        v.findViewById(R.id.footer).setVisibility(View.GONE);
         v.findViewById(R.id.first_progress).setVisibility(View.GONE);
         v.findViewById(R.id.progress).setVisibility(View.GONE);
         v.findViewById(R.id.loading).setVisibility(View.GONE);

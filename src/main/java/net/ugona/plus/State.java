@@ -11,6 +11,9 @@ import android.telephony.TelephonyManager;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
+import org.joda.time.LocalDate;
+
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
@@ -126,6 +129,15 @@ public class State {
         }
         @SuppressLint("SimpleDateFormat") SimpleDateFormat sf = new SimpleDateFormat("HH:mm:ss");
         return sf.format(time);
+    }
+
+    static String formatDateTime(Context context, long time) {
+        LocalDate now = new LocalDate();
+        LocalDate date = new LocalDate(time);
+        if (now.equals(date))
+            return formatTime(context, time);
+        DateFormat df = android.text.format.DateFormat.getDateFormat(context);
+        return formatTime(context, time) + " " + df.format(time);
     }
 
 }

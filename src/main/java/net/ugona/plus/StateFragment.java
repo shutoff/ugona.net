@@ -5,10 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 public class StateFragment extends MainFragment {
 
@@ -24,7 +26,10 @@ public class StateFragment extends MainFragment {
     Indicator iTemp2;
 
     CarView vCar;
+    TextView tvAddress;
+    TextView tvTime;
 
+    Handler handler;
     BroadcastReceiver br;
 
     @Override
@@ -35,6 +40,11 @@ public class StateFragment extends MainFragment {
     @Override
     boolean canRefresh() {
         return true;
+    }
+
+    @Override
+    void refresh() {
+        super.refresh();
     }
 
     @Override
@@ -51,6 +61,9 @@ public class StateFragment extends MainFragment {
         iTemp1 = (Indicator) v.findViewById(R.id.temp1);
         iTemp2 = (Indicator) v.findViewById(R.id.temp2);
         vCar = (CarView) v.findViewById(R.id.car);
+        tvAddress = (TextView) v.findViewById(R.id.address);
+        tvTime = (TextView) v.findViewById(R.id.time);
+        handler = new Handler();
         update();
         br = new BroadcastReceiver() {
             @Override
@@ -98,5 +111,48 @@ public class StateFragment extends MainFragment {
             iBalance.setText(balance);
         }
         vCar.update(state);
+        if (state.getTime() > 0) {
+            tvTime.setText(State.formatDateTime(getActivity(), state.getTime()));
+        } else {
+            tvTime.setText("???");
+        }
+        String text = "";
+        if (!state.isIgnition()) {
+            long last = state.getLast_stand();
+            if (last > 0)
+                text = State.formatDateTime(getActivity(), last);
+        }
+
+        String gps = state.getGps();
+        if (gps != null) {
+            String[] g = gps.split(",");
+            try {
+                double lat = Double.parseDouble(g[0]);
+                double lng = Double.parseDouble(g[1]);
+                String address = Address.get(getActivity(), lat, lng, new Address.Answer() {
+                    @Override
+                    public void result(String address) {
+                        if (address == null)
+                            return;
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                update();
+                            }
+                        });
+                    }
+                });
+                if (!text.equals(""))
+                    text += " ";
+                text += lat + ", " + lng;
+                if (address != null) {
+                    text += "\n";
+                    text += address;
+                }
+            } catch (Exception ex) {
+                // ignroe
+            }
+        }
+        tvAddress.setText(text);
     }
 }
