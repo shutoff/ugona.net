@@ -1,5 +1,9 @@
 package net.ugona.plus;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -27,6 +31,7 @@ public class PrimaryFragment extends MainFragment {
     PagerSlidingTabStrip tabs;
 
     CarState state;
+    BroadcastReceiver br;
 
     @Override
     int layout() {
@@ -40,7 +45,32 @@ public class PrimaryFragment extends MainFragment {
         tabs = (PagerSlidingTabStrip) v.findViewById(R.id.tabs);
         state = CarState.get(getActivity(), id());
         setTabs();
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+            }
+        };
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent == null)
+                    return;
+                if (!id().equals(intent.getStringExtra(Names.ID)))
+                    return;
+                if (intent.getAction().equals(Names.CONFIG_CHANGED))
+                    updatePages();
+            }
+        };
+        IntentFilter intFilter = new IntentFilter(Names.CONFIG_CHANGED);
+        getActivity().registerReceiver(br, intFilter);
         return v;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        getActivity().unregisterReceiver(br);
     }
 
     @Override

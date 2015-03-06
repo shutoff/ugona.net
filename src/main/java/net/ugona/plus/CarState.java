@@ -36,7 +36,7 @@ public class CarState extends Config implements Serializable {
     private String gsm;
     private String gps;
     private String temperature;
-    private double balance;
+    private String balance;
     private boolean guard;
     private int guard_mode;
     private double fuel;
@@ -53,6 +53,7 @@ public class CarState extends Config implements Serializable {
         gps = "";
         temperature = "";
         version = "";
+        balance = "";
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String s = preferences.getString(CAR_KEY + id, "");
@@ -180,7 +181,7 @@ public class CarState extends Config implements Serializable {
         return temperature;
     }
 
-    public double getBalance() {
+    public String getBalance() {
         return balance;
     }
 

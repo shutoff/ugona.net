@@ -229,8 +229,8 @@ public class EventsFragment extends MainFragment {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onDestroyView() {
+        super.onDestroyView();
         getActivity().unregisterReceiver(br);
     }
 

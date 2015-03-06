@@ -46,31 +46,31 @@ public class Config {
                     continue;
                 }
                 Type t = f.getGenericType();
-                if (t == int.class) {
+                if ((t == int.class) && v.isNumber()) {
                     int iv = v.asInt();
                     if (iv != f.getInt(o)) {
                         f.setInt(o, iv);
                         upd = true;
                     }
-                } else if (t == long.class) {
+                } else if ((t == long.class) && v.isNumber()) {
                     long lv = v.asLong();
                     if (lv != f.getLong(o)) {
                         f.setLong(o, lv);
                         upd = true;
                     }
-                } else if (t == double.class) {
+                } else if ((t == double.class) && v.isNumber()) {
                     double dv = v.asDouble();
                     if (dv != f.getDouble(o)) {
                         f.setDouble(o, dv);
                         upd = true;
                     }
-                } else if (t == boolean.class) {
+                } else if ((t == boolean.class) && v.isBoolean()) {
                     boolean bv = v.asBoolean();
                     if (bv != f.getBoolean(o)) {
                         f.setBoolean(o, bv);
                         upd = true;
                     }
-                } else if (t == String.class) {
+                } else if ((t == String.class) && v.isString()) {
                     String sv = v.asString();
                     if (!sv.equals(f.get(o))) {
                         f.set(o, sv);
