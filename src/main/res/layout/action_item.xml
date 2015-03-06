@@ -13,8 +13,8 @@
 
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
         android:paddingRight="10dp" />
 
     <LinearLayout

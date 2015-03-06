@@ -88,7 +88,10 @@ public class StateFragment extends MainFragment {
     }
 
     void update() {
-        CarState state = CarState.get(getActivity(), id());
+        Context context = getActivity();
+        if (context == null)
+            return;
+        CarState state = CarState.get(context, id());
         double power = state.getPower();
         if (power == 0) {
             iVoltage.setVisibility(View.GONE);
