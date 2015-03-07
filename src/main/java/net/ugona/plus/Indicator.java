@@ -13,6 +13,7 @@ public class Indicator extends FrameLayout {
 
     View v;
     TextView tvLabel;
+    ImageView ivInd;
 
     public Indicator(Context context) {
         this(context, null);
@@ -25,6 +26,7 @@ public class Indicator extends FrameLayout {
         v = inflater.inflate(R.layout.indicator, null, true);
         addView(v);
         tvLabel = (TextView) v.findViewById(R.id.text);
+        ivInd = (ImageView) v.findViewById(R.id.img);
 
         if (attrs != null) {
             TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.Indicator);
@@ -38,6 +40,10 @@ public class Indicator extends FrameLayout {
 
     void setText(CharSequence text) {
         tvLabel.setText(text);
+    }
+
+    void setImage(int id) {
+        ivInd.setImageResource(id);
     }
 
 }

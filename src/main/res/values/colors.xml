@@ -5,4 +5,5 @@
     <color name="error">#FF4040</color>
     <color name="hour">#20000000</color>
     <color name="hour_active">#FF000000</color>
+    <color name="indiicator">#FF72b01a</color>
 </resources>

@@ -78,6 +78,10 @@ public class StateFragment extends MainFragment {
         };
         IntentFilter intFilter = new IntentFilter(Names.UPDATED);
         getActivity().registerReceiver(br, intFilter);
+        Intent intent = new Intent(getActivity(), FetchService.class);
+        intent.setAction(FetchService.ACTION_UPDATE);
+        intent.putExtra(Names.ID, id());
+        getActivity().startService(intent);
         return v;
     }
 
@@ -112,6 +116,15 @@ public class StateFragment extends MainFragment {
         } else {
             iBalance.setVisibility(View.VISIBLE);
             iBalance.setText(balance);
+        }
+        int gsm_level = state.getGsm_level();
+        if (gsm_level == 0) {
+            iGsm.setVisibility(View.GONE);
+        } else {
+            iGsm.setVisibility(View.VISIBLE);
+            iGsm.setText(gsm_level + " dBm");
+            String pict = "ind02_" + State.GsmLevel(gsm_level);
+            iGsm.setImage(getResources().getIdentifier(pict, "drawable", getActivity().getPackageName()));
         }
         vCar.update(state);
         if (state.getTime() > 0) {

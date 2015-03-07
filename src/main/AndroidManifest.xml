@@ -77,6 +77,8 @@
         <activity android:name=".SplashActivity" />
         <activity android:name=".PhotoView" />
 
+        <service android:name=".FetchService" />
+
     </application>
 
 </manifest>

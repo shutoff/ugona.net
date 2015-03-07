@@ -15,8 +15,11 @@ public class Names {
     static final String CAMERA = "camera";
     static final String PHOTO = "photo";
     static final String DATE = "date";
+    static final String CONNECT = "connect";
 
     static final String UPDATED = "net.ugona.plus.updated";
+    static final String NO_UPDATED = "net.ugona.plus.no_updated";
     static final String CONFIG_CHANGED = "net.ugona.plus.changed";
     static final String ROTATE = "net.ugona.plus.rotate";
+    static final String ERROR = "net.ugona.plus.error";
 }

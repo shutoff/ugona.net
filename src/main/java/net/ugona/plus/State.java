@@ -140,4 +140,18 @@ public class State {
         return formatTime(context, time) + " " + df.format(time);
     }
 
+    static int GsmLevel(int level) {
+        if (level > -51)
+            return 5;
+        if (level > -65)
+            return 4;
+        if (level > -77)
+            return 3;
+        if (level > -91)
+            return 2;
+        if (level > -105)
+            return 1;
+        return 0;
+    }
+
 }

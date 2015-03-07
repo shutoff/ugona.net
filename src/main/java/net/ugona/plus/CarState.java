@@ -33,7 +33,7 @@ public class CarState extends Config implements Serializable {
     private int reserved_state;
     private double power;
     private double reserved;
-    private int dsm_level;
+    private int gsm_level;
     private String gsm;
     private String gps;
     private String temperature;
@@ -170,8 +170,8 @@ public class CarState extends Config implements Serializable {
         return accessory;
     }
 
-    public int getDsm_level() {
-        return dsm_level;
+    public int getGsm_level() {
+        return gsm_level;
     }
 
     public String getGsm() {
