@@ -78,6 +78,9 @@ public class MainActivity extends ActionBarActivity {
         });
 */
 
+        Font font = new Font("Exo2");
+        font.install(this);
+
         super.onCreate(savedInstanceState);
 
         id = getIntent().getStringExtra(Names.ID);

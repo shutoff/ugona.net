@@ -306,10 +306,10 @@ public class TracksFragment extends MainFragment {
         if (engine_time >= 60) {
             status += "\n";
             status += getString(R.string.engine_time);
-            status += ": ";
+            status += ": |";
             status += timeFormat((int) (engine_time / 60));
         }
-        tvSummary.setText(status);
+        tvSummary.setText(State.createSpans(status, getResources().getColor(android.R.color.white), true));
         refreshDone();
     }
 
@@ -591,19 +591,19 @@ public class TracksFragment extends MainFragment {
             TextView tvAddress = (TextView) v.findViewById(R.id.address);
             tvAddress.setText(track.start + " - " + track.finish);
             TextView tvStatus = (TextView) v.findViewById(R.id.status);
-            String text = "";
             if (position == selected) {
-                text = String.format(getString(R.string.short_status),
+                String text = String.format(getString(R.string.short_status),
                         timeFormat((int) ((track.end - track.begin) / 60000)),
                         (float) track.avg_speed,
                         track.max_speed);
+                tvStatus.setText(State.createSpans(text, getResources().getColor(R.color.highlighted), true));
                 tvTitle.setTypeface(null, Typeface.BOLD);
                 tvMileage.setTypeface(null, Typeface.BOLD);
             } else {
                 tvTitle.setTypeface(null, Typeface.NORMAL);
                 tvMileage.setTypeface(null, Typeface.NORMAL);
+                tvStatus.setText("");
             }
-            tvStatus.setText(text);
             return v;
         }
 

@@ -88,7 +88,9 @@
                     android:paddingBottom="3dp"
                     android:paddingLeft="15dp"
                     android:paddingTop="3dp"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@color/light_text"
+                    android:textSize="13sp"
+                    android:typeface="sans" />
 
             </LinearLayout>
 

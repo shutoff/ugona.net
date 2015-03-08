@@ -4,9 +4,15 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
@@ -152,6 +158,25 @@ public class State {
         if (level > -105)
             return 1;
         return 0;
+    }
+
+    static Spannable createSpans(String str, int color, boolean bold) {
+        String[] parts = str.split("\\|");
+        StringBuilder builder = new StringBuilder();
+        for (String p : parts) {
+            builder.append(p);
+        }
+        Spannable spannable = new SpannableString(builder.toString());
+        int pos = 0;
+        for (int i = 0; i + 1 < parts.length; i += 2) {
+            pos += parts[i].length();
+            int end = pos + parts[i + 1].length();
+            if (bold)
+                spannable.setSpan(new StyleSpan(Typeface.BOLD), pos, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannable.setSpan(new ForegroundColorSpan(color), pos, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            pos = end;
+        }
+        return spannable;
     }
 
 }

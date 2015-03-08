@@ -31,7 +31,7 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.HorizontalScrollView;
@@ -208,12 +208,9 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
     }
 
     private void addTextTab(final int position, String title) {
-
-        TextView tab = new TextView(getContext());
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        TextView tab = (TextView) inflater.inflate(R.layout.tab, null);
         tab.setText(title);
-        tab.setGravity(Gravity.CENTER);
-        tab.setSingleLine();
-
         addTab(position, tab);
     }
 
@@ -250,8 +247,8 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
             if (v instanceof TextView) {
 
                 TextView tab = (TextView) v;
-                tab.setTextSize(TypedValue.COMPLEX_UNIT_PX, tabTextSize);
-                tab.setTypeface(tabTypeface, tabTypefaceStyle);
+//                tab.setTextSize(TypedValue.COMPLEX_UNIT_PX, tabTextSize);
+//                tab.setTypeface(tabTypeface, tabTypefaceStyle);
                 tab.setTextColor(tabTextColor);
 
                 // setAllCaps() is only available from API 14, so the upper case is made manually if we are on a

@@ -68,12 +68,18 @@
             android:divider="@null"
             android:dividerHeight="0dp" />
 
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@color/div" />
+
         <TextView
             android:id="@+id/sidebar_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:padding="5dp"
-            android:text="@string/copyright" />
+            android:text="@string/copyright"
+            android:textSize="13sp" />
     </LinearLayout>
 </android.support.v4.widget.DrawerLayout>

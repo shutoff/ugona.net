@@ -132,6 +132,11 @@ public class HoursList extends FrameLayout {
         list.post(runnable_visible);
     }
 
+    void disableDivider() {
+        list.setDivider(null);
+        list.setDividerHeight(0);
+    }
+
     abstract static interface Listener {
 
         abstract int setHour(int h);

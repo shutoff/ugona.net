@@ -106,6 +106,7 @@ public class EventsFragment extends MainFragment {
         }
 
         vEvents = (HoursList) v.findViewById(R.id.events);
+        vEvents.disableDivider();
         vEvents.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

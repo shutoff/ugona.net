@@ -16,7 +16,9 @@
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/highlighted" />
+            android:textColor="@color/highlighted"
+            android:textSize="15sp"
+            android:typeface="sans" />
 
         <TextView
             android:layout_width="0dp"
@@ -27,7 +29,9 @@
             android:id="@+id/mileage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/highlighted" />
+            android:textColor="@color/highlighted"
+            android:textSize="14sp"
+            android:typeface="sans" />
     </LinearLayout>
 
     <TextView
@@ -35,10 +39,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingRight="5dp"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:textColor="@color/text_dark"
+        android:textSize="13sp"
+        android:typeface="sans" />
 
     <TextView
         android:id="@+id/status"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_dark"
+        android:textSize="13sp"
+        android:typeface="sans" />
+
 </LinearLayout>

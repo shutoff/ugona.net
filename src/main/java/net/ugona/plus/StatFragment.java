@@ -220,10 +220,10 @@ public class StatFragment extends MainFragment {
                 if (engine_time >= 60) {
                     status_text += "\n";
                     status_text += getString(R.string.engine_time);
-                    status_text += ": ";
+                    status_text += ": |";
                     status_text += timeFormat((int) (engine_time / 60));
                 }
-                tvSummary.setText(status_text);
+                tvSummary.setText(State.createSpans(status_text, getResources().getColor(android.R.color.white), true));
                 vProgress.setVisibility(View.GONE);
                 vLoading.setVisibility(View.GONE);
                 vError.setVisibility(View.GONE);
@@ -282,11 +282,11 @@ public class StatFragment extends MainFragment {
                         }
                         if (d.engine_time >= 60) {
                             status_text += getString(R.string.engine_time);
-                            status_text += ": ";
+                            status_text += ": |";
                             status_text += timeFormat((int) (d.engine_time / 60));
                             status_text += "\n";
                         }
-                        text.setText(status_text);
+                        text.setText(State.createSpans(status_text, getResources().getColor(R.color.highlighted), true));
                         int p = text.getPaddingRight();
                         text.setPadding(p * (2 * d.level + 1), 0, p, 0);
                         text = (TextView) v.findViewById(R.id.status);
