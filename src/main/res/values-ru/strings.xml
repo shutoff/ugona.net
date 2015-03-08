@@ -48,8 +48,8 @@
     <string name="password_summary">Укажите пароль для управления устройством из приложения</string>
     <string name="error_load">Ошибка загрузки данных</string>
     <string name="loading">Загрузка данных…</string>
-    <string name="status" formatted="false">Расстояние: %s км\nВремя в пути: %s\nСредняя скорость: %.2f км/ч\nМаксимальная скорость: %d км/ч</string>
-    <string name="short_status" formatted="false">Время в пути: %s\nСредняя скорость: %.2f км/ч\nМаксимальная скорость: %d км/ч\n</string>
+    <string name="status" formatted="false">Расстояние: |%s км|\nВремя в пути: |%s|\nСредняя скорость: |%.2f км/ч|\nМаксимальная скорость: |%d км/ч|</string>
+    <string name="short_status" formatted="false">Время в пути: |%s|\nСредняя скорость: |%.2f км/ч|\nМаксимальная скорость: |%d км/ч|\n</string>
     <string name="m_format" formatted="false">%d мин</string>
     <string name="hm_format" formatted="false">%d ч %02d мин</string>
     <string name="engine_time">Время работы двигателя</string>
