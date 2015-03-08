@@ -12,6 +12,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.text.NumberFormat;
+import java.util.Currency;
+import java.util.Locale;
+
 public class StateFragment extends MainFragment {
 
     Indicator iGsm;
@@ -115,7 +119,15 @@ public class StateFragment extends MainFragment {
             iBalance.setVisibility(View.GONE);
         } else {
             iBalance.setVisibility(View.VISIBLE);
-            iBalance.setText(balance);
+            try {
+                NumberFormat nf = NumberFormat.getCurrencyInstance();
+                String str = nf.format(Double.parseDouble(balance));
+                Currency currency = Currency.getInstance(Locale.getDefault());
+                str = str.replace(currency.getSymbol(), "");
+                iBalance.setText(str);
+            } catch (Exception ex) {
+                iBalance.setText(balance);
+            }
         }
         int gsm_level = state.getGsm_level();
         if (gsm_level == 0) {
@@ -126,6 +138,25 @@ public class StateFragment extends MainFragment {
             String pict = "ind02_" + State.GsmLevel(gsm_level);
             iGsm.setImage(getResources().getIdentifier(pict, "drawable", getActivity().getPackageName()));
         }
+        boolean temp = false;
+        String temperature = state.getTemperature();
+        if (temperature != null) {
+            String[] parts = temperature.split(",");
+            if (parts.length > 0) {
+                try {
+                    String[] p = parts[0].split(":");
+                    int t = Integer.parseInt(p[0]);
+                    iTemp.setVisibility(View.VISIBLE);
+                    iTemp.setText(t + " \u00B0C");
+                    temp = true;
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+        }
+        if (!temp)
+            iTemp.setVisibility(View.GONE);
+
         vCar.update(state);
         if (state.getTime() > 0) {
             tvTime.setText(State.formatDateTime(getActivity(), state.getTime()));

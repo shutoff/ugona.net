@@ -12,8 +12,12 @@
         android:background="@color/main"
         android:color="@android:color/white"
         app:pstsDividerColor="@color/main"
+        app:pstsDividerPadding="2dp"
         app:pstsIndicatorColor="@android:color/white"
-        app:pstsUnderlineColor="@android:color/white" />
+        app:pstsIndicatorHeight="3dp"
+        app:pstsTabPaddingLeftRight="15dp"
+        app:pstsUnderlineColor="@color/div"
+        app:pstsUnderlineHeight="1px" />
 
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"

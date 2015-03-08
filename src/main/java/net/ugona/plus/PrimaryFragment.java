@@ -33,6 +33,8 @@ public class PrimaryFragment extends MainFragment {
     CarState state;
     BroadcastReceiver br;
 
+    boolean show_page[] = new boolean[6];
+
     @Override
     int layout() {
         return R.layout.primary;
@@ -105,6 +107,7 @@ public class PrimaryFragment extends MainFragment {
     void setTabs() {
         if (vPager.getAdapter() != null)
             return;
+        setPageState();
         vPager.setAdapter(new PagerAdapter(getChildFragmentManager()));
         tabs.setViewPager(vPager);
         tabs.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -127,9 +130,40 @@ public class PrimaryFragment extends MainFragment {
         vPager.setCurrentItem(getPagePosition(PAGE_STATE));
     }
 
+    boolean setPageState() {
+        boolean upd = false;
+        if (show_page[PAGE_PHOTO] != state.isShow_photo()) {
+            show_page[PAGE_PHOTO] = state.isShow_photo();
+            upd = true;
+        }
+        if (!show_page[PAGE_ACTIONS]) {
+            show_page[PAGE_ACTIONS] = true;
+            upd = true;
+        }
+        if (!show_page[PAGE_STATE]) {
+            show_page[PAGE_STATE] = true;
+            upd = true;
+        }
+        if (!show_page[PAGE_EVENT]) {
+            show_page[PAGE_EVENT] = true;
+            upd = true;
+        }
+        if (show_page[PAGE_TRACK] != state.isShow_tracks()) {
+            show_page[PAGE_TRACK] = state.isShow_tracks();
+            upd = true;
+        }
+        if (show_page[PAGE_STAT] != state.isShow_tracks()) {
+            show_page[PAGE_STAT] = state.isShow_tracks();
+            upd = true;
+        }
+        return upd;
+    }
+
     void updatePages() {
         int id = getPageId(vPager.getCurrentItem());
-        vPager.getAdapter().notifyDataSetChanged();
+        if (!setPageState())
+            return;
+        vPager.setAdapter(new PagerAdapter(getChildFragmentManager()));
         if (tabs != null)
             tabs.notifyDataSetChanged();
         vPager.setCurrentItem(getPagePosition(id));
@@ -146,18 +180,7 @@ public class PrimaryFragment extends MainFragment {
     }
 
     boolean isShowPage(int id) {
-        switch (id) {
-            case PAGE_PHOTO:
-                return state.isShow_photo();
-            case PAGE_ACTIONS:
-            case PAGE_STATE:
-            case PAGE_EVENT:
-                return true;
-            case PAGE_TRACK:
-            case PAGE_STAT:
-                return state.isShow_tracks();
-        }
-        return false;
+        return show_page[id];
     }
 
     int getPageId(int n) {
@@ -213,6 +236,24 @@ public class PrimaryFragment extends MainFragment {
                     break;
             }
             return fragment;
+        }
+
+        @Override
+        public int getItemPosition(Object object) {
+            int id = 0;
+            if (object instanceof PhotoFragment)
+                id = 0;
+            if (object instanceof ActionFragment)
+                id = 1;
+            if (object instanceof StateFragment)
+                id = 2;
+            if (object instanceof EventsFragment)
+                id = 3;
+            if (object instanceof TracksFragment)
+                id = 4;
+            if (object instanceof StatFragment)
+                id = 5;
+            return getPagePosition(id);
         }
 
         @Override

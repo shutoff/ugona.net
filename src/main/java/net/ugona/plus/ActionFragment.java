@@ -41,6 +41,7 @@ public class ActionFragment extends MainFragment {
         v.findViewById(R.id.loading).setVisibility(View.GONE);
         v.findViewById(R.id.space).setVisibility(View.GONE);
         vActions = (HoursList) v.findViewById(R.id.tracks);
+        vActions.disableDivider();
         vActions.setVisibility(View.VISIBLE);
         vActions.setAdapter(new BaseAdapter() {
             @Override

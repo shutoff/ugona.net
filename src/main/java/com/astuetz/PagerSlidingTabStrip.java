@@ -182,7 +182,6 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
             } else {
                 addTextTab(i, pager.getAdapter().getPageTitle(i).toString());
             }
-
         }
 
         updateTabStyles();
@@ -260,6 +259,9 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
                         tab.setText(tab.getText().toString().toUpperCase(locale));
                     }
                 }
+                int left = (i == 0) ? dividerPadding : tabPadding;
+                int right = (i == tabCount - 1) ? dividerPadding : tabPadding;
+                tab.setPadding(left, 0, right, 0);
             }
         }
 

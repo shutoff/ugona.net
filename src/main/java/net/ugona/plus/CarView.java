@@ -180,7 +180,7 @@ public class CarView extends View {
             add(R.drawable.c_1_o_b, 570, 360);
             add(R.drawable.c_2_b, 338, 207);
             add(R.drawable.c_2_o_b, 262, 72);
-            add(R.drawable.c_3_b, 716, 182);
+            add(R.drawable.c_3_b, 717, 185);
             add(R.drawable.c_3_o_b, 726, 216);
             add(R.drawable.c_4_o_b, 478, 44);
             add(R.drawable.c_h_o_b, 168, 286);
