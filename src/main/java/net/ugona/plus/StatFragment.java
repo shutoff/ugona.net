@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.PopupMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -45,8 +44,6 @@ public class StatFragment extends MainFragment {
     Vector<Day> days;
     Vector<Day> stat;
 
-    Menu stat_menu;
-
     static String monthYear(int year, int month) {
         String s = new DateTime(year, month + 1, 1, 0, 0, 0, 0)
                 .monthOfYear().getAsText().toUpperCase();
@@ -66,14 +63,8 @@ public class StatFragment extends MainFragment {
     }
 
     @Override
-    Menu menu() {
-        if (stat_menu == null) {
-            PopupMenu menu = new PopupMenu(getActivity(), null);
-            stat_menu = menu.getMenu();
-            MenuInflater inflater = getActivity().getMenuInflater();
-            inflater.inflate(R.menu.stat, stat_menu);
-        }
-        return stat_menu;
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.stat, menu);
     }
 
     @Override

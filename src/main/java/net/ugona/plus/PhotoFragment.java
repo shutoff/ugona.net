@@ -138,16 +138,15 @@ public class PhotoFragment extends MainFragment {
                     photo.loading = ++loading;
                     startLoading();
                 } else if (file.exists()) {
-                    try {
-                        Intent intent = new Intent(getActivity(), PhotoView.class);
-                        intent.putExtra(Names.PHOTO, photo.id);
-                        intent.putExtra(Names.TITLE, photo.time);
-                        intent.putExtra(Names.CAMERA, photo.camera);
-                        intent.putExtra(Names.ID, id());
-                        getActivity().startActivity(intent);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
+                    PhotoView pv = new PhotoView();
+                    Bundle args = new Bundle();
+                    args.putLong(Names.PHOTO, photo.id);
+                    args.putLong(Names.TITLE, photo.time);
+                    args.putInt(Names.CAMERA, photo.camera);
+                    args.putString(Names.ID, id());
+                    pv.setArguments(args);
+                    MainActivity activity = (MainActivity) getActivity();
+                    activity.setFragment(pv);
                 }
             }
         });
@@ -414,7 +413,7 @@ public class PhotoFragment extends MainFragment {
                 PhotoParam pp = new PhotoParam();
                 pp.skey = api_key;
                 pp.id = p.id;
-                String data = Config.save(p);
+                String data = Config.save(pp);
                 RequestBody body = RequestBody.create(MediaType.parse("application/json"), data);
                 Request request = new Request.Builder().url(Names.API_URL + "/photo").post(body).build();
                 Response response = HttpTask.client.newCall(request).execute();

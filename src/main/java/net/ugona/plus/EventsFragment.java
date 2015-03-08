@@ -119,16 +119,16 @@ public class EventsFragment extends MainFragment {
                     if (e.text != null) {
                         info += e.text + "\n";
                     }
-                    Intent i = new Intent(getActivity(), MapEventActivity.class);
+                    Intent intent = new Intent(getActivity(), MapEventActivity.class);
                     String[] point = e.point.split(";");
                     if (point.length < 2)
                         return;
                     String point_data = point[0] + ";" + point[1] + ";" + e.course + ";" + info + e.address;
                     if (point.length > 2)
                         point_data += ";" + point[2];
-                    i.putExtra(Names.POINT_DATA, point_data);
-                    i.putExtra(Names.ID, id());
-                    startActivity(i);
+                    intent.putExtra(Names.POINT_DATA, point_data);
+                    intent.putExtra(Names.ID, id());
+                    getActivity().startActivity(intent);
                     return;
                 }
                 current_id = e.id;

@@ -146,8 +146,29 @@ public class CarView extends View {
         boolean az = s.getAz_time() > 0;
         if (!s.isGuard())
             az = false;
-        if (s.isIgnition() && !az)
-            parts.add(prefix + "_m5");
+        if (s.isIgnition() && !az) {
+            String p = prefix + "_i";
+            if (s.isGuard())
+                p += "_r";
+            parts.add(p);
+        }
+        int mode = s.getGuard_mode();
+        if (mode == 2) {
+            parts.add("s_block");
+        } else if (card) {
+            parts.add("s_g_r");
+        } else if (s.isGuard()) {
+            String p = prefix + "g";
+            if (mode == 3)
+                p += "_p";
+            parts.add(p);
+        }
+        if (s.getGuard_mode() == 1)
+            parts.add(prefix + "_valet");
+        if (s.getTilt() == 1)
+            parts.add(prefix + "_hit1");
+        if (s.getTilt() == 2)
+            parts.add(prefix + "_hit2");
 
         String new_state = null;
         for (String part : parts) {
@@ -207,12 +228,13 @@ public class CarView extends View {
             add(R.drawable.c_a_hit2, 54, 197);
             add(R.drawable.c_a_move, 32, 306);
             add(R.drawable.c_a_slope, 31, 25);
-            add(R.drawable.c_m1, 631, 19);
-            add(R.drawable.c_m2, 631, 19);
-            add(R.drawable.c_m3, 651, 64);
-            add(R.drawable.c_m4, 651, 64);
-            add(R.drawable.c_m5, 427, 131);
-            add(R.drawable.c_m6, 52, 164);
+            add(R.drawable.c_block, 631, 19);
+            add(R.drawable.c_g_r, 631, 19);
+            add(R.drawable.c_g_p, 651, 64);
+            add(R.drawable.c_g, 651, 64);
+            add(R.drawable.c_i, 427, 131);
+            add(R.drawable.c_i_r, 427, 131);
+            add(R.drawable.c_valet, 52, 164);
 
         }
 

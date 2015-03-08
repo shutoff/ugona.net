@@ -13,6 +13,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -97,11 +98,13 @@ public class PrimaryFragment extends MainFragment {
     }
 
     @Override
-    Menu menu() {
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         MainFragment fragment = getFragment(0);
-        if (fragment == null)
-            return null;
-        return fragment.menu();
+        if (fragment != null) {
+            fragment.onCreateOptionsMenu(menu, inflater);
+            return;
+        }
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     void setTabs() {

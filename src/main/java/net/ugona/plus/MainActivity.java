@@ -49,6 +49,7 @@ public class MainActivity extends ActionBarActivity {
 
     Menu topSubMenu;
     Menu sideMenu;
+    Menu fragmentMenu;
 
     LocalDate current;
 
@@ -199,12 +200,15 @@ public class MainActivity extends ActionBarActivity {
             } else {
                 menu.removeItem(R.id.date);
             }
-            Menu sub_menu = fragment.menu();
-            if (sub_menu != null) {
-                for (int i = 0; i < sub_menu.size(); i++) {
-                    MenuItem it = sub_menu.getItem(i);
-                    menu.add(it.getGroupId(), it.getItemId(), it.getOrder(), it.getTitle());
-                }
+            if (fragmentMenu == null) {
+                PopupMenu popupMenu = new PopupMenu(this, null);
+                fragmentMenu = popupMenu.getMenu();
+            }
+            fragmentMenu.clear();
+            fragment.onCreateOptionsMenu(fragmentMenu, getMenuInflater());
+            for (int i = 0; i < fragmentMenu.size(); i++) {
+                MenuItem it = fragmentMenu.getItem(i);
+                menu.add(it.getGroupId(), it.getItemId(), it.getOrder(), it.getTitle());
             }
         }
         return super.onCreateOptionsMenu(menu);

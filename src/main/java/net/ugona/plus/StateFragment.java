@@ -145,7 +145,7 @@ public class StateFragment extends MainFragment {
             if (parts.length > 0) {
                 try {
                     String[] p = parts[0].split(":");
-                    int t = Integer.parseInt(p[0]);
+                    int t = Integer.parseInt(p[1]);
                     iTemp.setVisibility(View.VISIBLE);
                     iTemp.setText(t + " \u00B0C");
                     temp = true;
@@ -156,6 +156,12 @@ public class StateFragment extends MainFragment {
         }
         if (!temp)
             iTemp.setVisibility(View.GONE);
+        if (state.getFuel() > 0) {
+            iFuel.setVisibility(View.VISIBLE);
+            iFuel.setText(state.getFuel() + " L");
+        } else {
+            iFuel.setVisibility(View.GONE);
+        }
 
         vCar.update(state);
         if (state.getTime() > 0) {

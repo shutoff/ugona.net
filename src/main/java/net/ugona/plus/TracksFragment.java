@@ -192,30 +192,27 @@ public class TracksFragment extends MainFragment {
     }
 
     void showTrack(int index) {
+
         Intent intent = new Intent(getActivity(), TrackView.class);
         Track track = tracks.get(index);
-        Vector<Track> track1 = new Vector<Track>();
-        track1.add(track);
-        if (!setTrack(track1, intent))
-            return;
+        Vector<Track> tracks = new Vector<Track>();
+        tracks.add(track);
         DateFormat df = android.text.format.DateFormat.getMediumDateFormat(getActivity());
         DateFormat tf = android.text.format.DateFormat.getTimeFormat(getActivity());
-        intent.putExtra(Names.TITLE, df.format(track.begin) + " " + tf.format(track.begin) + "-" + tf.format(track.end));
-        startActivity(intent);
+        String title = df.format(track.begin) + " " + tf.format(track.begin) + "-" + tf.format(track.end);
+        showTracks(tracks, title);
     }
 
     void showDay() {
         if (tracks.size() == 0)
             return;
-        Intent intent = new Intent(getActivity(), TrackView.class);
-        if (!setTrack(tracks, intent))
-            return;
         DateFormat df = android.text.format.DateFormat.getMediumDateFormat(getActivity());
-        intent.putExtra(Names.TITLE, df.format(date().toDate()));
-        startActivity(intent);
+        String title = df.format(date().toDate());
+        showTracks(tracks, title);
     }
 
-    boolean setTrack(Vector<Track> tracks, Intent intent) {
+    void showTracks(Vector<Track> tracks, String title) {
+        Intent intent = new Intent(getActivity(), TrackView.class);
         byte[] data = null;
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -228,7 +225,7 @@ public class TracksFragment extends MainFragment {
             // ignore
         }
         if (data == null)
-            return false;
+            return;
         if (data.length > 500000) {
             try {
                 File outputDir = getActivity().getCacheDir();
@@ -238,12 +235,13 @@ public class TracksFragment extends MainFragment {
                 intent.putExtra(Names.TRACK_FILE, file.getAbsolutePath());
                 f.close();
             } catch (Exception ex) {
-                return false;
+                return;
             }
         } else {
             intent.putExtra(Names.TRACK, data);
         }
-        return true;
+        intent.putExtra(Names.TITLE, title);
+        getActivity().startActivity(intent);
     }
 
     void refresh() {

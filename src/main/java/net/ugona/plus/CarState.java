@@ -34,6 +34,7 @@ public class CarState extends Config implements Serializable {
     private double power;
     private double reserved;
     private int gsm_level;
+    private int tilt;
     private String gsm;
     private String gps;
     private String temperature;
@@ -223,6 +224,10 @@ public class CarState extends Config implements Serializable {
             return;
         this.check_time = check_time;
         upd = true;
+    }
+
+    public int getTilt() {
+        return tilt;
     }
 
     public String getVersion() {
