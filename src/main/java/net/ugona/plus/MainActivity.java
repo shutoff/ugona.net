@@ -253,14 +253,9 @@ public class MainActivity extends ActionBarActivity {
             case R.id.passwd:
                 setFragment(new SetPassword());
                 return true;
-            case R.id.history: {
-                MainFragment historyFragment = new HistoryFragment();
-                Bundle args = new Bundle();
-                args.putString(Names.ID, id);
-                historyFragment.setArguments(args);
-                setFragment(historyFragment);
+            case R.id.history:
+                setFragment(new HistoryFragment());
                 return true;
-            }
         }
         return super.onOptionsItemSelected(item);
     }

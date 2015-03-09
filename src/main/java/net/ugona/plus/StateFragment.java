@@ -226,7 +226,7 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
                 type = "voltage";
                 break;
             case R.id.reserve:
-                type = "reserve";
+                type = "reserved";
                 break;
             case R.id.balance:
                 type = "balance";

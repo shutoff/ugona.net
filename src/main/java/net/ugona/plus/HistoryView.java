@@ -1,9 +1,18 @@
 package net.ugona.plus;
 
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PointF;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Region;
+import android.graphics.Typeface;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.FloatMath;
 import android.view.MotionEvent;
@@ -11,11 +20,13 @@ import android.view.View;
 
 import com.androidplot.ui.YLayoutStyle;
 import com.androidplot.ui.YPositionMetric;
+import com.androidplot.util.FontUtils;
 import com.androidplot.util.PixelUtils;
 import com.androidplot.xy.AxisValueLabelFormatter;
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.XValueMarker;
+import com.androidplot.xy.XYGraphWidget;
 import com.androidplot.xy.XYSeries;
 import com.androidplot.xy.XYStepMode;
 import com.eclipsesource.json.JsonArray;
@@ -55,8 +66,10 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
     float lastZooming;
     boolean zoomChanged;
     Paint markerPaint;
+    Paint markerTextPaint;
     LocalDate current;
     CarConfig config;
+    LineAndPointFormatter formatter;
 
     public HistoryView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -78,19 +91,97 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
                 return d.getHours() == 0;
             }
         });
+
+        Typeface typeface = Font.getFont(context, "Exo2-Regular");
+
         markerPaint = new Paint();
         markerPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-        markerPaint.setColor(Color.rgb(255, 255, 0));
+        markerPaint.setColor(Color.rgb(192, 0, 0));
         markerPaint.setStrokeWidth(PixelUtils.dpToPix(0.5f));
         markerPaint.setTextSize(PixelUtils.dpToPix(15));
+        markerPaint.setTypeface(typeface);
+
+        markerTextPaint = new Paint();
+        markerTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
+        markerTextPaint.setColor(Color.rgb(192, 0, 0));
+        markerTextPaint.setStrokeWidth(PixelUtils.dpToPix(1f));
+        markerTextPaint.setTextSize(PixelUtils.dpToPix(15));
+        markerTextPaint.setStyle(Paint.Style.STROKE);
+        markerTextPaint.setTypeface(typeface);
+
+        TypedArray array = context.getTheme().obtainStyledAttributes(new int[]{
+                android.R.attr.colorBackground,
+                android.R.attr.textColorPrimary,
+        });
+        int backgroundColor = array.getColor(0, 0xFF00FF);
+        array.recycle();
+
+        Paint backgroundPaint = new Paint();
+        backgroundPaint.setColor(backgroundColor);
+        backgroundPaint.setStyle(Paint.Style.FILL);
+        setBackgroundPaint(backgroundPaint);
+
+        XYGraphWidget widget = getGraphWidget();
+        widget.setBackgroundPaint(backgroundPaint);
+        widget.setGridBackgroundPaint(backgroundPaint);
+
+        Paint gridPaint = new Paint();
+        gridPaint.setColor(context.getResources().getColor(android.R.color.darker_gray));
+        gridPaint.setAntiAlias(true);
+        gridPaint.setStyle(Paint.Style.STROKE);
+
+        Paint rangeLabelPaint = new Paint();
+        rangeLabelPaint.setColor(context.getResources().getColor(R.color.text_dark));
+        rangeLabelPaint.setAntiAlias(true);
+        rangeLabelPaint.setStyle(Paint.Style.STROKE);
+        rangeLabelPaint.setTextSize(PixelUtils.dpToPix(13));
+        rangeLabelPaint.setTextAlign(Paint.Align.RIGHT);
+        rangeLabelPaint.setTypeface(typeface);
+
+        Paint domainLabelPaint = new Paint();
+        domainLabelPaint.setColor(context.getResources().getColor(R.color.text_dark));
+        domainLabelPaint.setAntiAlias(true);
+        domainLabelPaint.setStyle(Paint.Style.STROKE);
+        domainLabelPaint.setTextSize(PixelUtils.dpToPix(12));
+        domainLabelPaint.setTextAlign(Paint.Align.CENTER);
+        domainLabelPaint.setTypeface(typeface);
+
+        widget.setRangeGridLinePaint(gridPaint);
+        widget.setDomainGridLinePaint(gridPaint);
+        widget.setRangeSubGridLinePaint(gridPaint);
+        widget.setDomainOriginLinePaint(gridPaint);
+        widget.setRangeOriginLinePaint(gridPaint);
+        widget.setDomainOriginLinePaint(gridPaint);
+        widget.setRangeOriginLinePaint(gridPaint);
+        widget.setDomainOriginLabelPaint(domainLabelPaint);
+        widget.setRangeOriginLabelPaint(rangeLabelPaint);
+        widget.setDomainLabelPaint(domainLabelPaint);
+        widget.setRangeLabelPaint(rangeLabelPaint);
+
+        int color = getResources().getColor(R.color.main);
+        final int fill_color = Color.argb(192, Color.red(color), Color.green(color), Color.blue(color));
+        formatter = new LineAndPointFormatter(color, null, fill_color, null) {
+            @Override
+            public void fillPath(Canvas canvas, Path path) {
+                Region clip = new Region(0, 0, getWidth(), getHeight());
+                Region region = new Region();
+                region.setPath(path, clip);
+                Rect bounds = region.getBounds();
+                Paint fillPaint = formatter.getFillPaint();
+                fillPaint.setShader(new LinearGradient(bounds.left, bounds.top, bounds.left, bounds.bottom, fill_color, Color.TRANSPARENT, LinearGradient.TileMode.MIRROR));
+                super.fillPath(canvas, path);
+            }
+        };
+
         setOnTouchListener(this);
     }
 
-    void init(Context context, String id, String t, LocalDate c) {
+    public void init(Context context, String id, String t, LocalDate c) {
         car_id = id;
         type = t;
         current = c;
         config = CarConfig.get(context, id);
+
         loadData();
     }
 
@@ -127,7 +218,45 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
                         text += " ";
                         text += String.format("%.2f", series.getY(i));
                         text += getUnits();
-                        addMarker(new XValueMarker(series.getX(i), text, new YPositionMetric(5, YLayoutStyle.ABSOLUTE_FROM_TOP), markerPaint, markerPaint));
+                        float yPos = getGraphWidget().getYPix(series.getY(i).floatValue());
+                        addMarker(new XValueMarker(series.getX(i), text, new YPositionMetric(yPos, YLayoutStyle.ABSOLUTE_FROM_TOP), markerPaint, markerTextPaint) {
+                            @Override
+                            public void drawText(Canvas canvas, String text, float xPix, RectF paddedGridRect) {
+                                float yPix = getTextPosition().getPixelValue(
+                                        paddedGridRect.height());
+                                yPix += paddedGridRect.top;
+                                Paint textPaint = getGraphWidget().getDomainLabelPaint();
+                                canvas.drawCircle(xPix, yPix, PixelUtils.dpToPix(4), getBackgroundPaint());
+                                canvas.drawCircle(xPix, yPix, PixelUtils.dpToPix(4), textPaint);
+                                RectF textRect = new RectF(FontUtils.getStringDimensions(text, getTextPaint()));
+                                float margin = PixelUtils.dpToPix(2);
+                                float text_h = textRect.height() + margin * 2;
+                                float text_w = textRect.width() + margin * 2;
+                                boolean bUp = true;
+                                float marker_y = PixelUtils.dpToPix(10);
+                                float text_y = yPix - text_h - marker_y;
+                                if (text_y < paddedGridRect.top + margin) {
+                                    bUp = false;
+                                    text_y = (int) yPix + marker_y;
+                                }
+                                float text_x = xPix - text_w / 2;
+                                if (text_x < paddedGridRect.left + 2)
+                                    text_x = paddedGridRect.left + 2;
+                                if (text_x + text_w > paddedGridRect.right - 2)
+                                    text_x = paddedGridRect.right - text_w - 2;
+                                textRect = new RectF(text_x, text_y, text_x + text_w, text_y + text_h);
+                                float radius = PixelUtils.dpToPix(2);
+                                Paint p = new Paint();
+                                p.setColor(Color.WHITE);
+                                p.setShadowLayer(10, 5, 5, Color.BLACK);
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+                                    setLayerType(LAYER_TYPE_SOFTWARE, p);
+                                Path pt = new Path();
+                                pt.addRoundRect(textRect, radius, radius, Path.Direction.CW);
+                                canvas.drawPath(pt, p);
+                                canvas.drawText(text, textRect.centerX(), textRect.centerY() + margin, textPaint);
+                            }
+                        });
                         postInvalidate();
                     }
                 } catch (Exception ex) {
@@ -371,7 +500,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
                 min_value = 0;
             max_value += dv / 4;
 
-            addSeries(series, new LineAndPointFormatter(Color.rgb(0, 0, 255), null, Color.argb(128, 0, 0, 128), null));
+            addSeries(series, formatter);
 
             setDomainSteps();
             setDomainBoundaries(screenMinX, screenMaxX, BoundaryMode.FIXED);

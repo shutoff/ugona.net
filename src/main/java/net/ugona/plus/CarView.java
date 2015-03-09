@@ -158,7 +158,7 @@ public class CarView extends View {
         } else if (card) {
             parts.add("s_g_r");
         } else if (s.isGuard()) {
-            String p = prefix + "g";
+            String p = prefix + "_g";
             if (mode == 3)
                 p += "_p";
             parts.add(p);

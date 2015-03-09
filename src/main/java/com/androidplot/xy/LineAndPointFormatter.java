@@ -16,8 +16,10 @@
 
 package com.androidplot.xy;
 
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 
 import com.androidplot.ui.SeriesRenderer;
 import com.androidplot.util.PixelUtils;
@@ -176,5 +178,12 @@ public class LineAndPointFormatter extends XYSeriesFormatter<XYRegionFormatter> 
 
     public void setPointLabeler(PointLabeler pointLabeler) {
         this.pointLabeler = pointLabeler;
+    }
+
+    public void fillPath(Canvas canvas, Path path) {
+        if (getFillPaint() != null) {
+            canvas.drawPath(path, getFillPaint());
+        }
+
     }
 }

@@ -16,10 +16,13 @@
 
 package com.androidplot.xy;
 
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 
 import com.androidplot.ui.PositionMetric;
+import com.androidplot.util.FontUtils;
 
 /**
  * Encapsulates a single axis line marker drawn onto an XYPlot at a specified value.
@@ -153,8 +156,28 @@ public abstract class ValueMarker<PositionMetricType extends PositionMetric> {
         this.textPosition = textPosition;
     }
 
+    public void drawText(Canvas canvas, String text, float xPix, RectF paddedGridRect) {
+        float yPix = getTextPosition().getPixelValue(
+                paddedGridRect.height());
+        yPix += paddedGridRect.top;
+
+        RectF textRect = new RectF(FontUtils.getStringDimensions(text, getTextPaint()));
+        textRect.offsetTo(xPix, yPix - textRect.height());
+
+        if (textRect.right > paddedGridRect.right) {
+            textRect.offset(-(textRect.right - paddedGridRect.right), 0);
+        }
+
+        if (textRect.top < paddedGridRect.top) {
+            textRect.offset(0, paddedGridRect.top - textRect.top);
+        }
+
+        canvas.drawText(text, textRect.left, textRect.bottom, getTextPaint());
+    }
+
     public enum TextOrientation {
         HORIZONTAL,
         VERTICAL
     }
+
 }

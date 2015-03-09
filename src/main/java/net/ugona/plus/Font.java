@@ -26,6 +26,25 @@ public class Font {
         this.name = name;
     }
 
+    static public Typeface getFont(Context context, String path) {
+        if (FONTS.containsKey(path)) {
+            return FONTS.get(path);
+        } else {
+            Typeface typeface = makeTypeface(context, path);
+            FONTS.put(path, typeface);
+            return typeface;
+        }
+    }
+
+    static private Typeface makeTypeface(Context context, String path) {
+        try {
+            return Typeface.createFromAsset(context.getAssets(), "fonts/" + path + ".ttf");
+        } catch (Exception e) {
+            // add user-friendly error message
+            throw new IllegalArgumentException(String.format("Error creating font from assets path '%s'", path), e);
+        }
+    }
+
     public void install(Activity activity) {
         LayoutInflater layoutInflater = activity.getLayoutInflater();
         boolean factoryIsEmpty = layoutInflater.getFactory() == null;
@@ -38,9 +57,9 @@ public class Font {
     private Typeface getFont(int type, boolean sans, Context context) {
         switch (type) {
             case Typeface.NORMAL:
-                return getFont(context, sans ? "Light" : "Regular");
+                return getFont(context, this.name + "-" + (sans ? "Light" : "Regular"));
             case Typeface.BOLD:
-                return getFont(context, sans ? "Medium" : "Bold");
+                return getFont(context, this.name + "-" + (sans ? "Medium" : "Bold"));
             default: {
                 throw new IllegalArgumentException("Undefined font type " + type);
             }
@@ -64,26 +83,6 @@ public class Font {
         }
         typedArray.recycle();
         return getFont(type, sans, context);
-    }
-
-    private Typeface getFont(Context context, String path) {
-        path = this.name + "-" + path;
-        if (FONTS.containsKey(path)) {
-            return FONTS.get(path);
-        } else {
-            Typeface typeface = makeTypeface(context, path);
-            FONTS.put(path, typeface);
-            return typeface;
-        }
-    }
-
-    private Typeface makeTypeface(Context context, String path) {
-        try {
-            return Typeface.createFromAsset(context.getAssets(), "fonts/" + path + ".ttf");
-        } catch (Exception e) {
-            // add user-friendly error message
-            throw new IllegalArgumentException(String.format("Error creating font from assets path '%s'", path), e);
-        }
     }
 
     final class FontLayoutInflaterFactory implements LayoutInflater.Factory {

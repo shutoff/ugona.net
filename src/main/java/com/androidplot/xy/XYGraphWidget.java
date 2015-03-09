@@ -370,6 +370,17 @@ public class XYGraphWidget extends Widget {
                 .doubleValue(), paddedGridRect.height(), true);
     }
 
+    public float getYPix(float yVal) {
+        if (plot.getCalculatedMinY() == null
+                || plot.getCalculatedMaxY() == null) {
+            return 0;
+        }
+        return ValPixConverter.valToPix(yVal, plot
+                .getCalculatedMinY().doubleValue(), plot
+                .getCalculatedMaxY().doubleValue(), paddedGridRect
+                .height(), true);
+    }
+
     /**
      * Convenience method. Wraps getXVal(float)
      *
@@ -805,18 +816,10 @@ public class XYGraphWidget extends Widget {
                 xPix += paddedGridRect.left;
                 canvas.drawLine(xPix, paddedGridRect.top, xPix,
                         paddedGridRect.bottom, marker.getLinePaint());
-
-                // String text = getFormattedDomainValue(xVal);
-                float yPix = marker.getTextPosition().getPixelValue(
-                        paddedGridRect.height());
-                yPix += paddedGridRect.top;
-                if (marker.getText() != null) {
-                    drawMarkerText(canvas, marker.getText(), marker, xPix, yPix);
-                } else {
-                    drawMarkerText(canvas,
-                            getFormattedDomainValue(marker.getValue()), marker,
-                            xPix, yPix);
-                }
+                String text = marker.getText();
+                if (text == null)
+                    text = getFormattedDomainValue(marker.getValue());
+                marker.drawText(canvas, text, xPix, paddedGridRect);
             }
         }
     }

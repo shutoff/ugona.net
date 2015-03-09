@@ -191,10 +191,7 @@ public class LineAndPointRenderer<FormatterType extends LineAndPointFormatter> e
                 throw new UnsupportedOperationException("Fill direction not yet implemented: " + formatter.getFillDirection());
         }
 
-        if (formatter.getFillPaint() != null) {
-            canvas.drawPath(path, formatter.getFillPaint());
-        }
-
+        formatter.fillPath(canvas, path);
 
         //}
 
