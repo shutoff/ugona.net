@@ -46,6 +46,7 @@ public class CarState extends Config implements Serializable {
     private boolean show_photo;
     private boolean show_tracks;
     private boolean pointer;
+    private boolean history;
     private long check_time;
     private String version;
 
@@ -213,6 +214,10 @@ public class CarState extends Config implements Serializable {
 
     public boolean isShow_tracks() {
         return show_tracks;
+    }
+
+    public boolean isHistory() {
+        return history;
     }
 
     public long getCheck_time() {

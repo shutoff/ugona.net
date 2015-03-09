@@ -13,6 +13,8 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
@@ -177,6 +179,19 @@ public class State {
             pos = end;
         }
         return spannable;
+    }
+
+    static void forEachViews(ViewGroup group, ViewCallback cb) {
+        for (int i = 0; i < group.getChildCount(); i++) {
+            View v = group.getChildAt(i);
+            cb.view(v);
+            if (v instanceof ViewGroup)
+                forEachViews((ViewGroup) v, cb);
+        }
+    }
+
+    public static interface ViewCallback {
+        void view(View v);
     }
 
 }

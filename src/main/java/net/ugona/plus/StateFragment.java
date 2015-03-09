@@ -16,7 +16,7 @@ import java.text.NumberFormat;
 import java.util.Currency;
 import java.util.Locale;
 
-public class StateFragment extends MainFragment {
+public class StateFragment extends MainFragment implements View.OnClickListener {
 
     Indicator iGsm;
     Indicator iVoltage;
@@ -53,7 +53,7 @@ public class StateFragment extends MainFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = super.onCreateView(inflater, container, savedInstanceState);
+        ViewGroup v = (ViewGroup) super.onCreateView(inflater, container, savedInstanceState);
         iGsm = (Indicator) v.findViewById(R.id.gsm);
         iVoltage = (Indicator) v.findViewById(R.id.voltage);
         iReserve = (Indicator) v.findViewById(R.id.reserve);
@@ -68,6 +68,15 @@ public class StateFragment extends MainFragment {
         tvAddress = (TextView) v.findViewById(R.id.address);
         tvTime = (TextView) v.findViewById(R.id.time);
         handler = new Handler();
+
+        State.forEachViews(v, new State.ViewCallback() {
+            @Override
+            public void view(View v) {
+                if (v instanceof Indicator)
+                    v.setOnClickListener(StateFragment.this);
+            }
+        });
+
         update();
         br = new BroadcastReceiver() {
             @Override
@@ -207,5 +216,39 @@ public class StateFragment extends MainFragment {
             }
         }
         tvAddress.setText(text);
+    }
+
+    @Override
+    public void onClick(View v) {
+        String type = null;
+        switch (v.getId()) {
+            case R.id.voltage:
+                type = "voltage";
+                break;
+            case R.id.reserve:
+                type = "reserve";
+                break;
+            case R.id.balance:
+                type = "balance";
+                break;
+            case R.id.temp:
+                type = "t";
+                break;
+            case R.id.fuel:
+                type = "fuel";
+                break;
+        }
+        if (type == null)
+            return;
+        CarState state = CarState.get(getActivity(), id());
+        if (!state.isHistory())
+            return;
+        Bundle args = new Bundle();
+        args.putString(Names.ID, id());
+        args.putString(Names.TITLE, type);
+        HistoryFragment fragment = new HistoryFragment();
+        fragment.setArguments(args);
+        MainActivity activity = (MainActivity) getActivity();
+        activity.setFragment(fragment);
     }
 }
