@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -326,8 +327,11 @@ public class MainActivity extends ActionBarActivity {
                     LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     v = inflater.inflate(R.layout.menu_item, null);
                 }
+                MenuItem item = sideMenu.getItem(position);
                 TextView tv = (TextView) v.findViewById(R.id.name);
-                tv.setText(sideMenu.getItem(position).getTitle());
+                tv.setText(item.getTitle());
+                ImageView iv = (ImageView) v.findViewById(R.id.img);
+                iv.setImageDrawable(item.getIcon());
                 return v;
             }
         });

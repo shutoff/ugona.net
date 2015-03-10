@@ -2,25 +2,31 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/preferences"
+        android:icon="@drawable/ic_settings"
         android:title="@string/preferences" />
 
     <item
         android:id="@+id/charts"
+        android:icon="@drawable/ic_graphics"
         android:title="@string/charts" />
 
     <item
         android:id="@+id/maintenance"
+        android:icon="@drawable/ic_obslyg"
         android:title="@string/maintenance" />
 
     <item
         android:id="@+id/cars"
+        android:icon="@drawable/ic_auto"
         android:title="@string/cars" />
 
     <item
         android:id="@+id/passwd"
+        android:icon="@drawable/ic_password"
         android:title="@string/password" />
 
     <item
         android:id="@+id/about"
+        android:icon="@drawable/ic_info"
         android:title="@string/about" />
 </menu>

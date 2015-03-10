@@ -35,6 +35,7 @@ import com.eclipsesource.json.ParseException;
 
 import org.joda.time.LocalDate;
 
+import java.io.Serializable;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
@@ -397,12 +398,12 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         void errorLoading();
     }
 
-    static class Data {
+    static class Data implements Serializable {
         long t;
         double v;
     }
 
-    static class HistoryParams {
+    static class HistoryParams implements Serializable {
         String skey;
         long begin;
         long end;
