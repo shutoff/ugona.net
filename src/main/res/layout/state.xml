@@ -87,11 +87,18 @@
                         app:src="@drawable/ind08" />
 
                     <net.ugona.plus.Indicator
+                        android:id="@+id/temp_ext"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        app:src="@drawable/ind10" />
+
+                    <net.ugona.plus.Indicator
                         android:id="@+id/fuel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:visibility="gone"
-                        app:src="@drawable/ind06" />
+                        app:src="@drawable/ind09" />
 
                     <net.ugona.plus.Indicator
                         android:id="@+id/temp1"

@@ -25,6 +25,7 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
     Indicator iTemp;
     Indicator iTempEngine;
     Indicator iTempSalon;
+    Indicator iTempExt;
     Indicator iFuel;
     Indicator iTemp1;
     Indicator iTemp2;
@@ -61,6 +62,7 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
         iTemp = (Indicator) v.findViewById(R.id.temp);
         iTempEngine = (Indicator) v.findViewById(R.id.temp_engine);
         iTempSalon = (Indicator) v.findViewById(R.id.temp_salon);
+        iTempExt = (Indicator) v.findViewById(R.id.temp_ext);
         iFuel = (Indicator) v.findViewById(R.id.fuel);
         iTemp1 = (Indicator) v.findViewById(R.id.temp1);
         iTemp2 = (Indicator) v.findViewById(R.id.temp2);
