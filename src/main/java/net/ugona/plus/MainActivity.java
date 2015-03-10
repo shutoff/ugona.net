@@ -1,7 +1,9 @@
 package net.ugona.plus;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -58,6 +60,7 @@ public class MainActivity extends ActionBarActivity {
     ActionBarDrawerToggle drawerToggle;
     View vLogo;
     Spinner spinner;
+    BroadcastReceiver br;
 
     private FragmentManager.OnBackStackChangedListener
             mOnBackStackChangedListener = new FragmentManager.OnBackStackChangedListener() {
@@ -147,6 +150,20 @@ public class MainActivity extends ActionBarActivity {
 
         setPrimary();
 
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent == null)
+                    return;
+                if (!id.equals(intent.getStringExtra(Names.ID)))
+                    return;
+                if (intent.getAction().equals(Names.CONFIG_CHANGED))
+                    setSideMenu();
+            }
+        };
+        IntentFilter intFilter = new IntentFilter(Names.CONFIG_CHANGED);
+        registerReceiver(br, intFilter);
+
         checkCaps();
         if (checkPhone())
             return;
@@ -156,6 +173,7 @@ public class MainActivity extends ActionBarActivity {
     protected void onDestroy() {
         getSupportFragmentManager().removeOnBackStackChangedListener(mOnBackStackChangedListener);
         AppConfig.save(this);
+        unregisterReceiver(br);
         super.onDestroy();
     }
 
@@ -303,6 +321,11 @@ public class MainActivity extends ActionBarActivity {
         sideMenu = p.getMenu();
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.sidebar, sideMenu);
+
+        CarState state = CarState.get(this, id);
+        if (!state.isHistory())
+            sideMenu.removeItem(R.id.history);
+
         ListView lMenu = (ListView) findViewById(R.id.sidemenu);
         lMenu.setAdapter(new BaseAdapter() {
             @Override

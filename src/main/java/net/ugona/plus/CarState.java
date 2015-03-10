@@ -249,4 +249,12 @@ public class CarState extends Config implements Serializable {
     public boolean isPointer() {
         return pointer;
     }
+
+    public boolean isAz() {
+        if (az_time <= 0)
+            return false;
+        if (!guard)
+            return false;
+        return guard_time < az_time;
+    }
 }

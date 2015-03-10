@@ -71,6 +71,13 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
         tvTime = (TextView) v.findViewById(R.id.time);
         handler = new Handler();
 
+        v.findViewById(R.id.status).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
         State.forEachViews(v, new State.ViewCallback() {
             @Override
             public void view(View v) {
@@ -87,7 +94,7 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
                     return;
                 if (!id().equals(intent.getStringExtra(Names.ID)))
                     return;
-                if (intent.getAction().equals(Names.CONFIG_CHANGED))
+                if (intent.getAction().equals(Names.UPDATED))
                     update();
             }
         };
@@ -184,7 +191,7 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
         if (!state.isIgnition()) {
             long last = state.getLast_stand();
             if (last > 0)
-                text = State.formatDateTime(getActivity(), last);
+                text = "|" + State.formatDateTime(getActivity(), last) + "|";
         }
 
         String gps = state.getGps();
@@ -210,14 +217,24 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
                     text += " ";
                 text += lat + ", " + lng;
                 if (address != null) {
-                    text += "\n";
-                    text += address;
+                    text += "\n|";
+                    String[] parts = address.split(", ");
+                    text += parts[0];
+                    if (parts.length > 1)
+                        text += ", " + parts[1];
+                    if (parts.length > 2) {
+                        text += "|\n";
+                        text += parts[2];
+                        for (int i = 3; i < parts.length; i++) {
+                            text += ", " + parts[i];
+                        }
+                    }
                 }
             } catch (Exception ex) {
-                // ignroe
+                // ignore
             }
         }
-        tvAddress.setText(text);
+        tvAddress.setText(State.createSpans(text, getResources().getColor(android.R.color.white), true));
     }
 
     @Override
