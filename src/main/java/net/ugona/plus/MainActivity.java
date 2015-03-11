@@ -148,6 +148,8 @@ public class MainActivity extends ActionBarActivity {
                     setSideMenu();
             }
         };
+        IntentFilter intFilter = new IntentFilter(Names.CONFIG_CHANGED);
+        registerReceiver(br, intFilter);
 
         if (savedInstanceState != null)
             return;
@@ -161,9 +163,6 @@ public class MainActivity extends ActionBarActivity {
         }
 
         setPrimary();
-
-        IntentFilter intFilter = new IntentFilter(Names.CONFIG_CHANGED);
-        registerReceiver(br, intFilter);
 
         checkCaps();
         if (checkPhone())
