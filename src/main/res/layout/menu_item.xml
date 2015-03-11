@@ -9,15 +9,18 @@
         android:id="@+id/img"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="10dp" />
+        android:layout_marginLeft="8dp"
+        android:padding="8dp" />
 
     <TextView
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="10dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="16dp"
         android:textColor="@color/text"
-        android:textSize="18dp"
-        android:textStyle="bold" />
+        android:textSize="16dp"
+        android:textStyle="bold"
+        android:typeface="sans" />
 
 </LinearLayout>

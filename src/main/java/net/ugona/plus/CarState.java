@@ -40,6 +40,9 @@ public class CarState extends Config implements Serializable {
     private int shock;
     private String gsm;
     private String gps;
+    private boolean gps_valid;
+    private int speed;
+    private int course;
     private String temperature;
     private String balance;
     private boolean guard;
@@ -185,6 +188,18 @@ public class CarState extends Config implements Serializable {
 
     public String getGps() {
         return gps;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public int getCourse() {
+        return course;
+    }
+
+    public boolean isGps_valid() {
+        return gps_valid;
     }
 
     public String getTemperature() {

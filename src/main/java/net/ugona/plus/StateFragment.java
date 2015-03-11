@@ -218,11 +218,20 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
         } else {
             tvTime.setText("???");
         }
-        String text = "";
+        StringBuilder text = new StringBuilder();
         if (!state.isIgnition()) {
             long last = state.getLast_stand();
-            if (last > 0)
-                text = "|" + State.formatDateTime(getActivity(), last) + "|";
+            if (last > 0) {
+                text.append("|");
+                text.append(State.formatDateTime(getActivity(), last));
+                text.append("|");
+            }
+        } else if (state.isGps_valid()) {
+            text.append("|");
+            text.append(state.getSpeed());
+            text.append(" ");
+            text.append(getString(R.string.kmh));
+            text.append("|");
         }
 
         String gps = state.getGps();
@@ -246,20 +255,25 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
                     }
                 });
                 is_address = false;
-                if (!text.equals(""))
-                    text += " ";
-                text += lat + ", " + lng;
+                if (!text.toString().equals(""))
+                    text.append(" ");
+                text.append(lat);
+                text.append(", ");
+                text.append(lng);
                 if (address != null) {
-                    text += "\n|";
+                    text.append("\n|");
                     String[] parts = address.split(", ");
-                    text += parts[0];
-                    if (parts.length > 1)
-                        text += ", " + parts[1];
+                    text.append(parts[0]);
+                    if (parts.length > 1) {
+                        text.append(", ");
+                        text.append(parts[1]);
+                    }
                     if (parts.length > 2) {
-                        text += "|\n";
-                        text += parts[2];
+                        text.append("|\n");
+                        text.append(parts[2]);
                         for (int i = 3; i < parts.length; i++) {
-                            text += ", " + parts[i];
+                            text.append(", ");
+                            text.append(parts[i]);
                         }
                     }
                 }
@@ -267,7 +281,7 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
                 // ignore
             }
         }
-        tvAddress.setText(State.createSpans(text, getResources().getColor(android.R.color.white), true));
+        tvAddress.setText(State.createSpans(text.toString(), getResources().getColor(android.R.color.white), true));
     }
 
     @Override

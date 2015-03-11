@@ -184,23 +184,18 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:fillViewport="true">
+            android:fillViewport="true"
+            android:padding="5dp">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/address"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center">
-
-                <TextView
-                    android:id="@+id/address"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:textColor="@color/light_text"
-                    android:textSize="13sp"
-                    android:typeface="sans" />
-
-            </LinearLayout>
+                android:layout_gravity="center_vertical"
+                android:gravity="left|center_vertical"
+                android:textColor="@color/light_text"
+                android:textSize="13sp"
+                android:typeface="sans" />
 
         </ScrollView>
 

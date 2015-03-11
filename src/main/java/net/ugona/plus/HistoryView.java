@@ -71,6 +71,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
     LocalDate current;
     CarConfig config;
     LineAndPointFormatter formatter;
+    Paint mainLabelPaint;
 
     public HistoryView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -91,9 +92,18 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
                 Date d = new Date((long) value * 1000);
                 return d.getHours() == 0;
             }
+
+            @Override
+            public void paint(Paint p, double value) {
+                if (isMain(value)) {
+                    p.setTypeface(mainLabelPaint.getTypeface());
+                    p.setTextSize(mainLabelPaint.getTextSize());
+                }
+            }
         });
 
         Typeface typeface = Font.getFont(context, "Exo2-Regular");
+        Typeface typeface_bold = Font.getFont(context, "Exo2-Bold");
 
         markerPaint = new Paint();
         markerPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
@@ -147,17 +157,27 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         domainLabelPaint.setTextAlign(Paint.Align.CENTER);
         domainLabelPaint.setTypeface(typeface);
 
+        mainLabelPaint = new Paint();
+        mainLabelPaint.setColor(context.getResources().getColor(R.color.text_dark));
+        mainLabelPaint.setAntiAlias(true);
+        mainLabelPaint.setStyle(Paint.Style.STROKE);
+        mainLabelPaint.setTextSize(PixelUtils.dpToPix(14));
+        mainLabelPaint.setTextAlign(Paint.Align.CENTER);
+        mainLabelPaint.setTypeface(typeface_bold);
+
+
         widget.setRangeGridLinePaint(gridPaint);
         widget.setDomainGridLinePaint(gridPaint);
         widget.setRangeSubGridLinePaint(gridPaint);
         widget.setDomainOriginLinePaint(gridPaint);
         widget.setRangeOriginLinePaint(gridPaint);
-        widget.setDomainOriginLinePaint(gridPaint);
+        widget.setDomainOriginLinePaint(domainLabelPaint);
         widget.setRangeOriginLinePaint(gridPaint);
         widget.setDomainOriginLabelPaint(domainLabelPaint);
         widget.setRangeOriginLabelPaint(rangeLabelPaint);
         widget.setDomainLabelPaint(domainLabelPaint);
         widget.setRangeLabelPaint(rangeLabelPaint);
+
 
         int color = getResources().getColor(R.color.main);
         final int fill_color = Color.argb(192, Color.red(color), Color.green(color), Color.blue(color));

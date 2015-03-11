@@ -25,4 +25,8 @@
         <item name="android:textColor">@android:color/black</item>
     </style>
 
+    <style name="overlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:textSize">16sp</item>
+    </style>
+
 </resources>

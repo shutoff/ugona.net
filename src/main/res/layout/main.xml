@@ -23,9 +23,9 @@
             app:contentInsetLeft="0dp"
             app:contentInsetStart="0dp"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+            app:theme="@style/overlay">
 
-            <Spinner
+        <Spinner
                 android:id="@+id/spinner_nav"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -58,6 +58,7 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="130dp"
+            android:paddingBottom="8dp"
             android:src="@drawable/sidebar" />
 
         <ListView
