@@ -62,6 +62,14 @@ public class PullToRefreshLayout extends FrameLayout {
     }
 
     /**
+     * @return true if this Attacher is currently in a refreshing state.
+     */
+    public final boolean isRefreshing() {
+        ensureAttacher();
+        return mPullToRefreshAttacher.isRefreshing();
+    }
+
+    /**
      * Manually set this Attacher's refreshing state. The header will be
      * displayed or hidden as requested.
      *
@@ -70,14 +78,6 @@ public class PullToRefreshLayout extends FrameLayout {
     public final void setRefreshing(boolean refreshing) {
         ensureAttacher();
         mPullToRefreshAttacher.setRefreshing(refreshing);
-    }
-
-    /**
-     * @return true if this Attacher is currently in a refreshing state.
-     */
-    public final boolean isRefreshing() {
-        ensureAttacher();
-        return mPullToRefreshAttacher.isRefreshing();
     }
 
     /**
@@ -179,14 +179,29 @@ public class PullToRefreshLayout extends FrameLayout {
         addRefreshableViewRecursive(this);
     }
 
+    boolean haveScoll(View v) {
+        if (AbsListView.class.isInstance(v) || ScrollView.class.isInstance(v))
+            return true;
+        if (!ViewGroup.class.isInstance(v))
+            return false;
+        ViewGroup group = (ViewGroup) v;
+        for (int i = 0, z = group.getChildCount(); i < z; i++) {
+            if (haveScoll(group.getChildAt(i)))
+                return true;
+        }
+        return false;
+    }
+
     void addRefreshableViewRecursive(View v) {
-        if (!AbsListView.class.isInstance(v) && !ScrollView.class.isInstance(v)) {
-            if (ViewGroup.class.isInstance(v)) {
-                ViewGroup group = (ViewGroup) v;
-                for (int i = 0, z = group.getChildCount(); i < z; i++) {
-                    addRefreshableViewRecursive(group.getChildAt(i));
+        if (haveScoll(v)) {
+            if (!AbsListView.class.isInstance(v) && !ScrollView.class.isInstance(v)) {
+                if (ViewGroup.class.isInstance(v)) {
+                    ViewGroup group = (ViewGroup) v;
+                    for (int i = 0, z = group.getChildCount(); i < z; i++) {
+                        addRefreshableViewRecursive(group.getChildAt(i));
+                    }
+                    return;
                 }
-                return;
             }
         }
         addRefreshableView(v);

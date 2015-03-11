@@ -137,6 +137,18 @@ public class MainActivity extends ActionBarActivity {
         setupActionBar();
         setSideMenu();
 
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent == null)
+                    return;
+                if (!id.equals(intent.getStringExtra(Names.ID)))
+                    return;
+                if (intent.getAction().equals(Names.CONFIG_CHANGED))
+                    setSideMenu();
+            }
+        };
+
         if (savedInstanceState != null)
             return;
 
@@ -150,17 +162,6 @@ public class MainActivity extends ActionBarActivity {
 
         setPrimary();
 
-        br = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent == null)
-                    return;
-                if (!id.equals(intent.getStringExtra(Names.ID)))
-                    return;
-                if (intent.getAction().equals(Names.CONFIG_CHANGED))
-                    setSideMenu();
-            }
-        };
         IntentFilter intFilter = new IntentFilter(Names.CONFIG_CHANGED);
         registerReceiver(br, intFilter);
 

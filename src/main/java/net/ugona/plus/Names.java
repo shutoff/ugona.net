@@ -22,4 +22,5 @@ public class Names {
     static final String CONFIG_CHANGED = "net.ugona.plus.changed";
     static final String ROTATE = "net.ugona.plus.rotate";
     static final String ERROR = "net.ugona.plus.error";
+    static final String START_UPDATE = "net.ugona.plus.start_update";
 }

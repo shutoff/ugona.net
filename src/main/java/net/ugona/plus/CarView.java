@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.RectF;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -25,6 +26,10 @@ public class CarView extends View {
     Paint paint;
     String pkg;
 
+    int frame;
+    Handler handler;
+    int animation;
+
     public CarView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
@@ -37,6 +42,7 @@ public class CarView extends View {
         pkg = context.getPackageName();
         state = "";
         prefix = "c";
+        handler = new Handler();
     }
 
     @Override
@@ -53,7 +59,14 @@ public class CarView extends View {
             y = (canvas.getHeight() - h) / 2.f;
         }
         String[] parts = state.split(";");
-        for (String part : parts) {
+        for (int i = 0; i < parts.length; i++) {
+            String part = parts[i];
+            if (i == animation) {
+                frame++;
+                if (frame > 6)
+                    frame = 1;
+                part += frame;
+            }
             int id = getResources().getIdentifier(part, "drawable", pkg);
             if (id == 0)
                 continue;
@@ -71,6 +84,7 @@ public class CarView extends View {
         long guard_time = s.getGuard_time();
         long card_time = s.getCard();
         boolean card = false;
+        animation = -1;
         if ((guard_time > 0) && (card_time > 0) && (guard_time > card_time)) {
             card = true;
             guard = false;
@@ -165,10 +179,19 @@ public class CarView extends View {
         }
         if (s.getGuard_mode() == 1)
             parts.add(prefix + "_valet");
-        if (s.getTilt() == 1)
+        if (s.isTilt())
+            parts.add(prefix + "_a_slope");
+        if (s.isMove())
+            parts.add(prefix + "_a_move");
+        int shock = s.getShock();
+        if (shock == 1)
             parts.add(prefix + "_hit1");
-        if (s.getTilt() == 2)
+        if (shock == 2)
             parts.add(prefix + "_hit2");
+        if (s.isAz()) {
+            animation = parts.size();
+            parts.add(prefix + "_az");
+        }
 
         String new_state = null;
         for (String part : parts) {
@@ -178,10 +201,23 @@ public class CarView extends View {
             }
             new_state += ";" + part;
         }
-        if (new_state.equals(state))
+        if ((animation == -1) && new_state.equals(state))
             return;
         state = new_state;
         invalidate();
+        next_frame();
+    }
+
+    void next_frame() {
+        if (animation < 0)
+            return;
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                invalidate();
+                next_frame();
+            }
+        }, 300);
     }
 
     static class Pictures extends HashMap<Integer, Point> {
@@ -226,7 +262,7 @@ public class CarView extends View {
             add(R.drawable.c_a_in, 325, 67);
             add(R.drawable.c_a_hit, 39, 183);
             add(R.drawable.c_a_hit2, 54, 197);
-            add(R.drawable.c_a_move, 32, 306);
+            add(R.drawable.c_a_move, 31, 306);
             add(R.drawable.c_a_slope, 31, 25);
             add(R.drawable.c_block, 631, 19);
             add(R.drawable.c_g_r, 631, 19);
@@ -235,7 +271,12 @@ public class CarView extends View {
             add(R.drawable.c_i, 427, 131);
             add(R.drawable.c_i_r, 427, 131);
             add(R.drawable.c_valet, 52, 164);
-
+            add(R.drawable.c_az1, 927, 0);
+            add(R.drawable.c_az2, 920, 0);
+            add(R.drawable.c_az4, 912, 0);
+            add(R.drawable.c_az3, 919, 0);
+            add(R.drawable.c_az6, 907, 0);
+            add(R.drawable.c_az5, 907, 0);
         }
 
         void add(int id, int x, int y) {

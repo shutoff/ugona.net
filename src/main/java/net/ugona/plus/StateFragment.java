@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.NumberFormat;
@@ -37,6 +38,11 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
     Handler handler;
     BroadcastReceiver br;
 
+    ImageView ivRefresh;
+    View vProgress;
+
+    boolean is_address;
+
     @Override
     int layout() {
         return R.layout.state;
@@ -49,11 +55,15 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
 
     @Override
     void refresh() {
-        super.refresh();
+        Intent intent = new Intent(getActivity(), FetchService.class);
+        intent.setAction(Names.START_UPDATE);
+        intent.putExtra(Names.ID, id());
+        intent.putExtra(Names.CONNECT, true);
+        getActivity().startService(intent);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ViewGroup v = (ViewGroup) super.onCreateView(inflater, container, savedInstanceState);
         iGsm = (Indicator) v.findViewById(R.id.gsm);
         iVoltage = (Indicator) v.findViewById(R.id.voltage);
@@ -69,12 +79,21 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
         vCar = (CarView) v.findViewById(R.id.car);
         tvAddress = (TextView) v.findViewById(R.id.address);
         tvTime = (TextView) v.findViewById(R.id.time);
+        ivRefresh = (ImageView) v.findViewById(R.id.img_progress);
+        vProgress = v.findViewById(R.id.upd_progress);
         handler = new Handler();
 
         v.findViewById(R.id.status).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
+            }
+        });
+
+        v.findViewById(R.id.refresh).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                refresh();
             }
         });
 
@@ -94,11 +113,15 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
                     return;
                 if (!id().equals(intent.getStringExtra(Names.ID)))
                     return;
-                if (intent.getAction().equals(Names.UPDATED))
-                    update();
+                update();
+                if (!intent.getAction().equals(Names.START_UPDATE))
+                    refreshDone();
             }
         };
         IntentFilter intFilter = new IntentFilter(Names.UPDATED);
+        intFilter.addAction(Names.ERROR);
+        intFilter.addAction(Names.START_UPDATE);
+        intFilter.addAction(Names.NO_UPDATED);
         getActivity().registerReceiver(br, intFilter);
         Intent intent = new Intent(getActivity(), FetchService.class);
         intent.setAction(FetchService.ACTION_UPDATE);
@@ -118,6 +141,14 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
         if (context == null)
             return;
         CarState state = CarState.get(context, id());
+        if (FetchService.isProcessed(id())) {
+            vProgress.setVisibility(View.VISIBLE);
+            ivRefresh.setImageResource(R.drawable.refresh);
+        } else {
+            vProgress.setVisibility(View.INVISIBLE);
+            ivRefresh.setImageResource(state.isOnline() ? R.drawable.refresh_on : R.drawable.refresh_off);
+        }
+
         double power = state.getPower();
         if (power == 0) {
             iVoltage.setVisibility(View.GONE);
@@ -200,10 +231,11 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
             try {
                 double lat = Double.parseDouble(g[0]);
                 double lng = Double.parseDouble(g[1]);
+                is_address = true;
                 String address = Address.get(getActivity(), lat, lng, new Address.Answer() {
                     @Override
                     public void result(String address) {
-                        if (address == null)
+                        if ((address == null) || is_address)
                             return;
                         handler.post(new Runnable() {
                             @Override
@@ -213,6 +245,7 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
                         });
                     }
                 });
+                is_address = false;
                 if (!text.equals(""))
                     text += " ";
                 text += lat + ", " + lng;

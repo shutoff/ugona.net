@@ -33,6 +33,14 @@ public class FetchService extends Service {
     private ConnectivityManager conMgr;
     private AlarmManager alarmMgr;
 
+    public static boolean isProcessed(String id) {
+        if (requests == null)
+            return false;
+        synchronized (requests) {
+            return requests.containsKey("S" + id);
+        }
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -55,8 +63,12 @@ public class FetchService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             String car_id = intent.getStringExtra(Names.ID);
-            if (car_id != null)
+            if (car_id != null) {
                 new StatusRequest(car_id, intent.getExtras().containsKey(Names.CONNECT));
+                Intent i = new Intent(Names.START_UPDATE);
+                i.putExtra(Names.ID, car_id);
+                sendBroadcast(i);
+            }
         }
         if (startRequest())
             return START_STICKY;
@@ -220,6 +232,12 @@ public class FetchService extends Service {
             } else {
                 sendUpdate(Names.NO_UPDATED, car_id);
             }
+        }
+
+        @Override
+        void error() {
+            super.error();
+            sendUpdate(Names.ERROR, car_id);
         }
 
         @Override

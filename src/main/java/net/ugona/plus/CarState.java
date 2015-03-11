@@ -29,12 +29,15 @@ public class CarState extends Config implements Serializable {
     private boolean trunk;
     private boolean ignition;
     private boolean accessory;
+    private boolean online;
     private int power_state;
     private int reserved_state;
     private double power;
     private double reserved;
     private int gsm_level;
-    private int tilt;
+    private boolean tilt;
+    private boolean move;
+    private int shock;
     private String gsm;
     private String gps;
     private String temperature;
@@ -231,8 +234,20 @@ public class CarState extends Config implements Serializable {
         upd = true;
     }
 
-    public int getTilt() {
+    public boolean isOnline() {
+        return online;
+    }
+
+    public boolean isTilt() {
         return tilt;
+    }
+
+    public boolean isMove() {
+        return move;
+    }
+
+    public int getShock() {
+        return shock;
     }
 
     public String getVersion() {
