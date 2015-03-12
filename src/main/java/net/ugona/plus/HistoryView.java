@@ -95,10 +95,8 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
 
             @Override
             public void paint(Paint p, double value) {
-                if (isMain(value)) {
-                    p.setTypeface(mainLabelPaint.getTypeface());
+                if (isMain(value))
                     p.setTextSize(mainLabelPaint.getTextSize());
-                }
             }
         });
 
@@ -180,7 +178,12 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
 
 
         int color = getResources().getColor(R.color.main);
-        final int fill_color = Color.argb(192, Color.red(color), Color.green(color), Color.blue(color));
+//        final int fill_color = Color.argb(192, Color.red(color), Color.green(color), Color.blue(color));
+        float[] hsv = new float[3];
+        Color.colorToHSV(color, hsv);
+        hsv[2] *= 2;
+        final int fill_color = Color.HSVToColor(hsv);
+
         formatter = new LineAndPointFormatter(color, null, fill_color, null) {
             @Override
             public void fillPath(Canvas canvas, Path path) {
@@ -189,7 +192,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
                 region.setPath(path, clip);
                 Rect bounds = region.getBounds();
                 Paint fillPaint = formatter.getFillPaint();
-                fillPaint.setShader(new LinearGradient(bounds.left, bounds.top, bounds.left, bounds.bottom, fill_color, Color.TRANSPARENT, LinearGradient.TileMode.MIRROR));
+                fillPaint.setShader(new LinearGradient(bounds.left, bounds.top, bounds.left, bounds.bottom, fill_color, Color.WHITE, LinearGradient.TileMode.MIRROR));
                 super.fillPath(canvas, path);
             }
         };

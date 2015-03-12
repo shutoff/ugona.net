@@ -279,7 +279,7 @@ public class StatFragment extends MainFragment {
                         }
                         text.setText(State.createSpans(status_text, getResources().getColor(R.color.highlighted), true));
                         int p = text.getPaddingRight();
-                        text.setPadding(p * (2 * d.level + 1), 0, p, 0);
+                        text.setPadding(p * 2 * d.level, 0, p, 0);
                         text = (TextView) v.findViewById(R.id.status);
                         text.setVisibility(View.GONE);
                         return v;
