@@ -10,4 +10,6 @@
     <color name="text">#6b6b6b</color>
     <color name="div">#bbbbbb</color>
     <color name="text_dark">#010101</color>
+    <color name="dark_transparent">#80000000</color>
+    <color name="btn_main">#4cad50</color>
 </resources>

@@ -44,6 +44,7 @@ public class MainActivity extends ActionBarActivity {
 
     static final String TAG = "frag_tag";
     static final String PRIMARY = "prim_tag";
+    static final String SPLASH = "splash_tag";
 
     String id;
     AppConfig config;

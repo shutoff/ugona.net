@@ -29,4 +29,10 @@
         <item name="android:textSize">16sp</item>
     </style>
 
+    <style name="CustomDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@color/dark_transparent</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
 </resources>

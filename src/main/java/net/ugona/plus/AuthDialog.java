@@ -1,15 +1,11 @@
 package net.ugona.plus;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -23,15 +19,10 @@ import com.eclipsesource.json.ParseException;
 import java.io.Serializable;
 import java.util.Locale;
 
-public class AuthDialog extends Activity {
+public class AuthDialog extends Dialog {
 
     String car_id;
     CarConfig config;
-
-    int max_count;
-    int bad_count;
-
-    AlertDialog dialog;
 
     EditText etLogin;
     EditText etPass;
@@ -40,81 +31,23 @@ public class AuthDialog extends Activity {
     TextView tvError;
     View vProgress;
     TextWatcher watcher;
+    Listener listener;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public AuthDialog(Context context, String car_id, Listener listener) {
+        super(context, R.style.CustomDialogTheme);
+        this.listener = listener;
+        setContentView(R.layout.apikeydialog);
+        etLogin = (EditText) findViewById(R.id.login);
+        etPass = (EditText) findViewById(R.id.passwd);
+        tvError = (TextView) findViewById(R.id.error);
+        vProgress = findViewById(R.id.progress);
+        btnOk = (Button) findViewById(R.id.ok);
 
-        setResult(RESULT_CANCELED);
-
-        car_id = AppConfig.get(this).getId(getIntent().getStringExtra(Names.ID));
-        config = CarConfig.get(this, car_id);
-
-        max_count = 8;
-        boolean canDemo = config.getAuth().equals("");
-        if (canDemo) {
-            AppConfig appConfig = AppConfig.get(this);
-            if (!appConfig.getIds().equals(""))
-                canDemo = false;
-        }
-
-        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setTitle(R.string.auth)
-                .setPositiveButton(R.string.ok, null)
-                .setNegativeButton(R.string.cancel, null)
-                .setView(inflater.inflate(R.layout.apikeydialog, null));
-
-        if (canDemo)
-            builder = builder.setNeutralButton(R.string.demo, null);
-
-        dialog = builder.create();
-        dialog.show();
-
-        etLogin = (EditText) dialog.findViewById(R.id.login);
-        etPass = (EditText) dialog.findViewById(R.id.passwd);
-        btnOk = dialog.getButton(Dialog.BUTTON_POSITIVE);
-        btnDemo = dialog.getButton(Dialog.BUTTON_NEUTRAL);
-        tvError = (TextView) dialog.findViewById(R.id.error);
-        vProgress = dialog.findViewById(R.id.progress);
-
+        config = CarConfig.get(context, car_id);
         btnOk.setEnabled(false);
         String login = config.getLogin();
         if (!login.equals("demo"))
             etLogin.setText(config.getLogin());
-
-        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                dialog = null;
-                if ((max_count > 0) && (bad_count > max_count)) {
-                    AlertDialog bad = new AlertDialog.Builder(AuthDialog.this)
-                            .setTitle(R.string.auth_error)
-                            .setMessage(R.string.auth_message)
-                            .setNegativeButton(R.string.cancel, null)
-                            .setPositiveButton(R.string.send_msg, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    Intent intent = new Intent(Intent.ACTION_SEND);
-                                    intent.setType("text/html");
-                                    intent.putExtra(Intent.EXTRA_EMAIL, "info@ugona.net");
-                                    intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.auth_error));
-                                    startActivity(Intent.createChooser(intent, getString(R.string.send_msg)));
-                                }
-                            })
-                            .create();
-                    bad.show();
-                    bad.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dialog) {
-                            finish();
-                        }
-                    });
-                    return;
-                }
-                finish();
-            }
-        });
 
         watcher = new TextWatcher() {
             @Override
@@ -138,7 +71,7 @@ public class AuthDialog extends Activity {
         etLogin.addTextChangedListener(watcher);
         etPass.addTextChangedListener(watcher);
 
-        final CheckBox chkPswd = (CheckBox) dialog.findViewById(R.id.show_password);
+        final CheckBox chkPswd = (CheckBox) findViewById(R.id.show_password);
         final int initial_type = chkPswd.getInputType();
         chkPswd.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -159,14 +92,30 @@ public class AuthDialog extends Activity {
                 doLogin(etLogin.getText().toString(), etPass.getText().toString());
             }
         });
-        if (btnDemo != null) {
-            btnDemo.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    doLogin("demo", "demo");
-                }
-            });
+
+        btnDemo = (Button) findViewById(R.id.demo);
+        btnDemo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                doLogin("demo", "demo");
+            }
+        });
+
+        boolean canDemo = config.getAuth().equals("");
+        if (canDemo) {
+            AppConfig appConfig = AppConfig.get(context);
+            if (!appConfig.getIds().equals(""))
+                canDemo = false;
         }
+        if (!canDemo)
+            btnDemo.setVisibility(View.GONE);
+
+        findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dismiss();
+            }
+        });
     }
 
     void doLogin(final String login, String password) {
@@ -177,40 +126,33 @@ public class AuthDialog extends Activity {
         final HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
-                if (dialog == null)
-                    return;
                 Config.update(config, res);
-                CarState state = CarState.get(AuthDialog.this, car_id);
+                CarState state = CarState.get(getContext(), car_id);
                 if (CarState.update(state, res.get("state").asObject())) {
                     Intent intent = new Intent(Names.UPDATED);
                     intent.putExtra(Names.ID, car_id);
-                    sendBroadcast(intent);
+                    getContext().sendBroadcast(intent);
                 }
                 JsonObject caps = res.get("caps").asObject();
                 CarState.update(state, caps.get("caps").asObject());
                 if (CarState.update(config, caps)) {
                     Intent intent = new Intent(Names.CONFIG_CHANGED);
                     intent.putExtra(Names.ID, car_id);
-                    sendBroadcast(intent);
+                    getContext().sendBroadcast(intent);
                 }
                 CarState.update(config, res);
                 config.setLogin(login);
-                setResult(RESULT_OK);
-                dialog.dismiss();
+                listener.auth_ok();
+                dismiss();
             }
 
             @Override
             void error() {
-                if (dialog == null)
-                    return;
                 if (Names.AUTH_ERROR.equals(error_text)) {
-                    bad_count++;
                     tvError.setText(R.string.auth_error);
                     etPass.setText("");
-                    if ((max_count > 0) && (bad_count > max_count))
-                        dialog.dismiss();
                 } else {
-                    tvError.setText(getString(R.string.error) + "\n" + error_text);
+                    tvError.setText(getContext().getString(R.string.error) + "\n" + error_text);
                 }
                 tvError.setVisibility(View.VISIBLE);
                 vProgress.setVisibility(View.GONE);
@@ -225,9 +167,15 @@ public class AuthDialog extends Activity {
         task.execute("/key", authParam);
     }
 
+    interface Listener {
+        void auth_ok();
+    }
+
     static class AuthParam implements Serializable {
         String login;
         String password;
         String lang;
     }
+
+
 }

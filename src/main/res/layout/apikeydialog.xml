@@ -6,51 +6,115 @@
     android:orientation="vertical"
     android:padding="10dp">
 
-    <EditText
-        android:id="@+id/login"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/login"
-        android:inputType="textNoSuggestions">
+        android:background="@drawable/dialog_bg_top"
+        android:gravity="center">
 
-        <requestFocus />
-    </EditText>
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="134dp"
+            android:layout_height="30dp"
+            android:layout_marginBottom="20dp"
+            android:layout_marginTop="20dp"
+            android:src="@drawable/logo" />
 
-
-    <EditText
-        android:id="@+id/passwd"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/passwd"
-        android:inputType="textNoSuggestions|textPassword" />
-
-    <CheckBox
-        android:id="@+id/show_password"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/show_password" />
-
-    <TextView
-        android:id="@+id/error"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/error" />
+    </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/progress"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone">
+        android:background="@drawable/dialog_bg_bottom"
+        android:orientation="vertical"
+        android:padding="10dp">
 
-        <ProgressBar
-            style="?android:attr/progressBarStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        <EditText
+            android:id="@+id/login"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/login"
+            android:inputType="textNoSuggestions"
+            android:padding="10dp">
+
+            <requestFocus />
+        </EditText>
+
+        <EditText
+            android:id="@+id/passwd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/passwd"
+            android:inputType="textNoSuggestions|textPassword"
+            android:padding="10dp" />
+
+        <CheckBox
+            android:id="@+id/show_password"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/show_password" />
 
         <TextView
+            android:id="@+id/error"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/auth" />
+            android:layout_marginBottom="10dp"
+            android:textColor="@color/error" />
+
+        <LinearLayout
+            android:id="@+id/progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:visibility="gone">
+
+            <ProgressBar
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/auth" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/cancel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:layout_weight="1"
+                android:background="@drawable/dlg_button"
+                android:text="@string/cancel"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/ok"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/dlg_button_main"
+                android:text="@string/login"
+                android:textColor="@android:color/white" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/demo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/dlg_button"
+            android:text="@string/demo"
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
 
