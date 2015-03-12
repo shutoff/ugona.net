@@ -18,6 +18,11 @@ public class AboutFragment extends MainFragment {
     }
 
     @Override
+    String getTitle() {
+        return getString(R.string.about);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
         TextView tvVersion = (TextView) v.findViewById(R.id.version);
