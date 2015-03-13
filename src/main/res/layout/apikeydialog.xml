@@ -107,7 +107,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/dlg_button_main"
-                android:text="@string/login"
+                android:text="@string/enter"
                 android:textColor="@android:color/white" />
 
         </LinearLayout>

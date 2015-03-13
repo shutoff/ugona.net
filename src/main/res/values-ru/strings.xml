@@ -92,4 +92,5 @@
     <string name="demo">Демо режим</string>
     <string name="rotate">Повернуть</string>
     <string name="photo_error">Ошибка загрузки изображения</string>
+    <string name="enter">Войти</string>
 </resources>

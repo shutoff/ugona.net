@@ -96,4 +96,5 @@
     <string name="demo">Demo mode</string>
     <string name="rotate">Rotate</string>
     <string name="photo_error">Loading image error</string>
+    <string name="enter">Login</string>
 </resources>
