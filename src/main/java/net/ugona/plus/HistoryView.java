@@ -94,9 +94,10 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
             }
 
             @Override
-            public void paint(Paint p, double value) {
+            public Paint getPaint(double value) {
                 if (isMain(value))
-                    p.setTextSize(mainLabelPaint.getTextSize());
+                    return mainLabelPaint;
+                return null;
             }
         });
 

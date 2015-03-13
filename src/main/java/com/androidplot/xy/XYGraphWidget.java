@@ -472,15 +472,11 @@ public class XYGraphWidget extends Widget {
             // if a matching region formatter was found, create a clone
             // of labelPaint and use the formatter's color. Otherwise
             // just use labelPaint:
-            Paint p;
-            if (rf != null) {
-                // p = rf.getPaint();
-                p = new Paint(labelPaint);
-                rf.paint(p, v);
-                // p.setColor(Color.RED);
-            } else {
+            Paint p = null;
+            if (rf != null)
+                p = rf.getPaint(v);
+            if (p == null)
                 p = labelPaint;
-            }
             canvas.drawText(txt, xPix, yPix, p);
         } finally {
             canvas.restoreToCount(canvasState);

@@ -22,6 +22,6 @@ public abstract class AxisValueLabelFormatter {
 
     abstract public boolean isMain(double value);
 
-    abstract public void paint(Paint p, double value);
+    abstract public Paint getPaint(double value);
 
 }
