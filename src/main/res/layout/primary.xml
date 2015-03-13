@@ -12,10 +12,9 @@
         android:background="@color/main"
         android:color="@android:color/white"
         app:pstsDividerColor="@color/main"
-        app:pstsDividerPadding="2dp"
         app:pstsIndicatorColor="@android:color/white"
         app:pstsIndicatorHeight="3dp"
-        app:pstsTabPaddingLeftRight="15dp"
+        app:pstsTabPaddingLeftRight="16dp"
         app:pstsUnderlineColor="@color/div"
         app:pstsUnderlineHeight="1px" />
 
