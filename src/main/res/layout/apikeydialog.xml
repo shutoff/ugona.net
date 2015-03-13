@@ -56,22 +56,27 @@
             android:id="@+id/show_password"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:button="@drawable/checkbox"
+            android:layout_marginBottom="5dp"
+            android:button="@null"
+            android:drawableLeft="@drawable/checkbox"
+            android:drawablePadding="5dp"
             android:text="@string/show_password"
             android:textColor="@color/regular_text" />
 
         <TextView
             android:id="@+id/error"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
+            android:gravity="center"
             android:textColor="@color/error" />
 
         <LinearLayout
             android:id="@+id/progress"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
+            android:gravity="center"
             android:visibility="gone">
 
             <ProgressBar
