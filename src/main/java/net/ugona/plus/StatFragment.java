@@ -84,6 +84,7 @@ public class StatFragment extends MainFragment {
             }
         });
         tvSummary = (TextView) v.findViewById(R.id.summary);
+        vStat.disableDivider();
         refresh();
         return v;
     }
@@ -272,10 +273,10 @@ public class StatFragment extends MainFragment {
                             status_text = String.format(status, timeFormat((int) (d.time / 60)), speed, d.speed);
                         }
                         if (d.engine_time >= 60) {
+                            status_text += "\n";
                             status_text += getString(R.string.engine_time);
                             status_text += ": |";
                             status_text += timeFormat((int) (d.engine_time / 60));
-                            status_text += "\n";
                         }
                         text.setText(State.createSpans(status_text, getResources().getColor(R.color.highlighted), true));
                         int p = text.getPaddingRight();

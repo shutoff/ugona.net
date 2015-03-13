@@ -9,7 +9,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2">
+        android:layout_weight="8">
 
         <ImageView
             android:layout_width="match_parent"
@@ -98,16 +98,24 @@
 
     </FrameLayout>
 
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="1" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:gravity="bottom|center"
         android:padding="20dp"
         android:text="@string/application"
         android:textColor="@color/text_dark"
         android:textSize="14sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
     <Button
         android:id="@+id/service"
@@ -137,6 +145,6 @@
         android:layout_marginBottom="5dp"
         android:paddingTop="10dp"
         android:text="@string/copyright"
-        android:textSize="12sp" />
+        android:textSize="14sp" />
 
 </LinearLayout>

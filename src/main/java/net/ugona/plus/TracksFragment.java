@@ -3,7 +3,6 @@ package net.ugona.plus;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -108,6 +107,7 @@ public class TracksFragment extends MainFragment {
             }
         });
 
+        vTracks.disableDivider();
         vTracks.setListener(new HoursList.Listener() {
             @Override
             public int setHour(int h) {
@@ -192,8 +192,6 @@ public class TracksFragment extends MainFragment {
     }
 
     void showTrack(int index) {
-
-        Intent intent = new Intent(getActivity(), TrackView.class);
         Track track = tracks.get(index);
         Vector<Track> tracks = new Vector<Track>();
         tracks.add(track);
@@ -595,12 +593,10 @@ public class TracksFragment extends MainFragment {
                         (float) track.avg_speed,
                         track.max_speed);
                 tvStatus.setText(State.createSpans(text, getResources().getColor(R.color.highlighted), true));
-                tvTitle.setTypeface(null, Typeface.BOLD);
-                tvMileage.setTypeface(null, Typeface.BOLD);
+                tvStatus.setVisibility(View.VISIBLE);
             } else {
-                tvTitle.setTypeface(null, Typeface.NORMAL);
-                tvMileage.setTypeface(null, Typeface.NORMAL);
                 tvStatus.setText("");
+                tvStatus.setVisibility(View.GONE);
             }
             return v;
         }

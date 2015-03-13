@@ -157,9 +157,7 @@ public class State {
             return 3;
         if (level > -91)
             return 2;
-        if (level > -105)
-            return 1;
-        return 0;
+        return 1;
     }
 
     static Spannable createSpans(String str, int color, boolean bold) {

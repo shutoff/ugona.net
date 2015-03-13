@@ -141,8 +141,8 @@ public class SetPassword extends MainFragment {
                 char[] pattern = data.getCharArrayExtra(LockPatternActivity.EXTRA_PATTERN);
                 config.setPattern(String.copyValueOf(pattern));
                 config.setPassword("");
+                getActivity().onBackPressed();
             }
-            getActivity().onBackPressed();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }

@@ -69,6 +69,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="@drawable/btn_shadow"
+                android:paddingLeft="10dip"
+                android:paddingRight="10dip"
                 android:text="@android:string/cancel"
                 android:visibility="gone" />
 
@@ -78,7 +81,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="@drawable/btn_shadow"
                 android:enabled="false"
+                android:paddingLeft="10dip"
+                android:paddingRight="10dip"
                 android:text="@string/alp_42447968_cmd_continue" />
         </LinearLayout>
     </LinearLayout>

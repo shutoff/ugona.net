@@ -20,6 +20,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/highlighted"
             android:textSize="15sp"
+            android:textStyle="bold"
             android:typeface="sans" />
 
         <TextView
@@ -33,6 +34,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/highlighted"
             android:textSize="14sp"
+            android:textStyle="bold"
             android:typeface="sans" />
     </LinearLayout>
 
@@ -40,17 +42,25 @@
         android:id="@+id/address"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
         android:paddingRight="5dp"
         android:textColor="@color/text_dark"
-        android:textSize="13sp"
+        android:textSize="14sp"
         android:typeface="sans" />
 
     <TextView
         android:id="@+id/status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
         android:textColor="@color/text_dark"
-        android:textSize="13sp"
-        android:typeface="sans" />
+        android:textSize="14sp"
+        android:typeface="sans"
+        android:visibility="gone" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="@color/div" />
 
 </LinearLayout>

@@ -1,5 +1,6 @@
 package net.ugona.plus;
 
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -82,6 +83,14 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
         ivRefresh = (ImageView) v.findViewById(R.id.img_progress);
         vProgress = v.findViewById(R.id.upd_progress);
         handler = new Handler();
+
+        v.findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Dialog dialog = new FABCommands(getActivity());
+                dialog.show();
+            }
+        });
 
         v.findViewById(R.id.status).setOnClickListener(new View.OnClickListener() {
             @Override
