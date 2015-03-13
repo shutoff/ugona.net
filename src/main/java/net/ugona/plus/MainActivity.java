@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
@@ -62,6 +63,7 @@ public class MainActivity extends ActionBarActivity {
     View vLogo;
     Spinner spinner;
     BroadcastReceiver br;
+    Handler handler;
 
     private FragmentManager.OnBackStackChangedListener
             mOnBackStackChangedListener = new FragmentManager.OnBackStackChangedListener() {
@@ -88,6 +90,8 @@ public class MainActivity extends ActionBarActivity {
         font.install(this);
 
         super.onCreate(savedInstanceState);
+
+        handler = new Handler();
 
         id = getIntent().getStringExtra(Names.ID);
         current = new LocalDate();
@@ -166,8 +170,7 @@ public class MainActivity extends ActionBarActivity {
         setPrimary();
 
         checkCaps();
-        if (checkPhone())
-            return;
+        checkPhone();
     }
 
     @Override
@@ -201,8 +204,7 @@ public class MainActivity extends ActionBarActivity {
                 return;
             }
             setPrimary();
-            if (checkPhone())
-                return;
+            checkPhone();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -380,9 +382,16 @@ public class MainActivity extends ActionBarActivity {
         CarState state = CarState.get(this, id);
         if (!state.isUse_phone() || !car_config.getPhone().equals("") || !State.hasTelephony(this))
             return false;
-        Intent intent = new Intent(this, PhoneDialog.class);
-        intent.putExtra(Names.ID, id);
-        startActivityForResult(intent, DO_PHONE);
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                PhoneDialog dialog = new PhoneDialog();
+                Bundle args = new Bundle();
+                args.putString(Names.ID, id);
+                dialog.setArguments(args);
+                dialog.show(getSupportFragmentManager(), "phone");
+            }
+        });
         return true;
     }
 
