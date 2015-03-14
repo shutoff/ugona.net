@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentManager;
@@ -230,7 +232,13 @@ public class MainActivity extends ActionBarActivity {
             fragment.onCreateOptionsMenu(fragmentMenu, getMenuInflater());
             for (int i = 0; i < fragmentMenu.size(); i++) {
                 MenuItem it = fragmentMenu.getItem(i);
-                menu.add(it.getGroupId(), it.getItemId(), it.getOrder(), it.getTitle());
+                MenuItem new_it = menu.add(it.getGroupId(), it.getItemId(), it.getOrder(), it.getTitle());
+                Drawable icon = it.getIcon();
+                if (icon != null) {
+                    new_it.setIcon(icon);
+                    if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+                        new_it.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                }
             }
         }
         return super.onCreateOptionsMenu(menu);

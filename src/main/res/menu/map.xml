@@ -4,17 +4,15 @@
     xmlns:car="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/my"
-        android:icon="@android:drawable/ic_menu_myplaces"
+        android:icon="@drawable/tb_position"
         android:title="@string/position"
         car:showAsAction="ifRoom" />
     <item
         android:id="@+id/map"
-        android:icon="@android:drawable/ic_menu_mylocation"
-        android:title="@string/map"
-        car:showAsAction="ifRoom" />
+        android:title="@string/map" />
     <item
         android:id="@+id/share"
-        android:icon="@android:drawable/ic_menu_share"
+        android:icon="@drawable/tb_share"
         android:title="@string/share"
         car:showAsAction="ifRoom" />
     <group android:checkableBehavior="single">

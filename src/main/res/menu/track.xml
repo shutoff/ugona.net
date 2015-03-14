@@ -4,12 +4,12 @@
     xmlns:car="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/save"
-        android:icon="@android:drawable/ic_menu_save"
+        android:icon="@drawable/tb_save"
         android:title="@string/save"
         car:showAsAction="ifRoom" />
     <item
         android:id="@+id/share"
-        android:icon="@android:drawable/ic_menu_share"
+        android:icon="@drawable/tb_share"
         android:title="@string/share"
         car:showAsAction="ifRoom" />
     <group
