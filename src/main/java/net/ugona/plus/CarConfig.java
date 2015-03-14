@@ -180,6 +180,7 @@ public class CarConfig extends Config implements Serializable {
     }
 
     public static class Command implements Serializable {
+        int id;
         String name;
         String icon;
         String sms;

@@ -278,6 +278,9 @@ public class MainActivity extends ActionBarActivity {
             case R.id.history:
                 setFragment(new HistoryFragment());
                 return true;
+            case R.id.preferences:
+                setFragment(new SettingsFragment());
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

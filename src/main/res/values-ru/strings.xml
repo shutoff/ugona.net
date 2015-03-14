@@ -4,8 +4,8 @@
     <string name="ok">Продолжить</string>
     <string name="cancel">Отменить</string>
     <string name="auth">Авторизация</string>
-    <string name="login">Имя пользователя:</string>
-    <string name="passwd">Пароль:</string>
+    <string name="login">Имя пользователя</string>
+    <string name="passwd">Пароль</string>
     <string name="show_password">Показать пароль</string>
     <string name="error">Ошибка</string>
     <string name="auth_error">Ошибка авторизации</string>
@@ -38,8 +38,8 @@
     <string name="service_btn">Сервис Угона.нет</string>
     <string name="forum_btn">Форум поддержки</string>
     <string name="password_old">Старый пароль:</string>
-    <string name="password_text">Пароль:</string>
-    <string name="password_confirm">Подтверждение:</string>
+    <string name="password_text">Пароль</string>
+    <string name="password_confirm">Подтверждение</string>
     <string name="password_set">Установить</string>
     <string name="invalid_password">Неверный пароль</string>
     <string name="invalid_confirm">Пароли не совпадают</string>
@@ -93,4 +93,11 @@
     <string name="rotate">Повернуть</string>
     <string name="photo_error">Ошибка загрузки изображения</string>
     <string name="enter">Войти</string>
+    <string name="device_settings">Настройки устройства</string>
+    <string name="notifications">Уведомления</string>
+    <string name="widgets">Виджеты</string>
+    <string name="commands">Команды управления</string>
+    <string name="autostart">Автозапуск</string>
+    <string name="rele">Предпусковой подогреватель</string>
+    <string name="zones">Зоны</string>
 </resources>

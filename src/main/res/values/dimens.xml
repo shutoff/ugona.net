@@ -3,4 +3,5 @@
     <dimen name="actionbar_dimen">56dp</dimen>
     <dimen name="button_radius">2dp</dimen>
     <dimen name="window_radius">6dp</dimen>
+    <dimen name="button_corner">2dp</dimen>
 </resources>

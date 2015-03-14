@@ -97,4 +97,11 @@
     <string name="rotate">Rotate</string>
     <string name="photo_error">Loading image error</string>
     <string name="enter">Login</string>
+    <string name="device_settings">Device settings</string>
+    <string name="notifications">Notifications</string>
+    <string name="widgets">Widgets</string>
+    <string name="commands">Control commands</string>
+    <string name="autostart">Autostart</string>
+    <string name="rele">Prestarting heater</string>
+    <string name="zones">Zones</string>
 </resources>

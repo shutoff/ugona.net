@@ -143,7 +143,6 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         Paint rangeLabelPaint = new Paint();
         rangeLabelPaint.setColor(context.getResources().getColor(R.color.text_dark));
         rangeLabelPaint.setAntiAlias(true);
-        rangeLabelPaint.setStyle(Paint.Style.STROKE);
         rangeLabelPaint.setTextSize(PixelUtils.dpToPix(13));
         rangeLabelPaint.setTextAlign(Paint.Align.RIGHT);
         rangeLabelPaint.setTypeface(typeface);
@@ -151,7 +150,6 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         Paint domainLabelPaint = new Paint();
         domainLabelPaint.setColor(context.getResources().getColor(R.color.text_dark));
         domainLabelPaint.setAntiAlias(true);
-        domainLabelPaint.setStyle(Paint.Style.STROKE);
         domainLabelPaint.setTextSize(PixelUtils.dpToPix(12));
         domainLabelPaint.setTextAlign(Paint.Align.CENTER);
         domainLabelPaint.setTypeface(typeface);
@@ -159,11 +157,9 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         mainLabelPaint = new Paint();
         mainLabelPaint.setColor(context.getResources().getColor(R.color.text_dark));
         mainLabelPaint.setAntiAlias(true);
-        mainLabelPaint.setStyle(Paint.Style.STROKE);
         mainLabelPaint.setTextSize(PixelUtils.dpToPix(14));
         mainLabelPaint.setTextAlign(Paint.Align.CENTER);
         mainLabelPaint.setTypeface(typeface_bold);
-
 
         widget.setRangeGridLinePaint(gridPaint);
         widget.setDomainGridLinePaint(gridPaint);

@@ -3,4 +3,7 @@
     <declare-styleable name="Indicator">
         <attr name="src" format="integer" />
     </declare-styleable>
+    <declare-styleable name="StyledButton">
+        <attr name="bgColor" format="color" />
+    </declare-styleable>
 </resources>

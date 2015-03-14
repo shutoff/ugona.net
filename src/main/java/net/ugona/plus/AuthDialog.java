@@ -79,7 +79,8 @@ public class AuthDialog extends Dialog {
                 int type = initial_type;
                 if (isChecked) {
                     type |= InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
-                    chkPswd.setVisibility(View.GONE);
+                } else {
+                    type = initial_type;
                 }
                 etPass.setInputType(type);
                 etPass.setSelection(etPass.getText().length());

@@ -10,7 +10,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -216,7 +215,6 @@ public class PrimaryFragment extends MainFragment {
 
         @Override
         public Fragment getItem(int i) {
-            Log.v("v", "getItem " + i + ", " + getPageId(i));
             MainFragment fragment = null;
             switch (getPageId(i)) {
                 case PAGE_PHOTO:

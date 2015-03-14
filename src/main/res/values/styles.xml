@@ -29,11 +29,29 @@
         <item name="android:textSize">16sp</item>
     </style>
 
+    <style name="CheckBoxStyle" parent="@android:style/Widget.CompoundButton.CheckBox">
+        <item name="android:button">@drawable/abc_btn_check_material</item>
+        <item name="android:textColor">@color/text_dark</item>
+    </style>
+
+    <style name="EditTextStyle" parent="@android:style/Widget.EditText">
+        <item name="android:background">@drawable/control</item>
+        <item name="android:padding">10dp</item>
+    </style>
+
+    <style name="ButtonStyle" parent="@android:style/Widget.Button">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:padding">10dp</item>
+    </style>
+
     <style name="CustomDialogTheme" parent="ThemeOverlay.AppCompat.Light">
-    <item name="android:windowBackground">@color/dark_transparent</item>
+        <item name="android:windowBackground">@color/dark_transparent</item>
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="android:checkboxStyle">@style/CheckBoxStyle</item>
+        <item name="android:editTextStyle">@style/EditTextStyle</item>
+        <item name="android:buttonStyle">@style/ButtonStyle</item>
     </style>
 
 </resources>
