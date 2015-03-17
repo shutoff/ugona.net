@@ -76,6 +76,13 @@ public class Config {
                         f.set(o, sv);
                         upd = true;
                     }
+                } else if ((t == Integer.class) && v.isNumber()) {
+                    int iv = v.asInt();
+                    Integer ov = (Integer) f.get(o);
+                    if ((ov == null) || (ov != iv)) {
+                        f.set(o, (Integer) iv);
+                        upd = true;
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -89,6 +96,8 @@ public class Config {
     }
 
     static public JsonObject saveJson(Object o) {
+        if (o instanceof JsonObject)
+            return (JsonObject) o;
         Field[] fields = o.getClass().getDeclaredFields();
         JsonObject res = new JsonObject();
         try {

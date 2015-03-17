@@ -107,17 +107,13 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         markerPaint = new Paint();
         markerPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
         markerPaint.setColor(Color.rgb(192, 0, 0));
-        markerPaint.setStrokeWidth(PixelUtils.dpToPix(0.5f));
-        markerPaint.setTextSize(PixelUtils.dpToPix(15));
-        markerPaint.setTypeface(typeface);
+        markerPaint.setStyle(Paint.Style.STROKE);
 
         markerTextPaint = new Paint();
         markerTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
         markerTextPaint.setColor(Color.rgb(192, 0, 0));
-        markerTextPaint.setStrokeWidth(PixelUtils.dpToPix(1f));
-        markerTextPaint.setTextSize(PixelUtils.dpToPix(15));
         markerTextPaint.setStyle(Paint.Style.STROKE);
-        markerTextPaint.setTypeface(typeface);
+        markerTextPaint.setStrokeWidth(3);
 
         TypedArray array = context.getTheme().obtainStyledAttributes(new int[]{
                 android.R.attr.colorBackground,
@@ -249,9 +245,9 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
                                 yPix += paddedGridRect.top;
                                 Paint textPaint = getGraphWidget().getDomainLabelPaint();
                                 canvas.drawCircle(xPix, yPix, PixelUtils.dpToPix(4), getBackgroundPaint());
-                                canvas.drawCircle(xPix, yPix, PixelUtils.dpToPix(4), textPaint);
-                                RectF textRect = new RectF(FontUtils.getStringDimensions(text, getTextPaint()));
-                                float margin = PixelUtils.dpToPix(2);
+                                canvas.drawCircle(xPix, yPix, PixelUtils.dpToPix(4), markerTextPaint);
+                                RectF textRect = new RectF(FontUtils.getStringDimensions(text, textPaint));
+                                float margin = PixelUtils.dpToPix(4);
                                 float text_h = textRect.height() + margin * 2;
                                 float text_w = textRect.width() + margin * 2;
                                 boolean bUp = true;

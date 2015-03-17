@@ -16,6 +16,8 @@ public class Names {
     static final String PHOTO = "photo";
     static final String DATE = "date";
     static final String CONNECT = "connect";
+    static final String MESSAGE = "message";
+    static final String OK = "ok";
 
     static final String UPDATED = "net.ugona.plus.updated";
     static final String NO_UPDATED = "net.ugona.plus.no_updated";

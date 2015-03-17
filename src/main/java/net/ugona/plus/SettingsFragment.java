@@ -1,18 +1,25 @@
 package net.ugona.plus;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.astuetz.PagerSlidingTabStrip;
 
-public class SettingsFragment extends MainFragment {
+import java.util.HashMap;
+
+
+public class SettingsFragment extends MainFragment implements Alert.Listener {
 
     static final int PAGE_AUTH = 0;
     static final int PAGE_NOTIFY = 1;
@@ -27,6 +34,9 @@ public class SettingsFragment extends MainFragment {
 
     ViewPager vPager;
     PagerSlidingTabStrip tabs;
+    Handler handler;
+
+    HashMap<String, Object> changed;
 
     @Override
     int layout() {
@@ -59,7 +69,61 @@ public class SettingsFragment extends MainFragment {
             }
         });
         vPager.setCurrentItem(getPagePosition(PAGE_AUTH));
+        handler = new Handler();
         return v;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        MainFragment fragment = getFragment(0);
+        if (fragment != null) {
+            fragment.onCreateOptionsMenu(menu, inflater);
+            return;
+        }
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            FragmentStatePagerAdapter adapter = (FragmentStatePagerAdapter) vPager.getAdapter();
+            if (adapter == null)
+                return super.onOptionsItemSelected(item);
+            for (int i = 0; i < adapter.getCount(); i++) {
+                adapter.startUpdate(vPager);
+                MainFragment fragment = (MainFragment) adapter.instantiateItem(vPager, i);
+                adapter.finishUpdate(vPager);
+                if (fragment == null)
+                    continue;
+                if (!fragment.onOptionsItemSelected(item))
+                    continue;
+                vPager.setCurrentItem(i);
+                Alert alert = new Alert();
+                Bundle args = new Bundle();
+                args.putString(Names.TITLE, adapter.getPageTitle(i).toString());
+                args.putString(Names.MESSAGE, getString(R.string.changed_msg));
+                args.putString(Names.OK, getString(R.string.exit));
+                alert.setArguments(args);
+                alert.setListener(this);
+                alert.show(getFragmentManager(), "alert");
+                adapter.finishUpdate(vPager);
+                return true;
+            }
+        }
+        MainFragment fragment = getFragment(0);
+        if ((fragment != null) && fragment.onOptionsItemSelected(item))
+            return true;
+        return super.onOptionsItemSelected(item);
+    }
+
+    MainFragment getFragment(int position) {
+        FragmentStatePagerAdapter adapter = (FragmentStatePagerAdapter) vPager.getAdapter();
+        if (adapter == null)
+            return null;
+        int pos = vPager.getCurrentItem() + position;
+        if ((pos < 0) || (pos >= adapter.getCount()))
+            return null;
+        return (MainFragment) adapter.instantiateItem(vPager, vPager.getCurrentItem() + position);
     }
 
     boolean setPageState() {
@@ -123,6 +187,16 @@ public class SettingsFragment extends MainFragment {
                 pos++;
         }
         return pos;
+    }
+
+    @Override
+    public void ok() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                getActivity().getSupportFragmentManager().popBackStackImmediate();
+            }
+        });
     }
 
     class PagerAdapter extends FragmentStatePagerAdapter {

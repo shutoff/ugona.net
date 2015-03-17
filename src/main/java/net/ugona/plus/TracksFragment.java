@@ -34,6 +34,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.Vector;
 
 public class TracksFragment extends MainFragment {
@@ -294,7 +295,7 @@ public class TracksFragment extends MainFragment {
         }
         double avg_speed = mileage * 3600000. / time;
         String status = getString(R.string.status);
-        NumberFormat formatter = NumberFormat.getInstance(getResources().getConfiguration().locale);
+        NumberFormat formatter = NumberFormat.getInstance(Locale.getDefault());
         formatter.setMaximumFractionDigits(2);
         formatter.setMinimumFractionDigits(2);
         String s = formatter.format(mileage);

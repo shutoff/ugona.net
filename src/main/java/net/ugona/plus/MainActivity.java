@@ -49,6 +49,8 @@ public class MainActivity extends ActionBarActivity {
     static final String PRIMARY = "prim_tag";
     static final String SPLASH = "splash_tag";
 
+    static Menu homeMenu;
+
     String id;
     AppConfig config;
     CarState state;
@@ -82,7 +84,7 @@ public class MainActivity extends ActionBarActivity {
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
-                State.print(ex);
+                ex.printStackTrace();
                 System.exit(1);
             }
         });
@@ -248,12 +250,11 @@ public class MainActivity extends ActionBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (drawerToggle.isDrawerIndicatorEnabled() && drawerToggle.onOptionsItemSelected(item))
             return true;
-        if (item.getItemId() == android.R.id.home &&
-                getSupportFragmentManager().popBackStackImmediate())
-            return true;
-
         MainFragment fragment = getFragment();
         if ((fragment != null) && fragment.onOptionsItemSelected(item))
+            return true;
+        if (item.getItemId() == android.R.id.home &&
+                getSupportFragmentManager().popBackStackImmediate())
             return true;
         switch (item.getItemId()) {
             case R.id.date: {
@@ -291,6 +292,21 @@ public class MainActivity extends ActionBarActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        MainFragment fragment = getFragment();
+        if (fragment != null) {
+            if (homeMenu == null) {
+                homeMenu = new PopupMenu(this, vLogo).getMenu();
+                getMenuInflater().inflate(R.menu.home, homeMenu);
+            }
+            MenuItem item = homeMenu.findItem(R.id.home);
+            if (fragment.onOptionsItemSelected(item))
+                return;
+        }
+        super.onBackPressed();
     }
 
     private void setActionBarArrowDependingOnFragmentsBackStack() {

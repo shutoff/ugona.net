@@ -24,6 +24,7 @@ public class CarConfig extends Config implements Serializable {
     private int event_filter;
     private int voltage_shift;
     private String temp_settings;
+    private Setting[] settings;
 
     private CarConfig() {
         name = "";
@@ -179,6 +180,10 @@ public class CarConfig extends Config implements Serializable {
         return cmd;
     }
 
+    public Setting[] getSettings() {
+        return settings;
+    }
+
     public static class Command implements Serializable {
         int id;
         String name;
@@ -188,5 +193,16 @@ public class CarConfig extends Config implements Serializable {
         int inet;
         boolean inet_ccode;
         boolean custom_name;
+    }
+
+    public static class Setting implements Serializable {
+        String id;
+        String name;
+        String unit;
+        String values;
+        String zero;
+        Integer min;
+        Integer max;
+        double k;
     }
 }
