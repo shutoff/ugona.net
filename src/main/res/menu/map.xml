@@ -9,7 +9,9 @@
         car:showAsAction="ifRoom" />
     <item
         android:id="@+id/map"
-        android:title="@string/map" />
+        android:icon="@drawable/tb_map"
+        android:title="@string/map"
+        car:showAsAction="ifRoom" />
     <item
         android:id="@+id/share"
         android:icon="@drawable/tb_share"
