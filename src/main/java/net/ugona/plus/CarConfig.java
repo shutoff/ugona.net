@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 public class CarConfig extends Config implements Serializable {
 
@@ -25,6 +26,7 @@ public class CarConfig extends Config implements Serializable {
     private int voltage_shift;
     private String temp_settings;
     private Setting[] settings;
+    private int[] commands;
 
     private CarConfig() {
         name = "";
@@ -184,6 +186,33 @@ public class CarConfig extends Config implements Serializable {
         return settings;
     }
 
+    public int[] getCommands() {
+        if ((commands == null) && (cmd != null)) {
+            Map<String, Integer> groups = new HashMap<>();
+            Vector<Integer> res = new Vector<>();
+            for (Command c : cmd) {
+                if (c.group == null)
+                    continue;
+                if (c.state != 1)
+                    continue;
+                if (groups.containsKey(c.group))
+                    continue;
+                res.add(c.id);
+            }
+            commands = new int[res.size()];
+            int n = 0;
+            Set<Map.Entry<String, Integer>> entries = groups.entrySet();
+            for (Map.Entry<String, Integer> entry : entries) {
+                commands[n++] = entry.getValue();
+            }
+        }
+        return commands;
+    }
+
+    public void setCommands(int[] commands) {
+        this.commands = commands;
+    }
+
     public static class Command implements Serializable {
         int id;
         String name;
@@ -193,6 +222,9 @@ public class CarConfig extends Config implements Serializable {
         int inet;
         boolean inet_ccode;
         boolean custom_name;
+        String group;
+        String condition;
+        int state;
     }
 
     public static class Setting implements Serializable {

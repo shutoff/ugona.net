@@ -10,6 +10,11 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+
 public class CommandsFragment extends MainFragment {
 
     ListView vList;
@@ -24,16 +29,43 @@ public class CommandsFragment extends MainFragment {
         View v = super.onCreateView(inflater, container, savedInstanceState);
         vList = (ListView) v.findViewById(R.id.list);
         CarConfig config = CarConfig.get(getActivity(), id());
+
+        final Map<String, Integer> groups = new HashMap<>();
+
         final CarConfig.Command[] cmd = config.getCmd();
+        for (CarConfig.Command c : cmd) {
+            if (c.group == null)
+                continue;
+            String name = c.group;
+            if (name.equals(""))
+                name = c.name;
+            if (groups.containsKey(name))
+                continue;
+            groups.put(name, c.id);
+        }
+        Set<Map.Entry<String, Integer>> entries = groups.entrySet();
+        final Vector<Group> grp = new Vector<>();
+        int[] selected = config.getCommands();
+        for (Map.Entry<String, Integer> entry : entries) {
+            Group g = new Group();
+            g.name = entry.getKey();
+            g.id = entry.getValue();
+            for (int s : selected) {
+                if (s == g.id)
+                    g.checked = true;
+            }
+        }
+
+
         vList.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
-                return cmd.length;
+                return grp.size();
             }
 
             @Override
             public Object getItem(int position) {
-                return cmd[position];
+                return grp.get(position);
             }
 
             @Override
@@ -49,11 +81,19 @@ public class CommandsFragment extends MainFragment {
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     v = inflater.inflate(R.layout.command_item, null);
                 }
+                Group g = grp.get(position);
                 TextView tv = (TextView) v.findViewById(R.id.title);
-                tv.setText(cmd[position].name);
+                tv.setText(g.name);
                 return v;
             }
         });
         return v;
     }
+
+    static class Group {
+        String name;
+        int id;
+        boolean checked;
+    }
+
 }
