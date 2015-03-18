@@ -106,6 +106,6 @@
     <string name="zones">Zones</string>
     <string name="changed_msg">You have unsaved settings.\nYou are sure leave settings?</string>
     <string name="exit">Exit</string>
-    <string name="no_changes">No changes</string>
+    <string name="no_changed">No changes</string>
     <string name="save_error">Error save settings</string>
 </resources>

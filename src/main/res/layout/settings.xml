@@ -34,9 +34,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
 
-        <ProgressBar
+    <ProgressBar
             style="?android:attr/progressBarStyleLarge"
             android:layout_width="80dp"
             android:layout_height="80dp"
@@ -54,7 +55,6 @@
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible" />
+        android:layout_height="match_parent" />
 
 </LinearLayout>

@@ -1,8 +1,8 @@
 package net.ugona.plus;
 
-public class HeaterFragment extends MainFragment {
+public class HeaterFragment extends DeviceBaseFragment {
     @Override
-    int layout() {
-        return R.layout.settings;
+    boolean filter(String id) {
+        return id.substring(0, 7).equals("heater_");
     }
 }

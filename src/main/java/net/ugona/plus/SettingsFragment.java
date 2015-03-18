@@ -248,7 +248,7 @@ public class SettingsFragment extends MainFragment implements Alert.Listener {
                 id = 2;
             if (object instanceof CommandsFragment)
                 id = 3;
-            if (object instanceof DeviceFragment)
+            if (object instanceof DeviceBaseFragment)
                 id = 4;
             if (object instanceof AzFragment)
                 id = 5;
