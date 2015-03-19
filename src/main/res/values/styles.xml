@@ -5,6 +5,7 @@
         <item name="colorPrimary">@color/main</item>
         <item name="colorPrimaryDark">@color/highlighted</item>
         <item name="android:editTextStyle">@style/EditTextStyle</item>
+        <item name="android:checkboxStyle">@style/CheckBoxStyle</item>
     </style>
 
     <style name="Theme.Transparent" parent="Theme.AppCompat.Light.Dialog">

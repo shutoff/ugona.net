@@ -1,17 +1,11 @@
 package net.ugona.plus;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -25,7 +19,7 @@ import com.eclipsesource.json.ParseException;
 import java.io.Serializable;
 import java.util.Locale;
 
-public class AuthDialog extends DialogFragment {
+public class StyledAuthDialog extends Dialog {
 
     String car_id;
     CarConfig config;
@@ -33,25 +27,25 @@ public class AuthDialog extends DialogFragment {
     EditText etLogin;
     EditText etPass;
     Button btnOk;
+    Button btnDemo;
     TextView tvError;
     View vProgress;
     TextWatcher watcher;
-
     DialogListener listener;
 
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-        View v = inflater.inflate(R.layout.auth_dialog, null);
+    public StyledAuthDialog(Context context, String car_id, DialogListener listener) {
+        super(context, R.style.CustomDialogTheme);
+        this.listener = listener;
+        this.car_id = car_id;
+        setContentView(R.layout.styled_auth_dialog);
+        etLogin = (EditText) findViewById(R.id.login);
+        etPass = (EditText) findViewById(R.id.passwd);
+        tvError = (TextView) findViewById(R.id.error);
+        vProgress = findViewById(R.id.progress);
+        btnOk = (Button) findViewById(R.id.ok);
 
-        etLogin = (EditText) v.findViewById(R.id.login);
-        etPass = (EditText) v.findViewById(R.id.passwd);
-        tvError = (TextView) v.findViewById(R.id.error);
-        vProgress = v.findViewById(R.id.progress);
-
-        config = CarConfig.get(getActivity(), car_id);
-
+        config = CarConfig.get(context, car_id);
+        btnOk.setEnabled(false);
         String login = config.getLogin();
         if (!login.equals("demo"))
             etLogin.setText(config.getLogin());
@@ -70,7 +64,6 @@ public class AuthDialog extends DialogFragment {
             @Override
             public void afterTextChanged(Editable s) {
                 boolean bProgress = (vProgress.getVisibility() == View.VISIBLE);
-                if (btnOk != null)
                 btnOk.setEnabled(!bProgress &&
                         !etLogin.getText().toString().equals("") &&
                         !etPass.getText().toString().equals(""));
@@ -79,7 +72,7 @@ public class AuthDialog extends DialogFragment {
         etLogin.addTextChangedListener(watcher);
         etPass.addTextChangedListener(watcher);
 
-        final CheckBox chkPswd = (CheckBox) v.findViewById(R.id.show_password);
+        final CheckBox chkPswd = (CheckBox) findViewById(R.id.show_password);
         final int initial_type = chkPswd.getInputType();
         chkPswd.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -95,47 +88,52 @@ public class AuthDialog extends DialogFragment {
             }
         });
 
-        return new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.auth)
-                .setView(v)
-                .setPositiveButton(R.string.ok, null)
-                .setNegativeButton(R.string.cancel, null)
-                .create();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        AlertDialog dialog = (AlertDialog) getDialog();
-        btnOk = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 doLogin(etLogin.getText().toString(), etPass.getText().toString());
             }
         });
-        watcher.afterTextChanged(null);
-    }
 
-    @Override
-    public void setArguments(Bundle args) {
-        super.setArguments(args);
-        car_id = args.getString(Names.ID);
+        btnDemo = (Button) findViewById(R.id.demo);
+        btnDemo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                doLogin("demo", "demo");
+            }
+        });
+
+        boolean canDemo = config.getAuth().equals("");
+        if (canDemo) {
+            AppConfig appConfig = AppConfig.get(context);
+            if (!appConfig.getIds().equals(""))
+                canDemo = false;
+        }
+        if (!canDemo)
+            btnDemo.setVisibility(View.GONE);
+
+        findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dismiss();
+            }
+        });
     }
 
     void doLogin(final String login, String password) {
         btnOk.setEnabled(false);
+        btnDemo.setEnabled(false);
         tvError.setVisibility(View.GONE);
         vProgress.setVisibility(View.VISIBLE);
         final HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
                 Config.update(config, res);
-                CarState state = CarState.get(getActivity(), car_id);
+                CarState state = CarState.get(getContext(), car_id);
                 if (CarState.update(state, res.get("state").asObject())) {
                     Intent intent = new Intent(Names.UPDATED);
                     intent.putExtra(Names.ID, car_id);
-                    getActivity().sendBroadcast(intent);
+                    getContext().sendBroadcast(intent);
                 }
                 JsonObject caps = res.get("caps").asObject();
                 boolean changed = CarState.update(state, caps.get("caps").asObject());
@@ -143,12 +141,11 @@ public class AuthDialog extends DialogFragment {
                 if (changed) {
                     Intent intent = new Intent(Names.CONFIG_CHANGED);
                     intent.putExtra(Names.ID, car_id);
-                    getActivity().sendBroadcast(intent);
+                    getContext().sendBroadcast(intent);
                 }
                 CarState.update(config, res);
                 config.setLogin(login);
-                if (listener != null)
-                    listener.ok();
+                listener.ok();
                 dismiss();
             }
 
@@ -158,10 +155,11 @@ public class AuthDialog extends DialogFragment {
                     tvError.setText(R.string.auth_error);
                     etPass.setText("");
                 } else {
-                    tvError.setText(getActivity().getString(R.string.error) + "\n" + error_text);
+                    tvError.setText(getContext().getString(R.string.error) + "\n" + error_text);
                 }
                 tvError.setVisibility(View.VISIBLE);
                 vProgress.setVisibility(View.GONE);
+                btnDemo.setEnabled(true);
                 watcher.afterTextChanged(null);
             }
         };

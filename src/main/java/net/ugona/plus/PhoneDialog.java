@@ -25,6 +25,7 @@ public class PhoneDialog extends DialogFragment implements SelectNumberDialog.Li
     static final int DO_CONTACTS = 100;
     String id;
     EditText etPhone;
+    DialogListener listener;
 
     @Override
     public void setArguments(Bundle args) {
@@ -98,6 +99,8 @@ public class PhoneDialog extends DialogFragment implements SelectNumberDialog.Li
                 final CarConfig config = CarConfig.get(getActivity(), id);
                 config.setPhone(State.formatPhoneNumber(number));
                 dismiss();
+                if (listener != null)
+                    listener.ok();
             }
         });
     }
@@ -133,5 +136,9 @@ public class PhoneDialog extends DialogFragment implements SelectNumberDialog.Li
     @Override
     public void selectNumber(String number) {
         etPhone.setText(number);
+    }
+
+    void setListener(DialogListener listener) {
+        this.listener = listener;
     }
 }
