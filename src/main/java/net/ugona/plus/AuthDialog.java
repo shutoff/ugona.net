@@ -36,6 +36,7 @@ public class AuthDialog extends Dialog {
     public AuthDialog(Context context, String car_id, Listener listener) {
         super(context, R.style.CustomDialogTheme);
         this.listener = listener;
+        this.car_id = car_id;
         setContentView(R.layout.apikeydialog);
         etLogin = (EditText) findViewById(R.id.login);
         etPass = (EditText) findViewById(R.id.passwd);
@@ -135,8 +136,9 @@ public class AuthDialog extends Dialog {
                     getContext().sendBroadcast(intent);
                 }
                 JsonObject caps = res.get("caps").asObject();
-                CarState.update(state, caps.get("caps").asObject());
-                if (CarState.update(config, caps)) {
+                boolean changed = CarState.update(state, caps.get("caps").asObject());
+                changed |= CarState.update(config, caps);
+                if (changed) {
                     Intent intent = new Intent(Names.CONFIG_CHANGED);
                     intent.putExtra(Names.ID, car_id);
                     getContext().sendBroadcast(intent);

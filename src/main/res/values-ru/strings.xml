@@ -98,7 +98,7 @@
     <string name="widgets">Виджеты</string>
     <string name="commands">Команды управления</string>
     <string name="autostart">Автозапуск</string>
-    <string name="rele">Предпусковой подогреватель</string>
+    <string name="rele">Подогреватель</string>
     <string name="zones">Зоны</string>
     <string name="changed_msg">У вас есть несохраненные настройки.\nВы действительно хотите выйти?</string>
     <string name="exit">Выход</string>

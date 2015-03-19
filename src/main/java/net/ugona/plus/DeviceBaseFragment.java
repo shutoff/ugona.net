@@ -336,7 +336,8 @@ public abstract class DeviceBaseFragment extends MainFragment {
                             NumberFormat f = nf;
                             if (def.k > 0) {
                                 v = v * def.k;
-                                f = df;
+                                if (def.k < 1)
+                                    f = df;
                             }
                             String val = f.format(v);
                             if (def.unit != null) {
