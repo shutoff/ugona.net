@@ -58,11 +58,6 @@ public class StatFragment extends MainFragment {
     }
 
     @Override
-    boolean canRefresh() {
-        return true;
-    }
-
-    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.stat, menu);
     }

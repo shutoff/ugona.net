@@ -59,11 +59,6 @@ public class StateFragment
     }
 
     @Override
-    boolean canRefresh() {
-        return true;
-    }
-
-    @Override
     void refresh() {
         Intent intent = new Intent(getActivity(), FetchService.class);
         intent.setAction(Names.START_UPDATE);

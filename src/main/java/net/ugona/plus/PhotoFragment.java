@@ -82,11 +82,6 @@ public class PhotoFragment extends MainFragment {
     }
 
     @Override
-    boolean canRefresh() {
-        return true;
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
         v.findViewById(R.id.summary).setVisibility(View.GONE);

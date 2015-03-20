@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.Vector;
@@ -21,18 +22,18 @@ public class ActionFragment
         implements AdapterView.OnItemClickListener,
         AdapterView.OnItemLongClickListener {
 
-    HoursList vActions;
+    ListView vActions;
     Vector<CarConfig.Command> commands;
     boolean longTap;
 
     @Override
     int layout() {
-        return R.layout.tracks;
+        return R.layout.actions;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = super.onCreateView(inflater, container, savedInstanceState);
+        vActions = (ListView) super.onCreateView(inflater, container, savedInstanceState);
 
         commands = new Vector<>();
         CarConfig config = CarConfig.get(getActivity(), id());
@@ -43,13 +44,8 @@ public class ActionFragment
                     commands.add(cmd);
             }
         }
-        v.findViewById(R.id.footer).setVisibility(View.GONE);
-        v.findViewById(R.id.first_progress).setVisibility(View.GONE);
-        v.findViewById(R.id.progress).setVisibility(View.GONE);
-        v.findViewById(R.id.loading).setVisibility(View.GONE);
-        v.findViewById(R.id.space).setVisibility(View.GONE);
-        vActions = (HoursList) v.findViewById(R.id.tracks);
-        vActions.disableDivider();
+        vActions.setDivider(null);
+        vActions.setDividerHeight(0);
         vActions.setVisibility(View.VISIBLE);
         vActions.setAdapter(new BaseAdapter() {
             @Override
@@ -84,7 +80,7 @@ public class ActionFragment
                 return v;
             }
         });
-        return v;
+        return vActions;
     }
 
     @Override

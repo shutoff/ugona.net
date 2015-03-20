@@ -41,7 +41,7 @@ public class FABCommands
         setOwnerActivity(activity);
         this.items = items;
 
-        setContentView(R.layout.commands);
+        setContentView(R.layout.fab);
         pkg = activity.getPackageName();
         FrameLayout layout = (FrameLayout) findViewById(R.id.layout);
         layout.getViewTreeObserver().addOnGlobalLayoutListener(this);

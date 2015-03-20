@@ -56,24 +56,27 @@ public abstract class MainFragment extends Fragment implements OnRefreshListener
         }
     }
 
-    boolean canRefresh() {
-        return false;
-    }
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (!canRefresh())
-            return;
-
+        if (view instanceof uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout) {
+            mPullToRefreshLayout = (PullToRefreshLayout) view;
+            ActionBarPullToRefresh.from(getActivity())
+                    .allChildrenArePullable()
+                    .listener(this)
+                    .setup(mPullToRefreshLayout);
+            mPullToRefreshLayout.setPullEnabled(true);
+        }
+/*
         ViewGroup viewGroup = (ViewGroup) view;
         mPullToRefreshLayout = new PullToRefreshLayout(viewGroup.getContext());
         ActionBarPullToRefresh.from(getActivity())
-                .insertLayoutInto(viewGroup)
+        //        .insertLayoutInto(viewGroup)
                 .allChildrenArePullable()
                 .listener(this)
                 .setup(mPullToRefreshLayout);
         mPullToRefreshLayout.setPullEnabled(true);
+*/
     }
 
     @Override
