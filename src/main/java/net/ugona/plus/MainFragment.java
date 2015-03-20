@@ -96,4 +96,5 @@ public abstract class MainFragment extends Fragment implements OnRefreshListener
         String s = getString(R.string.hm_format);
         return String.format(s, hours, minutes);
     }
+
 }

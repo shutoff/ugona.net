@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,8 +20,11 @@ import java.util.Currency;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.Vector;
 
-public class StateFragment extends MainFragment implements View.OnClickListener {
+public class StateFragment
+        extends MainFragment
+        implements View.OnClickListener {
 
     Indicator iGsm;
     Indicator iVoltage;
@@ -46,6 +50,8 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
     View vProgress;
 
     boolean is_address;
+    boolean longTap;
+    String pkg;
 
     @Override
     int layout() {
@@ -87,13 +93,39 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
         vProgress = v.findViewById(R.id.upd_progress);
         vFab = (ImageView) v.findViewById(R.id.fab);
         handler = new Handler();
+        pkg = getActivity().getPackageName();
 
         vFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Set<Integer> fab = getFabCommands();
-                Dialog dialog = new FABCommands(getActivity(), fab, id());
+                Vector<CarConfig.Command> fab = getFabCommands();
+                if ((fab.size() == 1) && !fab.get(0).icon.equals("blocking")) {
+                    CarConfig.Command cmd = fab.get(0);
+                    int id = getResources().getIdentifier("b_" + cmd.icon, "drawable", pkg);
+                    if (id != 0) {
+                        MainActivity activity = (MainActivity) getActivity();
+                        activity.do_command(cmd.id, longTap);
+                        longTap = false;
+                        return;
+                    }
+                }
+                longTap = false;
+                MainActivity activity = (MainActivity) getActivity();
+                Dialog dialog = new FABCommands((MainActivity) activity, fab, id());
                 dialog.show();
+            }
+        });
+        vFab.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                try {
+                    Vibrator vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+                    vibrator.vibrate(700);
+                } catch (Exception ex) {
+                    // ignore
+                }
+                longTap = true;
+                return false;
             }
         });
 
@@ -296,10 +328,20 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
             }
         }
         tvAddress.setText(State.createSpans(text.toString(), getResources().getColor(android.R.color.white), true));
-        Set<Integer> fab = getFabCommands();
+        Vector<CarConfig.Command> fab = getFabCommands();
         if (fab.size() > 0) {
             vFab.setVisibility(View.VISIBLE);
-            vFab.setImageResource(R.drawable.fab_more);
+            boolean more = true;
+            if ((fab.size() == 1) && !fab.get(0).icon.equals("blocking")) {
+                CarConfig.Command cmd = fab.get(0);
+                int id = getResources().getIdentifier("b_" + cmd.icon, "drawable", pkg);
+                if (id != 0) {
+                    vFab.setImageResource(id);
+                    more = false;
+                }
+            }
+            if (more)
+                vFab.setImageResource(R.drawable.fab_more);
         } else {
             vFab.setVisibility(View.GONE);
         }
@@ -339,13 +381,13 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
         activity.setFragment(fragment);
     }
 
-    Set<Integer> getFabCommands() {
+    Vector<CarConfig.Command> getFabCommands() {
         CarConfig config = CarConfig.get(getActivity(), id());
         CarState state = CarState.get(getActivity(), id());
         int[] selected = config.getCommands();
         CarConfig.Command[] cmds = config.getCmd();
         Set<String> enabled = new HashSet<>();
-        Set<Integer> res = new HashSet<>();
+        Vector<CarConfig.Command> res = new Vector<>();
         for (CarConfig.Command cmd : cmds) {
             boolean enable = false;
             for (int s : selected) {
@@ -372,8 +414,9 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
                 if (!State.checkCondition(cmd.condition, state))
                     continue;
             }
-            res.add(cmd.id);
+            res.add(cmd);
         }
         return res;
     }
+
 }

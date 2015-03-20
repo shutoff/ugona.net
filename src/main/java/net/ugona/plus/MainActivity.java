@@ -40,7 +40,8 @@ import java.util.Date;
 
 import static android.view.Gravity.START;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity
+        extends ActionBarActivity {
 
     static final int DO_AUTH = 1;
     static final int DO_PHONE = 2;
@@ -531,6 +532,21 @@ public class MainActivity extends ActionBarActivity {
         KeyParam skey = new KeyParam();
         skey.skey = car_config.getKey();
         task.execute("/caps", skey);
+    }
+
+    public void do_command(int cmd, boolean longTap) {
+        CarConfig carConfig = CarConfig.get(this, id);
+        CarConfig.Command[] cmds = carConfig.getCmd();
+        for (CarConfig.Command c : cmds) {
+            if (c.id == cmd) {
+                do_command(c, longTap);
+                return;
+            }
+        }
+    }
+
+    void do_command(CarConfig.Command cmd, boolean longTap) {
+
     }
 
     static class KeyParam implements Serializable {

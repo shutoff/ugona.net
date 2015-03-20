@@ -2,6 +2,7 @@ package net.ugona.plus;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.os.Vibrator;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -13,14 +14,14 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.Set;
 import java.util.Vector;
 
 public class FABCommands
         extends Dialog
         implements View.OnClickListener,
         ViewTreeObserver.OnGlobalLayoutListener,
-        AdapterView.OnItemClickListener {
+        AdapterView.OnItemClickListener,
+        AdapterView.OnItemLongClickListener {
 
     static int[] bg = {
             R.drawable.bg_cmd1,
@@ -32,26 +33,21 @@ public class FABCommands
     View vFab;
     ListView vList;
     String pkg;
+    Vector<CarConfig.Command> items;
+    boolean longTap;
 
-    public FABCommands(Context context, Set<Integer> cmds, String car_id) {
-        super(context, R.style.CustomDialogTheme);
+    public FABCommands(MainActivity activity, final Vector<CarConfig.Command> items, String car_id) {
+        super(activity, R.style.CustomDialogTheme);
+        setOwnerActivity(activity);
+        this.items = items;
+
         setContentView(R.layout.commands);
-
-        pkg = context.getPackageName();
-
+        pkg = activity.getPackageName();
         FrameLayout layout = (FrameLayout) findViewById(R.id.layout);
         layout.getViewTreeObserver().addOnGlobalLayoutListener(this);
 
         vFab = findViewById(R.id.fab);
         vFab.setOnClickListener(this);
-
-        CarConfig config = CarConfig.get(getContext(), car_id);
-        final Vector<CarConfig.Command> items = new Vector<>();
-        CarConfig.Command[] commands = config.getCmd();
-        for (CarConfig.Command c : commands) {
-            if (cmds.contains(c.id))
-                items.add(c);
-        }
 
         vList = (ListView) findViewById(R.id.list);
         vList.setDivider(null);
@@ -96,6 +92,8 @@ public class FABCommands
             }
         });
         vList.setOnItemClickListener(this);
+        vList.setOnItemLongClickListener(this);
+
         getWindow().getAttributes().windowAnimations = R.style.PauseDialogAnimation;
     }
 
@@ -133,7 +131,22 @@ public class FABCommands
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
         dismiss();
+        MainActivity activity = (MainActivity) getOwnerActivity();
+        activity.do_command(items.get(position).id, longTap);
     }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        try {
+            Vibrator vibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
+            vibrator.vibrate(700);
+        } catch (Exception ex) {
+            // ignore
+        }
+        longTap = true;
+        return false;
+    }
+
 }

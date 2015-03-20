@@ -15,10 +15,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
-public class CommandsFragment extends MainFragment {
+public class CommandsFragment
+        extends MainFragment {
 
     final Vector<Group> grp = new Vector<>();
     ListView vList;
+    boolean longTap;
 
     @Override
     int layout() {

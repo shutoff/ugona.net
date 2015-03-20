@@ -2,20 +2,28 @@ package net.ugona.plus;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.Vector;
 
-public class ActionFragment extends MainFragment {
+public class ActionFragment
+        extends MainFragment
+        implements AdapterView.OnItemClickListener,
+        AdapterView.OnItemLongClickListener {
 
     HoursList vActions;
     Vector<CarConfig.Command> commands;
+    boolean longTap;
 
     @Override
     int layout() {
@@ -77,5 +85,29 @@ public class ActionFragment extends MainFragment {
             }
         });
         return v;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        MainActivity activity = (MainActivity) getActivity();
+        activity.do_command(commands.get(position).id, longTap);
+        longTap = false;
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        try {
+            Vibrator vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+            vibrator.vibrate(700);
+        } catch (Exception ex) {
+            // ignore
+        }
+        longTap = true;
+        return false;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.action, menu);
     }
 }

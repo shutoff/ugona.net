@@ -104,4 +104,5 @@
     <string name="exit">Выход</string>
     <string name="no_changed">Нет изменений</string>
     <string name="save_error">Ошибка загрузки настроек</string>
+    <string name="action_settings">Настройки команд</string>
 </resources>
