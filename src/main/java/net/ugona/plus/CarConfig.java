@@ -14,11 +14,11 @@ import java.util.Vector;
 
 public class CarConfig extends Config implements Serializable {
 
-    static final String CAR_KEY = "car_";
+    private static final String CAR_KEY = "car_";
     private static HashMap<String, CarConfig> config;
-    private String name;
-    private String key;
-    private String auth;
+    private final String name;
+    private final String key;
+    private final String auth;
     private String login;
     private String phone;
     private Command[] cmd;
@@ -40,7 +40,7 @@ public class CarConfig extends Config implements Serializable {
 
     public static CarConfig get(Context context, String car_id) {
         if (config == null)
-            config = new HashMap<String, CarConfig>();
+            config = new HashMap<>();
         CarConfig res = config.get(car_id);
         if (res != null)
             return res;
@@ -84,7 +84,6 @@ public class CarConfig extends Config implements Serializable {
         if (!s.equals("")) {
             try {
                 update(this, JsonObject.readFrom(s));
-                return;
             } catch (Exception ex) {
                 // ignore
             }
@@ -188,22 +187,17 @@ public class CarConfig extends Config implements Serializable {
 
     public int[] getCommands() {
         if ((commands == null) && (cmd != null)) {
-            Map<String, Integer> groups = new HashMap<>();
             Vector<Integer> res = new Vector<>();
             for (Command c : cmd) {
                 if (c.group == null)
                     continue;
-                if (c.state != 1)
-                    continue;
-                if (groups.containsKey(c.group))
+                if (!c.on)
                     continue;
                 res.add(c.id);
             }
             commands = new int[res.size()];
-            int n = 0;
-            Set<Map.Entry<String, Integer>> entries = groups.entrySet();
-            for (Map.Entry<String, Integer> entry : entries) {
-                commands[n++] = entry.getValue();
+            for (int i = 0; i < res.size(); i++) {
+                commands[i] = res.get(i);
             }
         }
         return commands;
@@ -211,6 +205,7 @@ public class CarConfig extends Config implements Serializable {
 
     public void setCommands(int[] commands) {
         this.commands = commands;
+        upd = true;
     }
 
     public static class Command implements Serializable {
@@ -224,7 +219,9 @@ public class CarConfig extends Config implements Serializable {
         boolean custom_name;
         String group;
         String condition;
-        int state;
+        String state;
+        boolean on;
+        boolean always;
     }
 
     public static class Setting implements Serializable {

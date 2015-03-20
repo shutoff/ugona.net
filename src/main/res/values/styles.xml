@@ -51,6 +51,11 @@
         <item name="android:padding">10dp</item>
     </style>
 
+    <style name="PauseDialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/fade_in</item>
+        <item name="android:windowExitAnimation">@anim/fade_out</item>
+    </style>
+
     <style name="CustomDialogTheme" parent="ThemeOverlay.AppCompat.Light">
         <item name="android:windowBackground">@color/dark_transparent</item>
         <item name="android:windowIsFloating">false</item>

@@ -162,7 +162,7 @@
             android:layout_height="58dp"
             android:layout_gravity="bottom|right"
             android:layout_margin="15dp"
-            android:src="@drawable/fab" />
+            android:background="@drawable/fab_bg" />
 
     </FrameLayout>
 

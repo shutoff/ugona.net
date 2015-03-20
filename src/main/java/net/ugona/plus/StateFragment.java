@@ -16,7 +16,9 @@ import android.widget.TextView;
 
 import java.text.NumberFormat;
 import java.util.Currency;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 public class StateFragment extends MainFragment implements View.OnClickListener {
 
@@ -35,6 +37,7 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
     CarView vCar;
     TextView tvAddress;
     TextView tvTime;
+    ImageView vFab;
 
     Handler handler;
     BroadcastReceiver br;
@@ -82,12 +85,14 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
         tvTime = (TextView) v.findViewById(R.id.time);
         ivRefresh = (ImageView) v.findViewById(R.id.img_progress);
         vProgress = v.findViewById(R.id.upd_progress);
+        vFab = (ImageView) v.findViewById(R.id.fab);
         handler = new Handler();
 
-        v.findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
+        vFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Dialog dialog = new FABCommands(getActivity());
+                Set<Integer> fab = getFabCommands();
+                Dialog dialog = new FABCommands(getActivity(), fab, id());
                 dialog.show();
             }
         });
@@ -291,6 +296,13 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
             }
         }
         tvAddress.setText(State.createSpans(text.toString(), getResources().getColor(android.R.color.white), true));
+        Set<Integer> fab = getFabCommands();
+        if (fab.size() > 0) {
+            vFab.setVisibility(View.VISIBLE);
+            vFab.setImageResource(R.drawable.fab_more);
+        } else {
+            vFab.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -325,5 +337,43 @@ public class StateFragment extends MainFragment implements View.OnClickListener 
         fragment.setArguments(args);
         MainActivity activity = (MainActivity) getActivity();
         activity.setFragment(fragment);
+    }
+
+    Set<Integer> getFabCommands() {
+        CarConfig config = CarConfig.get(getActivity(), id());
+        CarState state = CarState.get(getActivity(), id());
+        int[] selected = config.getCommands();
+        CarConfig.Command[] cmds = config.getCmd();
+        Set<String> enabled = new HashSet<>();
+        Set<Integer> res = new HashSet<>();
+        for (CarConfig.Command cmd : cmds) {
+            boolean enable = false;
+            for (int s : selected) {
+                if (cmd.id == s) {
+                    enable = true;
+                    break;
+                }
+            }
+            String group = cmd.group;
+            if ((group != null) && group.equals(""))
+                group = null;
+            if (group != null) {
+                if (enable) {
+                    enabled.add(group);
+                } else {
+                    enable = enabled.contains(group);
+                }
+            }
+            if (!enable)
+                enable = cmd.always;
+            if (!enable)
+                continue;
+            if (cmd.condition != null) {
+                if (!State.checkCondition(cmd.condition, state))
+                    continue;
+            }
+            res.add(cmd.id);
+        }
+        return res;
     }
 }
