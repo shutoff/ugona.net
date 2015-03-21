@@ -18,6 +18,7 @@ import com.eclipsesource.json.ParseException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class FetchService extends Service {
 
@@ -215,7 +216,6 @@ public class FetchService extends Service {
 
     class StatusRequest extends ServerRequest {
 
-        int msg_id;
         boolean connect;
 
         StatusRequest(String id, boolean refresh) {
@@ -227,7 +227,8 @@ public class FetchService extends Service {
         void result(JsonObject res) throws ParseException {
             super.result(res);
             CarState state = CarState.get(FetchService.this, car_id);
-            if (Config.update(state, res)) {
+            Set<String> upd = Config.update(state, res);
+            if (upd != null) {
                 sendUpdate(Names.UPDATED, car_id);
             } else {
                 sendUpdate(Names.NO_UPDATED, car_id);

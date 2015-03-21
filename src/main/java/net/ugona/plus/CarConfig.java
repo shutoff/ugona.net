@@ -220,6 +220,7 @@ public class CarConfig extends Config implements Serializable {
         String group;
         String condition;
         String state;
+        String done;
         boolean on;
         boolean always;
     }

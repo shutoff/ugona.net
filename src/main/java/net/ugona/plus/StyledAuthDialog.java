@@ -130,14 +130,14 @@ public class StyledAuthDialog extends Dialog {
             void result(JsonObject res) throws ParseException {
                 Config.update(config, res);
                 CarState state = CarState.get(getContext(), car_id);
-                if (CarState.update(state, res.get("state").asObject())) {
+                if (CarState.update(state, res.get("state").asObject()) != null) {
                     Intent intent = new Intent(Names.UPDATED);
                     intent.putExtra(Names.ID, car_id);
                     getContext().sendBroadcast(intent);
                 }
                 JsonObject caps = res.get("caps").asObject();
-                boolean changed = CarState.update(state, caps.get("caps").asObject());
-                changed |= CarState.update(config, caps);
+                boolean changed = (CarState.update(state, caps.get("caps").asObject()) != null);
+                changed |= (CarState.update(config, caps) != null);
                 if (changed) {
                     Intent intent = new Intent(Names.CONFIG_CHANGED);
                     intent.putExtra(Names.ID, car_id);

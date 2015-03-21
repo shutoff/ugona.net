@@ -514,7 +514,7 @@ public class MainActivity
         HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
-                if (CarState.update(state, res.get("caps").asObject())) {
+                if (CarState.update(state, res.get("caps").asObject()) != null) {
                     Intent intent = new Intent(Names.CONFIG_CHANGED);
                     intent.putExtra(Names.ID, id);
                     sendBroadcast(intent);

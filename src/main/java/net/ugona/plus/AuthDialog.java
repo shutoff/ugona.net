@@ -71,9 +71,9 @@ public class AuthDialog extends DialogFragment {
             public void afterTextChanged(Editable s) {
                 boolean bProgress = (vProgress.getVisibility() == View.VISIBLE);
                 if (btnOk != null)
-                btnOk.setEnabled(!bProgress &&
-                        !etLogin.getText().toString().equals("") &&
-                        !etPass.getText().toString().equals(""));
+                    btnOk.setEnabled(!bProgress &&
+                            !etLogin.getText().toString().equals("") &&
+                            !etPass.getText().toString().equals(""));
             }
         };
         etLogin.addTextChangedListener(watcher);
@@ -132,14 +132,14 @@ public class AuthDialog extends DialogFragment {
             void result(JsonObject res) throws ParseException {
                 Config.update(config, res);
                 CarState state = CarState.get(getActivity(), car_id);
-                if (CarState.update(state, res.get("state").asObject())) {
+                if (CarState.update(state, res.get("state").asObject()) != null) {
                     Intent intent = new Intent(Names.UPDATED);
                     intent.putExtra(Names.ID, car_id);
                     getActivity().sendBroadcast(intent);
                 }
                 JsonObject caps = res.get("caps").asObject();
-                boolean changed = CarState.update(state, caps.get("caps").asObject());
-                changed |= CarState.update(config, caps);
+                boolean changed = CarState.update(state, caps.get("caps").asObject()) != null;
+                changed |= (CarState.update(config, caps) != null);
                 if (changed) {
                     Intent intent = new Intent(Names.CONFIG_CHANGED);
                     intent.putExtra(Names.ID, car_id);

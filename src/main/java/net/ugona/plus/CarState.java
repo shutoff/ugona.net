@@ -19,12 +19,15 @@ public class CarState extends Config implements Serializable {
     private long guard_time;
     private long last_stand;
     private long az_time;
+    private long az_start;
     private long zone;
     private long card;
     private boolean door_fl;
     private boolean door_fr;
     private boolean door_bl;
     private boolean door_br;
+    private boolean relay1;
+    private boolean relay2;
     private boolean hood;
     private boolean trunk;
     private boolean ignition;
@@ -122,6 +125,10 @@ public class CarState extends Config implements Serializable {
         return az_time;
     }
 
+    public long getAz_start() {
+        return az_start;
+    }
+
     public long getZone() {
         return zone;
     }
@@ -156,6 +163,14 @@ public class CarState extends Config implements Serializable {
 
     public boolean isIgnition() {
         return ignition;
+    }
+
+    public boolean isRelay1() {
+        return relay1;
+    }
+
+    public boolean isRelay2() {
+        return relay2;
     }
 
     public int getPower_state() {

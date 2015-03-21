@@ -7,14 +7,16 @@ import com.eclipsesource.json.JsonValue;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Config {
 
     protected boolean upd;
 
-    static public boolean update(Object o, JsonObject from) {
+    static public Set<String> update(Object o, JsonObject from) {
         Field[] fields = o.getClass().getDeclaredFields();
-        boolean upd = false;
+        Set<String> res = new HashSet<>();
         try {
             for (Field f : fields) {
                 String name = f.getName();
@@ -32,7 +34,7 @@ public class Config {
                     if ((av == null) || (Array.getLength(av) != arr.size())) {
                         av = Array.newInstance(cel, arr.size());
                         f.set(o, av);
-                        upd = true;
+                        res.add(name);
                     }
                     for (int i = 0; i < arr.size(); i++) {
                         Object el = Array.get(av, i);
@@ -40,8 +42,8 @@ public class Config {
                             el = cel.newInstance();
                             Array.set(av, i, el);
                         }
-                        if (update(el, arr.get(i).asObject()))
-                            upd = true;
+                        if (update(el, arr.get(i).asObject()) != null)
+                            res.add(name);
                     }
                     continue;
                 }
@@ -50,49 +52,51 @@ public class Config {
                     int iv = v.asInt();
                     if (iv != f.getInt(o)) {
                         f.setInt(o, iv);
-                        upd = true;
+                        res.add(name);
                     }
                 } else if ((t == long.class) && v.isNumber()) {
                     long lv = v.asLong();
                     if (lv != f.getLong(o)) {
                         f.setLong(o, lv);
-                        upd = true;
+                        res.add(name);
                     }
                 } else if ((t == double.class) && v.isNumber()) {
                     double dv = v.asDouble();
                     if (dv != f.getDouble(o)) {
                         f.setDouble(o, dv);
-                        upd = true;
+                        res.add(name);
                     }
                 } else if ((t == boolean.class) && v.isBoolean()) {
                     boolean bv = v.asBoolean();
                     if (bv != f.getBoolean(o)) {
                         f.setBoolean(o, bv);
-                        upd = true;
+                        res.add(name);
                     }
                 } else if ((t == String.class) && v.isString()) {
                     String sv = v.asString();
                     if (!sv.equals(f.get(o))) {
                         f.set(o, sv);
-                        upd = true;
+                        res.add(name);
                     }
                 } else if ((t == Integer.class) && v.isNumber()) {
                     int iv = v.asInt();
                     Integer ov = (Integer) f.get(o);
                     if ((ov == null) || (ov != iv)) {
                         f.set(o, (Integer) iv);
-                        upd = true;
+                        res.add(name);
                     }
                 }
             }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        if (upd && (o instanceof Config)) {
+        if (res.isEmpty())
+            res = null;
+        if ((res != null) && (o instanceof Config)) {
             Config c = (Config) o;
             c.upd = true;
         }
-        return upd;
+        return res;
     }
 
     static public JsonObject saveJson(Object o) {
