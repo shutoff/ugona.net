@@ -6,6 +6,7 @@
         <item name="colorPrimaryDark">@color/highlighted</item>
         <item name="android:editTextStyle">@style/EditTextStyle</item>
         <item name="android:checkboxStyle">@style/CheckBoxStyle</item>
+        <item name="android:spinnerStyle">@style/SpinnerStyle</item>
     </style>
 
     <style name="Theme.Transparent" parent="Theme.AppCompat.Light.Dialog">
@@ -49,6 +50,11 @@
     <style name="ButtonStyle" parent="@android:style/Widget.Button">
         <item name="android:textColor">@android:color/white</item>
         <item name="android:padding">10dp</item>
+    </style>
+
+    <style name="SpinnerStyle" parent="android:Widget">
+        <item name="android:background">@drawable/spinner</item>
+        <item name="android:clickable">true</item>
     </style>
 
     <style name="PauseDialogAnimation">

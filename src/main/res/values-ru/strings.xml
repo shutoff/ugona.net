@@ -105,4 +105,16 @@
     <string name="no_changed">Нет изменений</string>
     <string name="save_error">Ошибка загрузки настроек</string>
     <string name="action_settings">Настройки команд</string>
+    <string name="control_method">Отправка команд</string>
+    <string-array name="ctrl_entries">
+        <item>SMS, долгое нажатие - интернет</item>
+        <item>Интернет, долгое нажатие - SMS</item>
+    </string-array>
+    <string name="sim_card">SIM карта для отправки SMS</string>
+    <string-array name="sim_entries">
+        <item>По умолчанию</item>
+        <item>SIM1</item>
+        <item>SIM2</item>
+    </string-array>
+    <string name="sim_card_note">Экспериментальная функция, может не работать на некоторых устройствах</string>
 </resources>

@@ -27,6 +27,8 @@ public class CarConfig extends Config implements Serializable {
     private String temp_settings;
     private Setting[] settings;
     private int[] commands;
+    private boolean inet_cmd;
+    private int sim_cmd;
 
     private CarConfig() {
         name = "";
@@ -130,6 +132,28 @@ public class CarConfig extends Config implements Serializable {
         if (this.login.equals(login))
             return;
         this.login = login;
+        upd = true;
+    }
+
+    public boolean isInet_cmd() {
+        return inet_cmd;
+    }
+
+    public void setInet_cmd(boolean inet_cmd) {
+        if (this.inet_cmd == inet_cmd)
+            return;
+        this.inet_cmd = inet_cmd;
+        upd = true;
+    }
+
+    public int getSim_cmd() {
+        return sim_cmd;
+    }
+
+    public void setSim_cmd(int sim_cmd) {
+        if (this.sim_cmd == sim_cmd)
+            return;
+        this.sim_cmd = sim_cmd;
         upd = true;
     }
 

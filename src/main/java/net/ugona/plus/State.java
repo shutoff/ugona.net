@@ -23,6 +23,7 @@ import com.google.i18n.phonenumbers.Phonenumber;
 import org.joda.time.LocalDate;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -253,8 +254,104 @@ public class State {
         return false;
     }
 
+    static boolean isDualSim(Context context) {
+        TelephonyInfo info = TelephonyInfo.getInstance(context);
+        return info.isSIM1Ready(context) && info.isSIM2Ready(context);
+    }
+
     public static interface ViewCallback {
         void view(View v);
     }
+
+    static public final class TelephonyInfo {
+
+        private static TelephonyInfo telephonyInfo;
+        Object msim;
+        Method msim_getState;
+
+        private TelephonyInfo() {
+            try {
+                Class msim_class = Class.forName("android.telephony.MSimTelephonyManager");
+                Method msim_default = msim_class.getDeclaredMethod("getDefault", new Class[0]);
+                msim = msim_default.invoke(null, new Object[0]);
+                Class aclass[] = new Class[1];
+                aclass[0] = Integer.TYPE;
+                msim_getState = msim_class.getDeclaredMethod("getSimState", aclass);
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+
+        public static TelephonyInfo getInstance(Context context) {
+
+            if (telephonyInfo == null) {
+                telephonyInfo = new TelephonyInfo();
+                TelephonyManager telephonyManager = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
+            }
+            return telephonyInfo;
+        }
+
+        private boolean getSIMStateBySlot(Context context, String predictedMethodName, int slotID) throws Exception {
+
+            if ((msim != null) && (msim_getState != null)) {
+                try {
+                    Object aobj[] = new Object[1];
+                    aobj[0] = Integer.valueOf(slotID);
+                    return ((Integer) msim_getState.invoke(msim, aobj)).intValue() == TelephonyManager.SIM_STATE_READY;
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+
+            TelephonyManager telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            Class<?> telephonyClass = Class.forName(telephony.getClass().getName());
+
+            Class<?>[] parameter = new Class[1];
+            parameter[0] = int.class;
+            Method getSimStateGemini = telephonyClass.getMethod(predictedMethodName, parameter);
+
+            Object[] obParameter = new Object[1];
+            obParameter[0] = slotID;
+            Object ob_phone = getSimStateGemini.invoke(telephony, obParameter);
+
+            if (ob_phone == null)
+                return false;
+
+            int simState = Integer.parseInt(ob_phone.toString());
+            return (simState == TelephonyManager.SIM_STATE_READY);
+        }
+
+        public boolean isSIM1Ready(Context context) {
+            try {
+                return getSIMStateBySlot(context, "getSimStateGemini", 0);
+            } catch (Exception ex) {
+                // ignore
+            }
+            try {
+                return getSIMStateBySlot(context, "getSimState", 0);
+            } catch (Exception ex) {
+                // ignore
+            }
+
+            TelephonyManager telephonyManager = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
+            return telephonyManager.getSimState() == TelephonyManager.SIM_STATE_READY;
+        }
+
+        public boolean isSIM2Ready(Context context) {
+            try {
+                return getSIMStateBySlot(context, "getSimStateGemini", 1);
+            } catch (Exception ex) {
+                // ignore
+            }
+            try {
+                return getSIMStateBySlot(context, "getSimState", 1);
+            } catch (Exception ex) {
+                // ignore
+            }
+            return false;
+        }
+
+    }
+
 
 }

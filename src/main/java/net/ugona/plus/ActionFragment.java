@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -105,5 +106,17 @@ public class ActionFragment
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.action, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_settings) {
+            CommandsSettingsDialog dialog = new CommandsSettingsDialog();
+            Bundle args = new Bundle();
+            args.putString(Names.ID, id());
+            dialog.setArguments(args);
+            dialog.show(getFragmentManager(), "settings");
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

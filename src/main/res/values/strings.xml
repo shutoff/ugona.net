@@ -109,4 +109,16 @@
     <string name="no_changed">No changes</string>
     <string name="save_error">Error save settings</string>
     <string name="action_settings">Command settings</string>
+    <string name="control_method">Control method</string>
+    <string-array name="ctrl_entries">
+        <item>SMS, Long tap - internet</item>
+        <item>Internet, Long tap - SMS</item>
+    </string-array>
+    <string name="sim_card">SIM card for sent SMS</string>
+    <string-array name="sim_entries">
+        <item>Default</item>
+        <item>SIM1</item>
+        <item>SIM2</item>
+    </string-array>
+    <string name="sim_card_node">This is experimental function, it can not work on any devices</string>
 </resources>
