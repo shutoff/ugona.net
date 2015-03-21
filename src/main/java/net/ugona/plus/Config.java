@@ -100,8 +100,14 @@ public class Config {
     }
 
     static public JsonObject saveJson(Object o) {
+        return saveJson(o, 0);
+    }
+
+    static private JsonObject saveJson(Object o, int depth) {
         if (o instanceof JsonObject)
             return (JsonObject) o;
+        if (depth > 3)
+            return null;
         Field[] fields = o.getClass().getDeclaredFields();
         JsonObject res = new JsonObject();
         try {
@@ -121,7 +127,9 @@ public class Config {
                         Object el = Array.get(v, i);
                         if (el == null)
                             continue;
-                        arr.add(saveJson(el));
+                        JsonObject r = saveJson(el, depth++);
+                        if (r != null)
+                            arr.add(r);
                     }
                     res.add(name, arr);
                     continue;

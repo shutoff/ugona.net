@@ -1,5 +1,6 @@
 package net.ugona.plus;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -17,6 +18,7 @@ import android.view.ViewGroup;
 import com.astuetz.PagerSlidingTabStrip;
 
 import java.util.HashMap;
+import java.util.List;
 
 
 public class SettingsFragment extends MainFragment implements Alert.Listener {
@@ -114,6 +116,17 @@ public class SettingsFragment extends MainFragment implements Alert.Listener {
         if ((fragment != null) && fragment.onOptionsItemSelected(item))
             return true;
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        List<Fragment> fragments = getChildFragmentManager().getFragments();
+        if (fragments != null) {
+            for (Fragment fragment : fragments) {
+                fragment.onActivityResult(requestCode, resultCode, data);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     MainFragment getFragment(int position) {

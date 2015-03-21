@@ -1,6 +1,8 @@
 package net.ugona.plus;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -22,6 +24,7 @@ import android.widget.Toast;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
+import com.haibison.android.lockpattern.LockPatternActivity;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -39,6 +42,8 @@ import java.util.Set;
 import java.util.Vector;
 
 public abstract class DeviceBaseFragment extends MainFragment {
+
+    final static int REQUEST_CHECK_PATTERN = 200;
 
     final static String DATA = "data";
     final static String CHANGED = "changed";
@@ -167,44 +172,62 @@ public abstract class DeviceBaseFragment extends MainFragment {
                 toast.show();
                 return true;
             }
-            HttpTask task = new HttpTask() {
-                @Override
-                void result(JsonObject res) throws ParseException {
-                    if (changed != null) {
-                        Set<Map.Entry<String, Object>> entries = changed.entrySet();
-                        for (Map.Entry<String, Object> entry : entries) {
-                            settings.put(entry.getKey(), entry.getValue());
-                        }
-                    }
-                    changed = new HashMap<>();
-                    BaseAdapter adapter = (BaseAdapter) vList.getAdapter();
-                    adapter.notifyDataSetChanged();
-                }
-
-                @Override
-                void error() {
-                    Toast toast = Toast.makeText(getActivity(), R.string.save_error, Toast.LENGTH_LONG);
-                    toast.show();
-                }
-            };
-            JsonObject params = new JsonObject();
-            Set<Map.Entry<String, Object>> entries = changed.entrySet();
-            for (Map.Entry<String, Object> entry : entries) {
-                Object o = entry.getValue();
-                if (o instanceof Integer) {
-                    params.add(entry.getKey(), ((Integer) o).intValue());
-                    continue;
-                }
-                if (o instanceof Boolean) {
-                    params.add(entry.getKey(), ((Boolean) o).booleanValue());
-                    continue;
-                }
+            AppConfig config = AppConfig.get(getActivity());
+            if (!config.getPattern().equals("")) {
+                Intent intent = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null,
+                        getActivity(), LockPatternActivity.class);
+                intent.putExtra(LockPatternActivity.EXTRA_PATTERN, config.getPattern().toCharArray());
+                startActivityForResult(intent, REQUEST_CHECK_PATTERN);
+                return true;
             }
-            CarConfig config = CarConfig.get(getActivity(), id());
-            params.add("skey", config.getKey());
-            task.execute("/set", params);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if ((requestCode == REQUEST_CHECK_PATTERN) && (resultCode == Activity.RESULT_OK))
+            send_update();
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    void send_update() {
+        HttpTask task = new HttpTask() {
+            @Override
+            void result(JsonObject res) throws ParseException {
+                if (changed != null) {
+                    Set<Map.Entry<String, Object>> entries = changed.entrySet();
+                    for (Map.Entry<String, Object> entry : entries) {
+                        settings.put(entry.getKey(), entry.getValue());
+                    }
+                }
+                changed = new HashMap<>();
+                BaseAdapter adapter = (BaseAdapter) vList.getAdapter();
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            void error() {
+                Toast toast = Toast.makeText(getActivity(), R.string.save_error, Toast.LENGTH_LONG);
+                toast.show();
+            }
+        };
+        JsonObject params = new JsonObject();
+        Set<Map.Entry<String, Object>> entries = changed.entrySet();
+        for (Map.Entry<String, Object> entry : entries) {
+            Object o = entry.getValue();
+            if (o instanceof Integer) {
+                params.add(entry.getKey(), ((Integer) o).intValue());
+                continue;
+            }
+            if (o instanceof Boolean) {
+                params.add(entry.getKey(), ((Boolean) o).booleanValue());
+                continue;
+            }
+        }
+        CarConfig config = CarConfig.get(getActivity(), id());
+        params.add("skey", config.getKey());
+        task.execute("/set", params);
     }
 
     void refresh() {

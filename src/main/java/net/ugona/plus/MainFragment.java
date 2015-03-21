@@ -67,16 +67,6 @@ public abstract class MainFragment extends Fragment implements OnRefreshListener
                     .setup(mPullToRefreshLayout);
             mPullToRefreshLayout.setPullEnabled(true);
         }
-/*
-        ViewGroup viewGroup = (ViewGroup) view;
-        mPullToRefreshLayout = new PullToRefreshLayout(viewGroup.getContext());
-        ActionBarPullToRefresh.from(getActivity())
-        //        .insertLayoutInto(viewGroup)
-                .allChildrenArePullable()
-                .listener(this)
-                .setup(mPullToRefreshLayout);
-        mPullToRefreshLayout.setPullEnabled(true);
-*/
     }
 
     @Override

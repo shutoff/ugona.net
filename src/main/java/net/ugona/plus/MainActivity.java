@@ -51,25 +51,21 @@ public class MainActivity
     static final String SPLASH = "splash_tag";
 
     static Menu homeMenu;
-
+    static Runnable password_request;
     String id;
     AppConfig config;
     CarState state;
     CarConfig car_config;
-
     Menu topSubMenu;
     Menu sideMenu;
     Menu fragmentMenu;
-
     LocalDate current;
-
     DrawerLayout drawer;
     ActionBarDrawerToggle drawerToggle;
     View vLogo;
     Spinner spinner;
     BroadcastReceiver br;
     Handler handler;
-
     private FragmentManager.OnBackStackChangedListener
             mOnBackStackChangedListener = new FragmentManager.OnBackStackChangedListener() {
         @Override
