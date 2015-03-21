@@ -117,4 +117,6 @@
         <item>SIM2</item>
     </string-array>
     <string name="sim_card_note">Экспериментальная функция, может не работать на некоторых устройствах</string>
+    <string name="require_ccode">Требуется C-код</string>
+    <string name="number">С-код содержит не только цифры</string>
 </resources>

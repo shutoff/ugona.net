@@ -121,4 +121,6 @@
         <item>SIM2</item>
     </string-array>
     <string name="sim_card_node">This is experimental function, it can not work on any devices</string>
+    <string name="require_ccode">Require C-code</string>
+    <string name="number">C-code contains letters</string>
 </resources>

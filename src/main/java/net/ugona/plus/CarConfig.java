@@ -29,6 +29,8 @@ public class CarConfig extends Config implements Serializable {
     private int[] commands;
     private boolean inet_cmd;
     private int sim_cmd;
+    private boolean ccode_text;
+    private boolean device_password;
 
     private CarConfig() {
         name = "";
@@ -157,6 +159,17 @@ public class CarConfig extends Config implements Serializable {
         upd = true;
     }
 
+    public boolean isCcode_text() {
+        return ccode_text;
+    }
+
+    public void setCcode_text(boolean ccode_text) {
+        if (this.ccode_text == ccode_text)
+            return;
+        this.ccode_text = ccode_text;
+        upd = true;
+    }
+
     public int getEvent_filter() {
         return event_filter;
     }
@@ -198,6 +211,17 @@ public class CarConfig extends Config implements Serializable {
         if (this.phone.equals(phone))
             return;
         this.phone = phone;
+        upd = true;
+    }
+
+    public boolean isDevice_password() {
+        return device_password;
+    }
+
+    public void setDevice_password(boolean device_password) {
+        if (this.device_password == device_password)
+            return;
+        this.device_password = device_password;
         upd = true;
     }
 

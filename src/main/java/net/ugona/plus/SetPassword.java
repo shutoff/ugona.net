@@ -40,7 +40,6 @@ public class SetPassword extends MainFragment {
             intent.putExtra(LockPatternActivity.EXTRA_PATTERN, config.getPattern().toCharArray());
             startActivityForResult(intent, REQUEST_CHECK_PATTERN);
         }
-
         View btnGraph = v.findViewById(R.id.graphic);
         final View btnSave = v.findViewById(R.id.set);
 

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,6 +33,7 @@ import android.widget.TextView;
 import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
+import com.haibison.android.lockpattern.LockPatternActivity;
 
 import org.joda.time.LocalDate;
 
@@ -41,18 +43,26 @@ import java.util.Date;
 import static android.view.Gravity.START;
 
 public class MainActivity
-        extends ActionBarActivity {
+        extends ActionBarActivity
+        implements PasswordDialog.Listener {
 
     static final int DO_AUTH = 1;
     static final int DO_PHONE = 2;
+    static final int DO_CCODE = 3;
+    static final int DO_INET = 4;
 
     static final String TAG = "frag_tag";
     static final String PRIMARY = "prim_tag";
     static final String SPLASH = "splash_tag";
 
+    static final String INET_COMMAND = "inet_command";
+
     static Menu homeMenu;
     static Runnable password_request;
+
     String id;
+    int inet_command;
+
     AppConfig config;
     CarState state;
     CarConfig car_config;
@@ -66,6 +76,7 @@ public class MainActivity
     Spinner spinner;
     BroadcastReceiver br;
     Handler handler;
+
     private FragmentManager.OnBackStackChangedListener
             mOnBackStackChangedListener = new FragmentManager.OnBackStackChangedListener() {
         @Override
@@ -100,6 +111,7 @@ public class MainActivity
         if (savedInstanceState != null) {
             id = savedInstanceState.getString(Names.ID);
             current = new LocalDate(savedInstanceState.getLong(Names.DATE));
+            inet_command = savedInstanceState.getInt(INET_COMMAND);
         }
 
         config = AppConfig.get(this);
@@ -187,6 +199,7 @@ public class MainActivity
         super.onSaveInstanceState(outState);
         outState.putString(Names.ID, id);
         outState.putLong(Names.DATE, current.toDate().getTime());
+        outState.putInt(INET_COMMAND, inet_command);
     }
 
     @Override
@@ -206,6 +219,14 @@ public class MainActivity
             }
             setPrimary();
             checkPhone();
+        }
+        if (requestCode == DO_CCODE) {
+            send_command_inet(data.getStringExtra(Names.VALUE));
+            return;
+        }
+        if ((requestCode == DO_INET) && (resultCode == RESULT_OK)) {
+            send_command_inet(null);
+            return;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -542,7 +563,74 @@ public class MainActivity
     }
 
     void do_command(CarConfig.Command cmd, boolean longTap) {
+        if (cmd.call != null) {
+            String phone = car_config.getPhone();
+            if (phone.equals(""))
+                return;
+            phone = cmd.call.replace("{phone}", phone);
+            Intent i = new Intent(android.content.Intent.ACTION_CALL, Uri.parse(phone));
+            startActivity(i);
+            return;
+        }
+        boolean is_inet = car_config.isInet_cmd();
+        if (longTap)
+            is_inet = !is_inet;
+        if (is_inet && do_command_inet(cmd))
+            return;
+        if (do_command_sms(cmd))
+            return;
+        do_command_inet(cmd);
+    }
 
+    boolean do_command_inet(CarConfig.Command cmd) {
+        if (cmd.inet == 0)
+            return false;
+        inet_command = cmd.inet;
+        if (cmd.inet_ccode) {
+            request_ccode();
+            return true;
+        }
+        if (!config.getPattern().equals("")) {
+            Intent intent = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null,
+                    this, LockPatternActivity.class);
+            intent.putExtra(LockPatternActivity.EXTRA_PATTERN, config.getPattern().toCharArray());
+            startActivityForResult(intent, DO_INET);
+            return true;
+        }
+        if (!config.getPassword().equals("")) {
+            PasswordDialog dialog = new PasswordDialog();
+            Bundle args = new Bundle();
+            args.putString(Names.MESSAGE, config.getPassword());
+            dialog.setArguments(args);
+            dialog.show(getSupportFragmentManager(), "password");
+            return true;
+        }
+        send_command_inet(null);
+        return true;
+    }
+
+    boolean do_command_sms(CarConfig.Command cmd) {
+        if (!State.hasTelephony(this))
+            return false;
+        if (cmd.sms == null)
+            return false;
+        return true;
+    }
+
+    void request_ccode() {
+        CCodeDialog dialog = new CCodeDialog();
+        Bundle args = new Bundle();
+        args.putString(Names.ID, id);
+        dialog.setArguments(args);
+        dialog.show(getSupportFragmentManager(), "ccode");
+    }
+
+    void send_command_inet(String ccode) {
+    }
+
+    @Override
+    public void password_ok() {
+        send_command_inet(null);
     }
 
     static class KeyParam implements Serializable {

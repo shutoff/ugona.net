@@ -81,12 +81,20 @@ public class PasswordDialog extends DialogFragment
             Fragment fragment = getTargetFragment();
             if (fragment != null)
                 fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, null);
+            if (getActivity() instanceof Listener) {
+                Listener listener = (Listener) getActivity();
+                listener.password_ok();
+            }
             dismiss();
             return;
         }
         etPasswd.setText("");
         vError.setVisibility(View.VISIBLE);
         return;
+    }
+
+    static interface Listener {
+        void password_ok();
     }
 
 }

@@ -81,6 +81,8 @@ public class ActionFragment
                 return v;
             }
         });
+        vActions.setOnItemClickListener(this);
+        vActions.setOnItemLongClickListener(this);
         return vActions;
     }
 
