@@ -42,8 +42,7 @@ import java.util.Set;
 import java.util.Vector;
 
 public abstract class DeviceBaseFragment
-        extends MainFragment
-        implements PasswordDialog.Listener {
+        extends MainFragment {
 
     final static int REQUEST_CHECK_PATTERN = 200;
 
@@ -190,15 +189,10 @@ public abstract class DeviceBaseFragment
             Bundle args = new Bundle();
             args.putString(Names.MESSAGE, config.getPassword());
             passwordDialog.setArguments(args);
-            passwordDialog.setListener(this);
+            passwordDialog.setTargetFragment(getParentFragment(), REQUEST_CHECK_PATTERN);
             passwordDialog.show(getFragmentManager(), "password");
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void ok() {
-        send_update();
     }
 
     @Override

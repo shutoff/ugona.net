@@ -21,7 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class SettingsFragment extends MainFragment implements Alert.Listener {
+public class SettingsFragment extends MainFragment {
+
+    static final int DO_BACK = 300;
 
     static final int PAGE_AUTH = 0;
     static final int PAGE_NOTIFY = 1;
@@ -106,7 +108,7 @@ public class SettingsFragment extends MainFragment implements Alert.Listener {
                 args.putString(Names.MESSAGE, getString(R.string.changed_msg));
                 args.putString(Names.OK, getString(R.string.exit));
                 alert.setArguments(args);
-                alert.setListener(this);
+                alert.setTargetFragment(this, DO_BACK);
                 alert.show(getFragmentManager(), "alert");
                 adapter.finishUpdate(vPager);
                 return true;
@@ -120,6 +122,15 @@ public class SettingsFragment extends MainFragment implements Alert.Listener {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == DO_BACK) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    getActivity().getSupportFragmentManager().popBackStackImmediate();
+                }
+            });
+            return;
+        }
         List<Fragment> fragments = getChildFragmentManager().getFragments();
         if (fragments != null) {
             for (Fragment fragment : fragments) {
@@ -200,16 +211,6 @@ public class SettingsFragment extends MainFragment implements Alert.Listener {
                 pos++;
         }
         return pos;
-    }
-
-    @Override
-    public void ok() {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                getActivity().getSupportFragmentManager().popBackStackImmediate();
-            }
-        });
     }
 
     class PagerAdapter extends FragmentStatePagerAdapter {
