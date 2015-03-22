@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -31,18 +32,27 @@ public class CCodeDialog
     EditText etCCodeText;
     CheckBox chkNumber;
 
+    boolean sent;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         if (savedInstanceState != null)
             setArgs(savedInstanceState);
         LayoutInflater inflater = LayoutInflater.from(getActivity());
-        return new AlertDialog.Builder(getActivity())
+        Dialog dialog = new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.require_ccode)
                 .setView(inflater.inflate(R.layout.ccode_dialog, null))
                 .setPositiveButton(R.string.ok, null)
                 .setNegativeButton(R.string.cancel, null)
                 .create();
+        return dialog;
     }
 
     @Override
@@ -73,6 +83,14 @@ public class CCodeDialog
         etCCodeText.addTextChangedListener(this);
         chkNumber = (CheckBox) dialog.findViewById(R.id.number);
         chkNumber.setOnCheckedChangeListener(this);
+        afterTextChanged(null);
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (getDialog() != null && getRetainInstance())
+            getDialog().setDismissMessage(null);
+        super.onDestroyView();
     }
 
     @Override
@@ -113,11 +131,25 @@ public class CCodeDialog
 
     @Override
     public void onClick(View v) {
-        EditText et = chkNumber.isChecked() ? etCCodeText : etCCodeNum;
-        Intent i = new Intent();
-        i.putExtra(Names.ID, id);
-        i.putExtra(Names.VALUE, et.getText().toString());
-        MainActivity activity = (MainActivity) getActivity();
-        activity.onActivityResult(MainActivity.DO_CCODE, Activity.RESULT_OK, i);
+        Fragment fragment = getTargetFragment();
+        if (fragment != null)
+            sent = true;
+        dismiss();
+        if (fragment != null) {
+            EditText et = chkNumber.isChecked() ? etCCodeText : etCCodeNum;
+            Intent i = new Intent();
+            i.putExtra(Names.ID, id);
+            i.putExtra(Names.VALUE, et.getText().toString());
+            fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, i);
+        }
     }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        Fragment fragment = getTargetFragment();
+        if ((fragment != null) && !sent)
+            fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_CANCELED, null);
+    }
+
 }

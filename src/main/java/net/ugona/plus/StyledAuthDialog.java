@@ -31,11 +31,9 @@ public class StyledAuthDialog extends Dialog {
     TextView tvError;
     View vProgress;
     TextWatcher watcher;
-    DialogListener listener;
 
-    public StyledAuthDialog(Context context, String car_id, DialogListener listener) {
+    public StyledAuthDialog(Context context, String car_id) {
         super(context, R.style.CustomDialogTheme);
-        this.listener = listener;
         this.car_id = car_id;
         setContentView(R.layout.styled_auth_dialog);
         etLogin = (EditText) findViewById(R.id.login);
@@ -145,7 +143,6 @@ public class StyledAuthDialog extends Dialog {
                 }
                 CarState.update(config, res);
                 config.setLogin(login);
-                listener.ok();
                 dismiss();
             }
 

@@ -98,8 +98,13 @@ public class StateFragment
                     CarConfig.Command cmd = fab.get(0);
                     int id = getResources().getIdentifier("b_" + cmd.icon, "drawable", pkg);
                     if (id != 0) {
-                        MainActivity activity = (MainActivity) getActivity();
-                        activity.do_command(cmd.id, longTap);
+                        SendCommandFragment fragment = new SendCommandFragment();
+                        Bundle args = new Bundle();
+                        args.putString(Names.ID, id());
+                        args.putInt(Names.COMMAND, cmd.id);
+                        args.putBoolean(Names.ROUTE, longTap);
+                        fragment.setArguments(args);
+                        fragment.show(getFragmentManager(), "send");
                         longTap = false;
                         return;
                     }

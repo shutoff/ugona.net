@@ -19,6 +19,8 @@ public class Names {
     static final String MESSAGE = "message";
     static final String OK = "ok";
     static final String VALUE = "value";
+    static final String COMMAND = "command";
+    static final String ROUTE = "route";
 
     static final String UPDATED = "net.ugona.plus.updated";
     static final String NO_UPDATED = "net.ugona.plus.no_updated";

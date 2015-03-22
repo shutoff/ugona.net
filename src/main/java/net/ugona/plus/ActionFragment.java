@@ -88,8 +88,14 @@ public class ActionFragment
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        MainActivity activity = (MainActivity) getActivity();
-        activity.do_command(commands.get(position).id, longTap);
+        SendCommandFragment fragment = new SendCommandFragment();
+        CarConfig.Command cmd = commands.get(position);
+        Bundle args = new Bundle();
+        args.putString(Names.ID, id());
+        args.putInt(Names.COMMAND, cmd.id);
+        args.putBoolean(Names.ROUTE, longTap);
+        fragment.setArguments(args);
+        fragment.show(getFragmentManager(), "send");
         longTap = false;
     }
 

@@ -2,6 +2,7 @@ package net.ugona.plus;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Vibrator;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,11 +36,13 @@ public class FABCommands
     String pkg;
     Vector<CarConfig.Command> items;
     boolean longTap;
+    String car_id;
 
     public FABCommands(MainActivity activity, final Vector<CarConfig.Command> items, String car_id) {
         super(activity, R.style.CustomDialogTheme);
         setOwnerActivity(activity);
         this.items = items;
+        this.car_id = car_id;
 
         setContentView(R.layout.fab);
         pkg = activity.getPackageName();
@@ -133,8 +136,15 @@ public class FABCommands
     @Override
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
         dismiss();
+        CarConfig.Command cmd = items.get(position);
+        SendCommandFragment fragment = new SendCommandFragment();
+        Bundle args = new Bundle();
+        args.putString(Names.ID, car_id);
+        args.putInt(Names.COMMAND, cmd.id);
+        args.putBoolean(Names.ROUTE, longTap);
+        fragment.setArguments(args);
         MainActivity activity = (MainActivity) getOwnerActivity();
-        activity.do_command(items.get(position).id, longTap);
+        fragment.show(activity.getSupportFragmentManager(), "send");
     }
 
     @Override

@@ -1,6 +1,7 @@
 package net.ugona.plus;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -13,7 +14,10 @@ import android.widget.TextView;
 
 import java.util.Vector;
 
-public class AuthFragment extends MainFragment implements DialogListener {
+public class AuthFragment extends MainFragment {
+
+    static final int DO_AUTH = 1;
+    static final int DO_PHONE = 2;
 
     ListView vList;
     Vector<Item> items;
@@ -41,7 +45,8 @@ public class AuthFragment extends MainFragment implements DialogListener {
                 Bundle args = new Bundle();
                 args.putString(Names.ID, id());
                 authDialog.setArguments(args);
-                authDialog.show(getFragmentManager(), "auth");
+                authDialog.setTargetFragment(AuthFragment.this, DO_AUTH);
+                authDialog.show(getParentFragment().getFragmentManager(), "auth");
             }
         }));
         items.add(new Item(R.string.phone_number, config.getPhone(), new Runnable() {
@@ -51,7 +56,8 @@ public class AuthFragment extends MainFragment implements DialogListener {
                 Bundle args = new Bundle();
                 args.putString(Names.ID, id());
                 phoneDialog.setArguments(args);
-                phoneDialog.show(getFragmentManager(), "phone");
+                phoneDialog.setTargetFragment(AuthFragment.this, DO_PHONE);
+                phoneDialog.show(getParentFragment().getFragmentManager(), "phone");
             }
         }));
         CarState state = CarState.get(getActivity(), id());
@@ -99,9 +105,9 @@ public class AuthFragment extends MainFragment implements DialogListener {
     }
 
     @Override
-    public void ok() {
-        BaseAdapter adapter = (BaseAdapter) vList.getAdapter();
-        adapter.notifyDataSetChanged();
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        fill();
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     static class Item {

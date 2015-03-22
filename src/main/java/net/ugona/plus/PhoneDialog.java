@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -20,12 +21,13 @@ import android.widget.Toast;
 
 import java.util.Vector;
 
-public class PhoneDialog extends DialogFragment implements SelectNumberDialog.Listener {
+public class PhoneDialog extends DialogFragment {
 
     static final int DO_CONTACTS = 100;
+    static final int DO_SELECT_PHONE = 101;
+
     String id;
     EditText etPhone;
-    DialogListener listener;
 
     @Override
     public void setArguments(Bundle args) {
@@ -99,8 +101,9 @@ public class PhoneDialog extends DialogFragment implements SelectNumberDialog.Li
                 final CarConfig config = CarConfig.get(getActivity(), id);
                 config.setPhone(State.formatPhoneNumber(number));
                 dismiss();
-                if (listener != null)
-                    listener.ok();
+                Fragment fragment = getTargetFragment();
+                if (fragment != null)
+                    fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, null);
             }
         });
     }
@@ -124,21 +127,15 @@ public class PhoneDialog extends DialogFragment implements SelectNumberDialog.Li
             Bundle args = new Bundle();
             args.putString(Names.ID, id);
             dialog.setArguments(args);
-            dialog.setListener(this);
+            dialog.setTargetFragment(this, DO_SELECT_PHONE);
             dialog.show(getActivity().getSupportFragmentManager(), "number");
             return;
-
+        }
+        if ((requestCode == DO_SELECT_PHONE) && (resultCode == Activity.RESULT_OK)) {
+            etPhone.setText(data.getStringExtra(Names.VALUE));
+            return;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-
-    @Override
-    public void selectNumber(String number) {
-        etPhone.setText(number);
-    }
-
-    void setListener(DialogListener listener) {
-        this.listener = listener;
-    }
 }

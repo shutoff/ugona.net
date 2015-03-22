@@ -1,13 +1,16 @@
 package net.ugona.plus;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +24,6 @@ import java.util.Vector;
 public class SelectNumberDialog extends DialogFragment {
 
     String id;
-    Listener listener;
 
     static Vector<PhoneWithType> getPhones(Context context, String id) {
         final Vector<PhoneWithType> allNumbers = new Vector<PhoneWithType>();
@@ -103,9 +105,13 @@ public class SelectNumberDialog extends DialogFragment {
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (listener != null)
-                    listener.selectNumber(allNumbers.get(position).number);
                 dismiss();
+                Fragment fragment = getTargetFragment();
+                if (fragment != null) {
+                    Intent data = new Intent();
+                    data.putExtra(Names.VALUE, allNumbers.get(position).number);
+                    fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, data);
+                }
             }
         });
 
@@ -126,14 +132,6 @@ public class SelectNumberDialog extends DialogFragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(Names.ID, id);
-    }
-
-    void setListener(Listener listener) {
-        this.listener = listener;
-    }
-
-    interface Listener {
-        void selectNumber(String number);
     }
 
     static class PhoneWithType {

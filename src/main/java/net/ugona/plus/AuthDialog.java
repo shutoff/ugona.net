@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -36,8 +37,6 @@ public class AuthDialog extends DialogFragment {
     TextView tvError;
     View vProgress;
     TextWatcher watcher;
-
-    DialogListener listener;
 
     @NonNull
     @Override
@@ -147,9 +146,10 @@ public class AuthDialog extends DialogFragment {
                 }
                 CarState.update(config, res);
                 config.setLogin(login);
-                if (listener != null)
-                    listener.ok();
                 dismiss();
+                Fragment fragment = getTargetFragment();
+                if (fragment != null)
+                    fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, null);
             }
 
             @Override

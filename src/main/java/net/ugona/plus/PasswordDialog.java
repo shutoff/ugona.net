@@ -22,6 +22,13 @@ public class PasswordDialog extends DialogFragment
     Button btnOk;
     String password;
     View vError;
+    boolean sent;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
 
     @NonNull
     @Override
@@ -62,6 +69,13 @@ public class PasswordDialog extends DialogFragment
     }
 
     @Override
+    public void onDestroyView() {
+        if (getDialog() != null && getRetainInstance())
+            getDialog().setDismissMessage(null);
+        super.onDestroyView();
+    }
+
+    @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
     }
 
@@ -80,12 +94,10 @@ public class PasswordDialog extends DialogFragment
         if (etPasswd.getText().toString().equals(password)) {
             Fragment fragment = getTargetFragment();
             if (fragment != null)
-                fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, null);
-            if (getActivity() instanceof Listener) {
-                Listener listener = (Listener) getActivity();
-                listener.password_ok();
-            }
+                sent = true;
             dismiss();
+            if (fragment != null)
+                fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, null);
             return;
         }
         etPasswd.setText("");
@@ -93,8 +105,11 @@ public class PasswordDialog extends DialogFragment
         return;
     }
 
-    static interface Listener {
-        void password_ok();
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        Fragment fragment = getTargetFragment();
+        if ((fragment != null) && !sent)
+            fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_CANCELED, null);
     }
-
 }
