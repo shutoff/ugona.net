@@ -67,7 +67,7 @@ public class Notification extends Config {
             return;
         CarState state = CarState.get(context, car_id);
         Notification notification = Notification.get(context, car_id);
-        if (names.contains("az_time")) {
+        if (names.contains("az_time") || names.contains("az")) {
             if (notification.az != 0) {
                 remove(context, notification.az);
                 notification.az = 0;

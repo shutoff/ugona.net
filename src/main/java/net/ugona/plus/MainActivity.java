@@ -97,7 +97,8 @@ public class MainActivity
 
         handler = new Handler();
 
-        id = getIntent().getStringExtra(Names.ID);
+        Intent intent = getIntent();
+        id = intent.getStringExtra(Names.ID);
         current = new LocalDate();
 
         if (savedInstanceState != null) {
@@ -163,11 +164,13 @@ public class MainActivity
         if (savedInstanceState != null)
             return;
 
-        if (car_config.getAuth().equals("")) {
+        if ((car_config.getKey().equals("")) ||
+                (car_config.getAuth().equals("") &&
+                        ((intent == null) || (intent.getStringExtra(Names.ID) == null)))) {
             car_config = CarConfig.clear(this, id);
-            Intent intent = new Intent(this, SplashActivity.class);
-            intent.putExtra(Names.ID, id);
-            startActivityForResult(intent, DO_AUTH);
+            Intent i = new Intent(this, SplashActivity.class);
+            i.putExtra(Names.ID, id);
+            startActivityForResult(i, DO_AUTH);
             return;
         }
 

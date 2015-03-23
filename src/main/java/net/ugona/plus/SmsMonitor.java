@@ -44,7 +44,7 @@ public class SmsMonitor extends BroadcastReceiver {
                 }
                 Toast toast = Toast.makeText(context, R.string.sms_sent, Toast.LENGTH_LONG);
                 toast.show();
-                String[] sms = c.sms.split("\\!");
+                String[] sms = c.sms.split("\\|");
                 if (sms.length == 1) {
                     if (c.done != null) {
                         CarState state = CarState.get(context, id);
@@ -58,28 +58,28 @@ public class SmsMonitor extends BroadcastReceiver {
                     }
                 }
             }
-            if (action.equals("android.provider.Telephony.SMS_RECEIVED")) {
-                Object[] pduArray = (Object[]) intent.getExtras().get("pdus");
-                SmsMessage[] messages = new SmsMessage[pduArray.length];
-                for (int i = 0; i < pduArray.length; i++) {
-                    messages[i] = SmsMessage.createFromPdu((byte[]) pduArray[i]);
-                }
-                String sms_from = messages[0].getOriginatingAddress();
-                StringBuilder bodyText = new StringBuilder();
-                for (SmsMessage m : messages) {
-                    bodyText.append(m.getMessageBody());
-                }
-                String body = bodyText.toString();
-                AppConfig appConfig = AppConfig.get(context);
-                String[] cars = appConfig.getCars();
-                for (String car_id : cars) {
-                    CarConfig carConfig = CarConfig.get(context, car_id);
-                    if (!compareNumbers(carConfig.getPhone(), sms_from) && !State.isDebug())
-                        continue;
-                    if (Commands.processSms(context, car_id, body)) {
-                        abortBroadcast();
-                        return;
-                    }
+        }
+        if (action.equals("android.provider.Telephony.SMS_RECEIVED")) {
+            Object[] pduArray = (Object[]) intent.getExtras().get("pdus");
+            SmsMessage[] messages = new SmsMessage[pduArray.length];
+            for (int i = 0; i < pduArray.length; i++) {
+                messages[i] = SmsMessage.createFromPdu((byte[]) pduArray[i]);
+            }
+            String sms_from = messages[0].getOriginatingAddress();
+            StringBuilder bodyText = new StringBuilder();
+            for (SmsMessage m : messages) {
+                bodyText.append(m.getMessageBody());
+            }
+            String body = bodyText.toString();
+            AppConfig appConfig = AppConfig.get(context);
+            String[] cars = appConfig.getCars();
+            for (String car_id : cars) {
+                CarConfig carConfig = CarConfig.get(context, car_id);
+                if (!compareNumbers(carConfig.getPhone(), sms_from) && !State.isDebug())
+                    continue;
+                if (Commands.processSms(context, car_id, body)) {
+                    abortBroadcast();
+                    return;
                 }
             }
         }

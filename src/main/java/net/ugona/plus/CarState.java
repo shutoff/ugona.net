@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import com.eclipsesource.json.JsonObject;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -343,5 +344,18 @@ public class CarState extends Config implements Serializable {
         if (!guard)
             return false;
         return guard_time < az_time;
+    }
+
+    public void setAz(boolean az) {
+        long now = new Date().getTime();
+        if (az) {
+            if (az_time < now - 1500000) {
+                az_time = now;
+                az_start = now;
+            }
+        } else {
+            if (az_time > 0)
+                az_time = -now;
+        }
     }
 }

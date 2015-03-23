@@ -29,12 +29,12 @@ public class Names {
 
     static final String PKG_NAME = Names.class.getPackage().getName();
 
-    static final String UPDATED = PKG_NAME + ".updated";
-    static final String NO_UPDATED = PKG_NAME + ".no_updated";
-    static final String CONFIG_CHANGED = PKG_NAME + ".changed";
-    static final String COMMANDS = PKG_NAME + ".commands";
-    static final String ROTATE = PKG_NAME + ".rotate";
-    static final String ERROR = PKG_NAME + ".error";
-    static final String START_UPDATE = PKG_NAME + ".start_update";
-    static final String SMS_SENT = PKG_NAME + ".sms_sent";
+    static final String UPDATED = PKG_NAME + ".UPDATED";
+    static final String NO_UPDATED = PKG_NAME + ".NO_UPDATED";
+    static final String CONFIG_CHANGED = PKG_NAME + ".CHANGED";
+    static final String COMMANDS = PKG_NAME + ".COMMAND";
+    static final String ROTATE = PKG_NAME + ".ROTATE";
+    static final String ERROR = PKG_NAME + ".ERROR";
+    static final String START_UPDATE = PKG_NAME + ".START_UPDATE";
+    static final String SMS_SENT = PKG_NAME + ".SMS_SENT";
 }

@@ -270,10 +270,10 @@ public class SendCommandFragment extends DialogFragment {
         for (final CarConfig.Command c : cmd) {
             if (c.id == cmd_id) {
                 String sms = c.sms.split("\\|")[0];
-                if (subst != null) {
-                    sms = sms.replace("{ccode}", subst);
-                    sms = sms.replace("{pwd}", subst);
-                }
+                if (subst == null)
+                    subst = "";
+                sms = sms.replace("{ccode}", subst);
+                sms = sms.replace("{pwd}", subst);
                 if (Sms.send(getActivity(), car_id, c.id, sms))
                     Commands.put(getActivity(), car_id, c);
                 break;

@@ -202,53 +202,17 @@ public class State {
     static boolean checkCondition(String condition, Object o) {
         Matcher m = ok_bool.matcher(condition);
         try {
-            if (m.find()) {
-                String id = m.group(1);
-                Field field = o.getClass().getDeclaredField(id);
-                if (field.getType() != boolean.class) {
-                    Log.v("check", id + " is not boolean");
-                    return false;
-                }
-                field.setAccessible(true);
-                return field.getBoolean(o);
-            }
+            if (m.find())
+                return getBoolean(o, m.group(1));
             m = not_bool.matcher(condition);
-            if (m.find()) {
-                String id = m.group(1);
-                Field field = o.getClass().getDeclaredField(id);
-                if (field.getType() != boolean.class) {
-                    Log.v("check", id + " is not boolean");
-                    return false;
-                }
-                field.setAccessible(true);
-                return !field.getBoolean(o);
-            }
+            if (m.find())
+                return !getBoolean(o, m.group(1));
             m = eq_int.matcher(condition);
-            if (m.find()) {
-                String id = m.group(1);
-                Field field = o.getClass().getDeclaredField(id);
-                if (field.getType() != int.class) {
-                    Log.v("check", id + " is not integer");
-                    return false;
-                }
-                field.setAccessible(true);
-                int v = field.getInt(o);
-                int test = Integer.parseInt(m.group(2));
-                return v == test;
-            }
+            if (m.find())
+                return getInteger(o, m.group(1)) == Integer.parseInt(m.group(2));
             m = ne_int.matcher(condition);
-            if (m.find()) {
-                String id = m.group(1);
-                Field field = o.getClass().getDeclaredField(id);
-                if (field.getType() != int.class) {
-                    Log.v("check", id + " is not integer");
-                    return false;
-                }
-                field.setAccessible(true);
-                int v = field.getInt(o);
-                int test = Integer.parseInt(m.group(2));
-                return v != test;
-            }
+            if (m.find())
+                return getInteger(o, m.group(1)) != Integer.parseInt(m.group(2));
             Log.v("check", "Bad condition: " + condition);
         } catch (Exception ex) {
             Log.v("check", ex.getMessage());
@@ -256,53 +220,115 @@ public class State {
         return false;
     }
 
+    static boolean getBoolean(Object o, String name) {
+        try {
+            Field field = o.getClass().getDeclaredField(name);
+            if (field.getType() != boolean.class)
+                return false;
+            field.setAccessible(true);
+            return field.getBoolean(o);
+        } catch (Exception ex) {
+            // ignore
+        }
+        name = "is" + name.substring(0, 1).toUpperCase() + name.substring(1);
+        try {
+            Method method = o.getClass().getDeclaredMethod(name);
+            return (Boolean) method.invoke(o);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return false;
+    }
+
+    static void setBoolean(Object o, String name, boolean value) {
+        try {
+            Field field = o.getClass().getDeclaredField(name);
+            if (field.getType() != boolean.class)
+                return;
+            field.setAccessible(true);
+            field.setBoolean(o, value);
+            return;
+        } catch (Exception ex) {
+            // ignore
+        }
+        name = "set" + name.substring(0, 1).toUpperCase() + name.substring(1);
+        try {
+            Method method = o.getClass().getDeclaredMethod(name, new Class[]{boolean.class});
+            method.invoke(o, value);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    static int getInteger(Object o, String name) {
+        try {
+            Field field = o.getClass().getDeclaredField(name);
+            if (field.getType() != int.class)
+                return 0;
+            field.setAccessible(true);
+            return field.getInt(o);
+        } catch (Exception ex) {
+            // ignore
+        }
+        name = "get" + name.substring(0, 1).toUpperCase() + name.substring(1);
+        try {
+            Method method = o.getClass().getDeclaredMethod(name);
+            return (Integer) method.invoke(o);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return 0;
+    }
+
+    static void setInteger(Object o, String name, int value) {
+        try {
+            Field field = o.getClass().getDeclaredField(name);
+            if (field.getType() != boolean.class)
+                return;
+            field.setAccessible(true);
+            field.setInt(o, value);
+            return;
+        } catch (Exception ex) {
+            // ignore
+        }
+        name = "set" + name.substring(0, 1).toUpperCase() + name.substring(1);
+        try {
+            Method method = o.getClass().getDeclaredMethod(name, new Class[]{int.class});
+            method.invoke(o, value);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+
     static Set<String> update(String condition, Object o) {
         Matcher m = ok_bool.matcher(condition);
         HashSet<String> res = new HashSet<>();
         try {
             if (m.find()) {
                 String id = m.group(1);
-                Field field = o.getClass().getDeclaredField(id);
-                if (field.getType() != boolean.class) {
-                    Log.v("check", id + " is not boolean");
+                if (getBoolean(o, id))
                     return null;
-                }
-                field.setAccessible(true);
-                if (field.getBoolean(o))
-                    return null;
-                field.setBoolean(o, true);
+                setBoolean(o, id, true);
                 res.add(id);
                 return res;
             }
             m = not_bool.matcher(condition);
             if (m.find()) {
                 String id = m.group(1);
-                Field field = o.getClass().getDeclaredField(id);
-                if (field.getType() != boolean.class) {
-                    Log.v("check", id + " is not boolean");
+                if (!getBoolean(o, id))
                     return null;
-                }
-                field.setAccessible(true);
-                if (!field.getBoolean(o))
-                    return null;
-                field.setBoolean(o, false);
+                setBoolean(o, id, false);
                 res.add(id);
                 return res;
             }
             m = eq_int.matcher(condition);
             if (m.find()) {
                 String id = m.group(1);
-                Field field = o.getClass().getDeclaredField(id);
-                if (field.getType() != int.class) {
-                    Log.v("check", id + " is not integer");
+                int v = Integer.parseInt(m.group(2));
+                if (getInteger(o, id) == v)
                     return null;
-                }
-                field.setAccessible(true);
-                int v = field.getInt(o);
-                int test = Integer.parseInt(m.group(2));
-                if (v == test)
-                    return null;
-                field.setInt(o, test);
+                setInteger(o, id, v);
                 res.add(id);
                 return res;
             }

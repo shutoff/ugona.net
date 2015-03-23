@@ -85,7 +85,7 @@ public class Commands {
             for (CarConfig.Command c : queue) {
                 if (c.sms == null)
                     continue;
-                String[] parts = c.sms.split("\\!");
+                String[] parts = c.sms.split("\\|");
                 if (parts.length < 2)
                     continue;
                 Pattern pattern = null;

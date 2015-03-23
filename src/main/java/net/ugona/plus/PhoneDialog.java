@@ -95,11 +95,13 @@ public class PhoneDialog extends DialogFragment {
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String number = State.formatPhoneNumber(etPhone.getText().toString());
+                String number = etPhone.getText().toString();
+                if (!State.isDebug())
+                    number = State.formatPhoneNumber(number);
                 if (number == null)
                     return;
                 final CarConfig config = CarConfig.get(getActivity(), id);
-                config.setPhone(State.formatPhoneNumber(number));
+                config.setPhone(number);
                 dismiss();
                 Fragment fragment = getTargetFragment();
                 if (fragment != null)
