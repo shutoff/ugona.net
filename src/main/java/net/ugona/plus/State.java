@@ -26,7 +26,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -252,6 +254,63 @@ public class State {
             Log.v("check", ex.getMessage());
         }
         return false;
+    }
+
+    static Set<String> update(String condition, Object o) {
+        Matcher m = ok_bool.matcher(condition);
+        HashSet<String> res = new HashSet<>();
+        try {
+            if (m.find()) {
+                String id = m.group(1);
+                Field field = o.getClass().getDeclaredField(id);
+                if (field.getType() != boolean.class) {
+                    Log.v("check", id + " is not boolean");
+                    return null;
+                }
+                field.setAccessible(true);
+                if (field.getBoolean(o))
+                    return null;
+                field.setBoolean(o, true);
+                res.add(id);
+                return res;
+            }
+            m = not_bool.matcher(condition);
+            if (m.find()) {
+                String id = m.group(1);
+                Field field = o.getClass().getDeclaredField(id);
+                if (field.getType() != boolean.class) {
+                    Log.v("check", id + " is not boolean");
+                    return null;
+                }
+                field.setAccessible(true);
+                if (!field.getBoolean(o))
+                    return null;
+                field.setBoolean(o, false);
+                res.add(id);
+                return res;
+            }
+            m = eq_int.matcher(condition);
+            if (m.find()) {
+                String id = m.group(1);
+                Field field = o.getClass().getDeclaredField(id);
+                if (field.getType() != int.class) {
+                    Log.v("check", id + " is not integer");
+                    return null;
+                }
+                field.setAccessible(true);
+                int v = field.getInt(o);
+                int test = Integer.parseInt(m.group(2));
+                if (v == test)
+                    return null;
+                field.setInt(o, test);
+                res.add(id);
+                return res;
+            }
+            Log.v("check", "Bad condition: " + condition);
+        } catch (Exception ex) {
+            Log.v("check", ex.getMessage());
+        }
+        return null;
     }
 
     static boolean isDualSim(Context context) {

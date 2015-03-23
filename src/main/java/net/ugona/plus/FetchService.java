@@ -23,6 +23,8 @@ import java.util.Set;
 public class FetchService extends Service {
 
     static final String ACTION_UPDATE = "net.ugona.plus.UPDATE";
+    static final String ACTION_NOTIFICATION = "net.ugona.plus.NOTIFICATION";
+    static final String ACTION_CLEAR = "net.ugona.plus.CLEAR_NOTIFICATION";
 
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;
@@ -70,6 +72,22 @@ public class FetchService extends Service {
                 i.putExtra(Names.ID, car_id);
                 sendBroadcast(i);
             }
+        }
+        if (ACTION_NOTIFICATION.equals(intent.getAction())) {
+            String car_id = intent.getStringExtra(Names.ID);
+            String sound = intent.getStringExtra(Names.SOUND);
+            String text = intent.getStringExtra(Names.MESSAGE);
+            String title = intent.getStringExtra(Names.TITLE);
+            int pictId = intent.getIntExtra(Names.PICTURE, 0);
+            int max_id = intent.getIntExtra(Names.NOTIFY_ID, 0);
+            long when = intent.getLongExtra(Names.WHEN, 0);
+            boolean outgoing = intent.getBooleanExtra(Names.OUTGOING, false);
+            Notification.show(this, car_id, text, title, pictId, max_id, sound, when, outgoing);
+        }
+        if (ACTION_CLEAR.equals(intent.getAction())) {
+            String car_id = intent.getStringExtra(Names.ID);
+            int id = intent.getIntExtra(Names.NOTIFY_ID, 0);
+            Notification.clear(this, car_id, id);
         }
         if (startRequest())
             return START_STICKY;
@@ -230,6 +248,8 @@ public class FetchService extends Service {
             Set<String> upd = Config.update(state, res);
             if (upd != null) {
                 sendUpdate(Names.UPDATED, car_id);
+                Commands.check(FetchService.this, car_id);
+                Notification.update(FetchService.this, car_id, upd);
             } else {
                 sendUpdate(Names.NO_UPDATED, car_id);
             }
