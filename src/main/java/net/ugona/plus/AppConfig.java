@@ -58,6 +58,7 @@ public class AppConfig extends Config implements Serializable {
         }
         CarConfig.save(context);
         CarState.save(context);
+        Notification.save(context);
     }
 
     String getId(String id) {

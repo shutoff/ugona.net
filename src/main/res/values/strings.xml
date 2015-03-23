@@ -127,4 +127,9 @@
     <string name="command_sent">Command was sent</string>
     <string name="sms_error">SMS send error</string>
     <string name="sms_sent">SMS sent</string>
+    <string name="motor_on_ok">Engine started</string>
+    <string name="motor_off_ok">Engine stopped</string>
+    <string name="valet_on_ok">VALET mode is ON</string>
+    <string name="valet_off_ok">VALET mode is OFF</string>
+    <string name="motor_time">after $1 min</string>
 </resources>

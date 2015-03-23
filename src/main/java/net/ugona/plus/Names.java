@@ -21,6 +21,11 @@ public class Names {
     static final String VALUE = "value";
     static final String COMMAND = "command";
     static final String ROUTE = "route";
+    static final String SOUND = "sound";
+    static final String PICTURE = "picture";
+    static final String NOTIFY_ID = "notify";
+    static final String OUTGOING = "outgoing";
+    static final String WHEN = "when";
 
     static final String PKG_NAME = Names.class.getPackage().getName();
 

@@ -103,8 +103,10 @@ public class Commands {
                 found = true;
                 if (c.done != null) {
                     Set<String> update = State.update(c.done, state);
-                    if (update != null)
+                    if (update != null) {
                         upd = true;
+                        Notification.update(context, id, update);
+                    }
                 }
                 queue.remove(c);
             }

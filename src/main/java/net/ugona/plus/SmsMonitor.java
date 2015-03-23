@@ -53,6 +53,7 @@ public class SmsMonitor extends BroadcastReceiver {
                             Intent i = new Intent(Names.UPDATED);
                             i.putExtra(Names.ID, id);
                             context.sendBroadcast(i);
+                            Notification.update(context, id, upd);
                         }
                     }
                 }

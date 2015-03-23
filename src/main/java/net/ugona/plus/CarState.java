@@ -60,6 +60,11 @@ public class CarState extends Config implements Serializable {
     private long check_time;
     private String version;
 
+    private boolean alert_doors;
+    private boolean alert_hood;
+    private boolean alert_trunk;
+    private boolean valet;
+
     private CarState(Context context, String id) {
 
         gsm = "";
@@ -279,6 +284,38 @@ public class CarState extends Config implements Serializable {
 
     public boolean isMove() {
         return move;
+    }
+
+    public boolean isAlert_doors() {
+        return alert_doors;
+    }
+
+    public void setAlert_doors(boolean alert_doors) {
+        this.alert_doors = alert_doors;
+    }
+
+    public boolean isAlert_hood() {
+        return alert_hood;
+    }
+
+    public void setAlert_hood(boolean alert_hood) {
+        this.alert_hood = alert_hood;
+    }
+
+    public boolean isAlert_trunk() {
+        return alert_trunk;
+    }
+
+    public void setAlert_trunk(boolean alert_trunk) {
+        this.alert_trunk = alert_trunk;
+    }
+
+    public boolean isValet() {
+        return valet;
+    }
+
+    public void setValet(boolean valet) {
+        this.valet = valet;
     }
 
     public int getShock() {

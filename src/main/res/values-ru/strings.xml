@@ -123,4 +123,9 @@
     <string name="command_sent">Команда отправлена</string>
     <string name="sms_error">Ошибка отправки СМС</string>
     <string name="sms_sent">СМС отправлено</string>
+    <string name="motor_on_ok">Двигатель заведен</string>
+    <string name="motor_off_ok">Двигатель заглушен</string>
+    <string name="valet_on_ok">Режим АВТОСЕРВИС включен</string>
+    <string name="valet_off_ok">Режим АВТОСЕРВИС выключен</string>
+    <string name="motor_time">после $1 мин</string>
 </resources>
