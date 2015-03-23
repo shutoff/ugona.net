@@ -1,6 +1,9 @@
 package net.ugona.plus;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
@@ -26,6 +29,7 @@ public class ActionFragment
     ListView vActions;
     Vector<CarConfig.Command> commands;
     boolean longTap;
+    BroadcastReceiver br;
 
     @Override
     int layout() {
@@ -83,7 +87,28 @@ public class ActionFragment
         });
         vActions.setOnItemClickListener(this);
         vActions.setOnItemLongClickListener(this);
+
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent == null)
+                    return;
+                if (!id().equals(intent.getStringExtra(Names.ID)))
+                    return;
+                BaseAdapter adapter = (BaseAdapter) vActions.getAdapter();
+                adapter.notifyDataSetChanged();
+            }
+        };
+        IntentFilter intFilter = new IntentFilter(Names.COMMANDS);
+        getActivity().registerReceiver(br, intFilter);
+
         return vActions;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        getActivity().unregisterReceiver(br);
     }
 
     @Override

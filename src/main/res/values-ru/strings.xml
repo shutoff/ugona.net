@@ -119,4 +119,8 @@
     <string name="sim_card_note">Экспериментальная функция, может не работать на некоторых устройствах</string>
     <string name="require_ccode">Требуется C-код</string>
     <string name="number">С-код содержит не только цифры</string>
+    <string name="send_command_error">Ошибка при отправке команды</string>
+    <string name="command_sent">Команда отправлена</string>
+    <string name="sms_error">Ошибка отправки СМС</string>
+    <string name="sms_sent">СМС отправлено</string>
 </resources>

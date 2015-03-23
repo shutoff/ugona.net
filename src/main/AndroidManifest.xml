@@ -70,6 +70,13 @@
 
         <service android:name=".FetchService" />
 
+        <receiver android:name=".SmsMonitor">
+            <intent-filter android:priority="7000">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+                <action android:name="net.ugona.plus.SMS_SENT" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

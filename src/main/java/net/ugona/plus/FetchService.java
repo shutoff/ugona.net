@@ -230,6 +230,7 @@ public class FetchService extends Service {
             Set<String> upd = Config.update(state, res);
             if (upd != null) {
                 sendUpdate(Names.UPDATED, car_id);
+                Commands.check(FetchService.this, car_id);
             } else {
                 sendUpdate(Names.NO_UPDATED, car_id);
             }
