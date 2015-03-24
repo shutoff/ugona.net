@@ -6,6 +6,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Build;
+import android.os.Environment;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.Spannable;
@@ -22,10 +23,17 @@ import com.google.i18n.phonenumbers.Phonenumber;
 
 import org.joda.time.LocalDate;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -35,48 +43,46 @@ import java.util.regex.Pattern;
 public class State {
 
     static final Pattern ok_bool = Pattern.compile("^([A-Za-z0-9_]+)$");
-
-    /*
-        static public void appendLog(String text) {
-            Log.v("v", text);
-
-            File logFile = Environment.getExternalStorageDirectory();
-            logFile = new File(logFile, "car.log");
-            if (!logFile.exists()) {
-                try {
-                    if (!logFile.createNewFile())
-                        return;
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
-            try {
-                //BufferedWriter for performance, true to set append to file flag
-                BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
-                Date d = new Date();
-                buf.append(d.toLocaleString());
-                buf.append(" ");
-                buf.append(text);
-                buf.newLine();
-                buf.close();
-            } catch (IOException e) {
-                // ignore
-            }
-        }
-
-        static public void print(Throwable ex) {
-            ex.printStackTrace();
-            appendLog("Error: " + ex.toString());
-            StringWriter sw = new StringWriter();
-            ex.printStackTrace(new PrintWriter(sw));
-            String s = sw.toString();
-            appendLog(s);
-        }
-    */
     static final Pattern not_bool = Pattern.compile("^\\!([A-Za-z0-9_]+)$");
     static final Pattern eq_int = Pattern.compile("^([A-Za-z0-9_]+)=([0-9]+)$");
     static final Pattern ne_int = Pattern.compile("^([A-Za-z0-9_]+)\\!=([0-9]+)$");
     static private int telephony_state = 0;
+
+    static public void appendLog(String text) {
+        Log.v("v", text);
+
+        File logFile = Environment.getExternalStorageDirectory();
+        logFile = new File(logFile, "car.log");
+        if (!logFile.exists()) {
+            try {
+                if (!logFile.createNewFile())
+                    return;
+            } catch (IOException e) {
+                // ignore
+            }
+        }
+        try {
+            //BufferedWriter for performance, true to set append to file flag
+            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            Date d = new Date();
+            buf.append(d.toLocaleString());
+            buf.append(" ");
+            buf.append(text);
+            buf.newLine();
+            buf.close();
+        } catch (IOException e) {
+            // ignore
+        }
+    }
+
+    static public void print(Throwable ex) {
+        ex.printStackTrace();
+        appendLog("Error: " + ex.toString());
+        StringWriter sw = new StringWriter();
+        ex.printStackTrace(new PrintWriter(sw));
+        String s = sw.toString();
+        appendLog(s);
+    }
 
     static boolean isDebug() {
         return Build.FINGERPRINT.startsWith("generic");

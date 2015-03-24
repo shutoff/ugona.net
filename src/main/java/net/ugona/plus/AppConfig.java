@@ -34,6 +34,7 @@ public class AppConfig extends Config implements Serializable {
         map_type = "OSM";
         show_speed = true;
         GCM_id = "";
+        GCM_version = "";
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String s = preferences.getString(CONFIG_KEY, "");
         if (!s.equals("")) {
