@@ -31,6 +31,7 @@ public class CarConfig extends Config implements Serializable {
     private int sim_cmd;
     private boolean ccode_text;
     private boolean device_password;
+    private boolean hideBalance;
 
     private CarConfig() {
         name = "";
@@ -223,6 +224,14 @@ public class CarConfig extends Config implements Serializable {
             return;
         this.device_password = device_password;
         upd = true;
+    }
+
+    public boolean isHideBalance() {
+        return hideBalance;
+    }
+
+    public void setHideBalance(boolean hideBalance) {
+        this.hideBalance = hideBalance;
     }
 
     public Command[] getCmd() {

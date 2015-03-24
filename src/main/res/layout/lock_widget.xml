@@ -2,13 +2,13 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/MainLayout"
-    android:layout_width="fill_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
     <ImageView
         android:id="@+id/bg"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:cropToPadding="true"
         android:scaleType="fitXY" />
 
@@ -20,36 +20,88 @@
         android:gravity="center"
         android:orientation="horizontal">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:layout_weight="1">
 
-            <ImageView
-                android:id="@+id/car"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:paddingBottom="2dp"
-                android:paddingTop="2dp" />
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/name"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp" />
+
+                <ImageView
+                    android:id="@+id/car"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_gravity="right"
+                    android:layout_weight="1"
+                    android:paddingBottom="2dp"
+                    android:paddingLeft="54dp"
+                    android:paddingTop="2dp"
+                    android:scaleType="fitEnd" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:textColor="@color/text_dark"
-                android:textSize="9sp"
-                android:textStyle="bold" />
+                android:layout_height="match_parent"
+                android:gravity="left"
+                android:orientation="vertical">
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="10dp"
+                    android:singleLine="true"
+                    android:text="00:00"
+                    android:textSize="48dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="10dp"
+                    android:text="01.01.2014"
+                    android:textSize="16dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <ImageView
+                    android:id="@+id/traffic"
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
+                    android:padding="5dp"
+                    android:src="@drawable/gray"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="10dp"
+                android:singleLine="true"
+                android:textSize="9sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -68,7 +120,7 @@
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:layout_margin="1dp"
-                    android:src="@drawable/w_gsm_level0" />
+                    android:src="@drawable/b_gsm_level0" />
 
                 <TextView
                     android:id="@+id/level"
@@ -76,21 +128,20 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/text_dark" />
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/voltage_block"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone">
+                android:orientation="horizontal">
 
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/w_voltage" />
+                    android:src="@drawable/b_voltage" />
 
                 <TextView
                     android:id="@+id/voltage"
@@ -99,7 +150,6 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -114,7 +164,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/w_reserve" />
+                    android:src="@drawable/b_reserve" />
 
                 <TextView
                     android:id="@+id/reserve"
@@ -123,7 +173,6 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -131,14 +180,13 @@
                 android:id="@+id/balance_block"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone">
+                android:orientation="horizontal">
 
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/w_balance" />
+                    android:src="@drawable/b_balance" />
 
                 <TextView
                     android:id="@+id/balance"
@@ -147,31 +195,6 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/text_dark"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/fuel_block"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="1dp"
-                    android:src="@drawable/w_fuel" />
-
-                <TextView
-                    android:id="@+id/fuel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="1dp"
-                    android:paddingLeft="2dp"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -179,15 +202,14 @@
                 android:id="@+id/temperature1_block"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone">
+                android:orientation="horizontal">
 
                 <ImageView
                     android:id="@+id/icon_temperature1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/w_temperature" />
+                    android:src="@drawable/b_temperature" />
 
                 <TextView
                     android:id="@+id/temperature1"
@@ -196,7 +218,6 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -212,7 +233,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/w_temperature_engine" />
+                    android:src="@drawable/b_temperature_engine" />
 
                 <TextView
                     android:id="@+id/temperature4"
@@ -221,7 +242,6 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -237,7 +257,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/w_temperature_salon" />
+                    android:src="@drawable/b_temperature_salon" />
 
                 <TextView
                     android:id="@+id/temperature5"
@@ -246,7 +266,6 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -262,7 +281,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/w_temperature_weather" />
+                    android:src="@drawable/b_temperature_weather" />
 
                 <TextView
                     android:id="@+id/temperature6"
@@ -271,7 +290,6 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -287,7 +305,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/w_temperature" />
+                    android:src="@drawable/b_temperature" />
 
                 <TextView
                     android:id="@+id/temperature2"
@@ -296,7 +314,6 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -312,7 +329,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/w_temperature" />
+                    android:src="@drawable/b_temperature" />
 
                 <TextView
                     android:id="@+id/temperature3"
@@ -321,7 +338,6 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -340,7 +356,6 @@
 
                 <ProgressBar
                     android:id="@+id/update"
-                    style="@android:style/Widget.ProgressBar.Inverse"
                     android:layout_width="15dp"
                     android:layout_height="15dp"
                     android:visibility="gone" />
@@ -349,13 +364,13 @@
                     android:id="@+id/refresh"
                     android:layout_width="15dp"
                     android:layout_height="15dp"
-                    android:src="@drawable/w_update" />
+                    android:src="@android:drawable/stat_notify_sync" />
 
                 <ImageView
                     android:id="@+id/error"
                     android:layout_width="15dp"
                     android:layout_height="15dp"
-                    android:src="@drawable/w_warning"
+                    android:src="@android:drawable/stat_notify_error"
                     android:visibility="gone" />
 
                 <TextView
@@ -365,7 +380,6 @@
                     android:gravity="bottom"
                     android:paddingLeft="10dp"
                     android:text="\??:??"
-                    android:textColor="@color/text_dark"
                     android:textSize="12sp" />
             </LinearLayout>
 

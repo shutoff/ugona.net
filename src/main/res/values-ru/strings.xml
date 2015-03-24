@@ -134,4 +134,13 @@
     <string name="zone_in">Въезд в зону</string>
     <string name="zone_out">Выезд из зоны</string>
     <string name="ps_guard">Включен режим охраны с пассажирами</string>
+    <string name="background">Фон</string>
+    <string name="show_name">Показать название</string>
+    <string name="widget_rows">К-во значений:</string>
+    <string name="widget_config">Настройка виджета</string>
+    <string-array name="themes">
+        <item>Темный фон</item>
+        <item>Светлый фон</item>
+    </string-array>
+    <string name="auto">автоматически</string>
 </resources>

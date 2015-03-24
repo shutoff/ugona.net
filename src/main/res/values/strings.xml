@@ -138,4 +138,13 @@
     <string name="zone_in">Zone in</string>
     <string name="zone_out">Zone out</string>
     <string name="ps_guard">Guard with passengers is ON</string>
+    <string name="background">Background</string>
+    <string name="show_name">Show name</string>
+    <string name="widget_rows">Show values:</string>
+    <string name="widget_config">Widget configuration</string>
+    <string-array name="themes">
+        <item>Dark background</item>
+        <item>Light background</item>
+    </string-array>
+    <string name="auto">auto</string>
 </resources>

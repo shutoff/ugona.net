@@ -26,6 +26,12 @@ public class Names {
     static final String NOTIFY_ID = "notify";
     static final String OUTGOING = "outgoing";
     static final String WHEN = "when";
+    static final String WIDGET = "widget";
+    static final String ROWS = "rows";
+    static final String THEME = "theme";
+    static final String TRANSPARENCY = "transparency";
+    static final String TRAFFIC_LEVEL = "traffic_level";
+    static final String TRAFFIC_TIME = "traffic_time";
 
     static final String PKG_NAME = Names.class.getPackage().getName();
 
