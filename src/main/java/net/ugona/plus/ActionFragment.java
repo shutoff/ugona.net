@@ -82,6 +82,7 @@ public class ActionFragment
                 tvName.setText(cmd.name);
                 int icon = getResources().getIdentifier("icon_" + cmd.icon, "drawable", getActivity().getPackageName());
                 vIcon.setImageResource(icon);
+                v.findViewById(R.id.progress).setVisibility(Commands.isProcessed(id(), cmd) ? View.VISIBLE : View.GONE);
                 return v;
             }
         });
@@ -115,6 +116,8 @@ public class ActionFragment
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         SendCommandFragment fragment = new SendCommandFragment();
         CarConfig.Command cmd = commands.get(position);
+        if (Commands.cancel(getActivity(), id(), cmd))
+            return;
         Bundle args = new Bundle();
         args.putString(Names.ID, id());
         args.putInt(Names.COMMAND, cmd.id);

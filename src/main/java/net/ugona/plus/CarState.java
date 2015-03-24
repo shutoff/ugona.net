@@ -353,9 +353,11 @@ public class CarState extends Config implements Serializable {
                 az_time = now;
                 az_start = now;
             }
+            ignition = true;
         } else {
             if (az_time > 0)
                 az_time = -now;
+            ignition = false;
         }
     }
 }

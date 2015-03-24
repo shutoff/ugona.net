@@ -38,7 +38,7 @@ public class FABCommands
     boolean longTap;
     String car_id;
 
-    public FABCommands(MainActivity activity, final Vector<CarConfig.Command> items, String car_id) {
+    public FABCommands(MainActivity activity, final Vector<CarConfig.Command> items, final String car_id) {
         super(activity, R.style.CustomDialogTheme);
         setOwnerActivity(activity);
         this.items = items;
@@ -91,6 +91,7 @@ public class FABCommands
                         id = R.drawable.bg_blocking;
                     iv.setBackgroundResource(id);
                 }
+                v.findViewById(R.id.progress).setVisibility(Commands.isProcessed(car_id, cmd) ? View.VISIBLE : View.GONE);
                 return v;
             }
         });
@@ -137,6 +138,8 @@ public class FABCommands
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
         dismiss();
         CarConfig.Command cmd = items.get(position);
+        if (Commands.cancel(getContext(), car_id, cmd))
+            return;
         SendCommandFragment fragment = new SendCommandFragment();
         Bundle args = new Bundle();
         args.putString(Names.ID, car_id);

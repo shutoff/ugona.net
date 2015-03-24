@@ -48,6 +48,7 @@ public class StateFragment
 
     ImageView ivRefresh;
     View vProgress;
+    View vFabProgress;
 
     boolean is_address;
     boolean longTap;
@@ -87,6 +88,7 @@ public class StateFragment
         ivRefresh = (ImageView) v.findViewById(R.id.img_progress);
         vProgress = v.findViewById(R.id.upd_progress);
         vFab = (ImageView) v.findViewById(R.id.fab);
+        vFabProgress = v.findViewById(R.id.fab_progress);
         handler = new Handler();
         pkg = getActivity().getPackageName();
 
@@ -95,19 +97,23 @@ public class StateFragment
             public void onClick(View v) {
                 Vector<CarConfig.Command> fab = getFabCommands();
                 if ((fab.size() == 1) && !fab.get(0).icon.equals("blocking")) {
-                    CarConfig.Command cmd = fab.get(0);
-                    int id = getResources().getIdentifier("b_" + cmd.icon, "drawable", pkg);
-                    if (id != 0) {
-                        SendCommandFragment fragment = new SendCommandFragment();
-                        Bundle args = new Bundle();
-                        args.putString(Names.ID, id());
-                        args.putInt(Names.COMMAND, cmd.id);
-                        args.putBoolean(Names.ROUTE, longTap);
-                        fragment.setArguments(args);
-                        fragment.show(getFragmentManager(), "send");
-                        longTap = false;
+                    final CarConfig.Command cmd = fab.get(0);
+                    if (Commands.isProcessed(id(), cmd))
                         return;
-                    }
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            SendCommandFragment fragment = new SendCommandFragment();
+                            Bundle args = new Bundle();
+                            args.putString(Names.ID, id());
+                            args.putInt(Names.COMMAND, cmd.id);
+                            args.putBoolean(Names.ROUTE, longTap);
+                            fragment.setArguments(args);
+                            fragment.show(getActivity().getSupportFragmentManager(), "send");
+                            longTap = false;
+                        }
+                    });
+                    return;
                 }
                 longTap = false;
                 MainActivity activity = (MainActivity) getActivity();
@@ -168,6 +174,7 @@ public class StateFragment
         intFilter.addAction(Names.ERROR);
         intFilter.addAction(Names.START_UPDATE);
         intFilter.addAction(Names.NO_UPDATED);
+        intFilter.addAction(Names.COMMANDS);
         getActivity().registerReceiver(br, intFilter);
         Intent intent = new Intent(getActivity(), FetchService.class);
         intent.setAction(FetchService.ACTION_UPDATE);
@@ -334,16 +341,20 @@ public class StateFragment
             boolean more = true;
             if ((fab.size() == 1) && !fab.get(0).icon.equals("blocking")) {
                 CarConfig.Command cmd = fab.get(0);
-                int id = getResources().getIdentifier("b_" + cmd.icon, "drawable", pkg);
-                if (id != 0) {
-                    vFab.setImageResource(id);
+                int res_id = getResources().getIdentifier("b_" + cmd.icon, "drawable", pkg);
+                if (res_id != 0) {
+                    vFab.setImageResource(res_id);
                     more = false;
+                    vFabProgress.setVisibility(Commands.isProcessed(id(), cmd) ? View.VISIBLE : View.GONE);
                 }
             }
-            if (more)
+            if (more) {
                 vFab.setImageResource(R.drawable.fab_more);
+                vFabProgress.setVisibility(View.GONE);
+            }
         } else {
             vFab.setVisibility(View.GONE);
+            vFabProgress.setVisibility(View.GONE);
         }
     }
 

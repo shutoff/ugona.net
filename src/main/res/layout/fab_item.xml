@@ -14,10 +14,23 @@
         android:orientation="horizontal"
         android:padding="10dp">
 
-        <ImageView
-            android:id="@+id/icon"
-            android:layout_width="52dp"
-            android:layout_height="52dp" />
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/icon"
+                android:layout_width="52dp"
+                android:layout_height="52dp" />
+
+            <ProgressBar
+                android:id="@+id/progress"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:padding="1dp"
+                android:visibility="gone" />
+
+        </FrameLayout>
 
         <TextView
             android:id="@+id/name"

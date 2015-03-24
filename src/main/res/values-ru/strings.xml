@@ -128,4 +128,7 @@
     <string name="valet_on_ok">Режим АВТОСЕРВИС включен</string>
     <string name="valet_off_ok">Режим АВТОСЕРВИС выключен</string>
     <string name="motor_time">после $1 мин</string>
+    <string name="open_trunk">Открыт багажник</string>
+    <string name="open_hood">Открыт капот</string>
+    <string name="open_door">Открыта дверь</string>
 </resources>

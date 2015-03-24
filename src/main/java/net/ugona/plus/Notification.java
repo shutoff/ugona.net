@@ -98,6 +98,41 @@ public class Notification extends Config {
                 }
             }
         }
+        boolean doors = state.isDoor_fl() || state.isDoor_fr() || state.isDoor_bl() || state.isDoor_br();
+        if (state.isGuard() && doors != state.isAlert_doors()) {
+            state.setAlert_doors(state.isGuard() && doors);
+            if (state.isAlert_doors()) {
+                notification.doors = create(context, context.getString(R.string.open_door), R.drawable.w_warning, car_id, null, 0, true, null);
+            } else {
+                if (notification.doors != 0) {
+                    remove(context, notification.doors);
+                    notification.doors = 0;
+                }
+            }
+        }
+        if (state.isGuard() && state.isHood() != state.isAlert_hood()) {
+            state.setAlert_hood(state.isGuard() && state.isHood());
+            if (state.isAlert_hood()) {
+                notification.hood = create(context, context.getString(R.string.open_hood), R.drawable.w_warning, car_id, null, 0, true, null);
+            } else {
+                if (notification.hood != 0) {
+                    remove(context, notification.hood);
+                    notification.hood = 0;
+                }
+            }
+        }
+        if (state.isGuard() && state.isTrunk() != state.isAlert_trunk()) {
+            state.setAlert_trunk(state.isGuard() && state.isTrunk());
+            if (state.isAlert_trunk()) {
+                notification.trunk = create(context, context.getString(R.string.open_trunk), R.drawable.w_warning, car_id, null, 0, true, null);
+            } else {
+                if (notification.trunk != 0) {
+                    remove(context, notification.trunk);
+                    notification.trunk = 0;
+                }
+            }
+        }
+
     }
 
     static int create(Context context, String text, int pictId, String car_id, String sound, long when, boolean outgoing, String title) {

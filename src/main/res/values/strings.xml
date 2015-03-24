@@ -132,4 +132,7 @@
     <string name="valet_on_ok">VALET mode is ON</string>
     <string name="valet_off_ok">VALET mode is OFF</string>
     <string name="motor_time">after $1 min</string>
+    <string name="open_trunk">Trunk open</string>
+    <string name="open_hood">Hood open</string>
+    <string name="open_door">Door open</string>
 </resources>

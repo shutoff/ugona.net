@@ -23,6 +23,21 @@ public class Commands {
         }
     }
 
+    static boolean cancel(Context context, String id, CarConfig.Command cmd) {
+        synchronized (requests) {
+            if (!requests.containsKey(id))
+                return false;
+            Queue queue = requests.get(id);
+            if (!queue.contains(cmd))
+                return false;
+            queue.remove(cmd);
+        }
+        Intent i = new Intent(Names.COMMANDS);
+        i.putExtra(Names.ID, id);
+        context.sendBroadcast(i);
+        return true;
+    }
+
     static void put(Context context, String id, CarConfig.Command cmd) {
         synchronized (requests) {
             if (!requests.containsKey(id))
@@ -32,7 +47,7 @@ public class Commands {
                 return;
             queue.add(cmd);
         }
-        Intent i = new Intent(Names.COMMAND);
+        Intent i = new Intent(Names.COMMANDS);
         i.putExtra(Names.ID, id);
         context.sendBroadcast(i);
     }
@@ -46,7 +61,7 @@ public class Commands {
                 return;
             queue.remove(cmd);
         }
-        Intent i = new Intent(Names.COMMAND);
+        Intent i = new Intent(Names.COMMANDS);
         i.putExtra(Names.ID, id);
         context.sendBroadcast(i);
     }
@@ -69,7 +84,7 @@ public class Commands {
             if (!found)
                 return;
         }
-        Intent i = new Intent(Names.COMMAND);
+        Intent i = new Intent(Names.COMMANDS);
         i.putExtra(Names.ID, id);
         context.sendBroadcast(i);
     }

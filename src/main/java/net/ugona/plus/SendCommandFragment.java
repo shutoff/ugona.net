@@ -92,6 +92,8 @@ public class SendCommandFragment extends DialogFragment {
             switch (requestCode) {
                 case DO_CCODE_INET:
                 case DO_INET:
+                case DO_CCODE_SMS:
+                case DO_SMS:
                     dismiss();
                     return;
             }

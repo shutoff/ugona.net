@@ -85,6 +85,13 @@ public class Config {
                         f.set(o, (Integer) iv);
                         res.add(name);
                     }
+                } else if ((t == Long.class) && v.isNumber()) {
+                    long iv = v.asLong();
+                    Long ov = (Long) f.get(o);
+                    if ((ov == null) || (ov != iv)) {
+                        f.set(o, (Long) iv);
+                        res.add(name);
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -151,6 +158,10 @@ public class Config {
                     Object v = f.get(o);
                     if (v != null)
                         res.add(name, (Integer) v);
+                } else if (t == Long.class) {
+                    Object v = f.get(o);
+                    if (v != null)
+                        res.add(name, (Long) v);
                 }
             }
         } catch (IllegalAccessException ex) {

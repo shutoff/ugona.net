@@ -64,6 +64,7 @@ public class FetchService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        String action = null;
         if (intent != null) {
             String car_id = intent.getStringExtra(Names.ID);
             if (car_id != null) {
@@ -72,22 +73,25 @@ public class FetchService extends Service {
                 i.putExtra(Names.ID, car_id);
                 sendBroadcast(i);
             }
+            action = intent.getAction();
         }
-        if (ACTION_NOTIFICATION.equals(intent.getAction())) {
-            String car_id = intent.getStringExtra(Names.ID);
-            String sound = intent.getStringExtra(Names.SOUND);
-            String text = intent.getStringExtra(Names.MESSAGE);
-            String title = intent.getStringExtra(Names.TITLE);
-            int pictId = intent.getIntExtra(Names.PICTURE, 0);
-            int max_id = intent.getIntExtra(Names.NOTIFY_ID, 0);
-            long when = intent.getLongExtra(Names.WHEN, 0);
-            boolean outgoing = intent.getBooleanExtra(Names.OUTGOING, false);
-            Notification.show(this, car_id, text, title, pictId, max_id, sound, when, outgoing);
-        }
-        if (ACTION_CLEAR.equals(intent.getAction())) {
-            String car_id = intent.getStringExtra(Names.ID);
-            int id = intent.getIntExtra(Names.NOTIFY_ID, 0);
-            Notification.clear(this, car_id, id);
+        if (action != null) {
+            if (action.equals(ACTION_NOTIFICATION)) {
+                String car_id = intent.getStringExtra(Names.ID);
+                String sound = intent.getStringExtra(Names.SOUND);
+                String text = intent.getStringExtra(Names.MESSAGE);
+                String title = intent.getStringExtra(Names.TITLE);
+                int pictId = intent.getIntExtra(Names.PICTURE, 0);
+                int max_id = intent.getIntExtra(Names.NOTIFY_ID, 0);
+                long when = intent.getLongExtra(Names.WHEN, 0);
+                boolean outgoing = intent.getBooleanExtra(Names.OUTGOING, false);
+                Notification.show(this, car_id, text, title, pictId, max_id, sound, when, outgoing);
+            }
+            if (action.equals(ACTION_CLEAR)) {
+                String car_id = intent.getStringExtra(Names.ID);
+                int id = intent.getIntExtra(Names.NOTIFY_ID, 0);
+                Notification.clear(this, car_id, id);
+            }
         }
         if (startRequest())
             return START_STICKY;
