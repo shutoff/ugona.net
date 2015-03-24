@@ -24,7 +24,6 @@ public class Notification extends Config {
     private static HashMap<String, Notification> notifications;
     private int az;
     private int valet;
-    private int guard;
     private int part_guard;
     private int doors;
     private int hood;
@@ -60,6 +59,32 @@ public class Notification extends Config {
         }
         if (ed != null)
             ed.commit();
+    }
+
+    static void clear(Context context, String car_id) {
+        Notification o = Notification.get(context, car_id);
+        Field[] fields = o.getClass().getDeclaredFields();
+        try {
+            for (Field f : fields) {
+                f.setAccessible(true);
+                Class<?> c = f.getType();
+                if (c != int.class)
+                    continue;
+                int v = f.getInt(o);
+                if (v > 0) {
+                    if (f.getName().equals("valet")) {
+                        CarState state = CarState.get(context, car_id);
+                        if (state.getGuard_mode() == 1)
+                            continue;
+                    }
+                    f.setInt(o, 0);
+                    remove(context, v);
+                }
+            }
+        } catch (Exception ex) {
+            // ignore
+        }
+        o.save(context);
     }
 
     static void update(Context context, String car_id, Set<String> names) {
@@ -98,11 +123,36 @@ public class Notification extends Config {
                 }
             }
         }
+        if (names.contains("zone")) {
+            if (notification.zone != 0) {
+                remove(context, notification.zone);
+                notification.zone = 0;
+            }
+            String text = null;
+            long time = state.getZone();
+            if (state.getZone() > 0) {
+                text = context.getString(R.string.zone_in);
+            } else {
+                text = context.getString(R.string.zone_out);
+                time = -time;
+            }
+            if (!state.getZone_name().equals(""))
+                text += " " + state.getZone_name();
+            notification.zone = create(context, text, R.drawable.white_zone, car_id, null, time, false, null);
+        }
+        if (names.contains("guard_mode")) {
+            if (notification.part_guard != 0) {
+                remove(context, notification.part_guard);
+                notification.part_guard = 0;
+            }
+            if (state.getGuard_mode() == 3)
+                notification.part_guard = create(context, context.getString(R.string.ps_guard), R.drawable.white_zone, car_id, null, 0, false, null);
+        }
         boolean doors = state.isDoor_fl() || state.isDoor_fr() || state.isDoor_bl() || state.isDoor_br();
         if (state.isGuard() && doors != state.isAlert_doors()) {
             state.setAlert_doors(state.isGuard() && doors);
             if (state.isAlert_doors()) {
-                notification.doors = create(context, context.getString(R.string.open_door), R.drawable.w_warning, car_id, null, 0, true, null);
+                notification.doors = create(context, context.getString(R.string.open_door), R.drawable.w_warning, car_id, null, 0, false, null);
             } else {
                 if (notification.doors != 0) {
                     remove(context, notification.doors);
@@ -113,7 +163,7 @@ public class Notification extends Config {
         if (state.isGuard() && state.isHood() != state.isAlert_hood()) {
             state.setAlert_hood(state.isGuard() && state.isHood());
             if (state.isAlert_hood()) {
-                notification.hood = create(context, context.getString(R.string.open_hood), R.drawable.w_warning, car_id, null, 0, true, null);
+                notification.hood = create(context, context.getString(R.string.open_hood), R.drawable.w_warning, car_id, null, 0, false, null);
             } else {
                 if (notification.hood != 0) {
                     remove(context, notification.hood);
@@ -124,7 +174,7 @@ public class Notification extends Config {
         if (state.isGuard() && state.isTrunk() != state.isAlert_trunk()) {
             state.setAlert_trunk(state.isGuard() && state.isTrunk());
             if (state.isAlert_trunk()) {
-                notification.trunk = create(context, context.getString(R.string.open_trunk), R.drawable.w_warning, car_id, null, 0, true, null);
+                notification.trunk = create(context, context.getString(R.string.open_trunk), R.drawable.w_warning, car_id, null, 0, false, null);
             } else {
                 if (notification.trunk != 0) {
                     remove(context, notification.trunk);
@@ -132,7 +182,6 @@ public class Notification extends Config {
                 }
             }
         }
-
     }
 
     static int create(Context context, String text, int pictId, String car_id, String sound, long when, boolean outgoing, String title) {
@@ -166,9 +215,8 @@ public class Notification extends Config {
             defs |= android.app.Notification.DEFAULT_SOUND;
 
         Uri uri = null;
-        if (sound != null) {
+        if (sound != null)
             uri = Uri.parse("android.resource://net.ugona.plus/raw/" + sound);
-        }
 
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context)

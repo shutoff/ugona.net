@@ -131,4 +131,7 @@
     <string name="open_trunk">Открыт багажник</string>
     <string name="open_hood">Открыт капот</string>
     <string name="open_door">Открыта дверь</string>
+    <string name="zone_in">Въезд в зону</string>
+    <string name="zone_out">Выезд из зоны</string>
+    <string name="ps_guard">Включен режим охраны с пассажирами</string>
 </resources>

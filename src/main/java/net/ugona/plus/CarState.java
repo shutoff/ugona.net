@@ -60,6 +60,7 @@ public class CarState extends Config implements Serializable {
     private boolean device_password;
     private long check_time;
     private String version;
+    private String zone_name;
 
     private boolean alert_doors;
     private boolean alert_hood;
@@ -73,6 +74,7 @@ public class CarState extends Config implements Serializable {
         temperature = "";
         version = "";
         balance = "";
+        zone_name = "";
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String s = preferences.getString(CAR_KEY + id, "");
@@ -332,6 +334,10 @@ public class CarState extends Config implements Serializable {
             return;
         this.version = version;
         upd = true;
+    }
+
+    public String getZone_name() {
+        return zone_name;
     }
 
     public boolean isPointer() {

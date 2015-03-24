@@ -111,10 +111,12 @@ public class MainActivity
         car_config = CarConfig.get(this, id);
         state = CarState.get(this, id);
 
+        if (savedInstanceState == null)
+            Notification.clear(this, id);
+
         setContentView(R.layout.main);
         vLogo = findViewById(R.id.logo);
         spinner = (Spinner) findViewById(R.id.spinner_nav);
-
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

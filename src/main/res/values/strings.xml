@@ -135,4 +135,7 @@
     <string name="open_trunk">Trunk open</string>
     <string name="open_hood">Hood open</string>
     <string name="open_door">Door open</string>
+    <string name="zone_in">Zone in</string>
+    <string name="zone_out">Zone out</string>
+    <string name="ps_guard">Guard with passengers is ON</string>
 </resources>
