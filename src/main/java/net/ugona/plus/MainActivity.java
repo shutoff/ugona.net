@@ -544,12 +544,18 @@ public class MainActivity
         HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
-                if (CarState.update(state, res.get("caps").asObject()) != null) {
+                boolean changed = CarState.update(state, res.get("caps").asObject()) != null;
+                if (car_config.update(car_config, res) != null) {
+                    changed = true;
+                    Intent intent = new Intent(Names.COMMANDS);
+                    intent.putExtra(Names.ID, id);
+                    sendBroadcast(intent);
+                }
+                if (changed) {
                     Intent intent = new Intent(Names.CONFIG_CHANGED);
                     intent.putExtra(Names.ID, id);
                     sendBroadcast(intent);
                 }
-                car_config.update(car_config, res);
                 state.setCheck_time(time + 86400000);
                 state.setVersion(version);
             }

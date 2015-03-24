@@ -40,15 +40,7 @@ public class ActionFragment
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         vActions = (ListView) super.onCreateView(inflater, container, savedInstanceState);
 
-        commands = new Vector<>();
-        CarConfig config = CarConfig.get(getActivity(), id());
-        CarConfig.Command[] cmds = config.getCmd();
-        if (cmds != null) {
-            for (CarConfig.Command cmd : cmds) {
-                if ((cmd.inet != 0) || State.hasTelephony(getActivity()))
-                    commands.add(cmd);
-            }
-        }
+        fill();
         vActions.setDivider(null);
         vActions.setDividerHeight(0);
         vActions.setVisibility(View.VISIBLE);
@@ -96,11 +88,14 @@ public class ActionFragment
                     return;
                 if (!id().equals(intent.getStringExtra(Names.ID)))
                     return;
+                if (intent.getAction().equals(Names.CONFIG_CHANGED))
+                    fill();
                 BaseAdapter adapter = (BaseAdapter) vActions.getAdapter();
                 adapter.notifyDataSetChanged();
             }
         };
         IntentFilter intFilter = new IntentFilter(Names.COMMANDS);
+        intFilter.addAction(Names.CONFIG_CHANGED);
         getActivity().registerReceiver(br, intFilter);
 
         return vActions;
@@ -151,8 +146,20 @@ public class ActionFragment
             Bundle args = new Bundle();
             args.putString(Names.ID, id());
             dialog.setArguments(args);
-            dialog.show(getFragmentManager(), "settings");
+            dialog.show(getActivity().getSupportFragmentManager(), "settings");
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    void fill() {
+        commands = new Vector<>();
+        CarConfig config = CarConfig.get(getActivity(), id());
+        CarConfig.Command[] cmds = config.getCmd();
+        if (cmds != null) {
+            for (CarConfig.Command cmd : cmds) {
+                if ((cmd.inet != 0) || State.hasTelephony(getActivity()))
+                    commands.add(cmd);
+            }
+        }
     }
 }

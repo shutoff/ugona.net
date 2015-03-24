@@ -147,4 +147,5 @@
         <item>Light background</item>
     </string-array>
     <string name="auto">auto</string>
+    <string name="run_command">Execute command?</string>
 </resources>

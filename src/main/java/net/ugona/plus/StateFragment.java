@@ -175,6 +175,7 @@ public class StateFragment
         intFilter.addAction(Names.START_UPDATE);
         intFilter.addAction(Names.NO_UPDATED);
         intFilter.addAction(Names.COMMANDS);
+        intFilter.addAction(Names.CONFIG_CHANGED);
         getActivity().registerReceiver(br, intFilter);
         Intent intent = new Intent(getActivity(), FetchService.class);
         intent.setAction(FetchService.ACTION_UPDATE);

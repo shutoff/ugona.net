@@ -58,7 +58,7 @@
     </style>
 
     <style name="PauseDialogAnimation">
-        <item name="android:windowEnterAnimation">@anim/fade_in</item>
+        <item name="android:windowEnterAnimation">@anim/show_up</item>
         <item name="android:windowExitAnimation">@anim/fade_out</item>
     </style>
 

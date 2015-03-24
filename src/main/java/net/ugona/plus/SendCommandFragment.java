@@ -38,13 +38,15 @@ public class SendCommandFragment extends DialogFragment {
         if (savedInstanceState != null)
             setArgs(savedInstanceState);
         View v = inflater.inflate(R.layout.send_command, container);
-        handler = new Handler();
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                process();
-            }
-        });
+        if (savedInstanceState == null) {
+            handler = new Handler();
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    process();
+                }
+            });
+        }
         return v;
     }
 
@@ -94,7 +96,11 @@ public class SendCommandFragment extends DialogFragment {
                 case DO_INET:
                 case DO_CCODE_SMS:
                 case DO_SMS:
-                    dismiss();
+                    try {
+                        dismiss();
+                    } catch (Exception ex) {
+                        // ignore
+                    }
                     return;
             }
         }
@@ -126,7 +132,7 @@ public class SendCommandFragment extends DialogFragment {
             if (phone.equals(""))
                 return;
             phone = cmd.call.replace("{phone}", phone);
-            Intent i = new Intent(android.content.Intent.ACTION_CALL, Uri.parse(phone));
+            Intent i = new Intent(android.content.Intent.ACTION_CALL, Uri.parse("tel:" + phone));
             startActivity(i);
             dismiss();
             return;
@@ -172,7 +178,13 @@ public class SendCommandFragment extends DialogFragment {
             dialog.show(getFragmentManager(), "password");
             return true;
         }
-        send_command_inet(null);
+        Alert dialog = new Alert();
+        Bundle args = new Bundle();
+        args.putString(Names.TITLE, cmd.name);
+        args.putString(Names.MESSAGE, getString(R.string.run_command));
+        dialog.setArguments(args);
+        dialog.setTargetFragment(this, DO_INET);
+        dialog.show(getFragmentManager(), "alert");
         return true;
     }
 
@@ -221,7 +233,13 @@ public class SendCommandFragment extends DialogFragment {
             dialog.show(getFragmentManager(), "password");
             return true;
         }
-        send_command_sms(null);
+        Alert dialog = new Alert();
+        Bundle args = new Bundle();
+        args.putString(Names.TITLE, cmd.name);
+        args.putString(Names.MESSAGE, getString(R.string.run_command));
+        dialog.setArguments(args);
+        dialog.setTargetFragment(this, DO_SMS);
+        dialog.show(getFragmentManager(), "alert");
         return true;
     }
 
