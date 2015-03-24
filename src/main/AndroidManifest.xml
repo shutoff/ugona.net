@@ -61,6 +61,11 @@
         </activity>
 
         <activity
+            android:name=".MessageDialog"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Transparent"></activity>
+
+        <activity
             android:name="com.haibison.android.lockpattern.LockPatternActivity"
             android:theme="@style/Alp.42447968.Theme.Light" />
 
@@ -69,11 +74,21 @@
         <activity android:name=".SplashActivity" />
 
         <service android:name=".FetchService" />
+        <service android:name=".GcmService" />
 
         <receiver android:name=".SmsMonitor">
             <intent-filter android:priority="7000">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
                 <action android:name="net.ugona.plus.SMS_SENT" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".GcmReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="net.ugona.plus" />
             </intent-filter>
         </receiver>
 

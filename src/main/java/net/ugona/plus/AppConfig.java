@@ -21,6 +21,10 @@ public class AppConfig extends Config implements Serializable {
     private boolean show_traffic;
     private boolean show_speed;
     private String map_type;
+    private boolean no_google;
+    private String GCM_id;
+    private long GCM_time;
+    private String GCM_version;
 
     private AppConfig(Context context) {
         ids = "";
@@ -29,6 +33,7 @@ public class AppConfig extends Config implements Serializable {
         pattern = "";
         map_type = "OSM";
         show_speed = true;
+        GCM_id = "";
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String s = preferences.getString(CONFIG_KEY, "");
         if (!s.equals("")) {
@@ -175,5 +180,49 @@ public class AppConfig extends Config implements Serializable {
         if (this.show_speed == show_speed)
             return;
         this.show_speed = show_speed;
+    }
+
+    public boolean isNo_google() {
+        return no_google;
+    }
+
+    public void setNo_google(boolean no_google) {
+        if (this.no_google == no_google)
+            return;
+        this.no_google = no_google;
+        upd = true;
+    }
+
+    public String getGCM_id() {
+        return GCM_id;
+    }
+
+    public void setGCM_id(String GCM_id) {
+        if (this.GCM_id.equals(GCM_id))
+            return;
+        this.GCM_id = GCM_id;
+        upd = true;
+    }
+
+    public long getGCM_time() {
+        return GCM_time;
+    }
+
+    public void setGCM_time(long GCM_time) {
+        if (this.GCM_time == GCM_time)
+            return;
+        this.GCM_time = GCM_time;
+        upd = true;
+    }
+
+    public String getGCM_version() {
+        return GCM_version;
+    }
+
+    public void setGCM_version(String GCM_version) {
+        if (this.GCM_version.equals(GCM_version))
+            return;
+        this.GCM_version = GCM_version;
+        upd = true;
     }
 }

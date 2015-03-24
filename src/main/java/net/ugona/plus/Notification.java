@@ -29,6 +29,16 @@ public class Notification extends Config {
     private int hood;
     private int trunk;
     private int zone;
+    private int info;
+    private String message;
+    private String title;
+    private String url;
+
+    Notification() {
+        message = "";
+        title = "";
+        url = "";
+    }
 
     public static Notification get(Context context, String car_id) {
         if (notifications == null)
@@ -61,7 +71,7 @@ public class Notification extends Config {
             ed.commit();
     }
 
-    static void clear(Context context, String car_id) {
+    static boolean clear(Context context, String car_id) {
         Notification o = Notification.get(context, car_id);
         Field[] fields = o.getClass().getDeclaredFields();
         try {
@@ -84,7 +94,13 @@ public class Notification extends Config {
         } catch (Exception ex) {
             // ignore
         }
-        o.save(context);
+        o = Notification.get(context, "");
+        if (o.info > 0) {
+            remove(context, o.info);
+            o.info = 0;
+        }
+        save(context);
+        return false;
     }
 
     static void update(Context context, String car_id, Set<String> names) {
@@ -205,6 +221,15 @@ public class Notification extends Config {
         return max_id;
     }
 
+    static void showMessage(Context context, String title, String message, String url) {
+        Notification notification = Notification.get(context, "");
+        if (notification.info > 0) {
+            remove(context, notification.info);
+        }
+        notification.info = create(context, message, R.drawable.info, "", null, 0, false, title);
+        save(context);
+    }
+
     static void show(Context context, String car_id, String text, String title, int pictId, int max_id, String sound, long when, boolean outgoing) {
         if (title == null)
             title = context.getString(R.string.app_name);
@@ -237,6 +262,8 @@ public class Notification extends Config {
         }
 
         Intent notificationIntent = new Intent(context, MainActivity.class);
+        if (pictId == R.drawable.info)
+            notificationIntent = new Intent(context, MessageDialog.class);
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         notificationIntent.putExtra(Names.ID, car_id);
@@ -264,7 +291,7 @@ public class Notification extends Config {
         manager.notify(max_id, notification);
 
         Notification n = Notification.get(context, car_id);
-        n.save(context);
+        save(context);
     }
 
     static void remove(Context context, int id) {
@@ -288,7 +315,7 @@ public class Notification extends Config {
         } catch (Exception ex) {
             // ignore
         }
-        o.save(context);
+        save(context);
         remove(context, id);
     }
 

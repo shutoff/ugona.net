@@ -4,10 +4,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
@@ -16,6 +20,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
+import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,12 +36,25 @@ import android.widget.TextView;
 
 import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
 
 import org.joda.time.LocalDate;
 
+import java.io.Reader;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import static android.view.Gravity.START;
 
@@ -49,6 +67,9 @@ public class MainActivity
     static final String TAG = "frag_tag";
     static final String PRIMARY = "prim_tag";
     static final String SPLASH = "splash_tag";
+
+    final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    static final String SENDER_ID = "915289471784";
 
     static Menu homeMenu;
     static Runnable password_request;
@@ -68,6 +89,7 @@ public class MainActivity
     Spinner spinner;
     BroadcastReceiver br;
     Handler handler;
+    GoogleCloudMessaging gcm;
 
     private FragmentManager.OnBackStackChangedListener
             mOnBackStackChangedListener = new FragmentManager.OnBackStackChangedListener() {
@@ -110,9 +132,6 @@ public class MainActivity
         id = config.getId(id);
         car_config = CarConfig.get(this, id);
         state = CarState.get(this, id);
-
-        if (savedInstanceState == null)
-            Notification.clear(this, id);
 
         setContentView(R.layout.main);
         vLogo = findViewById(R.id.logo);
@@ -177,9 +196,11 @@ public class MainActivity
         }
 
         setPrimary();
-
         checkCaps();
         checkPhone();
+
+        if (savedInstanceState == null)
+            Notification.clear(this, id);
     }
 
     @Override
@@ -202,6 +223,12 @@ public class MainActivity
         super.onPostCreate(savedInstanceState);
         drawerToggle.syncState();
         setActionBarArrowDependingOnFragmentsBackStack();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerGCM();
     }
 
     @Override
@@ -539,8 +566,143 @@ public class MainActivity
         task.execute("/caps", skey);
     }
 
+    boolean checkPlayServices() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (config.isNo_google())
+                return false;
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
+                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+                config.setNo_google(true);
+            }
+            return false;
+        }
+        return true;
+    }
+
+    String getAppVer() {
+        try {
+            PackageManager pkgManager = getPackageManager();
+            PackageInfo info = pkgManager.getPackageInfo("net.ugona.plus", 0);
+            return info.versionName;
+        } catch (Exception ex) {
+            // ignore
+        }
+        return null;
+    }
+
+    void registerGCM() {
+        if (!checkPlayServices())
+            return;
+        final String appVer = getAppVer();
+        if (appVer == null)
+            return;
+        gcm = GoogleCloudMessaging.getInstance(this);
+        String reg_id = config.getGCM_id();
+        long gcm_time = config.getGCM_time();
+        if (!config.getGCM_version().equals(appVer))
+            reg_id = "";
+        if (!reg_id.equals("") && (gcm_time > new Date().getTime() - 86400 * 1000))
+            return;
+
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                String reg = null;
+                Reader reader = null;
+                HttpURLConnection connection = null;
+                try {
+                    if (gcm == null)
+                        gcm = GoogleCloudMessaging.getInstance(MainActivity.this);
+                    reg = gcm.register(SENDER_ID);
+                    JsonObject data = new JsonObject();
+                    data.add("reg", reg);
+                    String[] cars = config.getCars();
+                    String d = null;
+                    JsonObject jCars = new JsonObject();
+                    for (String car : cars) {
+                        CarConfig carConfig = CarConfig.get(MainActivity.this, car);
+                        String key = carConfig.getKey();
+                        if (key.equals("") || (key.equals("demo")))
+                            continue;
+                        JsonObject c = new JsonObject();
+                        c.add("id", car);
+                        c.add("phone", carConfig.getPhone());
+                        c.add("auth", carConfig.getAuth());
+                        jCars.add(key, c);
+                    }
+                    data.add("car_data", jCars);
+                    Calendar cal = Calendar.getInstance();
+                    TimeZone tz = cal.getTimeZone();
+                    data.add("tz", tz.getID());
+                    data.add("version", appVer);
+                    TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                    String id = "";
+                    try {
+                        id = tm.getDeviceId();
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                    if (id.equals("")) {
+                        try {
+                            id = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+                        } catch (Exception ex) {
+                            // ignore
+                        }
+                    }
+                    if (!id.equals(""))
+                        data.add("uid", id);
+                    data.add("lang", Locale.getDefault().getLanguage());
+                    data.add("os", Build.VERSION.RELEASE);
+                    data.add("model", Build.MODEL);
+                    String phone = "";
+                    try {
+                        phone = tm.getLine1Number();
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                    if (!phone.equals(""))
+                        data.add("phone", phone);
+                    String url = "https://car-online.ugona.net/reg";
+                    RequestBody body = RequestBody.create(MediaType.parse("application/json"), data.toString());
+                    Request request = new Request.Builder().url(url).post(body).build();
+                    Response response = HttpTask.client.newCall(request).execute();
+                    if (response.code() != HttpURLConnection.HTTP_OK)
+                        return null;
+                    reader = response.body().charStream();
+                    JsonObject res = JsonValue.readFrom(reader).asObject();
+                    if (res.asObject().get("error") != null)
+                        return null;
+                } catch (Exception ex) {
+                    return null;
+                } finally {
+                    if (connection != null)
+                        connection.disconnect();
+                    if (reader != null) {
+                        try {
+                            reader.close();
+                        } catch (Exception e) {
+                            // ignore
+                        }
+                    }
+                }
+                return reg;
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                if (s == null)
+                    return;
+                config.setGCM_id(s);
+                config.setGCM_time(new Date().getTime());
+                config.setGCM_version(appVer);
+            }
+
+        }.execute();
+    }
+
     static class KeyParam implements Serializable {
         String skey;
     }
-
 }
