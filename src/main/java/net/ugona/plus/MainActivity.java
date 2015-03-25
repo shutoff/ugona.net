@@ -539,8 +539,11 @@ public class MainActivity
         final String version = State.getVersion(this);
         Date now = new Date();
         final long time = now.getTime();
-        if (version.equals(state.getVersion()) && (state.getCheck_time() > time))
-            return;
+        CarConfig carConfig = CarConfig.get(this, id);
+        if (carConfig.getSettings().length > 0) {
+            if (version.equals(state.getVersion()) && (state.getCheck_time() > time))
+                return;
+        }
         HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
@@ -558,6 +561,7 @@ public class MainActivity
                 }
                 state.setCheck_time(time + 86400000);
                 state.setVersion(version);
+                config.save(this);
             }
 
             @Override

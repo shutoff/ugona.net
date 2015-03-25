@@ -38,7 +38,6 @@ import android.widget.TextView;
 
 import com.haibison.android.lockpattern.util.IEncrypter;
 import com.haibison.android.lockpattern.util.InvalidEncrypterException;
-import com.haibison.android.lockpattern.util.LoadingDialog;
 import com.haibison.android.lockpattern.util.Settings;
 import com.haibison.android.lockpattern.util.Settings.Display;
 import com.haibison.android.lockpattern.util.Settings.Security;
@@ -714,60 +713,44 @@ public class LockPatternActivity extends Activity {
         if (pattern == null)
             return;
 
-        /*
-         * Use a LoadingDialog because decrypting pattern might take time...
-         */
+        boolean res = false;
+        if (ACTION_COMPARE_PATTERN.equals(getIntent().getAction())) {
+            char[] currentPattern = getIntent().getCharArrayExtra(
+                    EXTRA_PATTERN);
+            if (currentPattern == null)
+                currentPattern = Settings.Security
+                        .getPattern(LockPatternActivity.this);
+            if (currentPattern != null) {
+                if (mEncrypter != null)
+                    res = pattern.equals(mEncrypter.decrypt(
+                            LockPatternActivity.this, currentPattern));
+                else
+                    res = Arrays.equals(currentPattern,
+                            LockPatternUtils.patternToSha1(pattern)
+                                    .toCharArray());
+            }
+        }// ACTION_COMPARE_PATTERN
+        else if (ACTION_VERIFY_CAPTCHA.equals(getIntent().getAction())) {
+            res = pattern.equals(getIntent()
+                    .getParcelableArrayListExtra(EXTRA_PATTERN));
+        }// ACTION_VERIFY_CAPTCHA
 
-        new LoadingDialog<Void, Void, Boolean>(this, false) {
+        if (res)
+            finishWithResultOk(null);
+        else {
+            mRetryCount++;
+            mIntentResult.putExtra(EXTRA_RETRY_COUNT, mRetryCount);
 
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                if (ACTION_COMPARE_PATTERN.equals(getIntent().getAction())) {
-                    char[] currentPattern = getIntent().getCharArrayExtra(
-                            EXTRA_PATTERN);
-                    if (currentPattern == null)
-                        currentPattern = Settings.Security
-                                .getPattern(LockPatternActivity.this);
-                    if (currentPattern != null) {
-                        if (mEncrypter != null)
-                            return pattern.equals(mEncrypter.decrypt(
-                                    LockPatternActivity.this, currentPattern));
-                        else
-                            return Arrays.equals(currentPattern,
-                                    LockPatternUtils.patternToSha1(pattern)
-                                            .toCharArray());
-                    }
-                }// ACTION_COMPARE_PATTERN
-                else if (ACTION_VERIFY_CAPTCHA.equals(getIntent().getAction())) {
-                    return pattern.equals(getIntent()
-                            .getParcelableArrayListExtra(EXTRA_PATTERN));
-                }// ACTION_VERIFY_CAPTCHA
+            if (mRetryCount >= mMaxRetries)
+                finishWithNegativeResult(RESULT_FAILED);
+            else {
+                mLockPatternView.setDisplayMode(DisplayMode.Wrong);
+                mTextInfo.setText(R.string.alp_42447968_msg_try_again);
+                mLockPatternView.postDelayed(mLockPatternViewReloader,
+                        DELAY_TIME_TO_RELOAD_LOCK_PATTERN_VIEW);
+            }
+        }
 
-                return false;
-            }// doInBackground()
-
-            @Override
-            protected void onPostExecute(Boolean result) {
-                super.onPostExecute(result);
-
-                if (result)
-                    finishWithResultOk(null);
-                else {
-                    mRetryCount++;
-                    mIntentResult.putExtra(EXTRA_RETRY_COUNT, mRetryCount);
-
-                    if (mRetryCount >= mMaxRetries)
-                        finishWithNegativeResult(RESULT_FAILED);
-                    else {
-                        mLockPatternView.setDisplayMode(DisplayMode.Wrong);
-                        mTextInfo.setText(R.string.alp_42447968_msg_try_again);
-                        mLockPatternView.postDelayed(mLockPatternViewReloader,
-                                DELAY_TIME_TO_RELOAD_LOCK_PATTERN_VIEW);
-                    }
-                }
-            }// onPostExecute()
-
-        }.execute();
     }// doComparePattern()
 
     /*
@@ -791,68 +774,41 @@ public class LockPatternActivity extends Activity {
         }
 
         if (getIntent().hasExtra(EXTRA_PATTERN)) {
-            /*
-             * Use a LoadingDialog because decrypting pattern might take time...
-             */
-            new LoadingDialog<Void, Void, Boolean>(this, false) {
 
-                @Override
-                protected Boolean doInBackground(Void... params) {
-                    if (mEncrypter != null)
-                        return pattern.equals(mEncrypter.decrypt(
-                                LockPatternActivity.this, getIntent()
-                                        .getCharArrayExtra(EXTRA_PATTERN)));
-                    else
-                        return Arrays.equals(
-                                getIntent().getCharArrayExtra(EXTRA_PATTERN),
-                                LockPatternUtils.patternToSha1(pattern)
-                                        .toCharArray());
-                }// doInBackground()
+            boolean res = false;
+            if (mEncrypter != null)
+                res = pattern.equals(mEncrypter.decrypt(
+                        LockPatternActivity.this, getIntent()
+                                .getCharArrayExtra(EXTRA_PATTERN)));
+            else
+                res = Arrays.equals(
+                        getIntent().getCharArrayExtra(EXTRA_PATTERN),
+                        LockPatternUtils.patternToSha1(pattern)
+                                .toCharArray());
+            if (res) {
+                mTextInfo
+                        .setText(R.string.alp_42447968_msg_your_new_unlock_pattern);
+                mBtnConfirm.setEnabled(true);
+            } else {
+                mTextInfo
+                        .setText(R.string.alp_42447968_msg_redraw_pattern_to_confirm);
+                mBtnConfirm.setEnabled(false);
+                mLockPatternView.setDisplayMode(DisplayMode.Wrong);
+                mLockPatternView.postDelayed(mLockPatternViewReloader,
+                        DELAY_TIME_TO_RELOAD_LOCK_PATTERN_VIEW);
+            }
 
-                @Override
-                protected void onPostExecute(Boolean result) {
-                    super.onPostExecute(result);
-
-                    if (result) {
-                        mTextInfo
-                                .setText(R.string.alp_42447968_msg_your_new_unlock_pattern);
-                        mBtnConfirm.setEnabled(true);
-                    } else {
-                        mTextInfo
-                                .setText(R.string.alp_42447968_msg_redraw_pattern_to_confirm);
-                        mBtnConfirm.setEnabled(false);
-                        mLockPatternView.setDisplayMode(DisplayMode.Wrong);
-                        mLockPatternView.postDelayed(mLockPatternViewReloader,
-                                DELAY_TIME_TO_RELOAD_LOCK_PATTERN_VIEW);
-                    }
-                }// onPostExecute()
-
-            }.execute();
         } else {
-            /*
-             * Use a LoadingDialog because encrypting pattern might take time...
-             */
-            new LoadingDialog<Void, Void, char[]>(this, false) {
 
-                @Override
-                protected char[] doInBackground(Void... params) {
-                    return mEncrypter != null ? mEncrypter.encrypt(
-                            LockPatternActivity.this, pattern)
-                            : LockPatternUtils.patternToSha1(pattern)
-                            .toCharArray();
-                }// onCancel()
+            char[] result = (mEncrypter != null) ? mEncrypter.encrypt(
+                    LockPatternActivity.this, pattern)
+                    : LockPatternUtils.patternToSha1(pattern)
+                    .toCharArray();
+            getIntent().putExtra(EXTRA_PATTERN, result);
+            mTextInfo
+                    .setText(R.string.alp_42447968_msg_pattern_recorded);
+            mBtnConfirm.setEnabled(true);
 
-                @Override
-                protected void onPostExecute(char[] result) {
-                    super.onPostExecute(result);
-
-                    getIntent().putExtra(EXTRA_PATTERN, result);
-                    mTextInfo
-                            .setText(R.string.alp_42447968_msg_pattern_recorded);
-                    mBtnConfirm.setEnabled(true);
-                }// onPostExecute()
-
-            }.execute();
         }
     }// doCheckAndCreatePattern()
 

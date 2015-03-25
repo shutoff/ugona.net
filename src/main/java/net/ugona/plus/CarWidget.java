@@ -24,6 +24,7 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.NumberFormat;
@@ -465,6 +466,11 @@ public class CarWidget extends AppWidgetProvider {
         request = new TrafficRequest(context, lat, lon, widgetID);
     }
 
+    static class TrafficParams implements Serializable {
+        double lat;
+        double lng;
+    }
+
     class TrafficRequest extends HttpTask {
 
         int m_id;
@@ -473,7 +479,10 @@ public class CarWidget extends AppWidgetProvider {
         TrafficRequest(Context context, double lat, double lon, int widgetId) {
             m_context = context;
             m_id = widgetId;
-            execute("/traffic", lat, lon);
+            TrafficParams params = new TrafficParams();
+            params.lat = lat;
+            params.lng = lon;
+            execute("/traffic", params);
         }
 
         @Override

@@ -37,7 +37,7 @@
     <string name="application">Приложение Угона.нет+ предназначено для контроля и управления автомобилями, оборудованными охранным мониторинговым комплексом серии MS-PGSM</string>
     <string name="service_btn">Сервис Угона.нет</string>
     <string name="forum_btn">Форум поддержки</string>
-    <string name="password_old">Старый пароль:</string>
+    <string name="password_old">Старый пароль</string>
     <string name="password_text">Пароль</string>
     <string name="password_confirm">Подтверждение</string>
     <string name="password_set">Установить</string>
@@ -143,5 +143,5 @@
         <item>Светлый фон</item>
     </string-array>
     <string name="auto">автоматически</string>
-    <string name="run_command">Выполнить команду?</string>
+    <string name="run_command">Выполнить команду</string>
 </resources>

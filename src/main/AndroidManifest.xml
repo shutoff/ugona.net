@@ -2,9 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.ugona.plus"
     android:versionCode="16"
-    android:versionName="2.0 beta4">
+    android:versionName="2.0 beta3">
 
-<uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -114,10 +114,10 @@
         <receiver android:name=".CarWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="net.ugona.plus.UPDATE" />
-                <action android:name="net.ugona.plus.NO_UPDATE" />
+                <action android:name="net.ugona.plus.UPDATED" />
+                <action android:name="net.ugona.plus.NO_UPDATED" />
                 <action android:name="net.ugona.plus.ERROR" />
-                <action android:name="net.ugona.plus.START" />
+                <action android:name="net.ugona.plus.START_UPDATE" />
                 <action android:name="net.ugona.plus.WIDGET_SCREEN_ON" />
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
@@ -129,10 +129,10 @@
         <receiver android:name=".CarLockWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="net.ugona.plus.UPDATE" />
-                <action android:name="net.ugona.plus.NO_UPDATE" />
+                <action android:name="net.ugona.plus.UPDATED" />
+                <action android:name="net.ugona.plus.NO_UPDATED" />
                 <action android:name="net.ugona.plus.ERROR" />
-                <action android:name="net.ugona.plus.START" />
+                <action android:name="net.ugona.plus.START_UPDATE" />
                 <action android:name="net.ugona.plus.WIDGET_SCREEN_ON" />
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>

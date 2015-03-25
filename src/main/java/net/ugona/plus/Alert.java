@@ -14,12 +14,15 @@ public class Alert extends DialogFragment implements DialogInterface.OnClickList
     String title;
     String message;
     String ok;
+    boolean sent;
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         if (savedInstanceState != null)
             setArgs(savedInstanceState);
+        if (ok == null)
+            ok = getString(R.string.ok);
         return new AlertDialog.Builder(getActivity())
                 .setTitle(title)
                 .setMessage(message)
@@ -39,23 +42,31 @@ public class Alert extends DialogFragment implements DialogInterface.OnClickList
         super.onSaveInstanceState(outState);
         outState.putString(Names.TITLE, title);
         outState.putString(Names.MESSAGE, message);
-        outState.putString(Names.OK, ok);
+        if (ok != null)
+            outState.putString(Names.OK, ok);
     }
 
     void setArgs(Bundle args) {
         title = args.getString(Names.TITLE);
         message = args.getString(Names.MESSAGE);
         ok = args.getString(Names.OK);
-        if (ok == null)
-            ok = getString(R.string.ok);
     }
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
         Fragment fragment = getTargetFragment();
-        if (fragment != null)
+        if (fragment != null) {
             fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, null);
+            sent = true;
+        }
         dismiss();
     }
 
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        Fragment fragment = getTargetFragment();
+        if ((fragment != null) && !sent)
+            fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_CANCELED, null);
+    }
 }

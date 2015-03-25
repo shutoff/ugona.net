@@ -178,13 +178,7 @@ public class SendCommandFragment extends DialogFragment {
             dialog.show(getFragmentManager(), "password");
             return true;
         }
-        Alert dialog = new Alert();
-        Bundle args = new Bundle();
-        args.putString(Names.TITLE, cmd.name);
-        args.putString(Names.MESSAGE, getString(R.string.run_command));
-        dialog.setArguments(args);
-        dialog.setTargetFragment(this, DO_INET);
-        dialog.show(getFragmentManager(), "alert");
+        show_alert(cmd, DO_INET);
         return true;
     }
 
@@ -233,13 +227,7 @@ public class SendCommandFragment extends DialogFragment {
             dialog.show(getFragmentManager(), "password");
             return true;
         }
-        Alert dialog = new Alert();
-        Bundle args = new Bundle();
-        args.putString(Names.TITLE, cmd.name);
-        args.putString(Names.MESSAGE, getString(R.string.run_command));
-        dialog.setArguments(args);
-        dialog.setTargetFragment(this, DO_SMS);
-        dialog.show(getFragmentManager(), "alert");
+        show_alert(cmd, DO_SMS);
         return true;
     }
 
@@ -299,5 +287,20 @@ public class SendCommandFragment extends DialogFragment {
                 break;
             }
         }
+    }
+
+    void show_alert(CarConfig.Command cmd, int requestCode) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(getString(R.string.run_command));
+        builder.append(" \u00AB");
+        builder.append(cmd.name);
+        builder.append("\u00BB?");
+        Alert dialog = new Alert();
+        Bundle args = new Bundle();
+        args.putString(Names.TITLE, cmd.name);
+        args.putString(Names.MESSAGE, builder.toString());
+        dialog.setArguments(args);
+        dialog.setTargetFragment(this, requestCode);
+        dialog.show(getFragmentManager(), "alert");
     }
 }

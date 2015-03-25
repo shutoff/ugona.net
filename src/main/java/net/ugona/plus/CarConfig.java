@@ -90,7 +90,8 @@ public class CarConfig extends Config implements Serializable {
             try {
                 update(this, JsonObject.readFrom(s));
             } catch (Exception ex) {
-                // ignore
+                State.appendLog(ex.toString());
+                State.appendLog(s);
             }
         }
     }

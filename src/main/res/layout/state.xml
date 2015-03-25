@@ -86,13 +86,6 @@
                             app:src="@drawable/ind01" />
 
                         <net.ugona.plus.Indicator
-                            android:id="@+id/reserve"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:visibility="gone"
-                            app:src="@drawable/ind03_5" />
-
-                        <net.ugona.plus.Indicator
                             android:id="@+id/balance"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -105,6 +98,13 @@
                             android:layout_height="wrap_content"
                             android:visibility="gone"
                             app:src="@drawable/ind05" />
+
+                        <net.ugona.plus.Indicator
+                            android:id="@+id/reserve"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            app:src="@drawable/ind03_5" />
 
                         <net.ugona.plus.Indicator
                             android:id="@+id/temp_engine"
