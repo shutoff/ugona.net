@@ -5,11 +5,13 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.RectF;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.View;
 
 import java.util.HashMap;
@@ -19,16 +21,22 @@ public class CarView extends View {
 
     final static float WIDTH = 1080;
     final static float HEIGHT = 750;
+
     static Pictures pictures = new Pictures();
     String state;
     String prefix;
     Resources resources;
     Paint paint;
+    Paint pWhite;
+    Paint pRed;
+    Paint pBlue;
     String pkg;
 
     int frame;
     Handler handler;
     int animation;
+
+    float pk;
 
     public CarView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -39,10 +47,22 @@ public class CarView extends View {
         resources = context.getResources();
         paint = new Paint();
         paint.setFlags(Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG);
+        pRed = new Paint();
+        pRed.setFlags(Paint.ANTI_ALIAS_FLAG);
+        pRed.setColor(Color.rgb(0xC0, 0, 0));
+        pBlue = new Paint();
+        pBlue.setFlags(Paint.ANTI_ALIAS_FLAG);
+        pBlue.setColor(resources.getColor(R.color.main));
+        pWhite = new Paint();
+        pWhite.setFlags(Paint.ANTI_ALIAS_FLAG);
+        pWhite.setColor(Color.rgb(255, 255, 255));
         pkg = context.getPackageName();
         state = "";
         prefix = "c";
         handler = new Handler();
+        Resources resources = context.getResources();
+        DisplayMetrics metrics = resources.getDisplayMetrics();
+        pk = metrics.densityDpi / 160f;
     }
 
     @Override
@@ -58,7 +78,8 @@ public class CarView extends View {
         } else {
             y = (canvas.getHeight() - h) / 2.f;
         }
-        String[] parts = state.split(";");
+        String[] ext = state.split("\\|");
+        String[] parts = ext[0].split(";");
         for (int i = 0; i < parts.length; i++) {
             String part = parts[i];
             if (i == animation) {
@@ -74,7 +95,23 @@ public class CarView extends View {
             Point p = pictures.get(id);
             RectF rect = new RectF(x + p.x * k, y + p.y * k, x + (p.x + bitmap.getWidth()) * k, y + (bitmap.getHeight() + p.y) * k);
             canvas.drawBitmap(bitmap, null, rect, paint);
-
+        }
+        float radius = 20 * pk;
+        float yPos = y + k * HEIGHT - radius - 4 * pk;
+        float xPos = x + radius + 4 * pk;
+        parts = ext[1].split(";");
+        for (int i = 0; i < parts.length; i++) {
+            String part = parts[i];
+            int id = getResources().getIdentifier(part, "drawable", pkg);
+            if (id == 0)
+                continue;
+            boolean bRed = part.substring(0, 2).equals("r_");
+            canvas.drawCircle(xPos, yPos, radius, bRed ? pRed : pBlue);
+            canvas.drawCircle(xPos, yPos, 18 * pk, pWhite);
+            Bitmap bitmap = BitmapFactory.decodeResource(resources, id);
+            RectF rect = new RectF(xPos - radius, yPos - radius, xPos + radius, yPos + radius);
+            canvas.drawBitmap(bitmap, null, rect, paint);
+            xPos += radius * 2 + 4 * pk;
         }
     }
 
@@ -160,34 +197,14 @@ public class CarView extends View {
         boolean az = s.getAz_time() > 0;
         if (!s.isGuard())
             az = false;
-        if (s.isIgnition() && !az) {
-            String p = prefix + "_i";
-            if (s.isGuard())
-                p += "_r";
-            parts.add(p);
-        }
-        int mode = s.getGuard_mode();
-        if (mode == 2) {
-            parts.add("s_block");
-        } else if (card) {
-            parts.add("s_g_r");
-        } else if (s.isGuard()) {
-            String p = prefix + "_g";
-            if (mode == 3)
-                p += "_p";
-            parts.add(p);
-        }
-        if (s.getGuard_mode() == 1)
-            parts.add(prefix + "_valet");
-        if (s.isTilt())
-            parts.add(prefix + "_a_slope");
-        if (s.isMove())
-            parts.add(prefix + "_a_move");
+
         int shock = s.getShock();
         if (shock == 1)
             parts.add(prefix + "_hit1");
         if (shock == 2)
             parts.add(prefix + "_hit2");
+        if (s.isMove())
+            parts.add(prefix + "_a_move");
         if (s.isAz()) {
             animation = parts.size();
             parts.add(prefix + "_az");
@@ -201,6 +218,35 @@ public class CarView extends View {
             }
             new_state += ";" + part;
         }
+
+        new_state += "|";
+        parts = new Vector<String>();
+        if (s.isIgnition() && !az)
+            parts.add(s.isGuard() ? "r_ignition" : "b_ignition");
+        int mode = s.getGuard_mode();
+        if (mode == 2) {
+            parts.add("r_block");
+        } else if (card) {
+            parts.add("r_lock");
+        } else if (s.isGuard()) {
+            parts.add("b_lock");
+        }
+        if (s.getGuard_mode() == 1)
+            parts.add("b_valet");
+        if (s.isTilt())
+            parts.add("r_slope");
+
+        String ext_state = null;
+        for (String part : parts) {
+            if (ext_state == null) {
+                ext_state = part;
+                continue;
+            }
+            ext_state += ";" + part;
+        }
+        if (ext_state != null)
+            new_state += ext_state;
+
         if ((animation == -1) && new_state.equals(state))
             return;
         state = new_state;
@@ -263,14 +309,6 @@ public class CarView extends View {
             add(R.drawable.c_a_hit, 39, 183);
             add(R.drawable.c_a_hit2, 54, 197);
             add(R.drawable.c_a_move, 31, 306);
-            add(R.drawable.c_a_slope, 31, 25);
-            add(R.drawable.c_block, 631, 19);
-            add(R.drawable.c_g_r, 631, 19);
-            add(R.drawable.c_g_p, 651, 64);
-            add(R.drawable.c_g, 651, 64);
-            add(R.drawable.c_i, 427, 131);
-            add(R.drawable.c_i_r, 427, 131);
-            add(R.drawable.c_valet, 52, 164);
             add(R.drawable.c_az1, 927, 0);
             add(R.drawable.c_az2, 920, 0);
             add(R.drawable.c_az4, 912, 0);
