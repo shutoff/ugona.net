@@ -41,6 +41,7 @@
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:text="@string/app_name"
+                android:textColor="@color/text_dark"
                 android:textSize="9sp"
                 android:textStyle="bold" />
 
@@ -68,7 +69,7 @@
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:layout_margin="1dp"
-                    android:src="@drawable/b_gsm_level0" />
+                    android:src="@drawable/w_gsm_level0" />
 
                 <TextView
                     android:id="@+id/level"
@@ -76,7 +77,8 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/text_dark" />
             </LinearLayout>
 
             <LinearLayout
@@ -90,7 +92,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/b_voltage" />
+                    android:src="@drawable/w_voltage" />
 
                 <TextView
                     android:id="@+id/voltage"
@@ -99,6 +101,7 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -113,7 +116,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/b_reserve" />
+                    android:src="@drawable/w_reserve" />
 
                 <TextView
                     android:id="@+id/reserve"
@@ -122,6 +125,7 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -136,7 +140,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/b_balance" />
+                    android:src="@drawable/w_balance" />
 
                 <TextView
                     android:id="@+id/balance"
@@ -145,6 +149,7 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -159,7 +164,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/b_fuel" />
+                    android:src="@drawable/w_fuel" />
 
                 <TextView
                     android:id="@+id/fuel"
@@ -168,6 +173,7 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -183,7 +189,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/b_temperature" />
+                    android:src="@drawable/w_temperature" />
 
                 <TextView
                     android:id="@+id/temperature1"
@@ -192,6 +198,7 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -207,7 +214,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/b_temperature_engine" />
+                    android:src="@drawable/w_temperature_engine" />
 
                 <TextView
                     android:id="@+id/temperature4"
@@ -216,6 +223,7 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -231,7 +239,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/b_temperature_salon" />
+                    android:src="@drawable/w_temperature_salon" />
 
                 <TextView
                     android:id="@+id/temperature5"
@@ -240,6 +248,7 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -255,7 +264,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/b_temperature_weather" />
+                    android:src="@drawable/w_temperature_weather" />
 
                 <TextView
                     android:id="@+id/temperature6"
@@ -264,6 +273,7 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -279,7 +289,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/b_temperature" />
+                    android:src="@drawable/w_temperature" />
 
                 <TextView
                     android:id="@+id/temperature2"
@@ -288,6 +298,7 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -303,7 +314,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="1dp"
-                    android:src="@drawable/b_temperature" />
+                    android:src="@drawable/w_temperature" />
 
                 <TextView
                     android:id="@+id/temperature3"
@@ -312,6 +323,7 @@
                     android:layout_margin="1dp"
                     android:paddingLeft="2dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/text_dark"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -338,13 +350,13 @@
                     android:id="@+id/refresh"
                     android:layout_width="15dp"
                     android:layout_height="15dp"
-                    android:src="@android:drawable/stat_notify_sync" />
+                    android:src="@drawable/w_update" />
 
                 <ImageView
                     android:id="@+id/error"
                     android:layout_width="15dp"
                     android:layout_height="15dp"
-                    android:src="@android:drawable/stat_notify_error"
+                    android:src="@drawable/w_warning"
                     android:visibility="gone" />
 
                 <TextView
@@ -354,6 +366,7 @@
                     android:gravity="bottom"
                     android:paddingLeft="10dp"
                     android:text="\??:??"
+                    android:textColor="@color/text_dark"
                     android:textSize="12sp" />
             </LinearLayout>
 

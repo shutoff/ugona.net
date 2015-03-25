@@ -36,9 +36,12 @@ public class IndicatorsView extends HorizontalScrollView {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
         setupChildren();
-        boolean bArrows = getChildAt(0).getWidth() > getWidth();
-        vLeftArrow.setVisibility(bArrows ? VISIBLE : INVISIBLE);
-        vRightArrow.setVisibility(bArrows ? VISIBLE : INVISIBLE);
+        int w = getWidth();
+        if (vLeftArrow.getVisibility() == VISIBLE)
+            w += vLeftArrow.getWidth() + vRightArrow.getWidth();
+        boolean bArrows = getChildAt(0).getWidth() > w;
+        vLeftArrow.setVisibility(bArrows ? VISIBLE : GONE);
+        vRightArrow.setVisibility(bArrows ? VISIBLE : GONE);
     }
 
     void setupChildren() {

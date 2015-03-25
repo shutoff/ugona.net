@@ -91,14 +91,15 @@ public class CarView extends View {
             int id = getResources().getIdentifier(part, "drawable", pkg);
             if (id == 0)
                 continue;
-            Bitmap bitmap = BitmapFactory.decodeResource(resources, id);
+            Bitmap bitmap = getBitmapSafely(resources, id, 0);
             Point p = pictures.get(id);
             RectF rect = new RectF(x + p.x * k, y + p.y * k, x + (p.x + bitmap.getWidth()) * k, y + (bitmap.getHeight() + p.y) * k);
             canvas.drawBitmap(bitmap, null, rect, paint);
+            bitmap.recycle();
         }
         float radius = 20 * pk;
         float yPos = y + k * HEIGHT - radius - 4 * pk;
-        float xPos = x + radius + 4 * pk;
+        float xPos = x + radius + 10 * pk;
         parts = ext[1].split(";");
         for (int i = 0; i < parts.length; i++) {
             String part = parts[i];
@@ -108,11 +109,27 @@ public class CarView extends View {
             boolean bRed = part.substring(0, 2).equals("r_");
             canvas.drawCircle(xPos, yPos, radius, bRed ? pRed : pBlue);
             canvas.drawCircle(xPos, yPos, 18 * pk, pWhite);
-            Bitmap bitmap = BitmapFactory.decodeResource(resources, id);
+            Bitmap bitmap = getBitmapSafely(resources, id, 0);
             RectF rect = new RectF(xPos - radius, yPos - radius, xPos + radius, yPos + radius);
             canvas.drawBitmap(bitmap, null, rect, paint);
+            bitmap.recycle();
             xPos += radius * 2 + 4 * pk;
         }
+    }
+
+    private Bitmap getBitmapSafely(Resources res, int id, int sampleSize) {
+        Bitmap bitmap = null;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPurgeable = true;
+        options.inSampleSize = sampleSize;
+        try {
+            bitmap = BitmapFactory.decodeResource(res, id, options);
+        } catch (OutOfMemoryError oom) {
+            System.gc();
+            bitmap = getBitmapSafely(res, id, sampleSize + 1);
+        }
+
+        return bitmap;
     }
 
     void update(CarState s) {

@@ -58,7 +58,7 @@ public class CarWidget extends AppWidgetProvider {
 
     static final int id_layout[] = {
             R.layout.widget,
-            R.layout.widget
+            R.layout.widget_light
     };
 
     static final int id_bg[] = {
@@ -482,7 +482,7 @@ public class CarWidget extends AppWidgetProvider {
             TrafficParams params = new TrafficParams();
             params.lat = lat;
             params.lng = lon;
-            execute("/traffic", params);
+            execute("/level", params);
         }
 
         @Override

@@ -204,7 +204,6 @@ public class MainActivity
     @Override
     protected void onDestroy() {
         getSupportFragmentManager().removeOnBackStackChangedListener(mOnBackStackChangedListener);
-        AppConfig.save(this);
         unregisterReceiver(br);
         super.onDestroy();
     }
@@ -227,6 +226,12 @@ public class MainActivity
     protected void onResume() {
         super.onResume();
         registerGCM();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        AppConfig.save(this);
     }
 
     @Override
@@ -349,6 +354,7 @@ public class MainActivity
         }
         updateMenu();
         setupActionBar();
+        AppConfig.save(this);
     }
 
     MainFragment getFragment() {
