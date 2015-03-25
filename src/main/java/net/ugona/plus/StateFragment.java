@@ -92,6 +92,11 @@ public class StateFragment
         handler = new Handler();
         pkg = getActivity().getPackageName();
 
+        IndicatorsView indicatorsView = (IndicatorsView) v.findViewById(R.id.indocators);
+        View vLeftArrow = v.findViewById(R.id.ind_left);
+        View vRightArrow = v.findViewById(R.id.ind_right);
+        indicatorsView.setArrows(vLeftArrow, vRightArrow);
+
         vFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

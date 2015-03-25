@@ -12,6 +12,9 @@ public class IndicatorsView extends HorizontalScrollView {
 
     int offset;
 
+    View vLeftArrow;
+    View vRightArrow;
+
     public IndicatorsView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
@@ -33,6 +36,9 @@ public class IndicatorsView extends HorizontalScrollView {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
         setupChildren();
+        boolean bArrows = getChildAt(0).getWidth() > getWidth();
+        vLeftArrow.setVisibility(bArrows ? VISIBLE : INVISIBLE);
+        vRightArrow.setVisibility(bArrows ? VISIBLE : INVISIBLE);
     }
 
     void setupChildren() {
@@ -46,4 +52,32 @@ public class IndicatorsView extends HorizontalScrollView {
             v.setVisibility((x + v.getWidth() < getWidth() + offset) ? VISIBLE : INVISIBLE);
         }
     }
+
+    void setArrows(View vLeftArrow, View vRightArrow) {
+        this.vLeftArrow = vLeftArrow;
+        vLeftArrow.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ViewGroup layout = (ViewGroup) getChildAt(0);
+                int wChild = layout.getChildAt(0).getWidth();
+                int scrollX = getScrollX() - wChild;
+                if (scrollX < 0)
+                    scrollX = 0;
+                scrollTo(scrollX, 0);
+            }
+        });
+        this.vRightArrow = vRightArrow;
+        vRightArrow.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ViewGroup layout = (ViewGroup) getChildAt(0);
+                int wChild = layout.getChildAt(0).getWidth();
+                int scrollX = getScrollX() + wChild;
+                if (scrollX > getMaxScrollAmount())
+                    scrollX = getMaxScrollAmount();
+                scrollTo(scrollX, 0);
+            }
+        });
+    }
+
 }

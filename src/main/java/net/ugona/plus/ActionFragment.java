@@ -118,7 +118,7 @@ public class ActionFragment
         args.putInt(Names.COMMAND, cmd.id);
         args.putBoolean(Names.ROUTE, longTap);
         fragment.setArguments(args);
-        fragment.show(getFragmentManager(), "send");
+        fragment.show(getActivity().getSupportFragmentManager(), "send");
         longTap = false;
     }
 

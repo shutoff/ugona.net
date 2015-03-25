@@ -90,19 +90,17 @@ public class SendCommandFragment extends DialogFragment {
                     return;
             }
         }
-        if (resultCode == Activity.RESULT_CANCELED) {
-            switch (requestCode) {
-                case DO_CCODE_INET:
-                case DO_INET:
-                case DO_CCODE_SMS:
-                case DO_SMS:
-                    try {
-                        dismiss();
-                    } catch (Exception ex) {
-                        // ignore
-                    }
-                    return;
-            }
+        switch (requestCode) {
+            case DO_CCODE_INET:
+            case DO_INET:
+            case DO_CCODE_SMS:
+            case DO_SMS:
+                try {
+                    dismiss();
+                } catch (Exception ex) {
+                    // ignore
+                }
+                return;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
