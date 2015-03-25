@@ -15,87 +15,92 @@ public class Config {
     protected boolean upd;
 
     static public Set<String> update(Object o, JsonObject from) {
-        Field[] fields = o.getClass().getDeclaredFields();
         Set<String> res = new HashSet<>();
-        try {
-            for (Field f : fields) {
-                String name = f.getName();
-                if (name.equals("upd"))
-                    continue;
-                JsonValue v = from.get(name);
-                if (v == null)
-                    continue;
-                f.setAccessible(true);
-                Class<?> c = f.getType();
-                if (c.isArray()) {
-                    JsonArray arr = v.asArray();
-                    Class<?> cel = c.getComponentType();
-                    Object av = f.get(o);
-                    if ((av == null) || (Array.getLength(av) != arr.size())) {
-                        av = Array.newInstance(cel, arr.size());
-                        f.set(o, av);
-                        res.add(name);
-                    }
-                    for (int i = 0; i < arr.size(); i++) {
-                        Object el = Array.get(av, i);
-                        if (el == null) {
-                            el = cel.newInstance();
-                            Array.set(av, i, el);
-                        }
-                        if (update(el, arr.get(i).asObject()) != null)
+        synchronized (o) {
+            Field[] fields = o.getClass().getDeclaredFields();
+            try {
+                for (Field f : fields) {
+                    String name = f.getName();
+                    if (name.equals("upd"))
+                        continue;
+                    JsonValue v = from.get(name);
+                    if (v == null)
+                        continue;
+                    f.setAccessible(true);
+                    Class<?> c = f.getType();
+                    if (c.isArray()) {
+                        JsonArray arr = v.asArray();
+                        Class<?> cel = c.getComponentType();
+                        Object av = f.get(o);
+                        boolean bSet = false;
+                        if ((av == null) || (Array.getLength(av) != arr.size())) {
+                            av = Array.newInstance(cel, arr.size());
+                            bSet = true;
                             res.add(name);
+                        }
+                        for (int i = 0; i < arr.size(); i++) {
+                            Object el = Array.get(av, i);
+                            if (el == null) {
+                                el = cel.newInstance();
+                                Array.set(av, i, el);
+                            }
+                            if (update(el, arr.get(i).asObject()) != null)
+                                res.add(name);
+                        }
+                        if (bSet)
+                            f.set(o, av);
+                        continue;
                     }
-                    continue;
+                    Type t = f.getGenericType();
+                    if ((t == int.class) && v.isNumber()) {
+                        int iv = v.asInt();
+                        if (iv != f.getInt(o)) {
+                            f.setInt(o, iv);
+                            res.add(name);
+                        }
+                    } else if ((t == long.class) && v.isNumber()) {
+                        long lv = v.asLong();
+                        if (lv != f.getLong(o)) {
+                            f.setLong(o, lv);
+                            res.add(name);
+                        }
+                    } else if ((t == double.class) && v.isNumber()) {
+                        double dv = v.asDouble();
+                        if (dv != f.getDouble(o)) {
+                            f.setDouble(o, dv);
+                            res.add(name);
+                        }
+                    } else if ((t == boolean.class) && v.isBoolean()) {
+                        boolean bv = v.asBoolean();
+                        if (bv != f.getBoolean(o)) {
+                            f.setBoolean(o, bv);
+                            res.add(name);
+                        }
+                    } else if ((t == String.class) && v.isString()) {
+                        String sv = v.asString();
+                        if (!sv.equals(f.get(o))) {
+                            f.set(o, sv);
+                            res.add(name);
+                        }
+                    } else if ((t == Integer.class) && v.isNumber()) {
+                        int iv = v.asInt();
+                        Integer ov = (Integer) f.get(o);
+                        if ((ov == null) || (ov != iv)) {
+                            f.set(o, (Integer) iv);
+                            res.add(name);
+                        }
+                    } else if ((t == Long.class) && v.isNumber()) {
+                        long iv = v.asLong();
+                        Long ov = (Long) f.get(o);
+                        if ((ov == null) || (ov != iv)) {
+                            f.set(o, (Long) iv);
+                            res.add(name);
+                        }
+                    }
                 }
-                Type t = f.getGenericType();
-                if ((t == int.class) && v.isNumber()) {
-                    int iv = v.asInt();
-                    if (iv != f.getInt(o)) {
-                        f.setInt(o, iv);
-                        res.add(name);
-                    }
-                } else if ((t == long.class) && v.isNumber()) {
-                    long lv = v.asLong();
-                    if (lv != f.getLong(o)) {
-                        f.setLong(o, lv);
-                        res.add(name);
-                    }
-                } else if ((t == double.class) && v.isNumber()) {
-                    double dv = v.asDouble();
-                    if (dv != f.getDouble(o)) {
-                        f.setDouble(o, dv);
-                        res.add(name);
-                    }
-                } else if ((t == boolean.class) && v.isBoolean()) {
-                    boolean bv = v.asBoolean();
-                    if (bv != f.getBoolean(o)) {
-                        f.setBoolean(o, bv);
-                        res.add(name);
-                    }
-                } else if ((t == String.class) && v.isString()) {
-                    String sv = v.asString();
-                    if (!sv.equals(f.get(o))) {
-                        f.set(o, sv);
-                        res.add(name);
-                    }
-                } else if ((t == Integer.class) && v.isNumber()) {
-                    int iv = v.asInt();
-                    Integer ov = (Integer) f.get(o);
-                    if ((ov == null) || (ov != iv)) {
-                        f.set(o, (Integer) iv);
-                        res.add(name);
-                    }
-                } else if ((t == Long.class) && v.isNumber()) {
-                    long iv = v.asLong();
-                    Long ov = (Long) f.get(o);
-                    if ((ov == null) || (ov != iv)) {
-                        f.set(o, (Long) iv);
-                        res.add(name);
-                    }
-                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
         }
         if (res.isEmpty())
             res = null;
@@ -175,7 +180,10 @@ public class Config {
     }
 
     static public String save(Object o) {
-        JsonObject res = saveJson(o);
+        JsonObject res = null;
+        synchronized (o) {
+            res = saveJson(o);
+        }
         return res.toString();
     }
 
