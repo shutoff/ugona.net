@@ -6,6 +6,7 @@ import com.eclipsesource.json.JsonValue;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.HashSet;
@@ -15,12 +16,52 @@ public class Config {
 
     protected boolean upd;
 
+    static public void clear(Object o) {
+        synchronized (o) {
+            Field[] fields = o.getClass().getDeclaredFields();
+            try {
+                for (Field f : fields) {
+                    if ((f.getModifiers() & Modifier.STATIC) != 0)
+                        continue;
+                    String name = f.getName();
+                    if (name.equals("upd"))
+                        continue;
+                    f.setAccessible(true);
+                    Class<?> c = f.getType();
+                    if (c.isArray()) {
+                        f.set(o, null);
+                        continue;
+                    }
+                    Type t = f.getGenericType();
+                    if (t == int.class) {
+                        f.setInt(o, 0);
+                    } else if (t == long.class) {
+                        f.setLong(o, 0);
+                    } else if (t == double.class) {
+                        f.setDouble(o, 0);
+                    } else if (t == boolean.class) {
+                        f.setBoolean(o, false);
+                    } else if (t == String.class) {
+                        f.set(o, "");
+                    }
+                }
+                Method init = o.getClass().getMethod("invoke");
+                if (init != null)
+                    init.invoke(o);
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+    }
+
     static public Set<String> update(Object o, JsonObject from) {
         Set<String> res = new HashSet<>();
         synchronized (o) {
             Field[] fields = o.getClass().getDeclaredFields();
             try {
                 for (Field f : fields) {
+                    if ((f.getModifiers() & Modifier.STATIC) != 0)
+                        continue;
                     String name = f.getName();
                     if (name.equals("upd"))
                         continue;
@@ -123,15 +164,9 @@ public class Config {
         return res;
     }
 
-    static public JsonObject saveJson(Object o) {
-        return saveJson(o, 0);
-    }
-
-    static private JsonObject saveJson(Object o, int depth) {
+    static private JsonObject saveJson(Object o) {
         if (o instanceof JsonObject)
             return (JsonObject) o;
-        if (depth > 3)
-            return null;
         Field[] fields = o.getClass().getDeclaredFields();
         JsonObject res = new JsonObject();
         try {
@@ -160,7 +195,7 @@ public class Config {
                         Object el = Array.get(v, i);
                         if (el == null)
                             continue;
-                        JsonObject r = saveJson(el, depth + 1);
+                        JsonObject r = saveJson(el);
                         if (r != null)
                             arr.add(r);
                     }

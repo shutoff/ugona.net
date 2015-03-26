@@ -34,13 +34,7 @@ public class CarConfig extends Config implements Serializable {
     private boolean hideBalance;
 
     private CarConfig() {
-        name = "";
-        key = "";
-        auth = "";
-        login = "";
-        phone = "";
-        event_filter = 3;
-        temp_settings = "";
+        init();
     }
 
     public static CarConfig get(Context context, String car_id) {
@@ -51,15 +45,6 @@ public class CarConfig extends Config implements Serializable {
             return res;
         res = new CarConfig();
         res.read(context, car_id);
-        config.put(car_id, res);
-        return res;
-    }
-
-    public static CarConfig clear(Context context, String car_id) {
-        if (config != null)
-            config.remove(car_id);
-        CarConfig res = new CarConfig();
-        res.reset(context, car_id);
         config.put(car_id, res);
         return res;
     }
@@ -83,6 +68,16 @@ public class CarConfig extends Config implements Serializable {
             ed.commit();
     }
 
+    void init() {
+        name = "";
+        key = "";
+        auth = "";
+        login = "";
+        phone = "";
+        event_filter = 3;
+        temp_settings = "";
+    }
+
     void read(Context context, String id) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String s = preferences.getString(CAR_KEY + id, "");
@@ -94,13 +89,6 @@ public class CarConfig extends Config implements Serializable {
                 State.appendLog(s);
             }
         }
-    }
-
-    void reset(Context context, String id) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor ed = preferences.edit();
-        ed.remove(CAR_KEY + id);
-        ed.commit();
     }
 
     public String getName() {

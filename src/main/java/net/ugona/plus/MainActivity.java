@@ -186,7 +186,6 @@ public class MainActivity
         if ((car_config.getKey().equals("")) ||
                 (car_config.getAuth().equals("") &&
                         ((intent == null) || (intent.getStringExtra(Names.ID) == null)))) {
-            car_config = CarConfig.clear(this, id);
             Intent i = new Intent(this, SplashActivity.class);
             i.putExtra(Names.ID, id);
             startActivityForResult(i, DO_AUTH);

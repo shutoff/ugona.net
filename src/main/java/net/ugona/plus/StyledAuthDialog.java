@@ -126,8 +126,10 @@ public class StyledAuthDialog extends Dialog {
         final HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
+                Config.clear(config);
                 Config.update(config, res);
                 CarState state = CarState.get(getContext(), car_id);
+                Config.clear(state);
                 if (CarState.update(state, res.get("state").asObject()) != null) {
                     Intent intent = new Intent(Names.UPDATED);
                     intent.putExtra(Names.ID, car_id);
