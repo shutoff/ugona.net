@@ -6,6 +6,7 @@ import com.eclipsesource.json.JsonValue;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,10 +34,11 @@ public class Config {
                         Class<?> cel = c.getComponentType();
                         Object av = f.get(o);
                         boolean bSet = false;
+                        boolean bChanged = false;
                         if ((av == null) || (Array.getLength(av) != arr.size())) {
                             av = Array.newInstance(cel, arr.size());
                             bSet = true;
-                            res.add(name);
+                            bChanged = true;
                         }
                         for (int i = 0; i < arr.size(); i++) {
                             Object el = Array.get(av, i);
@@ -45,10 +47,12 @@ public class Config {
                                 Array.set(av, i, el);
                             }
                             if (update(el, arr.get(i).asObject()) != null)
-                                res.add(name);
+                                bChanged = true;
                         }
                         if (bSet)
                             f.set(o, av);
+                        if (bChanged)
+                            res.add(name);
                         continue;
                     }
                     Type t = f.getGenericType();
@@ -124,6 +128,8 @@ public class Config {
         JsonObject res = new JsonObject();
         try {
             for (Field f : fields) {
+                if ((f.getModifiers() & Modifier.STATIC) != 0)
+                    continue;
                 String name = f.getName();
                 if (name.equals("upd"))
                     continue;
@@ -139,7 +145,7 @@ public class Config {
                         Object el = Array.get(v, i);
                         if (el == null)
                             continue;
-                        JsonObject r = saveJson(el, depth++);
+                        JsonObject r = saveJson(el, depth + 1);
                         if (r != null)
                             arr.add(r);
                     }

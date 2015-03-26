@@ -280,6 +280,8 @@ public abstract class DeviceBaseFragment
     }
 
     void done() {
+        if (getActivity() == null)
+            return;
         if (changed == null)
             changed = new HashMap<>();
         vProgress.setVisibility(View.GONE);
