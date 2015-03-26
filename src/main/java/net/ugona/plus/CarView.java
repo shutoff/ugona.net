@@ -100,6 +100,7 @@ public class CarView extends View {
         float radius = 20 * pk;
         float yPos = y + k * HEIGHT - radius - 4 * pk;
         float xPos = x + radius + 10 * pk;
+        /*
         parts = ext[1].split(";");
         for (int i = 0; i < parts.length; i++) {
             String part = parts[i];
@@ -115,6 +116,7 @@ public class CarView extends View {
             bitmap.recycle();
             xPos += radius * 2 + 4 * pk;
         }
+        */
     }
 
     private Bitmap getBitmapSafely(Resources res, int id, int sampleSize) {
