@@ -289,6 +289,7 @@ public class PrimaryFragment extends MainFragment {
             }
             return super.getPageTitle(position);
         }
+
     }
 
 }

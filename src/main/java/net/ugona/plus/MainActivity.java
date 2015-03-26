@@ -63,7 +63,8 @@ public class MainActivity
 
     static final int DO_AUTH = 1;
 
-    static final String PRIMARY = "prim_tag";
+    static final String PRIMARY = "primary";
+    static final String FRAGMENT = "fragment";
 
     final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     static final String SENDER_ID = "915289471784";
@@ -126,6 +127,7 @@ public class MainActivity
 
         config = AppConfig.get(this);
         id = config.getId(id);
+
         car_config = CarConfig.get(this, id);
         state = CarState.get(this, id);
 
@@ -315,16 +317,16 @@ public class MainActivity
                 return true;
             }
             case R.id.about:
-                setFragment(new AboutFragment(), "about");
+                setFragment(new AboutFragment());
                 return true;
             case R.id.passwd:
-                setFragment(new SetPassword(), "password");
+                setFragment(new SetPassword());
                 return true;
             case R.id.history:
-                setFragment(new HistoryFragment(), "history");
+                setFragment(new HistoryFragment());
                 return true;
             case R.id.preferences:
-                setFragment(new SettingsFragment(), "pref");
+                setFragment(new SettingsFragment());
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -364,11 +366,11 @@ public class MainActivity
         return (MainFragment) getSupportFragmentManager().findFragmentByTag(tag);
     }
 
-    void setFragment(MainFragment fragment, String tag) {
+    void setFragment(MainFragment fragment) {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-        ft.replace(R.id.fragment, fragment, tag);
-        ft.addToBackStack(tag);
+        ft.replace(R.id.fragment, fragment, FRAGMENT);
+        ft.addToBackStack(FRAGMENT);
         ft.commit();
     }
 

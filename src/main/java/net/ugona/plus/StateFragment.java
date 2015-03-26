@@ -198,6 +198,7 @@ public class StateFragment
         Context context = getActivity();
         if (context == null)
             return;
+
         CarState state = CarState.get(context, id());
         if (FetchService.isProcessed(id())) {
             vProgress.setVisibility(View.VISIBLE);
@@ -254,12 +255,13 @@ public class StateFragment
                 try {
                     int pos = Integer.parseInt(v[0]);
                     int val = Integer.parseInt(v[1]);
-                    temps.append(pos, val);
+                    temps.put(pos, val);
                 } catch (Exception ex) {
                     // ignore
                 }
             }
         }
+
         for (int i = 0; i < temp_indicators.length; i++) {
             int v = temps.get(i, -100);
             if (v == -100) {
@@ -401,7 +403,7 @@ public class StateFragment
         HistoryFragment fragment = new HistoryFragment();
         fragment.setArguments(args);
         MainActivity activity = (MainActivity) getActivity();
-        activity.setFragment(fragment, "history");
+        activity.setFragment(fragment);
     }
 
     Vector<CarConfig.Command> getFabCommands() {

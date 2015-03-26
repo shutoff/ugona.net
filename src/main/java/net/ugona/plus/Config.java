@@ -41,6 +41,14 @@ public class Config {
                             bChanged = true;
                         }
                         for (int i = 0; i < arr.size(); i++) {
+                            if (cel == int.class) {
+                                if (!arr.get(i).isNumber())
+                                    continue;
+                                Array.setInt(av, i, arr.get(i).asInt());
+                                continue;
+                            }
+                            if (cel.isPrimitive())
+                                continue;
                             Object el = Array.get(av, i);
                             if (el == null) {
                                 el = cel.newInstance();
@@ -141,7 +149,14 @@ public class Config {
                         continue;
                     int length = Array.getLength(v);
                     JsonArray arr = new JsonArray();
+                    Class<?> cel = c.getComponentType();
                     for (int i = 0; i < length; i++) {
+                        if (cel == int.class) {
+                            arr.add(Array.getInt(v, i));
+                            continue;
+                        }
+                        if (cel.isPrimitive())
+                            continue;
                         Object el = Array.get(v, i);
                         if (el == null)
                             continue;

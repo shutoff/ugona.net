@@ -16,9 +16,9 @@ public class CarConfig extends Config implements Serializable {
 
     private static final String CAR_KEY = "car_";
     private static HashMap<String, CarConfig> config;
-    private final String name;
-    private final String key;
-    private final String auth;
+    private String name;
+    private String key;
+    private String auth;
     private String login;
     private String phone;
     private Command[] cmd;

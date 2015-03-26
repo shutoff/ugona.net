@@ -12,9 +12,9 @@ import android.graphics.RectF;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.SparseArray;
 import android.view.View;
 
-import java.util.HashMap;
 import java.util.Vector;
 
 public class CarView extends View {
@@ -315,7 +315,7 @@ public class CarView extends View {
         }, 300);
     }
 
-    static class Pictures extends HashMap<Integer, Point> {
+    static class Pictures extends SparseArray<Point> {
         Pictures() {
             add(R.drawable.c_1, 563, 221);
             add(R.drawable.c_1_o, 569, 361);
