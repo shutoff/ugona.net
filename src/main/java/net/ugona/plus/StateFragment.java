@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,33 +27,32 @@ public class StateFragment
         extends MainFragment
         implements View.OnClickListener {
 
+    static final int[] temp_id = {
+            R.id.temp,
+            R.id.temp_engine,
+            R.id.temp_salon,
+            R.id.temp_ext,
+            R.id.temp1,
+            R.id.temp2
+    };
     Indicator iGsm;
     Indicator iVoltage;
     Indicator iReserve;
     Indicator iBalance;
-    Indicator iTemp;
-    Indicator iTempEngine;
-    Indicator iTempSalon;
-    Indicator iTempExt;
     Indicator iFuel;
-    Indicator iTemp1;
-    Indicator iTemp2;
-
     CarView vCar;
     TextView tvAddress;
     TextView tvTime;
     ImageView vFab;
-
     Handler handler;
     BroadcastReceiver br;
-
     ImageView ivRefresh;
     View vProgress;
     View vFabProgress;
-
     boolean is_address;
     boolean longTap;
     String pkg;
+    Indicator[] temp_indicators;
 
     @Override
     int layout() {
@@ -75,13 +75,7 @@ public class StateFragment
         iVoltage = (Indicator) v.findViewById(R.id.voltage);
         iReserve = (Indicator) v.findViewById(R.id.reserve);
         iBalance = (Indicator) v.findViewById(R.id.balance);
-        iTemp = (Indicator) v.findViewById(R.id.temp);
-        iTempEngine = (Indicator) v.findViewById(R.id.temp_engine);
-        iTempSalon = (Indicator) v.findViewById(R.id.temp_salon);
-        iTempExt = (Indicator) v.findViewById(R.id.temp_ext);
         iFuel = (Indicator) v.findViewById(R.id.fuel);
-        iTemp1 = (Indicator) v.findViewById(R.id.temp1);
-        iTemp2 = (Indicator) v.findViewById(R.id.temp2);
         vCar = (CarView) v.findViewById(R.id.car);
         tvAddress = (TextView) v.findViewById(R.id.address);
         tvTime = (TextView) v.findViewById(R.id.time);
@@ -91,6 +85,11 @@ public class StateFragment
         vFabProgress = v.findViewById(R.id.fab_progress);
         handler = new Handler();
         pkg = getActivity().getPackageName();
+
+        temp_indicators = new Indicator[temp_id.length];
+        for (int i = 0; i < temp_id.length; i++) {
+            temp_indicators[i] = (Indicator) v.findViewById(temp_id[i]);
+        }
 
         IndicatorsView indicatorsView = (IndicatorsView) v.findViewById(R.id.indocators);
         View vLeftArrow = v.findViewById(R.id.ind_left);
@@ -246,24 +245,31 @@ public class StateFragment
             String pict = "ind02_" + State.GsmLevel(gsm_level);
             iGsm.setImage(getResources().getIdentifier(pict, "drawable", getActivity().getPackageName()));
         }
-        boolean temp = false;
+        SparseIntArray temps = new SparseIntArray();
         String temperature = state.getTemperature();
         if (temperature != null) {
             String[] parts = temperature.split(",");
-            if (parts.length > 0) {
+            for (String p : parts) {
+                String[] v = p.split(":");
                 try {
-                    String[] p = parts[0].split(":");
-                    int t = Integer.parseInt(p[1]);
-                    iTemp.setVisibility(View.VISIBLE);
-                    iTemp.setText(t + " \u00B0C");
-                    temp = true;
+                    int pos = Integer.parseInt(v[0]);
+                    int val = Integer.parseInt(v[1]);
+                    temps.append(pos, val);
                 } catch (Exception ex) {
                     // ignore
                 }
             }
         }
-        if (!temp)
-            iTemp.setVisibility(View.GONE);
+        for (int i = 0; i < temp_indicators.length; i++) {
+            int v = temps.get(i, -100);
+            if (v == -100) {
+                temp_indicators[i].setVisibility(View.GONE);
+                continue;
+            }
+            temp_indicators[i].setVisibility(View.VISIBLE);
+            temp_indicators[i].setText(v + " \u00B0C");
+        }
+
         if (state.getFuel() > 0) {
             iFuel.setVisibility(View.VISIBLE);
             iFuel.setText(state.getFuel() + " L");
@@ -395,7 +401,7 @@ public class StateFragment
         HistoryFragment fragment = new HistoryFragment();
         fragment.setArguments(args);
         MainActivity activity = (MainActivity) getActivity();
-        activity.setFragment(fragment);
+        activity.setFragment(fragment, "history");
     }
 
     Vector<CarConfig.Command> getFabCommands() {

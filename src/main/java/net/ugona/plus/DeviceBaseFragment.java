@@ -1,6 +1,7 @@
 package net.ugona.plus;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -189,8 +190,8 @@ public abstract class DeviceBaseFragment
             Bundle args = new Bundle();
             args.putString(Names.MESSAGE, config.getPassword());
             passwordDialog.setArguments(args);
-            passwordDialog.setTargetFragment(getParentFragment(), REQUEST_CHECK_PATTERN);
-            passwordDialog.show(getFragmentManager(), "password");
+            passwordDialog.setTargetFragment(this, REQUEST_CHECK_PATTERN);
+            passwordDialog.show(getActivity().getSupportFragmentManager(), "password");
         }
         return super.onOptionsItemSelected(item);
     }
@@ -203,24 +204,37 @@ public abstract class DeviceBaseFragment
     }
 
     void send_update() {
+        final ProgressDialog dialog = new ProgressDialog(getActivity());
+        dialog.setMessage(getString(R.string.save_settings));
+        dialog.show();
         HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
-                if (changed != null) {
-                    Set<Map.Entry<String, Object>> entries = changed.entrySet();
-                    for (Map.Entry<String, Object> entry : entries) {
-                        settings.put(entry.getKey(), entry.getValue());
+                try {
+                    if (changed != null) {
+                        Set<Map.Entry<String, Object>> entries = changed.entrySet();
+                        for (Map.Entry<String, Object> entry : entries) {
+                            settings.put(entry.getKey(), entry.getValue());
+                        }
                     }
+                    changed = new HashMap<>();
+                    BaseAdapter adapter = (BaseAdapter) vList.getAdapter();
+                    adapter.notifyDataSetChanged();
+                    dialog.dismiss();
+                } catch (Exception ex) {
+                    // ignore
                 }
-                changed = new HashMap<>();
-                BaseAdapter adapter = (BaseAdapter) vList.getAdapter();
-                adapter.notifyDataSetChanged();
             }
 
             @Override
             void error() {
-                Toast toast = Toast.makeText(getActivity(), R.string.save_error, Toast.LENGTH_LONG);
-                toast.show();
+                try {
+                    dialog.dismiss();
+                    Toast toast = Toast.makeText(getActivity(), R.string.save_error, Toast.LENGTH_LONG);
+                    toast.show();
+                } catch (Exception ex) {
+                    // ignore
+                }
             }
         };
         JsonObject params = new JsonObject();

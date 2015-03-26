@@ -62,11 +62,8 @@ public class MainActivity
         extends ActionBarActivity {
 
     static final int DO_AUTH = 1;
-    static final int DO_PHONE = 2;
 
-    static final String TAG = "frag_tag";
     static final String PRIMARY = "prim_tag";
-    static final String SPLASH = "splash_tag";
 
     final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     static final String SENDER_ID = "915289471784";
@@ -105,6 +102,7 @@ public class MainActivity
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
+                ex.printStackTrace();
                 State.print(ex);
                 System.exit(1);
             }
@@ -289,9 +287,11 @@ public class MainActivity
         MainFragment fragment = getFragment();
         if ((fragment != null) && fragment.onOptionsItemSelected(item))
             return true;
-        if (item.getItemId() == android.R.id.home &&
-                getSupportFragmentManager().popBackStackImmediate())
-            return true;
+        if (item.getItemId() == android.R.id.home) {
+            if (getSupportFragmentManager().popBackStackImmediate())
+                return true;
+        }
+
         switch (item.getItemId()) {
             case R.id.date: {
                 final CalendarDatePickerDialog dialog = new CalendarDatePickerDialog() {
@@ -315,16 +315,16 @@ public class MainActivity
                 return true;
             }
             case R.id.about:
-                setFragment(new AboutFragment());
+                setFragment(new AboutFragment(), "about");
                 return true;
             case R.id.passwd:
-                setFragment(new SetPassword());
+                setFragment(new SetPassword(), "password");
                 return true;
             case R.id.history:
-                setFragment(new HistoryFragment());
+                setFragment(new HistoryFragment(), "history");
                 return true;
             case R.id.preferences:
-                setFragment(new SettingsFragment());
+                setFragment(new SettingsFragment(), "pref");
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -364,11 +364,11 @@ public class MainActivity
         return (MainFragment) getSupportFragmentManager().findFragmentByTag(tag);
     }
 
-    void setFragment(MainFragment fragment) {
+    void setFragment(MainFragment fragment, String tag) {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-        ft.replace(R.id.fragment, fragment, TAG);
-        ft.addToBackStack(TAG);
+        ft.replace(R.id.fragment, fragment, tag);
+        ft.addToBackStack(tag);
         ft.commit();
     }
 
