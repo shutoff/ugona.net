@@ -22,6 +22,14 @@ public class CarView extends View {
     final static float WIDTH = 1080;
     final static float HEIGHT = 750;
 
+    final static int RADIUS_DP = 28;
+    final static int STROKE_DP = 2;
+    final static int X_PAD = 7;
+    final static int Y_PAD = 5;
+
+    final static int XC_LEFT = 20;
+    final static int YC_BOTTOM = 15;
+
     static Pictures pictures = new Pictures();
     String state;
     String prefix;
@@ -30,6 +38,7 @@ public class CarView extends View {
     Paint pWhite;
     Paint pRed;
     Paint pBlue;
+    Paint pGray;
     String pkg;
 
     int frame;
@@ -56,6 +65,9 @@ public class CarView extends View {
         pWhite = new Paint();
         pWhite.setFlags(Paint.ANTI_ALIAS_FLAG);
         pWhite.setColor(Color.rgb(255, 255, 255));
+        pGray = new Paint();
+        pGray.setColor(Color.rgb(200, 200, 200));
+        pGray.setStrokeWidth(1);
         pkg = context.getPackageName();
         state = "";
         prefix = "c";
@@ -67,17 +79,20 @@ public class CarView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        float add_x = XC_LEFT * pk;
+        float add_y = YC_BOTTOM * pk;
+        float k = (canvas.getWidth() + add_x) / WIDTH;
         float x = 0;
         float y = 0;
-        float k = canvas.getWidth() / WIDTH;
         float h = HEIGHT * k;
-        if (h > canvas.getHeight()) {
-            k = canvas.getHeight() / HEIGHT;
+        if (h > canvas.getHeight() + add_y) {
+            k = (canvas.getHeight() + add_y) / HEIGHT;
             float w = k * WIDTH;
-            x = (canvas.getWidth() - w) / 2.f;
+            x = (canvas.getWidth() + add_x - w) / 2.f;
         } else {
-            y = (canvas.getHeight() - h) / 2.f;
+            y = (canvas.getHeight() + add_y - h) / 2.f;
         }
+        x -= add_x;
         String[] ext = state.split("\\|");
         String[] parts = ext[0].split(";");
         for (int i = 0; i < parts.length; i++) {
@@ -97,26 +112,41 @@ public class CarView extends View {
             canvas.drawBitmap(bitmap, null, rect, paint);
             bitmap.recycle();
         }
-        float radius = 20 * pk;
-        float yPos = y + k * HEIGHT - radius - 4 * pk;
-        float xPos = x + radius + 10 * pk;
-        /*
-        parts = ext[1].split(";");
-        for (int i = 0; i < parts.length; i++) {
-            String part = parts[i];
-            int id = getResources().getIdentifier(part, "drawable", pkg);
-            if (id == 0)
-                continue;
-            boolean bRed = part.substring(0, 2).equals("r_");
-            canvas.drawCircle(xPos, yPos, radius, bRed ? pRed : pBlue);
-            canvas.drawCircle(xPos, yPos, 18 * pk, pWhite);
-            Bitmap bitmap = getBitmapSafely(resources, id, 0);
-            RectF rect = new RectF(xPos - radius, yPos - radius, xPos + radius, yPos + radius);
-            canvas.drawBitmap(bitmap, null, rect, paint);
-            bitmap.recycle();
-            xPos += radius * 2 + 4 * pk;
+        float radius = RADIUS_DP * pk;
+        float in_radius = (RADIUS_DP - STROKE_DP) * pk;
+
+        float xPos = x;
+        if (xPos < 0)
+            xPos = 0;
+        xPos += X_PAD * pk + radius;
+        float yPos = y + k * HEIGHT;
+        if (yPos > canvas.getHeight())
+            yPos = canvas.getHeight();
+        yPos -= Y_PAD * pk + radius;
+
+        if (ext.length > 1) {
+            parts = ext[1].split(";");
+            for (int i = 0; i < parts.length; i++) {
+                String part = parts[i];
+                int id = getResources().getIdentifier(part, "drawable", pkg);
+                if (id == 0)
+                    continue;
+                boolean bRed = part.substring(0, 2).equals("r_");
+                canvas.drawCircle(xPos, yPos, radius, bRed ? pRed : pBlue);
+                canvas.drawCircle(xPos, yPos, in_radius, pWhite);
+                Bitmap bitmap = getBitmapSafely(resources, id, 0);
+                RectF rect = new RectF(xPos - in_radius, yPos - in_radius, xPos + in_radius, yPos + in_radius);
+                canvas.drawBitmap(bitmap, null, rect, paint);
+                bitmap.recycle();
+                xPos += radius * 2 + X_PAD;
+            }
         }
-        */
+        float xr = x + WIDTH * k - 1;
+        float yb = y + HEIGHT * k - 1;
+        canvas.drawLine(x, y, xr, y, pGray);
+        canvas.drawLine(xr, y, xr, yb, pGray);
+        canvas.drawLine(xr, yb, x, yb, pGray);
+        canvas.drawLine(x, yb, x, y, pGray);
     }
 
     private Bitmap getBitmapSafely(Resources res, int id, int sampleSize) {

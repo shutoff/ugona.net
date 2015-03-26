@@ -144,4 +144,5 @@
     </string-array>
     <string name="auto">автоматически</string>
     <string name="run_command">Выполнить команду</string>
+    <string name="save_settings">Сохранение настроек</string>
 </resources>

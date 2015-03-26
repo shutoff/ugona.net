@@ -148,4 +148,5 @@
     </string-array>
     <string name="auto">auto</string>
     <string name="run_command">Execute command</string>
+    <string name="save_settings">Save settings</string>
 </resources>

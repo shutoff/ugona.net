@@ -141,7 +141,7 @@ public class PhotoFragment extends MainFragment {
                     args.putString(Names.ID, id());
                     pv.setArguments(args);
                     MainActivity activity = (MainActivity) getActivity();
-                    activity.setFragment(pv);
+                    activity.setFragment(pv, "photo");
                 }
             }
         });
