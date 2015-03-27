@@ -15,6 +15,7 @@ import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -29,6 +30,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
@@ -348,6 +350,17 @@ public class State {
     static boolean isDualSim(Context context) {
         TelephonyInfo info = TelephonyInfo.getInstance(context);
         return info.isSIM1Ready(context) && info.isSIM2Ready(context);
+    }
+
+    static public Menu createMenu(Context context) {
+        try {
+            Class<?> menuBuilderClass = Class.forName("com.android.internal.view.menu.MenuBuilder");
+            Constructor<?> constructor = menuBuilderClass.getDeclaredConstructor(Context.class);
+            return (Menu) constructor.newInstance(context);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static interface ViewCallback {

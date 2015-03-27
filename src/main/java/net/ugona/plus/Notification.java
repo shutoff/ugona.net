@@ -109,6 +109,7 @@ public class Notification extends Config {
         CarState state = CarState.get(context, car_id);
         Notification notification = Notification.get(context, car_id);
         if (names.contains("az_time") || names.contains("az")) {
+            State.appendLog("changed az " + state.getAz_time() + " " + state.isIgnition());
             if (notification.az != 0) {
                 remove(context, notification.az);
                 notification.az = 0;

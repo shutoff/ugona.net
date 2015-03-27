@@ -220,6 +220,23 @@ public abstract class DeviceBaseFragment
                     changed = new HashMap<>();
                     BaseAdapter adapter = (BaseAdapter) vList.getAdapter();
                     adapter.notifyDataSetChanged();
+
+                    CarConfig config = CarConfig.get(getActivity(), id());
+                    Config.update(config, res);
+                    CarState state = CarState.get(getActivity(), id());
+                    if (CarState.update(state, res.get("state").asObject()) != null) {
+                        Intent intent = new Intent(Names.UPDATED);
+                        intent.putExtra(Names.ID, id());
+                        getActivity().sendBroadcast(intent);
+                    }
+                    JsonObject caps = res.get("caps").asObject();
+                    boolean changed = CarState.update(state, caps.get("caps").asObject()) != null;
+                    changed |= (CarState.update(config, caps) != null);
+                    if (changed) {
+                        Intent intent = new Intent(Names.CONFIG_CHANGED);
+                        intent.putExtra(Names.ID, id());
+                        getActivity().sendBroadcast(intent);
+                    }
                     dialog.dismiss();
                 } catch (Exception ex) {
                     // ignore

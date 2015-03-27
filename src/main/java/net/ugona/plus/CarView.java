@@ -38,7 +38,6 @@ public class CarView extends View {
     Paint pWhite;
     Paint pRed;
     Paint pBlue;
-    Paint pGray;
     String pkg;
 
     int frame;
@@ -65,9 +64,6 @@ public class CarView extends View {
         pWhite = new Paint();
         pWhite.setFlags(Paint.ANTI_ALIAS_FLAG);
         pWhite.setColor(Color.rgb(255, 255, 255));
-        pGray = new Paint();
-        pGray.setColor(Color.rgb(200, 200, 200));
-        pGray.setStrokeWidth(1);
         pkg = context.getPackageName();
         state = "";
         prefix = "c";
@@ -141,12 +137,6 @@ public class CarView extends View {
                 xPos += radius * 2 + X_PAD;
             }
         }
-        float xr = x + WIDTH * k - 1;
-        float yb = y + HEIGHT * k - 1;
-        canvas.drawLine(x, y, xr, y, pGray);
-        canvas.drawLine(xr, y, xr, yb, pGray);
-        canvas.drawLine(xr, yb, x, yb, pGray);
-        canvas.drawLine(x, yb, x, y, pGray);
     }
 
     private Bitmap getBitmapSafely(Resources res, int id, int sampleSize) {

@@ -145,4 +145,8 @@
     <string name="auto">автоматически</string>
     <string name="run_command">Выполнить команду</string>
     <string name="save_settings">Сохранение настроек</string>
+    <string name="temp_engine">Температура двигателя</string>
+    <string name="temp_salon">Температура в салоне</string>
+    <string name="temp_ext">Температура за бортом</string>
+    <string name="fuel">Топливо</string>
 </resources>

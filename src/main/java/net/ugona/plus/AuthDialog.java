@@ -146,7 +146,6 @@ public class AuthDialog extends DialogFragment {
                     intent.putExtra(Names.ID, car_id);
                     getActivity().sendBroadcast(intent);
                 }
-                CarState.update(config, res);
                 config.setLogin(login);
                 dismiss();
                 Fragment fragment = getTargetFragment();

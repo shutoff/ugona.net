@@ -149,4 +149,8 @@
     <string name="auto">auto</string>
     <string name="run_command">Execute command</string>
     <string name="save_settings">Save settings</string>
+    <string name="temp_engine">Engine temperature</string>
+    <string name="temp_salon">Salon temperature</string>
+    <string name="temp_ext">Atmosphere temperature</string>
+    <string name="fuel">Fuel</string>
 </resources>

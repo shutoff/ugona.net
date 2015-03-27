@@ -29,7 +29,8 @@
                 android:id="@+id/spinner_nav"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1" />
+                android:background="@drawable/spinner_white"
+                android:gravity="left" />
 
             <ImageView
                 android:id="@+id/logo"

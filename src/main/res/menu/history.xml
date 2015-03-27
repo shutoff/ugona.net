@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/voltage"
+        android:title="@string/voltage" />
+    <item
+        android:id="@+id/reserved"
+        android:title="@string/reserved" />
+    <item
+        android:id="@+id/balance"
+        android:title="@string/balance" />
+    <item
+        android:id="@+id/temp"
+        android:title="@string/temperature" />
+    <item
+        android:id="@+id/temp_engine"
+        android:title="@string/temp_engine" />
+    <item
+        android:id="@+id/temp_salon"
+        android:title="@string/temp_salon" />
+    <item
+        android:id="@+id/temp_ext"
+        android:title="@string/temp_ext" />
+    <item
+        android:id="@+id/temp1"
+        android:title="@string/temperature" />
+    <item
+        android:id="@+id/temp2"
+        android:title="@string/temperature" />
+    <item
+        android:id="@+id/fuel"
+        android:title="@string/fuel" />
+</menu>

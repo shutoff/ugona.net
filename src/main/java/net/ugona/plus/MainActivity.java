@@ -18,7 +18,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
@@ -262,8 +261,7 @@ public class MainActivity
                 menu.removeItem(R.id.date);
             }
             if (fragmentMenu == null) {
-                PopupMenu popupMenu = new PopupMenu(this, null);
-                fragmentMenu = popupMenu.getMenu();
+                fragmentMenu = State.createMenu(this);
             }
             fragmentMenu.clear();
             fragment.onCreateOptionsMenu(fragmentMenu, getMenuInflater());
@@ -321,9 +319,14 @@ public class MainActivity
             case R.id.passwd:
                 setFragment(new SetPassword());
                 return true;
-            case R.id.history:
-                setFragment(new HistoryFragment());
+            case R.id.charts: {
+                Bundle args = new Bundle();
+                args.putString(Names.ID, id);
+                HistoryFragment historyFragment = new HistoryFragment();
+                historyFragment.setArguments(args);
+                setFragment(historyFragment);
                 return true;
+            }
             case R.id.preferences:
                 setFragment(new SettingsFragment());
                 return true;
@@ -336,7 +339,7 @@ public class MainActivity
         MainFragment fragment = getFragment();
         if (fragment != null) {
             if (homeMenu == null) {
-                homeMenu = new PopupMenu(this, vLogo).getMenu();
+                homeMenu = State.createMenu(this);
                 getMenuInflater().inflate(R.menu.home, homeMenu);
             }
             MenuItem item = homeMenu.findItem(R.id.home);
@@ -385,8 +388,7 @@ public class MainActivity
     }
 
     void setSideMenu() {
-        PopupMenu p = new PopupMenu(this, null);
-        sideMenu = p.getMenu();
+        sideMenu = State.createMenu(this);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.sidebar, sideMenu);
 
@@ -461,9 +463,8 @@ public class MainActivity
     }
 
     void setupActionBar() {
-
         String title = "";
-        MainFragment fragment = getFragment();
+        final MainFragment fragment = getFragment();
         if (fragment != null)
             title = fragment.getTitle();
         if (title != null) {
@@ -479,26 +480,25 @@ public class MainActivity
             return;
         }
 
-        final String[] cars = config.getCars();
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-        if (cars.length <= 1) {
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        final Menu combo = fragment.combo();
+        if (combo == null) {
             spinner.setVisibility(View.GONE);
             vLogo.setVisibility(View.VISIBLE);
             return;
         }
+
         vLogo.setVisibility(View.GONE);
         spinner.setVisibility(View.VISIBLE);
         spinner.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
-                return cars.length;
+                return combo.size();
             }
 
             @Override
             public Object getItem(int position) {
-                return cars[position];
+                return combo.getItem(position);
             }
 
             @Override
@@ -524,20 +524,26 @@ public class MainActivity
                     v = inflater.inflate(layout_id, null);
                 }
                 TextView tv = (TextView) v.findViewById(R.id.name);
-                CarConfig config = CarConfig.get(MainActivity.this, cars[position]);
-                tv.setText(config.getName(MainActivity.this, cars[position]));
+                tv.setText(combo.getItem(position).getTitle());
                 return v;
             }
-
         });
+        int current = fragment.currentComboItem();
+        for (int i = 0; i < combo.size(); i++) {
+            if (combo.getItem(i).getItemId() == current) {
+                spinner.setSelection(i);
+                break;
+            }
+        }
+
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                fragment.onOptionsItemSelected(combo.getItem(i));
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-
             }
         });
     }

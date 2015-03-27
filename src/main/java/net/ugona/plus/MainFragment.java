@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -88,6 +89,14 @@ public abstract class MainFragment extends Fragment implements OnRefreshListener
         minutes -= hours * 60;
         String s = getString(R.string.hm_format);
         return String.format(s, hours, minutes);
+    }
+
+    Menu combo() {
+        return null;
+    }
+
+    int currentComboItem() {
+        return 0;
     }
 
 }

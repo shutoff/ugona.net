@@ -74,9 +74,12 @@ public class Commands {
             Queue queue = requests.get(id);
             CarState state = CarState.get(context, id);
             for (CarConfig.Command c : queue) {
-                if (c.done == null)
-                    continue;
-                if (!State.checkCondition(c.done, state))
+                boolean ok = false;
+                if (c.done != null)
+                    ok = State.checkCondition(c.done, state);
+                if (!ok && (c.condition != null))
+                    ok = !State.checkCondition(c.condition, state);
+                if (!ok)
                     continue;
                 queue.remove(c);
                 found = true;

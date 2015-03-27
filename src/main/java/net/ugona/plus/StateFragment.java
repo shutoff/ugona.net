@@ -92,9 +92,8 @@ public class StateFragment
         }
 
         IndicatorsView indicatorsView = (IndicatorsView) v.findViewById(R.id.indocators);
-        View vLeftArrow = v.findViewById(R.id.ind_left);
         View vRightArrow = v.findViewById(R.id.ind_right);
-        indicatorsView.setArrows(vLeftArrow, vRightArrow);
+        indicatorsView.setArrows(vRightArrow);
 
         vFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -374,36 +373,28 @@ public class StateFragment
 
     @Override
     public void onClick(View v) {
-        String type = null;
         switch (v.getId()) {
             case R.id.voltage:
-                type = "voltage";
-                break;
             case R.id.reserve:
-                type = "reserved";
-                break;
             case R.id.balance:
-                type = "balance";
-                break;
             case R.id.temp:
-                type = "t";
-                break;
+            case R.id.temp_engine:
+            case R.id.temp_salon:
+            case R.id.temp_ext:
+            case R.id.temp1:
+            case R.id.temp2:
             case R.id.fuel:
-                type = "fuel";
-                break;
+                CarState state = CarState.get(getActivity(), id());
+                if (!state.isHistory())
+                    return;
+                Bundle args = new Bundle();
+                args.putString(Names.ID, id());
+                args.putInt(Names.TITLE, v.getId());
+                HistoryFragment fragment = new HistoryFragment();
+                fragment.setArguments(args);
+                MainActivity activity = (MainActivity) getActivity();
+                activity.setFragment(fragment);
         }
-        if (type == null)
-            return;
-        CarState state = CarState.get(getActivity(), id());
-        if (!state.isHistory())
-            return;
-        Bundle args = new Bundle();
-        args.putString(Names.ID, id());
-        args.putString(Names.TITLE, type);
-        HistoryFragment fragment = new HistoryFragment();
-        fragment.setArguments(args);
-        MainActivity activity = (MainActivity) getActivity();
-        activity.setFragment(fragment);
     }
 
     Vector<CarConfig.Command> getFabCommands() {
