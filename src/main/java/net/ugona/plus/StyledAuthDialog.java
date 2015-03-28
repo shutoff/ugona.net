@@ -17,7 +17,6 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
 import java.io.Serializable;
-import java.util.Locale;
 
 public class StyledAuthDialog extends Dialog {
 
@@ -165,7 +164,7 @@ public class StyledAuthDialog extends Dialog {
         AuthParam authParam = new AuthParam();
         authParam.login = login;
         authParam.password = password;
-        authParam.lang = Locale.getDefault().getLanguage();
+        authParam.lang = getContext().getResources().getConfiguration().locale.getLanguage();
         task.execute("/key", authParam);
     }
 

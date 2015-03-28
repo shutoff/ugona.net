@@ -7,6 +7,8 @@ public class DeviceFragment extends DeviceBaseFragment {
             return false;
         if ((id.length() > 7) && id.substring(0, 7).equals("heater_"))
             return false;
+        if ((id.length() > 5) && id.substring(0, 5).equals("auth_"))
+            return false;
         return true;
     }
 }

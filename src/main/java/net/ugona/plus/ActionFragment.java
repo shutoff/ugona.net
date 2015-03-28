@@ -157,6 +157,8 @@ public class ActionFragment
         CarConfig.Command[] cmds = config.getCmd();
         if (cmds != null) {
             for (CarConfig.Command cmd : cmds) {
+                if (cmd.icon == null)
+                    continue;
                 if ((cmd.inet != 0) || State.hasTelephony(getActivity()))
                     commands.add(cmd);
             }

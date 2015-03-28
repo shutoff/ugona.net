@@ -280,5 +280,7 @@ public class CarConfig extends Config implements Serializable {
         Integer min;
         Integer max;
         double k;
+        String text;
+        int[] cmd;
     }
 }

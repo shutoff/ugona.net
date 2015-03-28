@@ -32,6 +32,7 @@ public class SendCommandFragment extends DialogFragment {
     String car_id;
     int cmd_id;
     boolean longTap;
+    boolean no_prompt;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -70,6 +71,7 @@ public class SendCommandFragment extends DialogFragment {
         outState.putString(Names.ID, car_id);
         outState.putInt(Names.COMMAND, cmd_id);
         outState.putBoolean(Names.ROUTE, longTap);
+        outState.putBoolean(Names.NO_PROMPT, no_prompt);
     }
 
     @Override
@@ -109,6 +111,7 @@ public class SendCommandFragment extends DialogFragment {
         car_id = args.getString(Names.ID);
         cmd_id = args.getInt(Names.COMMAND);
         longTap = args.getBoolean(Names.ROUTE);
+        no_prompt = args.getBoolean(Names.NO_PROMPT);
     }
 
     void process() {
@@ -176,6 +179,10 @@ public class SendCommandFragment extends DialogFragment {
             dialog.show(getFragmentManager(), "password");
             return true;
         }
+        if (no_prompt) {
+            onActivityResult(DO_INET, Activity.RESULT_OK, null);
+            return true;
+        }
         show_alert(cmd, DO_INET);
         return true;
     }
@@ -223,6 +230,10 @@ public class SendCommandFragment extends DialogFragment {
             dialog.setArguments(args);
             dialog.setTargetFragment(this, DO_SMS);
             dialog.show(getFragmentManager(), "password");
+            return true;
+        }
+        if (no_prompt) {
+            onActivityResult(DO_SMS, Activity.RESULT_OK, null);
             return true;
         }
         show_alert(cmd, DO_SMS);

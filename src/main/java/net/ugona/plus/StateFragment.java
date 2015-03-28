@@ -207,19 +207,23 @@ public class StateFragment
             ivRefresh.setImageResource(state.isOnline() ? R.drawable.refresh_on : R.drawable.refresh_off);
         }
 
+        NumberFormat formatter = NumberFormat.getInstance(getResources().getConfiguration().locale);
+        formatter.setMaximumFractionDigits(2);
+        formatter.setMinimumFractionDigits(2);
+
         double power = state.getPower();
         if (power == 0) {
             iVoltage.setVisibility(View.GONE);
         } else {
             iVoltage.setVisibility(View.VISIBLE);
-            iVoltage.setText(power + " V");
+            iVoltage.setText(formatter.format(power) + " V");
         }
         double reserved = state.getReserved();
         if (reserved == 0) {
             iReserve.setVisibility(View.GONE);
         } else {
             iReserve.setVisibility(View.VISIBLE);
-            iReserve.setText(reserved + " V");
+            iReserve.setText(formatter.format(reserved) + " V");
         }
         String balance = state.getBalance();
         if (balance.equals("")) {
@@ -273,7 +277,8 @@ public class StateFragment
 
         if (state.getFuel() > 0) {
             iFuel.setVisibility(View.VISIBLE);
-            iFuel.setText(state.getFuel() + " L");
+            formatter = NumberFormat.getInstance(getResources().getConfiguration().locale);
+            iFuel.setText(formatter.format(state.getFuel()) + " L");
         } else {
             iFuel.setVisibility(View.GONE);
         }

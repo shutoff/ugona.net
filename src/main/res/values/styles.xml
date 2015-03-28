@@ -7,6 +7,7 @@
         <item name="android:editTextStyle">@style/EditTextStyle</item>
         <item name="android:checkboxStyle">@style/CheckBoxStyle</item>
         <item name="android:spinnerStyle">@style/SpinnerStyle</item>
+        <item name="android:radioButtonStyle">@style/RadioButtonStyle</item>
     </style>
 
     <style name="Theme.Transparent" parent="Theme.AppCompat.Light.Dialog">
@@ -52,6 +53,12 @@
         <item name="android:padding">10dp</item>
     </style>
 
+    <style name="RadioButtonStyle" parent="@android:style/Widget.CompoundButton.RadioButton">
+        <item name="android:textColor">@color/text_dark</item>
+        <item name="android:button">@drawable/btn_radio</item>
+        <item name="android:padding">10dp</item>
+    </style>
+
     <style name="SpinnerStyle" parent="android:Widget">
         <item name="android:background">@drawable/spinner</item>
         <item name="android:clickable">true</item>
@@ -70,6 +77,7 @@
         <item name="android:checkboxStyle">@style/CheckBoxStyle</item>
         <item name="android:editTextStyle">@style/BorderEditTextStyle</item>
         <item name="android:buttonStyle">@style/ButtonStyle</item>
+        <item name="android:radioButtonStyle">@style/RadioButtonStyle</item>
     </style>
 
 </resources>

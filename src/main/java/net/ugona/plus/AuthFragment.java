@@ -38,7 +38,7 @@ public class AuthFragment extends MainFragment {
     void fill() {
         CarConfig config = CarConfig.get(getActivity(), id());
         items = new Vector<>();
-        items.add(new Item(R.string.auth, config.getLogin(), new Runnable() {
+        items.add(new Item(getString(R.string.auth), config.getLogin(), new Runnable() {
             @Override
             public void run() {
                 AuthDialog authDialog = new AuthDialog();
@@ -49,7 +49,7 @@ public class AuthFragment extends MainFragment {
                 authDialog.show(getParentFragment().getFragmentManager(), "auth");
             }
         }));
-        items.add(new Item(R.string.phone_number, config.getPhone(), new Runnable() {
+        items.add(new Item(getString(R.string.phone_number), config.getPhone(), new Runnable() {
             @Override
             public void run() {
                 PhoneDialog phoneDialog = new PhoneDialog();
@@ -60,8 +60,28 @@ public class AuthFragment extends MainFragment {
                 phoneDialog.show(getParentFragment().getFragmentManager(), "phone");
             }
         }));
+
+        CarConfig.Setting[] settings = config.getSettings();
+        for (final CarConfig.Setting setting : settings) {
+            if ((setting.id.length() < 5) || !setting.id.substring(0, 5).equals("auth_"))
+                continue;
+            items.add(new Item(setting.name, setting.text, new Runnable() {
+                @Override
+                public void run() {
+                    if (setting.cmd == null)
+                        return;
+                    Bundle args = new Bundle();
+                    args.putString(Names.ID, id());
+                    args.putString(Names.TITLE, setting.id);
+                    SmsSettingsFragment fragment = new SmsSettingsFragment();
+                    fragment.setArguments(args);
+                    fragment.show(getActivity().getSupportFragmentManager(), "sms");
+                }
+            }));
+        }
+
         CarState state = CarState.get(getActivity(), id());
-        items.add(new Item(R.string.version, state.getVersion(), null));
+        items.add(new Item(getString(R.string.version), state.getVersion(), null));
         vList.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
@@ -112,11 +132,11 @@ public class AuthFragment extends MainFragment {
 
     static class Item {
 
-        int title;
+        String title;
         String text;
         Runnable action;
 
-        Item(int title, String text, Runnable action) {
+        Item(String title, String text, Runnable action) {
             this.title = title;
             this.text = text;
             this.action = action;
