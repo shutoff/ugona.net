@@ -8,10 +8,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 
 public class SmsSettingsFragment
         extends DialogFragment
@@ -36,8 +36,8 @@ public class SmsSettingsFragment
             if (!setting.id.equals(id))
                 continue;
             LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-            View v = inflater.inflate(R.layout.sms_settings, null);
-            group = (RadioGroup) v;
+            ScrollView scrollView = (ScrollView) inflater.inflate(R.layout.radio_list, null);
+            group = (RadioGroup) scrollView.getChildAt(0);
             if (setting.cmd != null) {
                 for (int cmd : setting.cmd) {
                     for (CarConfig.Command command : commands) {
@@ -56,7 +56,7 @@ public class SmsSettingsFragment
                     .setTitle(setting.name)
                     .setNegativeButton(R.string.cancel, null)
                     .setPositiveButton(R.string.ok, this)
-                    .setView(v)
+                    .setView(scrollView)
                     .create();
         }
         return null;

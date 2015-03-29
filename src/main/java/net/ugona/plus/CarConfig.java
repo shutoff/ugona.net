@@ -244,22 +244,8 @@ public class CarConfig extends Config implements Serializable {
         return alarmSound;
     }
 
-    public void setAlarmSound(String alarmSound) {
-        if (this.alarmSound.equals(alarmSound))
-            return;
-        this.alarmSound = alarmSound;
-        upd = true;
-    }
-
     public String getNotifySound() {
         return notifySound;
-    }
-
-    public void setNotifySound(String notifySound) {
-        if (this.notifySound.equals(notifySound))
-            return;
-        this.notifySound = notifySound;
-        upd = true;
     }
 
     public int[] getCommands() {

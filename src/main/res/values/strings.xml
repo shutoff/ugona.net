@@ -154,4 +154,9 @@
     <string name="temp_ext">Atmosphere temperature</string>
     <string name="fuel">Fuel</string>
     <string name="close">Close</string>
+    <string name="alarm_test">Alarm test</string>
+    <string name="alarm_test_sum">Click for test alarm</string>
+    <string name="def">default</string>
+    <string name="alarm_sound">Alarm sound</string>
+    <string name="notify_sound">Notify sound</string>
 </resources>

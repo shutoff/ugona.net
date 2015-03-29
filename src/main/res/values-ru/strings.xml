@@ -150,4 +150,9 @@
     <string name="temp_ext">Температура за бортом</string>
     <string name="fuel">Топливо</string>
     <string name="close">Close</string>
+    <string name="alarm_test">Проверка тревоги</string>
+    <string name="alarm_test_sum">Нажмите для проверки тревоги</string>
+    <string name="def">по умолчанию</string>
+    <string name="alarm_sound">Звук тревоги</string>
+    <string name="notify_sound">Звук уведомления</string>
 </resources>
