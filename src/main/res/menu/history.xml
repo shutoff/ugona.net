@@ -4,7 +4,7 @@
         android:id="@+id/voltage"
         android:title="@string/voltage" />
     <item
-        android:id="@+id/reserved"
+        android:id="@+id/reserve"
         android:title="@string/reserved" />
     <item
         android:id="@+id/balance"

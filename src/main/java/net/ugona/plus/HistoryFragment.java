@@ -176,7 +176,7 @@ public class HistoryFragment extends MainFragment implements HistoryView.History
     static class TypesMap extends SparseArray<String> {
         TypesMap() {
             put(R.id.voltage, "voltage");
-            put(R.id.reserve, "reserve");
+            put(R.id.reserve, "reserved");
             put(R.id.balance, "balance");
             put(R.id.fuel, "fuel");
             put(R.id.temp, "t_0");
