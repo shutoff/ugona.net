@@ -191,12 +191,11 @@ public class MainActivity
             return;
         }
 
+        Notification.clear(this, id);
+
         setPrimary();
         checkCaps();
         checkPhone();
-
-        if (savedInstanceState == null)
-            Notification.clear(this, id);
     }
 
     @Override
@@ -221,9 +220,19 @@ public class MainActivity
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Notification.clear(this, id);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         registerGCM();
+        if (!config.getInfo_message().equals("")) {
+            MessageDialog dialog = new MessageDialog();
+            dialog.show(getSupportFragmentManager(), "info");
+        }
     }
 
     @Override
@@ -637,6 +646,7 @@ public class MainActivity
                     if (gcm == null)
                         gcm = GoogleCloudMessaging.getInstance(MainActivity.this);
                     reg = gcm.register(SENDER_ID);
+                    State.appendLog("GCM: " + reg);
                     JsonObject data = new JsonObject();
                     data.add("reg", reg);
                     String[] cars = config.getCars();
@@ -696,6 +706,7 @@ public class MainActivity
                     if (res.asObject().get("error") != null)
                         return null;
                 } catch (Exception ex) {
+                    State.print(ex);
                     return null;
                 } finally {
                     if (connection != null)

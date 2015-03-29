@@ -25,6 +25,9 @@ public class AppConfig extends Config implements Serializable {
     private String GCM_id;
     private long GCM_time;
     private String GCM_version;
+    private String info_title;
+    private String info_message;
+    private String info_url;
 
     private AppConfig(Context context) {
         ids = "";
@@ -35,6 +38,9 @@ public class AppConfig extends Config implements Serializable {
         show_speed = true;
         GCM_id = "";
         GCM_version = "";
+        info_title = "";
+        info_message = "";
+        info_url = "";
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String s = preferences.getString(CONFIG_KEY, "");
         if (!s.equals("")) {
@@ -224,6 +230,39 @@ public class AppConfig extends Config implements Serializable {
         if (this.GCM_version.equals(GCM_version))
             return;
         this.GCM_version = GCM_version;
+        upd = true;
+    }
+
+    public String getInfo_title() {
+        return info_title;
+    }
+
+    public void setInfo_title(String info_title) {
+        if (this.info_title.equals(info_title))
+            return;
+        this.info_title = info_title;
+        upd = true;
+    }
+
+    public String getInfo_message() {
+        return info_message;
+    }
+
+    public void setInfo_message(String info_message) {
+        if (this.info_message.equals(info_message))
+            return;
+        this.info_message = info_message;
+        upd = true;
+    }
+
+    public String getInfo_url() {
+        return info_url;
+    }
+
+    public void setInfo_url(String info_url) {
+        if (this.info_url.equals(info_url))
+            return;
+        this.info_url = info_url;
         upd = true;
     }
 }

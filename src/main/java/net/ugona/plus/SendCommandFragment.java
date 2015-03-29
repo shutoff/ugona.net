@@ -253,11 +253,15 @@ public class SendCommandFragment extends DialogFragment {
                         toast.show();
                         if (c.done == null)
                             Commands.remove(context, car_id, c);
+                        Intent intent = new Intent(context, FetchService.class);
+                        intent.setAction(FetchService.ACTION_UPDATE);
+                        intent.putExtra(Names.ID, car_id);
+                        context.startService(intent);
                     }
 
                     @Override
                     void error() {
-                        String text = getString(R.string.send_command_error);
+                        String text = context.getString(R.string.send_command_error);
                         if (error_text != null) {
                             text += ": ";
                             text += error_text;
@@ -291,8 +295,13 @@ public class SendCommandFragment extends DialogFragment {
                     subst = "";
                 sms = sms.replace("{ccode}", subst);
                 sms = sms.replace("{pwd}", subst);
-                if (Sms.send(getActivity(), car_id, c.id, sms))
+                if (Sms.send(getActivity(), car_id, c.id, sms)) {
                     Commands.put(getActivity(), car_id, c);
+                    Intent intent = new Intent(getActivity(), FetchService.class);
+                    intent.setAction(FetchService.ACTION_UPDATE);
+                    intent.putExtra(Names.ID, car_id);
+                    getActivity().startService(intent);
+                }
                 break;
             }
         }

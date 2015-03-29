@@ -101,8 +101,10 @@ public class StateFragment
                 Vector<CarConfig.Command> fab = getFabCommands();
                 if ((fab.size() == 1) && !fab.get(0).icon.equals("blocking")) {
                     final CarConfig.Command cmd = fab.get(0);
-                    if (Commands.isProcessed(id(), cmd))
+                    if (Commands.isProcessed(id(), cmd)) {
+                        Commands.cancel(getActivity(), id(), cmd);
                         return;
+                    }
                     handler.post(new Runnable() {
                         @Override
                         public void run() {

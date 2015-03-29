@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.ugona.plus"
     android:versionCode="16"
-    android:versionName="2.0 (beta 28-03-2015)">
+    android:versionName="2.0 (beta 29-03-2015)">
 
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
@@ -61,11 +61,6 @@
         </activity>
 
         <activity
-            android:name=".MessageDialog"
-            android:launchMode="singleTop"
-            android:theme="@style/Theme.Transparent"></activity>
-
-        <activity
             android:name="com.haibison.android.lockpattern.LockPatternActivity"
             android:theme="@style/Alp.42447968.Theme.Light" />
 
@@ -112,6 +107,8 @@
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+
                 <category android:name="net.ugona.plus" />
             </intent-filter>
         </receiver>

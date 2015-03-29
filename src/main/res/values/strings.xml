@@ -163,4 +163,5 @@
     <string name="balance_notification">Balance notification</string>
     <string name="balance_no_notify">No notify</string>
     <string name="balance_limit">less %s</string>
+    <string name="more">More info</string>
 </resources>

@@ -13,6 +13,7 @@ import android.support.v4.app.NotificationCompat;
 import com.eclipsesource.json.JsonObject;
 
 import java.lang.reflect.Field;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -115,16 +116,22 @@ public class Notification extends Config {
                 remove(context, notification.az);
                 notification.az = 0;
             }
-            if (state.getAz_time() > 0) {
-                notification.az = create(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "start", state.getAz_start(), false, null);
-            } else if ((state.getAz_time() < 0) && !state.isIgnition()) {
-                String msg = context.getString(R.string.motor_off_ok);
-                long az_stop = -state.getAz_time();
-                long az_start = state.getAz_start();
-                long time = (az_stop - az_start) / 60000;
-                if ((time > 0) && (time <= 20))
-                    msg += " " + context.getString(R.string.motor_time).replace("$1", time + "");
-                notification.az = create(context, msg, R.drawable.white_motor_off, car_id, null, -state.getAz_time(), false, null);
+            long now = new Date().getTime();
+            long az_time = state.getAz_time();
+            if (az_time < 0)
+                az_time = -az_time;
+            if (az_time + 1200000 > now) {
+                if (state.getAz_time() > 0) {
+                    notification.az = create(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "start", state.getAz_start(), false, null);
+                } else if ((state.getAz_time() < 0) && !state.isIgnition()) {
+                    String msg = context.getString(R.string.motor_off_ok);
+                    long az_stop = -state.getAz_time();
+                    long az_start = state.getAz_start();
+                    long time = (az_stop - az_start) / 60000;
+                    if ((time > 0) && (time <= 20))
+                        msg += " " + context.getString(R.string.motor_time).replace("$1", time + "");
+                    notification.az = create(context, msg, R.drawable.white_motor_off, car_id, null, -state.getAz_time(), false, null);
+                }
             }
         }
         if (names.contains("guard_mode")) {
@@ -228,11 +235,19 @@ public class Notification extends Config {
 
     static void showMessage(Context context, String title, String message, String url) {
         Notification notification = Notification.get(context, "");
-        if (notification.info > 0) {
+        if (notification.info > 0)
             remove(context, notification.info);
-        }
         notification.info = create(context, message, R.drawable.info, "", null, 0, false, title);
         save(context);
+        AppConfig config = AppConfig.get(context);
+        if (title == null)
+            title = "";
+        if (url == null)
+            url = "";
+        config.setInfo_title(title);
+        config.setInfo_message(message);
+        config.setInfo_url(url);
+        AppConfig.save(context);
     }
 
     static void showAlarm(Context context, String car_id, String text) {
@@ -283,8 +298,6 @@ public class Notification extends Config {
         }
 
         Intent notificationIntent = new Intent(context, MainActivity.class);
-        if (pictId == R.drawable.info)
-            notificationIntent = new Intent(context, MessageDialog.class);
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         notificationIntent.putExtra(Names.ID, car_id);

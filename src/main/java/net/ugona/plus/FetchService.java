@@ -29,6 +29,7 @@ public class FetchService extends Service {
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;
     private static final long LONG_TIMEOUT = 5 * 60 * 60 * 1000;
+
     static private Map<String, ServerRequest> requests;
     private BroadcastReceiver mReceiver;
     private PendingIntent piTimer;
@@ -92,6 +93,16 @@ public class FetchService extends Service {
                 int id = intent.getIntExtra(Names.NOTIFY_ID, 0);
                 Notification.clear(this, car_id, id);
             }
+            if (action.equals(ACTION_UPDATE) && (intent.getStringExtra(Names.ID) == null)) {
+                AppConfig config = AppConfig.get(this);
+                String[] ids = config.getIds().split(";");
+                for (String id : ids) {
+                    new StatusRequest(id, false);
+                    Intent i = new Intent(Names.START_UPDATE);
+                    i.putExtra(Names.ID, id);
+                    sendBroadcast(i);
+                }
+            }
         }
         if (startRequest())
             return START_STICKY;
@@ -107,6 +118,17 @@ public class FetchService extends Service {
             }
             if (requests.size() > 0)
                 return true;
+        }
+        AppConfig config = AppConfig.get(this);
+        String[] ids = config.getIds().split(";");
+        for (String id : ids) {
+            if (Commands.haveProcessed(this, id)) {
+                Intent iUpd = new Intent(this, FetchService.class);
+                iUpd.setAction(FetchService.ACTION_UPDATE);
+                iUpd.putExtra(Names.ID, id);
+                PendingIntent piUpd = PendingIntent.getService(this, 0, iUpd, 0);
+                alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + REPEAT_AFTER_ERROR, REPEAT_AFTER_ERROR, piUpd);
+            }
         }
         if (piUpdate == null) {
             Intent iUpdate = new Intent(this, FetchService.class);

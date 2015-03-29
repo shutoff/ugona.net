@@ -3,6 +3,7 @@ package net.ugona.plus;
 import android.content.Context;
 import android.content.Intent;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -21,6 +22,32 @@ public class Commands {
             Queue queue = requests.get(id);
             return queue.contains(cmd);
         }
+    }
+
+    static boolean haveProcessed(Context context, String id) {
+        boolean bChanged = false;
+        boolean bRes = false;
+        synchronized (requests) {
+            if (!requests.containsKey(id))
+                return false;
+            Queue queue = requests.get(id);
+            long now = new Date().getTime();
+            for (ExecCommand cmd : queue) {
+                if (cmd.time + 900000 < now) {
+                    bChanged = true;
+                    queue.remove(cmd);
+                    continue;
+                }
+                if (cmd.command.done != null)
+                    bRes = true;
+            }
+        }
+        if (bChanged) {
+            Intent i = new Intent(Names.COMMANDS);
+            i.putExtra(Names.ID, id);
+            context.sendBroadcast(i);
+        }
+        return bRes;
     }
 
     static boolean cancel(Context context, String id, CarConfig.Command cmd) {
@@ -45,7 +72,10 @@ public class Commands {
             Queue queue = requests.get(id);
             if (queue.contains(id))
                 return;
-            queue.add(cmd);
+            ExecCommand exec = new ExecCommand();
+            exec.command = cmd;
+            exec.time = new Date().getTime();
+            queue.add(exec);
         }
         Intent i = new Intent(Names.COMMANDS);
         i.putExtra(Names.ID, id);
@@ -73,12 +103,12 @@ public class Commands {
             boolean found = false;
             Queue queue = requests.get(id);
             CarState state = CarState.get(context, id);
-            for (CarConfig.Command c : queue) {
+            for (ExecCommand c : queue) {
                 boolean ok = false;
-                if (c.done != null)
-                    ok = State.checkCondition(c.done, state);
-                if (!ok && (c.condition != null))
-                    ok = !State.checkCondition(c.condition, state);
+                if (c.command.done != null)
+                    ok = State.checkCondition(c.command.done, state);
+                if (!ok && (c.command.condition != null))
+                    ok = !State.checkCondition(c.command.condition, state);
                 if (!ok)
                     continue;
                 queue.remove(c);
@@ -100,10 +130,10 @@ public class Commands {
             boolean found = false;
             Queue queue = requests.get(id);
             CarState state = CarState.get(context, id);
-            for (CarConfig.Command c : queue) {
-                if (c.sms == null)
+            for (ExecCommand c : queue) {
+                if (c.command.sms == null)
                     continue;
-                String[] parts = c.sms.split("\\|");
+                String[] parts = c.command.sms.split("\\|");
                 if (parts.length < 2)
                     continue;
                 Pattern pattern = null;
@@ -119,8 +149,8 @@ public class Commands {
                 if (!matcher.find())
                     continue;
                 found = true;
-                if (c.done != null) {
-                    Set<String> update = State.update(c.done, state, null);
+                if (c.command.done != null) {
+                    Set<String> update = State.update(c.command.done, state, null);
                     if (update != null) {
                         upd = true;
                         Notification.update(context, id, update);
@@ -142,7 +172,12 @@ public class Commands {
         return true;
     }
 
-    static class Queue extends HashSet<CarConfig.Command> {
+    static class ExecCommand {
+        CarConfig.Command command;
+        long time;
+    }
+
+    static class Queue extends HashSet<ExecCommand> {
 
     }
 }
