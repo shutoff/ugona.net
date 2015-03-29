@@ -121,14 +121,14 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:visibility="gone"
-                                app:src="@drawable/ind07" />
+                                app:src="@drawable/ind08" />
 
                             <net.ugona.plus.Indicator
                                 android:id="@+id/temp_salon"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:visibility="gone"
-                                app:src="@drawable/ind08" />
+                                app:src="@drawable/ind07" />
 
                             <net.ugona.plus.Indicator
                                 android:id="@+id/temp_ext"
