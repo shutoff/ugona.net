@@ -48,7 +48,7 @@ public class State {
     static final Pattern not_bool = Pattern.compile("^\\!([A-Za-z0-9_]+)$");
     static final Pattern eq_int = Pattern.compile("^([A-Za-z0-9_]+)=([0-9]+)$");
     static final Pattern ne_int = Pattern.compile("^([A-Za-z0-9_]+)\\!=([0-9]+)$");
-    static final Pattern eq_str = Pattern.compile("^([A-Za-z0-9_]+)=\\$([0-9]+)$");
+    static final Pattern eq_str = Pattern.compile("^([A-Za-z0-9_]+)=\"(.*)\"$");
 
     static private int telephony_state = 0;
 
@@ -332,6 +332,14 @@ public class State {
 
     static void setString(Object o, String name, String value) {
         try {
+            String setter = "set" + name.substring(0, 1).toUpperCase() + name.substring(1);
+            Method method = o.getClass().getDeclaredMethod(setter, new Class[]{String.class});
+            method.invoke(o, value);
+            return;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        try {
             Field field = o.getClass().getDeclaredField(name);
             if (field.getType() != int.class)
                 return;
@@ -340,13 +348,6 @@ public class State {
             return;
         } catch (Exception ex) {
             // ignore
-        }
-        name = "set" + name.substring(0, 1).toUpperCase() + name.substring(1);
-        try {
-            Method method = o.getClass().getDeclaredMethod(name, new Class[]{String.class});
-            method.invoke(o, value);
-        } catch (Exception ex) {
-            ex.printStackTrace();
         }
     }
 
@@ -384,13 +385,16 @@ public class State {
             m = eq_str.matcher(condition);
             if (m.find()) {
                 String id = m.group(1);
-                int v = Integer.parseInt(m.group(2));
-                if ((matcher == null) || (v >= matcher.groupCount()))
+                String v = m.group(2);
+                if (matcher != null) {
+                    for (int n = matcher.groupCount(); n > 0; n--) {
+                        String subst = "$" + n;
+                        v = v.replace(subst, matcher.group(n));
+                    }
+                }
+                if (getString(o, id).equals(v))
                     return null;
-                String val = matcher.group(v);
-                if (getString(o, id).equals(val))
-                    return null;
-                setString(o, id, val);
+                setString(o, id, v);
                 res.add(id);
                 return res;
             }

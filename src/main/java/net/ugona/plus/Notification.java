@@ -146,16 +146,19 @@ public class Notification extends Config {
                 remove(context, notification.zone);
                 notification.zone = 0;
             }
-            String text = null;
-            long time = state.getZone();
-            if (state.getZone() > 0) {
+            String text;
+            long time = state.getZone_time();
+            if (time > 0) {
                 text = context.getString(R.string.zone_in);
             } else {
                 text = context.getString(R.string.zone_out);
                 time = -time;
             }
-            if (!state.getZone_name().equals(""))
-                text += " " + state.getZone_name();
+            String zone = state.getZone();
+            if (zone.length() >= 1)
+                zone = zone.substring(1);
+            if (!zone.equals(""))
+                text += " " + zone;
             notification.zone = create(context, text, R.drawable.white_zone, car_id, null, time, false, null);
         }
         if (names.contains("guard_mode")) {

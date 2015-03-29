@@ -46,4 +46,8 @@ public class Indicator extends FrameLayout {
         ivInd.setImageResource(id);
     }
 
+    void setTextColor(int color) {
+        tvLabel.setTextColor(color);
+    }
+
 }

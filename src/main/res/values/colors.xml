@@ -13,4 +13,5 @@
     <color name="text_dark">#3c3c3c</color>
     <color name="dark_transparent">#80000000</color>
     <color name="btn_main">#4cad50</color>
+    <color name="neutral">#A0A000</color>
 </resources>

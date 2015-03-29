@@ -199,6 +199,7 @@ public class StateFragment
             return;
 
         CarState state = CarState.get(context, id());
+        CarConfig config = CarConfig.get(context, id());
         if (FetchService.isProcessed(id())) {
             vProgress.setVisibility(View.VISIBLE);
             ivRefresh.setImageResource(R.drawable.refresh);
@@ -217,6 +218,7 @@ public class StateFragment
         } else {
             iVoltage.setVisibility(View.VISIBLE);
             iVoltage.setText(formatter.format(power) + " V");
+            setPowerState(iVoltage, state.getPower_state());
         }
         double reserved = state.getReserved();
         if (reserved == 0) {
@@ -224,20 +226,29 @@ public class StateFragment
         } else {
             iReserve.setVisibility(View.VISIBLE);
             iReserve.setText(formatter.format(reserved) + " V");
+            setPowerState(iReserve, state.getReserved_state());
         }
         String balance = state.getBalance();
-        if (balance.equals("")) {
+        if (balance.equals("") || config.isHideBalance()) {
             iBalance.setVisibility(View.GONE);
         } else {
             iBalance.setVisibility(View.VISIBLE);
             try {
                 NumberFormat nf = NumberFormat.getCurrencyInstance();
-                String str = nf.format(Double.parseDouble(balance));
+                double value = Double.parseDouble(balance);
+                String str = nf.format(value);
                 Currency currency = Currency.getInstance(Locale.getDefault());
                 str = str.replace(currency.getSymbol(), "");
                 iBalance.setText(str);
+                int balance_limit = config.getBalance_limit();
+                if (value <= balance_limit) {
+                    iBalance.setTextColor(getResources().getColor(R.color.error));
+                } else {
+                    iBalance.setTextColor(getResources().getColor(R.color.indiicator));
+                }
             } catch (Exception ex) {
                 iBalance.setText(balance);
+                iBalance.setTextColor(getResources().getColor(R.color.indiicator));
             }
         }
         int gsm_level = state.getGsm_level();
@@ -374,6 +385,19 @@ public class StateFragment
             vFab.setVisibility(View.GONE);
             vFabProgress.setVisibility(View.GONE);
         }
+    }
+
+    void setPowerState(Indicator ind, int state) {
+        int color = R.color.indiicator;
+        switch (state) {
+            case 0:
+                color = R.color.error;
+                break;
+            case 2:
+                color = R.color.neutral;
+                break;
+        }
+        ind.setTextColor(getResources().getColor(color));
     }
 
     @Override

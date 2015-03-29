@@ -18,5 +18,37 @@
         android:layout_height="wrap_content"
         android:textSize="15sp" />
 
+    <CheckBox
+        android:id="@+id/check"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:button="@drawable/checkbox"
+        android:textColor="@color/text_dark"
+        android:textSize="15sp"
+        android:typeface="sans"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/edit_block"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/edit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="numberDecimal" />
+
+        <ImageView
+            android:id="@+id/ok"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/btn_ok" />
+
+    </LinearLayout>
 
 </LinearLayout>

@@ -21,7 +21,8 @@ public class CarState extends Config implements Serializable {
     private long last_stand;
     private long az_time;
     private long az_start;
-    private long zone;
+    private String zone;
+    private long zone_time;
     private long card;
     private boolean door_fl;
     private boolean door_fr;
@@ -61,7 +62,6 @@ public class CarState extends Config implements Serializable {
     private boolean device_password;
     private long check_time;
     private String version;
-    private String zone_name;
 
     private boolean alert_doors;
     private boolean alert_hood;
@@ -75,7 +75,7 @@ public class CarState extends Config implements Serializable {
         temperature = "";
         version = "";
         balance = "";
-        zone_name = "";
+        zone = "";
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String s = preferences.getString(CAR_KEY + id, "");
@@ -139,8 +139,23 @@ public class CarState extends Config implements Serializable {
         return az_start;
     }
 
-    public long getZone() {
+    public String getZone() {
         return zone;
+    }
+
+    public void setZone(String zone) {
+        if (this.zone.equals(zone))
+            return;
+        this.zone = zone;
+        Date now = new Date();
+        zone_time = now.getTime();
+        if (zone.substring(0, 1).equals("-"))
+            zone_time = -zone_time;
+        upd = true;
+    }
+
+    public long getZone_time() {
+        return zone_time;
     }
 
     public long getCard() {
@@ -347,10 +362,6 @@ public class CarState extends Config implements Serializable {
             return;
         this.version = version;
         upd = true;
-    }
-
-    public String getZone_name() {
-        return zone_name;
     }
 
     public boolean isPointer() {

@@ -155,4 +155,8 @@
     <string name="def">по умолчанию</string>
     <string name="alarm_sound">Звук тревоги</string>
     <string name="notify_sound">Звук уведомления</string>
+    <string name="show_balance">Отображать баланс</string>
+    <string name="balance_notification">Предупреждать о пороге отключения</string>
+    <string name="balance_no_notify">Не уведомлять</string>
+    <string name="balance_limit">если меньше %s</string>
 </resources>

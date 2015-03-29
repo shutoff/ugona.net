@@ -89,7 +89,6 @@ public class SettingsFragment extends MainFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-/*
         if (item.getItemId() == android.R.id.home) {
             FragmentStatePagerAdapter adapter = (FragmentStatePagerAdapter) vPager.getAdapter();
             if (adapter == null)
@@ -115,7 +114,6 @@ public class SettingsFragment extends MainFragment {
                 return true;
             }
         }
-*/
         MainFragment fragment = getFragment(0);
         if ((fragment != null) && fragment.onOptionsItemSelected(item))
             return true;

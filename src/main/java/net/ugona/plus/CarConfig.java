@@ -33,6 +33,7 @@ public class CarConfig extends Config implements Serializable {
     private boolean ccode_text;
     private boolean device_password;
     private boolean hideBalance;
+    private int balance_limit;
     private String alarmSound;
     private String notifySound;
 
@@ -78,6 +79,7 @@ public class CarConfig extends Config implements Serializable {
         login = "";
         phone = "";
         event_filter = 3;
+        balance_limit = 50;
         temp_settings = "";
         alarmSound = "";
         notifySound = "";
@@ -246,6 +248,17 @@ public class CarConfig extends Config implements Serializable {
 
     public String getNotifySound() {
         return notifySound;
+    }
+
+    public int getBalance_limit() {
+        return balance_limit;
+    }
+
+    public void setBalance_limit(int balance_limit) {
+        if (this.balance_limit == balance_limit)
+            return;
+        this.balance_limit = balance_limit;
+        upd = true;
     }
 
     public int[] getCommands() {

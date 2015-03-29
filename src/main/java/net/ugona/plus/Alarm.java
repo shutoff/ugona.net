@@ -119,8 +119,10 @@ public class Alarm
 
     @Override
     protected void onDestroy() {
-        if (player != null)
+        if (player != null) {
             player.stop();
+            player.release();
+        }
         timer.cancel();
         super.onDestroy();
         CarState state = CarState.get(this, car_id);
