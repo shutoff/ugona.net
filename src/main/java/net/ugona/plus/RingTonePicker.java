@@ -6,6 +6,8 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -23,14 +25,15 @@ import android.widget.ScrollView;
 public class RingTonePicker
         extends DialogFragment
         implements DialogInterface.OnClickListener,
-        RadioGroup.OnCheckedChangeListener {
+        RadioGroup.OnCheckedChangeListener,
+        MediaPlayer.OnCompletionListener {
 
     int type;
     String title;
     String sound;
     Button btnOk;
     RadioGroup group;
-    Ringtone ringtone;
+    MediaPlayer player;
 
     @NonNull
     @Override
@@ -56,9 +59,10 @@ public class RingTonePicker
         group.setOnCheckedChangeListener(this);
 
         Cursor cursor = manager.getCursor();
+        int position = 0;
         while (cursor.moveToNext()) {
             String title = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX);
-            String uri = cursor.getString(RingtoneManager.URI_COLUMN_INDEX);
+            String uri = manager.getRingtoneUri(position++).toString();
             rb = new RadioButton(getActivity());
             rb.setText(title);
             rb.setTag(uri);
@@ -127,10 +131,37 @@ public class RingTonePicker
         if (btnOk != null)
             btnOk.setEnabled(true);
         sound = v.getTag().toString();
-        if (ringtone != null)
-            ringtone.stop();
-        ringtone = RingtoneManager.getRingtone(getActivity(), Uri.parse(sound));
-        if (ringtone != null)
-            ringtone.play();
+        if (player != null) {
+            player.stop();
+            player.release();
+        }
+        try {
+            player = new MediaPlayer();
+            player.setDataSource(getActivity(), Uri.parse(sound));
+            player.setAudioStreamType(AudioManager.STREAM_ALARM);
+            player.prepare();
+            player.setLooping(false);
+            player.start();
+            player.setOnCompletionListener(this);
+        } catch (Exception ex) {
+            player = null;
+        }
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        if (player != null) {
+            player.stop();
+            player.release();
+        }
+        super.onDismiss(dialog);
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        if (player != null) {
+            player.stop();
+            player.release();
+        }
     }
 }
