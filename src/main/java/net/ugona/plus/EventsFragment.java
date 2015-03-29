@@ -562,19 +562,33 @@ public class EventsFragment extends MainFragment {
                 data += getString(R.string.balance) + ": " + String.format("%.2f", balance.asDouble()) + "\n";
             JsonValue temperature = res.get("temperature");
             if (temperature != null) {
-                JsonObject t = temperature.asObject();
-                data += getString(R.string.temperature);
-                if (t.get("t1") != null)
-                    data += ": " + temp(t, 1) + "\n";
-                for (String name : t.names()) {
-                    try {
-                        int sensor = Integer.parseInt(name.substring(1));
-                        if (sensor == 1)
-                            continue;
-                        data += getString(R.string.sensor) + ": " + temp(t, sensor);
-                    } catch (Exception ex) {
-                        //ignore
+                String[] temp = temperature.asString().split(";");
+                for (String t : temp) {
+                    String[] parts = t.split(":");
+                    switch (Integer.parseInt(parts[0])) {
+                        case 0:
+                            data += getString(R.string.temperature);
+                            break;
+                        case 1:
+                            data += getString(R.string.temp_engine);
+                            break;
+                        case 2:
+                            data += getString(R.string.temp_salon);
+                            break;
+                        case 3:
+                            data += getString(R.string.temp_ext);
+                            break;
+                        default:
+                            data += getString(R.string.temperature);
+                            if (!parts[2].equals("")) {
+                                data += " (";
+                                data += getString(R.string.sensor);
+                                data += " ";
+                                data += parts[2];
+                                data += ")";
+                            }
                     }
+                    data += ": " + parts[1] + " \u00B0C\n";
                 }
             }
             JsonValue vLevel = res.get("card_level");
