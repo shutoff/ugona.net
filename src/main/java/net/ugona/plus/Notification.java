@@ -30,6 +30,7 @@ public class Notification extends Config {
     private int trunk;
     private int zone;
     private int info;
+    private int alarm;
     private String message;
     private String title;
     private String url;
@@ -169,7 +170,7 @@ public class Notification extends Config {
         if (state.isGuard() && doors != state.isAlert_doors()) {
             state.setAlert_doors(state.isGuard() && doors);
             if (state.isAlert_doors()) {
-                notification.doors = create(context, context.getString(R.string.open_door), R.drawable.w_warning, car_id, null, 0, false, null);
+                notification.doors = create(context, context.getString(R.string.open_door), R.drawable.w_warning_light, car_id, null, 0, false, null);
             } else {
                 if (notification.doors != 0) {
                     remove(context, notification.doors);
@@ -180,7 +181,7 @@ public class Notification extends Config {
         if (state.isGuard() && state.isHood() != state.isAlert_hood()) {
             state.setAlert_hood(state.isGuard() && state.isHood());
             if (state.isAlert_hood()) {
-                notification.hood = create(context, context.getString(R.string.open_hood), R.drawable.w_warning, car_id, null, 0, false, null);
+                notification.hood = create(context, context.getString(R.string.open_hood), R.drawable.w_warning_light, car_id, null, 0, false, null);
             } else {
                 if (notification.hood != 0) {
                     remove(context, notification.hood);
@@ -191,7 +192,7 @@ public class Notification extends Config {
         if (state.isGuard() && state.isTrunk() != state.isAlert_trunk()) {
             state.setAlert_trunk(state.isGuard() && state.isTrunk());
             if (state.isAlert_trunk()) {
-                notification.trunk = create(context, context.getString(R.string.open_trunk), R.drawable.w_warning, car_id, null, 0, false, null);
+                notification.trunk = create(context, context.getString(R.string.open_trunk), R.drawable.w_warning_light, car_id, null, 0, false, null);
             } else {
                 if (notification.trunk != 0) {
                     remove(context, notification.trunk);
@@ -231,9 +232,25 @@ public class Notification extends Config {
         save(context);
     }
 
+    static void showAlarm(Context context, String car_id, String text) {
+        Notification notification = Notification.get(context, car_id);
+        if (notification.alarm != 0) {
+            remove(context, notification.alarm);
+            notification.alarm = 0;
+        }
+        notification.alarm = create(context, text, R.drawable.w_warning_light, car_id, null, 0, false, null);
+    }
+
     static void show(Context context, String car_id, String text, String title, int pictId, int max_id, String sound, long when, boolean outgoing) {
         if (title == null)
             title = context.getString(R.string.app_name);
+
+        if (sound == null) {
+            CarConfig carConfig = CarConfig.get(context, car_id);
+            sound = carConfig.getNotifySound();
+            if (sound.equals(""))
+                sound = null;
+        }
 
         int defs = android.app.Notification.DEFAULT_LIGHTS;
         defs |= android.app.Notification.DEFAULT_VIBRATE;

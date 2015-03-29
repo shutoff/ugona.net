@@ -4,7 +4,7 @@
     android:versionCode="16"
     android:versionName="2.0 (beta 28-03-2015)">
 
-<uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -90,6 +90,11 @@
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".Alarm"
+            android:configChanges="keyboard|keyboardHidden|orientation"
+            android:launchMode="singleTop" />
 
         <service android:name=".FetchService" />
         <service android:name=".WidgetService" />

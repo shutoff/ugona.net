@@ -239,9 +239,9 @@ public class CarView extends View {
 
         int shock = s.getShock();
         if (shock == 1)
-            parts.add(prefix + "_hit1");
+            parts.add(prefix + "_a_hit1");
         if (shock == 2)
-            parts.add(prefix + "_hit2");
+            parts.add(prefix + "_a_hit2");
         if (s.isMove())
             parts.add(prefix + "_a_move");
         if (s.isAz()) {

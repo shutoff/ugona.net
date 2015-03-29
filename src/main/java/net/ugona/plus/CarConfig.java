@@ -26,12 +26,15 @@ public class CarConfig extends Config implements Serializable {
     private int voltage_shift;
     private String temp_settings;
     private Setting[] settings;
+    private Sms[] sms;
     private int[] commands;
     private boolean inet_cmd;
     private int sim_cmd;
     private boolean ccode_text;
     private boolean device_password;
     private boolean hideBalance;
+    private String alarmSound;
+    private String notifySound;
 
     private CarConfig() {
         init();
@@ -76,6 +79,8 @@ public class CarConfig extends Config implements Serializable {
         phone = "";
         event_filter = 3;
         temp_settings = "";
+        alarmSound = "";
+        notifySound = "";
     }
 
     void read(Context context, String id) {
@@ -227,8 +232,34 @@ public class CarConfig extends Config implements Serializable {
         return cmd;
     }
 
+    public Sms[] getSms() {
+        return sms;
+    }
+
     public Setting[] getSettings() {
         return settings;
+    }
+
+    public String getAlarmSound() {
+        return alarmSound;
+    }
+
+    public void setAlarmSound(String alarmSound) {
+        if (this.alarmSound.equals(alarmSound))
+            return;
+        this.alarmSound = alarmSound;
+        upd = true;
+    }
+
+    public String getNotifySound() {
+        return notifySound;
+    }
+
+    public void setNotifySound(String notifySound) {
+        if (this.notifySound.equals(notifySound))
+            return;
+        this.notifySound = notifySound;
+        upd = true;
     }
 
     public int[] getCommands() {
@@ -282,5 +313,12 @@ public class CarConfig extends Config implements Serializable {
         double k;
         String text;
         int[] cmd;
+    }
+
+    public static class Sms implements Serializable {
+        String sms;
+        String set;
+        String alarm;
+        String notify;
     }
 }

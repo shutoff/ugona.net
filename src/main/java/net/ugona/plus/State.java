@@ -48,6 +48,8 @@ public class State {
     static final Pattern not_bool = Pattern.compile("^\\!([A-Za-z0-9_]+)$");
     static final Pattern eq_int = Pattern.compile("^([A-Za-z0-9_]+)=([0-9]+)$");
     static final Pattern ne_int = Pattern.compile("^([A-Za-z0-9_]+)\\!=([0-9]+)$");
+    static final Pattern eq_str = Pattern.compile("^([A-Za-z0-9_]+)=\\$([0-9]+)$");
+
     static private int telephony_state = 0;
 
     static public void appendLog(String text) {
@@ -291,7 +293,7 @@ public class State {
     static void setInteger(Object o, String name, int value) {
         try {
             Field field = o.getClass().getDeclaredField(name);
-            if (field.getType() != boolean.class)
+            if (field.getType() != int.class)
                 return;
             field.setAccessible(true);
             field.setInt(o, value);
@@ -308,8 +310,47 @@ public class State {
         }
     }
 
+    static String getString(Object o, String name) {
+        try {
+            Field field = o.getClass().getDeclaredField(name);
+            if (field.getType() != String.class)
+                return null;
+            field.setAccessible(true);
+            return field.get(o).toString();
+        } catch (Exception ex) {
+            // ignore
+        }
+        name = "get" + name.substring(0, 1).toUpperCase() + name.substring(1);
+        try {
+            Method method = o.getClass().getDeclaredMethod(name);
+            return method.invoke(o).toString();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
 
-    static Set<String> update(String condition, Object o) {
+    static void setString(Object o, String name, String value) {
+        try {
+            Field field = o.getClass().getDeclaredField(name);
+            if (field.getType() != int.class)
+                return;
+            field.setAccessible(true);
+            field.set(o, value);
+            return;
+        } catch (Exception ex) {
+            // ignore
+        }
+        name = "set" + name.substring(0, 1).toUpperCase() + name.substring(1);
+        try {
+            Method method = o.getClass().getDeclaredMethod(name, new Class[]{String.class});
+            method.invoke(o, value);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    static Set<String> update(String condition, Object o, Matcher matcher) {
         Matcher m = ok_bool.matcher(condition);
         HashSet<String> res = new HashSet<>();
         try {
@@ -337,6 +378,19 @@ public class State {
                 if (getInteger(o, id) == v)
                     return null;
                 setInteger(o, id, v);
+                res.add(id);
+                return res;
+            }
+            m = eq_str.matcher(condition);
+            if (m.find()) {
+                String id = m.group(1);
+                int v = Integer.parseInt(m.group(2));
+                if ((matcher == null) || (v >= matcher.groupCount()))
+                    return null;
+                String val = matcher.group(v);
+                if (getString(o, id).equals(val))
+                    return null;
+                setString(o, id, val);
                 res.add(id);
                 return res;
             }

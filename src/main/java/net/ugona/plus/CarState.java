@@ -41,6 +41,7 @@ public class CarState extends Config implements Serializable {
     private int gsm_level;
     private boolean tilt;
     private boolean move;
+    private boolean sos;
     private int shock;
     private String gsm;
     private String gps;
@@ -289,6 +290,10 @@ public class CarState extends Config implements Serializable {
         return move;
     }
 
+    public void setMove(boolean move) {
+        this.move = move;
+    }
+
     public boolean isAlert_doors() {
         return alert_doors;
     }
@@ -323,6 +328,14 @@ public class CarState extends Config implements Serializable {
 
     public int getShock() {
         return shock;
+    }
+
+    public void setShock(int shock) {
+        this.shock = shock;
+    }
+
+    public void setSos(boolean sos) {
+        this.sos = sos;
     }
 
     public String getVersion() {

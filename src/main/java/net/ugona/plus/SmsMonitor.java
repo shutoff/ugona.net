@@ -9,6 +9,8 @@ import android.telephony.SmsMessage;
 import android.widget.Toast;
 
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SmsMonitor extends BroadcastReceiver {
     static boolean compareNumbers(String config, String from) {
@@ -48,7 +50,7 @@ public class SmsMonitor extends BroadcastReceiver {
                 if (sms.length == 1) {
                     if (c.done != null) {
                         CarState state = CarState.get(context, id);
-                        Set<String> upd = State.update(c.done, state);
+                        Set<String> upd = State.update(c.done, state, null);
                         if (upd != null) {
                             Intent i = new Intent(Names.UPDATED);
                             i.putExtra(Names.ID, id);
@@ -81,7 +83,41 @@ public class SmsMonitor extends BroadcastReceiver {
                     abortBroadcast();
                     return;
                 }
+                CarConfig.Sms[] sms = carConfig.getSms();
+                for (CarConfig.Sms s : sms) {
+                    try {
+                        Pattern pattern = Pattern.compile(s.sms);
+                        Matcher matcher = pattern.matcher(body);
+                        if (!matcher.find())
+                            continue;
+                        Set<String> changed = null;
+                        if (s.set != null) {
+                            CarState state = CarState.get(context, car_id);
+                            changed = State.update(s.set, state, matcher);
+                        }
+                        if (s.alarm != null) {
+                            Intent alarmIntent = new Intent(context, Alarm.class);
+                            alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            alarmIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            alarmIntent.putExtra(Names.TITLE, s.alarm);
+                            alarmIntent.putExtra(Names.ID, car_id);
+                            context.startActivity(alarmIntent);
+                            abortBroadcast();
+                            return;
+                        }
+                        if (s.notify != null) {
+                            Notification.showAlarm(context, car_id, s.notify);
+                            abortBroadcast();
+                            return;
+                        }
+                        if (changed != null)
+                            Notification.update(context, car_id, changed);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
             }
         }
     }
+
 }

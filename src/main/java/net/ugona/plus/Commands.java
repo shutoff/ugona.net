@@ -120,7 +120,7 @@ public class Commands {
                     continue;
                 found = true;
                 if (c.done != null) {
-                    Set<String> update = State.update(c.done, state);
+                    Set<String> update = State.update(c.done, state, null);
                     if (update != null) {
                         upd = true;
                         Notification.update(context, id, update);

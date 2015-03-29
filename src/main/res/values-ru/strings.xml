@@ -149,4 +149,5 @@
     <string name="temp_salon">Температура в салоне</string>
     <string name="temp_ext">Температура за бортом</string>
     <string name="fuel">Топливо</string>
+    <string name="close">Close</string>
 </resources>

@@ -153,4 +153,5 @@
     <string name="temp_salon">Salon temperature</string>
     <string name="temp_ext">Atmosphere temperature</string>
     <string name="fuel">Fuel</string>
+    <string name="close">Close</string>
 </resources>
