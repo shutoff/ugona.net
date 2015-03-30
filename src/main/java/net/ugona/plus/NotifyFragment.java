@@ -55,6 +55,7 @@ public class NotifyFragment
                 Intent intent = new Intent(getActivity(), Alarm.class);
                 intent.putExtra(Names.ID, id());
                 intent.putExtra(Names.TITLE, getString(R.string.alarm_test));
+                intent.putExtra(Names.ERROR, true);
                 startActivity(intent);
             }
         }));

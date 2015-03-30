@@ -166,4 +166,5 @@
     <string name="more">More info</string>
     <string name="add_zone">Add zone</string>
     <string name="remove">Remove</string>
+    <string name="low_balance">Low balance</string>
 </resources>

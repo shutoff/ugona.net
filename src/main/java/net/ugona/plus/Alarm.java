@@ -28,6 +28,9 @@ public class Alarm
     int max_level;
     int prev_level;
     int count;
+    boolean bDemo;
+    int demo_count;
+    int demo_state;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,10 +40,12 @@ public class Alarm
         if (getIntent() != null) {
             car_id = getIntent().getStringExtra(Names.ID);
             title = getIntent().getStringExtra(Names.TITLE);
+            bDemo = getIntent().getBooleanExtra(Names.ERROR, false);
         }
         if (savedInstanceState != null) {
             car_id = savedInstanceState.getString(Names.ID);
             title = savedInstanceState.getString(Names.TITLE);
+            bDemo = savedInstanceState.getBoolean(Names.ERROR);
         }
         setContentView(R.layout.alarm);
         TextView tvTitle = (TextView) findViewById(R.id.title);
@@ -64,6 +69,44 @@ public class Alarm
                 if (new_level != prev_level) {
                     audioManager.setStreamVolume(AudioManager.STREAM_ALARM, new_level, 0);
                     prev_level = new_level;
+                }
+                if (--demo_count <= 0) {
+                    demo_count = 10;
+                    CarState state = CarState.get(Alarm.this, car_id);
+                    switch (++demo_state) {
+                        case 1:
+                            state.setShock(1);
+                            break;
+                        case 2:
+                            state.setShock(2);
+                            break;
+                        case 3:
+                            state.setShock(0);
+                            state.setMove(true);
+                            break;
+                        case 4:
+                            state.setTilt(true);
+                            break;
+                        case 5:
+                            state.setSos(true);
+                            break;
+                        case 6:
+                            state.setMove(false);
+                            state.setSos(false);
+                            state.setTilt(false);
+                            state.setIn_sensor(true);
+                            break;
+                        case 7:
+                            state.setExt_sensor(true);
+                            break;
+                        case 8:
+                            state.setIn_sensor(false);
+                            state.setExt_sensor(false);
+                            state.setSos(true);
+                        default:
+                            demo_state = 0;
+                    }
+                    carView.update(state);
                 }
             }
 
@@ -110,6 +153,7 @@ public class Alarm
         super.onSaveInstanceState(outState);
         outState.putString(Names.ID, car_id);
         outState.putString(Names.TITLE, title);
+        outState.putBoolean(Names.ERROR, bDemo);
     }
 
     @Override
@@ -129,5 +173,8 @@ public class Alarm
         state.setSos(false);
         state.setShock(0);
         state.setMove(false);
+        state.setTilt(true);
+        state.setIn_sensor(false);
+        state.setExt_sensor(false);
     }
 }

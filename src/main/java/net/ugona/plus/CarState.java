@@ -43,6 +43,8 @@ public class CarState extends Config implements Serializable {
     private boolean tilt;
     private boolean move;
     private boolean sos;
+    private boolean in_sensor;
+    private boolean ext_sensor;
     private int shock;
     private String gsm;
     private String gps;
@@ -67,6 +69,7 @@ public class CarState extends Config implements Serializable {
     private boolean alert_hood;
     private boolean alert_trunk;
     private boolean valet;
+    private double notify_balance;
 
     private CarState(Context context, String id) {
 
@@ -301,6 +304,10 @@ public class CarState extends Config implements Serializable {
         return tilt;
     }
 
+    public void setTilt(boolean tilt) {
+        this.tilt = tilt;
+    }
+
     public boolean isMove() {
         return move;
     }
@@ -353,6 +360,22 @@ public class CarState extends Config implements Serializable {
         this.sos = sos;
     }
 
+    public boolean isIn_sensor() {
+        return in_sensor;
+    }
+
+    public void setIn_sensor(boolean in_sensor) {
+        this.in_sensor = in_sensor;
+    }
+
+    public boolean isExt_sensor() {
+        return ext_sensor;
+    }
+
+    public void setExt_sensor(boolean ext_sensor) {
+        this.ext_sensor = ext_sensor;
+    }
+
     public String getVersion() {
         return version;
     }
@@ -373,7 +396,11 @@ public class CarState extends Config implements Serializable {
             return false;
         if (!guard)
             return false;
-        return guard_time < az_time;
+        if (!ignition)
+            return false;
+        if (guard_time >= az_time)
+            return false;
+        return az_time >= new Date().getTime() - 1500000;
     }
 
     public void setAz(boolean az) {
@@ -389,5 +416,16 @@ public class CarState extends Config implements Serializable {
                 az_time = -now;
             ignition = false;
         }
+    }
+
+    public double getNotify_balance() {
+        return notify_balance;
+    }
+
+    public void setNotify_balance(double notify_balance) {
+        if (this.notify_balance == notify_balance)
+            return;
+        this.notify_balance = notify_balance;
+        upd = true;
     }
 }

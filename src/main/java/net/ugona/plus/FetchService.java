@@ -28,6 +28,7 @@ public class FetchService extends Service {
 
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;
+    private static final long REPEAT_COMMANDS = 40 * 1000;
     private static final long LONG_TIMEOUT = 5 * 60 * 60 * 1000;
 
     static private Map<String, ServerRequest> requests;
@@ -127,7 +128,7 @@ public class FetchService extends Service {
                 iUpd.setAction(FetchService.ACTION_UPDATE);
                 iUpd.putExtra(Names.ID, id);
                 PendingIntent piUpd = PendingIntent.getService(this, 0, iUpd, 0);
-                alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + REPEAT_AFTER_ERROR, REPEAT_AFTER_ERROR, piUpd);
+                alarmMgr.set(AlarmManager.RTC, System.currentTimeMillis() + REPEAT_COMMANDS, piUpd);
             }
         }
         if (piUpdate == null) {
@@ -296,6 +297,7 @@ public class FetchService extends Service {
                 params.time = state.getTime();
             if (connect)
                 params.connect = 1;
+            State.appendLog("status " + params.time);
             execute("/", params);
         }
     }

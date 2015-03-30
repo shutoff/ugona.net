@@ -115,10 +115,7 @@ public class CarView extends View {
         if (xPos < 0)
             xPos = 0;
         xPos += X_PAD * pk + radius;
-        float yPos = y + k * HEIGHT;
-        if (yPos > canvas.getHeight())
-            yPos = canvas.getHeight();
-        yPos -= Y_PAD * pk + radius;
+        float yPos = y + Y_PAD * pk + radius;
 
         if (ext.length > 1) {
             parts = ext[1].split(";");
@@ -248,6 +245,10 @@ public class CarView extends View {
             animation = parts.size();
             parts.add(prefix + "_az");
         }
+        if (s.isIn_sensor())
+            parts.add(prefix + "_a_in");
+        if (s.isExt_sensor())
+            parts.add(prefix + "_a_out");
 
         String new_state = null;
         for (String part : parts) {
@@ -274,6 +275,8 @@ public class CarView extends View {
             parts.add("b_valet");
         if (s.isTilt())
             parts.add("r_slope");
+        if (s.isTilt())
+            parts.add("r_sos");
 
         String ext_state = null;
         for (String part : parts) {

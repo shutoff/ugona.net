@@ -13,6 +13,7 @@ import android.support.v4.app.NotificationCompat;
 import com.eclipsesource.json.JsonObject;
 
 import java.lang.reflect.Field;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +33,7 @@ public class Notification extends Config {
     private int zone;
     private int info;
     private int alarm;
+    private int balance;
     private String message;
     private String title;
     private String url;
@@ -111,7 +113,7 @@ public class Notification extends Config {
         CarState state = CarState.get(context, car_id);
         Notification notification = Notification.get(context, car_id);
         if (names.contains("az_time") || names.contains("az")) {
-            State.appendLog("changed az " + state.getAz_time() + " " + state.isIgnition());
+            State.appendLog("changed az " + state.getAz_time() + " " + state.isIgnition() + " " + state.isGuard());
             if (notification.az != 0) {
                 remove(context, notification.az);
                 notification.az = 0;
@@ -132,6 +134,12 @@ public class Notification extends Config {
                         msg += " " + context.getString(R.string.motor_time).replace("$1", time + "");
                     notification.az = create(context, msg, R.drawable.white_motor_off, car_id, null, -state.getAz_time(), false, null);
                 }
+            }
+        }
+        if (names.contains("guard") || names.contains("ignition")) {
+            if ((notification.az != 0) && (!state.isGuard() || (state.isIgnition() && !state.isAz()))) {
+                remove(context, notification.az);
+                notification.az = 0;
             }
         }
         if (names.contains("guard_mode")) {
@@ -175,6 +183,30 @@ public class Notification extends Config {
             }
             if (state.getGuard_mode() == 3)
                 notification.part_guard = create(context, context.getString(R.string.ps_guard), R.drawable.white_zone, car_id, null, 0, false, null);
+        }
+        if (names.contains("balance")) {
+            try {
+                double balance = Double.parseDouble(state.getBalance());
+                if (balance != state.getNotify_balance()) {
+                    CarConfig carConfig = CarConfig.get(context, car_id);
+                    if (!carConfig.isHideBalance() && (carConfig.getBalance_limit() > 0) && (balance <= carConfig.getBalance_limit())) {
+                        Calendar calendar = Calendar.getInstance();
+                        int h = calendar.get(Calendar.HOUR_OF_DAY);
+                        if ((h >= 9) && (h <= 21)) {
+                            state.setNotify_balance(balance);
+                            if (notification.balance == 0)
+                                notification.balance = create(context, context.getString(R.string.low_balance), R.drawable.white_balance, car_id, null, 0, false, null);
+                        }
+                    } else {
+                        if (notification.balance != 0) {
+                            remove(context, notification.balance);
+                            notification.balance = 0;
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                // ignore
+            }
         }
         boolean doors = state.isDoor_fl() || state.isDoor_fr() || state.isDoor_bl() || state.isDoor_br();
         if (state.isGuard() && doors != state.isAlert_doors()) {

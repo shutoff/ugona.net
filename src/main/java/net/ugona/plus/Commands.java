@@ -5,7 +5,6 @@ import android.content.Intent;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -20,7 +19,7 @@ public class Commands {
             if (!requests.containsKey(id))
                 return false;
             Queue queue = requests.get(id);
-            return queue.contains(cmd);
+            return queue.containsKey(cmd);
         }
     }
 
@@ -32,13 +31,14 @@ public class Commands {
                 return false;
             Queue queue = requests.get(id);
             long now = new Date().getTime();
-            for (ExecCommand cmd : queue) {
-                if (cmd.time + 900000 < now) {
+            Set<Map.Entry<CarConfig.Command, Long>> entries = queue.entrySet();
+            for (Map.Entry<CarConfig.Command, Long> entry : entries) {
+                if (entry.getValue() + 900000 < now) {
                     bChanged = true;
-                    queue.remove(cmd);
+                    queue.remove(entry.getKey());
                     continue;
                 }
-                if (cmd.command.done != null)
+                if (entry.getKey().done != null)
                     bRes = true;
             }
         }
@@ -55,7 +55,7 @@ public class Commands {
             if (!requests.containsKey(id))
                 return false;
             Queue queue = requests.get(id);
-            if (!queue.contains(cmd))
+            if (!queue.containsKey(cmd))
                 return false;
             queue.remove(cmd);
         }
@@ -70,12 +70,9 @@ public class Commands {
             if (!requests.containsKey(id))
                 requests.put(id, new Queue());
             Queue queue = requests.get(id);
-            if (queue.contains(id))
+            if (queue.containsKey(cmd))
                 return;
-            ExecCommand exec = new ExecCommand();
-            exec.command = cmd;
-            exec.time = new Date().getTime();
-            queue.add(exec);
+            queue.put(cmd, new Date().getTime());
         }
         Intent i = new Intent(Names.COMMANDS);
         i.putExtra(Names.ID, id);
@@ -87,7 +84,7 @@ public class Commands {
             if (!requests.containsKey(id))
                 return;
             Queue queue = requests.get(id);
-            if (!queue.contains(id))
+            if (!queue.containsKey(cmd))
                 return;
             queue.remove(cmd);
         }
@@ -103,15 +100,17 @@ public class Commands {
             boolean found = false;
             Queue queue = requests.get(id);
             CarState state = CarState.get(context, id);
-            for (ExecCommand c : queue) {
+            Set<Map.Entry<CarConfig.Command, Long>> entries = queue.entrySet();
+            for (Map.Entry<CarConfig.Command, Long> entry : entries) {
                 boolean ok = false;
-                if (c.command.done != null)
-                    ok = State.checkCondition(c.command.done, state);
-                if (!ok && (c.command.condition != null))
-                    ok = !State.checkCondition(c.command.condition, state);
+                CarConfig.Command command = entry.getKey();
+                if (command.done != null)
+                    ok = State.checkCondition(command.done, state);
+                if (!ok && (command.condition != null))
+                    ok = !State.checkCondition(command.condition, state);
                 if (!ok)
                     continue;
-                queue.remove(c);
+                queue.remove(command);
                 found = true;
             }
             if (!found)
@@ -130,10 +129,12 @@ public class Commands {
             boolean found = false;
             Queue queue = requests.get(id);
             CarState state = CarState.get(context, id);
-            for (ExecCommand c : queue) {
-                if (c.command.sms == null)
+            Set<Map.Entry<CarConfig.Command, Long>> entries = queue.entrySet();
+            for (Map.Entry<CarConfig.Command, Long> entry : entries) {
+                CarConfig.Command command = entry.getKey();
+                if (command.sms == null)
                     continue;
-                String[] parts = c.command.sms.split("\\|");
+                String[] parts = command.sms.split("\\|");
                 if (parts.length < 2)
                     continue;
                 Pattern pattern = null;
@@ -149,14 +150,14 @@ public class Commands {
                 if (!matcher.find())
                     continue;
                 found = true;
-                if (c.command.done != null) {
-                    Set<String> update = State.update(c.command.done, state, null);
+                if (command.done != null) {
+                    Set<String> update = State.update(command.done, state, null);
                     if (update != null) {
                         upd = true;
                         Notification.update(context, id, update);
                     }
                 }
-                queue.remove(c);
+                queue.remove(command);
             }
             if (!found)
                 return false;
@@ -172,12 +173,7 @@ public class Commands {
         return true;
     }
 
-    static class ExecCommand {
-        CarConfig.Command command;
-        long time;
-    }
-
-    static class Queue extends HashSet<ExecCommand> {
+    static class Queue extends HashMap<CarConfig.Command, Long> {
 
     }
 }
