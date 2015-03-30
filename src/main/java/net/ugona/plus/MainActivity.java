@@ -1,5 +1,6 @@
 package net.ugona.plus;
 
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -87,6 +88,8 @@ public class MainActivity
     BroadcastReceiver br;
     Handler handler;
     GoogleCloudMessaging gcm;
+    boolean bActive;
+    PendingIntent piRefresh;
 
     private FragmentManager.OnBackStackChangedListener
             mOnBackStackChangedListener = new FragmentManager.OnBackStackChangedListener() {
@@ -233,12 +236,18 @@ public class MainActivity
             MessageDialog dialog = new MessageDialog();
             dialog.show(getSupportFragmentManager(), "info");
         }
+        bActive = true;
+        Intent intent = new Intent(this, FetchService.class);
+        intent.setAction(Names.START_UPDATE);
+        intent.putExtra(Names.ID, id);
+        startService(intent);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         AppConfig.save(this);
+        bActive = false;
     }
 
     @Override
