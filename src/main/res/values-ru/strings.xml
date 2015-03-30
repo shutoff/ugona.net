@@ -161,4 +161,5 @@
     <string name="balance_limit">если меньше %s</string>
     <string name="more">Подробнее</string>
     <string name="add_zone">Добавить зону</string>
+    <string name="remove">Удалить</string>
 </resources>

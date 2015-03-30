@@ -49,7 +49,9 @@ public class State {
     static final Pattern eq_int = Pattern.compile("^([A-Za-z0-9_]+)=([0-9]+)$");
     static final Pattern ne_int = Pattern.compile("^([A-Za-z0-9_]+)\\!=([0-9]+)$");
     static final Pattern eq_str = Pattern.compile("^([A-Za-z0-9_]+)=\"(.*)\"$");
-
+    final static double D2R = 0.017453;
+    final static double a = 6378137.0;
+    final static double e2 = 0.006739496742337;
     static private int telephony_state = 0;
 
     static public void appendLog(String text) {
@@ -421,6 +423,29 @@ public class State {
         return null;
     }
 
+    static double distance(double lat1, double lng1, double lat2, double lng2) {
+        if ((lat1 == lat2) && (lng1 == lng2))
+            return 0;
+
+        double fdLambda = (lng1 - lng2) * D2R;
+        double fdPhi = (lat1 - lat2) * D2R;
+        double fPhimean = ((lat1 + lat2) / 2.0) * D2R;
+
+        double fTemp = 1 - e2 * (Math.pow(Math.sin(fPhimean), 2));
+        double fRho = (a * (1 - e2)) / Math.pow(fTemp, 1.5);
+        double fNu = a / (Math.sqrt(1 - e2 * (Math.sin(fPhimean) * Math.sin(fPhimean))));
+
+        double fz = Math.sqrt(Math.pow(Math.sin(fdPhi / 2.0), 2) +
+                Math.cos(lat2 * D2R) * Math.cos(lat1 * D2R) * Math.pow(Math.sin(fdLambda / 2.0), 2));
+        fz = 2 * Math.asin(fz);
+
+        double fAlpha = Math.cos(lat1 * D2R) * Math.sin(fdLambda) * 1 / Math.sin(fz);
+        fAlpha = Math.asin(fAlpha);
+
+        double fR = (fRho * fNu) / ((fRho * Math.pow(Math.sin(fAlpha), 2)) + (fNu * Math.pow(Math.cos(fAlpha), 2)));
+        return fz * fR;
+    }
+
     public static interface ViewCallback {
         void view(View v);
     }
@@ -514,6 +539,5 @@ public class State {
         }
 
     }
-
 
 }

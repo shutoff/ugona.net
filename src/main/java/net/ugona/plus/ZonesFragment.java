@@ -1,6 +1,7 @@
 package net.ugona.plus;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -8,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.ListView;
@@ -17,11 +19,17 @@ import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Vector;
 
-public class ZonesFragment extends MainFragment {
+public class ZonesFragment
+        extends MainFragment
+        implements AdapterView.OnItemClickListener {
 
+    static final int ZONE_REQUEST = 1;
     ListView vList;
     View vProgress;
     View vError;
@@ -103,6 +111,7 @@ public class ZonesFragment extends MainFragment {
                 return v;
             }
         });
+        vList.setOnItemClickListener(this);
     }
 
     void refresh() {
@@ -135,6 +144,45 @@ public class ZonesFragment extends MainFragment {
         Param param = new Param();
         param.skey = config.getKey();
         task.execute("/zones", param);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Zone zone = null;
+        if (position < zones.size())
+            zone = zones.get(position);
+        if (zone == null) {
+            zone = new Zone();
+            zone.name = "Zone";
+            CarState state = CarState.get(getActivity(), id());
+            try {
+                String[] pos = state.getGps().split(",");
+                double lat = Double.parseDouble(pos[0]);
+                double lng = Double.parseDouble(pos[1]);
+                zone.lat1 = lat - 0.001;
+                zone.lat2 = lat + 0.001;
+                double d1 = State.distance(lat, lng, zone.lat1, lng);
+                double d2 = State.distance(lat, lng, lat, lng + 0.001);
+                zone.lng1 = lng - 0.001 * d1 / d2;
+                zone.lng2 = lng + 0.001 * d1 / d2;
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+        Intent intent = new Intent(getActivity(), ZoneEdit.class);
+        byte[] data = null;
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutput out = new ObjectOutputStream(bos);
+            out.writeObject(zone);
+            data = bos.toByteArray();
+            out.close();
+            bos.close();
+        } catch (Exception ex) {
+            // ignore
+        }
+        intent.putExtra(Names.TRACK, data);
+        startActivityForResult(intent, ZONE_REQUEST);
     }
 
     static class Param implements Serializable {

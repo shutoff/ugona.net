@@ -165,4 +165,5 @@
     <string name="balance_limit">less %s</string>
     <string name="more">More info</string>
     <string name="add_zone">Add zone</string>
+    <string name="remove">Remove</string>
 </resources>
