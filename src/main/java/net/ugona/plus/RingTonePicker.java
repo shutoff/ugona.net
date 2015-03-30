@@ -132,8 +132,13 @@ public class RingTonePicker
             btnOk.setEnabled(true);
         sound = v.getTag().toString();
         if (player != null) {
-            player.stop();
-            player.release();
+            try {
+                if (player.isPlaying())
+                    player.stop();
+                player.release();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
         try {
             player = new MediaPlayer();
@@ -151,8 +156,13 @@ public class RingTonePicker
     @Override
     public void onDismiss(DialogInterface dialog) {
         if (player != null) {
-            player.stop();
-            player.release();
+            try {
+                if (player.isPlaying())
+                    player.stop();
+                player.release();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
         super.onDismiss(dialog);
     }
@@ -160,8 +170,14 @@ public class RingTonePicker
     @Override
     public void onCompletion(MediaPlayer mp) {
         if (player != null) {
-            player.stop();
-            player.release();
+            try {
+                if (player.isPlaying())
+                    player.stop();
+                player.release();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            player = null;
         }
     }
 }
