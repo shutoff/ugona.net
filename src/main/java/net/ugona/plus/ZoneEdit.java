@@ -98,6 +98,8 @@ public class ZoneEdit extends MapActivity {
     @Override
     public void finish() {
         if (!bDelete) {
+            EditText editText = (EditText) findViewById(R.id.edit_nav);
+            zone.name = editText.getText().toString();
             Intent result = new Intent();
             byte[] data = null;
             try {

@@ -360,7 +360,7 @@ public class MainActivity
                 homeMenu = State.createMenu(this);
                 getMenuInflater().inflate(R.menu.home, homeMenu);
             }
-            MenuItem item = homeMenu.findItem(R.id.home);
+            MenuItem item = homeMenu.findItem(android.R.id.home);
             if (fragment.onOptionsItemSelected(item))
                 return;
         }

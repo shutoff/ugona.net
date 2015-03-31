@@ -1,5 +1,6 @@
 package net.ugona.plus;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -14,6 +16,7 @@ import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
@@ -37,6 +40,7 @@ public class ZonesFragment
     View vProgress;
     View vError;
     Vector<Zone> zones;
+    Vector<Zone> saved;
 
     @Override
     int layout() {
@@ -60,8 +64,119 @@ public class ZonesFragment
             }
         });
         vProgress = v.findViewById(R.id.progress);
-        refresh();
+        if (savedInstanceState != null) {
+            byte[] data = savedInstanceState.getByteArray("zones");
+            if (data != null) {
+                try {
+                    ByteArrayInputStream bis = new ByteArrayInputStream(data);
+                    ObjectInput in = new ObjectInputStream(bis);
+                    zones = (Vector<Zone>) in.readObject();
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+            data = savedInstanceState.getByteArray("saved");
+            if (data != null) {
+                try {
+                    ByteArrayInputStream bis = new ByteArrayInputStream(data);
+                    ObjectInput in = new ObjectInputStream(bis);
+                    saved = (Vector<Zone>) in.readObject();
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+        }
+        if (zones != null) {
+            done();
+        } else {
+            refresh();
+        }
         return v;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (zones != null) {
+            byte[] data = null;
+            try {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                ObjectOutput out = new ObjectOutputStream(bos);
+                out.writeObject(zones);
+                data = bos.toByteArray();
+                out.close();
+                bos.close();
+            } catch (Exception ex) {
+                // ignore
+            }
+            outState.putByteArray("zones", data);
+        }
+        if (saved != null) {
+            byte[] data = null;
+            try {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                ObjectOutput out = new ObjectOutputStream(bos);
+                out.writeObject(saved);
+                data = bos.toByteArray();
+                out.close();
+                bos.close();
+            } catch (Exception ex) {
+                // ignore
+            }
+            outState.putByteArray("saved", data);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (zones != null) {
+            if (item.getItemId() == android.R.id.home) {
+                if (zones.size() != saved.size())
+                    return true;
+                for (int i = 0; i < zones.size(); i++) {
+                    if (!zones.get(i).equals(saved.get(i)))
+                        return true;
+                }
+            }
+            if (item.getItemId() == R.id.ok) {
+                final ProgressDialog dialog = new ProgressDialog(getActivity());
+                dialog.setMessage(getString(R.string.save_settings));
+                dialog.show();
+                HttpTask task = new HttpTask() {
+                    @Override
+                    void result(JsonObject res) throws ParseException {
+                        try {
+                            saved = new Vector<>();
+                            for (Zone z : zones) {
+                                saved.add(z.copy());
+                            }
+                            dialog.dismiss();
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    void error() {
+                        try {
+                            dialog.dismiss();
+                            Toast toast = Toast.makeText(getActivity(), R.string.save_error, Toast.LENGTH_LONG);
+                            toast.show();
+                        } catch (Exception ex) {
+                            // ignore
+                        }
+                    }
+                };
+                CarConfig config = CarConfig.get(getActivity(), id());
+                Param params = new Param();
+                params.skey = config.getKey();
+                params.zones = new Zone[zones.size()];
+                zones.toArray(params.zones);
+                task.execute("/zones", params);
+                return true;
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     void done() {
@@ -137,12 +252,17 @@ public class ZonesFragment
                     Config.update(z, v_zones.get(i).asObject());
                     zones.add(z);
                 }
+                saved = new Vector<>();
+                for (Zone z : zones) {
+                    saved.add(z.copy());
+                }
                 done();
                 refreshDone();
             }
 
             @Override
             void error() {
+                zones = null;
                 vProgress.setVisibility(View.GONE);
                 vError.setVisibility(View.VISIBLE);
                 vList.setVisibility(View.GONE);
@@ -174,6 +294,7 @@ public class ZonesFragment
                 double d2 = State.distance(lat, lng, lat, lng + 0.001);
                 zone.lng1 = lng - 0.001 * d1 / d2;
                 zone.lng2 = lng + 0.001 * d1 / d2;
+                zone.device = true;
             } catch (Exception ex) {
                 // ignore
             }
@@ -191,7 +312,7 @@ public class ZonesFragment
             // ignore
         }
         intent.putExtra(Names.TRACK, data);
-        startActivityForResult(intent, position);
+        getParentFragment().startActivityForResult(intent, ZONE_REQUEST + position);
     }
 
     @Override
@@ -214,21 +335,41 @@ public class ZonesFragment
                 }
                 return;
             }
+            if (!checkName(zone, requestCode)) {
+                String name = zone.name;
+                for (int i = 1; i < 20; i++) {
+                    zone.name = name + i;
+                    if (checkName(zone, requestCode))
+                        break;
+                }
+            }
             if (requestCode < zones.size()) {
                 zones.set(requestCode, zone);
             } else {
                 zones.add(zone);
             }
             adapter.notifyDataSetChanged();
+            return;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    static class Param implements Serializable {
-        String skey;
+    boolean checkName(Zone z, int position) {
+        for (int i = 0; i < zones.size(); i++) {
+            if (i == position)
+                continue;
+            if (zones.get(i).name.equals(z.name))
+                return false;
+        }
+        return true;
     }
 
-    static class Zone implements Serializable {
+    static class Param implements Serializable {
+        String skey;
+        Zone[] zones;
+    }
+
+    static class Zone extends Config implements Cloneable {
         int id;
         double lat1;
         double lng1;
@@ -241,5 +382,16 @@ public class ZonesFragment
         Zone() {
             name = "";
         }
+
+        Zone copy() {
+            try {
+                Object res = clone();
+                return (Zone) res;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            return null;
+        }
+
     }
 }

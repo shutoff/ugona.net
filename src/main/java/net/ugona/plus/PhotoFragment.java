@@ -219,6 +219,21 @@ public class PhotoFragment extends MainFragment {
         fetcher.execute(photo);
     }
 
+    private Bitmap getBitmapSafely(String pathname, int sampleSize) {
+        Bitmap bitmap = null;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPurgeable = true;
+        options.inSampleSize = sampleSize;
+        try {
+            bitmap = BitmapFactory.decodeFile(pathname, options);
+        } catch (OutOfMemoryError oom) {
+            System.gc();
+            bitmap = getBitmapSafely(pathname, sampleSize + 1);
+        }
+
+        return bitmap;
+    }
+
     static class PhotosParam implements Serializable {
         String skey;
         long begin;
@@ -356,7 +371,7 @@ public class PhotoFragment extends MainFragment {
             File file = new File(cacheDir, name);
             if (file.exists()) {
                 try {
-                    Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
+                    Bitmap bmp = getBitmapSafely(file.getAbsolutePath(), 0);
                     if (preferences.getBoolean(Names.ROTATE + photo.camera + "_" + car_id, false)) {
                         Matrix matrix = new Matrix();
                         matrix.postRotate(180);

@@ -80,7 +80,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/button"
                 android:text="@string/actions"
-                android:textColor="@android:color/white"
+                android:textColor="@color/white"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 android:typeface="sans" />
@@ -93,7 +93,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/button"
                 android:text="@string/contacts"
-                android:textColor="@android:color/white"
+                android:textColor="@color/white"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 android:typeface="sans" />
@@ -106,7 +106,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/button"
                 android:text="@string/system"
-                android:textColor="@android:color/white"
+                android:textColor="@color/white"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 android:typeface="sans" />

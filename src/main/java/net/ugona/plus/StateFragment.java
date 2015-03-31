@@ -53,6 +53,7 @@ public class StateFragment
     boolean longTap;
     String pkg;
     Indicator[] temp_indicators;
+    View vAddressView;
 
     @Override
     int layout() {
@@ -83,6 +84,7 @@ public class StateFragment
         vProgress = v.findViewById(R.id.upd_progress);
         vFab = (ImageView) v.findViewById(R.id.fab);
         vFabProgress = v.findViewById(R.id.fab_progress);
+        vAddressView = v.findViewById(R.id.address_view);
         handler = new Handler();
         pkg = getActivity().getPackageName();
 

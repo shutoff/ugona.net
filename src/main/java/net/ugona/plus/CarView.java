@@ -75,18 +75,20 @@ public class CarView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if ((getWidth() == 0) || (getHeight() == 0))
+            return;
         float add_x = XC_LEFT * pk;
         float add_y = YC_BOTTOM * pk;
-        float k = (canvas.getWidth() + add_x) / WIDTH;
+        float k = (getWidth() + add_x) / WIDTH;
         float x = 0;
         float y = 0;
         float h = HEIGHT * k;
-        if (h > canvas.getHeight() + add_y) {
-            k = (canvas.getHeight() + add_y) / HEIGHT;
+        if (h > getHeight() + add_y) {
+            k = (getHeight() + add_y) / HEIGHT;
             float w = k * WIDTH;
-            x = (canvas.getWidth() + add_x - w) / 2.f;
+            x = (getWidth() + add_x - w) / 2.f;
         } else {
-            y = (canvas.getHeight() + add_y - h) / 2.f;
+            y = (getHeight() + add_y - h) / 2.f;
         }
         x -= add_x;
         String[] ext = state.split("\\|");

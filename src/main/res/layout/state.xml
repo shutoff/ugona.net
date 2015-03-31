@@ -214,6 +214,7 @@
                 android:src="@drawable/point" />
 
             <net.ugona.plus.CenteredScrollView
+                android:id="@+id/address_view"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1">
@@ -228,6 +229,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="5dp"
+                        android:singleLine="false"
                         android:textColor="@color/light_text"
                         android:textSize="13sp"
                         android:typeface="sans" />

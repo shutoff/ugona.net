@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-public class CarConfig extends Config implements Serializable {
+public class CarConfig extends Config {
 
     private static final String CAR_KEY = "car_";
     private static HashMap<String, CarConfig> config;

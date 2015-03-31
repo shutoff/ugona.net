@@ -114,6 +114,8 @@ public class StatFragment extends MainFragment {
         fetcher = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
+                if (getActivity() == null)
+                    return;
                 fetcher = null;
                 days = new Vector<Day>();
                 for (JsonObject.Member member : res) {

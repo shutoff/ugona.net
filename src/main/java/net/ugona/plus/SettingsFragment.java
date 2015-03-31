@@ -1,5 +1,6 @@
 package net.ugona.plus;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,7 +19,6 @@ import android.view.ViewGroup;
 import com.astuetz.PagerSlidingTabStrip;
 
 import java.util.HashMap;
-import java.util.List;
 
 
 public class SettingsFragment extends MainFragment {
@@ -123,24 +123,23 @@ public class SettingsFragment extends MainFragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == DO_BACK) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        getActivity().getSupportFragmentManager().popBackStackImmediate();
-                    } catch (Exception ex) {
-                        // ignore
+            if (resultCode == Activity.RESULT_OK) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            getActivity().getSupportFragmentManager().popBackStackImmediate();
+                        } catch (Exception ex) {
+                            // ignore
+                        }
                     }
-                }
-            });
+                });
+            }
             return;
         }
-        List<Fragment> fragments = getChildFragmentManager().getFragments();
-        if (fragments != null) {
-            for (Fragment fragment : fragments) {
-                fragment.onActivityResult(requestCode, resultCode, data);
-            }
-        }
+        MainFragment fragment = getFragment(0);
+        if (fragment != null)
+            fragment.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
     }
 

@@ -6,13 +6,12 @@ import android.preference.PreferenceManager;
 
 import com.eclipsesource.json.JsonObject;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class CarState extends Config implements Serializable {
+public class CarState extends Config {
 
     static final String CAR_KEY = "state_";
     private static HashMap<String, CarState> state;

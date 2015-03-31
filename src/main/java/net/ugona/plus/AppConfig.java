@@ -6,9 +6,7 @@ import android.preference.PreferenceManager;
 
 import com.eclipsesource.json.JsonObject;
 
-import java.io.Serializable;
-
-public class AppConfig extends Config implements Serializable {
+public class AppConfig extends Config {
 
     final static String CONFIG_KEY = "config";
     static private AppConfig config;

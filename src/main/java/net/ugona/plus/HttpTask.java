@@ -2,6 +2,7 @@ package net.ugona.plus;
 
 import android.os.AsyncTask;
 import android.os.Build;
+import android.util.Log;
 
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
@@ -46,6 +47,7 @@ public abstract class HttpTask {
             @Override
             protected JsonObject doInBackground(Object... params) {
                 String url = params[0].toString();
+                String data = "";
                 if (url.charAt(0) == '/')
                     url = Names.API_URL + url;
                 Reader reader = null;
@@ -69,7 +71,7 @@ public abstract class HttpTask {
 
                     Request.Builder builder = new Request.Builder().url(url);
                     if (last_param < params.length) {
-                        String data = Config.save(params[params.length - 1]);
+                        data = Config.save(params[params.length - 1]);
                         RequestBody body = RequestBody.create(MediaType.parse("application/json"), data);
                         builder = builder.post(body);
                     }
@@ -79,6 +81,7 @@ public abstract class HttpTask {
 
                     if (response.code() != HttpURLConnection.HTTP_OK) {
                         error_text = response.message();
+                        Log.v("v", url + " " + data + " " + error_text);
                         return null;
                     }
                     reader = response.body().charStream();
@@ -94,12 +97,14 @@ public abstract class HttpTask {
                     }
                     if (result.get("error") != null) {
                         error_text = result.get("error").asString();
+                        Log.v("v", url + " " + data + " " + error_text);
                         return null;
                     }
                     background(result);
                     return result;
                 } catch (Exception ex) {
                     ex.printStackTrace();
+                    Log.v("v", url + " " + data);
                     error_text = ex.getLocalizedMessage();
                     if (error_text != null) {
                         int pos = error_text.indexOf(":");

@@ -4,6 +4,7 @@ import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -12,7 +13,7 @@ import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Config {
+public class Config implements Serializable {
 
     protected boolean upd;
 
@@ -241,6 +242,37 @@ public class Config {
             res = saveJson(o);
         }
         return res.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        try {
+            Field[] fields = o.getClass().getDeclaredFields();
+            for (Field f : fields) {
+                if ((f.getModifiers() & Modifier.STATIC) != 0)
+                    continue;
+                String name = f.getName();
+                if (name.equals("upd"))
+                    continue;
+                f.setAccessible(true);
+                Class<?> c = f.getType();
+                if (c.isArray())
+                    continue;
+                Type t = f.getGenericType();
+                if ((t == int.class) && (f.getInt(this) != f.getInt(o)))
+                    return false;
+                if ((t == long.class) && (f.getLong(this) != f.getLong(o)))
+                    return false;
+                if ((t == boolean.class) && (f.getBoolean(this) != f.getBoolean(o)))
+                    return false;
+                if ((t == String.class) && !f.get(this).toString().equals(f.get(o).toString()))
+                    return false;
+            }
+            return true;
+        } catch (Exception ex) {
+            // ignore
+        }
+        return false;
     }
 
 }

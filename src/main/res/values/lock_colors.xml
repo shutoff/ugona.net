@@ -18,7 +18,7 @@
 
     <attr name="alp_42447968_color_pattern_path" format="reference" />
 
-    <color name="alp_42447968_pattern_path_light">@android:color/white</color>
+    <color name="alp_42447968_pattern_path_light">@color/white</color>
     <color name="alp_42447968_pattern_path_dark">#999999</color>
 
 </resources>
