@@ -163,4 +163,6 @@
     <string name="add_zone">Добавить зону</string>
     <string name="remove">Удалить</string>
     <string name="low_balance">Вы приблизились к порогу отключения</string>
+    <string name="zone_device">Зона включена</string>
+    <string name="zone_sms">Уведомлять по СМС</string>
 </resources>

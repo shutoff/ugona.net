@@ -19,7 +19,10 @@ import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -29,7 +32,7 @@ public class ZonesFragment
         extends MainFragment
         implements AdapterView.OnItemClickListener {
 
-    static final int ZONE_REQUEST = 1;
+    static final int ZONE_REQUEST = 200;
     ListView vList;
     View vProgress;
     View vError;
@@ -86,7 +89,7 @@ public class ZonesFragment
             }
 
             @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
+            public View getView(final int position, View convertView, ViewGroup parent) {
                 View v = convertView;
                 if (v == null) {
                     LayoutInflater inflater = (LayoutInflater) getActivity()
@@ -99,6 +102,12 @@ public class ZonesFragment
                     Zone z = zones.get(position);
                     TextView tvName = (TextView) v.findViewById(R.id.name);
                     tvName.setText(z.name);
+                    tvName.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            onItemClick(vList, null, position, 0);
+                        }
+                    });
                     CheckBox checkBox = (CheckBox) v.findViewById(R.id.check);
                     checkBox.setChecked(z.device);
                     v.findViewById(R.id.sms).setVisibility(z.sms ? View.VISIBLE : View.INVISIBLE);
@@ -182,7 +191,37 @@ public class ZonesFragment
             // ignore
         }
         intent.putExtra(Names.TRACK, data);
-        startActivityForResult(intent, ZONE_REQUEST);
+        startActivityForResult(intent, position);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if ((requestCode >= ZONE_REQUEST) && (requestCode <= ZONE_REQUEST + zones.size())) {
+            requestCode -= ZONE_REQUEST;
+            Zone zone = null;
+            try {
+                ByteArrayInputStream bis = new ByteArrayInputStream(data.getByteArrayExtra(Names.TRACK));
+                ObjectInput in = new ObjectInputStream(bis);
+                zone = (ZonesFragment.Zone) in.readObject();
+            } catch (Exception ex) {
+                // ignore
+            }
+            BaseAdapter adapter = (BaseAdapter) vList.getAdapter();
+            if (zone == null) {
+                if (requestCode < zones.size()) {
+                    zones.remove(requestCode);
+                    adapter.notifyDataSetChanged();
+                }
+                return;
+            }
+            if (requestCode < zones.size()) {
+                zones.set(requestCode, zone);
+            } else {
+                zones.add(zone);
+            }
+            adapter.notifyDataSetChanged();
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     static class Param implements Serializable {

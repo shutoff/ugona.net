@@ -3,10 +3,14 @@ package net.ugona.plus;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Rect;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -18,7 +22,9 @@ import com.eclipsesource.json.ParseException;
 
 import java.io.Serializable;
 
-public class StyledAuthDialog extends Dialog {
+public class StyledAuthDialog
+        extends Dialog
+        implements ViewTreeObserver.OnGlobalLayoutListener {
 
     String car_id;
     CarConfig config;
@@ -30,11 +36,20 @@ public class StyledAuthDialog extends Dialog {
     TextView tvError;
     View vProgress;
     TextWatcher watcher;
+    float pk;
 
     public StyledAuthDialog(Context context, String car_id) {
         super(context, R.style.CustomDialogTheme);
         this.car_id = car_id;
         setContentView(R.layout.styled_auth_dialog);
+
+        Resources resources = context.getResources();
+        DisplayMetrics metrics = resources.getDisplayMetrics();
+        pk = metrics.densityDpi / 160f;
+
+        View v = findViewById(R.id.root);
+        v.getViewTreeObserver().addOnGlobalLayoutListener(this);
+
         etLogin = (EditText) findViewById(R.id.login);
         etPass = (EditText) findViewById(R.id.passwd);
         tvError = (TextView) findViewById(R.id.error);
@@ -166,6 +181,20 @@ public class StyledAuthDialog extends Dialog {
         authParam.password = password;
         authParam.lang = getContext().getResources().getConfiguration().locale.getLanguage();
         task.execute("/key", authParam);
+    }
+
+    @Override
+    public void onGlobalLayout() {
+        Rect rect = new Rect();
+        btnDemo.getLocalVisibleRect(rect);
+        if (btnDemo.getHeight() < 20 * pk) {
+            View vHeader = findViewById(R.id.header);
+            if (vHeader.getVisibility() != View.GONE) {
+                vHeader.setVisibility(View.GONE);
+                View vMain = findViewById(R.id.main);
+                vMain.setBackgroundResource(R.drawable.dialog_bg_bottom_top);
+            }
+        }
     }
 
     static class AuthParam implements Serializable {

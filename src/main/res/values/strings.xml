@@ -167,4 +167,6 @@
     <string name="add_zone">Add zone</string>
     <string name="remove">Remove</string>
     <string name="low_balance">Low balance</string>
+    <string name="zone_device">Zone ON</string>
+    <string name="zone_sms">SMS notify</string>
 </resources>

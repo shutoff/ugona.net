@@ -7,6 +7,18 @@
         android:icon="@drawable/tb_remove"
         android:title="@string/remove"
         car:showAsAction="ifRoom" />
+    <group
+        android:id="@+id/zone_tr"
+        android:checkableBehavior="all">
+        <item
+            android:id="@+id/device"
+            android:title="@string/zone_device"
+            car:showAsAction="never" />
+        <item
+            android:id="@+id/sms"
+            android:title="@string/zone_sms"
+            car:showAsAction="never" />
+    </group>
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/google"

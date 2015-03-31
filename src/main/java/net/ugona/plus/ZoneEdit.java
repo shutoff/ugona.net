@@ -1,6 +1,10 @@
 package net.ugona.plus;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.EditText;
@@ -15,6 +19,7 @@ import java.io.ObjectOutputStream;
 public class ZoneEdit extends MapActivity {
 
     ZonesFragment.Zone zone;
+    boolean bDelete;
 
     @Override
     int menuId() {
@@ -60,6 +65,56 @@ public class ZoneEdit extends MapActivity {
         }
         if (data != null)
             outState.putByteArray(Names.TRACK, data);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (!super.onCreateOptionsMenu(menu))
+            return false;
+        menu.findItem(R.id.device).setChecked(zone.device);
+        menu.findItem(R.id.sms).setChecked(zone.sms);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.delete) {
+            bDelete = true;
+            setResult(Activity.RESULT_OK);
+            finish();
+            return true;
+        }
+        if (item.getItemId() == R.id.device) {
+            zone.device = !zone.device;
+            updateMenu();
+        }
+        if (item.getItemId() == R.id.sms) {
+            zone.sms = !zone.sms;
+            updateMenu();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void finish() {
+        if (!bDelete) {
+            Intent result = new Intent();
+            byte[] data = null;
+            try {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                ObjectOutput out = new ObjectOutputStream(bos);
+                out.writeObject(zone);
+                data = bos.toByteArray();
+                out.close();
+                bos.close();
+            } catch (Exception ex) {
+                // ignore
+            }
+            if (data != null)
+                result.putExtra(Names.TRACK, data);
+            setResult(Activity.RESULT_OK, result);
+        }
+        super.finish();
     }
 
     @Override
