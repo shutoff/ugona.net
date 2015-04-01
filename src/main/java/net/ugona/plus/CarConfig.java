@@ -296,6 +296,7 @@ public class CarConfig extends Config {
         String group;
         String condition;
         String done;
+        String data;
         boolean on;
         boolean always;
     }

@@ -258,6 +258,7 @@ public class MainActivity
                 finish();
                 return;
             }
+            setSideMenu();
             setPrimary();
             checkPhone();
             return;
@@ -337,16 +338,14 @@ public class MainActivity
             case R.id.passwd:
                 setFragment(new SetPassword());
                 return true;
-            case R.id.charts: {
-                Bundle args = new Bundle();
-                args.putString(Names.ID, id);
-                HistoryFragment historyFragment = new HistoryFragment();
-                historyFragment.setArguments(args);
-                setFragment(historyFragment);
+            case R.id.charts:
+                setFragment(new HistoryFragment());
                 return true;
-            }
             case R.id.preferences:
                 setFragment(new SettingsFragment());
+                return true;
+            case R.id.cars:
+                setFragment(new CarsFragment());
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -409,6 +408,9 @@ public class MainActivity
         sideMenu = State.createMenu(this);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.sidebar, sideMenu);
+
+        if (car_config.getKey().equals("demo"))
+            sideMenu.removeItem(R.id.cars);
 
         CarState state = CarState.get(this, id);
         if (!state.isHistory())

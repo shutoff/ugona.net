@@ -34,6 +34,16 @@ public class SendCommandFragment extends DialogFragment {
     boolean longTap;
     boolean no_prompt;
 
+    static String replace(String text, String subst, Intent data) {
+        String s = "";
+        if (data != null) {
+            s = data.getStringExtra(subst);
+            if (s == null)
+                s = "";
+        }
+        return text.replace("{" + subst + "}", s);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (savedInstanceState != null)
@@ -79,13 +89,13 @@ public class SendCommandFragment extends DialogFragment {
         if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
                 case DO_CCODE_INET:
-                    send_command_inet(data.getStringExtra(Names.VALUE));
+                    send_command_inet(data.getStringExtra("ccode"));
                     return;
                 case DO_INET:
                     send_command_inet(null);
                     return;
                 case DO_CCODE_SMS:
-                    send_command_sms(data.getStringExtra(Names.VALUE));
+                    send_command_sms(data);
                     return;
                 case DO_SMS:
                     send_command_sms(null);
@@ -192,6 +202,17 @@ public class SendCommandFragment extends DialogFragment {
             return false;
         if (!State.hasTelephony(getActivity()))
             return false;
+        if (cmd.data != null) {
+            CCodeDialog dialog = new CCodeDialog();
+            Bundle args = new Bundle();
+            args.putString(Names.ID, car_id);
+            args.putString(Names.MESSAGE, cmd.data);
+            args.putString(Names.TITLE, cmd.name);
+            dialog.setArguments(args);
+            dialog.setTargetFragment(this, DO_CCODE_SMS);
+            dialog.show(getFragmentManager(), "ccode");
+            return true;
+        }
         String sms = cmd.sms.split("\\|")[0];
         if (sms.indexOf("{ccode}") >= 0) {
             CCodeDialog dialog = new CCodeDialog();
@@ -284,17 +305,16 @@ public class SendCommandFragment extends DialogFragment {
         dismiss();
     }
 
-    void send_command_sms(String subst) {
+    void send_command_sms(Intent data) {
         dismiss();
         CarConfig config = CarConfig.get(getActivity(), car_id);
         CarConfig.Command[] cmd = config.getCmd();
         for (final CarConfig.Command c : cmd) {
             if (c.id == cmd_id) {
                 String sms = c.sms.split("\\|")[0];
-                if (subst == null)
-                    subst = "";
-                sms = sms.replace("{ccode}", subst);
-                sms = sms.replace("{pwd}", subst);
+                sms = replace(sms, "ccode", data);
+                sms = replace(sms, "pwd", data);
+                sms = replace(sms, "ccode_new", data);
                 if (Sms.send(getActivity(), car_id, c.id, sms)) {
                     Commands.put(getActivity(), car_id, c);
                     Intent intent = new Intent(getActivity(), FetchService.class);

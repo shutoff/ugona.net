@@ -212,24 +212,27 @@ public class State {
     }
 
     static boolean checkCondition(String condition, Object o) {
-        Matcher m = ok_bool.matcher(condition);
-        try {
-            if (m.find())
-                return getBoolean(o, m.group(1));
-            m = not_bool.matcher(condition);
-            if (m.find())
-                return !getBoolean(o, m.group(1));
-            m = eq_int.matcher(condition);
-            if (m.find())
-                return getInteger(o, m.group(1)) == Integer.parseInt(m.group(2));
-            m = ne_int.matcher(condition);
-            if (m.find())
-                return getInteger(o, m.group(1)) != Integer.parseInt(m.group(2));
-            Log.v("check", "Bad condition: " + condition);
-        } catch (Exception ex) {
-            Log.v("check", ex.getMessage());
+        String[] parts = condition.split("\\&");
+        for (String part : parts) {
+            Matcher m = ok_bool.matcher(part);
+            try {
+                if (m.find() && !getBoolean(o, m.group(1)))
+                    return false;
+                m = not_bool.matcher(condition);
+                if (m.find() && getBoolean(o, m.group(1)))
+                    return false;
+                m = eq_int.matcher(condition);
+                if (m.find() && (getInteger(o, m.group(1)) != Integer.parseInt(m.group(2))))
+                    return false;
+                m = ne_int.matcher(condition);
+                if (m.find() && (getInteger(o, m.group(1)) == Integer.parseInt(m.group(2))))
+                    return false;
+                Log.v("check", "Bad condition: " + condition);
+            } catch (Exception ex) {
+                Log.v("check", ex.getMessage());
+            }
         }
-        return false;
+        return true;
     }
 
     static boolean getBoolean(Object o, String name) {

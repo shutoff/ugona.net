@@ -169,4 +169,9 @@
     <string name="low_balance">Low balance</string>
     <string name="zone_device">Zone ON</string>
     <string name="zone_sms">SMS notify</string>
+    <string name="ccode">C-code</string>
+    <string name="confirm">Confirm</string>
+    <string name="add_car">Add car</string>
+    <string name="timers">Timers</string>
+    <string name="add_timer">Добавить таймер</string>
 </resources>

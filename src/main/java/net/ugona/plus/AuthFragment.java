@@ -70,6 +70,15 @@ public class AuthFragment extends MainFragment {
                 public void run() {
                     if (setting.cmd == null)
                         return;
+                    if (setting.cmd.length == 1) {
+                        SendCommandFragment fragment = new SendCommandFragment();
+                        Bundle args = new Bundle();
+                        args.putString(Names.ID, id());
+                        args.putInt(Names.COMMAND, setting.cmd[0]);
+                        fragment.setArguments(args);
+                        fragment.show(getActivity().getSupportFragmentManager(), "send");
+                        return;
+                    }
                     Bundle args = new Bundle();
                     args.putString(Names.ID, id());
                     args.putString(Names.TITLE, setting.id);

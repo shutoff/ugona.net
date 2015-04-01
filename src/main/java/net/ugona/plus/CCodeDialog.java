@@ -6,7 +6,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -19,6 +18,10 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.TextView;
+
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 
 public class CCodeDialog
         extends DialogFragment
@@ -36,14 +39,11 @@ public class CCodeDialog
     EditText etCCodeText;
     CheckBox chkNumber;
     String init_string;
-    Handler handler;
+    String title;
+
+    JsonObject data;
 
     boolean sent;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
 
     @NonNull
     @Override
@@ -52,9 +52,11 @@ public class CCodeDialog
             setArgs(savedInstanceState);
             init_string = savedInstanceState.getString(TEXT);
         }
+        if (title == null)
+            title = getString(R.string.require_ccode);
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         Dialog dialog = new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.require_ccode)
+                .setTitle(title)
                 .setView(inflater.inflate(R.layout.ccode_dialog, null))
                 .setPositiveButton(R.string.ok, null)
                 .setNegativeButton(R.string.cancel, null)
@@ -70,6 +72,15 @@ public class CCodeDialog
 
     void setArgs(Bundle args) {
         id = args.getString(Names.ID);
+        title = args.getString(Names.TITLE);
+        String d = args.getString(Names.MESSAGE);
+        if (d != null) {
+            try {
+                data = JsonValue.readFrom(d).asObject();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -78,6 +89,9 @@ public class CCodeDialog
         outState.putString(Names.ID, id);
         EditText e = chkNumber.isChecked() ? etCCodeText : etCCodeNum;
         outState.putString(TEXT, e.getText().toString());
+        outState.putString(Names.TITLE, title);
+        if (data != null)
+            outState.putString(Names.MESSAGE, data.toString());
     }
 
     @Override
@@ -99,6 +113,28 @@ public class CCodeDialog
             EditText e = chkNumber.isChecked() ? etCCodeText : etCCodeNum;
             e.setText(init_string);
             e.setSelection(init_string.length(), init_string.length());
+        }
+        if (data != null) {
+            JsonValue v = data.get("title");
+            if (v != null) {
+                TextView tv = (TextView) dialog.findViewById(R.id.text);
+                tv.setVisibility(View.VISIBLE);
+                tv.setText(v.asString());
+            }
+            v = data.get("ccode");
+            if (v != null) {
+                etCCodeNum.setHint(v.asString());
+                etCCodeText.setHint(v.asString());
+            }
+            v = data.get("ccode_new_prompt");
+            if (v != null) {
+                dialog.findViewById(R.id.new_block).setVisibility(View.VISIBLE);
+                EditText et = (EditText) dialog.findViewById(R.id.ccode_new);
+                et.setHint(v.asString());
+                et.addTextChangedListener(this);
+                et = (EditText) dialog.findViewById(R.id.ccode_new1);
+                et.addTextChangedListener(this);
+            }
         }
     }
 
@@ -123,8 +159,20 @@ public class CCodeDialog
     public void afterTextChanged(Editable s) {
         EditText et = chkNumber.isChecked() ? etCCodeText : etCCodeNum;
         String ccode = et.getText().toString();
-        btnOk.setEnabled(ccode.length() > 0);
-        if (ccode.length() == 6)
+        boolean okEnabled = ccode.length() > 0;
+        if (data != null) {
+            EditText et1 = (EditText) getDialog().findViewById(R.id.ccode_new);
+            EditText et2 = (EditText) getDialog().findViewById(R.id.ccode_new1);
+            boolean bConfirm = et1.getText().toString().equals(et2.getText().toString());
+            View vErr = getDialog().findViewById(R.id.err_confirm);
+            vErr.setVisibility(bConfirm ? View.INVISIBLE : View.VISIBLE);
+            if (!bConfirm)
+                okEnabled = false;
+            if (et1.getText().toString().equals(""))
+                okEnabled = false;
+        }
+        btnOk.setEnabled(okEnabled);
+        if ((ccode.length() == 6) && (data == null))
             onClick(btnOk);
     }
 
@@ -156,14 +204,17 @@ public class CCodeDialog
         Fragment fragment = getTargetFragment();
         if (fragment != null)
             sent = true;
-        dismiss();
-        if (fragment != null) {
-            EditText et = chkNumber.isChecked() ? etCCodeText : etCCodeNum;
-            Intent i = new Intent();
-            i.putExtra(Names.ID, id);
-            i.putExtra(Names.VALUE, et.getText().toString());
-            fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, i);
+        EditText et = chkNumber.isChecked() ? etCCodeText : etCCodeNum;
+        Intent i = new Intent();
+        i.putExtra(Names.ID, id);
+        i.putExtra("ccode", et.getText().toString());
+        if (data != null) {
+            et = (EditText) getDialog().findViewById(R.id.ccode_new);
+            i.putExtra("ccode_new", et.getText().toString());
         }
+        dismiss();
+        if (fragment != null)
+            fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, i);
     }
 
     @Override

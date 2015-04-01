@@ -165,4 +165,9 @@
     <string name="low_balance">Вы приблизились к порогу отключения</string>
     <string name="zone_device">Зона включена</string>
     <string name="zone_sms">Уведомлять по СМС</string>
+    <string name="ccode">C-код</string>
+    <string name="confirm">Подтверждение</string>
+    <string name="add_car">Добавить автомобиль</string>
+    <string name="timers">Таймеры</string>
+    <string name="add_timer">Добавить таймер</string>
 </resources>

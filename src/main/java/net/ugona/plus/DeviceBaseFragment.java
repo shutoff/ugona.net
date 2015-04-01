@@ -22,6 +22,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
@@ -43,12 +44,14 @@ import java.util.Set;
 import java.util.Vector;
 
 public abstract class DeviceBaseFragment
-        extends MainFragment {
+        extends MainFragment
+        implements AdapterView.OnItemClickListener {
 
     final static int REQUEST_CHECK_PATTERN = 200;
 
     final static String DATA = "data";
     final static String CHANGED = "changed";
+    final static String TIMERS = "timers";
 
     HashMap<String, Object> settings;
     HashMap<String, Object> changed;
@@ -56,6 +59,8 @@ public abstract class DeviceBaseFragment
     ListView vList;
     View vProgress;
     View vError;
+
+    Vector<Timer> timers;
 
     NumberFormat nf;
     NumberFormat df;
@@ -65,6 +70,14 @@ public abstract class DeviceBaseFragment
     @Override
     int layout() {
         return R.layout.settings;
+    }
+
+    int getTimer() {
+        return 0;
+    }
+
+    boolean showTimers() {
+        return false;
     }
 
     @Override
@@ -103,6 +116,18 @@ public abstract class DeviceBaseFragment
                     ByteArrayInputStream bis = new ByteArrayInputStream(data);
                     ObjectInput in = new ObjectInputStream(bis);
                     changed = (HashMap<String, Object>) in.readObject();
+                    in.close();
+                    bis.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            data = savedInstanceState.getByteArray(TIMERS);
+            if (data != null) {
+                try {
+                    ByteArrayInputStream bis = new ByteArrayInputStream(data);
+                    ObjectInput in = new ObjectInputStream(bis);
+                    timers = (Vector<Timer>) in.readObject();
                     in.close();
                     bis.close();
                 } catch (Exception ex) {
@@ -159,6 +184,21 @@ public abstract class DeviceBaseFragment
             }
             if (data != null)
                 outState.putByteArray(CHANGED, data);
+        }
+        if (timers != null) {
+            byte[] data = null;
+            try {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                ObjectOutput out = new ObjectOutputStream(bos);
+                out.writeObject(timers);
+                data = bos.toByteArray();
+                out.close();
+                bos.close();
+            } catch (Exception ex) {
+                // ignore
+            }
+            if (data != null)
+                outState.putByteArray(TIMERS, data);
         }
     }
 
@@ -279,6 +319,16 @@ public abstract class DeviceBaseFragment
         HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
+                JsonValue vTimers = res.get("timers");
+                if (vTimers != null) {
+                    timers = new Vector<>();
+                    JsonArray aTimers = vTimers.asArray();
+                    for (int i = 0; i < aTimers.size(); i++) {
+                        Timer t = new Timer();
+                        Config.update(t, aTimers.get(i).asObject());
+                        timers.add(t);
+                    }
+                }
                 List<String> names = res.names();
                 settings = new HashMap<>();
                 for (String name : names) {
@@ -307,6 +357,7 @@ public abstract class DeviceBaseFragment
         CarConfig config = CarConfig.get(getActivity(), id());
         Param param = new Param();
         param.skey = config.getKey();
+        param.timer = getTimer();
         task.execute("/settings", param);
     }
 
@@ -318,35 +369,77 @@ public abstract class DeviceBaseFragment
         vProgress.setVisibility(View.GONE);
         vError.setVisibility(View.GONE);
         vList.setVisibility(View.VISIBLE);
+        fill();
+    }
+
+    void fill() {
         CarConfig config = CarConfig.get(getActivity(), id());
         Vector<CarConfig.Setting> settings = new Vector<>();
         for (CarConfig.Setting setting : config.getSettings()) {
             if (filter(setting.id))
                 settings.add(setting);
         }
-        vList.setAdapter(new SettingsAdapter(settings));
+        vList.setAdapter(new SettingsAdapter(settings, showTimers()));
+        vList.setOnItemClickListener(this);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        SettingsAdapter adapter = (SettingsAdapter) vList.getAdapter();
+        CarConfig.Setting setting = adapter.defs.get(i);
+        if (setting.cmd == null)
+            return;
+        Bundle args = new Bundle();
+        args.putString(Names.ID, id());
+        args.putString(Names.TITLE, setting.id);
+        SmsSettingsFragment fragment = new SmsSettingsFragment();
+        fragment.setArguments(args);
+        fragment.show(getActivity().getSupportFragmentManager(), "sms");
+    }
+
+    void onChanged(String id) {
+
     }
 
     static class Param implements Serializable {
         String skey;
+        int timer;
+    }
+
+    static class Timer implements Serializable {
+        int day;
+        int hour;
+        int min;
+        int period;
+        int param;
     }
 
     class SettingsAdapter extends BaseAdapter {
 
         Vector<CarConfig.Setting> defs;
+        boolean show_timers;
 
-        SettingsAdapter(Vector<CarConfig.Setting> settings) {
+        SettingsAdapter(Vector<CarConfig.Setting> settings, boolean show_timers) {
             this.defs = settings;
+            this.show_timers = show_timers;
         }
 
         @Override
         public int getCount() {
-            return defs.size();
+            int res = defs.size();
+            if (show_timers && (timers != null))
+                res += timers.size() + 2;
+            return res;
         }
 
         @Override
         public Object getItem(int position) {
-            return defs.get(position);
+            if (position < defs.size())
+                return defs.get(position);
+            position -= defs.size();
+            if (position < timers.size())
+                return timers.get(position);
+            return null;
         }
 
         @Override
@@ -362,200 +455,250 @@ public abstract class DeviceBaseFragment
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 v = inflater.inflate(R.layout.setting_item, null);
             }
-            final CarConfig.Setting def = this.defs.get(position);
+
             final TextView vTitle = (TextView) v.findViewById(R.id.title);
             final TextView vVal = (TextView) v.findViewById(R.id.value);
             final CheckBox vCheck = (CheckBox) v.findViewById(R.id.check);
+            final TextView vText = (TextView) v.findViewById(R.id.text);
             SeekBar vSeek = (SeekBar) v.findViewById(R.id.seek);
             final Spinner vSpinner = (Spinner) v.findViewById(R.id.spinner);
-            boolean isChanged = true;
-            Object val = changed.get(def.id);
-            Object sVal = settings.get(def.id);
-            if (val == null) {
-                isChanged = false;
-                val = sVal;
-            }
 
-            if ((def.min != null) && (def.max != null)) {
-                vTitle.setText(def.name);
-                vTitle.setVisibility(View.VISIBLE);
-                vTitle.setTextColor(getResources().getColor(isChanged ? R.color.main : R.color.text_dark));
-                vCheck.setVisibility(View.GONE);
-                vVal.setVisibility(View.VISIBLE);
-                vSeek.setVisibility(View.VISIBLE);
-                vSpinner.setVisibility(View.GONE);
-                vSeek.setMax(def.max - def.min);
-                int iVal = 0;
-                if ((val != null) && (val instanceof Integer))
-                    iVal = (int) val;
-                if (iVal < def.min)
-                    iVal = def.min;
-                if (iVal > def.max)
-                    iVal = def.max;
-                if (sVal == null)
-                    sVal = (Integer) iVal;
-                final int start_value = (Integer) sVal;
-                SeekBar.OnSeekBarChangeListener listener = new SeekBar.OnSeekBarChangeListener() {
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        if ((progress != 0) || (def.zero == null)) {
-                            double v = progress + def.min;
-                            NumberFormat f = nf;
-                            if (def.k > 0) {
-                                v = v * def.k;
-                                if (def.k < 1)
-                                    f = df;
-                            }
-                            String val = f.format(v);
-                            if (def.unit != null) {
-                                val += " ";
-                                val += def.unit;
-                            }
-                            vVal.setText(val);
-                        } else {
-                            vVal.setText(def.zero);
-                        }
-                        int new_val = def.min + progress;
-                        if (new_val == start_value) {
-                            changed.remove(def.id);
-                            vTitle.setTextColor(getResources().getColor(R.color.text_dark));
-                        } else {
-                            changed.put(def.id, (Integer) new_val);
-                            vTitle.setTextColor(getResources().getColor(R.color.main));
-                        }
-                    }
+            v.findViewById(R.id.add).setVisibility(View.GONE);
 
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {
+            if (position < defs.size()) {
 
-                    }
-
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-
-                    }
-                };
-                vSeek.setOnSeekBarChangeListener(listener);
-                vSeek.setProgress(iVal - def.min);
-                listener.onProgressChanged(vSeek, iVal - def.min, false);
-            } else if (def.values != null) {
-                vTitle.setText(def.name);
-                vTitle.setVisibility(View.VISIBLE);
-                vTitle.setTextColor(getResources().getColor(isChanged ? R.color.main : R.color.text_dark));
-                vVal.setVisibility(View.GONE);
-                vCheck.setVisibility(View.GONE);
-                vSeek.setVisibility(View.GONE);
-                vSpinner.setVisibility(View.VISIBLE);
-                final String[] values = def.values.split("\\|");
-                vSpinner.setAdapter(new BaseAdapter() {
-                    @Override
-                    public int getCount() {
-                        return values.length;
-                    }
-
-                    @Override
-                    public Object getItem(int position) {
-                        return values[position];
-                    }
-
-                    @Override
-                    public long getItemId(int position) {
-                        return position;
-                    }
-
-                    @Override
-                    public View getView(int position, View convertView, ViewGroup parent) {
-                        View v = convertView;
-                        if (v == null) {
-                            LayoutInflater inflater = (LayoutInflater) getActivity()
-                                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                            v = inflater.inflate(R.layout.list_item, null);
-                        }
-                        TextView tv = (TextView) v;
-                        String[] val = values[position].split(":");
-                        tv.setText(val[1]);
-                        return v;
-                    }
-
-                    @Override
-                    public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                        View v = convertView;
-                        if (v == null) {
-                            LayoutInflater inflater = (LayoutInflater) getActivity()
-                                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                            v = inflater.inflate(R.layout.list_dropdown_item, null);
-                        }
-                        TextView tv = (TextView) v;
-                        String[] val = values[position].split(":");
-                        tv.setText(val[1]);
-                        String fontName = "Exo2-";
-                        fontName += (position == vSpinner.getSelectedItemPosition()) ? "Medium" : "Light";
-                        tv.setTypeface(Font.getFont(getActivity(), fontName));
-                        return v;
-                    }
-                });
-
-                int iVal = 0;
-                if ((val != null) && (val instanceof Integer))
-                    iVal = (int) val;
-                if (sVal == null)
-                    sVal = (Integer) iVal;
-                final int start_val = (Integer) sVal;
-                for (int i = 0; i < values.length; i++) {
-                    int iv = Integer.parseInt(values[i].split(":")[0]);
-                    if (iv == iVal) {
-                        vSpinner.setSelection(i);
-                        break;
-                    }
+                final CarConfig.Setting def = defs.get(position);
+                boolean isChanged = true;
+                Object val = changed.get(def.id);
+                Object sVal = settings.get(def.id);
+                if (val == null) {
+                    isChanged = false;
+                    val = sVal;
                 }
-                vSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        int selected = Integer.parseInt(values[position].split(":")[0]);
-                        if (selected == start_val) {
-                            vTitle.setTextColor(getResources().getColor(R.color.text_dark));
-                            changed.remove(def.id);
-                        } else {
-                            vTitle.setTextColor(getResources().getColor(R.color.main));
-                            changed.put(def.id, (Integer) selected);
+
+                if ((def.min != null) && (def.max != null)) {
+                    vTitle.setText(def.name);
+                    vTitle.setVisibility(View.VISIBLE);
+                    vTitle.setTextColor(getResources().getColor(isChanged ? R.color.main : R.color.text_dark));
+                    vCheck.setVisibility(View.GONE);
+                    vVal.setVisibility(View.VISIBLE);
+                    vSeek.setVisibility(View.VISIBLE);
+                    vSpinner.setVisibility(View.GONE);
+                    vText.setVisibility(View.GONE);
+                    vSeek.setMax(def.max - def.min);
+                    int iVal = 0;
+                    if ((val != null) && (val instanceof Integer))
+                        iVal = (int) val;
+                    if (iVal < def.min)
+                        iVal = def.min;
+                    if (iVal > def.max)
+                        iVal = def.max;
+                    if (sVal == null)
+                        sVal = (Integer) iVal;
+                    final int start_value = (Integer) sVal;
+                    SeekBar.OnSeekBarChangeListener listener = new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                            if ((progress != 0) || (def.zero == null)) {
+                                double v = progress + def.min;
+                                NumberFormat f = nf;
+                                if (def.k > 0) {
+                                    v = v * def.k;
+                                    if (def.k < 1)
+                                        f = df;
+                                }
+                                String val = f.format(v);
+                                if (def.unit != null) {
+                                    val += " ";
+                                    val += def.unit;
+                                }
+                                vVal.setText(val);
+                            } else {
+                                vVal.setText(def.zero);
+                            }
+                            int new_val = def.min + progress;
+                            if (new_val == start_value) {
+                                changed.remove(def.id);
+                                vTitle.setTextColor(getResources().getColor(R.color.text_dark));
+                            } else {
+                                changed.put(def.id, (Integer) new_val);
+                                vTitle.setTextColor(getResources().getColor(R.color.main));
+                            }
+                        }
+
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
+
+                        }
+
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+
+                        }
+                    };
+                    vSeek.setOnSeekBarChangeListener(listener);
+                    vSeek.setProgress(iVal - def.min);
+                    listener.onProgressChanged(vSeek, iVal - def.min, false);
+                } else if (def.values != null) {
+                    vTitle.setText(def.name);
+                    vTitle.setVisibility(View.VISIBLE);
+                    vTitle.setTextColor(getResources().getColor(isChanged ? R.color.main : R.color.text_dark));
+                    vVal.setVisibility(View.GONE);
+                    vCheck.setVisibility(View.GONE);
+                    vSeek.setVisibility(View.GONE);
+                    vSpinner.setVisibility(View.VISIBLE);
+                    vText.setVisibility(View.GONE);
+                    final String[] values = def.values.split("\\|");
+                    vSpinner.setAdapter(new BaseAdapter() {
+                        @Override
+                        public int getCount() {
+                            return values.length;
+                        }
+
+                        @Override
+                        public Object getItem(int position) {
+                            return values[position];
+                        }
+
+                        @Override
+                        public long getItemId(int position) {
+                            return position;
+                        }
+
+                        @Override
+                        public View getView(int position, View convertView, ViewGroup parent) {
+                            View v = convertView;
+                            if (v == null) {
+                                LayoutInflater inflater = (LayoutInflater) getActivity()
+                                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                                v = inflater.inflate(R.layout.list_item, null);
+                            }
+                            TextView tv = (TextView) v;
+                            String[] val = values[position].split(":");
+                            tv.setText(val[1]);
+                            return v;
+                        }
+
+                        @Override
+                        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                            View v = convertView;
+                            if (v == null) {
+                                LayoutInflater inflater = (LayoutInflater) getActivity()
+                                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                                v = inflater.inflate(R.layout.list_dropdown_item, null);
+                            }
+                            TextView tv = (TextView) v;
+                            String[] val = values[position].split(":");
+                            tv.setText(val[1]);
+                            String fontName = "Exo2-";
+                            fontName += (position == vSpinner.getSelectedItemPosition()) ? "Medium" : "Light";
+                            tv.setTypeface(Font.getFont(getActivity(), fontName));
+                            return v;
+                        }
+                    });
+
+                    int iVal = 0;
+                    if ((val != null) && (val instanceof Integer))
+                        iVal = (int) val;
+                    if (sVal == null)
+                        sVal = (Integer) iVal;
+                    final int start_val = (Integer) sVal;
+                    for (int i = 0; i < values.length; i++) {
+                        int iv = Integer.parseInt(values[i].split(":")[0]);
+                        if (iv == iVal) {
+                            vSpinner.setSelection(i);
+                            break;
                         }
                     }
+                    vSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                            int selected = Integer.parseInt(values[position].split(":")[0]);
+                            if (selected == start_val) {
+                                vTitle.setTextColor(getResources().getColor(R.color.text_dark));
+                                changed.remove(def.id);
+                            } else {
+                                vTitle.setTextColor(getResources().getColor(R.color.main));
+                                changed.put(def.id, (Integer) selected);
+                            }
+                            onChanged(def.id);
+                        }
 
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
 
+                        }
+                    });
+                } else if (def.cmd != null) {
+                    vTitle.setText(def.name);
+                    vCheck.setVisibility(View.GONE);
+                    vTitle.setVisibility(View.VISIBLE);
+                    vVal.setVisibility(View.GONE);
+                    vSeek.setVisibility(View.GONE);
+                    vSpinner.setVisibility(View.GONE);
+                    String text = def.text;
+                    if (text == null)
+                        text = "";
+                    if (text.equals("")) {
+                        vText.setVisibility(View.GONE);
+                    } else {
+                        vText.setText(text);
+                        vText.setVisibility(View.VISIBLE);
                     }
-                });
-
+                } else {
+                    vCheck.setText(def.name);
+                    vCheck.setVisibility(View.VISIBLE);
+                    vTitle.setVisibility(View.GONE);
+                    vVal.setVisibility(View.GONE);
+                    vSeek.setVisibility(View.GONE);
+                    vSpinner.setVisibility(View.GONE);
+                    vText.setVisibility(View.GONE);
+                    boolean bChecked = false;
+                    if ((val != null) && (val instanceof Boolean))
+                        bChecked = (boolean) val;
+                    if (sVal == null)
+                        sVal = (Boolean) bChecked;
+                    final boolean start_checked = (Boolean) sVal;
+                    vCheck.setTextColor(getResources().getColor(isChanged ? R.color.main : R.color.text_dark));
+                    vCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                            if (isChecked == start_checked) {
+                                vCheck.setTextColor(getResources().getColor(R.color.text_dark));
+                                changed.remove(def.id);
+                            } else {
+                                vCheck.setTextColor(getResources().getColor(R.color.main));
+                                changed.put(def.id, (Boolean) isChecked);
+                            }
+                            onChanged(def.id);
+                        }
+                    });
+                    vCheck.setChecked(bChecked);
+                }
+            } else if (position == defs.size()) {
+                vCheck.setVisibility(View.GONE);
+                vTitle.setVisibility(View.VISIBLE);
+                vVal.setVisibility(View.GONE);
+                vSeek.setVisibility(View.GONE);
+                vSpinner.setVisibility(View.GONE);
+                vText.setVisibility(View.GONE);
+                vTitle.setText(R.string.timers);
             } else {
-                vCheck.setText(def.name);
-                vCheck.setVisibility(View.VISIBLE);
+                vCheck.setVisibility(View.GONE);
                 vTitle.setVisibility(View.GONE);
                 vVal.setVisibility(View.GONE);
                 vSeek.setVisibility(View.GONE);
                 vSpinner.setVisibility(View.GONE);
-                boolean bChecked = false;
-                if ((val != null) && (val instanceof Boolean))
-                    bChecked = (boolean) val;
-                if (sVal == null)
-                    sVal = (Boolean) bChecked;
-                final boolean start_checked = (Boolean) sVal;
-                vCheck.setTextColor(getResources().getColor(isChanged ? R.color.main : R.color.text_dark));
-                vCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (isChecked == start_checked) {
-                            vCheck.setTextColor(getResources().getColor(R.color.text_dark));
-                            changed.remove(def.id);
-                        } else {
-                            vCheck.setTextColor(getResources().getColor(R.color.main));
-                            changed.put(def.id, (Boolean) isChecked);
-                        }
-                    }
-                });
-                vCheck.setChecked(bChecked);
+                vText.setVisibility(View.GONE);
+                position -= defs.size() + 1;
+                if (position < timers.size()) {
+                    Timer t = timers.get(position);
+                } else {
+                    v.findViewById(R.id.add).setVisibility(View.VISIBLE);
+                }
             }
             return v;
         }
     }
+
 }
