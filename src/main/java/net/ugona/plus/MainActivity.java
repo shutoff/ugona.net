@@ -572,7 +572,7 @@ public class MainActivity
         final long time = now.getTime();
         CarConfig carConfig = CarConfig.get(this, id);
         if (carConfig.getSettings().length > 0) {
-            if (version.equals(state.getVersion()) && (state.getCheck_time() > time))
+            if (version.equals(state.getCheck_version()) && (state.getCheck_time() > time))
                 return;
         }
         HttpTask task = new HttpTask() {
@@ -591,7 +591,7 @@ public class MainActivity
                     sendBroadcast(intent);
                 }
                 state.setCheck_time(time + 86400000);
-                state.setVersion(version);
+                state.setCheck_version(version);
                 config.save(this);
             }
 

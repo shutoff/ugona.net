@@ -179,7 +179,7 @@ public abstract class DeviceBaseFragment
                 Intent intent = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null,
                         getActivity(), LockPatternActivity.class);
                 intent.putExtra(LockPatternActivity.EXTRA_PATTERN, config.getPattern().toCharArray());
-                startActivityForResult(intent, REQUEST_CHECK_PATTERN);
+                getParentFragment().startActivityForResult(intent, REQUEST_CHECK_PATTERN);
                 return true;
             }
             if (config.getPassword().equals("")) {

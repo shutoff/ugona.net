@@ -33,7 +33,8 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:paddingBottom="2dp"
-                android:paddingTop="2dp" />
+                android:paddingTop="2dp"
+                android:scaleType="centerInside" />
 
             <TextView
                 android:id="@+id/name"
@@ -42,7 +43,8 @@
                 android:singleLine="true"
                 android:text="@string/app_name"
                 android:textSize="9sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
         </LinearLayout>
 

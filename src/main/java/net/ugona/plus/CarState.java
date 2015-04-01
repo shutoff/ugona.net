@@ -62,6 +62,7 @@ public class CarState extends Config {
     private boolean history;
     private boolean device_password;
     private long check_time;
+    private String check_version;
     private String version;
 
     private boolean alert_doors;
@@ -78,6 +79,7 @@ public class CarState extends Config {
         version = "";
         balance = "";
         zone = "";
+        check_version = "";
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String s = preferences.getString(CAR_KEY + id, "");
@@ -379,15 +381,16 @@ public class CarState extends Config {
         return version;
     }
 
-    public void setVersion(String version) {
-        if (this.version.equals(version))
-            return;
-        this.version = version;
-        upd = true;
-    }
-
     public boolean isPointer() {
         return pointer;
+    }
+
+    public String getCheck_version() {
+        return check_version;
+    }
+
+    public void setCheck_version(String check_version) {
+        this.check_version = check_version;
     }
 
     public boolean isAz() {

@@ -8,6 +8,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -97,6 +98,7 @@ public class CarWidget extends AppWidgetProvider {
     static Map<String, Integer> states;
     static SparseIntArray height_rows;
     static TrafficRequest request;
+    static CarImage carImage;
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -282,8 +284,18 @@ public class CarWidget extends AppWidgetProvider {
             PendingIntent pIntent = PendingIntent.getService(context, widgetID, configIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             widgetView.setOnClickPendingIntent(R.id.update_block, pIntent);
 
+            if (carImage == null)
+                carImage = new CarImage(context);
+
             CarState carState = CarState.get(context, car_id);
             CarConfig carConfig = CarConfig.get(context, car_id);
+
+            if (carImage.update(carState)) {
+                Bitmap bmp = carImage.getBitmap();
+                if (bmp != null)
+                    widgetView.setImageViewBitmap(R.id.car, bmp);
+            }
+
             long last = carState.getTime();
             Date now = new Date();
             if (last > now.getTime() - 24 * 60 * 60 * 1000) {
