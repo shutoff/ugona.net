@@ -174,4 +174,8 @@
     <string name="add_car">Add car</string>
     <string name="timers">Timers</string>
     <string name="add_timer">Добавить таймер</string>
+    <string name="delete">Delete</string>
+    <string name="delete_car">Delete "%s"?</string>
+    <string name="pointer">Pointer</string>
+    <string name="pointer_msg">Connect pointer with car?</string>
 </resources>

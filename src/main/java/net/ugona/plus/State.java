@@ -240,7 +240,6 @@ public class State {
                 m = ne_int.matcher(condition);
                 if (m.find() && (getInteger(o, m.group(1)) == Integer.parseInt(m.group(2))))
                     return false;
-                Log.v("check", "Bad condition: " + condition);
             } catch (Exception ex) {
                 Log.v("check", ex.getMessage());
             }

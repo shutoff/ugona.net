@@ -74,7 +74,7 @@ public class AppConfig extends Config {
     String getId(String id) {
         if (id == null)
             id = current_id;
-        String[] s_ids = ids.split(",");
+        String[] s_ids = ids.split(";");
         for (String s : s_ids) {
             if (id.equals(s)) {
                 if (!id.equals(current_id)) {
@@ -97,7 +97,7 @@ public class AppConfig extends Config {
     }
 
     String[] getCars() {
-        return ids.split(",");
+        return ids.split(";");
     }
 
     public String getIds() {
@@ -108,6 +108,22 @@ public class AppConfig extends Config {
         if (this.ids.equals(ids))
             return;
         this.ids = ids;
+        upd = true;
+    }
+
+    void removeId(String id) {
+        String new_ids = null;
+        String[] ids = this.ids.split(";");
+        for (String i : ids) {
+            if (i.equals(id))
+                continue;
+            if (new_ids == null) {
+                new_ids = i;
+                continue;
+            }
+            new_ids += ";" + i;
+        }
+        this.ids = new_ids;
         upd = true;
     }
 

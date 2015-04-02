@@ -36,6 +36,7 @@ public class CarConfig extends Config {
     private int balance_limit;
     private String alarmSound;
     private String notifySound;
+    private int[] pointers;
 
     private CarConfig() {
         init();
@@ -70,6 +71,13 @@ public class CarConfig extends Config {
         }
         if (ed != null)
             ed.commit();
+    }
+
+    public void save(Context context, String id) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor ed = preferences.edit();
+        ed.putString(CAR_KEY + id, save(this));
+        ed.commit();
     }
 
     void init() {
@@ -281,6 +289,15 @@ public class CarConfig extends Config {
 
     public void setCommands(int[] commands) {
         this.commands = commands;
+        upd = true;
+    }
+
+    public int[] getPointers() {
+        return pointers;
+    }
+
+    public void setPointers(int[] pointers) {
+        this.pointers = pointers;
         upd = true;
     }
 

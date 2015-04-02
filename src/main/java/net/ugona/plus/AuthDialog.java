@@ -149,8 +149,11 @@ public class AuthDialog extends DialogFragment {
                 config.setLogin(login);
                 dismiss();
                 Fragment fragment = getTargetFragment();
-                if (fragment != null)
-                    fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, null);
+                if (fragment != null) {
+                    Intent data = new Intent();
+                    data.putExtra(Names.ID, car_id);
+                    fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, data);
+                }
             }
 
             @Override

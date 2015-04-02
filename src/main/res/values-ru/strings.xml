@@ -170,4 +170,8 @@
     <string name="add_car">Добавить автомобиль</string>
     <string name="timers">Таймеры</string>
     <string name="add_timer">Добавить таймер</string>
+    <string name="delete">Удалить</string>
+    <string name="delete_car">Удалить "%s"?</string>
+    <string name="pointer">Маяк</string>
+    <string name="pointer_msg">Связать с автомобилем?</string>
 </resources>

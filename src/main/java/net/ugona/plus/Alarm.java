@@ -1,6 +1,7 @@
 package net.ugona.plus;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.Ringtone;
@@ -168,7 +169,6 @@ public class Alarm
             player.release();
         }
         timer.cancel();
-        super.onDestroy();
         CarState state = CarState.get(this, car_id);
         state.setSos(false);
         state.setShock(0);
@@ -176,5 +176,9 @@ public class Alarm
         state.setTilt(true);
         state.setIn_sensor(false);
         state.setExt_sensor(false);
+        Intent intent = new Intent(Names.UPDATED);
+        intent.putExtra(Names.ID, car_id);
+        sendBroadcast(intent);
+        super.onDestroy();
     }
 }

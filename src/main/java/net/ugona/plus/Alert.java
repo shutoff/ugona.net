@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -15,6 +16,7 @@ public class Alert extends DialogFragment implements DialogInterface.OnClickList
     String message;
     String ok;
     boolean sent;
+    String id;
 
     @NonNull
     @Override
@@ -42,6 +44,7 @@ public class Alert extends DialogFragment implements DialogInterface.OnClickList
         super.onSaveInstanceState(outState);
         outState.putString(Names.TITLE, title);
         outState.putString(Names.MESSAGE, message);
+        outState.putString(Names.ID, id);
         if (ok != null)
             outState.putString(Names.OK, ok);
     }
@@ -50,13 +53,16 @@ public class Alert extends DialogFragment implements DialogInterface.OnClickList
         title = args.getString(Names.TITLE);
         message = args.getString(Names.MESSAGE);
         ok = args.getString(Names.OK);
+        id = args.getString(Names.ID);
     }
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
         Fragment fragment = getTargetFragment();
         if (fragment != null) {
-            fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, null);
+            Intent intent = new Intent();
+            intent.putExtra(Names.ID, id);
+            fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, intent);
             sent = true;
         }
         dismiss();

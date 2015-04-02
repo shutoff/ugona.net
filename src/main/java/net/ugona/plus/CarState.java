@@ -123,6 +123,13 @@ public class CarState extends Config {
             ed.commit();
     }
 
+    void save(Context context, String id) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor ed = preferences.edit();
+        ed.putString(CAR_KEY + id, save(this));
+        ed.commit();
+    }
+
     public long getTime() {
         return time;
     }

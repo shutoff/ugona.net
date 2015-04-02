@@ -745,7 +745,18 @@ public class MainActivity
         }.execute();
     }
 
+    void setCarId(String new_id) {
+        if (id.equals(new_id))
+            return;
+        config.setCurrent_id(new_id);
+        config.save(this);
+        id = new_id;
+        Intent intent = new Intent(Names.CAR_CHANGED);
+        sendBroadcast(intent);
+    }
+
     static class KeyParam implements Serializable {
         String skey;
     }
 }
+

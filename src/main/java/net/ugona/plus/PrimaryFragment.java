@@ -34,6 +34,8 @@ public class PrimaryFragment extends MainFragment {
     CarState state;
     BroadcastReceiver br;
 
+    Menu carsMenu;
+
     boolean show_page[] = new boolean[6];
 
     @Override
@@ -59,13 +61,26 @@ public class PrimaryFragment extends MainFragment {
             public void onReceive(Context context, Intent intent) {
                 if (intent == null)
                     return;
+                if (intent.getAction().equals(Names.CAR_CHANGED)) {
+                    carsMenu = null;
+                    int page_id = getPageId(vPager.getCurrentItem());
+                    state = CarState.get(getActivity(), id());
+                    setPageState();
+                    vPager.setAdapter(new PagerAdapter(getChildFragmentManager()));
+                    tabs.notifyDataSetChanged();
+                    vPager.setCurrentItem(getPagePosition(page_id));
+                    return;
+                }
                 if (!id().equals(intent.getStringExtra(Names.ID)))
                     return;
-                if (intent.getAction().equals(Names.CONFIG_CHANGED))
+                if (intent.getAction().equals(Names.CONFIG_CHANGED)) {
                     updatePages();
+                    carsMenu = null;
+                }
             }
         };
         IntentFilter intFilter = new IntentFilter(Names.CONFIG_CHANGED);
+        intFilter.addAction(Names.CAR_CHANGED);
         getActivity().registerReceiver(br, intFilter);
         return v;
     }
@@ -109,6 +124,13 @@ public class PrimaryFragment extends MainFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        AppConfig appConfig = AppConfig.get(getActivity());
+        String[] ids = appConfig.getIds().split(";");
+        if (item.getItemId() <= ids.length) {
+            MainActivity activity = (MainActivity) getActivity();
+            activity.setCarId(ids[item.getItemId() - 1]);
+            return true;
+        }
         MainFragment fragment = getFragment(0);
         if ((fragment != null) && fragment.onOptionsItemSelected(item))
             return true;
@@ -216,6 +238,38 @@ public class PrimaryFragment extends MainFragment {
         return pos;
     }
 
+    @Override
+    Menu combo() {
+        AppConfig appConfig = AppConfig.get(getActivity());
+        String[] ids = appConfig.getIds().split(";");
+        if (ids.length < 2)
+            return null;
+        if (carsMenu == null) {
+            carsMenu = State.createMenu(getActivity());
+            int item_id = 0;
+            for (String id : ids) {
+                CarConfig config = CarConfig.get(getActivity(), id);
+                String name = config.getName();
+                if (name.equals(""))
+                    name = config.getLogin();
+                ++item_id;
+                carsMenu.add(1, item_id, item_id, name);
+            }
+        }
+        return carsMenu;
+    }
+
+    @Override
+    int currentComboItem() {
+        AppConfig appConfig = AppConfig.get(getActivity());
+        String[] ids = appConfig.getIds().split(";");
+        for (int i = 0; i < ids.length; i++) {
+            if (ids[i].equals(id()))
+                return i + 1;
+        }
+        return 0;
+    }
+
     class PagerAdapter extends FragmentStatePagerAdapter {
 
         public PagerAdapter(FragmentManager fm) {
@@ -291,5 +345,4 @@ public class PrimaryFragment extends MainFragment {
         }
 
     }
-
 }
