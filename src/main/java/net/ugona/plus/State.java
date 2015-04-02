@@ -162,6 +162,19 @@ public class State {
         return sf.format(time);
     }
 
+    static String shortFormatTime(Context context, long time) {
+        try {
+            if (Settings.System.getInt(context.getContentResolver(), Settings.System.TIME_12_24) == 12) {
+                SimpleDateFormat sf = new SimpleDateFormat("KK:mm a");
+                return sf.format(time);
+            }
+        } catch (Exception ex) {
+            // ignore
+        }
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sf = new SimpleDateFormat("HH:mm");
+        return sf.format(time);
+    }
+
     static String formatDateTime(Context context, long time) {
         LocalDate now = new LocalDate();
         LocalDate date = new LocalDate(time);

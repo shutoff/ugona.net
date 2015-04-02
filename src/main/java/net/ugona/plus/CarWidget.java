@@ -100,6 +100,8 @@ public class CarWidget extends AppWidgetProvider {
     static TrafficRequest request;
     static CarImage carImage;
 
+    static int[] picts = {R.id.pict1, R.id.pict2, R.id.pict3};
+
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
@@ -290,10 +292,32 @@ public class CarWidget extends AppWidgetProvider {
             CarState carState = CarState.get(context, car_id);
             CarConfig carConfig = CarConfig.get(context, car_id);
 
+            carImage.state = preferences.getString(Names.STATE + widgetID, "");
             if (carImage.update(carState)) {
+                SharedPreferences.Editor ed = preferences.edit();
+                ed.putString(Names.STATE + widgetID, carImage.state);
+                ed.commit();
                 Bitmap bmp = carImage.getBitmap();
                 if (bmp != null)
                     widgetView.setImageViewBitmap(R.id.car, bmp);
+                String[] ext = carImage.state.split("\\|");
+                int kn = 0;
+                if (ext.length > 1) {
+                    String[] parts = ext[1].split(";");
+                    for (String part : parts) {
+                        int pict_id = carImage.getBitmapId(part);
+                        if (pict_id == 0)
+                            continue;
+                        int w_id = picts[kn++];
+                        widgetView.setImageViewResource(w_id, pict_id);
+                        widgetView.setViewVisibility(w_id, View.VISIBLE);
+                        if (kn >= picts.length)
+                            break;
+                    }
+                }
+                for (; kn < picts.length; kn++) {
+                    widgetView.setViewVisibility(picts[kn], View.GONE);
+                }
             }
 
             long last = carState.getTime();

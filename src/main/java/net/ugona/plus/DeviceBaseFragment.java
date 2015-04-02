@@ -36,6 +36,7 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.text.NumberFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -386,15 +387,17 @@ public abstract class DeviceBaseFragment
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         SettingsAdapter adapter = (SettingsAdapter) vList.getAdapter();
-        CarConfig.Setting setting = adapter.defs.get(i);
-        if (setting.cmd == null)
-            return;
-        Bundle args = new Bundle();
-        args.putString(Names.ID, id());
-        args.putString(Names.TITLE, setting.id);
-        SmsSettingsFragment fragment = new SmsSettingsFragment();
-        fragment.setArguments(args);
-        fragment.show(getActivity().getSupportFragmentManager(), "sms");
+        if (i < adapter.defs.size()) {
+            CarConfig.Setting setting = adapter.defs.get(i);
+            if (setting.cmd == null)
+                return;
+            Bundle args = new Bundle();
+            args.putString(Names.ID, id());
+            args.putString(Names.TITLE, setting.id);
+            SmsSettingsFragment fragment = new SmsSettingsFragment();
+            fragment.setArguments(args);
+            fragment.show(getActivity().getSupportFragmentManager(), "sms");
+        }
     }
 
     void onChanged(String id) {
@@ -464,6 +467,7 @@ public abstract class DeviceBaseFragment
             final Spinner vSpinner = (Spinner) v.findViewById(R.id.spinner);
 
             v.findViewById(R.id.add).setVisibility(View.GONE);
+            v.findViewById(R.id.timer_block).setVisibility(View.GONE);
 
             if (position < defs.size()) {
 
@@ -693,6 +697,13 @@ public abstract class DeviceBaseFragment
                 position -= defs.size() + 1;
                 if (position < timers.size()) {
                     Timer t = timers.get(position);
+                    v.findViewById(R.id.timer_block).setVisibility(View.VISIBLE);
+                    Date d = new Date();
+                    d.setHours(t.hour);
+                    d.setMinutes(t.min);
+                    d.setSeconds(0);
+                    TextView tv = (TextView) v.findViewById(R.id.time);
+                    tv.setText(State.shortFormatTime(getActivity(), d.getTime()));
                 } else {
                     v.findViewById(R.id.add).setVisibility(View.VISIBLE);
                 }
