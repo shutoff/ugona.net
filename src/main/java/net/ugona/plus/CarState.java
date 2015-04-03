@@ -47,6 +47,7 @@ public class CarState extends Config {
     private int shock;
     private String gsm;
     private String gps;
+    private String gsm_region;
     private boolean gps_valid;
     private int speed;
     private int course;
@@ -80,6 +81,7 @@ public class CarState extends Config {
         balance = "";
         zone = "";
         check_version = "";
+        gsm_region = "";
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String s = preferences.getString(CAR_KEY + id, "");
@@ -239,6 +241,10 @@ public class CarState extends Config {
 
     public String getGps() {
         return gps;
+    }
+
+    public String getGsm_region() {
+        return gsm_region;
     }
 
     public int getSpeed() {

@@ -101,6 +101,7 @@ public class CarsFragment
                 dialog.show(getActivity().getSupportFragmentManager(), "pointer");
                 return;
             }
+            config.setGCM_time(0);
             checkPhone(id);
             return;
         }
@@ -109,6 +110,7 @@ public class CarsFragment
             if (del_id.indexOf("_") < 0) {
                 AppConfig config = AppConfig.get(getActivity());
                 config.removeId(del_id);
+                config.setGCM_time(0);
                 config.save(getActivity());
                 refresh();
                 if (id().equals(del_id)) {
@@ -134,6 +136,7 @@ public class CarsFragment
                 }
                 carConfig.setPointers(pointers);
             }
+            refresh();
             return;
         }
         if (requestCode == DO_POINTER) {

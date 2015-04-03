@@ -174,4 +174,5 @@
     <string name="delete_car">Удалить "%s"?</string>
     <string name="pointer">Маяк</string>
     <string name="pointer_msg">Связать с автомобилем?</string>
+    <string name="speed">Скорость: %s км/ч</string>
 </resources>

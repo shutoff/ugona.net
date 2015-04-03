@@ -219,7 +219,7 @@ public class FetchService extends Service {
             }
             new StatusRequest(car_id, false);
             long timeout = (error_text != null) ? REPEAT_AFTER_500 : REPEAT_AFTER_ERROR;
-            alarmMgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + timeout, timeout, piTimer);
+            alarmMgr.set(AlarmManager.RTC, System.currentTimeMillis() + timeout, piTimer);
             sendError(error_text, car_id);
         }
 

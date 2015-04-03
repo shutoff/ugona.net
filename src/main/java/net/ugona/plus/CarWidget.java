@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -99,6 +100,7 @@ public class CarWidget extends AppWidgetProvider {
     static SparseIntArray height_rows;
     static TrafficRequest request;
     static CarImage carImage;
+    static SparseArray<String> pictState;
 
     static int[] picts = {R.id.pict1, R.id.pict2, R.id.pict3};
 
@@ -292,11 +294,11 @@ public class CarWidget extends AppWidgetProvider {
             CarState carState = CarState.get(context, car_id);
             CarConfig carConfig = CarConfig.get(context, car_id);
 
-            carImage.state = preferences.getString(Names.STATE + widgetID, "");
+            if (pictState == null)
+                pictState = new SparseArray<>();
+            carImage.state = pictState.get(widgetID, "");
             if (carImage.update(carState)) {
-                SharedPreferences.Editor ed = preferences.edit();
-                ed.putString(Names.STATE + widgetID, carImage.state);
-                ed.commit();
+                pictState.put(widgetID, carImage.state);
                 Bitmap bmp = carImage.getBitmap();
                 if (bmp != null)
                     widgetView.setImageViewBitmap(R.id.car, bmp);

@@ -476,6 +476,7 @@ public class EventsFragment extends MainFragment {
                         public void run() {
                             tvNoEvents.setVisibility(View.GONE);
                             vProgress.setVisibility(View.GONE);
+                            vEvents.setVisibility(View.GONE);
                             vError.setVisibility(View.VISIBLE);
                         }
                     });

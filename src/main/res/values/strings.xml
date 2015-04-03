@@ -178,4 +178,5 @@
     <string name="delete_car">Delete "%s"?</string>
     <string name="pointer">Pointer</string>
     <string name="pointer_msg">Connect pointer with car?</string>
+    <string name="speed">Speed: %s km/h</string>
 </resources>

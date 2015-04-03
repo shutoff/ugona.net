@@ -145,7 +145,23 @@ public class StateFragment
         v.findViewById(R.id.status).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                CarState carState = CarState.get(getActivity(), id());
+                if (carState.getGps().equals(""))
+                    return;
+                Intent intent = new Intent(getActivity(), MapPointActivity.class);
+                intent.putExtra(Names.ID, id());
+                startActivity(intent);
+            }
+        });
+        v.findViewById(R.id.address_block).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CarState carState = CarState.get(getActivity(), id());
+                if (carState.getGps().equals(""))
+                    return;
+                Intent intent = new Intent(getActivity(), MapPointActivity.class);
+                intent.putExtra(Names.ID, id());
+                startActivity(intent);
             }
         });
 

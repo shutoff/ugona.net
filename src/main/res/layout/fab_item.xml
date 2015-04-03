@@ -12,7 +12,10 @@
         android:background="@drawable/fab_item_bg"
         android:gravity="center"
         android:orientation="horizontal"
-        android:padding="10dp">
+        android:paddingBottom="10dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="8dp">
 
         <FrameLayout
             android:layout_width="wrap_content"
@@ -20,13 +23,13 @@
 
             <ImageView
                 android:id="@+id/icon"
-                android:layout_width="52dp"
-                android:layout_height="52dp" />
+                android:layout_width="42dp"
+                android:layout_height="42dp" />
 
             <ProgressBar
                 android:id="@+id/progress"
-                android:layout_width="52dp"
-                android:layout_height="52dp"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
                 android:padding="1dp"
                 android:visibility="gone" />
 
@@ -38,7 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:paddingRight="10dp"
-            android:textSize="18sp" />
+            android:textSize="16sp" />
 
     </LinearLayout>
 
