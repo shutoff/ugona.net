@@ -347,6 +347,9 @@ public class MainActivity
             case R.id.cars:
                 setFragment(new CarsFragment());
                 return true;
+            case R.id.maintenance:
+                setFragment(new MaintenanceFragment());
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

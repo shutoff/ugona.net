@@ -179,4 +179,28 @@
     <string name="pointer">Pointer</string>
     <string name="pointer_msg">Connect pointer with car?</string>
     <string name="speed">Speed: %s km/h</string>
+    <string name="or">or</string>
+    <plurals name="years">
+        <item quantity="one">%d year</item>
+        <item quantity="other">%d years</item>
+    </plurals>
+    <plurals name="months">
+        <item quantity="one">%d month</item>
+        <item quantity="other">%d months</item>
+    </plurals>
+    <plurals name="days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <plurals name="hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <string name="mototime">Engine time</string>
+    <string name="left">Left</string>
+    <string name="rerun">Rerun</string>
+    <string name="delay">Delay</string>
+    <string name="mileage_str">Mileage</string>
+    <string name="period">Period</string>
+    <string name="maintenance_date">Last maintenance date</string>
 </resources>

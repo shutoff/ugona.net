@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
+import com.seppius.i18n.plurals.PluralResources;
 
 import org.joda.time.LocalDate;
 
@@ -459,6 +460,17 @@ public class State {
 
         double fR = (fRho * fNu) / ((fRho * Math.pow(Math.sin(fAlpha), 2)) + (fNu * Math.pow(Math.cos(fAlpha), 2)));
         return fz * fR;
+    }
+
+    static String getPlural(Context context, int id, int n) {
+        if (android.os.Build.VERSION.SDK_INT < 11) {
+            try {
+                PluralResources pluralizer = new PluralResources(context.getResources());
+                return pluralizer.getQuantityString(id, n, n);
+            } catch (Throwable t) {
+            }
+        }
+        return context.getResources().getQuantityString(id, n, n);
     }
 
     public static interface ViewCallback {

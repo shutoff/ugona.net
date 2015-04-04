@@ -175,4 +175,36 @@
     <string name="pointer">Маяк</string>
     <string name="pointer_msg">Связать с автомобилем?</string>
     <string name="speed">Скорость: %s км/ч</string>
+    <string name="or">или</string>
+    <plurals name="years">
+        <item quantity="one">%d год</item>
+        <item quantity="many">%d лет</item>
+        <item quantity="other">%d лет</item>
+        <item quantity="few">%d года</item>
+    </plurals>
+    <plurals name="months">
+        <item quantity="one">%d месяц</item>
+        <item quantity="many">%d месяцев</item>
+        <item quantity="other">%d месяца</item>
+        <item quantity="few">%d месяца</item>
+    </plurals>
+    <plurals name="days">
+        <item quantity="one">%d день</item>
+        <item quantity="many">%d дней</item>
+        <item quantity="other">%d дней</item>
+        <item quantity="few">%d дня</item>
+    </plurals>
+    <plurals name="hours">
+        <item quantity="one">%d час</item>
+        <item quantity="many">%d часов</item>
+        <item quantity="other">%d часов</item>
+        <item quantity="few">%d часа</item>
+    </plurals>
+    <string name="mototime">Моточасы</string>
+    <string name="left">Осталось</string>
+    <string name="rerun">Перепробег</string>
+    <string name="delay">Просрочка</string>
+    <string name="mileage_str">Пробег</string>
+    <string name="period">Период</string>
+    <string name="maintenance_date">Дата последнего обслуживания</string>
 </resources>
