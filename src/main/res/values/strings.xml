@@ -203,4 +203,5 @@
     <string name="mileage_str">Mileage</string>
     <string name="period">Period</string>
     <string name="maintenance_date">Last maintenance date</string>
+    <string name="no_widgets">No widgets</string>
 </resources>

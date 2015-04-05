@@ -27,7 +27,6 @@ public class Names {
     static final String OUTGOING = "outgoing";
     static final String WHEN = "when";
     static final String WIDGET = "widget";
-    static final String ROWS = "rows";
     static final String THEME = "theme";
     static final String TRANSPARENCY = "transparency";
     static final String TRAFFIC_LEVEL = "traffic_level";

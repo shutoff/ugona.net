@@ -17,9 +17,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.RemoteViews;
 
 import com.eclipsesource.json.JsonObject;
@@ -43,6 +41,8 @@ public class CarWidget extends AppWidgetProvider {
 
     static final int STATE_UPDATE = 1;
     static final int STATE_ERROR = 2;
+
+    static final int MAX_ROWS = 6;
 
     final static int[] trafic_pict = {
             R.drawable.p0,
@@ -74,7 +74,7 @@ public class CarWidget extends AppWidgetProvider {
     };
     static final int id_lock_layout[] = {
             R.layout.lock_widget,
-            R.layout.lock_widget
+            R.layout.lock_widget_light
     };
     static final int[] id_gsm_level[] = {
             {
@@ -205,17 +205,6 @@ public class CarWidget extends AppWidgetProvider {
         }
     }
 
-    int getLayoutHeight(Context context, int maxWidth, int id) {
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View v = inflater.inflate(id, null);
-        v.setLayoutParams(new ViewGroup.LayoutParams(0, 0));
-        int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(maxWidth, View.MeasureSpec.AT_MOST);
-        int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-        v.measure(widthMeasureSpec, heightMeasureSpec);
-        v.layout(0, 0, v.getMeasuredWidth(), v.getMeasuredHeight());
-        return v.getHeight();
-    }
-
     int getLayoutId(Context context, int widgetId, int theme) {
         if (isLockScreen(context, widgetId))
             return id_lock_layout[theme];
@@ -225,43 +214,6 @@ public class CarWidget extends AppWidgetProvider {
     void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetID) {
         try {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-            int rows = preferences.getInt(Names.ROWS + widgetID, 0);
-            boolean bigPict = false;
-            if (rows == 0) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    Method method = AppWidgetManager.class.getMethod("getAppWidgetOptions", int.class);
-                    Bundle options = (Bundle) method.invoke(appWidgetManager, widgetID);
-                    int maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
-                    if (maxHeight > 0) {
-                        if (height_rows == null)
-                            height_rows = new SparseIntArray();
-                        rows = height_rows.get(maxHeight, -1);
-                        if (rows < 0) {
-                            Intent intent = new Intent(Intent.ACTION_MAIN);
-                            intent.addCategory(Intent.CATEGORY_HOME);
-                            float density = context.getResources().getDisplayMetrics().density;
-                            int maxWidth = (int) (options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH) * density + 0.5);
-                            int h = (int) (maxHeight * density - 0.5);
-                            int h3 = getLayoutHeight(context, maxWidth, R.layout.widget3);
-                            int h4 = getLayoutHeight(context, maxWidth, R.layout.widget4);
-                            int h5 = getLayoutHeight(context, maxWidth, R.layout.widget5);
-                            rows = 3;
-                            if (h < h3)
-                                rows = 2;
-                            if (h > h4)
-                                rows = 5;
-                            if (h > h5)
-                                rows = 6;
-                            height_rows.put(maxHeight, rows);
-                        }
-                        rows = height_rows.get(maxHeight);
-                        bigPict = (rows > 3);
-                    }
-                } else {
-                    rows = 3;
-                }
-            }
-
             int theme = preferences.getInt(Names.THEME + widgetID, 0);
             if ((theme < 0) || (theme >= id_layout.length))
                 theme = 0;
@@ -360,7 +312,7 @@ public class CarWidget extends AppWidgetProvider {
             }
 
             boolean show_balance = carConfig.isShowBalance();
-            if (show_count >= rows)
+            if (show_count >= MAX_ROWS)
                 show_balance = false;
             String balance = carState.getBalance();
             if (balance.equals(""))
@@ -385,7 +337,7 @@ public class CarWidget extends AppWidgetProvider {
             widgetView.setViewVisibility(R.id.name, View.GONE);
 
             int gsm_level = carState.getGsm_level();
-            boolean show_level = (show_count < rows);
+            boolean show_level = (show_count < MAX_ROWS);
             if (gsm_level == 0)
                 show_level = false;
             if (show_level) {
@@ -398,7 +350,7 @@ public class CarWidget extends AppWidgetProvider {
                 widgetView.setViewVisibility(R.id.level_block, View.GONE);
             }
 
-            boolean show_reserve = (show_count < rows);
+            boolean show_reserve = (show_count < MAX_ROWS);
             double reserved = carState.getReserved();
             if (reserved == 0)
                 show_reserve = false;
