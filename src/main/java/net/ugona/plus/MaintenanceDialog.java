@@ -277,11 +277,11 @@ public class MaintenanceDialog
         fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, intent);
     }
 
-    int getInt(String str){
+    int getInt(String str) {
         str = str.replaceAll("[^0-9]", "");
-        try{
+        try {
             return Integer.parseInt(str);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             //
         }
         return 0;

@@ -169,6 +169,12 @@ public abstract class Address {
     static class OpenHelper extends SQLiteOpenHelper {
 
         final static String DB_NAME = "address.db";
+        final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " ("
+                + "ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+                + "Lat REAL NOT NULL, "
+                + "Lng REAL NOT NULL, "
+                + "Address TEXT NOT NULL, "
+                + "Param TEXT NOT NULL)";
 
         public OpenHelper(Context context) {
             super(context, DB_NAME, null, 35);
@@ -186,13 +192,6 @@ public abstract class Address {
             db.execSQL("DROP TABLE IF EXISTS address");
             onCreate(db);
         }
-
-        final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " ("
-                + "ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-                + "Lat REAL NOT NULL, "
-                + "Lng REAL NOT NULL, "
-                + "Address TEXT NOT NULL, "
-                + "Param TEXT NOT NULL)";
 
 
     }

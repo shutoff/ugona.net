@@ -48,9 +48,9 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
     final static long LOAD_INTERVAL = 5 * 86400 * 1000;
     // Definition of the touch states
     static final int NONE = 0;
-    int mode = NONE;
     static final int ONE_FINGER_DRAG = 1;
     static final int TWO_FINGERS_DRAG = 2;
+    int mode = NONE;
     String car_id;
     String type;
     java.text.DateFormat time_format;

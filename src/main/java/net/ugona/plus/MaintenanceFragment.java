@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -170,9 +168,9 @@ public class MaintenanceFragment
             refresh(params);
             return;
         }
-        if (resultCode == Activity.RESULT_OK){
+        if (resultCode == Activity.RESULT_OK) {
             int pos = requestCode - DO_ITEM;
-            if ((pos >= 0) && (pos <= maintenances.size())){
+            if ((pos >= 0) && (pos <= maintenances.size())) {
                 byte[] data = intent.getByteArrayExtra(DATA);
                 if (data != null) {
                     try {
@@ -180,11 +178,11 @@ public class MaintenanceFragment
                         ObjectInput in = new ObjectInputStream(bis);
                         Maintenance m = (Maintenance) in.readObject();
                         ParamsAdd params = null;
-                        if (pos < maintenances.size()){
+                        if (pos < maintenances.size()) {
                             ParamsSet paramsSet = new ParamsSet();
                             paramsSet.set = m.id;
                             params = paramsSet;
-                        }else{
+                        } else {
                             params = new ParamsAdd();
                         }
                         params.name = m.name;
