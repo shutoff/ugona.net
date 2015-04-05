@@ -14,8 +14,8 @@ import android.view.View;
 
 public class CarView extends View {
 
-    final static int RADIUS_DP = 28;
-    final static int STROKE_DP = 2;
+    final static int RADIUS_DP = 20;
+    final static int STROKE_DP = 1;
     final static int X_PAD = 7;
     final static int Y_PAD = 5;
 

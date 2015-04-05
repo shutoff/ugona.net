@@ -7,6 +7,9 @@ import android.os.Vibrator;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
@@ -39,7 +42,7 @@ public class FABCommands
     String car_id;
 
     public FABCommands(MainActivity activity, final Vector<CarConfig.Command> items, final String car_id) {
-        super(activity, R.style.CustomDialogTheme);
+        super(activity, R.style.FabDialogTheme);
         setOwnerActivity(activity);
         this.items = items;
         this.car_id = car_id;

@@ -148,14 +148,14 @@ public class CarImage {
         if (s.isIgnition())
             parts.add((s.isGuard() && !az) ? "r_ignition" : "b_ignition");
         int mode = s.getGuard_mode();
-        if (mode == 2) {
+        if (mode == 1) {
             parts.add("r_block");
         } else if (card) {
             parts.add("r_lock");
         } else if (s.isGuard()) {
             parts.add("b_lock");
         }
-        if (s.getGuard_mode() == 1)
+        if (mode == 2)
             parts.add("b_valet");
         if (s.isTilt())
             parts.add("r_slope");

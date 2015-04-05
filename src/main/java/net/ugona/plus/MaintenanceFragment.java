@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -34,7 +36,6 @@ public class MaintenanceFragment
 
     static final String DATA = "data";
     static final String PRESET = "preset";
-    static final String SAVED = "saved";
 
     static final int DO_DELETE = 1;
     static final int DO_ITEM = 2;
@@ -47,7 +48,6 @@ public class MaintenanceFragment
 
     Vector<Preset> presets;
     Vector<Maintenance> maintenances;
-    Vector<Maintenance> saved;
 
     @Override
     int layout() {
@@ -92,16 +92,6 @@ public class MaintenanceFragment
                     // ignore
                 }
             }
-            data = savedInstanceState.getByteArray(SAVED);
-            if (data != null) {
-                try {
-                    ByteArrayInputStream bis = new ByteArrayInputStream(data);
-                    ObjectInput in = new ObjectInputStream(bis);
-                    saved = (Vector<Maintenance>) in.readObject();
-                } catch (Exception ex) {
-                    // ignore
-                }
-            }
             data = savedInstanceState.getByteArray(PRESET);
             if (data != null) {
                 try {
@@ -140,20 +130,6 @@ public class MaintenanceFragment
             }
             outState.putByteArray(DATA, data);
         }
-        if (saved != null) {
-            byte[] data = null;
-            try {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                ObjectOutput out = new ObjectOutputStream(bos);
-                out.writeObject(saved);
-                data = bos.toByteArray();
-                out.close();
-                bos.close();
-            } catch (Exception ex) {
-                // ignore
-            }
-            outState.putByteArray(SAVED, data);
-        }
         if (presets != null) {
             byte[] data = null;
             try {
@@ -172,23 +148,57 @@ public class MaintenanceFragment
 
     @Override
     public void refresh() {
+        Params param = new Params();
+        refresh(param);
+    }
+
+    void refresh(Params param) {
         vProgress.setVisibility(View.VISIBLE);
         vList.setVisibility(View.GONE);
         vError.setVisibility(View.GONE);
         if (data_fetcher != null)
             data_fetcher.cancel();
         data_fetcher = new DataFetcher();
-        data_fetcher.update();
+        data_fetcher.update(param);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if ((requestCode == DO_DELETE) && (resultCode == Activity.RESULT_OK)) {
-            int position = Integer.parseInt(intent.getStringExtra(Names.ID));
-            maintenances.remove(position);
-            BaseAdapter adapter = (BaseAdapter) vList.getAdapter();
-            adapter.notifyDataSetChanged();
+            ParamsDelete params = new ParamsDelete();
+            params.set = Integer.parseInt(intent.getStringExtra(Names.ID));
+            refresh(params);
             return;
+        }
+        if (resultCode == Activity.RESULT_OK){
+            int pos = requestCode - DO_ITEM;
+            if ((pos >= 0) && (pos <= maintenances.size())){
+                byte[] data = intent.getByteArrayExtra(DATA);
+                if (data != null) {
+                    try {
+                        ByteArrayInputStream bis = new ByteArrayInputStream(data);
+                        ObjectInput in = new ObjectInputStream(bis);
+                        Maintenance m = (Maintenance) in.readObject();
+                        ParamsAdd params = null;
+                        if (pos < maintenances.size()){
+                            ParamsSet paramsSet = new ParamsSet();
+                            paramsSet.set = m.id;
+                            params = paramsSet;
+                        }else{
+                            params = new ParamsAdd();
+                        }
+                        params.name = m.name;
+                        params.mileage = m.mileage;
+                        params.mototime = m.mototime;
+                        params.period = m.period;
+                        params.last = m.last;
+                        refresh(params);
+                        return;
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                }
+            }
         }
         super.onActivityResult(requestCode, resultCode, intent);
     }
@@ -371,7 +381,7 @@ public class MaintenanceFragment
         Bundle args = new Bundle();
         args.putString(Names.TITLE, getString(R.string.delete));
         args.putString(Names.MESSAGE, String.format(getString(R.string.delete_car), maintenances.get(position).name));
-        args.putString(Names.ID, position + "");
+        args.putString(Names.ID, maintenances.get(position).id + "");
         alert.setArguments(args);
         alert.setTargetFragment(this, DO_DELETE);
         alert.show(getFragmentManager(), "alert");
@@ -412,7 +422,7 @@ public class MaintenanceFragment
         }
         MaintenanceDialog dialog = new MaintenanceDialog();
         dialog.setArguments(args);
-        dialog.setTargetFragment(this, DO_ITEM);
+        dialog.setTargetFragment(this, DO_ITEM + position);
         dialog.show(getActivity().getSupportFragmentManager(), "item");
     }
 
@@ -421,13 +431,29 @@ public class MaintenanceFragment
         String lang;
     }
 
+    static class ParamsDelete extends Params {
+        int set;
+    }
+
+    static class ParamsAdd extends Params {
+        String name;
+        int period;
+        int mileage;
+        int mototime;
+        long last;
+    }
+
+    static class ParamsSet extends ParamsAdd {
+        int set;
+    }
+
     static class Preset implements Serializable {
         String name;
         int period;
         int distance;
     }
 
-    static class Maintenance implements Serializable, Cloneable {
+    static class Maintenance implements Serializable {
         int id;
         String name;
         int period;
@@ -436,16 +462,6 @@ public class MaintenanceFragment
         int current;
         int current_time;
         long last;
-
-        Maintenance copy() {
-            try {
-                Object res = clone();
-                return (Maintenance) res;
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            return null;
-        }
     }
 
     class DataFetcher extends HttpTask {
@@ -453,13 +469,11 @@ public class MaintenanceFragment
         @Override
         void result(JsonObject res) throws ParseException {
             maintenances = new Vector<>();
-            saved = new Vector<>();
             JsonArray arr = res.get("data").asArray();
             for (int i = 0; i < arr.size(); i++) {
                 Maintenance m = new Maintenance();
                 Config.update(m, arr.get(i).asObject());
                 maintenances.add(m);
-                saved.add(m.copy());
             }
             presets = new Vector<>();
             arr = res.get("preset").asArray();
@@ -479,9 +493,8 @@ public class MaintenanceFragment
             refreshDone();
         }
 
-        void update() {
+        void update(Params param) {
             CarConfig config = CarConfig.get(getActivity(), id());
-            Params param = new Params();
             param.skey = config.getKey();
             param.lang = Locale.getDefault().getLanguage();
             execute("/maintenance", param);

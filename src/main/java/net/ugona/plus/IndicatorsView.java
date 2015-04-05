@@ -35,6 +35,21 @@ public class IndicatorsView extends HorizontalScrollView {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
         setupChildren();
+        if ((getScrollX() == 0) && (getChildAt(0).getWidth() > getWidth())){
+            ViewGroup layout = (ViewGroup) getChildAt(0);
+            int padding_left = layout.getPaddingLeft();
+            float last_x = 0;
+            for (int i = 0; i < layout.getChildCount(); i++){
+                View v = layout.getChildAt(i);
+                float right = v.getLeft() + v.getWidth() - padding_left;
+                if (right > getWidth())
+                    continue;
+                if (right > last_x)
+                    last_x = right;
+            }
+            int d = (int)((getWidth() - last_x) / 2);
+            layout.setPadding(d, 0, 0, 0);
+        }
     }
 
     void setupChildren() {

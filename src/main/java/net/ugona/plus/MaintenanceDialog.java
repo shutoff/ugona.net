@@ -1,12 +1,15 @@
 package net.ugona.plus;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -251,7 +254,37 @@ public class MaintenanceDialog
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
+        maintenance.name = vName.getText().toString();
+        maintenance.period = periods[vPeriod.getSelectedItemPosition()];
+        maintenance.mileage = getInt(vMileage.getText().toString());
+        maintenance.mototime = getInt(vMotoTime.getText().toString());
+        Fragment fragment = getTargetFragment();
+        if (fragment == null)
+            return;
+        Intent intent = new Intent();
+        byte[] data = null;
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutput out = new ObjectOutputStream(bos);
+            out.writeObject(maintenance);
+            data = bos.toByteArray();
+            out.close();
+            bos.close();
+        } catch (Exception ex) {
+            // ignore
+        }
+        intent.putExtra(MaintenanceFragment.DATA, data);
+        fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, intent);
+    }
 
+    int getInt(String str){
+        str = str.replaceAll("[^0-9]", "");
+        try{
+            return Integer.parseInt(str);
+        }catch (Exception ex){
+            //
+        }
+        return 0;
     }
 
     @Override
@@ -290,8 +323,6 @@ public class MaintenanceDialog
     public void afterTextChanged(Editable s) {
         boolean ok = (vName.getText().length() > 0) &&
                 ((vPeriod.getSelectedItemPosition() > 0) || (vMileage.getText().length() > 0) || (vMotoTime.getText().length() > 0));
-        if ((vMileage.getText().length() == 0) && (vMotoTime.getText().length() == 0) && (maintenance.current == 0))
-            ok = false;
         if (okButton != null)
             okButton.setEnabled(ok);
     }
