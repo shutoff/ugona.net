@@ -32,7 +32,7 @@ public class CarConfig extends Config {
     private int sim_cmd;
     private boolean ccode_text;
     private boolean device_password;
-    private boolean hideBalance;
+    private boolean showBalance;
     private int balance_limit;
     private String alarmSound;
     private String notifySound;
@@ -100,8 +100,7 @@ public class CarConfig extends Config {
             try {
                 update(this, JsonObject.readFrom(s));
             } catch (Exception ex) {
-                State.appendLog(ex.toString());
-                State.appendLog(s);
+                ex.printStackTrace();
             }
         }
     }
@@ -230,12 +229,12 @@ public class CarConfig extends Config {
         upd = true;
     }
 
-    public boolean isHideBalance() {
-        return hideBalance;
+    public boolean isShowBalance() {
+        return showBalance;
     }
 
-    public void setHideBalance(boolean hideBalance) {
-        this.hideBalance = hideBalance;
+    public void setShowBalance(boolean showBalance) {
+        this.showBalance = showBalance;
     }
 
     public Command[] getCmd() {

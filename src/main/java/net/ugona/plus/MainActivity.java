@@ -102,6 +102,7 @@ public class MainActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+/*
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
@@ -110,6 +111,7 @@ public class MainActivity
                 System.exit(1);
             }
         });
+*/
 
         Font font = new Font("Exo2");
         font.install(this);
@@ -660,7 +662,6 @@ public class MainActivity
                     if (gcm == null)
                         gcm = GoogleCloudMessaging.getInstance(MainActivity.this);
                     reg = gcm.register(SENDER_ID);
-                    State.appendLog("GCM: " + reg);
                     JsonObject data = new JsonObject();
                     data.add("reg", reg);
                     String[] cars = config.getCars();
@@ -720,7 +721,7 @@ public class MainActivity
                     if (res.asObject().get("error") != null)
                         return null;
                 } catch (Exception ex) {
-                    State.print(ex);
+                    ex.printStackTrace();
                     return null;
                 } finally {
                     if (connection != null)

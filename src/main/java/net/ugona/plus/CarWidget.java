@@ -359,7 +359,7 @@ public class CarWidget extends AppWidgetProvider {
                 widgetView.setViewVisibility(R.id.temperature1_block, View.GONE);
             }
 
-            boolean show_balance = !carConfig.isHideBalance();
+            boolean show_balance = carConfig.isShowBalance();
             if (show_count >= rows)
                 show_balance = false;
             String balance = carState.getBalance();

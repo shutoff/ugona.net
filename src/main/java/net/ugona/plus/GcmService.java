@@ -19,7 +19,6 @@ public class GcmService extends IntentService {
         String messageType = gcm.getMessageType(intent);
         if ((extras != null) && GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
             AppConfig config = AppConfig.get(this);
-            State.appendLog("GCM received");
             String car_id = config.getId(extras.getString(Names.ID));
             Intent i = new Intent(this, FetchService.class);
             i.putExtra(Names.ID, car_id);

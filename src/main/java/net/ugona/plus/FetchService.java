@@ -297,7 +297,6 @@ public class FetchService extends Service {
                 params.time = state.getTime();
             if (connect)
                 params.connect = 1;
-            State.appendLog("status " + params.time);
             execute("/", params);
         }
     }

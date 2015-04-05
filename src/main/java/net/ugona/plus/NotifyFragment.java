@@ -64,7 +64,7 @@ public class NotifyFragment
 
         CarState state = CarState.get(getActivity(), id());
         if (!state.getBalance().equals("")) {
-            items.add(new CheckBoxItem(getString(R.string.show_balance), "hideBalance"));
+            items.add(new CheckBoxItem(getString(R.string.show_balance), "showBalance"));
             items.add(new BalanceLimitItem(getString(R.string.balance_notification)));
         }
 
@@ -157,7 +157,7 @@ public class NotifyFragment
             try {
                 Field field = carConfig.getClass().getDeclaredField(name);
                 field.setAccessible(true);
-                checkBox.setChecked(!field.getBoolean(carConfig));
+                checkBox.setChecked(field.getBoolean(carConfig));
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -167,9 +167,9 @@ public class NotifyFragment
                     try {
                         Field field = carConfig.getClass().getDeclaredField(name);
                         field.setAccessible(true);
-                        if (field.getBoolean(carConfig) == !isChecked)
+                        if (field.getBoolean(carConfig) == isChecked)
                             return;
-                        field.setBoolean(carConfig, !isChecked);
+                        field.setBoolean(carConfig, isChecked);
                         carConfig.upd = true;
                         Intent intent = new Intent(Names.CONFIG_CHANGED);
                         intent.putExtra(Names.ID, id());

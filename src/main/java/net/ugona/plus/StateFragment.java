@@ -249,7 +249,7 @@ public class StateFragment
             setPowerState(iReserve, state.getReserved_state());
         }
         String balance = state.getBalance();
-        if (balance.equals("") || config.isHideBalance()) {
+        if (balance.equals("") || !config.isShowBalance()) {
             iBalance.setVisibility(View.GONE);
         } else {
             iBalance.setVisibility(View.VISIBLE);

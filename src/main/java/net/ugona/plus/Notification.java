@@ -113,7 +113,6 @@ public class Notification extends Config {
         CarState state = CarState.get(context, car_id);
         Notification notification = Notification.get(context, car_id);
         if (names.contains("az_time") || names.contains("az")) {
-            State.appendLog("changed az " + state.getAz_time() + " " + state.isIgnition() + " " + state.isGuard());
             if (notification.az != 0) {
                 remove(context, notification.az);
                 notification.az = 0;
@@ -189,7 +188,7 @@ public class Notification extends Config {
                 double balance = Double.parseDouble(state.getBalance());
                 if (balance != state.getNotify_balance()) {
                     CarConfig carConfig = CarConfig.get(context, car_id);
-                    if (!carConfig.isHideBalance() && (carConfig.getBalance_limit() > 0) && (balance <= carConfig.getBalance_limit())) {
+                    if (carConfig.isShowBalance() && (carConfig.getBalance_limit() > 0) && (balance <= carConfig.getBalance_limit())) {
                         Calendar calendar = Calendar.getInstance();
                         int h = calendar.get(Calendar.HOUR_OF_DAY);
                         if ((h >= 9) && (h <= 21)) {
