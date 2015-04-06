@@ -204,4 +204,5 @@
     <string name="period">Period</string>
     <string name="maintenance_date">Last maintenance date</string>
     <string name="no_widgets">No widgets</string>
+    <string name="home">Home</string>
 </resources>

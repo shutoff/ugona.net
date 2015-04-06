@@ -23,4 +23,16 @@
         android:textStyle="bold"
         android:typeface="sans" />
 
+    <TextView
+        android:id="@+id/subname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="32dp"
+        android:layout_marginRight="16dp"
+        android:paddingBottom="6dp"
+        android:paddingTop="6dp"
+        android:textColor="@color/text"
+        android:textSize="15dp"
+        android:typeface="sans" />
+
 </LinearLayout>

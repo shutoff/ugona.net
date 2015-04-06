@@ -99,4 +99,7 @@ public abstract class MainFragment extends Fragment implements OnRefreshListener
         return 0;
     }
 
+    void setupSideMenu(Menu menu) {
+    }
+
 }

@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,6 +35,8 @@ public class SettingsFragment extends MainFragment {
     static final int PAGE_HEATER = 6;
     static final int PAGE_ZONES = 7;
 
+    static final int SETTINGS_START_ID = 30;
+
     boolean show_page[] = new boolean[8];
 
     ViewPager vPager;
@@ -48,30 +51,45 @@ public class SettingsFragment extends MainFragment {
     }
 
     @Override
+    void setupSideMenu(Menu menu) {
+        super.setupSideMenu(menu);
+        if (tabs != null)
+            return;
+        MenuItem item = menu.findItem(R.id.preferences);
+        int order = item.getOrder();
+        PagerAdapter adapter = vPager.getAdapter();
+        for (int i = 0; i < adapter.getCount(); i++) {
+            menu.add(1, SETTINGS_START_ID + i, ++order, adapter.getPageTitle(i));
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
         vPager = (ViewPager) v.findViewById(R.id.pager);
         tabs = (PagerSlidingTabStrip) v.findViewById(R.id.tabs);
         setPageState();
-        vPager.setAdapter(new PagerAdapter(getChildFragmentManager()));
-        tabs.setViewPager(vPager);
-        tabs.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int i, float v, int i2) {
+        vPager.setAdapter(new PagesAdapter(getChildFragmentManager()));
+        if (tabs != null) {
+            tabs.setViewPager(vPager);
+            tabs.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int i, float v, int i2) {
 
-            }
+                }
 
-            @Override
-            public void onPageSelected(int i) {
-                MainActivity activity = (MainActivity) getActivity();
-                activity.updateMenu();
-            }
+                @Override
+                public void onPageSelected(int i) {
+                    MainActivity activity = (MainActivity) getActivity();
+                    activity.updateMenu();
+                }
 
-            @Override
-            public void onPageScrollStateChanged(int i) {
+                @Override
+                public void onPageScrollStateChanged(int i) {
 
-            }
-        });
+                }
+            });
+        }
         vPager.setCurrentItem(getPagePosition(PAGE_AUTH));
         handler = new Handler();
         return v;
@@ -113,6 +131,11 @@ public class SettingsFragment extends MainFragment {
                 adapter.finishUpdate(vPager);
                 return true;
             }
+        }
+        PagerAdapter adapter = vPager.getAdapter();
+        if ((item.getItemId() >= SETTINGS_START_ID) && (item.getItemId() < SETTINGS_START_ID + adapter.getCount())) {
+            vPager.setCurrentItem(item.getItemId() - SETTINGS_START_ID, true);
+            return true;
         }
         MainFragment fragment = getFragment(0);
         if ((fragment != null) && fragment.onOptionsItemSelected(item))
@@ -216,9 +239,9 @@ public class SettingsFragment extends MainFragment {
         return pos;
     }
 
-    class PagerAdapter extends FragmentStatePagerAdapter {
+    class PagesAdapter extends FragmentStatePagerAdapter {
 
-        public PagerAdapter(FragmentManager fm) {
+        public PagesAdapter(FragmentManager fm) {
             super(fm);
         }
 

@@ -379,6 +379,7 @@ public class MainActivity
             drawerToggle.setDrawerIndicatorEnabled(true);
         }
         updateMenu();
+        setSideMenu();
         setupActionBar();
         AppConfig.save(this);
     }
@@ -396,6 +397,7 @@ public class MainActivity
         ft.replace(R.id.fragment, fragment, FRAGMENT);
         ft.addToBackStack(FRAGMENT);
         ft.commit();
+        setSideMenu();
     }
 
     void setPrimary() {
@@ -407,6 +409,7 @@ public class MainActivity
         ft.setTransition(FragmentTransaction.TRANSIT_ENTER_MASK);
         ft.add(R.id.fragment, primaryFragment, PRIMARY);
         ft.commitAllowingStateLoss();
+        setSideMenu();
     }
 
     void setSideMenu() {
@@ -420,6 +423,10 @@ public class MainActivity
         CarState state = CarState.get(this, id);
         if (!state.isHistory())
             sideMenu.removeItem(R.id.history);
+
+        MainFragment fragment = getFragment();
+        if (fragment != null)
+            fragment.setupSideMenu(sideMenu);
 
         ListView lMenu = (ListView) findViewById(R.id.sidemenu);
         lMenu.setAdapter(new BaseAdapter() {
@@ -446,8 +453,18 @@ public class MainActivity
                     v = inflater.inflate(R.layout.menu_item, null);
                 }
                 MenuItem item = sideMenu.getItem(position);
-                TextView tv = (TextView) v.findViewById(R.id.name);
-                tv.setText(item.getTitle());
+                if (item.getGroupId() > 0) {
+                    TextView tv = (TextView) v.findViewById(R.id.subname);
+                    tv.setText(item.getTitle());
+                    tv.setVisibility(View.VISIBLE);
+                    v.findViewById(R.id.name).setVisibility(View.GONE);
+
+                } else {
+                    TextView tv = (TextView) v.findViewById(R.id.name);
+                    tv.setText(item.getTitle());
+                    tv.setVisibility(View.VISIBLE);
+                    v.findViewById(R.id.subname).setVisibility(View.GONE);
+                }
                 ImageView iv = (ImageView) v.findViewById(R.id.img);
                 iv.setImageDrawable(item.getIcon());
                 return v;

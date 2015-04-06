@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,6 +29,8 @@ public class PrimaryFragment extends MainFragment {
     static final int PAGE_TRACK = 4;
     static final int PAGE_STAT = 5;
 
+    static final int PRIMARY_START_ID = 20;
+
     ViewPager vPager;
     PagerSlidingTabStrip tabs;
 
@@ -41,6 +44,20 @@ public class PrimaryFragment extends MainFragment {
     @Override
     int layout() {
         return R.layout.primary;
+    }
+
+    @Override
+    void setupSideMenu(Menu menu) {
+        if (tabs != null)
+            return;
+        MenuItem item = menu.add(0, 0, 10, R.string.home);
+        item.setIcon(R.drawable.ic_home);
+        PagerAdapter adapter = vPager.getAdapter();
+        int order = PRIMARY_START_ID;
+        for (int i = 0; i < adapter.getCount(); i++) {
+            menu.add(1, order, order, adapter.getPageTitle(i));
+            order++;
+        }
     }
 
     @Override
@@ -66,8 +83,9 @@ public class PrimaryFragment extends MainFragment {
                     int page_id = getPageId(vPager.getCurrentItem());
                     state = CarState.get(getActivity(), id());
                     setPageState();
-                    vPager.setAdapter(new PagerAdapter(getChildFragmentManager()));
-                    tabs.notifyDataSetChanged();
+                    vPager.setAdapter(new PagesAdapter(getChildFragmentManager()));
+                    if (tabs != null)
+                        tabs.notifyDataSetChanged();
                     vPager.setCurrentItem(getPagePosition(page_id));
                     return;
                 }
@@ -126,9 +144,14 @@ public class PrimaryFragment extends MainFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         AppConfig appConfig = AppConfig.get(getActivity());
         String[] ids = appConfig.getIds().split(";");
-        if (item.getItemId() <= ids.length) {
+        if ((item.getItemId() > 0) && (item.getItemId() <= ids.length)) {
             MainActivity activity = (MainActivity) getActivity();
             activity.setCarId(ids[item.getItemId() - 1]);
+            return true;
+        }
+        PagerAdapter adapter = vPager.getAdapter();
+        if ((item.getItemId() >= PRIMARY_START_ID) && (item.getItemId() < PRIMARY_START_ID + adapter.getCount())) {
+            vPager.setCurrentItem(item.getItemId() - PRIMARY_START_ID, true);
             return true;
         }
         MainFragment fragment = getFragment(0);
@@ -141,25 +164,27 @@ public class PrimaryFragment extends MainFragment {
         if (vPager.getAdapter() != null)
             return;
         setPageState();
-        vPager.setAdapter(new PagerAdapter(getChildFragmentManager()));
-        tabs.setViewPager(vPager);
-        tabs.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int i, float v, int i2) {
+        vPager.setAdapter(new PagesAdapter(getChildFragmentManager()));
+        if (tabs != null) {
+            tabs.setViewPager(vPager);
+            tabs.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int i, float v, int i2) {
 
-            }
+                }
 
-            @Override
-            public void onPageSelected(int i) {
-                MainActivity activity = (MainActivity) getActivity();
-                activity.updateMenu();
-            }
+                @Override
+                public void onPageSelected(int i) {
+                    MainActivity activity = (MainActivity) getActivity();
+                    activity.updateMenu();
+                }
 
-            @Override
-            public void onPageScrollStateChanged(int i) {
+                @Override
+                public void onPageScrollStateChanged(int i) {
 
-            }
-        });
+                }
+            });
+        }
         vPager.setCurrentItem(getPagePosition(PAGE_STATE));
     }
 
@@ -196,7 +221,7 @@ public class PrimaryFragment extends MainFragment {
         int id = getPageId(vPager.getCurrentItem());
         if (!setPageState())
             return;
-        vPager.setAdapter(new PagerAdapter(getChildFragmentManager()));
+        vPager.setAdapter(new PagesAdapter(getChildFragmentManager()));
         if (tabs != null)
             tabs.notifyDataSetChanged();
         vPager.setCurrentItem(getPagePosition(id));
@@ -270,9 +295,9 @@ public class PrimaryFragment extends MainFragment {
         return 0;
     }
 
-    class PagerAdapter extends FragmentStatePagerAdapter {
+    class PagesAdapter extends FragmentStatePagerAdapter {
 
-        public PagerAdapter(FragmentManager fm) {
+        public PagesAdapter(FragmentManager fm) {
             super(fm);
         }
 
