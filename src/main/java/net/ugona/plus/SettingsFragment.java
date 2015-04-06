@@ -22,7 +22,9 @@ import com.astuetz.PagerSlidingTabStrip;
 import java.util.HashMap;
 
 
-public class SettingsFragment extends MainFragment {
+public class SettingsFragment
+        extends MainFragment
+        implements ViewPager.OnPageChangeListener {
 
     static final int DO_BACK = 300;
 
@@ -57,6 +59,8 @@ public class SettingsFragment extends MainFragment {
             return;
         MenuItem item = menu.findItem(R.id.preferences);
         int order = item.getOrder();
+        if (vPager == null)
+            return;
         PagerAdapter adapter = vPager.getAdapter();
         for (int i = 0; i < adapter.getCount(); i++) {
             menu.add(1, SETTINGS_START_ID + i, ++order, adapter.getPageTitle(i));
@@ -70,26 +74,8 @@ public class SettingsFragment extends MainFragment {
         tabs = (PagerSlidingTabStrip) v.findViewById(R.id.tabs);
         setPageState();
         vPager.setAdapter(new PagesAdapter(getChildFragmentManager()));
-        if (tabs != null) {
+        if (tabs != null)
             tabs.setViewPager(vPager);
-            tabs.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                @Override
-                public void onPageScrolled(int i, float v, int i2) {
-
-                }
-
-                @Override
-                public void onPageSelected(int i) {
-                    MainActivity activity = (MainActivity) getActivity();
-                    activity.updateMenu();
-                }
-
-                @Override
-                public void onPageScrollStateChanged(int i) {
-
-                }
-            });
-        }
         vPager.setCurrentItem(getPagePosition(PAGE_AUTH));
         handler = new Handler();
         return v;
@@ -237,6 +223,22 @@ public class SettingsFragment extends MainFragment {
                 pos++;
         }
         return pos;
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        MainActivity activity = (MainActivity) getActivity();
+        activity.updateMenu();
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
     }
 
     class PagesAdapter extends FragmentStatePagerAdapter {

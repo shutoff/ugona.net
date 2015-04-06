@@ -9,6 +9,9 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -61,6 +64,7 @@ public class EventsFragment extends MainFragment {
     CarState state;
     DataFetcher fetcher;
     BroadcastReceiver br;
+    boolean isButton;
 
     @Override
     int layout() {
@@ -75,6 +79,16 @@ public class EventsFragment extends MainFragment {
     @Override
     void changeDate() {
         refresh();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        if (isButton)
+            return;
+        inflater.inflate(R.menu.events, menu);
+        menu.findItem(R.id.actions).setChecked((filter & 1) != 0);
+        menu.findItem(R.id.contacts).setChecked((filter & 2) != 0);
+        menu.findItem(R.id.system).setChecked((filter & 4) != 0);
     }
 
     @Override
@@ -182,6 +196,8 @@ public class EventsFragment extends MainFragment {
             });
         }
 
+        isButton = (v.findViewById(R.id.actions) != null);
+
         if (loaded) {
             filterEvents(false);
             vProgress.setVisibility(View.GONE);
@@ -231,6 +247,23 @@ public class EventsFragment extends MainFragment {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.actions:
+                toggle(1);
+                return true;
+            case R.id.contacts:
+                toggle(2);
+                return true;
+            case R.id.system:
+                toggle(4);
+                return true;
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putLong(DATE, date().toDate().getTime());
@@ -267,6 +300,8 @@ public class EventsFragment extends MainFragment {
 
     void setupButton(View v, int id, int mask) {
         Button btn = (Button) v.findViewById(id);
+        if (btn == null)
+            return;
         if ((mask & filter) != 0) {
             btn.setBackgroundResource(R.drawable.pressed);
             btn.setTextColor(getResources().getColor(R.color.main));
@@ -296,6 +331,20 @@ public class EventsFragment extends MainFragment {
         config.setEvent_filter(filter);
         if (loaded)
             filterEvents(false);
+    }
+
+    void toggle(int mask) {
+        if ((filter & mask) == 0) {
+            filter |= mask;
+        } else {
+            filter &= ~mask;
+        }
+        CarConfig config = CarConfig.get(getActivity(), id());
+        config.setEvent_filter(filter);
+        if (loaded)
+            filterEvents(false);
+        MainActivity activity = (MainActivity) getActivity();
+        activity.updateMenu();
     }
 
     void filterEvents(boolean no_reload) {

@@ -289,6 +289,10 @@ public class MainActivity
             for (int i = 0; i < fragmentMenu.size(); i++) {
                 MenuItem it = fragmentMenu.getItem(i);
                 MenuItem new_it = menu.add(it.getGroupId(), it.getItemId(), it.getOrder(), it.getTitle());
+                if (it.isCheckable()) {
+                    new_it.setCheckable(true);
+                    new_it.setChecked(it.isChecked());
+                }
                 Drawable icon = it.getIcon();
                 if (icon != null) {
                     new_it.setIcon(icon);
