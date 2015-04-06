@@ -140,7 +140,7 @@ public class CarWidget extends AppWidgetProvider {
                 String car_id = intent.getStringExtra(Names.ID);
                 if (action.equalsIgnoreCase(Names.UPDATED)) {
                     states.remove(car_id);
-                    updateWidgets(context, car_id, true);
+                    updateWidgets(context, car_id, false);
                 }
                 if (action.equalsIgnoreCase(Names.NO_UPDATED)) {
                     if (states.containsKey(car_id)) {

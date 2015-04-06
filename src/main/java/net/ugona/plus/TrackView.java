@@ -227,7 +227,7 @@ public class TrackView extends MapActivity {
                     double d_best = 200.;
                     for (int n = 0; n < markers.size(); n++) {
                         Track.Marker marker = markers.get(n);
-                        double delta = Address.calc_distance(start.latitude, start.longitude, marker.latitude, marker.longitude);
+                        double delta = State.distance(start.latitude, start.longitude, marker.latitude, marker.longitude);
                         if (delta < d_best) {
                             d_best = delta;
                             n_start = n;
@@ -252,7 +252,7 @@ public class TrackView extends MapActivity {
                         Track next = tracks.get(i + 1);
                         points = next.track.split("\\|");
                         Track.Point last = new Track.Point(points[points.length - 1]);
-                        double delta = Address.calc_distance(start.latitude, start.longitude, last.latitude, last.longitude);
+                        double delta = State.distance(start.latitude, start.longitude, last.latitude, last.longitude);
                         if (delta > 200)
                             track_data.append("|");
                     }
@@ -264,7 +264,7 @@ public class TrackView extends MapActivity {
                         if (n == n_start)
                             continue;
                         marker = markers.get(n);
-                        double delta = Address.calc_distance(finish.latitude, finish.longitude, marker.latitude, marker.longitude);
+                        double delta = State.distance(finish.latitude, finish.longitude, marker.latitude, marker.longitude);
                         if (delta < d_best) {
                             n_finish = n;
                             d_best = delta;

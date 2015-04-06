@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.Date;
 import java.util.Locale;
 
 public abstract class Address {
@@ -19,6 +20,7 @@ public abstract class Address {
             "Lng",
             "Address",
             "Param",
+            "Time"
     };
 
     static SQLiteDatabase address_db;
@@ -35,10 +37,6 @@ public abstract class Address {
         String map_type = config.getMap_type();
         if (map_type.equals("OSM"))
             p += "_";
-        if (map_type.equals("Bing"))
-            p += "a";
-        if (map_type.equals("Yandex"))
-            p += "y";
         final String param = p;
 
         final double lat = Math.round(v_lat * 100000.) / 100000.;
@@ -62,12 +60,19 @@ public abstract class Address {
         String result = null;
         double best = 400;
         if (address_db != null) {
+            int limit = (int) (new Date().getTime() / 864000) - 30;
             Cursor cursor = address_db.query(TABLE_NAME, columns, "(Param = ?) AND (Lat BETWEEN ? AND ?) AND (Lng BETWEEN ? AND ?)", conditions, null, null, null, null);
             if (cursor.moveToFirst()) {
                 for (; ; ) {
                     double db_lat = cursor.getDouble(0);
                     double db_lon = cursor.getDouble(1);
-                    double distance = calc_distance(lat, lng, db_lat, db_lon);
+                    int time = cursor.getInt(4);
+                    if (time < limit) {
+                        address_db.delete(TABLE_NAME, "(Param = ?) AND (Lat=?) AND (Lng=?)",
+                                new String[]{param, db_lat + "", db_lon + ""});
+                        continue;
+                    }
+                    double distance = State.distance(lat, lng, db_lat, db_lon);
                     if (distance < best) {
                         result = cursor.getString(2);
                         best = distance;
@@ -104,6 +109,7 @@ public abstract class Address {
                             values.put(columns[1], lng);
                             values.put(columns[2], address);
                             values.put(columns[3], param);
+                            values.put(columns[4], (int) (new Date().getTime() / 864000));
                             address_db.insert(TABLE_NAME, null, values);
                         }
                         if (answer != null)
@@ -137,31 +143,6 @@ public abstract class Address {
         return res;
     }
 
-    static double calc_distance(double lat1, double lon1, double lat2, double lon2) {
-
-        if ((lat1 == lat2) && (lon1 == lon2))
-            return 0;
-
-        double fdLambda = (lon1 - lon2) * D2R;
-        double fdPhi = (lat1 - lat2) * D2R;
-        double fPhimean = ((lat1 + lat2) / 2.0) * D2R;
-
-        double fTemp = 1 - e2 * (Math.pow(Math.sin(fPhimean), 2));
-        double fRho = (a * (1 - e2)) / Math.pow(fTemp, 1.5);
-        double fNu = a / (Math.sqrt(1 - e2 * (Math.sin(fPhimean) * Math.sin(fPhimean))));
-
-        double fz = Math.sqrt(Math.pow(Math.sin(fdPhi / 2.0), 2) +
-                Math.cos(lat2 * D2R) * Math.cos(lat1 * D2R) * Math.pow(Math.sin(fdLambda / 2.0), 2));
-        fz = 2 * Math.asin(fz);
-
-        double fAlpha = Math.cos(lat1 * D2R) * Math.sin(fdLambda) * 1 / Math.sin(fz);
-        fAlpha = Math.asin(fAlpha);
-
-        double fR = (fRho * fNu) / ((fRho * Math.pow(Math.sin(fAlpha), 2)) + (fNu * Math.pow(Math.cos(fAlpha), 2)));
-
-        return fz * fR;
-    }
-
     public interface Answer {
         abstract void result(String address);
     }
@@ -174,10 +155,11 @@ public abstract class Address {
                 + "Lat REAL NOT NULL, "
                 + "Lng REAL NOT NULL, "
                 + "Address TEXT NOT NULL, "
+                + "Time INTEGER NOT NULL, "
                 + "Param TEXT NOT NULL)";
 
         public OpenHelper(Context context) {
-            super(context, DB_NAME, null, 35);
+            super(context, DB_NAME, null, 40);
         }
 
         @Override
