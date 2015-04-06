@@ -268,8 +268,8 @@ public class CarImage {
             add(R.drawable.c_r, 36, 56);
             add(R.drawable.c_a_out, 697, 265);
             add(R.drawable.c_a_in, 325, 67);
-            add(R.drawable.c_a_hit1, 169, 283);
-            add(R.drawable.c_a_hit2, 169, 283);
+            add(R.drawable.c_a_hit1, 32, 184);
+            add(R.drawable.c_a_hit2, 58, 222);
             add(R.drawable.c_a_move, 61, 336);
             add(R.drawable.c_az1, 927, 0);
             add(R.drawable.c_az2, 920, 0);
