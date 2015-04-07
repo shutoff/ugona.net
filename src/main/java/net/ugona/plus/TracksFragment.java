@@ -50,6 +50,7 @@ public class TracksFragment extends MainFragment {
     ProgressBar prgMain;
     TextView tvLoading;
     HoursList vTracks;
+    CenteredScrollView vSummary;
 
     boolean loaded;
     Vector<Track> tracks;
@@ -85,6 +86,7 @@ public class TracksFragment extends MainFragment {
         tvLoading = (TextView) v.findViewById(R.id.loading);
         vError = v.findViewById(R.id.error);
         vSpace = v.findViewById(R.id.space);
+        vSummary = (CenteredScrollView) v.findViewById(R.id.summary_view);
 
         vError.setClickable(true);
         vError.setOnClickListener(new View.OnClickListener() {
@@ -301,7 +303,7 @@ public class TracksFragment extends MainFragment {
             status += ": |";
             status += timeFormat((int) (engine_time / 60));
         }
-        tvSummary.setText(State.createSpans(status, getResources().getColor(android.R.color.white), true));
+        tvSummary.setText(State.createSpans(status, vSummary.selectedColor, true));
         refreshDone();
     }
 

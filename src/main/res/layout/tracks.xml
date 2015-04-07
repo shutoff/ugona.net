@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -75,10 +76,12 @@
             android:background="@drawable/map_bg"
             android:orientation="horizontal">
 
-            <ScrollView
+            <net.ugona.plus.CenteredScrollView
+                android:id="@+id/summary_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:fillViewport="true">
+                android:fillViewport="true"
+                app:selectedColor="@color/white">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -98,7 +101,7 @@
 
                 </LinearLayout>
 
-            </ScrollView>
+            </net.ugona.plus.CenteredScrollView>
 
         </LinearLayout>
 

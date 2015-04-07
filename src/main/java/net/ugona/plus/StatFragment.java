@@ -39,6 +39,7 @@ public class StatFragment extends MainFragment {
     View vSpace;
     TextView tvSummary;
     HoursList vStat;
+    CenteredScrollView vSummary;
 
     HttpTask fetcher;
     Vector<Day> days;
@@ -79,6 +80,7 @@ public class StatFragment extends MainFragment {
             }
         });
         tvSummary = (TextView) v.findViewById(R.id.summary);
+        vSummary = (CenteredScrollView) v.findViewById(R.id.summary_view);
         vStat.disableDivider();
         refresh();
         return v;
@@ -212,7 +214,7 @@ public class StatFragment extends MainFragment {
                     status_text += ": |";
                     status_text += timeFormat((int) (engine_time / 60));
                 }
-                tvSummary.setText(State.createSpans(status_text, getResources().getColor(android.R.color.white), true));
+                tvSummary.setText(State.createSpans(status_text, vSummary.selectedColor, true));
                 vProgress.setVisibility(View.GONE);
                 vLoading.setVisibility(View.GONE);
                 vError.setVisibility(View.GONE);

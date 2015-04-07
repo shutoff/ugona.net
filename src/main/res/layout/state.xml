@@ -217,7 +217,8 @@
                 android:id="@+id/address_view"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                app:selectedColor="@color/white">
 
                 <LinearLayout
                     android:id="@+id/address_block"

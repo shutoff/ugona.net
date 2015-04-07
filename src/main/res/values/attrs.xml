@@ -6,4 +6,8 @@
     <declare-styleable name="StyledButton">
         <attr name="bgColor" format="color" />
     </declare-styleable>
+    <declare-styleable name="CenteredScrollView">
+        <attr name="selectedColor" format="color" />
+        <attr name="bottom" format="dimension" />
+    </declare-styleable>
 </resources>

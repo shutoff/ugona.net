@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 public class AboutFragment extends MainFragment implements View.OnClickListener {
 
+    TextView tvVersion;
+
     @Override
     int layout() {
         return R.layout.about;
@@ -18,14 +20,17 @@ public class AboutFragment extends MainFragment implements View.OnClickListener 
 
     @Override
     String getTitle() {
-        return getString(R.string.about);
+        if (tvVersion != null)
+            return getString(R.string.about);
+        return getString(R.string.version) + " " + State.getVersion(getActivity());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
         TextView tvVersion = (TextView) v.findViewById(R.id.version);
-        tvVersion.setText(getString(R.string.version) + " " + State.getVersion(getActivity()));
+        if (tvVersion != null)
+            tvVersion.setText(getString(R.string.version) + " " + State.getVersion(getActivity()));
 
         v.findViewById(R.id.service).setOnClickListener(this);
         v.findViewById(R.id.forum).setOnClickListener(this);

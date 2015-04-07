@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/refresh"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="5dp">
+
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/img_progress"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:src="@drawable/refresh_off" />
+
+                        <ProgressBar
+                            android:id="@+id/upd_progress"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:visibility="invisible" />
+
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="5dp"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                </LinearLayout>
+
+                <net.ugona.plus.IndicatorsView
+                    android:id="@+id/indocators"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fadingEdge="none"
+                    android:fillViewport="true"
+                    android:overScrollMode="never">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:descendantFocusability="beforeDescendants"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <net.ugona.plus.Indicator
+                            android:id="@+id/gsm"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            app:src="@drawable/ind02_5" />
+
+                        <net.ugona.plus.Indicator
+                            android:id="@+id/voltage"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            app:src="@drawable/ind01" />
+
+                        <net.ugona.plus.Indicator
+                            android:id="@+id/balance"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            app:src="@drawable/ind04" />
+
+                        <net.ugona.plus.Indicator
+                            android:id="@+id/temp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            app:src="@drawable/ind05" />
+
+                        <net.ugona.plus.Indicator
+                            android:id="@+id/reserve"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            app:src="@drawable/ind03_5" />
+
+                        <net.ugona.plus.Indicator
+                            android:id="@+id/temp_engine"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            app:src="@drawable/ind08" />
+
+                        <net.ugona.plus.Indicator
+                            android:id="@+id/temp_salon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            app:src="@drawable/ind07" />
+
+                        <net.ugona.plus.Indicator
+                            android:id="@+id/temp_ext"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            app:src="@drawable/ind10" />
+
+                        <net.ugona.plus.Indicator
+                            android:id="@+id/fuel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            app:src="@drawable/ind09" />
+
+                        <net.ugona.plus.Indicator
+                            android:id="@+id/temp1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            app:src="@drawable/ind05" />
+
+                        <net.ugona.plus.Indicator
+                            android:id="@+id/temp2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            app:src="@drawable/ind05" />
+
+                    </LinearLayout>
+
+                </net.ugona.plus.IndicatorsView>
+
+                <ImageView
+                    android:id="@+id/ind_right"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:background="@drawable/ind_right"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <net.ugona.plus.CarView
+                    android:id="@+id/car"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+
+                <net.ugona.plus.CenteredScrollView
+                    android:id="@+id/address_view"
+                    android:layout_width="240dp"
+                    android:layout_height="match_parent"
+                    app:bottom="75dp"
+                    app:selectedColor="@color/main">
+
+                    <LinearLayout
+                        android:id="@+id/address_block"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/address"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="5dp"
+                            android:singleLine="false"
+                            android:textColor="@color/text_dark"
+                            android:textSize="13sp"
+                            android:typeface="sans" />
+
+                    </LinearLayout>
+
+                </net.ugona.plus.CenteredScrollView>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/fab"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_gravity="bottom|right"
+            android:layout_margin="15dp"
+            android:background="@drawable/fab_bg" />
+
+        <ProgressBar
+            android:id="@+id/fab_progress"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_gravity="bottom|right"
+            android:layout_margin="15dp"
+            android:padding="1dp"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+</uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout>

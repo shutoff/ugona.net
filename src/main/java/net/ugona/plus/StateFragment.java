@@ -53,7 +53,7 @@ public class StateFragment
     boolean longTap;
     String pkg;
     Indicator[] temp_indicators;
-    View vAddressView;
+    CenteredScrollView vAddressView;
 
     @Override
     int layout() {
@@ -84,7 +84,7 @@ public class StateFragment
         vProgress = v.findViewById(R.id.upd_progress);
         vFab = (ImageView) v.findViewById(R.id.fab);
         vFabProgress = v.findViewById(R.id.fab_progress);
-        vAddressView = v.findViewById(R.id.address_view);
+        vAddressView = (CenteredScrollView) v.findViewById(R.id.address_view);
         handler = new Handler();
         pkg = getActivity().getPackageName();
 
@@ -142,17 +142,20 @@ public class StateFragment
             }
         });
 
-        v.findViewById(R.id.status).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CarState carState = CarState.get(getActivity(), id());
-                if (carState.getGps().equals(""))
-                    return;
-                Intent intent = new Intent(getActivity(), MapPointActivity.class);
-                intent.putExtra(Names.ID, id());
-                startActivity(intent);
-            }
-        });
+        View vStatus = v.findViewById(R.id.status);
+        if (vStatus != null) {
+            vStatus.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CarState carState = CarState.get(getActivity(), id());
+                    if (carState.getGps().equals(""))
+                        return;
+                    Intent intent = new Intent(getActivity(), MapPointActivity.class);
+                    intent.putExtra(Names.ID, id());
+                    startActivity(intent);
+                }
+            });
+        }
         v.findViewById(R.id.address_block).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -321,7 +324,7 @@ public class StateFragment
             tvTime.setText("???");
         }
         StringBuilder text = new StringBuilder();
-        if (!state.isIgnition()) {
+        if (!state.isIgnition() || state.isAz()) {
             long last = state.getLast_stand();
             if (last > 0) {
                 text.append("|");
@@ -359,9 +362,21 @@ public class StateFragment
                 is_address = false;
                 if (!text.toString().equals(""))
                     text.append(" ");
-                text.append(lat);
-                text.append(", ");
-                text.append(lng);
+                if (state.isGps_valid()) {
+                    text.append(lat);
+                    text.append(", ");
+                    text.append(lng);
+                } else if (!state.getGsm().equals("")) {
+                    String[] parts = state.getGsm().split(",");
+                    text.append("MCC: ");
+                    text.append(parts[0]);
+                    text.append("MNC: ");
+                    text.append(parts[1]);
+                    text.append("LAC: ");
+                    text.append(parts[2]);
+                    text.append("CID: ");
+                    text.append(parts[3]);
+                }
                 if (address != null) {
                     text.append("\n|");
                     String[] parts = address.split(", ");
@@ -383,7 +398,7 @@ public class StateFragment
                 // ignore
             }
         }
-        tvAddress.setText(State.createSpans(text.toString(), getResources().getColor(android.R.color.white), true));
+        tvAddress.setText(State.createSpans(text.toString(), vAddressView.selectedColor, true));
         Vector<CarConfig.Command> fab = getFabCommands();
         if (fab.size() > 0) {
             vFab.setVisibility(View.VISIBLE);
