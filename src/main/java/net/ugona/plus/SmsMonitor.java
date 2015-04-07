@@ -50,7 +50,7 @@ public class SmsMonitor extends BroadcastReceiver {
                 if (sms.length == 1) {
                     if (c.done != null) {
                         CarState state = CarState.get(context, id);
-                        Set<String> upd = State.update(c.done, state, null);
+                        Set<String> upd = State.update(context, c, c.done, state, null);
                         if (upd != null) {
                             Intent i = new Intent(Names.UPDATED);
                             i.putExtra(Names.ID, id);
@@ -79,7 +79,6 @@ public class SmsMonitor extends BroadcastReceiver {
                 CarConfig carConfig = CarConfig.get(context, car_id);
                 if (!compareNumbers(carConfig.getPhone(), sms_from) && !State.isDebug())
                     continue;
-                State.appendLog(body);
                 if (Commands.processSms(context, car_id, body)) {
                     abortBroadcast();
                     return;
@@ -88,15 +87,13 @@ public class SmsMonitor extends BroadcastReceiver {
                 for (CarConfig.Sms s : sms) {
                     try {
                         Pattern pattern = Pattern.compile(s.sms);
-                        State.appendLog(s.sms);
                         Matcher matcher = pattern.matcher(body);
                         if (!matcher.find())
                             continue;
-                        State.appendLog("match!!!");
                         Set<String> changed = null;
                         if (s.set != null) {
                             CarState state = CarState.get(context, car_id);
-                            changed = State.update(s.set, state, matcher);
+                            changed = State.update(context, null, s.set, state, matcher);
                         }
                         if (s.alarm != null) {
                             Intent alarmIntent = new Intent(context, Alarm.class);
@@ -115,6 +112,7 @@ public class SmsMonitor extends BroadcastReceiver {
                         }
                         if (changed != null)
                             Notification.update(context, car_id, changed);
+                        abortBroadcast();
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }

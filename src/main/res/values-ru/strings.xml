@@ -209,4 +209,5 @@
     <string name="maintenance_date">Дата последнего обслуживания</string>
     <string name="no_widgets">Нет виджетов</string>
     <string name="home">Главная</string>
+    <string name="show_map">Показать на карте</string>
 </resources>

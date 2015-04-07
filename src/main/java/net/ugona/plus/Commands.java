@@ -151,7 +151,7 @@ public class Commands {
                     continue;
                 found = true;
                 if (command.done != null) {
-                    Set<String> update = State.update(command.done, state, null);
+                    Set<String> update = State.update(context, command, command.done, state, matcher);
                     if (update != null) {
                         upd = true;
                         Notification.update(context, id, update);

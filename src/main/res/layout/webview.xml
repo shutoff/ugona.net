@@ -20,7 +20,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/spinner_white"
-            android:gravity="left" />
+            android:gravity="left"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/logo"

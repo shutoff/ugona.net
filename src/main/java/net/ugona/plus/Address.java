@@ -64,7 +64,6 @@ public abstract class Address {
         String result = null;
         double best = 400;
         if (address_db != null) {
-            State.appendLog("Get " + lat + "," + lng);
             int limit = (int) (new Date().getTime() / 864000) - 30;
             Cursor cursor = address_db.query(TABLE_NAME, columns, "(Param = ?) AND (Lat BETWEEN ? AND ?) AND (Lng BETWEEN ? AND ?)", conditions, null, null, null, null);
             if (cursor.moveToFirst()) {
@@ -72,9 +71,7 @@ public abstract class Address {
                     double db_lat = cursor.getDouble(0);
                     double db_lon = cursor.getDouble(1);
                     int time = cursor.getInt(4);
-                    State.appendLog("> " + db_lat + "," + db_lon + " " + time);
                     if (time < limit) {
-                        State.appendLog("delete");
                         address_db.delete(TABLE_NAME, "(Param = ?) AND (Lat=?) AND (Lng=?)",
                                 new String[]{param, db_lat + "", db_lon + ""});
                         continue;
@@ -89,7 +86,6 @@ public abstract class Address {
                 }
             }
             cursor.close();
-            State.appendLog("best=" + best);
         }
         if ((best > 80) && (answer != null)) {
             final String key = lat + "," + lng + "," + param;
@@ -98,9 +94,7 @@ public abstract class Address {
                 AddressRequest request = new AddressRequest() {
                     @Override
                     void addressResult(String address) {
-                        State.appendLog("res");
                         if (address != null) {
-                            State.appendLog(address);
                             String[] parts = address.split(", ");
                             address = parts[0];
                             for (int i = 1; i < parts.length; i++) {
@@ -143,7 +137,6 @@ public abstract class Address {
             if (async)
                 return null;
         }
-        State.appendLog("answer");
         if (answer != null)
             answer.result(result);
         return result;

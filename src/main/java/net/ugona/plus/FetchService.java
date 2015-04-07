@@ -293,8 +293,11 @@ public class FetchService extends Service {
             StatusParams params = new StatusParams();
             params.skey = api_key;
             CarState state = CarState.get(FetchService.this, car_id);
-            if (state.getTime() > 0)
+            if (state.getTime() > 0) {
                 params.time = state.getTime();
+                if ((state.getCard() > 0) && (state.getGuard_time() > 0) && (state.getGuard_time() > state.getCard()))
+                    params.time = state.getGuard_time();
+            }
             if (connect)
                 params.connect = 1;
             execute("/", params);

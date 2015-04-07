@@ -102,6 +102,7 @@ public class MainActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+/*
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
@@ -110,6 +111,7 @@ public class MainActivity
                 System.exit(1);
             }
         });
+*/
 
         Font font = new Font("Exo2");
         font.install(this);

@@ -64,7 +64,9 @@ public class MaintenanceFragment
 
         vProgress = v.findViewById(R.id.first_progress);
 
-        v.findViewById(R.id.footer).setVisibility(View.GONE);
+        View vFooter = v.findViewById(R.id.footer);
+        if (vFooter != null)
+            vFooter.setVisibility(View.GONE);
         v.findViewById(R.id.progress).setVisibility(View.GONE);
         v.findViewById(R.id.loading).setVisibility(View.GONE);
         v.findViewById(R.id.space).setVisibility(View.GONE);

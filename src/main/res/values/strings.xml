@@ -205,4 +205,5 @@
     <string name="maintenance_date">Last maintenance date</string>
     <string name="no_widgets">No widgets</string>
     <string name="home">Home</string>
+    <string name="show_map">Show map</string>
 </resources>

@@ -2,11 +2,11 @@ package net.ugona.plus;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Build;
-import android.os.Environment;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.Spannable;
@@ -25,18 +25,11 @@ import com.seppius.i18n.plurals.PluralResources;
 
 import org.joda.time.LocalDate;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -50,11 +43,14 @@ public class State {
     static final Pattern eq_int = Pattern.compile("^([A-Za-z0-9_]+)=([0-9]+)$");
     static final Pattern ne_int = Pattern.compile("^([A-Za-z0-9_]+)\\!=([0-9]+)$");
     static final Pattern eq_str = Pattern.compile("^([A-Za-z0-9_]+)=\"(.*)\"$");
+    static final Pattern map_str = Pattern.compile("^map:\"(.*)\"$");
+    static final Pattern alert_str = Pattern.compile("^alert:\"(.*)\"$");
     final static double D2R = 0.017453;
     final static double a = 6378137.0;
     final static double e2 = 0.006739496742337;
     static private int telephony_state = 0;
 
+/*
     static public void appendLog(String text) {
         Log.v("v", text);
 
@@ -90,6 +86,7 @@ public class State {
         String s = sw.toString();
         appendLog(s);
     }
+*/
 
     static boolean isDebug() {
         return Build.FINGERPRINT.startsWith("generic");
@@ -241,6 +238,15 @@ public class State {
                 m = ne_int.matcher(condition);
                 if (m.find() && (getInteger(o, m.group(1)) == Integer.parseInt(m.group(2))))
                     return false;
+                m = eq_str.matcher(condition);
+                if (m.find())
+                    return false;
+                m = map_str.matcher(condition);
+                if (m.find())
+                    return false;
+                m = alert_str.matcher(condition);
+                if (m.find())
+                    return false;
             } catch (Exception ex) {
                 Log.v("check", ex.getMessage());
             }
@@ -369,7 +375,7 @@ public class State {
         }
     }
 
-    static Set<String> update(String condition, Object o, Matcher matcher) {
+    static Set<String> update(final Context context, final CarConfig.Command cmd, String condition, Object o, Matcher matcher) {
         Matcher m = ok_bool.matcher(condition);
         HashSet<String> res = new HashSet<>();
         try {
@@ -414,6 +420,55 @@ public class State {
                     return null;
                 setString(o, id, v);
                 res.add(id);
+                return res;
+            }
+            m = map_str.matcher(condition);
+            if (m.find()) {
+                String v = m.group(1);
+                if (matcher != null) {
+                    for (int n = matcher.groupCount(); n > 0; n--) {
+                        String subst = "$" + n;
+                        v = v.replace(subst, matcher.group(n));
+                    }
+                    try {
+                        String[] parts = v.split(",");
+                        final double lat = Double.parseDouble(parts[0]);
+                        final double lng = Double.parseDouble(parts[1]);
+                        Address.get(context, lat, lng, new Address.Answer() {
+                            @Override
+                            public void result(String address) {
+                                if (address == null)
+                                    address = lat + "," + lng;
+                                Intent intent = new Intent(context, DialogActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                if (cmd != null)
+                                    intent.putExtra(Names.TITLE, cmd.name);
+                                intent.putExtra(Names.MESSAGE, address);
+                                intent.putExtra(Names.POINT_DATA, lat + "," + lng);
+                                context.startActivity(intent);
+                            }
+                        }, true);
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                }
+                return res;
+            }
+            m = alert_str.matcher(condition);
+            if (m.find()) {
+                String v = m.group(1);
+                if (matcher != null) {
+                    for (int n = matcher.groupCount(); n > 0; n--) {
+                        String subst = "$" + n;
+                        v = v.replace(subst, matcher.group(n));
+                    }
+                    Intent intent = new Intent(context, DialogActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    if (cmd != null)
+                        intent.putExtra(Names.TITLE, cmd.name);
+                    intent.putExtra(Names.MESSAGE, v);
+                    context.startActivity(intent);
+                }
                 return res;
             }
             Log.v("check", "Bad condition: " + condition);
