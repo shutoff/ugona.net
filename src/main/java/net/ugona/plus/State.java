@@ -6,6 +6,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Build;
+import android.os.Environment;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.Spannable;
@@ -24,11 +25,16 @@ import com.seppius.i18n.plurals.PluralResources;
 
 import org.joda.time.LocalDate;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -47,7 +53,6 @@ public class State {
     final static double e2 = 0.006739496742337;
     static private int telephony_state = 0;
 
-/*
     static public void appendLog(String text) {
         Log.v("v", text);
 
@@ -74,7 +79,7 @@ public class State {
             // ignore
         }
     }
-
+    /*
     static public void print(Throwable ex) {
         ex.printStackTrace();
         appendLog("Error: " + ex.toString());

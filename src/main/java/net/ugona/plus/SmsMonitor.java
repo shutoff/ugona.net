@@ -83,6 +83,7 @@ public class SmsMonitor extends BroadcastReceiver {
                     abortBroadcast();
                     return;
                 }
+                State.appendLog(body);
                 CarConfig.Sms[] sms = carConfig.getSms();
                 for (CarConfig.Sms s : sms) {
                     try {
@@ -90,10 +91,16 @@ public class SmsMonitor extends BroadcastReceiver {
                         Matcher matcher = pattern.matcher(body);
                         if (!matcher.find())
                             continue;
+                        State.appendLog(s.sms);
                         Set<String> changed = null;
                         if (s.set != null) {
                             CarState state = CarState.get(context, car_id);
                             changed = State.update(s.set, state, matcher);
+                            if (changed != null) {
+                                for (String str : changed) {
+                                    State.appendLog(str);
+                                }
+                            }
                         }
                         if (s.alarm != null) {
                             Intent alarmIntent = new Intent(context, Alarm.class);
@@ -112,6 +119,7 @@ public class SmsMonitor extends BroadcastReceiver {
                         }
                         if (changed != null)
                             Notification.update(context, car_id, changed);
+                        break;
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }

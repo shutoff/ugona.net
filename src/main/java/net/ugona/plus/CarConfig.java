@@ -27,7 +27,7 @@ public class CarConfig extends Config {
     private String temp_settings;
     private Setting[] settings;
     private Sms[] sms;
-    private int[] commands;
+    private int[] fab;
     private boolean inet_cmd;
     private int sim_cmd;
     private boolean ccode_text;
@@ -268,8 +268,8 @@ public class CarConfig extends Config {
         upd = true;
     }
 
-    public int[] getCommands() {
-        if ((commands == null) && (cmd != null)) {
+    public int[] getFab() {
+        if ((fab == null) && (cmd != null)) {
             Vector<Integer> res = new Vector<>();
             for (Command c : cmd) {
                 if (c.group == null)
@@ -278,16 +278,16 @@ public class CarConfig extends Config {
                     continue;
                 res.add(c.id);
             }
-            commands = new int[res.size()];
+            fab = new int[res.size()];
             for (int i = 0; i < res.size(); i++) {
-                commands[i] = res.get(i);
+                fab[i] = res.get(i);
             }
         }
-        return commands;
+        return fab;
     }
 
-    public void setCommands(int[] commands) {
-        this.commands = commands;
+    public void setFab(int[] fab) {
+        this.fab = fab;
         upd = true;
     }
 

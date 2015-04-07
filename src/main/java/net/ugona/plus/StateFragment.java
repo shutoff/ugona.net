@@ -449,7 +449,7 @@ public class StateFragment
     Vector<CarConfig.Command> getFabCommands() {
         CarConfig config = CarConfig.get(getActivity(), id());
         CarState state = CarState.get(getActivity(), id());
-        int[] selected = config.getCommands();
+        int[] selected = config.getFab();
         CarConfig.Command[] cmds = config.getCmd();
         Set<String> enabled = new HashSet<>();
         Vector<CarConfig.Command> res = new Vector<>();

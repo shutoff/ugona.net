@@ -37,7 +37,7 @@ public class CommandsFragment
         final Set<String> used = new HashSet<>();
 
         final CarConfig.Command[] cmd = config.getCmd();
-        int[] selected = config.getCommands();
+        int[] selected = config.getFab();
         for (CarConfig.Command c : cmd) {
             if (c.group == null)
                 continue;
@@ -118,7 +118,7 @@ public class CommandsFragment
                 cmd[count++] = g.id;
         }
         CarConfig config = CarConfig.get(getActivity(), id());
-        config.setCommands(cmd);
+        config.setFab(cmd);
     }
 
     static class Group {
