@@ -7,7 +7,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Vector;
 
 public abstract class Address {
 
@@ -24,6 +27,7 @@ public abstract class Address {
     };
 
     static SQLiteDatabase address_db;
+    static Map<String, Vector<AnswerQueue>> requests = new HashMap<>();
 
     static String get(Context context, final double v_lat, final double v_lng, final Answer answer) {
         return get(context, v_lat, v_lng, answer, false);
@@ -60,6 +64,7 @@ public abstract class Address {
         String result = null;
         double best = 400;
         if (address_db != null) {
+            State.appendLog("Get " + lat + "," + lng);
             int limit = (int) (new Date().getTime() / 864000) - 30;
             Cursor cursor = address_db.query(TABLE_NAME, columns, "(Param = ?) AND (Lat BETWEEN ? AND ?) AND (Lng BETWEEN ? AND ?)", conditions, null, null, null, null);
             if (cursor.moveToFirst()) {
@@ -67,7 +72,9 @@ public abstract class Address {
                     double db_lat = cursor.getDouble(0);
                     double db_lon = cursor.getDouble(1);
                     int time = cursor.getInt(4);
+                    State.appendLog("> " + db_lat + "," + db_lon + " " + time);
                     if (time < limit) {
+                        State.appendLog("delete");
                         address_db.delete(TABLE_NAME, "(Param = ?) AND (Lat=?) AND (Lng=?)",
                                 new String[]{param, db_lat + "", db_lon + ""});
                         continue;
@@ -82,48 +89,61 @@ public abstract class Address {
                 }
             }
             cursor.close();
+            State.appendLog("best=" + best);
         }
-        if (best > 80) {
-            AddressRequest request = new AddressRequest() {
-                @Override
-                void addressResult(String address) {
-                    if (address != null) {
-                        String[] parts = address.split(", ");
-                        address = parts[0];
-                        for (int i = 1; i < parts.length; i++) {
-                            String p = parts[i];
-                            if (p.equals(""))
-                                continue;
-                            address += ",";
-                            p = setA0(p);
-                            if ((i > 1) && (p.length() < 6)) {
-                                address += "\u00A0";
-                                address += p.replaceAll(" ", "\u00A0");
-                                continue;
+        if ((best > 80) && (answer != null)) {
+            final String key = lat + "," + lng + "," + param;
+            if (!requests.containsKey(key)) {
+                requests.put(key, new Vector<AnswerQueue>());
+                AddressRequest request = new AddressRequest() {
+                    @Override
+                    void addressResult(String address) {
+                        State.appendLog("res");
+                        if (address != null) {
+                            State.appendLog(address);
+                            String[] parts = address.split(", ");
+                            address = parts[0];
+                            for (int i = 1; i < parts.length; i++) {
+                                String p = parts[i];
+                                if (p.equals(""))
+                                    continue;
+                                address += ",";
+                                p = setA0(p);
+                                if ((i > 1) && (p.length() < 6)) {
+                                    address += "\u00A0";
+                                    address += p.replaceAll(" ", "\u00A0");
+                                    continue;
+                                }
+                                address += " " + p;
                             }
-                            address += " " + p;
+                            if (address_db != null) {
+                                ContentValues values = new ContentValues();
+                                values.put(columns[0], lat);
+                                values.put(columns[1], lng);
+                                values.put(columns[2], address);
+                                values.put(columns[3], param);
+                                values.put(columns[4], (int) (new Date().getTime() / 864000));
+                                address_db.insert(TABLE_NAME, null, values);
+                            }
                         }
-                        if (address_db != null) {
-                            ContentValues values = new ContentValues();
-                            values.put(columns[0], lat);
-                            values.put(columns[1], lng);
-                            values.put(columns[2], address);
-                            values.put(columns[3], param);
-                            values.put(columns[4], (int) (new Date().getTime() / 864000));
-                            address_db.insert(TABLE_NAME, null, values);
+                        Vector<AnswerQueue> answerQueues = requests.get(key);
+                        requests.remove(key);
+                        for (AnswerQueue queue : answerQueues) {
+                            if ((address != null) || queue.async)
+                                queue.answer.result(address);
                         }
-                        if (answer != null)
-                            answer.result(address);
-                        return;
                     }
-                    if (async)
-                        answer.result(null);
-                }
-            };
-            request.getAddress(map_type, lat, lng);
+                };
+                request.getAddress(map_type, lat, lng);
+            }
+            AnswerQueue answerQueue = new AnswerQueue();
+            answerQueue.answer = answer;
+            answerQueue.async = async;
+            requests.get(key).add(answerQueue);
             if (async)
                 return null;
         }
+        State.appendLog("answer");
         if (answer != null)
             answer.result(result);
         return result;
@@ -147,6 +167,11 @@ public abstract class Address {
         abstract void result(String address);
     }
 
+    static class AnswerQueue {
+        Answer answer;
+        boolean async;
+    }
+
     static class OpenHelper extends SQLiteOpenHelper {
 
         final static String DB_NAME = "address.db";
@@ -159,7 +184,7 @@ public abstract class Address {
                 + "Param TEXT NOT NULL)";
 
         public OpenHelper(Context context) {
-            super(context, DB_NAME, null, 40);
+            super(context, DB_NAME, null, 42);
         }
 
         @Override

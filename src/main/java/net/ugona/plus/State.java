@@ -29,6 +29,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -79,7 +81,7 @@ public class State {
             // ignore
         }
     }
-    /*
+
     static public void print(Throwable ex) {
         ex.printStackTrace();
         appendLog("Error: " + ex.toString());
@@ -88,7 +90,6 @@ public class State {
         String s = sw.toString();
         appendLog(s);
     }
-*/
 
     static boolean isDebug() {
         return Build.FINGERPRINT.startsWith("generic");
