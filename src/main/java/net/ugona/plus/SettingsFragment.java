@@ -74,8 +74,12 @@ public class SettingsFragment
         tabs = (PagerSlidingTabStrip) v.findViewById(R.id.tabs);
         setPageState();
         vPager.setAdapter(new PagesAdapter(getChildFragmentManager()));
-        if (tabs != null)
+        if (tabs != null) {
             tabs.setViewPager(vPager);
+            tabs.delegatePageListener = this;
+        } else {
+            vPager.setOnPageChangeListener(this);
+        }
         vPager.setCurrentItem(getPagePosition(PAGE_AUTH));
         handler = new Handler();
         return v;

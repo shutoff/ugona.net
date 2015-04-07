@@ -169,9 +169,12 @@ public class PrimaryFragment
             return;
         setPageState();
         vPager.setAdapter(new PagesAdapter(getChildFragmentManager()));
-        if (tabs != null)
+        if (tabs != null) {
             tabs.setViewPager(vPager);
-        vPager.setOnPageChangeListener(this);
+            tabs.delegatePageListener = this;
+        } else {
+            vPager.setOnPageChangeListener(this);
+        }
         vPager.setCurrentItem(getPagePosition(PAGE_STATE));
     }
 
