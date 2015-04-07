@@ -447,7 +447,7 @@ public class State {
                                 intent.putExtra(Names.POINT_DATA, lat + "," + lng);
                                 context.startActivity(intent);
                             }
-                        }, true);
+                        });
                     } catch (Exception ex) {
                         // ignore
                     }

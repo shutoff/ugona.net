@@ -49,7 +49,6 @@ public class StateFragment
     ImageView ivRefresh;
     View vProgress;
     View vFabProgress;
-    boolean is_address;
     boolean longTap;
     String pkg;
     Indicator[] temp_indicators;
@@ -189,6 +188,10 @@ public class StateFragment
             public void onReceive(Context context, Intent intent) {
                 if (intent == null)
                     return;
+                if (intent.getAction().equals(Names.ADDRESS_UPDATE)) {
+                    update();
+                    return;
+                }
                 if (!id().equals(intent.getStringExtra(Names.ID)))
                     return;
                 update();
@@ -202,6 +205,7 @@ public class StateFragment
         intFilter.addAction(Names.NO_UPDATED);
         intFilter.addAction(Names.COMMANDS);
         intFilter.addAction(Names.CONFIG_CHANGED);
+        intFilter.addAction(Names.ADDRESS_UPDATE);
         getActivity().registerReceiver(br, intFilter);
         Intent intent = new Intent(getActivity(), FetchService.class);
         intent.setAction(FetchService.ACTION_UPDATE);
@@ -343,23 +347,8 @@ public class StateFragment
         if (gps != null) {
             String[] g = gps.split(",");
             try {
-                double lat = Double.parseDouble(g[0]);
-                double lng = Double.parseDouble(g[1]);
-                is_address = true;
-                String address = Address.get(getActivity(), lat, lng, new Address.Answer() {
-                    @Override
-                    public void result(String address) {
-                        if ((address == null) || is_address)
-                            return;
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                update();
-                            }
-                        });
-                    }
-                });
-                is_address = false;
+                final double lat = Double.parseDouble(g[0]);
+                final double lng = Double.parseDouble(g[1]);
                 if (!text.toString().equals(""))
                     text.append(" ");
                 if (state.isGps_valid()) {
@@ -377,6 +366,7 @@ public class StateFragment
                     text.append("CID: ");
                     text.append(parts[3]);
                 }
+                String address = state.getAddress(getActivity());
                 if (address != null) {
                     text.append("\n|");
                     String[] parts = address.split(", ");

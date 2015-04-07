@@ -456,7 +456,7 @@ public class TracksFragment extends MainFragment {
             Track.Point p = getPoint(track);
             if (getActivity() == null)
                 return;
-            Address.get(getActivity(), p.latitude, p.longitude, this, true);
+            Address.get(getActivity(), p.latitude, p.longitude, this);
         }
 
     }

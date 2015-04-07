@@ -155,13 +155,20 @@ public class MapPointActivity extends MapActivity {
         br = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(Names.ADDRESS_UPDATE)) {
+                    if (loaded)
+                        callJs("showPoints()");
+                    return;
+                }
                 update();
                 updateTrack();
                 stopTimer();
                 startTimer(false);
             }
         };
-        registerReceiver(br, new IntentFilter(FetchService.ACTION_UPDATE));
+        IntentFilter intentFilter = new IntentFilter(FetchService.ACTION_UPDATE);
+        intentFilter.addAction(Names.ADDRESS_UPDATE);
+        registerReceiver(br, intentFilter);
     }
 
     @Override
@@ -336,7 +343,7 @@ public class MapPointActivity extends MapActivity {
             }
 
             data += location + "<br/>";
-            String address = Address.get(getBaseContext(), lat, lng, null);
+            String address = carState.getAddress(getBaseContext());
             if (address != null) {
                 String[] parts = address.split(", ");
                 if (parts.length >= 3) {
@@ -345,19 +352,6 @@ public class MapPointActivity extends MapActivity {
                         address += "<br/>" + parts[n];
                 }
                 data += address;
-            } else {
-                Address.get(getBaseContext(), lat, lng, new Address.Answer() {
-                    @Override
-                    public void result(String address) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (loaded)
-                                    callJs("showPoints()");
-                            }
-                        });
-                    }
-                });
             }
             data += ";" + zone;
             if (times.containsKey(id))

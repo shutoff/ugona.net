@@ -45,4 +45,5 @@ public class Names {
     static final String START_UPDATE = PKG_NAME + ".START_UPDATE";
     static final String SMS_SENT = PKG_NAME + ".SMS_SENT";
     static final String CAR_CHANGED = PKG_NAME + ".CAR_CHANGED";
+    static final String ADDRESS_UPDATE = PKG_NAME + ".ADDR_UPDATE";
 }

@@ -1,6 +1,7 @@
 package net.ugona.plus;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
@@ -72,6 +73,11 @@ public class CarState extends Config {
     private boolean valet;
     private double notify_balance;
 
+    private String address;
+    private double addr_lat;
+    private double addr_lon;
+    private String address_type;
+
     private CarState(Context context, String id) {
 
         gsm = "";
@@ -82,6 +88,8 @@ public class CarState extends Config {
         zone = "";
         check_version = "";
         gsm_region = "";
+        address = "";
+        address_type = "";
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String s = preferences.getString(CAR_KEY + id, "");
@@ -443,4 +451,49 @@ public class CarState extends Config {
         this.notify_balance = notify_balance;
         upd = true;
     }
+
+    public String getAddress(final Context context) {
+        try {
+            String[] parts = gps.split(",");
+            final double lat = Double.parseDouble(parts[0]);
+            final double lon = Double.parseDouble(parts[1]);
+            double distance = 1000;
+            AppConfig appConfig = AppConfig.get(context);
+            final String type = appConfig.getMap_type();
+            if (!type.equals(address_type))
+                address = "";
+            if (!address.equals(""))
+                distance = State.distance(lat, lon, addr_lat, addr_lon);
+            if (distance > 400) {
+                if (!address.equals("")) {
+                    address = "";
+                    upd = true;
+                }
+            }
+            if (distance > 80) {
+                Address.get(context, lat, lon, type, new Address.Answer() {
+                    @Override
+                    public void result(String res) {
+                        if (res == null)
+                            return;
+                        addr_lat = lat;
+                        addr_lon = lon;
+                        address_type = type;
+                        upd = true;
+                        if (res.equals(address))
+                            return;
+                        address = res;
+                        Intent intent = new Intent(Names.ADDRESS_UPDATE);
+                        context.sendBroadcast(intent);
+                    }
+                });
+            }
+        } catch (Exception ex) {
+            return null;
+        }
+        if (address.equals(""))
+            return null;
+        return address;
+    }
+
 }
