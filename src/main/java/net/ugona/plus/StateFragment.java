@@ -372,13 +372,9 @@ public class StateFragment
                     String[] parts = address.split(", ");
                     text.append(parts[0]);
                     if (parts.length > 1) {
-                        text.append(", ");
-                        text.append(parts[1]);
-                    }
-                    if (parts.length > 2) {
                         text.append("|\n");
-                        text.append(parts[2]);
-                        for (int i = 3; i < parts.length; i++) {
+                        text.append(parts[1]);
+                        for (int i = 2; i < parts.length; i++) {
                             text.append(", ");
                             text.append(parts[i]);
                         }
