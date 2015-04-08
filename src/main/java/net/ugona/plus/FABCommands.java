@@ -146,7 +146,7 @@ public class FABCommands
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                 ObjectAnimator animator = ObjectAnimator.ofFloat(vList, View.TRANSLATION_Y, fab_pos[1], new_pos);
                 animator.setRepeatCount(0);
-                animator.setDuration(500);
+                animator.setDuration(400);
                 animator.start();
             }
         }

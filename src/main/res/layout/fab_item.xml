@@ -18,12 +18,13 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/btn_shadow"
-            android:paddingBottom="10dp"
+            android:gravity="center"
+            android:paddingBottom="9dp"
             android:paddingLeft="10dp"
             android:paddingRight="16dp"
-            android:paddingTop="10dp"
-            android:textColor="@color/text_dark"
-            android:textSize="13sp"
+            android:paddingTop="9dp"
+            android:textColor="#2D2D2D"
+            android:textSize="13.3sp"
             android:typeface="sans" />
 
         <FrameLayout

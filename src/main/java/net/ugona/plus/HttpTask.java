@@ -61,11 +61,8 @@ public abstract class HttpTask {
         Request request = builder.build();
         Response response = client.newCall(request).execute();
 
-        if (response.code() != HttpURLConnection.HTTP_OK) {
-            State.appendLog(url);
-            State.appendLog(data);
+        if (response.code() != HttpURLConnection.HTTP_OK)
             throw new Exception(response.message());
-        }
 
         JsonObject result;
         Reader reader = response.body().charStream();

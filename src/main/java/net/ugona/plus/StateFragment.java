@@ -357,13 +357,12 @@ public class StateFragment
                     text.append(lng);
                 } else if (!state.getGsm().equals("")) {
                     String[] parts = state.getGsm().split(",");
-                    text.append("MCC: ");
                     text.append(parts[0]);
-                    text.append("MNC: ");
+                    text.append("-");
                     text.append(parts[1]);
-                    text.append("LAC: ");
+                    text.append(" LAC: ");
                     text.append(parts[2]);
-                    text.append("CID: ");
+                    text.append(" CID: ");
                     text.append(parts[3]);
                 }
                 String address = state.getAddress(getActivity());
