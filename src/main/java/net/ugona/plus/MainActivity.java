@@ -318,13 +318,7 @@ public class MainActivity
 
         switch (item.getItemId()) {
             case R.id.date: {
-                final CalendarDatePickerDialog dialog = new CalendarDatePickerDialog() {
-                    @Override
-                    public void onDayOfMonthSelected(int year, int month, int day) {
-                        super.onDayOfMonthSelected(year, month, day);
-                        getView().findViewById(R.id.done).performClick();
-                    }
-                };
+                final CalendarDatePickerDialog dialog = new DatePicker();
                 dialog.initialize(new CalendarDatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(CalendarDatePickerDialog calendarDatePickerDialog, int i, int i2, int i3) {
