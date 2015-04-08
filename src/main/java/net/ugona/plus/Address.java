@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
+import android.os.Build;
 
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
@@ -227,6 +228,7 @@ public abstract class Address {
                     dbHelper.getWritableDatabase().insert(TABLE_NAME, null, values);
 
                 } catch (Exception ex) {
+                    State.print(ex);
                     ex.printStackTrace();
                     return null;
                 }
@@ -236,15 +238,25 @@ public abstract class Address {
             @Override
             protected void onPostExecute(String s) {
                 Vector<Answer> answers = requests.remove(key);
-                if (answers == null)
-                    return;
                 for (Answer a : answers) {
                     a.result(s);
                 }
-
             }
         };
-        task.execute(param);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, param);
+            } else {
+                task.execute(param);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            State.print(ex);
+            Vector<Answer> answers = requests.remove(key);
+            for (Answer a : answers) {
+                a.result(null);
+            }
+        }
     }
 
     static String setA0(String s) {
