@@ -212,6 +212,8 @@ public class MaintenanceFragment
         vList.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
+                if (maintenances.size() == 0)
+                    return 2;
                 return maintenances.size() + 1;
             }
 
@@ -237,6 +239,7 @@ public class MaintenanceFragment
                 if (position < maintenances.size()) {
                     v.findViewById(R.id.info_block).setVisibility(View.VISIBLE);
                     v.findViewById(R.id.add).setVisibility(View.GONE);
+                    v.findViewById(R.id.add_info).setVisibility(View.GONE);
                     Maintenance m = maintenances.get(position);
                     TextView tv = (TextView) v.findViewById(R.id.name);
                     tv.setText(m.name);
@@ -354,8 +357,13 @@ public class MaintenanceFragment
                     View vDelete = v.findViewById(R.id.delete);
                     vDelete.setTag(position);
                     vDelete.setOnClickListener(MaintenanceFragment.this);
+                } else if (position > maintenances.size()) {
+                    v.findViewById(R.id.info_block).setVisibility(View.GONE);
+                    v.findViewById(R.id.add_info).setVisibility(View.VISIBLE);
+                    v.findViewById(R.id.add).setVisibility(View.GONE);
                 } else {
                     v.findViewById(R.id.info_block).setVisibility(View.GONE);
+                    v.findViewById(R.id.add_info).setVisibility(View.GONE);
                     v.findViewById(R.id.add).setVisibility(View.VISIBLE);
                 }
                 return v;

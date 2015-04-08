@@ -80,7 +80,7 @@ public class CarConfig extends Config {
         ed.commit();
     }
 
-    void init() {
+    public void init() {
         name = "";
         key = "";
         auth = "";

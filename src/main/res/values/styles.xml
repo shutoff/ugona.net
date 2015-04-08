@@ -87,6 +87,7 @@
     </style>
 
     <style name="FabDialogTheme" parent="CustomDialogTheme">
+        <item name="android:windowBackground">@color/light_transparent</item>
     </style>
 
 </resources>

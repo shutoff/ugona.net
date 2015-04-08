@@ -7,6 +7,7 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
 
 public class IndicatorsView extends HorizontalScrollView {
 
@@ -34,9 +35,27 @@ public class IndicatorsView extends HorizontalScrollView {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
+        ViewGroup layout = (ViewGroup) getChildAt(0);
+        int max_width = 0;
+        for (int i = 1; i < layout.getChildCount(); i++) {
+            View v1 = layout.getChildAt(i - 1);
+            View v = layout.getChildAt(i);
+            v1.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+            v.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+            int w = (v1.getMeasuredWidth() + v.getMeasuredWidth()) / 2;
+            if (w > max_width)
+                max_width = w;
+        }
+        for (int i = 1; i < layout.getChildCount(); i++) {
+            View v = layout.getChildAt(i);
+            int w = (layout.getChildAt(i - 1).getMeasuredWidth() + v.getMeasuredWidth()) / 2;
+            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) v.getLayoutParams();
+            lp.leftMargin = max_width - w;
+            v.setLayoutParams(lp);
+        }
+
         setupChildren();
         if ((getScrollX() == 0) && (getChildAt(0).getWidth() > getWidth())) {
-            ViewGroup layout = (ViewGroup) getChildAt(0);
             int padding_left = layout.getPaddingLeft();
             float last_x = 0;
             for (int i = 0; i < layout.getChildCount(); i++) {

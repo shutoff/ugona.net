@@ -46,11 +46,11 @@ public class Config implements Serializable {
                         f.set(o, "");
                     }
                 }
-                Method init = o.getClass().getMethod("invoke");
+                Method init = o.getClass().getMethod("init");
                 if (init != null)
                     init.invoke(o);
             } catch (Exception ex) {
-                // ignore
+                ex.printStackTrace();
             }
         }
     }

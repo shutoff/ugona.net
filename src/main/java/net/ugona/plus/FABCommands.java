@@ -1,7 +1,9 @@
 package net.ugona.plus;
 
+import android.animation.ObjectAnimator;
 import android.app.Dialog;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.view.View;
@@ -37,6 +39,7 @@ public class FABCommands
     Vector<CarConfig.Command> items;
     boolean longTap;
     String car_id;
+    boolean animate;
 
     public FABCommands(MainActivity activity, final Vector<CarConfig.Command> items, final String car_id) {
         super(activity, R.style.FabDialogTheme);
@@ -102,6 +105,12 @@ public class FABCommands
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        animate = true;
+    }
+
+    @Override
     public void onClick(View v) {
         dismiss();
     }
@@ -131,6 +140,15 @@ public class FABCommands
         if (new_pos != lp.topMargin) {
             lp.topMargin = new_pos;
             vList.setLayoutParams(lp);
+        }
+        if (animate) {
+            animate = false;
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                ObjectAnimator animator = ObjectAnimator.ofFloat(vList, View.TRANSLATION_Y, fab_pos[1], new_pos);
+                animator.setRepeatCount(0);
+                animator.setDuration(500);
+                animator.start();
+            }
         }
     }
 

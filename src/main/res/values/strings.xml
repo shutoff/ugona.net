@@ -206,4 +206,6 @@
     <string name="no_widgets">No widgets</string>
     <string name="home">Home</string>
     <string name="show_map">Show map</string>
+    <string name="add_notification">Add notification</string>
+    <string name="maintenance_info">You can add notification about periodicaly maintenance</string>
 </resources>

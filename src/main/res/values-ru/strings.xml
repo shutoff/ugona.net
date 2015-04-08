@@ -210,4 +210,6 @@
     <string name="no_widgets">Нет виджетов</string>
     <string name="home">Главная</string>
     <string name="show_map">Показать на карте</string>
+    <string name="add_notification">Добавить напоминание</string>
+    <string name="maintenance_info">Вы можете добавить напоминания о периодическом обслужтивании автомибиля на основе сроков, пробега или моточасов</string>
 </resources>

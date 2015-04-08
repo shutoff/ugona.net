@@ -88,11 +88,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="6dp"
-            android:text="@string/add_car"
+            android:text="@string/add_notification"
             android:textColor="@color/text_dark"
             android:textSize="15sp"
             android:typeface="sans" />
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/add_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="@string/maintenance_info"
+        android:textColor="@color/text_dark"
+        android:textSize="14sp"
+        android:typeface="sans" />
 
 </LinearLayout>

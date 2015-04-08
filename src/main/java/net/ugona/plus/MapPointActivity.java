@@ -149,6 +149,7 @@ public class MapPointActivity extends MapActivity {
         } else {
             findViewById(R.id.logo).setVisibility(View.VISIBLE);
         }
+        updateTrack();
 
         alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         pi = createPendingResult(REQUEST_ALARM, new Intent(), 0);
@@ -287,8 +288,6 @@ public class MapPointActivity extends MapActivity {
         long begin;
         long end;
     }
-
-    ;
 
     class JsInterface extends MapActivity.JsInterface {
 

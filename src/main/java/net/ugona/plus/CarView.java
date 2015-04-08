@@ -18,6 +18,7 @@ public class CarView extends View {
     final static int STROKE_DP = 1;
     final static int X_PAD = 7;
     final static int Y_PAD = 5;
+    final static int X_MARGIN = 16;
 
     final static int XC_LEFT = 20;
     final static int YC_BOTTOM = 15;
@@ -114,7 +115,7 @@ public class CarView extends View {
                 RectF rect = new RectF(xPos - in_radius, yPos - in_radius, xPos + in_radius, yPos + in_radius);
                 canvas.drawBitmap(bitmap, null, rect, carImage.paint);
                 bitmap.recycle();
-                xPos += radius * 2 + X_PAD;
+                xPos += radius * 2 + X_MARGIN;
             }
         }
     }
