@@ -453,6 +453,8 @@ public class StateFragment
         CarConfig.Command[] cmds = config.getCmd();
         Set<String> enabled = new HashSet<>();
         Vector<CarConfig.Command> res = new Vector<>();
+        if (cmds == null)
+            return res;
         for (CarConfig.Command cmd : cmds) {
             boolean enable = false;
             for (int s : selected) {

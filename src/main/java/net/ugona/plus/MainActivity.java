@@ -193,7 +193,6 @@ public class MainActivity
                 (car_config.getAuth().equals("") &&
                         ((intent == null) || (intent.getStringExtra(Names.ID) == null)))) {
             Intent i = new Intent(this, SplashActivity.class);
-            i.putExtra(Names.ID, id);
             startActivityForResult(i, DO_AUTH);
             return;
         }
@@ -611,7 +610,7 @@ public class MainActivity
         Date now = new Date();
         final long time = now.getTime();
         CarConfig carConfig = CarConfig.get(this, id);
-        if (carConfig.getSettings().length > 0) {
+        if ((carConfig.getSettings() != null) && (carConfig.getSettings().length > 0)) {
             if (version.equals(state.getCheck_version()) && (state.getCheck_time() > time))
                 return;
         }
@@ -641,7 +640,7 @@ public class MainActivity
             }
         };
         KeyParam skey = new KeyParam();
-        skey.skey = car_config.getKey();
+        skey.skey = carConfig.getKey();
         task.execute("/caps", skey);
     }
 
@@ -788,8 +787,12 @@ public class MainActivity
         config.setCurrent_id(new_id);
         config.save(this);
         id = new_id;
+        car_config = CarConfig.get(this, id);
         Intent intent = new Intent(Names.CAR_CHANGED);
         sendBroadcast(intent);
+        Notification.clear(this, id);
+        checkCaps();
+
     }
 
     static class KeyParam implements Serializable {
