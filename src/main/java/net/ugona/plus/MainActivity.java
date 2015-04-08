@@ -41,6 +41,7 @@ import com.eclipsesource.json.ParseException;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.haibison.android.lockpattern.LockPatternActivity;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
@@ -62,6 +63,7 @@ public class MainActivity
         extends ActionBarActivity {
 
     static final int DO_AUTH = 1;
+    static final int REQUEST_CHECK_PATTERN = 2;
 
     static final String PRIMARY = "primary";
     static final String FRAGMENT = "fragment";
@@ -265,6 +267,15 @@ public class MainActivity
             checkPhone();
             return;
         }
+        if ((requestCode == REQUEST_CHECK_PATTERN) && (resultCode == RESULT_OK)) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    setFragment(new SetPassword());
+                }
+            });
+            return;
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -336,6 +347,13 @@ public class MainActivity
                 setFragment(new AboutFragment());
                 return true;
             case R.id.passwd:
+                if (!config.getPattern().equals("")) {
+                    Intent intent = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null,
+                            this, LockPatternActivity.class);
+                    intent.putExtra(LockPatternActivity.EXTRA_PATTERN, config.getPattern().toCharArray());
+                    startActivityForResult(intent, REQUEST_CHECK_PATTERN);
+                    return true;
+                }
                 setFragment(new SetPassword());
                 return true;
             case R.id.charts:

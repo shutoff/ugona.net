@@ -15,7 +15,6 @@ import com.haibison.android.lockpattern.LockPatternActivity;
 
 public class SetPassword extends MainFragment {
 
-    static final int REQUEST_CHECK_PATTERN = 101;
     static final int REQUEST_PATTERN = 102;
 
     AppConfig config;
@@ -34,12 +33,7 @@ public class SetPassword extends MainFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
         config = AppConfig.get(getActivity());
-        if (!config.getPattern().equals("")) {
-            Intent intent = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null,
-                    getActivity(), LockPatternActivity.class);
-            intent.putExtra(LockPatternActivity.EXTRA_PATTERN, config.getPattern().toCharArray());
-            startActivityForResult(intent, REQUEST_CHECK_PATTERN);
-        }
+
         View btnGraph = v.findViewById(R.id.graphic);
         final View btnSave = v.findViewById(R.id.set);
 
@@ -131,10 +125,6 @@ public class SetPassword extends MainFragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CHECK_PATTERN) {
-            if (resultCode != Activity.RESULT_OK)
-                getActivity().onBackPressed();
-        }
         if (requestCode == REQUEST_PATTERN) {
             if (resultCode == Activity.RESULT_OK) {
                 char[] pattern = data.getCharArrayExtra(LockPatternActivity.EXTRA_PATTERN);
