@@ -57,6 +57,8 @@ public class StateFragment
     Indicator[] temp_indicators;
     CenteredScrollView vAddressView;
     String error;
+    View vPointers;
+    TextView[] tvPointers;
 
     @Override
     int layout() {
@@ -89,6 +91,37 @@ public class StateFragment
         vFab = (ImageView) v.findViewById(R.id.fab);
         vFabProgress = v.findViewById(R.id.fab_progress);
         vAddressView = (CenteredScrollView) v.findViewById(R.id.address_view);
+
+
+        View.OnClickListener pointerClick = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int pointer = (Integer) v.getTag();
+                CarConfig config = CarConfig.get(getActivity(), id());
+                int[] pointers = config.getPointers();
+                if (pointers == null)
+                    return;
+                if (pointer >= pointers.length)
+                    return;
+                PointerFragment fragment = new PointerFragment();
+                Bundle args = new Bundle();
+                args.putString(Names.ID, id() + "_" + pointers[pointer]);
+                fragment.setArguments(args);
+                MainActivity activity = (MainActivity) getActivity();
+                activity.setFragment(fragment);
+            }
+        };
+
+        vPointers = v.findViewById(R.id.pointer);
+        vPointers.setTag(0);
+        vPointers.setOnClickListener(pointerClick);
+        tvPointers = new TextView[2];
+        tvPointers[0] = (TextView) v.findViewById(R.id.pointer1);
+        tvPointers[0].setTag(0);
+        tvPointers[0].setOnClickListener(pointerClick);
+        tvPointers[1] = (TextView) v.findViewById(R.id.pointer2);
+        tvPointers[1].setTag(1);
+        tvPointers[1].setOnClickListener(pointerClick);
         handler = new Handler();
         pkg = getActivity().getPackageName();
 
@@ -464,6 +497,31 @@ public class StateFragment
         } else {
             vFab.setVisibility(View.GONE);
             vFabProgress.setVisibility(View.GONE);
+        }
+
+        int[] pointers = config.getPointers();
+        int len = 0;
+        if (pointers != null)
+            len = pointers.length;
+        if (len > tvPointers.length)
+            len = tvPointers.length;
+        int i = 0;
+        if (len > 0) {
+            vPointers.setVisibility(View.VISIBLE);
+            for (i = 0; i < len; i++) {
+                CarState pointerState = CarState.get(getActivity(), id() + "_" + pointers[i]);
+                tvPointers[i].setVisibility(View.VISIBLE);
+                if (pointerState.getTime() > 0) {
+                    tvPointers[i].setText(State.formatDateTime(getActivity(), pointerState.getTime()));
+                } else {
+                    tvPointers[i].setText("???");
+                }
+            }
+        } else {
+            vPointers.setVisibility(View.GONE);
+        }
+        for (; i < tvPointers.length; i++) {
+            tvPointers[i].setVisibility(View.GONE);
         }
     }
 

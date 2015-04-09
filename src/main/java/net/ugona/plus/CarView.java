@@ -14,11 +14,11 @@ import android.view.View;
 
 public class CarView extends View {
 
-    final static int RADIUS_DP = 20;
-    final static int STROKE_DP = 1;
+    final static int RADIUS_DP = 22;
+    final static int STROKE_DP = 4;
     final static int X_PAD = 7;
     final static int Y_PAD = 5;
-    final static int X_MARGIN = 16;
+    final static int X_MARGIN = 5;
 
     final static int XC_LEFT = 20;
     final static int YC_BOTTOM = 15;
@@ -108,11 +108,12 @@ public class CarView extends View {
                 int id = carImage.getBitmapId(part);
                 if (id == 0)
                     continue;
-                Bitmap bitmap = carImage.getBitmap(id);
-                boolean bRed = part.substring(0, 2).equals("r_");
-                canvas.drawCircle(xPos, yPos, radius, bRed ? pRed : pBlue);
-                canvas.drawCircle(xPos, yPos, in_radius, pWhite);
-                RectF rect = new RectF(xPos - in_radius, yPos - in_radius, xPos + in_radius, yPos + in_radius);
+                RectF rect = new RectF(xPos - radius, yPos - radius, xPos + radius, yPos + radius);
+                Bitmap bitmap = carImage.getBitmap(R.drawable.bg_circle);
+                canvas.drawBitmap(bitmap, null, rect, carImage.paint);
+                bitmap.recycle();
+                bitmap = carImage.getBitmap(id);
+                rect = new RectF(xPos - in_radius, yPos - in_radius, xPos + in_radius, yPos + in_radius);
                 canvas.drawBitmap(bitmap, null, rect, carImage.paint);
                 bitmap.recycle();
                 xPos += radius * 2 + X_MARGIN;

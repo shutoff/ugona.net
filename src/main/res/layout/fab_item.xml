@@ -42,14 +42,15 @@
 
             <ImageView
                 android:id="@+id/icon"
-                android:layout_width="42dp"
-                android:layout_height="42dp" />
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:padding="4dp" />
 
             <ProgressBar
                 android:id="@+id/progress"
-                android:layout_width="42dp"
-                android:layout_height="42dp"
-                android:padding="1dp"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:padding="4dp"
                 android:visibility="gone" />
 
         </FrameLayout>

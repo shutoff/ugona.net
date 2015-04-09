@@ -200,7 +200,7 @@ public class MainActivity
         Notification.clear(this, id);
 
         setPrimary();
-        checkCaps();
+        checkCaps(id);
         checkPhone();
     }
 
@@ -609,20 +609,22 @@ public class MainActivity
         });
     }
 
-    void checkCaps() {
+    void checkCaps(final String id) {
         final String version = State.getVersion(this);
         Date now = new Date();
         final long time = now.getTime();
-        CarConfig carConfig = CarConfig.get(this, id);
+        final CarConfig carConfig = CarConfig.get(this, id);
+        final CarState state = CarState.get(this, id);
         if ((carConfig.getSettings() != null) && (carConfig.getSettings().length > 0)) {
             if (version.equals(state.getCheck_version()) && (state.getCheck_time() > time))
                 return;
         }
+        final Context context = this;
         HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
                 boolean changed = CarState.update(state, res.get("caps").asObject()) != null;
-                if (car_config.update(car_config, res) != null) {
+                if (Config.update(carConfig, res) != null) {
                     changed = true;
                     Intent intent = new Intent(Names.COMMANDS);
                     intent.putExtra(Names.ID, id);
@@ -635,7 +637,7 @@ public class MainActivity
                 }
                 state.setCheck_time(time + 86400000);
                 state.setCheck_version(version);
-                config.save(this);
+                config.save(context);
             }
 
             @Override
@@ -795,7 +797,7 @@ public class MainActivity
         Intent intent = new Intent(Names.CAR_CHANGED);
         sendBroadcast(intent);
         Notification.clear(this, id);
-        checkCaps();
+        checkCaps(id);
 
     }
 

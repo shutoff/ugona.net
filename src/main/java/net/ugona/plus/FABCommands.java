@@ -91,7 +91,7 @@ public class FABCommands
                     iv.setImageResource(id);
                     id = bg[position % bg.length];
                     if (cmd.icon.equals("blocking"))
-                        id = R.drawable.bg_blocking;
+                        id = R.drawable.bg_cmd6;
                     iv.setBackgroundResource(id);
                 }
                 v.findViewById(R.id.progress).setVisibility(Commands.isProcessed(car_id, cmd) ? View.VISIBLE : View.GONE);

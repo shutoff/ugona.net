@@ -233,7 +233,7 @@ public class CarsFragment
                     tv.setText(name);
                     View vDelete = v.findViewById(R.id.delete);
                     boolean bDelete = true;
-                    if (id.indexOf("_") > 0) {
+                    if (id.indexOf("_") >= 0) {
                         v.findViewById(R.id.pointer).setVisibility(View.VISIBLE);
                     } else {
                         v.findViewById(R.id.pointer).setVisibility(View.GONE);

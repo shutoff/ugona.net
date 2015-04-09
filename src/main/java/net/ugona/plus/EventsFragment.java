@@ -136,6 +136,7 @@ public class EventsFragment extends MainFragment {
                     if (point.length > 2)
                         point_data += ";" + point[2];
                     intent.putExtra(Names.POINT_DATA, point_data);
+                    intent.putExtra(Names.TITLE, State.formatTime(getActivity(), e.time));
                     intent.putExtra(Names.ID, id());
                     getActivity().startActivity(intent);
                     return;
