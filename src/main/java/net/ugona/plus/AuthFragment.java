@@ -46,7 +46,7 @@ public class AuthFragment extends MainFragment {
                 args.putString(Names.ID, id());
                 authDialog.setArguments(args);
                 authDialog.setTargetFragment(AuthFragment.this, DO_AUTH);
-                authDialog.show(getParentFragment().getFragmentManager(), "auth");
+                authDialog.show(getParentFragment().getFragmentManager(), "auth_dialog");
             }
         }));
         items.add(new Item(getString(R.string.phone_number), config.getPhone(), new Runnable() {

@@ -5,6 +5,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -43,6 +45,7 @@ public class StateFragment
     CarView vCar;
     TextView tvAddress;
     TextView tvTime;
+    TextView tvError;
     ImageView vFab;
     Handler handler;
     BroadcastReceiver br;
@@ -53,6 +56,7 @@ public class StateFragment
     String pkg;
     Indicator[] temp_indicators;
     CenteredScrollView vAddressView;
+    String error;
 
     @Override
     int layout() {
@@ -79,6 +83,7 @@ public class StateFragment
         vCar = (CarView) v.findViewById(R.id.car);
         tvAddress = (TextView) v.findViewById(R.id.address);
         tvTime = (TextView) v.findViewById(R.id.time);
+        tvError = (TextView) v.findViewById(R.id.error);
         ivRefresh = (ImageView) v.findViewById(R.id.img_progress);
         vProgress = v.findViewById(R.id.upd_progress);
         vFab = (ImageView) v.findViewById(R.id.fab);
@@ -188,12 +193,43 @@ public class StateFragment
             public void onReceive(Context context, Intent intent) {
                 if (intent == null)
                     return;
+                if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                    update();
+                    return;
+                }
                 if (intent.getAction().equals(Names.ADDRESS_UPDATE)) {
                     update();
                     return;
                 }
                 if (!id().equals(intent.getStringExtra(Names.ID)))
                     return;
+                if (intent.getAction().equals(Names.ERROR)) {
+                    error = intent.getStringExtra(Names.ERROR);
+                    if (error == null)
+                        error = getString(R.string.data_error);
+                    update();
+                    if (error.equals("Auth error")) {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                MainActivity activity = (MainActivity) getActivity();
+                                if (activity == null)
+                                    return;
+                                if (activity.isFragmentShow("auth_dialog"))
+                                    return;
+                                AuthDialog authDialog = new AuthDialog();
+                                Bundle args = new Bundle();
+                                args.putString(Names.ID, id());
+                                authDialog.setArguments(args);
+                                authDialog.show(getParentFragment().getFragmentManager(), "auth_dialog");
+                            }
+                        });
+                    }
+                }
+                if (intent.getAction().equals(Names.UPDATED))
+                    error = null;
+                if (intent.getAction().equals(Names.NO_UPDATED))
+                    error = null;
                 update();
                 if (!intent.getAction().equals(Names.START_UPDATE))
                     refreshDone();
@@ -206,6 +242,7 @@ public class StateFragment
         intFilter.addAction(Names.COMMANDS);
         intFilter.addAction(Names.CONFIG_CHANGED);
         intFilter.addAction(Names.ADDRESS_UPDATE);
+        intFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         getActivity().registerReceiver(br, intFilter);
         Intent intent = new Intent(getActivity(), FetchService.class);
         intent.setAction(FetchService.ACTION_UPDATE);
@@ -233,6 +270,29 @@ public class StateFragment
         } else {
             vProgress.setVisibility(View.INVISIBLE);
             ivRefresh.setImageResource(state.isOnline() ? R.drawable.refresh_on : R.drawable.refresh_off);
+        }
+
+        String error_text = error;
+        if (error_text == null) {
+            if (state.getGuard_mode() == 2) {
+                error_text = getString(R.string.valet_warning);
+            } else if (state.getGuard_mode() == 3) {
+                error_text = getString(R.string.ps_guard);
+            }
+        }
+        if (error_text == null) {
+            ConnectivityManager cm =
+                    (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            if ((activeNetwork == null) || !activeNetwork.isConnectedOrConnecting())
+                error_text = getString(R.string.net_warning);
+        }
+
+        if (error_text == null) {
+            tvError.setVisibility(View.GONE);
+        } else {
+            tvError.setVisibility(View.VISIBLE);
+            tvError.setText(error_text);
         }
 
         NumberFormat formatter = NumberFormat.getInstance(getResources().getConfiguration().locale);

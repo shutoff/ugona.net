@@ -415,6 +415,10 @@ public class MainActivity
         setSideMenu();
     }
 
+    boolean isFragmentShow(String tag) {
+        return getSupportFragmentManager().findFragmentByTag(tag) != null;
+    }
+
     void setPrimary() {
         if (getFragment() != null)
             return;

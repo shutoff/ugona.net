@@ -5,6 +5,7 @@
     <color name="light_text">#d0d0d0</color>
     <color name="regular_text">#808080</color>
     <color name="error">#FF4040</color>
+    <color name="error_text">#C00000</color>
     <color name="hour">#20000000</color>
     <color name="hour_active">#FF000000</color>
     <color name="indiicator">#4c7a0b</color>
