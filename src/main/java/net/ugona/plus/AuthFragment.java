@@ -1,7 +1,9 @@
 package net.ugona.plus;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -22,6 +24,8 @@ public class AuthFragment extends MainFragment {
     ListView vList;
     Vector<Item> items;
 
+    BroadcastReceiver br;
+
     @Override
     int layout() {
         return R.layout.settings;
@@ -31,8 +35,25 @@ public class AuthFragment extends MainFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
         vList = (ListView) v.findViewById(R.id.list);
+
         fill();
+
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                BaseAdapter adapter = (BaseAdapter) vList.getAdapter();
+                adapter.notifyDataSetChanged();
+            }
+        };
+        IntentFilter intFilter = new IntentFilter(Names.COMMANDS);
+        getActivity().registerReceiver(br, intFilter);
         return v;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        getActivity().unregisterReceiver(br);
     }
 
     void fill() {
@@ -46,7 +67,7 @@ public class AuthFragment extends MainFragment {
                 args.putString(Names.ID, id());
                 authDialog.setArguments(args);
                 authDialog.setTargetFragment(AuthFragment.this, DO_AUTH);
-                authDialog.show(getParentFragment().getFragmentManager(), "auth");
+                authDialog.show(getParentFragment().getFragmentManager(), "auth_dialog");
             }
         }));
         items.add(new Item(getString(R.string.phone_number), config.getPhone(), new Runnable() {
@@ -62,6 +83,7 @@ public class AuthFragment extends MainFragment {
         }));
 
         CarConfig.Setting[] settings = config.getSettings();
+        final CarConfig.Command[] commands = config.getCmd();
         for (final CarConfig.Setting setting : settings) {
             if ((setting.id.length() < 5) || !setting.id.substring(0, 5).equals("auth_"))
                 continue;
@@ -70,6 +92,18 @@ public class AuthFragment extends MainFragment {
                 public void run() {
                     if (setting.cmd == null)
                         return;
+                    if (commands != null) {
+                        for (int cmd : setting.cmd) {
+                            for (CarConfig.Command c : commands) {
+                                if (c.id != cmd)
+                                    continue;
+                                if (Commands.isProcessed(id(), c)) {
+                                    Commands.cancel(getActivity(), id(), c);
+                                    return;
+                                }
+                            }
+                        }
+                    }
                     if (setting.cmd.length == 1) {
                         SendCommandFragment fragment = new SendCommandFragment();
                         Bundle args = new Bundle();
@@ -86,7 +120,24 @@ public class AuthFragment extends MainFragment {
                     fragment.setArguments(args);
                     fragment.show(getActivity().getSupportFragmentManager(), "sms");
                 }
-            }));
+            }) {
+                @Override
+                boolean isProgress() {
+                    if (commands == null)
+                        return false;
+                    if (setting.cmd == null)
+                        return false;
+                    for (int cmd : setting.cmd) {
+                        for (CarConfig.Command c : commands) {
+                            if (c.id != cmd)
+                                continue;
+                            if (Commands.isProcessed(id(), c))
+                                return true;
+                        }
+                    }
+                    return false;
+                }
+            });
         }
 
         CarState state = CarState.get(getActivity(), id());
@@ -120,6 +171,8 @@ public class AuthFragment extends MainFragment {
                 TextView tvText = (TextView) v.findViewById(R.id.text);
                 tvTitle.setText(item.title);
                 tvText.setText(item.text);
+                View vProgress = v.findViewById(R.id.progress);
+                vProgress.setVisibility(item.isProgress() ? View.VISIBLE : View.GONE);
                 return v;
             }
         });
@@ -150,5 +203,10 @@ public class AuthFragment extends MainFragment {
             this.text = text;
             this.action = action;
         }
+
+        boolean isProgress() {
+            return false;
+        }
+
     }
 }

@@ -1,5 +1,7 @@
 package net.ugona.plus;
 
+import android.content.SharedPreferences;
+
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
@@ -273,6 +275,18 @@ public class Config implements Serializable {
             // ignore
         }
         return false;
+    }
+
+    String upgradeString(SharedPreferences preferences, String key) {
+        String res = preferences.getString(key, "");
+/*
+        if (!res.equals("")){
+            SharedPreferences.Editor ed = preferences.edit();
+            ed.remove(key);
+            ed.commit();
+        }
+*/
+        return res;
     }
 
 }

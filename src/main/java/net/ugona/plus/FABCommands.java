@@ -91,7 +91,7 @@ public class FABCommands
                     iv.setImageResource(id);
                     id = bg[position % bg.length];
                     if (cmd.icon.equals("blocking"))
-                        id = R.drawable.bg_blocking;
+                        id = R.drawable.bg_cmd6;
                     iv.setBackgroundResource(id);
                 }
                 v.findViewById(R.id.progress).setVisibility(Commands.isProcessed(car_id, cmd) ? View.VISIBLE : View.GONE);
@@ -146,7 +146,7 @@ public class FABCommands
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                 ObjectAnimator animator = ObjectAnimator.ofFloat(vList, View.TRANSLATION_Y, fab_pos[1], new_pos);
                 animator.setRepeatCount(0);
-                animator.setDuration(500);
+                animator.setDuration(400);
                 animator.start();
             }
         }

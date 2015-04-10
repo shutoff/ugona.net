@@ -19,7 +19,7 @@
     <string name="phone_work">рабочий</string>
     <string name="phone_mobile">мобильный</string>
     <string name="car">Автомобиль</string>
-    <string name="copyright">© 2013–2014 Ugona.net, info@ugona.net</string>
+    <string name="copyright">© 2013–2015 Ugona.net, info@ugona.net</string>
     <string name="photo">Фото</string>
     <string name="control">Управление</string>
     <string name="state">Состояние</string>
@@ -34,7 +34,7 @@
     <string name="about">О программе</string>
     <string name="version">Версия:</string>
     <string name="service">ФЕДЕРАЛЬНЫЙ СЕРВИС</string>
-    <string name="application">Приложение Угона.нет+ предназначено для контроля и управления автомобилями, оборудованными охранным мониторинговым комплексом серии MS-PGSM</string>
+    <string name="application">Приложение Угона.нет+ предназначено для контроля и управления автомобилями</string>
     <string name="service_btn">Сервис Угона.нет</string>
     <string name="forum_btn">Форум поддержки</string>
     <string name="password_old">Старый пароль</string>
@@ -212,4 +212,7 @@
     <string name="show_map">Показать на карте</string>
     <string name="add_notification">Добавить напоминание</string>
     <string name="maintenance_info">Вы можете добавить напоминания о периодическом обслужтивании автомибиля на основе сроков, пробега или моточасов</string>
+    <string name="net_warning">Нет соединения для передачи данных</string>
+    <string name="valet_warning">Не забудьте отключить режим АВТОСЕРВИС</string>
+    <string name="data_error">Ошибка обновления данных</string>
 </resources>

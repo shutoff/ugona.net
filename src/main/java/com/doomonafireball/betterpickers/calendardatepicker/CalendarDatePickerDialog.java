@@ -55,7 +55,6 @@ public class CalendarDatePickerDialog extends DialogFragment implements
     private static final String TAG = "DatePickerDialog";
 
     private static final int UNINITIALIZED = -1;
-    private int mCurrentView = UNINITIALIZED;
     private static final int MONTH_AND_DAY_VIEW = 0;
     private static final int YEAR_VIEW = 1;
     private static final String KEY_SELECTED_YEAR = "year";
@@ -68,15 +67,16 @@ public class CalendarDatePickerDialog extends DialogFragment implements
     private static final String KEY_CURRENT_VIEW = "current_view";
     private static final String KEY_LIST_POSITION_OFFSET = "list_position_offset";
     private static final int DEFAULT_START_YEAR = 1900;
-    private int mMinYear = DEFAULT_START_YEAR;
     private static final int DEFAULT_END_YEAR = 2100;
-    private int mMaxYear = DEFAULT_END_YEAR;
     private static final int ANIMATION_DURATION = 300;
     private static final int ANIMATION_DELAY = 500;
     private static final SimpleDateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy", Locale.getDefault());
     private static final SimpleDateFormat DAY_FORMAT = new SimpleDateFormat("dd", Locale.getDefault());
     private static final SimpleDateFormat WDAY_FORMAT = new SimpleDateFormat("EEEE", Locale.getDefault());
     private final Calendar mCalendar = Calendar.getInstance();
+    private int mCurrentView = UNINITIALIZED;
+    private int mMinYear = DEFAULT_START_YEAR;
+    private int mMaxYear = DEFAULT_END_YEAR;
     private OnDateSetListener mCallBack;
     private HashSet<OnDateChangedListener> mListeners = new HashSet<OnDateChangedListener>();
     private AccessibleDateAnimator mAnimator;
@@ -84,7 +84,6 @@ public class CalendarDatePickerDialog extends DialogFragment implements
     private LinearLayout mMonthAndDayView;
     private TextView mSelectedMonthTextView;
     private TextView mSelectedDayTextView;
-    private TextView mSelectedWDayTextView;
     private TextView mYearView;
     private DayPickerView mDayPickerView;
     private YearPickerView mYearPickerView;
@@ -170,7 +169,6 @@ public class CalendarDatePickerDialog extends DialogFragment implements
         mMonthAndDayView.setOnClickListener(this);
         mSelectedMonthTextView = (TextView) view.findViewById(R.id.date_picker_month);
         mSelectedDayTextView = (TextView) view.findViewById(R.id.date_picker_day);
-        mSelectedWDayTextView = (TextView) view.findViewById(R.id.date_picker_wday);
         mYearView = (TextView) view.findViewById(R.id.date_picker_year);
         mYearView.setOnClickListener(this);
 
@@ -315,7 +313,6 @@ public class CalendarDatePickerDialog extends DialogFragment implements
         mSelectedMonthTextView.setText(mCalendar.getDisplayName(Calendar.MONTH, Calendar.SHORT,
                 Locale.getDefault()).toUpperCase(Locale.getDefault()));
         mSelectedDayTextView.setText(DAY_FORMAT.format(mCalendar.getTime()));
-        mSelectedWDayTextView.setText(WDAY_FORMAT.format(mCalendar.getTime()).toUpperCase());
         mYearView.setText(YEAR_FORMAT.format(mCalendar.getTime()));
 
         // Accessibility.

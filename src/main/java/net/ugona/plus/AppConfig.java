@@ -49,6 +49,13 @@ public class AppConfig extends Config {
                 // ignore
             }
         }
+        ids = upgradeString(preferences, "car_list").replaceAll(",", ";");
+        password = upgradeString(preferences, "Password");
+        pattern = upgradeString(preferences, "Pattern");
+        upd = true;
+        SharedPreferences.Editor ed = preferences.edit();
+        ed.putString(CONFIG_KEY, save(this));
+        ed.commit();
     }
 
     static public AppConfig get(Context context) {

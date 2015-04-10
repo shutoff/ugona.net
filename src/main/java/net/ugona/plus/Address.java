@@ -86,8 +86,10 @@ public abstract class Address {
                         double db_lon = cursor.getDouble(1);
                         int time = cursor.getInt(4);
                         if (time < limit) {
-                            dbHelper.getWritableDatabase().delete(TABLE_NAME, "(Param = ?) AND (Lat=?) AND (Lng=?)",
-                                    new String[]{p.lang + p.type, db_lat + "", db_lon + ""});
+                            dbHelper.getWritableDatabase().delete(TABLE_NAME, "(Time < ?)",
+                                    new String[]{limit + ""});
+                            if (!cursor.moveToNext())
+                                break;
                             continue;
                         }
                         double distance = State.distance(p.lat, p.lon, db_lat, db_lon);
@@ -228,7 +230,6 @@ public abstract class Address {
                     dbHelper.getWritableDatabase().insert(TABLE_NAME, null, values);
 
                 } catch (Exception ex) {
-                    State.print(ex);
                     ex.printStackTrace();
                     return null;
                 }
@@ -251,7 +252,6 @@ public abstract class Address {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            State.print(ex);
             Vector<Answer> answers = requests.remove(key);
             for (Answer a : answers) {
                 a.result(null);

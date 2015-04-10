@@ -33,8 +33,8 @@ public class IndicatorsView extends HorizontalScrollView {
     }
 
     @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed, l, t, r, b);
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         ViewGroup layout = (ViewGroup) getChildAt(0);
         int max_width = 0;
         for (int i = 1; i < layout.getChildCount(); i++) {
@@ -53,7 +53,12 @@ public class IndicatorsView extends HorizontalScrollView {
             lp.leftMargin = max_width - w;
             v.setLayoutParams(lp);
         }
+    }
 
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        ViewGroup layout = (ViewGroup) getChildAt(0);
         setupChildren();
         if ((getScrollX() == 0) && (getChildAt(0).getWidth() > getWidth())) {
             int padding_left = layout.getPaddingLeft();

@@ -41,6 +41,7 @@ import com.eclipsesource.json.ParseException;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.haibison.android.lockpattern.LockPatternActivity;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
@@ -62,6 +63,7 @@ public class MainActivity
         extends ActionBarActivity {
 
     static final int DO_AUTH = 1;
+    static final int REQUEST_CHECK_PATTERN = 2;
 
     static final String PRIMARY = "primary";
     static final String FRAGMENT = "fragment";
@@ -191,7 +193,6 @@ public class MainActivity
                 (car_config.getAuth().equals("") &&
                         ((intent == null) || (intent.getStringExtra(Names.ID) == null)))) {
             Intent i = new Intent(this, SplashActivity.class);
-            i.putExtra(Names.ID, id);
             startActivityForResult(i, DO_AUTH);
             return;
         }
@@ -199,7 +200,7 @@ public class MainActivity
         Notification.clear(this, id);
 
         setPrimary();
-        checkCaps();
+        checkCaps(id);
         checkPhone();
     }
 
@@ -265,6 +266,15 @@ public class MainActivity
             checkPhone();
             return;
         }
+        if ((requestCode == REQUEST_CHECK_PATTERN) && (resultCode == RESULT_OK)) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    setFragment(new SetPassword());
+                }
+            });
+            return;
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -318,13 +328,7 @@ public class MainActivity
 
         switch (item.getItemId()) {
             case R.id.date: {
-                final CalendarDatePickerDialog dialog = new CalendarDatePickerDialog() {
-                    @Override
-                    public void onDayOfMonthSelected(int year, int month, int day) {
-                        super.onDayOfMonthSelected(year, month, day);
-                        getView().findViewById(R.id.done).performClick();
-                    }
-                };
+                final CalendarDatePickerDialog dialog = new DatePicker();
                 dialog.initialize(new CalendarDatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(CalendarDatePickerDialog calendarDatePickerDialog, int i, int i2, int i3) {
@@ -342,6 +346,13 @@ public class MainActivity
                 setFragment(new AboutFragment());
                 return true;
             case R.id.passwd:
+                if (!config.getPattern().equals("")) {
+                    Intent intent = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null,
+                            this, LockPatternActivity.class);
+                    intent.putExtra(LockPatternActivity.EXTRA_PATTERN, config.getPattern().toCharArray());
+                    startActivityForResult(intent, REQUEST_CHECK_PATTERN);
+                    return true;
+                }
                 setFragment(new SetPassword());
                 return true;
             case R.id.charts:
@@ -402,6 +413,10 @@ public class MainActivity
         ft.addToBackStack(FRAGMENT);
         ft.commit();
         setSideMenu();
+    }
+
+    boolean isFragmentShow(String tag) {
+        return getSupportFragmentManager().findFragmentByTag(tag) != null;
     }
 
     void setPrimary() {
@@ -594,20 +609,22 @@ public class MainActivity
         });
     }
 
-    void checkCaps() {
+    void checkCaps(final String id) {
         final String version = State.getVersion(this);
         Date now = new Date();
         final long time = now.getTime();
-        CarConfig carConfig = CarConfig.get(this, id);
-        if (carConfig.getSettings().length > 0) {
+        final CarConfig carConfig = CarConfig.get(this, id);
+        final CarState state = CarState.get(this, id);
+        if ((carConfig.getSettings() != null) && (carConfig.getSettings().length > 0)) {
             if (version.equals(state.getCheck_version()) && (state.getCheck_time() > time))
                 return;
         }
+        final Context context = this;
         HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
                 boolean changed = CarState.update(state, res.get("caps").asObject()) != null;
-                if (car_config.update(car_config, res) != null) {
+                if (Config.update(carConfig, res) != null) {
                     changed = true;
                     Intent intent = new Intent(Names.COMMANDS);
                     intent.putExtra(Names.ID, id);
@@ -620,7 +637,7 @@ public class MainActivity
                 }
                 state.setCheck_time(time + 86400000);
                 state.setCheck_version(version);
-                config.save(this);
+                config.save(context);
             }
 
             @Override
@@ -629,7 +646,7 @@ public class MainActivity
             }
         };
         KeyParam skey = new KeyParam();
-        skey.skey = car_config.getKey();
+        skey.skey = carConfig.getKey();
         task.execute("/caps", skey);
     }
 
@@ -776,8 +793,12 @@ public class MainActivity
         config.setCurrent_id(new_id);
         config.save(this);
         id = new_id;
+        car_config = CarConfig.get(this, id);
         Intent intent = new Intent(Names.CAR_CHANGED);
         sendBroadcast(intent);
+        Notification.clear(this, id);
+        checkCaps(id);
+
     }
 
     static class KeyParam implements Serializable {

@@ -29,6 +29,9 @@ public abstract class MainFragment extends Fragment implements OnRefreshListener
     }
 
     String id() {
+        MainFragment parent = (MainFragment) getParentFragment();
+        if (parent != null)
+            return parent.id();
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity == null)
             return null;

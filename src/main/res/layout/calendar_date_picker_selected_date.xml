@@ -23,17 +23,6 @@
     android:gravity="center"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/date_picker_wday"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/main"
-        android:duplicateParentState="true"
-        android:gravity="center"
-        android:includeFontPadding="false"
-        android:textColor="@color/bpWhite"
-        android:textSize="@dimen/selected_date_wday_size" />
-
     <com.doomonafireball.betterpickers.widget.AccessibleLinearLayout
         android:id="@+id/date_picker_month_and_day"
         android:layout_width="match_parent"

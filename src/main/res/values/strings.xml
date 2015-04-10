@@ -34,7 +34,7 @@
     <string name="about">About</string>
     <string name="version">Version:</string>
     <string name="service">FEDERAL SERVICE</string>
-    <string name="application">Application UGONA.NET+ works with MS-PGSM devices</string>
+    <string name="application">Application UGONA.NET+ for car monitoring and control</string>
     <string name="service_btn">Service Ugona.net</string>
     <string name="forum_btn">Support forum</string>
     <string name="password_old">Old password</string>
@@ -208,4 +208,7 @@
     <string name="show_map">Show map</string>
     <string name="add_notification">Add notification</string>
     <string name="maintenance_info">You can add notification about periodicaly maintenance</string>
+    <string name="net_warning">No data connection</string>
+    <string name="valet_warning">VALET mode ON</string>
+    <string name="data_error">Data update error</string>
 </resources>

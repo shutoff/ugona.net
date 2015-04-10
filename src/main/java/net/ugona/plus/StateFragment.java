@@ -5,6 +5,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -43,6 +45,7 @@ public class StateFragment
     CarView vCar;
     TextView tvAddress;
     TextView tvTime;
+    TextView tvError;
     ImageView vFab;
     Handler handler;
     BroadcastReceiver br;
@@ -53,6 +56,9 @@ public class StateFragment
     String pkg;
     Indicator[] temp_indicators;
     CenteredScrollView vAddressView;
+    String error;
+    View vPointers;
+    TextView[] tvPointers;
 
     @Override
     int layout() {
@@ -79,11 +85,43 @@ public class StateFragment
         vCar = (CarView) v.findViewById(R.id.car);
         tvAddress = (TextView) v.findViewById(R.id.address);
         tvTime = (TextView) v.findViewById(R.id.time);
+        tvError = (TextView) v.findViewById(R.id.error);
         ivRefresh = (ImageView) v.findViewById(R.id.img_progress);
         vProgress = v.findViewById(R.id.upd_progress);
         vFab = (ImageView) v.findViewById(R.id.fab);
         vFabProgress = v.findViewById(R.id.fab_progress);
         vAddressView = (CenteredScrollView) v.findViewById(R.id.address_view);
+
+
+        View.OnClickListener pointerClick = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int pointer = (Integer) v.getTag();
+                CarConfig config = CarConfig.get(getActivity(), id());
+                int[] pointers = config.getPointers();
+                if (pointers == null)
+                    return;
+                if (pointer >= pointers.length)
+                    return;
+                PointerFragment fragment = new PointerFragment();
+                Bundle args = new Bundle();
+                args.putString(Names.ID, id() + "_" + pointers[pointer]);
+                fragment.setArguments(args);
+                MainActivity activity = (MainActivity) getActivity();
+                activity.setFragment(fragment);
+            }
+        };
+
+        vPointers = v.findViewById(R.id.pointer);
+        vPointers.setTag(0);
+        vPointers.setOnClickListener(pointerClick);
+        tvPointers = new TextView[2];
+        tvPointers[0] = (TextView) v.findViewById(R.id.pointer1);
+        tvPointers[0].setTag(0);
+        tvPointers[0].setOnClickListener(pointerClick);
+        tvPointers[1] = (TextView) v.findViewById(R.id.pointer2);
+        tvPointers[1].setTag(1);
+        tvPointers[1].setOnClickListener(pointerClick);
         handler = new Handler();
         pkg = getActivity().getPackageName();
 
@@ -188,12 +226,43 @@ public class StateFragment
             public void onReceive(Context context, Intent intent) {
                 if (intent == null)
                     return;
+                if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                    update();
+                    return;
+                }
                 if (intent.getAction().equals(Names.ADDRESS_UPDATE)) {
                     update();
                     return;
                 }
                 if (!id().equals(intent.getStringExtra(Names.ID)))
                     return;
+                if (intent.getAction().equals(Names.ERROR)) {
+                    error = intent.getStringExtra(Names.ERROR);
+                    if (error == null)
+                        error = getString(R.string.data_error);
+                    update();
+                    if (error.equals("Auth error")) {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                MainActivity activity = (MainActivity) getActivity();
+                                if (activity == null)
+                                    return;
+                                if (activity.isFragmentShow("auth_dialog"))
+                                    return;
+                                AuthDialog authDialog = new AuthDialog();
+                                Bundle args = new Bundle();
+                                args.putString(Names.ID, id());
+                                authDialog.setArguments(args);
+                                authDialog.show(getParentFragment().getFragmentManager(), "auth_dialog");
+                            }
+                        });
+                    }
+                }
+                if (intent.getAction().equals(Names.UPDATED))
+                    error = null;
+                if (intent.getAction().equals(Names.NO_UPDATED))
+                    error = null;
                 update();
                 if (!intent.getAction().equals(Names.START_UPDATE))
                     refreshDone();
@@ -206,6 +275,7 @@ public class StateFragment
         intFilter.addAction(Names.COMMANDS);
         intFilter.addAction(Names.CONFIG_CHANGED);
         intFilter.addAction(Names.ADDRESS_UPDATE);
+        intFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         getActivity().registerReceiver(br, intFilter);
         Intent intent = new Intent(getActivity(), FetchService.class);
         intent.setAction(FetchService.ACTION_UPDATE);
@@ -233,6 +303,29 @@ public class StateFragment
         } else {
             vProgress.setVisibility(View.INVISIBLE);
             ivRefresh.setImageResource(state.isOnline() ? R.drawable.refresh_on : R.drawable.refresh_off);
+        }
+
+        String error_text = error;
+        if (error_text == null) {
+            if (state.getGuard_mode() == 2) {
+                error_text = getString(R.string.valet_warning);
+            } else if (state.getGuard_mode() == 3) {
+                error_text = getString(R.string.ps_guard);
+            }
+        }
+        if (error_text == null) {
+            ConnectivityManager cm =
+                    (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            if ((activeNetwork == null) || !activeNetwork.isConnectedOrConnecting())
+                error_text = getString(R.string.net_warning);
+        }
+
+        if (error_text == null) {
+            tvError.setVisibility(View.GONE);
+        } else {
+            tvError.setVisibility(View.VISIBLE);
+            tvError.setText(error_text);
         }
 
         NumberFormat formatter = NumberFormat.getInstance(getResources().getConfiguration().locale);
@@ -263,9 +356,14 @@ public class StateFragment
             try {
                 NumberFormat nf = NumberFormat.getCurrencyInstance();
                 double value = Double.parseDouble(balance);
+                double abs_value = Math.abs(value);
                 String str = nf.format(value);
                 Currency currency = Currency.getInstance(Locale.getDefault());
                 str = str.replace(currency.getSymbol(), "");
+                if (abs_value > 10000) {
+                    NumberFormat f = NumberFormat.getInstance(getResources().getConfiguration().locale);
+                    str = f.format(Math.round(value));
+                }
                 iBalance.setText(str);
                 int balance_limit = config.getBalance_limit();
                 if (value <= balance_limit) {
@@ -357,13 +455,12 @@ public class StateFragment
                     text.append(lng);
                 } else if (!state.getGsm().equals("")) {
                     String[] parts = state.getGsm().split(",");
-                    text.append("MCC: ");
                     text.append(parts[0]);
-                    text.append("MNC: ");
+                    text.append("-");
                     text.append(parts[1]);
-                    text.append("LAC: ");
+                    text.append(" LAC: ");
                     text.append(parts[2]);
-                    text.append("CID: ");
+                    text.append(" CID: ");
                     text.append(parts[3]);
                 }
                 String address = state.getAddress(getActivity());
@@ -405,6 +502,31 @@ public class StateFragment
         } else {
             vFab.setVisibility(View.GONE);
             vFabProgress.setVisibility(View.GONE);
+        }
+
+        int[] pointers = config.getPointers();
+        int len = 0;
+        if (pointers != null)
+            len = pointers.length;
+        if (len > tvPointers.length)
+            len = tvPointers.length;
+        int i = 0;
+        if (len > 0) {
+            vPointers.setVisibility(View.VISIBLE);
+            for (i = 0; i < len; i++) {
+                CarState pointerState = CarState.get(getActivity(), id() + "_" + pointers[i]);
+                tvPointers[i].setVisibility(View.VISIBLE);
+                if (pointerState.getTime() > 0) {
+                    tvPointers[i].setText(State.formatDateTime(getActivity(), pointerState.getTime()));
+                } else {
+                    tvPointers[i].setText("???");
+                }
+            }
+        } else {
+            vPointers.setVisibility(View.GONE);
+        }
+        for (; i < tvPointers.length; i++) {
+            tvPointers[i].setVisibility(View.GONE);
         }
     }
 
@@ -454,6 +576,8 @@ public class StateFragment
         CarConfig.Command[] cmds = config.getCmd();
         Set<String> enabled = new HashSet<>();
         Vector<CarConfig.Command> res = new Vector<>();
+        if (cmds == null)
+            return res;
         for (CarConfig.Command cmd : cmds) {
             boolean enable = false;
             for (int s : selected) {

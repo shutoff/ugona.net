@@ -99,9 +99,20 @@ public class CarConfig extends Config {
         if (!s.equals("")) {
             try {
                 update(this, JsonObject.readFrom(s));
+                return;
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
+        }
+        key = upgradeString(preferences, "apikey" + id);
+        auth = upgradeString(preferences, "auth" + id);
+        login = upgradeString(preferences, "login" + id);
+        phone = upgradeString(preferences, "phone" + id);
+        name = upgradeString(preferences, "name" + id);
+        if (!key.equals("") && !key.equals("demo")) {
+            SharedPreferences.Editor ed = preferences.edit();
+            ed.putString(CAR_KEY + id, save(this));
+            ed.commit();
         }
     }
 
