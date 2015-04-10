@@ -381,6 +381,19 @@ public class State {
         }
     }
 
+    static double toWGS(double pos) {
+        boolean sign = false;
+        if (pos < 0) {
+            pos = -pos;
+            sign = true;
+        }
+        double res = Math.floor(pos / 100);
+        res += (pos - res * 100) / 60;
+        if (sign)
+            res = -res;
+        return res;
+    }
+
     static Set<String> update(final Context context, final CarConfig.Command cmd, String condition, Object o, Matcher matcher) {
         Matcher m = ok_bool.matcher(condition);
         HashSet<String> res = new HashSet<>();
@@ -438,8 +451,8 @@ public class State {
                     }
                     try {
                         String[] parts = v.split(",");
-                        final double lat = Double.parseDouble(parts[0]);
-                        final double lng = Double.parseDouble(parts[1]);
+                        final double lat = toWGS(Double.parseDouble(parts[0]));
+                        final double lng = toWGS(Double.parseDouble(parts[1]));
                         Address.get(context, lat, lng, new Address.Answer() {
                             @Override
                             public void result(String address) {

@@ -253,9 +253,7 @@ public class CarWidget extends AppWidgetProvider {
                 bitmaps = new SparseArray<>();
 
             carImage.state = pictState.get(widgetID, "");
-            State.appendLog(widgetID + ": " + carImage.state);
             if (carImage.update(carState)) {
-                State.appendLog(widgetID + " upd: " + carImage.state);
                 pictState.put(widgetID, carImage.state);
                 Bitmap saved_bmp = bitmaps.get(widgetID, null);
                 Bitmap bmp = carImage.getBitmap(saved_bmp);
@@ -263,8 +261,6 @@ public class CarWidget extends AppWidgetProvider {
                     if (saved_bmp == null)
                         bitmaps.put(widgetID, bmp);
                     widgetView.setImageViewBitmap(R.id.car, bmp);
-                } else {
-                    State.appendLog(widgetID + ": bitmap is null");
                 }
                 String[] ext = carImage.state.split("\\|");
                 int kn = 0;
