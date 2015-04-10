@@ -149,7 +149,7 @@ public class EventsFragment extends MainFragment {
                 }
                 current_state = 1;
                 vEvents.notifyChanges();
-                new EventRequest(e.id, e.time);
+                new EventRequest(e.id, e.time, e.type);
             }
         });
 
@@ -407,6 +407,7 @@ public class EventsFragment extends MainFragment {
         String skey;
         long id;
         long time;
+        long type;
         String lang;
     }
 
@@ -576,7 +577,7 @@ public class EventsFragment extends MainFragment {
         long event_id;
         long event_time;
 
-        EventRequest(long id, long time) {
+        EventRequest(long id, long time, long type) {
             event_id = id;
             event_time = time;
             EventParams params = new EventParams();
@@ -584,6 +585,7 @@ public class EventsFragment extends MainFragment {
             params.skey = config.getKey();
             params.id = id;
             params.time = time;
+            params.type = type;
             params.lang = Locale.getDefault().getLanguage();
             execute("/event", params);
         }

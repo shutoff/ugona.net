@@ -44,7 +44,7 @@
                     android:paddingBottom="2dp"
                     android:paddingLeft="54dp"
                     android:paddingTop="2dp"
-                    android:scaleType="fitEnd" />
+                    android:scaleType="fitCenter" />
 
             </LinearLayout>
 
