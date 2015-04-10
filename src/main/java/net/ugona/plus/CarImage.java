@@ -23,7 +23,6 @@ public class CarImage {
     String prefix;
     Resources resources;
     String pkg;
-    Bitmap bitmap;
     Paint paint;
 
     CarImage(Context context) {
@@ -187,7 +186,7 @@ public class CarImage {
         return getBitmapSafely(id, 0);
     }
 
-    Bitmap getBitmap() {
+    Bitmap getBitmap(Bitmap bitmap) {
         int w = (int) (WIDTH / 4);
         int h = (int) (HEIGHT / 4);
         float k = w / WIDTH;
