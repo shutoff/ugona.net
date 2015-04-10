@@ -356,9 +356,14 @@ public class StateFragment
             try {
                 NumberFormat nf = NumberFormat.getCurrencyInstance();
                 double value = Double.parseDouble(balance);
+                double abs_value = Math.abs(value);
                 String str = nf.format(value);
                 Currency currency = Currency.getInstance(Locale.getDefault());
                 str = str.replace(currency.getSymbol(), "");
+                if (abs_value > 10000) {
+                    NumberFormat f = NumberFormat.getInstance(getResources().getConfiguration().locale);
+                    str = f.format(Math.round(value));
+                }
                 iBalance.setText(str);
                 int balance_limit = config.getBalance_limit();
                 if (value <= balance_limit) {
