@@ -66,6 +66,12 @@ public class StateFragment
     }
 
     @Override
+    public void onRefresh() {
+        super.onRefresh();
+        refreshDone();
+        refresh();
+    }
+
     void refresh() {
         Intent intent = new Intent(getActivity(), FetchService.class);
         intent.setAction(Names.START_UPDATE);
@@ -264,8 +270,6 @@ public class StateFragment
                 if (intent.getAction().equals(Names.NO_UPDATED))
                     error = null;
                 update();
-                if (!intent.getAction().equals(Names.START_UPDATE))
-                    refreshDone();
             }
         };
         IntentFilter intFilter = new IntentFilter(Names.UPDATED);

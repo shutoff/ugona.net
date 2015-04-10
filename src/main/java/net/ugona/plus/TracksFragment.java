@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.eclipsesource.json.JsonArray;
@@ -45,10 +44,6 @@ public class TracksFragment extends MainFragment {
 
     TextView tvSummary;
     View vError;
-    View vSpace;
-    ProgressBar prgFirst;
-    ProgressBar prgMain;
-    TextView tvLoading;
     HoursList vTracks;
     CenteredScrollView vSummary;
 
@@ -56,7 +51,6 @@ public class TracksFragment extends MainFragment {
     Vector<Track> tracks;
     long engine_time;
     long selected;
-    int progress;
 
     TracksFetcher fetcher;
 
@@ -72,7 +66,10 @@ public class TracksFragment extends MainFragment {
 
     @Override
     void changeDate() {
-        refresh();
+        vError.setVisibility(View.GONE);
+        vTracks.setVisibility(View.GONE);
+        tvSummary.setText("");
+        onRefresh();
     }
 
     @Override
@@ -81,18 +78,14 @@ public class TracksFragment extends MainFragment {
 
         tvSummary = (TextView) v.findViewById(R.id.summary);
         vTracks = (HoursList) v.findViewById(R.id.tracks);
-        prgFirst = (ProgressBar) v.findViewById(R.id.first_progress);
-        prgMain = (ProgressBar) v.findViewById(R.id.progress);
-        tvLoading = (TextView) v.findViewById(R.id.loading);
         vError = v.findViewById(R.id.error);
-        vSpace = v.findViewById(R.id.space);
         vSummary = (CenteredScrollView) v.findViewById(R.id.summary_view);
 
         vError.setClickable(true);
         vError.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                refresh();
+                onRefresh();
             }
         });
 
@@ -161,7 +154,7 @@ public class TracksFragment extends MainFragment {
             tracks_done();
             all_done();
         } else {
-            refresh();
+            onRefresh();
         }
 
         return v;
@@ -240,17 +233,11 @@ public class TracksFragment extends MainFragment {
         getActivity().startActivity(intent);
     }
 
-    void refresh() {
+    @Override
+    public void onRefresh() {
+        super.onRefresh();
         if (fetcher != null)
             fetcher.cancel();
-        tvSummary.setText("");
-        vError.setVisibility(View.GONE);
-        vTracks.setVisibility(View.GONE);
-        vSpace.setVisibility(View.VISIBLE);
-        tvLoading.setVisibility(View.VISIBLE);
-        prgFirst.setVisibility(View.VISIBLE);
-        prgMain.setVisibility(View.VISIBLE);
-        prgMain.setProgress(0);
         selected = -1;
         fetcher = new TracksFetcher();
         fetcher.update();
@@ -265,11 +252,10 @@ public class TracksFragment extends MainFragment {
     void tracks_done() {
         if (getActivity() == null)
             return;
-        tvSummary.setVisibility(View.VISIBLE);
         if (tracks.size() == 0) {
-            tvSummary.setText(getString(R.string.no_data));
-            prgMain.setVisibility(View.GONE);
-            tvLoading.setVisibility(View.GONE);
+            vTracks.setVisibility(View.GONE);
+            vError.setVisibility(View.GONE);
+            refreshDone();
             return;
         }
         double mileage = 0;
@@ -310,12 +296,10 @@ public class TracksFragment extends MainFragment {
     void all_done() {
         if (getActivity() == null)
             return;
-        prgFirst.setVisibility(View.GONE);
-        tvLoading.setVisibility(View.GONE);
-        prgMain.setVisibility(View.GONE);
-        vSpace.setVisibility(View.GONE);
+        vError.setVisibility(View.GONE);
         vTracks.setVisibility(View.VISIBLE);
         vTracks.setAdapter(new TracksAdapter());
+        refreshDone();
         loaded = true;
     }
 
@@ -351,14 +335,11 @@ public class TracksFragment extends MainFragment {
             if (engine != null)
                 engine_time = engine.asLong();
 
-            prgMain.setProgress(++progress);
             if (tracks.size() == 0) {
                 tracks_done();
                 all_done();
                 return;
             }
-            prgMain.setMax(tracks.size() * 2 + progress);
-
             tracks_done();
 
             TrackStartPositionFetcher fetcher = new TrackStartPositionFetcher();
@@ -377,10 +358,6 @@ public class TracksFragment extends MainFragment {
                 public void run() {
                     vError.setVisibility(View.VISIBLE);
                     vTracks.setVisibility(View.GONE);
-                    vSpace.setVisibility(View.VISIBLE);
-                    tvLoading.setVisibility(View.GONE);
-                    prgFirst.setVisibility(View.GONE);
-                    prgMain.setVisibility(View.GONE);
                 }
             });
             refreshDone();
@@ -436,10 +413,7 @@ public class TracksFragment extends MainFragment {
                 Track.Point p = getPoint(track);
                 address = p.latitude + "," + p.longitude;
             }
-
             process(address);
-            prgMain.setProgress(++progress);
-
             if (++pos >= tracks.size()) {
                 // All tracks done
                 done();

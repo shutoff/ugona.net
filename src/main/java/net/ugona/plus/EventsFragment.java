@@ -58,7 +58,6 @@ public class EventsFragment extends MainFragment {
 
     HoursList vEvents;
     TextView tvNoEvents;
-    View vProgress;
     View vError;
 
     CarState state;
@@ -78,7 +77,7 @@ public class EventsFragment extends MainFragment {
 
     @Override
     void changeDate() {
-        refresh();
+        onRefresh();
     }
 
     @Override
@@ -154,12 +153,11 @@ public class EventsFragment extends MainFragment {
         });
 
         tvNoEvents = (TextView) v.findViewById(R.id.no_events);
-        vProgress = v.findViewById(R.id.progress);
         vError = v.findViewById(R.id.error);
         vError.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                refresh();
+                onRefresh();
             }
         });
 
@@ -170,9 +168,9 @@ public class EventsFragment extends MainFragment {
         state = CarState.get(getActivity(), id());
         if (state.isPointer()) {
             filter = 7;
-            v.findViewById(R.id.actions).setVisibility(View.GONE);
-            v.findViewById(R.id.contacts).setVisibility(View.GONE);
-            v.findViewById(R.id.system).setVisibility(View.GONE);
+            View vFooter = v.findViewById(R.id.footer);
+            if (vFooter != null)
+                vFooter.setVisibility(View.GONE);
         } else {
             CarConfig config = CarConfig.get(getActivity(), id());
             filter = config.getEvent_filter();
@@ -201,11 +199,8 @@ public class EventsFragment extends MainFragment {
 
         if (loaded) {
             filterEvents(false);
-            vProgress.setVisibility(View.GONE);
         } else {
-            fetcher = new DataFetcher();
-            loaded = false;
-            fetcher.update();
+            onRefresh();
         }
 
         br = new BroadcastReceiver() {
@@ -286,13 +281,11 @@ public class EventsFragment extends MainFragment {
         }
     }
 
-    void refresh() {
+    @Override
+    public void onRefresh() {
+        super.onRefresh();
         if (fetcher != null)
             fetcher.cancel();
-        vProgress.setVisibility(View.VISIBLE);
-        vEvents.setVisibility(View.GONE);
-        tvNoEvents.setVisibility(View.GONE);
-        vError.setVisibility(View.GONE);
         fetcher = new DataFetcher();
         loaded = false;
         fetcher = new DataFetcher();
@@ -373,6 +366,7 @@ public class EventsFragment extends MainFragment {
             tvNoEvents.setVisibility(View.VISIBLE);
             vEvents.setVisibility(View.GONE);
         }
+        vError.setVisibility(View.GONE);
     }
 
     static class Event implements Serializable {
@@ -512,7 +506,6 @@ public class EventsFragment extends MainFragment {
             }
             loaded = true;
             filterEvents(no_reload);
-            vProgress.setVisibility(View.GONE);
         }
 
         @Override
@@ -526,7 +519,6 @@ public class EventsFragment extends MainFragment {
                         @Override
                         public void run() {
                             tvNoEvents.setVisibility(View.GONE);
-                            vProgress.setVisibility(View.GONE);
                             vEvents.setVisibility(View.GONE);
                             vError.setVisibility(View.VISIBLE);
                         }

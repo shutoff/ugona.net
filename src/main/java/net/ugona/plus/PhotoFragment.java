@@ -47,7 +47,6 @@ public class PhotoFragment extends MainFragment {
 
     final static int MAX_CACHE = 6;
 
-    View vProgress;
     View vError;
     HoursList vPhotos;
 
@@ -78,7 +77,7 @@ public class PhotoFragment extends MainFragment {
 
     @Override
     void changeDate() {
-        refresh();
+        onRefresh();
     }
 
     @Override
@@ -88,20 +87,16 @@ public class PhotoFragment extends MainFragment {
 
         preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
-        vProgress = v.findViewById(R.id.first_progress);
-
         v.findViewById(R.id.footer).setVisibility(View.GONE);
-        v.findViewById(R.id.progress).setVisibility(View.GONE);
-        v.findViewById(R.id.loading).setVisibility(View.GONE);
-        v.findViewById(R.id.space).setVisibility(View.GONE);
 
         vPhotos = (HoursList) v.findViewById(R.id.tracks);
         vError = v.findViewById(R.id.error);
+        vPhotos.setEmptyText(R.string.no_photo);
 
         vError.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                refresh();
+                onRefresh();
             }
         });
 
@@ -148,7 +143,7 @@ public class PhotoFragment extends MainFragment {
 
         photos = new Vector<Photo>();
 
-        refresh();
+        onRefresh();
 
         br = new BroadcastReceiver() {
             @Override
@@ -176,10 +171,8 @@ public class PhotoFragment extends MainFragment {
     }
 
     @Override
-    public void refresh() {
-        vProgress.setVisibility(View.VISIBLE);
-        vPhotos.setVisibility(View.GONE);
-        vError.setVisibility(View.GONE);
+    public void onRefresh() {
+        super.onRefresh();
         if (data_fetcher != null)
             data_fetcher.cancel();
         data_fetcher = new DataFetcher();
@@ -272,8 +265,8 @@ public class PhotoFragment extends MainFragment {
                 photos.add(photo);
             }
             loaded = true;
-            vProgress.setVisibility(View.GONE);
             refreshDone();
+            vError.setVisibility(View.GONE);
             vPhotos.setVisibility(View.VISIBLE);
             vPhotos.setAdapter(new BaseAdapter() {
                 @Override
@@ -340,7 +333,6 @@ public class PhotoFragment extends MainFragment {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        vProgress.setVisibility(View.GONE);
                         vError.setVisibility(View.VISIBLE);
                         vPhotos.setVisibility(View.GONE);
                         refreshDone();

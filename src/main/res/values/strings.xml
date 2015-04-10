@@ -211,4 +211,5 @@
     <string name="net_warning">No data connection</string>
     <string name="valet_warning">VALET mode ON</string>
     <string name="data_error">Data update error</string>
+    <string name="no_photo">No photo</string>
 </resources>

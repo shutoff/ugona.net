@@ -38,7 +38,6 @@ public class MaintenanceFragment
     static final int DO_DELETE = 1;
     static final int DO_ITEM = 2;
 
-    View vProgress;
     View vError;
     HoursList vList;
 
@@ -62,14 +61,9 @@ public class MaintenanceFragment
         View v = super.onCreateView(inflater, container, savedInstanceState);
         v.findViewById(R.id.summary).setVisibility(View.GONE);
 
-        vProgress = v.findViewById(R.id.first_progress);
-
         View vFooter = v.findViewById(R.id.footer);
         if (vFooter != null)
             vFooter.setVisibility(View.GONE);
-        v.findViewById(R.id.progress).setVisibility(View.GONE);
-        v.findViewById(R.id.loading).setVisibility(View.GONE);
-        v.findViewById(R.id.space).setVisibility(View.GONE);
 
         vList = (HoursList) v.findViewById(R.id.tracks);
         vError = v.findViewById(R.id.error);
@@ -77,7 +71,7 @@ public class MaintenanceFragment
         vError.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                refresh();
+                onRefresh();
             }
         });
 
@@ -105,7 +99,7 @@ public class MaintenanceFragment
         }
 
         if (maintenances == null) {
-            refresh();
+            onRefresh();
         } else {
             done();
         }
@@ -147,13 +141,13 @@ public class MaintenanceFragment
     }
 
     @Override
-    public void refresh() {
+    public void onRefresh() {
+        super.onRefresh();
         Params param = new Params();
         refresh(param);
     }
 
     void refresh(Params param) {
-        vProgress.setVisibility(View.VISIBLE);
         vList.setVisibility(View.GONE);
         vError.setVisibility(View.GONE);
         if (data_fetcher != null)
@@ -206,7 +200,6 @@ public class MaintenanceFragment
     void done() {
         vList.setVisibility(View.VISIBLE);
         vError.setVisibility(View.GONE);
-        vProgress.setVisibility(View.GONE);
         refreshDone();
         vList.setOnItemClickListener(this);
         vList.setAdapter(new BaseAdapter() {
@@ -496,7 +489,6 @@ public class MaintenanceFragment
         @Override
         void error() {
             vList.setVisibility(View.GONE);
-            vProgress.setVisibility(View.GONE);
             vError.setVisibility(View.VISIBLE);
             refreshDone();
         }

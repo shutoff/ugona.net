@@ -33,10 +33,7 @@ import java.util.Vector;
 
 public class StatFragment extends MainFragment {
 
-    View vProgress;
     View vError;
-    View vLoading;
-    View vSpace;
     TextView tvSummary;
     HoursList vStat;
     CenteredScrollView vSummary;
@@ -66,23 +63,18 @@ public class StatFragment extends MainFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
-        vProgress = v.findViewById(R.id.progress);
-        vProgress.setVisibility(View.GONE);
-        vLoading = v.findViewById(R.id.loading);
-        vProgress = v.findViewById(R.id.first_progress);
-        vSpace = v.findViewById(R.id.space);
         vError = v.findViewById(R.id.error);
         vStat = (HoursList) v.findViewById(R.id.tracks);
         vError.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                refresh();
+                onRefresh();
             }
         });
         tvSummary = (TextView) v.findViewById(R.id.summary);
         vSummary = (CenteredScrollView) v.findViewById(R.id.summary_view);
         vStat.disableDivider();
-        refresh();
+        onRefresh();
         return v;
     }
 
@@ -106,7 +98,8 @@ public class StatFragment extends MainFragment {
     }
 
     @Override
-    void refresh() {
+    public void onRefresh() {
+        super.onRefresh();
         refresh(false);
     }
 
@@ -215,10 +208,7 @@ public class StatFragment extends MainFragment {
                     status_text += timeFormat((int) (engine_time / 60));
                 }
                 tvSummary.setText(State.createSpans(status_text, vSummary.selectedColor, true));
-                vProgress.setVisibility(View.GONE);
-                vLoading.setVisibility(View.GONE);
                 vError.setVisibility(View.GONE);
-                vSpace.setVisibility(View.GONE);
                 vStat.setAdapter(new BaseAdapter() {
                     @Override
                     public int getCount() {
@@ -318,6 +308,7 @@ public class StatFragment extends MainFragment {
                         }
                     }
                 });
+                refreshDone();
             }
 
             @Override
@@ -327,8 +318,7 @@ public class StatFragment extends MainFragment {
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            vProgress.setVisibility(View.GONE);
-                            vLoading.setVisibility(View.GONE);
+                            vStat.setVisibility(View.GONE);
                             vError.setVisibility(View.VISIBLE);
                             refreshDone();
                         }

@@ -3,6 +3,8 @@ package net.ugona.plus;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -10,13 +12,12 @@ import android.view.ViewGroup;
 
 import org.joda.time.LocalDate;
 
-import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
-import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
-import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
+public abstract class MainFragment
+        extends Fragment
+        implements SwipeRefreshLayout.OnRefreshListener {
 
-public abstract class MainFragment extends Fragment implements OnRefreshListener {
-
-    PullToRefreshLayout mPullToRefreshLayout;
+    SwipeRefreshLayout mSwipeRefreshLayout;
+    boolean initRefresh;
 
     abstract int layout();
 
@@ -45,42 +46,36 @@ public abstract class MainFragment extends Fragment implements OnRefreshListener
         return mainActivity.current;
     }
 
-    void refresh() {
-        refreshDone();
+    @Override
+    public void onRefresh() {
+        if (mSwipeRefreshLayout != null) {
+            if (!initRefresh) {
+                initRefresh = true;
+                TypedValue typed_value = new TypedValue();
+                getActivity().getTheme().resolveAttribute(android.support.v7.appcompat.R.attr.actionBarSize, typed_value, true);
+                mSwipeRefreshLayout.setProgressViewOffset(false, 0, getResources().getDimensionPixelSize(typed_value.resourceId));
+            }
+            mSwipeRefreshLayout.setRefreshing(true);
+        }
     }
 
     void changeDate() {
     }
 
     void refreshDone() {
-        try {
-            mPullToRefreshLayout.setRefreshComplete();
-        } catch (Exception ex) {
-            // ignore
-        }
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        if (view instanceof uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout) {
-            mPullToRefreshLayout = (PullToRefreshLayout) view;
-            ActionBarPullToRefresh.from(getActivity())
-                    .allChildrenArePullable()
-                    .listener(this)
-                    .setup(mPullToRefreshLayout);
-            mPullToRefreshLayout.setPullEnabled(true);
-        }
+        if (mSwipeRefreshLayout != null)
+            mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(layout(), container, false);
-    }
-
-    @Override
-    public void onRefreshStarted(View view) {
-        refresh();
+        View v = inflater.inflate(layout(), container, false);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.refresh_layout);
+        if (mSwipeRefreshLayout != null) {
+            mSwipeRefreshLayout.setOnRefreshListener(this);
+            mSwipeRefreshLayout.setColorSchemeResources(R.color.main, R.color.refresh1, R.color.refresh2, R.color.refresh3);
+        }
+        return v;
     }
 
     String timeFormat(int minutes) {

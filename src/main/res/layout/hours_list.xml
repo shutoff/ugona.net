@@ -6,7 +6,7 @@
     android:baselineAligned="false"
     android:orientation="horizontal">
 
-    <ListView
+    <net.ugona.plus.CustomListView
         android:id="@+id/list"
         android:layout_width="0dp"
         android:layout_height="match_parent"
@@ -18,5 +18,19 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:visibility="gone" />
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/empty_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/no_data" />
+
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </LinearLayout>

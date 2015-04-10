@@ -10,16 +10,17 @@ import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
-public class HoursList extends FrameLayout {
+public class HoursList
+        extends FrameLayout {
 
-    ListView list;
+    CustomListView list;
     LinearLayout vHours;
     Listener listener;
     Runnable runnable;
     Runnable runnable_visible;
+    TextView tvEmpty;
 
     public HoursList(Context context) {
         this(context, null, 0);
@@ -55,7 +56,12 @@ public class HoursList extends FrameLayout {
         View view = LayoutInflater.from(context).inflate(R.layout.hours_list, null);
         addView(view);
 
-        list = (ListView) view.findViewById(R.id.list);
+        list = (CustomListView) view.findViewById(R.id.list);
+        tvEmpty = (TextView) view.findViewById(R.id.empty_text);
+
+        View vEmpty = view.findViewById(R.id.empty_view);
+        list.setEmptyView(vEmpty);
+
         View.OnTouchListener touchListener = new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -99,6 +105,10 @@ public class HoursList extends FrameLayout {
         list.post(runnable);
     }
 
+    void setEmptyText(int id) {
+        tvEmpty.setText(id);
+    }
+
     void setListener(Listener l) {
         listener = l;
     }
@@ -135,6 +145,10 @@ public class HoursList extends FrameLayout {
     void disableDivider() {
         list.setDivider(null);
         list.setDividerHeight(0);
+    }
+
+    public boolean canScrollUp() {
+        return list.canScrollUp();
     }
 
     abstract static interface Listener {
