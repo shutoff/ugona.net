@@ -37,7 +37,6 @@ public class ZonesFragment
 
     static final int ZONE_REQUEST = 200;
     ListView vList;
-    View vProgress;
     View vError;
     Vector<Zone> zones;
     Vector<Zone> saved;
@@ -60,10 +59,9 @@ public class ZonesFragment
         vError.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                refresh();
+                onRefresh();
             }
         });
-        vProgress = v.findViewById(R.id.progress);
         if (savedInstanceState != null) {
             byte[] data = savedInstanceState.getByteArray("zones");
             if (data != null) {
@@ -89,7 +87,7 @@ public class ZonesFragment
         if (zones != null) {
             done();
         } else {
-            refresh();
+            onRefresh();
         }
         return v;
     }
@@ -182,7 +180,6 @@ public class ZonesFragment
     void done() {
         if (getActivity() == null)
             return;
-        vProgress.setVisibility(View.GONE);
         vError.setVisibility(View.GONE);
         vList.setVisibility(View.VISIBLE);
         vList.setAdapter(new BaseAdapter() {
@@ -238,10 +235,9 @@ public class ZonesFragment
         vList.setOnItemClickListener(this);
     }
 
-    void refresh() {
-        vProgress.setVisibility(View.VISIBLE);
-        vError.setVisibility(View.GONE);
-        vList.setVisibility(View.GONE);
+    @Override
+    public void onRefresh() {
+        super.onRefresh();
         HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
@@ -263,7 +259,6 @@ public class ZonesFragment
             @Override
             void error() {
                 zones = null;
-                vProgress.setVisibility(View.GONE);
                 vError.setVisibility(View.VISIBLE);
                 vList.setVisibility(View.GONE);
                 refreshDone();

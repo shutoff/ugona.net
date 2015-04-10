@@ -58,7 +58,6 @@ public abstract class DeviceBaseFragment
     HashMap<String, Object> changed;
 
     ListView vList;
-    View vProgress;
     View vError;
 
     Vector<Timer> timers;
@@ -94,10 +93,9 @@ public abstract class DeviceBaseFragment
         vError.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                refresh();
+                onRefresh();
             }
         });
-        vProgress = v.findViewById(R.id.progress);
         if (savedInstanceState != null) {
             byte[] data = savedInstanceState.getByteArray(DATA);
             if (data != null) {
@@ -146,7 +144,7 @@ public abstract class DeviceBaseFragment
         df.setMinimumFractionDigits(2);
 
         if (settings == null) {
-            refresh();
+            onRefresh();
         } else {
             done();
         }
@@ -313,10 +311,9 @@ public abstract class DeviceBaseFragment
         task.execute("/set", params);
     }
 
-    void refresh() {
-        vProgress.setVisibility(View.VISIBLE);
-        vError.setVisibility(View.GONE);
-        vList.setVisibility(View.GONE);
+    @Override
+    public void onRefresh() {
+        super.onRefresh();
         HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
@@ -349,7 +346,6 @@ public abstract class DeviceBaseFragment
 
             @Override
             void error() {
-                vProgress.setVisibility(View.GONE);
                 vError.setVisibility(View.VISIBLE);
                 vList.setVisibility(View.GONE);
                 refreshDone();
@@ -367,7 +363,6 @@ public abstract class DeviceBaseFragment
             return;
         if (changed == null)
             changed = new HashMap<>();
-        vProgress.setVisibility(View.GONE);
         vError.setVisibility(View.GONE);
         vList.setVisibility(View.VISIBLE);
         fill();
