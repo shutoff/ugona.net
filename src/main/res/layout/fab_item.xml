@@ -31,7 +31,7 @@
                 android:paddingRight="16dp"
                 android:paddingTop="9dp"
                 android:textColor="#2D2D2D"
-                android:textSize="13.3sp"
+                android:textSize="15sp"
                 android:typeface="sans" />
 
         </LinearLayout>
