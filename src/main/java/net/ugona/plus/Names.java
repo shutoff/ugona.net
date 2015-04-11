@@ -33,6 +33,7 @@ public class Names {
     static final String TRAFFIC_TIME = "traffic_time";
     static final String NO_PROMPT = "no_prompt";
     static final String TYPE = "type";
+    static final String FLAGS = "flags";
 
     static final String PKG_NAME = Names.class.getPackage().getName();
 

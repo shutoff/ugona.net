@@ -91,8 +91,6 @@ public class ConfigWidget extends Activity {
                 TextView tvName = (TextView) v;
                 CarConfig carConfig = CarConfig.get(ConfigWidget.this, cars[position]);
                 String name = carConfig.getName();
-                if (name.equals(""))
-                    name = carConfig.getLogin();
                 tvName.setText(name);
                 return v;
             }
@@ -107,8 +105,6 @@ public class ConfigWidget extends Activity {
                 TextView tvName = (TextView) v;
                 CarConfig carConfig = CarConfig.get(ConfigWidget.this, cars[position]);
                 String name = carConfig.getName();
-                if (name.equals(""))
-                    name = carConfig.getLogin();
                 tvName.setText(name);
                 return v;
             }

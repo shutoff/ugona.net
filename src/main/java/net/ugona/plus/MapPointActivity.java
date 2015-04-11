@@ -113,8 +113,6 @@ public class MapPointActivity extends MapActivity {
                     TextView tv = (TextView) v.findViewById(R.id.name);
                     CarConfig carConfig = CarConfig.get(MapPointActivity.this, ids[position]);
                     String name = carConfig.getName();
-                    if (name.equals(""))
-                        name = carConfig.getLogin();
                     tv.setText(name);
                     return v;
                 }
@@ -315,8 +313,6 @@ public class MapPointActivity extends MapActivity {
             if (ids.length > 1) {
                 CarConfig carConfig = CarConfig.get(MapPointActivity.this, id);
                 String name = carConfig.getName();
-                if (name.equals(""))
-                    name = carConfig.getLogin();
                 data += name + "<br/>";
             }
 

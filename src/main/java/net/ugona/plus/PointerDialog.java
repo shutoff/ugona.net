@@ -69,9 +69,6 @@ public class PointerDialog
                 }
                 CarConfig carConfig = CarConfig.get(getActivity(), cars.get(position));
                 String name = carConfig.getName();
-                if (name.equals(""))
-                    name = carConfig.getLogin();
-
                 TextView tv = (TextView) v;
                 tv.setText(name);
                 return v;
@@ -86,9 +83,6 @@ public class PointerDialog
                 }
                 CarConfig carConfig = CarConfig.get(getActivity(), cars.get(position));
                 String name = carConfig.getName();
-                if (name.equals(""))
-                    name = carConfig.getLogin();
-
                 TextView tv = (TextView) v;
                 tv.setText(name);
                 return v;

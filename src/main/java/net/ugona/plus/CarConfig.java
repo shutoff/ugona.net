@@ -117,20 +117,16 @@ public class CarConfig extends Config {
     }
 
     public String getName() {
+        if (name.equals(""))
+            return login;
         return name;
     }
 
-    public String getName(Context context, String id) {
-        if (!name.equals(""))
-            return name;
-        String res = context.getString(R.string.car);
-        int n = 0;
-        try {
-            n = Integer.parseInt(id);
-        } catch (Exception ex) {
-            // ignore
-        }
-        return res + " " + (n + 1);
+    public void setName(String name) {
+        if (this.name.equals(name))
+            return;
+        this.name = name;
+        upd = true;
     }
 
     public String getKey() {

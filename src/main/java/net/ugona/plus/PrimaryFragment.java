@@ -265,8 +265,6 @@ public class PrimaryFragment
             for (String id : ids) {
                 CarConfig config = CarConfig.get(getActivity(), id);
                 String name = config.getName();
-                if (name.equals(""))
-                    name = config.getLogin();
                 ++item_id;
                 carsMenu.add(1, item_id, item_id, name);
             }

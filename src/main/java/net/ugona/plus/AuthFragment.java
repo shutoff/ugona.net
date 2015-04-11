@@ -20,6 +20,7 @@ public class AuthFragment extends MainFragment {
 
     static final int DO_AUTH = 1;
     static final int DO_PHONE = 2;
+    static final int DO_NAME = 3;
 
     ListView vList;
     Vector<Item> items;
@@ -57,8 +58,20 @@ public class AuthFragment extends MainFragment {
     }
 
     void fill() {
-        CarConfig config = CarConfig.get(getActivity(), id());
+        final CarConfig config = CarConfig.get(getActivity(), id());
         items = new Vector<>();
+        items.add(new Item(getString(R.string.name), config.getName(), new Runnable() {
+            @Override
+            public void run() {
+                InputText inputText = new InputText();
+                Bundle args = new Bundle();
+                args.putString(Names.TITLE, getString(R.string.name));
+                args.putString(Names.OK, config.getName());
+                inputText.setArguments(args);
+                inputText.setTargetFragment(AuthFragment.this, DO_NAME);
+                inputText.show(getParentFragment().getFragmentManager(), "name");
+            }
+        }));
         items.add(new Item(getString(R.string.auth), config.getLogin(), new Runnable() {
             @Override
             public void run() {
@@ -188,6 +201,12 @@ public class AuthFragment extends MainFragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == DO_NAME) {
+            CarConfig carConfig = CarConfig.get(getActivity(), id());
+            carConfig.setName(data.getStringExtra(Names.OK));
+            Intent intent = new Intent(Names.CAR_CHANGED);
+            getActivity().sendBroadcast(intent);
+        }
         fill();
         super.onActivityResult(requestCode, resultCode, data);
     }

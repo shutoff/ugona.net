@@ -153,8 +153,6 @@ public class CarsFragment
             return;
         CarConfig config = CarConfig.get(getActivity(), id);
         String name = config.getName();
-        if (name.equals(""))
-            name = config.getLogin();
         Alert alert = new Alert();
         Bundle args = new Bundle();
         args.putString(Names.ID, id);
@@ -227,8 +225,6 @@ public class CarsFragment
                     String id = ids.get(i);
                     CarConfig carConfig = CarConfig.get(getActivity(), id);
                     String name = carConfig.getName();
-                    if (name.equals(""))
-                        name = carConfig.getLogin();
                     TextView tv = (TextView) v.findViewById(R.id.name);
                     tv.setText(name);
                     View vDelete = v.findViewById(R.id.delete);
