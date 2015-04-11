@@ -2,6 +2,7 @@ package net.ugona.plus;
 
 import android.os.AsyncTask;
 import android.os.Build;
+import android.util.Log;
 
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
@@ -61,8 +62,12 @@ public abstract class HttpTask {
         Request request = builder.build();
         Response response = client.newCall(request).execute();
 
-        if (response.code() != HttpURLConnection.HTTP_OK)
+        if (response.code() != HttpURLConnection.HTTP_OK) {
+            Log.v("http", url);
+            if (data != null)
+                Log.v("data", data);
             throw new Exception(response.message());
+        }
 
         JsonObject result;
         Reader reader = response.body().charStream();
@@ -76,8 +81,12 @@ public abstract class HttpTask {
                 result = new JsonObject();
                 result.set("data", res);
             }
-            if (result.get("error") != null)
+            if (result.get("error") != null) {
+                Log.v("http", url);
+                if (data != null)
+                    Log.v("data", data);
                 throw new Exception(result.get("error").asString());
+            }
         } finally {
             reader.close();
         }

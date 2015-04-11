@@ -236,6 +236,7 @@ public class TracksFragment extends MainFragment {
     @Override
     public void onRefresh() {
         super.onRefresh();
+        vError.setVisibility(View.GONE);
         if (fetcher != null)
             fetcher.cancel();
         selected = -1;

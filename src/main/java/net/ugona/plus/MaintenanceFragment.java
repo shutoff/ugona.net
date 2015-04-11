@@ -143,6 +143,7 @@ public class MaintenanceFragment
     @Override
     public void onRefresh() {
         super.onRefresh();
+        vError.setVisibility(View.GONE);
         Params param = new Params();
         refresh(param);
     }

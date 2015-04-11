@@ -106,6 +106,7 @@ public class StatFragment extends MainFragment {
     void refresh(boolean recalc) {
         if (fetcher != null)
             fetcher.cancel();
+        vError.setVisibility(View.GONE);
         fetcher = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {

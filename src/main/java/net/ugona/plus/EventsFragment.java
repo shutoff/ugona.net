@@ -284,6 +284,7 @@ public class EventsFragment extends MainFragment {
     @Override
     public void onRefresh() {
         super.onRefresh();
+        vError.setVisibility(View.GONE);
         if (fetcher != null)
             fetcher.cancel();
         fetcher = new DataFetcher();

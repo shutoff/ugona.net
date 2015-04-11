@@ -1,6 +1,7 @@
 package net.ugona.plus;
 
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
@@ -61,8 +62,8 @@ public class Config implements Serializable {
         Set<String> res = new HashSet<>();
         synchronized (o) {
             Field[] fields = o.getClass().getDeclaredFields();
-            try {
-                for (Field f : fields) {
+            for (Field f : fields) {
+                try {
                     if ((f.getModifiers() & Modifier.STATIC) != 0)
                         continue;
                     String name = f.getName();
@@ -153,9 +154,10 @@ public class Config implements Serializable {
                             res.add(name);
                         }
                     }
+                } catch (Exception ex) {
+                    Log.v("Bad field", f.getName());
+                    ex.printStackTrace();
                 }
-            } catch (Exception ex) {
-                ex.printStackTrace();
             }
         }
         if (res.isEmpty())

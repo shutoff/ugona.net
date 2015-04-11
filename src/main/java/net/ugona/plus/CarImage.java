@@ -20,7 +20,6 @@ public class CarImage {
     static Pictures pictures = new Pictures();
     int animation;
     String state;
-    String prefix;
     Resources resources;
     String pkg;
     Paint paint;
@@ -28,7 +27,6 @@ public class CarImage {
     CarImage(Context context) {
         resources = context.getResources();
         state = "";
-        prefix = "c";
         pkg = context.getPackageName();
         paint = new Paint();
         paint.setFlags(Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG);
@@ -36,6 +34,9 @@ public class CarImage {
 
     boolean update(CarState s) {
         Vector<String> parts = new Vector<String>();
+        String prefix = s.getPrefix();
+        if (prefix.equals(""))
+            prefix = "c";
         boolean guard = s.isGuard();
         long guard_time = s.getGuard_time();
         long card_time = s.getCard();
@@ -190,11 +191,9 @@ public class CarImage {
         int w = (int) (WIDTH / 4);
         int h = (int) (HEIGHT / 4);
         float k = w / WIDTH;
-        if (bitmap == null) {
+        if (bitmap == null)
             bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        } else {
-            bitmap.eraseColor(Color.TRANSPARENT);
-        }
+        bitmap.eraseColor(Color.TRANSPARENT);
         Canvas canvas = new Canvas(bitmap);
         String[] ext = state.split("\\|");
         String[] parts = ext[0].split(";");
@@ -276,6 +275,10 @@ public class CarImage {
             add(R.drawable.c_az3, 919, 0);
             add(R.drawable.c_az6, 907, 0);
             add(R.drawable.c_az5, 907, 0);
+            add(R.drawable.m, 97, 4);
+            add(R.drawable.m_b, 97, 4);
+            add(R.drawable.q, 119, 89);
+            add(R.drawable.q_b, 119, 89);
         }
 
         void add(int id, int x, int y) {

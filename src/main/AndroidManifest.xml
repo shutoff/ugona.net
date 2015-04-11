@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.ugona.plus"
     android:versionCode="16"
-    android:versionName="2.0 (beta 10-04-2015)">
+    android:versionName="2.0 (beta 11-04-2015)">
 
 <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
@@ -69,6 +69,7 @@
         <activity android:name=".MapEventActivity" />
         <activity android:name=".ZoneEdit" />
         <activity android:name=".SplashActivity" />
+        <activity android:name=".ControlPhones" />
 
         <activity
             android:name=".DialogActivity"

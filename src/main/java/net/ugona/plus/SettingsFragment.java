@@ -167,6 +167,32 @@ public class SettingsFragment
     }
 
     boolean setPageState() {
+        CarState state = CarState.get(getActivity(), id());
+        CarConfig config = CarConfig.get(getActivity(), id());
+        boolean cmd = false;
+        boolean az = false;
+        boolean heater = false;
+        CarConfig.Setting[] settings = config.getSettings();
+        if (settings != null) {
+            for (CarConfig.Setting setting : settings) {
+                String id = setting.id;
+                if ((id.length() > 3) && id.substring(0, 3).equals("az_"))
+                    az = true;
+                if ((id.length() > 7) && id.substring(0, 7).equals("heater_"))
+                    heater = true;
+            }
+        }
+        CarConfig.Command[] commands = config.getCmd();
+        if (commands != null) {
+            for (CarConfig.Command command : commands) {
+                if (command.group != null) {
+                    cmd = true;
+                    break;
+                }
+            }
+        }
+
+
         boolean upd = false;
         if (!show_page[PAGE_AUTH]) {
             show_page[PAGE_AUTH] = true;
@@ -180,24 +206,24 @@ public class SettingsFragment
             show_page[PAGE_WIDGETS] = true;
             upd = true;
         }
-        if (!show_page[PAGE_COMMANDS]) {
-            show_page[PAGE_COMMANDS] = true;
+        if (show_page[PAGE_COMMANDS] != cmd) {
+            show_page[PAGE_COMMANDS] = cmd;
             upd = true;
         }
         if (!show_page[PAGE_DEVICE]) {
             show_page[PAGE_DEVICE] = true;
             upd = true;
         }
-        if (!show_page[PAGE_AZ]) {
-            show_page[PAGE_AZ] = true;
+        if (show_page[PAGE_AZ] != az) {
+            show_page[PAGE_AZ] = az;
             upd = true;
         }
-        if (!show_page[PAGE_HEATER]) {
-            show_page[PAGE_HEATER] = true;
+        if (show_page[PAGE_HEATER] != heater) {
+            show_page[PAGE_HEATER] = heater;
             upd = true;
         }
-        if (!show_page[PAGE_ZONES]) {
-            show_page[PAGE_ZONES] = true;
+        if (show_page[PAGE_ZONES] != state.isZones()) {
+            show_page[PAGE_ZONES] = state.isZones();
             upd = true;
         }
         return upd;

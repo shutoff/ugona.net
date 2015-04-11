@@ -216,4 +216,5 @@
     <string name="valet_warning">Не забудьте отключить режим АВТОСЕРВИС</string>
     <string name="data_error">Ошибка обновления данных</string>
     <string name="no_photo">Нет фотографий</string>
+    <string name="on">Вкл.</string>
 </resources>

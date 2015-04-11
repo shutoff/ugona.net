@@ -111,6 +111,7 @@ public class PrimaryFragment
     public void onDestroyView() {
         super.onDestroyView();
         getActivity().unregisterReceiver(br);
+        carsMenu = null;
     }
 
     @Override
@@ -179,13 +180,24 @@ public class PrimaryFragment
     }
 
     boolean setPageState() {
+        boolean cmd = false;
+        CarConfig carConfig = CarConfig.get(getActivity(), id());
+        CarConfig.Command[] commands = carConfig.getCmd();
+        if (commands != null) {
+            for (CarConfig.Command command : commands) {
+                if (command.icon != null) {
+                    cmd = true;
+                    break;
+                }
+            }
+        }
         boolean upd = false;
         if (show_page[PAGE_PHOTO] != state.isShow_photo()) {
             show_page[PAGE_PHOTO] = state.isShow_photo();
             upd = true;
         }
-        if (!show_page[PAGE_ACTIONS]) {
-            show_page[PAGE_ACTIONS] = true;
+        if (show_page[PAGE_ACTIONS] != cmd) {
+            show_page[PAGE_ACTIONS] = cmd;
             upd = true;
         }
         if (!show_page[PAGE_STATE]) {

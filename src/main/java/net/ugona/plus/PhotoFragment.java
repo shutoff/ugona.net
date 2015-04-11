@@ -173,6 +173,7 @@ public class PhotoFragment extends MainFragment {
     @Override
     public void onRefresh() {
         super.onRefresh();
+        vError.setVisibility(View.GONE);
         if (data_fetcher != null)
             data_fetcher.cancel();
         data_fetcher = new DataFetcher();

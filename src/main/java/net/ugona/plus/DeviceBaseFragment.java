@@ -314,6 +314,7 @@ public abstract class DeviceBaseFragment
     @Override
     public void onRefresh() {
         super.onRefresh();
+        vError.setVisibility(View.GONE);
         HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {

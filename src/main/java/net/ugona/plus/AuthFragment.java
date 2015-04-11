@@ -97,64 +97,68 @@ public class AuthFragment extends MainFragment {
 
         CarConfig.Setting[] settings = config.getSettings();
         final CarConfig.Command[] commands = config.getCmd();
-        for (final CarConfig.Setting setting : settings) {
-            if ((setting.id.length() < 5) || !setting.id.substring(0, 5).equals("auth_"))
-                continue;
-            items.add(new Item(setting.name, setting.text, new Runnable() {
-                @Override
-                public void run() {
-                    if (setting.cmd == null)
-                        return;
-                    if (commands != null) {
+        if (settings != null) {
+            for (final CarConfig.Setting setting : settings) {
+                if ((setting.id.length() < 5) || !setting.id.substring(0, 5).equals("auth_"))
+                    continue;
+                items.add(new Item(setting.name, setting.text, new Runnable() {
+                    @Override
+                    public void run() {
+                        if (setting.cmd == null)
+                            return;
+                        if (commands != null) {
+                            for (int cmd : setting.cmd) {
+                                for (CarConfig.Command c : commands) {
+                                    if (c.id != cmd)
+                                        continue;
+                                    if (Commands.isProcessed(id(), c)) {
+                                        Commands.cancel(getActivity(), id(), c);
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                        if (setting.cmd.length == 1) {
+                            SendCommandFragment fragment = new SendCommandFragment();
+                            Bundle args = new Bundle();
+                            args.putString(Names.ID, id());
+                            args.putInt(Names.COMMAND, setting.cmd[0]);
+                            args.putBoolean(Names.NO_PROMPT, true);
+                            fragment.setArguments(args);
+                            fragment.show(getActivity().getSupportFragmentManager(), "send");
+                            return;
+                        }
+                        Bundle args = new Bundle();
+                        args.putString(Names.ID, id());
+                        args.putString(Names.TITLE, setting.id);
+                        SmsSettingsFragment fragment = new SmsSettingsFragment();
+                        fragment.setArguments(args);
+                        fragment.show(getActivity().getSupportFragmentManager(), "sms");
+                    }
+                }) {
+                    @Override
+                    boolean isProgress() {
+                        if (commands == null)
+                            return false;
+                        if (setting.cmd == null)
+                            return false;
                         for (int cmd : setting.cmd) {
                             for (CarConfig.Command c : commands) {
                                 if (c.id != cmd)
                                     continue;
-                                if (Commands.isProcessed(id(), c)) {
-                                    Commands.cancel(getActivity(), id(), c);
-                                    return;
-                                }
+                                if (Commands.isProcessed(id(), c))
+                                    return true;
                             }
                         }
-                    }
-                    if (setting.cmd.length == 1) {
-                        SendCommandFragment fragment = new SendCommandFragment();
-                        Bundle args = new Bundle();
-                        args.putString(Names.ID, id());
-                        args.putInt(Names.COMMAND, setting.cmd[0]);
-                        fragment.setArguments(args);
-                        fragment.show(getActivity().getSupportFragmentManager(), "send");
-                        return;
-                    }
-                    Bundle args = new Bundle();
-                    args.putString(Names.ID, id());
-                    args.putString(Names.TITLE, setting.id);
-                    SmsSettingsFragment fragment = new SmsSettingsFragment();
-                    fragment.setArguments(args);
-                    fragment.show(getActivity().getSupportFragmentManager(), "sms");
-                }
-            }) {
-                @Override
-                boolean isProgress() {
-                    if (commands == null)
                         return false;
-                    if (setting.cmd == null)
-                        return false;
-                    for (int cmd : setting.cmd) {
-                        for (CarConfig.Command c : commands) {
-                            if (c.id != cmd)
-                                continue;
-                            if (Commands.isProcessed(id(), c))
-                                return true;
-                        }
                     }
-                    return false;
-                }
-            });
+                });
+            }
         }
 
         CarState state = CarState.get(getActivity(), id());
-        items.add(new Item(getString(R.string.version), state.getVersion(), null));
+        if (!state.getVersion().equals(""))
+            items.add(new Item(getString(R.string.version), state.getVersion(), null));
         vList.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {

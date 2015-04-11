@@ -338,7 +338,12 @@ public class StateFragment
 
         double power = state.getPower();
         if (power == 0) {
-            iVoltage.setVisibility(View.GONE);
+            if (state.getPower_state() == 1) {
+                iVoltage.setVisibility(View.VISIBLE);
+                iVoltage.setText(getString(R.string.on));
+            } else {
+                iVoltage.setVisibility(View.GONE);
+            }
         } else {
             iVoltage.setVisibility(View.VISIBLE);
             iVoltage.setText(formatter.format(power) + " V");

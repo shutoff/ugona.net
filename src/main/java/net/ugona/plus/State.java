@@ -53,6 +53,7 @@ public class State {
     static final Pattern eq_str = Pattern.compile("^([A-Za-z0-9_]+)=\"(.*)\"$");
     static final Pattern map_str = Pattern.compile("^map:\"(.*)\"$");
     static final Pattern alert_str = Pattern.compile("^alert:\"(.*)\"$");
+    static final Pattern phone_str = Pattern.compile("^phones:\"(.*)\"$");
     final static double D2R = 0.017453;
     final static double a = 6378137.0;
     final static double e2 = 0.006739496742337;
@@ -482,6 +483,23 @@ public class State {
                         v = v.replace(subst, matcher.group(n));
                     }
                     Intent intent = new Intent(context, DialogActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    if (cmd != null)
+                        intent.putExtra(Names.TITLE, cmd.name);
+                    intent.putExtra(Names.MESSAGE, v);
+                    context.startActivity(intent);
+                }
+                return res;
+            }
+            m = phone_str.matcher(condition);
+            if (m.find()) {
+                String v = m.group(1);
+                if (matcher != null) {
+                    for (int n = matcher.groupCount(); n > 0; n--) {
+                        String subst = "$" + n;
+                        v = v.replace(subst, matcher.group(n));
+                    }
+                    Intent intent = new Intent(context, ControlPhones.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     if (cmd != null)
                         intent.putExtra(Names.TITLE, cmd.name);
