@@ -41,7 +41,7 @@ public class WidgetsFragment extends MainFragment {
         if (appWidgetManager != null) {
             items = new Vector<Item>();
             ComponentName thisAppWidget = new ComponentName(
-                    getActivity().getPackageName(), CarWidget.class.getName());
+                    getActivity().getPackageName(), Widget.class.getName());
             int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
             AppWidgetHost appWidgetHost = null;

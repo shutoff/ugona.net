@@ -37,7 +37,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-public class CarWidget extends AppWidgetProvider {
+public class Widget extends AppWidgetProvider {
 
     static final int STATE_UPDATE = 1;
     static final int STATE_ERROR = 2;

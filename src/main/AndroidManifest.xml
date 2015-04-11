@@ -119,7 +119,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".CarWidget">
+        <receiver android:name=".Widget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="net.ugona.plus.UPDATED" />
@@ -134,7 +134,7 @@
                 android:resource="@xml/widget_metadata" />
         </receiver>
 
-        <receiver android:name=".CarLockWidget">
+        <receiver android:name=".LockWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="net.ugona.plus.UPDATED" />
