@@ -217,4 +217,5 @@
     <string name="data_error">Ошибка обновления данных</string>
     <string name="no_photo">Нет фотографий</string>
     <string name="on">Вкл.</string>
+    <string name="card_message">Возможно метка осталась в машине</string>
 </resources>

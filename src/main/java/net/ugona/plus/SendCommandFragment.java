@@ -328,14 +328,18 @@ public class SendCommandFragment extends DialogFragment {
     }
 
     void show_alert(CarConfig.Command cmd, int requestCode) {
+        String name = cmd.name;
+        int pos = name.indexOf('\n');
+        if (pos > 0)
+            name = name.substring(0, pos);
         StringBuilder builder = new StringBuilder();
         builder.append(getString(R.string.run_command));
         builder.append(" \u00AB");
-        builder.append(cmd.name);
+        builder.append(name);
         builder.append("\u00BB?");
         Alert dialog = new Alert();
         Bundle args = new Bundle();
-        args.putString(Names.TITLE, cmd.name);
+        args.putString(Names.TITLE, name);
         args.putString(Names.MESSAGE, builder.toString());
         dialog.setArguments(args);
         dialog.setTargetFragment(this, requestCode);

@@ -213,4 +213,5 @@
     <string name="data_error">Data update error</string>
     <string name="no_photo">No photo</string>
     <string name="on">On</string>
+    <string name="card_message">Security card in car</string>
 </resources>

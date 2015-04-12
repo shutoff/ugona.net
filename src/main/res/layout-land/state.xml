@@ -74,7 +74,7 @@
                     </LinearLayout>
 
                     <net.ugona.plus.IndicatorsView
-                        android:id="@+id/indocators"
+                        android:id="@+id/indicators"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"

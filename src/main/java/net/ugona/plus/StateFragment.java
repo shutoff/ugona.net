@@ -98,7 +98,6 @@ public class StateFragment
         vFabProgress = v.findViewById(R.id.fab_progress);
         vAddressView = (CenteredScrollView) v.findViewById(R.id.address_view);
 
-
         View.OnClickListener pointerClick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -136,7 +135,7 @@ public class StateFragment
             temp_indicators[i] = (Indicator) v.findViewById(temp_id[i]);
         }
 
-        IndicatorsView indicatorsView = (IndicatorsView) v.findViewById(R.id.indocators);
+        IndicatorsView indicatorsView = (IndicatorsView) v.findViewById(R.id.indicators);
         View vRightArrow = v.findViewById(R.id.ind_right);
         indicatorsView.setArrows(vRightArrow);
 
@@ -315,6 +314,11 @@ public class StateFragment
                 error_text = getString(R.string.valet_warning);
             } else if (state.getGuard_mode() == 3) {
                 error_text = getString(R.string.ps_guard);
+            } else {
+                long guard_time = state.getGuard_time();
+                long card_time = state.getCard();
+                if ((guard_time > 0) && (card_time > 0) && (guard_time > card_time))
+                    error_text = getString(R.string.card_message);
             }
         }
         if (error_text == null) {

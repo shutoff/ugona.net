@@ -15,11 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
-
-import java.util.Vector;
 
 public class ActionFragment
         extends MainFragment
@@ -27,7 +23,7 @@ public class ActionFragment
         AdapterView.OnItemLongClickListener {
 
     ListView vActions;
-    Vector<CarConfig.Command> commands;
+
     boolean longTap;
     BroadcastReceiver br;
 
@@ -40,44 +36,10 @@ public class ActionFragment
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         vActions = (ListView) super.onCreateView(inflater, container, savedInstanceState);
 
-        fill();
         vActions.setDivider(null);
         vActions.setDividerHeight(0);
         vActions.setVisibility(View.VISIBLE);
-        vActions.setAdapter(new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return commands.size();
-            }
-
-            @Override
-            public Object getItem(int position) {
-                return commands.get(position);
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = (LayoutInflater) getActivity()
-                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = inflater.inflate(R.layout.action_item, null);
-                }
-                ImageView vIcon = (ImageView) v.findViewById(R.id.icon);
-                TextView tvName = (TextView) v.findViewById(R.id.name);
-                CarConfig.Command cmd = commands.get(position);
-                tvName.setText(cmd.name);
-                int icon = getResources().getIdentifier("icon_" + cmd.icon, "drawable", getActivity().getPackageName());
-                vIcon.setImageResource(icon);
-                v.findViewById(R.id.progress).setVisibility(Commands.isProcessed(id(), cmd) ? View.VISIBLE : View.GONE);
-                return v;
-            }
-        });
+        vActions.setAdapter(new ActionsAdapter(getActivity(), id()));
         vActions.setOnItemClickListener(this);
         vActions.setOnItemLongClickListener(this);
 
@@ -88,8 +50,10 @@ public class ActionFragment
                     return;
                 if (!id().equals(intent.getStringExtra(Names.ID)))
                     return;
-                if (intent.getAction().equals(Names.CONFIG_CHANGED))
-                    fill();
+                if (intent.getAction().equals(Names.CONFIG_CHANGED)) {
+                    ActionsAdapter actionsAdapter = (ActionsAdapter) vActions.getAdapter();
+                    actionsAdapter.fill(getActivity(), id());
+                }
                 BaseAdapter adapter = (BaseAdapter) vActions.getAdapter();
                 adapter.notifyDataSetChanged();
             }
@@ -109,16 +73,8 @@ public class ActionFragment
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        SendCommandFragment fragment = new SendCommandFragment();
-        CarConfig.Command cmd = commands.get(position);
-        if (Commands.cancel(getActivity(), id(), cmd))
-            return;
-        Bundle args = new Bundle();
-        args.putString(Names.ID, id());
-        args.putInt(Names.COMMAND, cmd.id);
-        args.putBoolean(Names.ROUTE, longTap);
-        fragment.setArguments(args);
-        fragment.show(getActivity().getSupportFragmentManager(), "send");
+        ActionsAdapter actionsAdapter = (ActionsAdapter) vActions.getAdapter();
+        actionsAdapter.itemClick(position, longTap);
         longTap = false;
     }
 
@@ -151,17 +107,4 @@ public class ActionFragment
         return super.onOptionsItemSelected(item);
     }
 
-    void fill() {
-        commands = new Vector<>();
-        CarConfig config = CarConfig.get(getActivity(), id());
-        CarConfig.Command[] cmds = config.getCmd();
-        if (cmds != null) {
-            for (CarConfig.Command cmd : cmds) {
-                if (cmd.icon == null)
-                    continue;
-                if ((cmd.inet != 0) || State.hasTelephony(getActivity()))
-                    commands.add(cmd);
-            }
-        }
-    }
 }
