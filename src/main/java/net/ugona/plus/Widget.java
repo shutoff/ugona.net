@@ -8,14 +8,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -26,6 +24,7 @@ import com.eclipsesource.json.ParseException;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -100,7 +99,6 @@ public class Widget extends AppWidgetProvider {
     static SparseIntArray height_rows;
     static TrafficRequest request;
     static CarImage carImage;
-    static SparseArray<String> pictState;
 
     static int[] picts = {R.id.pict1, R.id.pict2, R.id.pict3};
 
@@ -119,7 +117,6 @@ public class Widget extends AppWidgetProvider {
         super.onEnabled(context);
         Intent intent = new Intent(context, WidgetService.class);
         context.startService(intent);
-        pictState.clear();
         updateWidgets(context, null, true);
     }
 
@@ -247,33 +244,26 @@ public class Widget extends AppWidgetProvider {
             CarState carState = CarState.get(context, car_id);
             CarConfig carConfig = CarConfig.get(context, car_id);
 
-            if (pictState == null)
-                pictState = new SparseArray<>();
+            carImage.update(carState);
+            String[] ext = carImage.state.split("\\|");
+            String car_state = URLEncoder.encode(ext[0], "utf-8");
+            Uri uri = Uri.parse("content://net.ugona.plus.car/" + car_state);
+            widgetView.setImageViewUri(R.id.car, uri);
 
-            carImage.state = pictState.get(widgetID, "");
-            if (carImage.update(carState) || isLockScreen(context, widgetID)) {
-                pictState.put(widgetID, carImage.state);
-                Bitmap bmp = carImage.getBitmap();
-                if (bmp != null)
-                    widgetView.setImageViewBitmap(R.id.car, bmp);
-                String[] ext = carImage.state.split("\\|");
-                int kn = 0;
-                if (ext.length > 1) {
-                    String[] parts = ext[1].split(";");
-                    for (String part : parts) {
-                        int pict_id = carImage.getBitmapId(part);
-                        if (pict_id == 0)
-                            continue;
-                        int w_id = picts[kn++];
-                        widgetView.setImageViewResource(w_id, pict_id);
-                        widgetView.setViewVisibility(w_id, View.VISIBLE);
-                        if (kn >= picts.length)
-                            break;
-                    }
+            int kn = 0;
+            if (ext.length > 1) {
+                String[] parts = ext[1].split(";");
+                for (String part : parts) {
+                    uri = Uri.parse("content://net.ugona.plus.car/__" + part);
+                    int w_id = picts[kn++];
+                    widgetView.setImageViewUri(w_id, uri);
+                    widgetView.setViewVisibility(w_id, View.VISIBLE);
+                    if (kn >= picts.length)
+                        break;
                 }
-                for (; kn < picts.length; kn++) {
-                    widgetView.setViewVisibility(picts[kn], View.GONE);
-                }
+            }
+            for (; kn < picts.length; kn++) {
+                widgetView.setViewVisibility(picts[kn], View.GONE);
             }
 
             long last = carState.getTime();

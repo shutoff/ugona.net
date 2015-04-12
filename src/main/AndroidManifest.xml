@@ -150,6 +150,11 @@
                 android:resource="@xml/lockwidget_metadata" />
         </receiver>
 
+        <provider
+            android:name=".CarPictureProvider"
+            android:authorities="net.ugona.plus.car"
+            android:exported="true" />
+
     </application>
 
 </manifest>
