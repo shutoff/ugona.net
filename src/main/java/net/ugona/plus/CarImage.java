@@ -18,7 +18,6 @@ public class CarImage {
     final static float WIDTH = 1080;
     final static float HEIGHT = 750;
     static Pictures pictures = new Pictures();
-    static Bitmap bitmap = null;
     int animation;
     String state;
     Resources resources;
@@ -192,8 +191,7 @@ public class CarImage {
         int w = (int) (WIDTH / 4);
         int h = (int) (HEIGHT / 4);
         float k = w / WIDTH;
-        if (bitmap == null)
-            bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         bitmap.eraseColor(Color.TRANSPARENT);
         Canvas canvas = new Canvas(bitmap);
         String[] ext = state.split("\\|");
