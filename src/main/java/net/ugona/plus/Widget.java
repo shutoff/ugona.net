@@ -101,7 +101,6 @@ public class Widget extends AppWidgetProvider {
     static TrafficRequest request;
     static CarImage carImage;
     static SparseArray<String> pictState;
-    static SparseArray<Bitmap> bitmaps;
 
     static int[] picts = {R.id.pict1, R.id.pict2, R.id.pict3};
 
@@ -120,6 +119,7 @@ public class Widget extends AppWidgetProvider {
         super.onEnabled(context);
         Intent intent = new Intent(context, WidgetService.class);
         context.startService(intent);
+        pictState.clear();
         updateWidgets(context, null, true);
     }
 
@@ -249,19 +249,13 @@ public class Widget extends AppWidgetProvider {
 
             if (pictState == null)
                 pictState = new SparseArray<>();
-            if (bitmaps == null)
-                bitmaps = new SparseArray<>();
 
             carImage.state = pictState.get(widgetID, "");
-            if (carImage.update(carState)) {
+            if (carImage.update(carState) || isLockScreen(context, widgetID)) {
                 pictState.put(widgetID, carImage.state);
-                Bitmap saved_bmp = bitmaps.get(widgetID, null);
-                Bitmap bmp = carImage.getBitmap(saved_bmp);
-                if (bmp != null) {
-                    if (saved_bmp == null)
-                        bitmaps.put(widgetID, bmp);
+                Bitmap bmp = carImage.getBitmap();
+                if (bmp != null)
                     widgetView.setImageViewBitmap(R.id.car, bmp);
-                }
                 String[] ext = carImage.state.split("\\|");
                 int kn = 0;
                 if (ext.length > 1) {

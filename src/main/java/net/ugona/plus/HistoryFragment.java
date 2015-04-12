@@ -24,7 +24,6 @@ public class HistoryFragment extends MainFragment implements HistoryView.History
     HistoryView vHistory;
     View vNoData;
     View vError;
-    View vProgress;
     int type;
 
     @Override
@@ -39,7 +38,9 @@ public class HistoryFragment extends MainFragment implements HistoryView.History
 
     @Override
     void changeDate() {
-        refresh();
+        vHistory.setVisibility(View.GONE);
+        vNoData.setVisibility(View.GONE);
+        onRefresh();
     }
 
     @Override
@@ -49,19 +50,18 @@ public class HistoryFragment extends MainFragment implements HistoryView.History
             setArgs(savedInstanceState);
         vHistory = (HistoryView) v.findViewById(R.id.history);
         vNoData = v.findViewById(R.id.no_data);
-        vProgress = v.findViewById(R.id.progress);
         vError = v.findViewById(R.id.error);
         vHistory.mListener = this;
         vError.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                refresh();
+                onRefresh();
             }
         });
         Menu m = combo();
         if (m.findItem(type) == null)
             type = m.getItem(0).getItemId();
-        refresh();
+        onRefresh();
         return v;
     }
 
@@ -82,7 +82,7 @@ public class HistoryFragment extends MainFragment implements HistoryView.History
         vHistory.setVisibility(View.VISIBLE);
         vNoData.setVisibility(View.GONE);
         vError.setVisibility(View.GONE);
-        vProgress.setVisibility(View.GONE);
+        refreshDone();
     }
 
     @Override
@@ -90,7 +90,7 @@ public class HistoryFragment extends MainFragment implements HistoryView.History
         vHistory.setVisibility(View.GONE);
         vNoData.setVisibility(View.VISIBLE);
         vError.setVisibility(View.GONE);
-        vProgress.setVisibility(View.GONE);
+        refreshDone();
     }
 
     @Override
@@ -98,21 +98,20 @@ public class HistoryFragment extends MainFragment implements HistoryView.History
         vHistory.setVisibility(View.GONE);
         vNoData.setVisibility(View.GONE);
         vError.setVisibility(View.VISIBLE);
-        vProgress.setVisibility(View.GONE);
+        refreshDone();
     }
 
     void setArgs(Bundle args) {
         type = args.getInt(Names.TITLE, 0);
         if (vHistory != null) {
-            vHistory.setVisibility(View.GONE);
-            vNoData.setVisibility(View.GONE);
             vError.setVisibility(View.GONE);
-            vProgress.setVisibility(View.VISIBLE);
             vHistory.init(getActivity(), id(), typesMap.get(type), date());
         }
     }
 
-    void refresh() {
+    @Override
+    public void onRefresh() {
+        super.onRefresh();
         Bundle args = new Bundle();
         args.putInt(Names.TITLE, type);
         setArgs(args);
@@ -167,7 +166,7 @@ public class HistoryFragment extends MainFragment implements HistoryView.History
             if (type == item.getItemId())
                 return true;
             type = item.getItemId();
-            refresh();
+            onRefresh();
             return true;
         }
         return super.onOptionsItemSelected(item);

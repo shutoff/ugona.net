@@ -199,8 +199,9 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         type = t;
         current = c;
         config = CarConfig.get(context, id);
-
         loadData();
+        removeXMarkers();
+        postInvalidate();
     }
 
     void loadData() {

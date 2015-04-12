@@ -18,6 +18,7 @@ public class CarImage {
     final static float WIDTH = 1080;
     final static float HEIGHT = 750;
     static Pictures pictures = new Pictures();
+    static Bitmap bitmap = null;
     int animation;
     String state;
     Resources resources;
@@ -187,7 +188,7 @@ public class CarImage {
         return getBitmapSafely(id, 0);
     }
 
-    Bitmap getBitmap(Bitmap bitmap) {
+    Bitmap getBitmap() {
         int w = (int) (WIDTH / 4);
         int h = (int) (HEIGHT / 4);
         float k = w / WIDTH;
