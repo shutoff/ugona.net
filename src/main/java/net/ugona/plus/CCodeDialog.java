@@ -1,7 +1,6 @@
 package net.ugona.plus;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,6 +19,9 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.AlertDialogWrapper;
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
@@ -34,7 +36,7 @@ public class CCodeDialog
     String id;
     int inet;
 
-    Button btnOk;
+    View btnOk;
     EditText etCCodeNum;
     EditText etCCodeText;
     CheckBox chkNumber;
@@ -55,7 +57,7 @@ public class CCodeDialog
         if (title == null)
             title = getString(R.string.require_ccode);
         LayoutInflater inflater = LayoutInflater.from(getActivity());
-        Dialog dialog = new AlertDialog.Builder(getActivity())
+        Dialog dialog = new AlertDialogWrapper.Builder(getActivity())
                 .setTitle(title)
                 .setView(inflater.inflate(R.layout.ccode_dialog, null))
                 .setPositiveButton(R.string.ok, null)
@@ -97,8 +99,8 @@ public class CCodeDialog
     @Override
     public void onStart() {
         super.onStart();
-        AlertDialog dialog = (AlertDialog) getDialog();
-        btnOk = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        MaterialDialog dialog = (MaterialDialog) getDialog();
+        btnOk = dialog.getActionButton(DialogAction.POSITIVE);
         btnOk.setOnClickListener(this);
         etCCodeNum = (EditText) dialog.findViewById(R.id.ccode_num);
         etCCodeText = (EditText) dialog.findViewById(R.id.ccode_text);

@@ -1,7 +1,6 @@
 package net.ugona.plus;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,6 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+
+import com.afollestad.materialdialogs.AlertDialogWrapper;
 
 public class InputText
         extends DialogFragment
@@ -34,7 +35,7 @@ public class InputText
         if (flags != 0)
             editText.setInputType(flags);
         editText.setText(data);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+        AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(getActivity())
                 .setTitle(title)
                 .setPositiveButton(R.string.ok, this)
                 .setNegativeButton(R.string.cancel, null)

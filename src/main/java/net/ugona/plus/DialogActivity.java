@@ -1,10 +1,12 @@
 package net.ugona.plus;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+
+import com.afollestad.materialdialogs.AlertDialogWrapper;
 
 public class DialogActivity
         extends Activity
@@ -18,7 +20,7 @@ public class DialogActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
         title = getIntent().getStringExtra(Names.TITLE);
         if (title != null)
             builder.setTitle(title);
@@ -29,7 +31,7 @@ public class DialogActivity
         if (point != null)
             builder.setPositiveButton(R.string.show_map, this);
         builder.setNegativeButton(R.string.cancel, null);
-        AlertDialog dialog = builder.create();
+        Dialog dialog = builder.create();
         dialog.setOnDismissListener(this);
         dialog.show();
     }

@@ -1,7 +1,6 @@
 package net.ugona.plus;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -25,6 +24,9 @@ import android.widget.Filterable;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.AlertDialogWrapper;
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
 
 import org.joda.time.LocalDate;
@@ -58,7 +60,7 @@ public class MaintenanceDialog
     Spinner vPeriod;
     TextView vDate;
     Handler handler;
-    Button okButton;
+    View okButton;
 
     @NonNull
     @Override
@@ -168,7 +170,7 @@ public class MaintenanceDialog
             }
         }
 
-        return new AlertDialog.Builder(getActivity())
+        return new AlertDialogWrapper.Builder(getActivity())
                 .setView(v)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.ok, this)
@@ -178,8 +180,8 @@ public class MaintenanceDialog
     @Override
     public void onStart() {
         super.onStart();
-        AlertDialog dialog = (AlertDialog) getDialog();
-        okButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        MaterialDialog dialog = (MaterialDialog) getDialog();
+        okButton = dialog.getActionButton(DialogAction.POSITIVE);
         afterTextChanged(null);
 
         if (vName.getText().toString().equals("")) {

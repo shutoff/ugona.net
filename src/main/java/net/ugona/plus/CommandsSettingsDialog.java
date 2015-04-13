@@ -1,6 +1,5 @@
 package net.ugona.plus;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.afollestad.materialdialogs.AlertDialogWrapper;
 
 public class CommandsSettingsDialog
         extends DialogFragment
@@ -28,7 +29,7 @@ public class CommandsSettingsDialog
         if (savedInstanceState != null)
             id = savedInstanceState.getString(Names.ID);
         LayoutInflater inflater = LayoutInflater.from(getActivity());
-        return new AlertDialog.Builder(getActivity())
+        return new AlertDialogWrapper.Builder(getActivity())
                 .setTitle(R.string.action_settings)
                 .setView(inflater.inflate(R.layout.command_settings_dialog, null))
                 .setPositiveButton(R.string.ok, this)

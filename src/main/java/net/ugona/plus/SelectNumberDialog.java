@@ -19,6 +19,8 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.AlertDialogWrapper;
+
 import java.util.Vector;
 
 public class SelectNumberDialog extends DialogFragment {
@@ -115,7 +117,7 @@ public class SelectNumberDialog extends DialogFragment {
             }
         });
 
-        return new AlertDialog.Builder(getActivity())
+        return new AlertDialogWrapper.Builder(getActivity())
                 .setTitle(R.string.select_phone)
                 .setNegativeButton(R.string.cancel, null)
                 .setView(list)

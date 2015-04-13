@@ -1,7 +1,7 @@
 package net.ugona.plus;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -16,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.AlertDialogWrapper;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
@@ -81,7 +82,7 @@ public class StatFragment extends MainFragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.recalc) {
-            final AlertDialog dialog = new AlertDialog.Builder(getActivity())
+            final Dialog dialog = new AlertDialogWrapper.Builder(getActivity())
                     .setTitle(R.string.recalc_stat)
                     .setMessage(R.string.recalc_message)
                     .setNegativeButton(R.string.cancel, null)

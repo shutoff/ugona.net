@@ -1,7 +1,6 @@
 package net.ugona.plus;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -13,14 +12,17 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
+
+import com.afollestad.materialdialogs.AlertDialogWrapper;
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 
 public class PasswordDialog extends DialogFragment
         implements View.OnClickListener, TextWatcher {
 
     EditText etPasswd;
-    Button btnOk;
+    View btnOk;
     String password;
     View vError;
     boolean sent;
@@ -36,7 +38,7 @@ public class PasswordDialog extends DialogFragment
         if (savedInstanceState != null)
             password = savedInstanceState.getString(Names.MESSAGE);
         LayoutInflater inflater = LayoutInflater.from(getActivity());
-        return new AlertDialog.Builder(getActivity())
+        return new AlertDialogWrapper.Builder(getActivity())
                 .setTitle(R.string.passwd)
                 .setView(inflater.inflate(R.layout.password_dialog, null))
                 .setPositiveButton(R.string.ok, null)
@@ -47,10 +49,10 @@ public class PasswordDialog extends DialogFragment
     @Override
     public void onStart() {
         super.onStart();
-        AlertDialog dialog = (AlertDialog) getDialog();
+        MaterialDialog dialog = (MaterialDialog) getDialog();
         etPasswd = (EditText) dialog.findViewById(R.id.passwd);
         vError = dialog.findViewById(R.id.error);
-        btnOk = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        btnOk = dialog.getActionButton(DialogAction.POSITIVE);
         btnOk.setOnClickListener(this);
         etPasswd.addTextChangedListener(this);
         afterTextChanged(etPasswd.getText());

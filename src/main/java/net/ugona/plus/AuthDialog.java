@@ -21,6 +21,9 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.AlertDialogWrapper;
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
@@ -34,7 +37,7 @@ public class AuthDialog extends DialogFragment {
 
     EditText etLogin;
     EditText etPass;
-    Button btnOk;
+    View btnOk;
     TextView tvError;
     View vProgress;
     TextWatcher watcher;
@@ -95,7 +98,7 @@ public class AuthDialog extends DialogFragment {
             }
         });
 
-        return new AlertDialog.Builder(getActivity())
+        return new AlertDialogWrapper.Builder(getActivity())
                 .setTitle(R.string.auth)
                 .setView(v)
                 .setPositiveButton(R.string.ok, null)
@@ -106,8 +109,8 @@ public class AuthDialog extends DialogFragment {
     @Override
     public void onStart() {
         super.onStart();
-        AlertDialog dialog = (AlertDialog) getDialog();
-        btnOk = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        MaterialDialog dialog = (MaterialDialog) getDialog();
+        btnOk = dialog.getActionButton(DialogAction.POSITIVE);
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

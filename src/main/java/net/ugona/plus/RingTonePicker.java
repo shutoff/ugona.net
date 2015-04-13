@@ -22,6 +22,10 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 
+import com.afollestad.materialdialogs.AlertDialogWrapper;
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+
 public class RingTonePicker
         extends DialogFragment
         implements DialogInterface.OnClickListener,
@@ -31,7 +35,7 @@ public class RingTonePicker
     int type;
     String title;
     String sound;
-    Button btnOk;
+    View btnOk;
     RadioGroup group;
     MediaPlayer player;
 
@@ -71,7 +75,7 @@ public class RingTonePicker
                 rb.setChecked(true);
             group.addView(rb);
         }
-        return new AlertDialog.Builder(getActivity())
+        return new AlertDialogWrapper.Builder(getActivity())
                 .setTitle(title)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.ok, this)
@@ -96,8 +100,8 @@ public class RingTonePicker
     @Override
     public void onStart() {
         super.onStart();
-        AlertDialog dialog = (AlertDialog) getDialog();
-        btnOk = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        MaterialDialog dialog = (MaterialDialog) getDialog();
+        btnOk = dialog.getActionButton(DialogAction.POSITIVE);
         btnOk.setEnabled(group.getCheckedRadioButtonId() > 0);
     }
 

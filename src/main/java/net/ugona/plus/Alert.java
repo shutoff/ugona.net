@@ -9,8 +9,15 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.view.View;
 
-public class Alert extends DialogFragment implements DialogInterface.OnClickListener {
+import com.afollestad.materialdialogs.AlertDialogWrapper;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.MaterialDialog.ButtonCallback;
+
+public class Alert
+        extends DialogFragment
+        implements DialogInterface.OnClickListener {
 
     String title;
     String message;
@@ -25,12 +32,13 @@ public class Alert extends DialogFragment implements DialogInterface.OnClickList
             setArgs(savedInstanceState);
         if (ok == null)
             ok = getString(R.string.ok);
-        return new AlertDialog.Builder(getActivity())
+        return new AlertDialogWrapper.Builder(getActivity())
                 .setTitle(title)
                 .setMessage(message)
                 .setPositiveButton(ok, this)
                 .setNegativeButton(R.string.cancel, null)
                 .create();
+
     }
 
     @Override
@@ -57,7 +65,7 @@ public class Alert extends DialogFragment implements DialogInterface.OnClickList
     }
 
     @Override
-    public void onClick(DialogInterface dialog, int which) {
+    public void onClick(DialogInterface dialogInterface, int i) {
         Fragment fragment = getTargetFragment();
         if (fragment != null) {
             Intent intent = new Intent();
@@ -75,4 +83,5 @@ public class Alert extends DialogFragment implements DialogInterface.OnClickList
         if ((fragment != null) && !sent)
             fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_CANCELED, null);
     }
+
 }

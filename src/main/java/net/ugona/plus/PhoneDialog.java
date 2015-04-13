@@ -1,7 +1,6 @@
 package net.ugona.plus;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,6 +18,10 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.afollestad.materialdialogs.AlertDialogWrapper;
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.Vector;
 
@@ -47,7 +50,7 @@ public class PhoneDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         View v = inflater.inflate(R.layout.phonedialog, null);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+        AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(getActivity())
                 .setTitle(R.string.device_phone_number)
                 .setPositiveButton(R.string.ok, null)
                 .setNegativeButton(R.string.cancel, null)
@@ -74,8 +77,8 @@ public class PhoneDialog extends DialogFragment {
     @Override
     public void onStart() {
         super.onStart();
-        AlertDialog dialog = (AlertDialog) getDialog();
-        final Button okButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        MaterialDialog dialog = (MaterialDialog) getDialog();
+        final View okButton = dialog.getActionButton(DialogAction.POSITIVE);
         etPhone.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

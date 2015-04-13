@@ -1,7 +1,6 @@
 package net.ugona.plus;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
@@ -14,10 +13,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.afollestad.materialdialogs.AlertDialogWrapper;
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 
 public class ConfigWidget extends Activity {
 
@@ -56,7 +58,7 @@ public class ConfigWidget extends Activity {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        final AlertDialog dialog = new AlertDialog.Builder(this)
+        final Dialog dialog = new AlertDialogWrapper.Builder(this)
                 .setTitle(R.string.widget_config)
                 .setPositiveButton(R.string.ok, null)
                 .setNegativeButton(R.string.cancel, null)
@@ -125,7 +127,8 @@ public class ConfigWidget extends Activity {
                 finish();
             }
         });
-        final Button btnOk = dialog.getButton(Dialog.BUTTON_POSITIVE);
+        MaterialDialog materialDialog = (MaterialDialog) dialog;
+        final View btnOk = materialDialog.getActionButton(DialogAction.POSITIVE);
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

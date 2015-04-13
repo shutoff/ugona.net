@@ -1,6 +1,5 @@
 package net.ugona.plus;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -14,6 +13,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
+
+import com.afollestad.materialdialogs.AlertDialogWrapper;
 
 import java.lang.reflect.Method;
 import java.util.Date;
@@ -178,7 +179,7 @@ abstract public class MapActivity extends WebViewActivity {
                         // ignore
                     }
                     if (!gps_enabled) {
-                        AlertDialog.Builder ad = new AlertDialog.Builder(this);
+                        AlertDialogWrapper.Builder ad = new AlertDialogWrapper.Builder(this);
                         ad.setTitle(R.string.no_gps_title);
                         ad.setMessage((currentBestLocation == null) ? R.string.no_gps_message : R.string.net_gps_message);
                         ad.setPositiveButton(R.string.settings, new DialogInterface.OnClickListener() {
