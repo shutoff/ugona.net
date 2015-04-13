@@ -1,6 +1,5 @@
 package net.ugona.plus;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -78,8 +77,7 @@ public class CommandsFragment
             public View getView(int position, View convertView, ViewGroup parent) {
                 View v = convertView;
                 if (v == null) {
-                    LayoutInflater inflater = (LayoutInflater) getActivity()
-                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    LayoutInflater inflater = LayoutInflater.from(getActivity());
                     v = inflater.inflate(R.layout.command_item, null);
                 }
                 final Group g = grp.get(position);

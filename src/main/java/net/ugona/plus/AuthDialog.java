@@ -42,7 +42,7 @@ public class AuthDialog extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
         View v = inflater.inflate(R.layout.auth_dialog, null);
 
         etLogin = (EditText) v.findViewById(R.id.login);

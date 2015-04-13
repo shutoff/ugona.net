@@ -34,7 +34,7 @@ public class PointerDialog
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         if (savedInstanceState != null)
             setArgs(savedInstanceState);
-        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
         View v = inflater.inflate(R.layout.pointerdialog, null);
         vCars = (Spinner) v.findViewById(R.id.cars);
         AppConfig config = AppConfig.get(getActivity());

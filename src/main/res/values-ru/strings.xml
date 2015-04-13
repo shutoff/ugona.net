@@ -226,4 +226,6 @@
     <string name="hour6">6 часов</string>
     <string name="everyday">ежедневно</string>
     <string name="everyweek">еженедельно</string>
+    <string name="device_pswd">Требуется отправка пароля в СМС</string>
+    <string name="input_device_pswd">Введите пароль устройства</string>
 </resources>

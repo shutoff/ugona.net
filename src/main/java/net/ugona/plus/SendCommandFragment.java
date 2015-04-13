@@ -223,16 +223,16 @@ public class SendCommandFragment extends DialogFragment {
             dialog.show(getFragmentManager(), "ccode");
             return true;
         }
-        if (sms.indexOf("{pwd}") > 0) {
+        if (sms.indexOf("{pwd}") >= 0) {
             CarConfig config = CarConfig.get(getActivity(), car_id);
             CarState state = CarState.get(getActivity(), car_id);
             if (config.isDevice_password() && state.isDevice_password()) {
-                CCodeDialog dialog = new CCodeDialog();
+                PasswordDialog dialog = new PasswordDialog();
                 Bundle args = new Bundle();
-                args.putString(Names.ID, car_id);
+                args.putString(Names.TITLE, getString(R.string.input_device_pswd));
                 dialog.setArguments(args);
                 dialog.setTargetFragment(this, DO_CCODE_SMS);
-                dialog.show(getFragmentManager(), "ccode");
+                dialog.show(getFragmentManager(), "password");
                 return true;
             }
         }

@@ -468,7 +468,7 @@ public class MainActivity
             public View getView(int position, View convertView, ViewGroup parent) {
                 View v = convertView;
                 if (v == null) {
-                    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
                     v = inflater.inflate(R.layout.menu_item, null);
                 }
                 MenuItem item = sideMenu.getItem(position);
@@ -580,8 +580,7 @@ public class MainActivity
             public View getView(int position, View convertView, int layout_id) {
                 View v = convertView;
                 if (v == null) {
-                    LayoutInflater inflater = (LayoutInflater) getSupportActionBar().getThemedContext()
-                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    LayoutInflater inflater = LayoutInflater.from(getSupportActionBar().getThemedContext());
                     v = inflater.inflate(layout_id, null);
                 }
                 TextView tv = (TextView) v.findViewById(R.id.name);

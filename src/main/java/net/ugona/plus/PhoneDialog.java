@@ -46,7 +46,7 @@ public class PhoneDialog extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
         View v = inflater.inflate(R.layout.phonedialog, null);
         AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(getActivity())
                 .setTitle(R.string.device_phone_number)

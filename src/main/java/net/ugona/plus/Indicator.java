@@ -22,7 +22,7 @@ public class Indicator extends FrameLayout {
     public Indicator(Context context, AttributeSet attrs) {
         super(context, attrs);
         setWillNotDraw(false);
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = LayoutInflater.from(context);
         v = inflater.inflate(R.layout.indicator, null, true);
         addView(v);
         tvLabel = (TextView) v.findViewById(R.id.text);

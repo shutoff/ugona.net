@@ -17,6 +17,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <CheckBox
+        android:id="@+id/device_passwd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/device_pswd" />
+
     <LinearLayout
         android:id="@+id/sim_block"
         android:layout_width="match_parent"

@@ -1,7 +1,6 @@
 package net.ugona.plus;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -22,6 +22,7 @@ public class CommandsSettingsDialog
     String id;
     Spinner spinner;
     Spinner simSpinner;
+    CheckBox devicePswd;
 
     @NonNull
     @Override
@@ -74,8 +75,7 @@ public class CommandsSettingsDialog
             public View getView(int position, View convertView, ViewGroup parent) {
                 View v = convertView;
                 if (v == null) {
-                    LayoutInflater inflater = (LayoutInflater) getActivity()
-                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    LayoutInflater inflater = LayoutInflater.from(getActivity());
                     v = inflater.inflate(R.layout.list_item, null);
                 }
                 TextView tv = (TextView) v;
@@ -87,8 +87,7 @@ public class CommandsSettingsDialog
             public View getDropDownView(int position, View convertView, ViewGroup parent) {
                 View v = convertView;
                 if (v == null) {
-                    LayoutInflater inflater = (LayoutInflater) getActivity()
-                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    LayoutInflater inflater = LayoutInflater.from(getActivity());
                     v = inflater.inflate(R.layout.list_dropdown_item, null);
                 }
                 TextView tv = (TextView) v;
@@ -118,8 +117,7 @@ public class CommandsSettingsDialog
             public View getView(int position, View convertView, ViewGroup parent) {
                 View v = convertView;
                 if (v == null) {
-                    LayoutInflater inflater = (LayoutInflater) getActivity()
-                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    LayoutInflater inflater = LayoutInflater.from(getActivity());
                     v = inflater.inflate(R.layout.list_item, null);
                 }
                 TextView tv = (TextView) v;
@@ -131,8 +129,7 @@ public class CommandsSettingsDialog
             public View getDropDownView(int position, View convertView, ViewGroup parent) {
                 View v = convertView;
                 if (v == null) {
-                    LayoutInflater inflater = (LayoutInflater) getActivity()
-                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    LayoutInflater inflater = LayoutInflater.from(getActivity());
                     v = inflater.inflate(R.layout.list_dropdown_item, null);
                 }
                 TextView tv = (TextView) v;
@@ -146,6 +143,13 @@ public class CommandsSettingsDialog
         simSpinner.setSelection(config.getSim_cmd());
         if (!State.isDualSim(getActivity()))
             getDialog().findViewById(R.id.sim_block).setVisibility(View.GONE);
+        devicePswd = (CheckBox) getDialog().findViewById(R.id.device_passwd);
+        CarState state = CarState.get(getActivity(), id);
+        if (state.isDevice_password()) {
+            devicePswd.setChecked(config.isDevice_password());
+        } else {
+            devicePswd.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -153,5 +157,6 @@ public class CommandsSettingsDialog
         final CarConfig config = CarConfig.get(getActivity(), id);
         config.setInet_cmd(spinner.getSelectedItemPosition() > 0);
         config.setSim_cmd(simSpinner.getSelectedItemPosition());
+        config.setDevice_password(devicePswd.isChecked());
     }
 }

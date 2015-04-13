@@ -29,7 +29,7 @@ public class InputText
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         if (savedInstanceState != null)
             setArgs(savedInstanceState);
-        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
         View v = inflater.inflate(R.layout.input, null);
         editText = (EditText) v.findViewById(R.id.text);
         if (flags != 0)

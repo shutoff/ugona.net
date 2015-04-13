@@ -1,6 +1,5 @@
 package net.ugona.plus;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -38,7 +37,7 @@ public class SmsSettingsFragment
         for (CarConfig.Setting setting : settings) {
             if (!setting.id.equals(id))
                 continue;
-            LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater inflater = LayoutInflater.from(getActivity());
             ScrollView scrollView = (ScrollView) inflater.inflate(R.layout.radio_list, null);
             group = (RadioGroup) scrollView.getChildAt(0);
             if (setting.cmd != null) {

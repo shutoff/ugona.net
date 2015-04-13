@@ -81,7 +81,7 @@ public class SelectNumberDialog extends DialogFragment {
             public View getView(int position, View convertView, ViewGroup parent) {
                 View v = convertView;
                 if (v == null) {
-                    LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    LayoutInflater inflater = LayoutInflater.from(getActivity());
                     v = inflater.inflate(R.layout.item_with_title, null);
                 }
                 TextView tvNumber = (TextView) v.findViewById(R.id.title);

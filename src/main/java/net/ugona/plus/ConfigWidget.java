@@ -57,7 +57,7 @@ public class ConfigWidget extends Activity {
         final String[] cars = appConfig.getCars();
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = LayoutInflater.from(this);
         final Dialog dialog = new AlertDialogWrapper.Builder(this)
                 .setTitle(R.string.widget_config)
                 .setPositiveButton(R.string.ok, null)

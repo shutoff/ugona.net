@@ -1,7 +1,6 @@
 package net.ugona.plus;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -204,8 +203,7 @@ public class ZonesFragment
             public View getView(final int position, View convertView, ViewGroup parent) {
                 View v = convertView;
                 if (v == null) {
-                    LayoutInflater inflater = (LayoutInflater) getActivity()
-                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    LayoutInflater inflater = LayoutInflater.from(getActivity());
                     v = inflater.inflate(R.layout.zone_item, null);
                 }
                 View vAdd = v.findViewById(R.id.add);

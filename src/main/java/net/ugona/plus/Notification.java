@@ -291,16 +291,16 @@ public class Notification extends Config {
     }
 
     static void show(Context context, String car_id, String text, String title, int pictId, int max_id, String sound, long when, boolean outgoing) {
-        if (title == null)
-            title = context.getString(R.string.app_name);
-
+        if (title == null) {
+            CarConfig carConfig = CarConfig.get(context, car_id);
+            title = carConfig.getName();
+        }
         if (sound == null) {
             CarConfig carConfig = CarConfig.get(context, car_id);
             sound = carConfig.getNotifySound();
             if (sound.equals(""))
                 sound = null;
         }
-
         int defs = android.app.Notification.DEFAULT_LIGHTS;
         defs |= android.app.Notification.DEFAULT_VIBRATE;
         if (sound == null)

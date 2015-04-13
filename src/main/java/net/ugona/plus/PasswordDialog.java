@@ -3,6 +3,7 @@ package net.ugona.plus;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -24,6 +25,7 @@ public class PasswordDialog extends DialogFragment
     EditText etPasswd;
     View btnOk;
     String password;
+    String title;
     View vError;
     boolean sent;
 
@@ -38,8 +40,10 @@ public class PasswordDialog extends DialogFragment
         if (savedInstanceState != null)
             password = savedInstanceState.getString(Names.MESSAGE);
         LayoutInflater inflater = LayoutInflater.from(getActivity());
+        if (title == null)
+            title = getString(R.string.password);
         return new AlertDialogWrapper.Builder(getActivity())
-                .setTitle(R.string.passwd)
+                .setTitle(title)
                 .setView(inflater.inflate(R.layout.password_dialog, null))
                 .setPositiveButton(R.string.ok, null)
                 .setNegativeButton(R.string.cancel, null)
@@ -62,12 +66,14 @@ public class PasswordDialog extends DialogFragment
     public void setArguments(Bundle args) {
         super.setArguments(args);
         password = args.getString(Names.MESSAGE);
+        title = args.getString(Names.TITLE);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(Names.MESSAGE, password);
+        outState.putString(Names.TITLE, title);
     }
 
     @Override
@@ -99,13 +105,16 @@ public class PasswordDialog extends DialogFragment
 
     @Override
     public void onClick(View v) {
-        if (etPasswd.getText().toString().equals(password)) {
+        if ((password == null) || etPasswd.getText().toString().equals(password)) {
             Fragment fragment = getTargetFragment();
             if (fragment != null)
                 sent = true;
             dismiss();
-            if (fragment != null)
-                fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, null);
+            if (fragment != null) {
+                Intent data = new Intent();
+                data.putExtra("pwd", etPasswd.getText().toString() + " ");
+                fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, data);
+            }
             return;
         }
         etPasswd.setText("");

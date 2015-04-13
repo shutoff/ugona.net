@@ -1,7 +1,6 @@
 package net.ugona.plus;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -216,8 +215,7 @@ public class CarsFragment
         public View getView(int i, View view, ViewGroup viewGroup) {
             View v = view;
             if (v == null) {
-                LayoutInflater inflater = (LayoutInflater) getActivity()
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                LayoutInflater inflater = LayoutInflater.from(getActivity());
                 v = inflater.inflate(R.layout.car_item, null);
                 if (i < ids.size()) {
                     v.findViewById(R.id.car_block).setVisibility(View.VISIBLE);

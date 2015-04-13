@@ -1,7 +1,6 @@
 package net.ugona.plus;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -91,8 +90,7 @@ public class NotifyFragment
             public View getView(int position, View convertView, ViewGroup parent) {
                 View v = convertView;
                 if (v == null) {
-                    LayoutInflater inflater = (LayoutInflater) getActivity()
-                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    LayoutInflater inflater = LayoutInflater.from(getActivity());
                     v = inflater.inflate(R.layout.auth_item, null);
                 }
                 Item item = items.get(position);

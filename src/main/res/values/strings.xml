@@ -222,4 +222,6 @@
     <string name="hour6">6 hours</string>
     <string name="everyday">Daily</string>
     <string name="everyweek">Weekly</string>
+    <string name="device_pswd">Device require password on SMS</string>
+    <string name="input_device_pswd">Input device password</string>
 </resources>

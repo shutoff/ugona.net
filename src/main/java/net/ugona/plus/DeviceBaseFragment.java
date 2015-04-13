@@ -2,7 +2,6 @@ package net.ugona.plus;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -16,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -55,6 +55,8 @@ public abstract class DeviceBaseFragment
     final static String DATA = "data";
     final static String CHANGED = "changed";
     final static String TIMERS = "timers";
+    final static String TYPES = "types";
+
     static int[] wdays = {
             R.id.wday1,
             R.id.wday2,
@@ -79,6 +81,7 @@ public abstract class DeviceBaseFragment
     ListView vList;
     View vError;
     Vector<Timer> timers;
+    Vector<TimerType> timerTypes;
     NumberFormat nf;
     NumberFormat df;
 
@@ -150,6 +153,18 @@ public abstract class DeviceBaseFragment
                     ex.printStackTrace();
                 }
             }
+            data = savedInstanceState.getByteArray(TYPES);
+            if (data != null) {
+                try {
+                    ByteArrayInputStream bis = new ByteArrayInputStream(data);
+                    ObjectInput in = new ObjectInputStream(bis);
+                    timerTypes = (Vector<TimerType>) in.readObject();
+                    in.close();
+                    bis.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
 
         nf = NumberFormat.getInstance(Locale.getDefault());
@@ -215,6 +230,21 @@ public abstract class DeviceBaseFragment
             }
             if (data != null)
                 outState.putByteArray(TIMERS, data);
+        }
+        if (timerTypes != null) {
+            byte[] data = null;
+            try {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                ObjectOutput out = new ObjectOutputStream(bos);
+                out.writeObject(timerTypes);
+                data = bos.toByteArray();
+                out.close();
+                bos.close();
+            } catch (Exception ex) {
+                // ignore
+            }
+            if (data != null)
+                outState.putByteArray(TYPES, data);
         }
     }
 
@@ -345,6 +375,16 @@ public abstract class DeviceBaseFragment
                         timers.add(t);
                     }
                 }
+                JsonValue vTimerTypes = res.get("timer_types");
+                if (vTimerTypes != null) {
+                    timerTypes = new Vector<>();
+                    JsonArray aTimerTypes = vTimerTypes.asArray();
+                    for (int i = 0; i < aTimerTypes.size(); i++) {
+                        TimerType t = new TimerType();
+                        Config.update(t, aTimerTypes.get(i).asObject());
+                        timerTypes.add(t);
+                    }
+                }
                 List<String> names = res.names();
                 settings = new HashMap<>();
                 for (String name : names) {
@@ -373,6 +413,7 @@ public abstract class DeviceBaseFragment
         Param param = new Param();
         param.skey = config.getKey();
         param.get_timers = getTimer();
+        param.lang = Locale.getDefault().getLanguage();
         task.execute("/settings", param);
     }
 
@@ -420,6 +461,7 @@ public abstract class DeviceBaseFragment
     static class Param implements Serializable {
         String skey;
         int get_timers;
+        String lang;
     }
 
     static class Timer implements Serializable {
@@ -428,6 +470,12 @@ public abstract class DeviceBaseFragment
         int min;
         int period;
         int param;
+    }
+
+    static class TimerType implements Serializable {
+        int id;
+        String name;
+        String icon;
     }
 
     class SettingsAdapter extends BaseAdapter {
@@ -467,8 +515,7 @@ public abstract class DeviceBaseFragment
         public View getView(int position, View convertView, ViewGroup parent) {
             View v = convertView;
             if (v == null) {
-                LayoutInflater inflater = (LayoutInflater) getActivity()
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                LayoutInflater inflater = LayoutInflater.from(getActivity());
                 v = inflater.inflate(R.layout.setting_item, null);
             }
 
@@ -586,8 +633,7 @@ public abstract class DeviceBaseFragment
                         public View getView(int position, View convertView, ViewGroup parent) {
                             View v = convertView;
                             if (v == null) {
-                                LayoutInflater inflater = (LayoutInflater) getActivity()
-                                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                                LayoutInflater inflater = LayoutInflater.from(getActivity());
                                 v = inflater.inflate(R.layout.list_item, null);
                             }
                             TextView tv = (TextView) v;
@@ -600,8 +646,7 @@ public abstract class DeviceBaseFragment
                         public View getDropDownView(int position, View convertView, ViewGroup parent) {
                             View v = convertView;
                             if (v == null) {
-                                LayoutInflater inflater = (LayoutInflater) getActivity()
-                                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                                LayoutInflater inflater = LayoutInflater.from(getActivity());
                                 v = inflater.inflate(R.layout.list_dropdown_item, null);
                             }
                             TextView tv = (TextView) v;
@@ -734,6 +779,24 @@ public abstract class DeviceBaseFragment
 
                     tv = (TextView) v.findViewById(R.id.timer_period);
                     tv.setText(period_names[t.period]);
+
+                    ImageView ivIcon = (ImageView) v.findViewById(R.id.icon);
+                    String icon = null;
+                    if (timerTypes != null) {
+                        for (TimerType type : timerTypes) {
+                            if (type.id == t.param) {
+                                icon = type.icon;
+                                break;
+                            }
+                        }
+                    }
+                    if (icon == null) {
+                        ivIcon.setVisibility(View.INVISIBLE);
+                    } else {
+                        ivIcon.setVisibility(View.VISIBLE);
+                        int icon_id = getActivity().getResources().getIdentifier("w_" + icon, "drawable", getActivity().getPackageName());
+                        ivIcon.setImageResource(icon_id);
+                    }
 
                 } else {
                     v.findViewById(R.id.add).setVisibility(View.VISIBLE);
