@@ -48,6 +48,7 @@ public class PlotStatistics implements PlotListener {
     String annotationString = "";
 
     private Paint paint;
+    private boolean annotatePlotEnabled;
 
     {
         paint = new Paint();
@@ -56,9 +57,6 @@ public class PlotStatistics implements PlotListener {
         paint.setTextSize(30);
         resetCounters();
     }
-
-
-    private boolean annotatePlotEnabled;
 
 
     public PlotStatistics(long updateDelayMs, boolean annotatePlotEnabled) {

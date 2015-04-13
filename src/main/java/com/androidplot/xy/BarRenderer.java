@@ -221,7 +221,7 @@ public class BarRenderer<T extends BarFormatter> extends XYSeriesRenderer<T> {
             }
 
     		/*
-    		 * Draw the bars within the barGroup area.
+             * Draw the bars within the barGroup area.
     		 */
             double rangeOrigin = getPlot().getRangeOrigin().doubleValue();
             float basePositionY = ValPixConverter.valToPix(rangeOrigin,

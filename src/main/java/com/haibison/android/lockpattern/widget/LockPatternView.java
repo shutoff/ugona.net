@@ -63,14 +63,6 @@ public class LockPatternView extends View {
      * The size of the pattern's matrix.
      */
     public static final int MATRIX_SIZE = MATRIX_WIDTH * MATRIX_WIDTH;
-    private ArrayList<Cell> mPattern = new ArrayList<Cell>(MATRIX_SIZE);
-    /**
-     * Lookup table for the circles of the pattern we are currently drawing.
-     * This will be the cells of the complete pattern unless we are animating,
-     * in which case we use this to hold the cells we are drawing for the in
-     * progress animation.
-     */
-    private boolean[][] mPatternDrawLookup = new boolean[MATRIX_WIDTH][MATRIX_WIDTH];
     /**
      * Aspect to use when rendering this view. View will be the minimum of
      * width/height.
@@ -109,6 +101,14 @@ public class LockPatternView extends View {
     private final int mPaddingTop = mPadding;
     private final int mPaddingBottom = mPadding;
     private final Context mContext;
+    private ArrayList<Cell> mPattern = new ArrayList<Cell>(MATRIX_SIZE);
+    /**
+     * Lookup table for the circles of the pattern we are currently drawing.
+     * This will be the cells of the complete pattern unless we are animating,
+     * in which case we use this to hold the cells we are drawing for the in
+     * progress animation.
+     */
+    private boolean[][] mPatternDrawLookup = new boolean[MATRIX_WIDTH][MATRIX_WIDTH];
     private boolean mDrawingProfilingStarted = false;
     private Paint mPaint = new Paint();
     private Paint mPathPaint = new Paint();
@@ -1154,11 +1154,20 @@ public class LockPatternView extends View {
                 return new Cell[size];
             }// newArray()
         };// CREATOR
+        static Cell[][] sCells = new Cell[MATRIX_WIDTH][MATRIX_WIDTH];
+
+        static {
+            for (int i = 0; i < MATRIX_WIDTH; i++) {
+                for (int j = 0; j < MATRIX_WIDTH; j++) {
+                    sCells[i][j] = new Cell(i, j);
+                }
+            }
+        }
+
         int mRow;
         int mColumn;        /*
          * keep # objects limited to MATRIX_SIZE
          */
-        static Cell[][] sCells = new Cell[MATRIX_WIDTH][MATRIX_WIDTH];
 
         /**
          * @param row    The row of the cell.
@@ -1168,14 +1177,6 @@ public class LockPatternView extends View {
             checkRange(row, column);
             this.mRow = row;
             this.mColumn = column;
-        }
-
-        static {
-            for (int i = 0; i < MATRIX_WIDTH; i++) {
-                for (int j = 0; j < MATRIX_WIDTH; j++) {
-                    sCells[i][j] = new Cell(i, j);
-                }
-            }
         }
 
         private Cell(Parcel in) {

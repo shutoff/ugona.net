@@ -34,6 +34,18 @@ import java.lang.reflect.Method;
  */
 public class MaterialEditTextPreference extends EditTextPreference {
 
+    /**
+     * Callback listener for the MaterialDialog. Positive button checks with
+     * OnPreferenceChangeListener before committing user entered text
+     */
+    private final ButtonCallback callback = new ButtonCallback() {
+        @Override
+        public void onPositive(MaterialDialog dialog) {
+            String value = getEditText().getText().toString();
+            if (callChangeListener(value) && isPersistent())
+                setText(value);
+        }
+    };
     private int mColor = 0;
     private MaterialDialog mDialog;
 
@@ -118,19 +130,6 @@ public class MaterialEditTextPreference extends EditTextPreference {
 
         mDialog.show();
     }
-
-    /**
-     * Callback listener for the MaterialDialog. Positive button checks with
-     * OnPreferenceChangeListener before committing user entered text
-     */
-    private final ButtonCallback callback = new ButtonCallback() {
-        @Override
-        public void onPositive(MaterialDialog dialog) {
-            String value = getEditText().getText().toString();
-            if (callChangeListener(value) && isPersistent())
-                setText(value);
-        }
-    };
 
     /**
      * Copied from DialogPreference.java

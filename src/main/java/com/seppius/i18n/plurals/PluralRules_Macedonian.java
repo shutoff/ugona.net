@@ -1,26 +1,26 @@
 package com.seppius.i18n.plurals;
 /**
  * Plural rules for Macedonian language
- *
+ * <p/>
  * Locales: mk
- *
+ * <p/>
  * Languages:
  * - Macedonian (mk)
- *
+ * <p/>
  * Rules:
- * 	one → n mod 10 is 1 and n is not 11;
- * 	other → everything else
- *
+ * one → n mod 10 is 1 and n is not 11;
+ * other → everything else
+ * <p/>
  * Reference CLDR Version 1.9 beta (2010-11-16 21:48:45 GMT)
- * @see http://unicode.org/repos/cldr-tmp/trunk/diff/supplemental/language_plural_rules.html
- * @see http://unicode.org/repos/cldr/trunk/common/supplemental/plurals.xml
- * @see plurals.xml (local copy)
  *
  * @package I18n_Plural
  * @category Plural Rules
  * @author Korney Czukowski
  * @copyright (c) 2011 Korney Czukowski
  * @license MIT License
+ * @see http://unicode.org/repos/cldr-tmp/trunk/diff/supplemental/language_plural_rules.html
+ * @see http://unicode.org/repos/cldr/trunk/common/supplemental/plurals.xml
+ * @see plurals.xml (local copy)
  */
 
 /**

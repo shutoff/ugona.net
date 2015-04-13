@@ -269,6 +269,14 @@ public class LockPatternActivity extends Activity {
      * Delay time to reload the lock pattern view after a wrong pattern.
      */
     private static final long DELAY_TIME_TO_RELOAD_LOCK_PATTERN_VIEW = DateUtils.SECOND_IN_MILLIS;
+    /*
+     * FIELDS
+     */
+    private int mMaxRetries, mMinWiredDots, mRetryCount = 0, mCaptchaWiredDots;
+    private boolean mAutoSave, mStealthMode;
+    private IEncrypter mEncrypter;
+    private ButtonOkCommand mBtnOkCmd;
+    private Intent mIntentResult;
     private final View.OnClickListener mBtnCancelOnClickListener = new View.OnClickListener() {
 
         @Override
@@ -276,6 +284,14 @@ public class LockPatternActivity extends Activity {
             finishWithNegativeResult(RESULT_CANCELED);
         }// onClick()
     };// mBtnCancelOnClickListener
+    /*
+     * CONTROLS
+     */
+    private TextView mTextInfo;
+    private LockPatternView mLockPatternView;
+    private View mFooter;
+    private Button mBtnCancel;
+    private Button mBtnConfirm;
     /**
      * This reloads the {@link #mLockPatternView} after a wrong pattern.
      */
@@ -287,13 +303,6 @@ public class LockPatternActivity extends Activity {
             mLockPatternViewListener.onPatternCleared();
         }// run()
     };// mLockPatternViewReloader
-    /*
-     * FIELDS
-     */
-    private int mMaxRetries, mMinWiredDots, mRetryCount = 0, mCaptchaWiredDots;
-    private boolean mAutoSave, mStealthMode;
-    private IEncrypter mEncrypter;
-    private ButtonOkCommand mBtnOkCmd;
     private final LockPatternView.OnPatternListener mLockPatternViewListener = new LockPatternView.OnPatternListener() {
 
         @Override
@@ -407,15 +416,6 @@ public class LockPatternActivity extends Activity {
             }// ACTION_COMPARE_PATTERN
         }// onClick()
     };// mBtnConfirmOnClickListener
-    private Intent mIntentResult;
-    /*
-     * CONTROLS
-     */
-    private TextView mTextInfo;
-    private LockPatternView mLockPatternView;
-    private View mFooter;
-    private Button mBtnCancel;
-    private Button mBtnConfirm;
 
     /**
      * Called when the activity is first created.

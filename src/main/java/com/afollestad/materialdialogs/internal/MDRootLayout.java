@@ -9,6 +9,7 @@ import android.graphics.Paint;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +17,6 @@ import android.view.ViewTreeObserver;
 import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ScrollView;
-import android.support.v7.widget.RecyclerView;
 
 import com.afollestad.materialdialogs.GravityEnum;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -34,12 +34,11 @@ import net.ugona.plus.R;
  */
 public class MDRootLayout extends ViewGroup {
 
-    private View mTitleBar;
-    private View mContent;
-
     private static final int INDEX_NEUTRAL = 0;
     private static final int INDEX_NEGATIVE = 1;
     private static final int INDEX_POSITIVE = 2;
+    private View mTitleBar;
+    private View mContent;
     private boolean mDrawTopDivider = false;
     private boolean mDrawBottomDivider = false;
     private MDButton[] mButtons = new MDButton[3];
@@ -82,6 +81,102 @@ public class MDRootLayout extends ViewGroup {
     public MDRootLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context, attrs, defStyleAttr);
+    }
+
+    private static boolean isVisible(View v) {
+        boolean visible = v != null && v.getVisibility() != View.GONE;
+        if (visible && v instanceof MDButton)
+            visible = ((MDButton) v).getText().toString().trim().length() > 0;
+        return visible;
+    }
+
+    public static boolean canRecyclerViewScroll(RecyclerView view) {
+        final RecyclerView.LayoutManager lm = view.getLayoutManager();
+        final int count = view.getAdapter().getItemCount();
+        int lastVisible;
+
+        if (lm instanceof LinearLayoutManager) {
+            LinearLayoutManager llm = (LinearLayoutManager) lm;
+            lastVisible = llm.findLastVisibleItemPosition();
+        } else {
+            throw new MaterialDialog.NotImplementedException("Material Dialogs currently only supports LinearLayoutManager. Please report any new layout managers.");
+        }
+
+        if (lastVisible == -1)
+            return false;
+        /* We scroll if the last item is not visible */
+        final boolean lastItemVisible = lastVisible == count - 1;
+        return !lastItemVisible ||
+                (view.getChildCount() > 0 && view.getChildAt(view.getChildCount() - 1).getBottom() > view.getHeight() - view.getPaddingBottom());
+    }
+
+    private static boolean canScrollViewScroll(ScrollView sv) {
+        if (sv.getChildCount() == 0)
+            return false;
+        final int childHeight = sv.getChildAt(0).getMeasuredHeight();
+        return sv.getMeasuredHeight() - sv.getPaddingTop() - sv.getPaddingBottom() < childHeight;
+    }
+
+    private static boolean canWebViewScroll(WebView view) {
+        return view.getMeasuredHeight() > view.getContentHeight();
+    }
+
+    private static boolean canAdapterViewScroll(AdapterView lv) {
+        /* Force it to layout it's children */
+        if (lv.getLastVisiblePosition() == -1)
+            return false;
+
+        /* We can scroll if the first or last item is not visible */
+        boolean firstItemVisible = lv.getFirstVisiblePosition() == 0;
+        boolean lastItemVisible = lv.getLastVisiblePosition() == lv.getCount() - 1;
+
+        if (firstItemVisible && lastItemVisible && lv.getChildCount() > 0) {
+            /* Or the first item's top is above or own top */
+            if (lv.getChildAt(0).getTop() < lv.getPaddingTop())
+                return true;
+            /* or the last item's bottom is beyond our own bottom */
+            return lv.getChildAt(lv.getChildCount() - 1).getBottom() >
+                    lv.getHeight() - lv.getPaddingBottom();
+        }
+
+        return true;
+    }
+
+    /**
+     * Find the view touching the bottom of this ViewGroup. Non visible children are ignored,
+     * however getChildDrawingOrder is not taking into account for simplicity and because it behaves
+     * inconsistently across platform versions.
+     *
+     * @return View touching the bottom of this ViewGroup or null
+     */
+    @Nullable
+    private static View getBottomView(ViewGroup viewGroup) {
+        if (viewGroup == null || viewGroup.getChildCount() == 0)
+            return null;
+        View bottomView = null;
+        for (int i = viewGroup.getChildCount() - 1; i >= 0; i--) {
+            View child = viewGroup.getChildAt(i);
+            if (child.getVisibility() == View.VISIBLE && child.getBottom() == viewGroup.getMeasuredHeight()) {
+                bottomView = child;
+                break;
+            }
+        }
+        return bottomView;
+    }
+
+    @Nullable
+    private static View getTopView(ViewGroup viewGroup) {
+        if (viewGroup == null || viewGroup.getChildCount() == 0)
+            return null;
+        View topView = null;
+        for (int i = viewGroup.getChildCount() - 1; i >= 0; i--) {
+            View child = viewGroup.getChildAt(i);
+            if (child.getVisibility() == View.VISIBLE && child.getTop() == 0) {
+                topView = child;
+                break;
+            }
+        }
+        return topView;
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -209,13 +304,6 @@ public class MDRootLayout extends ViewGroup {
         }
 
         setMeasuredDimension(width, height - availableHeight);
-    }
-
-    private static boolean isVisible(View v) {
-        boolean visible = v != null && v.getVisibility() != View.GONE;
-        if (visible && v instanceof MDButton)
-            visible = ((MDButton) v).getText().toString().trim().length() > 0;
-        return visible;
     }
 
     @Override
@@ -444,94 +532,5 @@ public class MDRootLayout extends ViewGroup {
                     view.getScrollY() + view.getHeight() - view.getPaddingBottom() < view.getChildAt(view.getChildCount() - 1).getBottom();
         }
         invalidate();
-    }
-
-    public static boolean canRecyclerViewScroll(RecyclerView view) {
-        final RecyclerView.LayoutManager lm = view.getLayoutManager();
-        final int count = view.getAdapter().getItemCount();
-        int lastVisible;
-
-        if (lm instanceof LinearLayoutManager) {
-            LinearLayoutManager llm = (LinearLayoutManager) lm;
-            lastVisible = llm.findLastVisibleItemPosition();
-        } else {
-            throw new MaterialDialog.NotImplementedException("Material Dialogs currently only supports LinearLayoutManager. Please report any new layout managers.");
-        }
-
-        if (lastVisible == -1)
-            return false;
-        /* We scroll if the last item is not visible */
-        final boolean lastItemVisible = lastVisible == count - 1;
-        return !lastItemVisible ||
-                (view.getChildCount() > 0 && view.getChildAt(view.getChildCount() - 1).getBottom() > view.getHeight() - view.getPaddingBottom());
-    }
-
-    private static boolean canScrollViewScroll(ScrollView sv) {
-        if (sv.getChildCount() == 0)
-            return false;
-        final int childHeight = sv.getChildAt(0).getMeasuredHeight();
-        return sv.getMeasuredHeight() - sv.getPaddingTop() - sv.getPaddingBottom() < childHeight;
-    }
-
-    private static boolean canWebViewScroll(WebView view) {
-        return view.getMeasuredHeight() > view.getContentHeight();
-    }
-
-    private static boolean canAdapterViewScroll(AdapterView lv) {
-        /* Force it to layout it's children */
-        if (lv.getLastVisiblePosition() == -1)
-            return false;
-
-        /* We can scroll if the first or last item is not visible */
-        boolean firstItemVisible = lv.getFirstVisiblePosition() == 0;
-        boolean lastItemVisible = lv.getLastVisiblePosition() == lv.getCount() - 1;
-
-        if (firstItemVisible && lastItemVisible && lv.getChildCount() > 0) {
-            /* Or the first item's top is above or own top */
-            if (lv.getChildAt(0).getTop() < lv.getPaddingTop())
-                return true;
-            /* or the last item's bottom is beyond our own bottom */
-            return lv.getChildAt(lv.getChildCount() - 1).getBottom() >
-                    lv.getHeight() - lv.getPaddingBottom();
-        }
-
-        return true;
-    }
-
-    /**
-     * Find the view touching the bottom of this ViewGroup. Non visible children are ignored,
-     * however getChildDrawingOrder is not taking into account for simplicity and because it behaves
-     * inconsistently across platform versions.
-     *
-     * @return View touching the bottom of this ViewGroup or null
-     */
-    @Nullable
-    private static View getBottomView(ViewGroup viewGroup) {
-        if (viewGroup == null || viewGroup.getChildCount() == 0)
-            return null;
-        View bottomView = null;
-        for (int i = viewGroup.getChildCount() - 1; i >= 0; i--) {
-            View child = viewGroup.getChildAt(i);
-            if (child.getVisibility() == View.VISIBLE && child.getBottom() == viewGroup.getMeasuredHeight()) {
-                bottomView = child;
-                break;
-            }
-        }
-        return bottomView;
-    }
-
-    @Nullable
-    private static View getTopView(ViewGroup viewGroup) {
-        if (viewGroup == null || viewGroup.getChildCount() == 0)
-            return null;
-        View topView = null;
-        for (int i = viewGroup.getChildCount() - 1; i >= 0; i--) {
-            View child = viewGroup.getChildAt(i);
-            if (child.getVisibility() == View.VISIBLE && child.getTop() == 0) {
-                topView = child;
-                break;
-            }
-        }
-        return topView;
     }
 }

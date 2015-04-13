@@ -1,33 +1,33 @@
 package com.seppius.i18n.plurals;
 /**
  * Plural rules for Breton language:
- *
+ * <p/>
  * Locales: br
- *
+ * <p/>
  * Languages:
  * - Breton (br)
- *
+ * <p/>
  * Rules:
- *  zero → n is 0;
- *  one → n is 1;
- *  two → n is 2;
- *  few → n is 3;
- *  many → n is 6;
- *  other → everything else
- *
+ * zero → n is 0;
+ * one → n is 1;
+ * two → n is 2;
+ * few → n is 3;
+ * many → n is 6;
+ * other → everything else
+ * <p/>
  * Note: for now, the rules are the same as with Welsh language, but according to the ticket
  * http://unicode.org/cldr/trac/ticket/2886 it's probably going to change
- *
+ * <p/>
  * Reference CLDR Version 1.9 beta (2010-11-16 21:48:45 GMT)
- * @see http://unicode.org/repos/cldr-tmp/trunk/diff/supplemental/language_plural_rules.html
- * @see http://unicode.org/repos/cldr/trunk/common/supplemental/plurals.xml
- * @see plurals.xml (local copy)
  *
  * @package I18n_Plural
  * @category Plural Rules
  * @author Korney Czukowski
  * @copyright (c) 2011 Korney Czukowski
  * @license MIT License
+ * @see http://unicode.org/repos/cldr-tmp/trunk/diff/supplemental/language_plural_rules.html
+ * @see http://unicode.org/repos/cldr/trunk/common/supplemental/plurals.xml
+ * @see plurals.xml (local copy)
  */
 
 /**

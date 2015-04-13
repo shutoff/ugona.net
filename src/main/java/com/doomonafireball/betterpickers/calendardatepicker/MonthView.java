@@ -98,26 +98,15 @@ public abstract class MonthView extends View {
      */
     public static final String VIEW_PARAMS_SHOW_WK_NUM = "show_wk_num";
     protected static final int DEFAULT_SELECTED_DAY = -1;
-    // Which day is today [0-6] or -1 if no day is today
-    protected int mToday = DEFAULT_SELECTED_DAY;
     protected static final int DEFAULT_WEEK_START = Calendar.SUNDAY;
-    // Which day of the week to start on [0-6]
-    protected int mWeekStart = DEFAULT_WEEK_START;
     protected static final int DEFAULT_NUM_DAYS = 7;
-    // How many days to display
-    protected int mNumDays = DEFAULT_NUM_DAYS;
-    // The number of days + a spot for week number if it is displayed
-    protected int mNumCells = mNumDays;
     protected static final int DEFAULT_SHOW_WK_NUM = 0;
     protected static final int DEFAULT_FOCUS_MONTH = -1;
     protected static final int DEFAULT_NUM_ROWS = 6;
-    private int mNumRows = DEFAULT_NUM_ROWS;
     protected static final int MAX_NUM_ROWS = 6;
     private static final String TAG = "MonthView";
     private static final int SELECTED_CIRCLE_ALPHA = 60;
     protected static int DEFAULT_HEIGHT = 32;
-    // The height this view should draw at in pixels, set by height param
-    protected int mRowHeight = DEFAULT_HEIGHT;
     protected static int MIN_HEIGHT = 10;
     protected static int DAY_SEPARATOR_WIDTH = 1;
     protected static int MINI_DAY_NUMBER_TEXT_SIZE;
@@ -132,6 +121,16 @@ public abstract class MonthView extends View {
     private final Calendar mCalendar;
     private final Calendar mDayLabelCalendar;
     private final MonthViewTouchHelper mTouchHelper;
+    // Which day is today [0-6] or -1 if no day is today
+    protected int mToday = DEFAULT_SELECTED_DAY;
+    // Which day of the week to start on [0-6]
+    protected int mWeekStart = DEFAULT_WEEK_START;
+    // How many days to display
+    protected int mNumDays = DEFAULT_NUM_DAYS;
+    // The number of days + a spot for week number if it is displayed
+    protected int mNumCells = mNumDays;
+    // The height this view should draw at in pixels, set by height param
+    protected int mRowHeight = DEFAULT_HEIGHT;
     // affects the padding on the sides of this view
     protected int mPadding = 0;
     protected Paint mMonthNumPaint;
@@ -161,6 +160,7 @@ public abstract class MonthView extends View {
     protected int mTodayNumberColor;
     protected int mMonthTitleColor;
     protected int mMonthTitleBGColor;
+    private int mNumRows = DEFAULT_NUM_ROWS;
     private String mDayOfWeekTypeface;
     private String mMonthTitleTypeface;
     // Optional listener for handling day click actions
