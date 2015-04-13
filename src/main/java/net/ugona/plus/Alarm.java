@@ -71,7 +71,7 @@ public class Alarm
                     audioManager.setStreamVolume(AudioManager.STREAM_ALARM, new_level, 0);
                     prev_level = new_level;
                 }
-                if (--demo_count <= 0) {
+                if (bDemo && (--demo_count <= 0)) {
                     demo_count = 10;
                     CarState state = CarState.get(Alarm.this, car_id);
                     switch (++demo_state) {
@@ -169,16 +169,18 @@ public class Alarm
             player.release();
         }
         timer.cancel();
-        CarState state = CarState.get(this, car_id);
-        state.setSos(false);
-        state.setShock(0);
-        state.setMove(false);
-        state.setTilt(true);
-        state.setIn_sensor(false);
-        state.setExt_sensor(false);
-        Intent intent = new Intent(Names.UPDATED);
-        intent.putExtra(Names.ID, car_id);
-        sendBroadcast(intent);
+        if (bDemo) {
+            CarState state = CarState.get(this, car_id);
+            state.setSos(false);
+            state.setShock(0);
+            state.setMove(false);
+            state.setTilt(true);
+            state.setIn_sensor(false);
+            state.setExt_sensor(false);
+            Intent intent = new Intent(Names.UPDATED);
+            intent.putExtra(Names.ID, car_id);
+            sendBroadcast(intent);
+        }
         super.onDestroy();
     }
 }

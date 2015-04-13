@@ -214,4 +214,12 @@
     <string name="no_photo">No photo</string>
     <string name="on">On</string>
     <string name="card_message">Security card in car</string>
+    <string name="once">Once</string>
+    <string name="hour">1 hour</string>
+    <string name="hour2">2 hours</string>
+    <string name="hour3">3 hours</string>
+    <string name="hour4">4 hours</string>
+    <string name="hour6">6 hours</string>
+    <string name="everyday">Daily</string>
+    <string name="everyweek">Weekly</string>
 </resources>

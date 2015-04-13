@@ -35,7 +35,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.text.DateFormatSymbols;
 import java.text.NumberFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -53,15 +55,30 @@ public abstract class DeviceBaseFragment
     final static String DATA = "data";
     final static String CHANGED = "changed";
     final static String TIMERS = "timers";
-
+    static int[] wdays = {
+            R.id.wday1,
+            R.id.wday2,
+            R.id.wday3,
+            R.id.wday4,
+            R.id.wday5,
+            R.id.wday6,
+            R.id.wday7
+    };
+    static int[] period_names = {
+            R.string.once,
+            R.string.hour,
+            R.string.hour2,
+            R.string.hour3,
+            R.string.hour4,
+            R.string.hour6,
+            R.string.everyday,
+            R.string.everyweek
+    };
     HashMap<String, Object> settings;
     HashMap<String, Object> changed;
-
     ListView vList;
     View vError;
-
     Vector<Timer> timers;
-
     NumberFormat nf;
     NumberFormat df;
 
@@ -355,7 +372,7 @@ public abstract class DeviceBaseFragment
         CarConfig config = CarConfig.get(getActivity(), id());
         Param param = new Param();
         param.skey = config.getKey();
-        param.timer = getTimer();
+        param.get_timers = getTimer();
         task.execute("/settings", param);
     }
 
@@ -402,7 +419,7 @@ public abstract class DeviceBaseFragment
 
     static class Param implements Serializable {
         String skey;
-        int timer;
+        int get_timers;
     }
 
     static class Timer implements Serializable {
@@ -700,6 +717,24 @@ public abstract class DeviceBaseFragment
                     d.setSeconds(0);
                     TextView tv = (TextView) v.findViewById(R.id.time);
                     tv.setText(State.shortFormatTime(getActivity(), d.getTime()));
+
+                    Calendar calendar = Calendar.getInstance();
+                    int first = calendar.getFirstDayOfWeek();
+                    DateFormatSymbols symbols = new DateFormatSymbols(Locale.getDefault());
+                    String[] dayNames = symbols.getShortWeekdays();
+                    for (int i = 0; i < 7; i++) {
+                        int wd = (i + first + 6) % 7 + 1;
+                        TextView tWday = (TextView) v.findViewById(wdays[i]);
+                        tWday.setText(dayNames[wd]);
+                        int color = R.color.text_dark;
+                        if ((t.day & (1 << (wd % 7))) != 0)
+                            color = R.color.main;
+                        tWday.setTextColor(getResources().getColor(color));
+                    }
+
+                    tv = (TextView) v.findViewById(R.id.timer_period);
+                    tv.setText(period_names[t.period]);
+
                 } else {
                     v.findViewById(R.id.add).setVisibility(View.VISIBLE);
                 }

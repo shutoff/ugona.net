@@ -218,4 +218,12 @@
     <string name="no_photo">Нет фотографий</string>
     <string name="on">Вкл.</string>
     <string name="card_message">Возможно метка осталась в машине</string>
+    <string name="once">1 раз</string>
+    <string name="hour">1 час</string>
+    <string name="hour2">2 часа</string>
+    <string name="hour3">3 часа</string>
+    <string name="hour4">4 часа</string>
+    <string name="hour6">6 часов</string>
+    <string name="everyday">ежедневно</string>
+    <string name="everyweek">еженедельно</string>
 </resources>
