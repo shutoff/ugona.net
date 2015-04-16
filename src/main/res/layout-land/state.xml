@@ -73,6 +73,25 @@
 
                     </LinearLayout>
 
+                    <ImageView
+                        android:id="@+id/pointer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/pointer"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/pointer1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/pointer2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone" />
+
                     <net.ugona.plus.IndicatorsView
                         android:id="@+id/indicators"
                         android:layout_width="0dp"
@@ -220,33 +239,6 @@
                         </LinearLayout>
 
                     </net.ugona.plus.CenteredScrollView>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:id="@+id/pointer"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/pointer"
-                        android:visibility="gone" />
-
-                    <TextView
-                        android:id="@+id/pointer1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone" />
-
-                    <TextView
-                        android:id="@+id/pointer2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone" />
 
                 </LinearLayout>
 

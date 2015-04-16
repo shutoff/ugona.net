@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -149,6 +150,7 @@ public class MainActivity
         actionBar.setDisplayUseLogoEnabled(false);
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
         drawerToggle = new ActionBarDrawerToggle(
                 this,
