@@ -228,4 +228,5 @@
     <string name="everyweek">еженедельно</string>
     <string name="device_pswd">Требуется отправка пароля в СМС</string>
     <string name="input_device_pswd">Введите пароль устройства</string>
+    <string name="add_phone">Добавить телефон</string>
 </resources>

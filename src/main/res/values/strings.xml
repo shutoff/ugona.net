@@ -224,4 +224,5 @@
     <string name="everyweek">Weekly</string>
     <string name="device_pswd">Device require password on SMS</string>
     <string name="input_device_pswd">Input device password</string>
+    <string name="add_phone">Add phone</string>
 </resources>

@@ -298,7 +298,7 @@ public class SendCommandFragment extends DialogFragment {
                 if (ccode != null)
                     params.add("ccode", ccode);
                 task.execute("/command", params);
-                Commands.put(getActivity(), car_id, c);
+                Commands.put(getActivity(), car_id, c, null);
                 break;
             }
         }
@@ -316,7 +316,7 @@ public class SendCommandFragment extends DialogFragment {
                 sms = replace(sms, "pwd", data);
                 sms = replace(sms, "ccode_new", data);
                 if (Sms.send(getActivity(), car_id, c.id, sms)) {
-                    Commands.put(getActivity(), car_id, c);
+                    Commands.put(getActivity(), car_id, c, data.getStringExtra("pwd"));
                     Intent intent = new Intent(getActivity(), FetchService.class);
                     intent.setAction(FetchService.ACTION_UPDATE);
                     intent.putExtra(Names.ID, car_id);

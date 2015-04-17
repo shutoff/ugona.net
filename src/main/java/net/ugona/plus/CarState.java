@@ -57,6 +57,8 @@ public class CarState extends Config {
     private boolean guard;
     private int guard_mode;
     private double fuel;
+    private double card_voltage;
+    private double card_level;
     private boolean use_phone;
     private boolean show_photo;
     private boolean show_tracks;
@@ -292,6 +294,14 @@ public class CarState extends Config {
 
     public double getFuel() {
         return fuel;
+    }
+
+    public double getCard_voltage() {
+        return card_voltage;
+    }
+
+    public double getCard_level() {
+        return card_level;
     }
 
     public boolean isUse_phone() {

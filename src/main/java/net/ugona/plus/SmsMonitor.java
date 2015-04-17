@@ -50,7 +50,7 @@ public class SmsMonitor extends BroadcastReceiver {
                 if (sms.length == 1) {
                     if (c.done != null) {
                         CarState state = CarState.get(context, id);
-                        Set<String> upd = State.update(context, c, c.done, state, null);
+                        Set<String> upd = State.update(context, id, c, c.done, state, null, null);
                         if (upd != null) {
                             Intent i = new Intent(Names.UPDATED);
                             i.putExtra(Names.ID, id);
@@ -85,6 +85,8 @@ public class SmsMonitor extends BroadcastReceiver {
                     return;
                 }
                 CarConfig.Sms[] sms = carConfig.getSms();
+                if (sms == null)
+                    return;
                 for (CarConfig.Sms s : sms) {
                     try {
                         Pattern pattern = Pattern.compile(s.sms);
@@ -94,7 +96,7 @@ public class SmsMonitor extends BroadcastReceiver {
                         Set<String> changed = null;
                         if (s.set != null) {
                             CarState state = CarState.get(context, car_id);
-                            changed = State.update(context, null, s.set, state, matcher);
+                            changed = State.update(context, car_id, null, s.set, state, matcher, null);
                         }
                         if (s.alarm != null) {
                             Intent alarmIntent = new Intent(context, Alarm.class);

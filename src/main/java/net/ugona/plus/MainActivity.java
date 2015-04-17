@@ -203,7 +203,6 @@ public class MainActivity
 
         setPrimary();
         checkCaps(id);
-        checkPhone();
     }
 
     @Override
@@ -265,7 +264,6 @@ public class MainActivity
             }
             setSideMenu();
             setPrimary();
-            checkPhone();
             return;
         }
         if ((requestCode == REQUEST_CHECK_PATTERN) && (resultCode == RESULT_OK)) {
@@ -506,23 +504,6 @@ public class MainActivity
             return;
         topSubMenu.clear();
         onCreateOptionsMenu(topSubMenu);
-    }
-
-    boolean checkPhone() {
-        CarState state = CarState.get(this, id);
-        if (!state.isUse_phone() || !car_config.getPhone().equals("") || !State.hasTelephony(this))
-            return false;
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                PhoneDialog dialog = new PhoneDialog();
-                Bundle args = new Bundle();
-                args.putString(Names.ID, id);
-                dialog.setArguments(args);
-                dialog.show(getSupportFragmentManager(), "phone");
-            }
-        });
-        return true;
     }
 
     void setupActionBar() {

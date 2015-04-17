@@ -14,7 +14,7 @@ import android.view.View;
 
 public class CarView extends View {
 
-    final static int RADIUS_DP = 22;
+    final static int MIN_RADIUS_DP = 22;
     final static int STROKE_DP = 4;
     final static int X_PAD = 7;
     final static int Y_PAD = 5;
@@ -92,8 +92,14 @@ public class CarView extends View {
             canvas.drawBitmap(bitmap, null, rect, carImage.paint);
             bitmap.recycle();
         }
-        float radius = RADIUS_DP * pk;
-        float in_radius = (RADIUS_DP - STROKE_DP) * pk;
+        float min_radius = MIN_RADIUS_DP * pk;
+        float max_radius = min_radius * 2;
+        float radius = k * carImage.HEIGHT / 8;
+        if (radius < min_radius)
+            radius = min_radius;
+        if (radius > max_radius)
+            radius = max_radius;
+        float in_radius = radius - STROKE_DP * pk;
 
         float xPos = x;
         if (xPos < 0)

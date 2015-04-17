@@ -322,6 +322,7 @@ public class CarConfig extends Config {
         String data;
         boolean on;
         boolean always;
+        Runnable onAnswer;
     }
 
     public static class Setting implements Serializable {

@@ -42,6 +42,7 @@ public class StateFragment
     Indicator iReserve;
     Indicator iBalance;
     Indicator iFuel;
+    Indicator iCard;
     CarView vCar;
     TextView tvAddress;
     TextView tvTime;
@@ -88,6 +89,7 @@ public class StateFragment
         iReserve = (Indicator) v.findViewById(R.id.reserve);
         iBalance = (Indicator) v.findViewById(R.id.balance);
         iFuel = (Indicator) v.findViewById(R.id.fuel);
+        iCard = (Indicator) v.findViewById(R.id.card);
         vCar = (CarView) v.findViewById(R.id.car);
         tvAddress = (TextView) v.findViewById(R.id.address);
         tvTime = (TextView) v.findViewById(R.id.time);
@@ -361,6 +363,14 @@ public class StateFragment
             iReserve.setText(formatter.format(reserved) + " V");
             setPowerState(iReserve, state.getReserved_state());
         }
+        double card_voltage = state.getCard_voltage();
+        if (card_voltage == 0) {
+            iCard.setVisibility(View.GONE);
+        } else {
+            iCard.setVisibility(View.VISIBLE);
+            iCard.setText(formatter.format(card_voltage) + " V");
+        }
+
         String balance = state.getBalance();
         if (balance.equals("") || !config.isShowBalance()) {
             iBalance.setVisibility(View.GONE);

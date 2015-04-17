@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="8dp">
 
     <TextView
         android:id="@+id/text"
@@ -16,19 +17,13 @@
         android:visibility="gone" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            android:src="@drawable/bl_password" />
-
         <EditText
             android:id="@+id/ccode_num"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/ccode"
             android:inputType="textPassword|numberDecimal"
@@ -39,7 +34,7 @@
 
         <EditText
             android:id="@+id/ccode_text"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/ccode"
             android:inputType="textPassword"
@@ -65,53 +60,27 @@
         android:orientation="vertical"
         android:visibility="gone">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <EditText
+            android:id="@+id/ccode_new"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:hint="@string/ccode"
+            android:inputType="textPassword|numberDecimal"
+            android:maxEms="6"
+            android:maxLength="6"
+            android:minEms="6"
+            android:password="true" />
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:src="@drawable/bl_password" />
-
-            <EditText
-                android:id="@+id/ccode_new"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:hint="@string/ccode"
-                android:inputType="textPassword|numberDecimal"
-                android:maxEms="6"
-                android:maxLength="6"
-                android:minEms="6"
-                android:password="true" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <EditText
+            android:id="@+id/ccode_new1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:src="@drawable/bl_password" />
-
-            <EditText
-                android:id="@+id/ccode_new1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:hint="@string/confirm"
-                android:inputType="textPassword|numberDecimal"
-                android:maxEms="6"
-                android:maxLength="6"
-                android:minEms="6"
-                android:password="true" />
-
-        </LinearLayout>
+            android:hint="@string/confirm"
+            android:inputType="textPassword|numberDecimal"
+            android:maxEms="6"
+            android:maxLength="6"
+            android:minEms="6"
+            android:password="true" />
 
         <TextView
             android:id="@+id/err_confirm"

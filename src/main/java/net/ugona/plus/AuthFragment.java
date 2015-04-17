@@ -86,9 +86,11 @@ public class AuthFragment extends MainFragment {
         items.add(new Item(getString(R.string.phone_number), config.getPhone(), new Runnable() {
             @Override
             public void run() {
-                PhoneDialog phoneDialog = new PhoneDialog();
+                CarConfig carConfig = CarConfig.get(getActivity(), id());
+                InputPhoneDialog phoneDialog = new InputPhoneDialog();
                 Bundle args = new Bundle();
-                args.putString(Names.ID, id());
+                args.putString(Names.TITLE, getString(R.string.device_phone_number));
+                args.putString(Names.PHONE, carConfig.getPhone());
                 phoneDialog.setArguments(args);
                 phoneDialog.setTargetFragment(AuthFragment.this, DO_PHONE);
                 phoneDialog.show(getParentFragment().getFragmentManager(), "phone");
@@ -207,6 +209,12 @@ public class AuthFragment extends MainFragment {
         if (requestCode == DO_NAME) {
             CarConfig carConfig = CarConfig.get(getActivity(), id());
             carConfig.setName(data.getStringExtra(Names.OK));
+            Intent intent = new Intent(Names.CAR_CHANGED);
+            getActivity().sendBroadcast(intent);
+        }
+        if (requestCode == DO_PHONE) {
+            CarConfig carConfig = CarConfig.get(getActivity(), id());
+            carConfig.setPhone(data.getStringExtra(Names.PHONE));
             Intent intent = new Intent(Names.CAR_CHANGED);
             getActivity().sendBroadcast(intent);
         }

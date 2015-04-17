@@ -61,6 +61,7 @@ public class CCodeDialog
                 .setView(inflater.inflate(R.layout.ccode_dialog, null))
                 .setPositiveButton(R.string.ok, null)
                 .setNegativeButton(R.string.cancel, null)
+                .setIcon(R.drawable.bl_password)
                 .create();
         return dialog;
     }

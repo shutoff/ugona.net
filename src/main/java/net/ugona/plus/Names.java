@@ -34,6 +34,8 @@ public class Names {
     static final String NO_PROMPT = "no_prompt";
     static final String TYPE = "type";
     static final String FLAGS = "flags";
+    static final String PASSWORD = "password";
+    static final String PHONE = "phone";
 
     static final String PKG_NAME = Names.class.getPackage().getName();
 

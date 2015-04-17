@@ -395,7 +395,7 @@ public class State {
         return res;
     }
 
-    static Set<String> update(final Context context, final CarConfig.Command cmd, String condition, Object o, Matcher matcher) {
+    static Set<String> update(final Context context, String car_id, final CarConfig.Command cmd, String condition, Object o, Matcher matcher, Commands.CommandState state) {
         Matcher m = ok_bool.matcher(condition);
         HashSet<String> res = new HashSet<>();
         try {
@@ -504,6 +504,9 @@ public class State {
                     if (cmd != null)
                         intent.putExtra(Names.TITLE, cmd.name);
                     intent.putExtra(Names.MESSAGE, v);
+                    if (state != null)
+                        intent.putExtra(Names.PASSWORD, state.passwd);
+                    intent.putExtra(Names.ID, car_id);
                     context.startActivity(intent);
                 }
                 return res;

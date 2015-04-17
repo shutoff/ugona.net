@@ -34,7 +34,11 @@ public class InputText
         editText = (EditText) v.findViewById(R.id.text);
         if (flags != 0)
             editText.setInputType(flags);
-        editText.setText(data);
+        if (data != null) {
+            editText.setText(data);
+            if (savedInstanceState == null)
+                editText.setSelection(0, data.length());
+        }
         AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(getActivity())
                 .setTitle(title)
                 .setPositiveButton(R.string.ok, this)

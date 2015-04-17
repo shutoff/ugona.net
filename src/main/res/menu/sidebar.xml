@@ -9,19 +9,19 @@
     <item
         android:id="@+id/cars"
         android:icon="@drawable/ic_auto"
-        android:orderInCategory="400"
+        android:orderInCategory="200"
         android:title="@string/cars" />
 
     <item
         android:id="@+id/charts"
         android:icon="@drawable/ic_graphics"
-        android:orderInCategory="200"
+        android:orderInCategory="300"
         android:title="@string/charts" />
 
     <item
         android:id="@+id/maintenance"
         android:icon="@drawable/ic_obslyg"
-        android:orderInCategory="300"
+        android:orderInCategory="400"
         android:title="@string/maintenance" />
 
     <item

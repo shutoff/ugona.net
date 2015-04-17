@@ -23,23 +23,34 @@ import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.Vector;
 
-public class PhoneDialog extends DialogFragment {
+public class InputPhoneDialog extends DialogFragment {
 
     static final int DO_CONTACTS = 100;
     static final int DO_SELECT_PHONE = 101;
 
+    String title;
+    String phone;
     String id;
+
     EditText etPhone;
 
     @Override
     public void setArguments(Bundle args) {
         super.setArguments(args);
+        setArgs(args);
+    }
+
+    void setArgs(Bundle args) {
+        title = args.getString(Names.TITLE);
+        phone = args.getString(Names.PHONE);
         id = args.getString(Names.ID);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putString(Names.TITLE, title);
+        outState.putString(Names.PHONE, etPhone.getText().toString());
         outState.putString(Names.ID, id);
     }
 
@@ -49,16 +60,18 @@ public class PhoneDialog extends DialogFragment {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View v = inflater.inflate(R.layout.phonedialog, null);
         AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(getActivity())
-                .setTitle(R.string.device_phone_number)
+                .setTitle(title)
                 .setPositiveButton(R.string.ok, null)
                 .setNegativeButton(R.string.cancel, null)
                 .setView(v);
         if (savedInstanceState != null)
-            id = savedInstanceState.getString(Names.ID);
+            setArgs(savedInstanceState);
         etPhone = (EditText) v.findViewById(R.id.phone);
-        final CarConfig config = CarConfig.get(getActivity(), id);
-        if (savedInstanceState == null)
-            etPhone.setText(config.getPhone());
+        if (phone != null) {
+            etPhone.setText(phone);
+            if (savedInstanceState == null)
+                etPhone.setSelection(0, phone.length());
+        }
         v.findViewById(R.id.contacts).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -102,12 +115,13 @@ public class PhoneDialog extends DialogFragment {
                     number = State.formatPhoneNumber(number);
                 if (number == null)
                     return;
-                final CarConfig config = CarConfig.get(getActivity(), id);
-                config.setPhone(number);
                 dismiss();
                 Fragment fragment = getTargetFragment();
+                Intent data = new Intent();
+                data.putExtra(Names.PHONE, number);
+                data.putExtra(Names.ID, id);
                 if (fragment != null)
-                    fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, null);
+                    fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, data);
             }
         });
     }

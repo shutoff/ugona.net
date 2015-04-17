@@ -31,9 +31,9 @@ public class Commands {
                 return false;
             Queue queue = requests.get(id);
             long now = new Date().getTime();
-            Set<Map.Entry<CarConfig.Command, Long>> entries = queue.entrySet();
-            for (Map.Entry<CarConfig.Command, Long> entry : entries) {
-                if (entry.getValue() + 900000 < now) {
+            Set<Map.Entry<CarConfig.Command, CommandState>> entries = queue.entrySet();
+            for (Map.Entry<CarConfig.Command, CommandState> entry : entries) {
+                if (entry.getValue().time + 900000 < now) {
                     bChanged = true;
                     queue.remove(entry.getKey());
                     continue;
@@ -65,14 +65,17 @@ public class Commands {
         return true;
     }
 
-    static void put(Context context, String id, CarConfig.Command cmd) {
+    static void put(Context context, String id, CarConfig.Command cmd, String passwd) {
         synchronized (requests) {
             if (!requests.containsKey(id))
                 requests.put(id, new Queue());
             Queue queue = requests.get(id);
             if (queue.containsKey(cmd))
                 return;
-            queue.put(cmd, new Date().getTime());
+            CommandState state = new CommandState();
+            state.time = new Date().getTime();
+            state.passwd = passwd;
+            queue.put(cmd, state);
         }
         Intent i = new Intent(Names.COMMANDS);
         i.putExtra(Names.ID, id);
@@ -100,8 +103,8 @@ public class Commands {
             boolean found = false;
             Queue queue = requests.get(id);
             CarState state = CarState.get(context, id);
-            Set<Map.Entry<CarConfig.Command, Long>> entries = queue.entrySet();
-            for (Map.Entry<CarConfig.Command, Long> entry : entries) {
+            Set<Map.Entry<CarConfig.Command, CommandState>> entries = queue.entrySet();
+            for (Map.Entry<CarConfig.Command, CommandState> entry : entries) {
                 boolean ok = false;
                 CarConfig.Command command = entry.getKey();
                 if (command.done != null)
@@ -129,8 +132,8 @@ public class Commands {
             boolean found = false;
             Queue queue = requests.get(id);
             CarState state = CarState.get(context, id);
-            Set<Map.Entry<CarConfig.Command, Long>> entries = queue.entrySet();
-            for (Map.Entry<CarConfig.Command, Long> entry : entries) {
+            Set<Map.Entry<CarConfig.Command, CommandState>> entries = queue.entrySet();
+            for (Map.Entry<CarConfig.Command, CommandState> entry : entries) {
                 CarConfig.Command command = entry.getKey();
                 if (command.sms == null)
                     continue;
@@ -150,8 +153,10 @@ public class Commands {
                 if (!matcher.find())
                     continue;
                 found = true;
-                if (command.done != null) {
-                    Set<String> update = State.update(context, command, command.done, state, matcher);
+                if (command.onAnswer != null) {
+                    command.onAnswer.run();
+                } else if (command.done != null) {
+                    Set<String> update = State.update(context, id, command, command.done, state, matcher, entry.getValue());
                     if (update != null) {
                         upd = true;
                         Notification.update(context, id, update);
@@ -173,7 +178,12 @@ public class Commands {
         return true;
     }
 
-    static class Queue extends HashMap<CarConfig.Command, Long> {
+    static class CommandState {
+        long time;
+        String passwd;
+    }
+
+    static class Queue extends HashMap<CarConfig.Command, CommandState> {
 
     }
 }

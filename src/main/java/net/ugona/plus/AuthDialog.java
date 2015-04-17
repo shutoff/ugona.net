@@ -100,6 +100,7 @@ public class AuthDialog extends DialogFragment {
                 .setView(v)
                 .setPositiveButton(R.string.ok, null)
                 .setNegativeButton(R.string.cancel, null)
+                .setIcon(R.drawable.bl_password)
                 .create();
     }
 

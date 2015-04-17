@@ -47,6 +47,7 @@ public class PasswordDialog extends DialogFragment
                 .setView(inflater.inflate(R.layout.password_dialog, null))
                 .setPositiveButton(R.string.ok, null)
                 .setNegativeButton(R.string.cancel, null)
+                .setIcon(R.drawable.bl_password)
                 .create();
     }
 

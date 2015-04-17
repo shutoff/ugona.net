@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -31,6 +32,8 @@ public class PrimaryFragment
     static final int PAGE_TRACK = 4;
     static final int PAGE_STAT = 5;
 
+    static final int DO_PHONE = 1;
+
     static final int PRIMARY_START_ID = 20;
 
     ViewPager vPager;
@@ -38,6 +41,8 @@ public class PrimaryFragment
 
     CarState state;
     BroadcastReceiver br;
+
+    Handler handler;
 
     Menu carsMenu;
 
@@ -104,7 +109,33 @@ public class PrimaryFragment
         IntentFilter intFilter = new IntentFilter(Names.CONFIG_CHANGED);
         intFilter.addAction(Names.CAR_CHANGED);
         getActivity().registerReceiver(br, intFilter);
+
+        CarState state = CarState.get(getActivity(), id());
+        CarConfig carConfig = CarConfig.get(getActivity(), id());
+        if (state.isUse_phone() && carConfig.getPhone().equals("") && State.hasTelephony(getActivity())) {
+            handler = new Handler();
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    InputPhoneDialog dialog = new InputPhoneDialog();
+                    Bundle args = new Bundle();
+                    args.putString(Names.TITLE, getString(R.string.device_phone_number));
+                    dialog.setArguments(args);
+                    dialog.setTargetFragment(PrimaryFragment.this, DO_PHONE);
+                    dialog.show(getActivity().getSupportFragmentManager(), "phone");
+                }
+            });
+        }
         return v;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == DO_PHONE) {
+            CarConfig carConfig = CarConfig.get(getActivity(), id());
+            carConfig.setPhone(data.getStringExtra(Names.PHONE));
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

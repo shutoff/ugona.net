@@ -24,6 +24,7 @@ public class CarsFragment
     static final int DO_AUTH = 1;
     static final int DO_DELETE = 2;
     static final int DO_POINTER = 3;
+    static final int DO_PHONE = 4;
 
     ListView vList;
 
@@ -138,6 +139,12 @@ public class CarsFragment
             refresh();
             return;
         }
+        if ((requestCode == DO_PHONE) && (resultCode == Activity.RESULT_OK)) {
+            String id = data.getStringExtra(Names.ID);
+            CarConfig carConfig = CarConfig.get(getActivity(), id);
+            carConfig.setPhone(data.getStringExtra(Names.PHONE));
+            return;
+        }
         if (requestCode == DO_POINTER) {
             refresh();
             checkPhone(data.getStringExtra(Names.ID));
@@ -185,10 +192,12 @@ public class CarsFragment
         CarState carState = CarState.get(getActivity(), id);
         if (!carState.isUse_phone() || !carConfig.getPhone().equals("") || !State.hasTelephony(getActivity()))
             return;
-        PhoneDialog dialog = new PhoneDialog();
+        InputPhoneDialog dialog = new InputPhoneDialog();
         Bundle args = new Bundle();
         args.putString(Names.ID, id);
+        args.putString(Names.TITLE, getString(R.string.device_phone_number));
         dialog.setArguments(args);
+        dialog.setTargetFragment(this, DO_PHONE);
         dialog.show(getActivity().getSupportFragmentManager(), "phone");
     }
 
