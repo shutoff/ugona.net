@@ -242,4 +242,5 @@
         <item>4 hours</item>
         <item>6 hours</item>
     </string-array>
+    <string name="delete_timer">Delete timer?</string>
 </resources>

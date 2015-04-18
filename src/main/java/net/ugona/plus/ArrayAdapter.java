@@ -1,0 +1,47 @@
+package net.ugona.plus;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.Spinner;
+import android.widget.TextView;
+
+public abstract class ArrayAdapter extends BaseAdapter {
+
+    Spinner spinner;
+    LayoutInflater inflater;
+
+    ArrayAdapter(Spinner spinner) {
+        this.spinner = spinner;
+        inflater = LayoutInflater.from(spinner.getContext());
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View v = convertView;
+        if (v == null)
+            v = inflater.inflate(R.layout.list_item, null);
+        TextView tvName = (TextView) v;
+        tvName.setText(getItem(position).toString());
+        return v;
+    }
+
+    @Override
+    public View getDropDownView(int position, View convertView, ViewGroup parent) {
+        View v = convertView;
+        if (v == null)
+            v = inflater.inflate(R.layout.list_dropdown_item, null);
+        TextView tvName = (TextView) v;
+        tvName.setText(getItem(position).toString());
+        String fontName = "Exo2-";
+        fontName += (position == spinner.getSelectedItemPosition()) ? "Medium" : "Light";
+        tvName.setTypeface(Font.getFont(inflater.getContext(), fontName));
+        return v;
+    }
+}

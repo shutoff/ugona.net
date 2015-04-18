@@ -246,4 +246,5 @@
         <item>4 часа</item>
         <item>6 часов</item>
     </string-array>
+    <string name="delete_timer">Удалить таймер?</string>
 </resources>

@@ -105,7 +105,7 @@ public class WidgetsFragment extends MainFragment {
                     v.findViewById(R.id.block_widget).setVisibility(View.VISIBLE);
                     v.findViewById(R.id.text).setVisibility(View.GONE);
                     Spinner vTheme = (Spinner) v.findViewById(R.id.theme);
-                    vTheme.setAdapter(new ConfigWidget.ThemeAdapter(getActivity()));
+                    vTheme.setAdapter(new ConfigWidget.ThemeAdapter(vTheme));
                     final int widget_id = item.id;
                     final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
                     int theme = preferences.getInt(Names.THEME + item.id, 0);

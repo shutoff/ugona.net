@@ -7,11 +7,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.afollestad.materialdialogs.AlertDialogWrapper;
 
@@ -55,7 +52,7 @@ public class CommandsSettingsDialog
         super.onStart();
         spinner = (Spinner) getDialog().findViewById(R.id.method);
         final String[] items = getResources().getStringArray(R.array.ctrl_entries);
-        spinner.setAdapter(new BaseAdapter() {
+        spinner.setAdapter(new ArrayAdapter(spinner) {
             @Override
             public int getCount() {
                 return items.length;
@@ -65,39 +62,10 @@ public class CommandsSettingsDialog
             public Object getItem(int position) {
                 return items[position];
             }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = LayoutInflater.from(getActivity());
-                    v = inflater.inflate(R.layout.list_item, null);
-                }
-                TextView tv = (TextView) v;
-                tv.setText(items[position]);
-                return v;
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = LayoutInflater.from(getActivity());
-                    v = inflater.inflate(R.layout.list_dropdown_item, null);
-                }
-                TextView tv = (TextView) v;
-                tv.setText(items[position]);
-                return v;
-            }
         });
         simSpinner = (Spinner) getDialog().findViewById(R.id.sim);
         final String[] sims = getResources().getStringArray(R.array.sim_entries);
-        simSpinner.setAdapter(new BaseAdapter() {
+        simSpinner.setAdapter(new ArrayAdapter(simSpinner) {
             @Override
             public int getCount() {
                 return sims.length;
@@ -106,35 +74,6 @@ public class CommandsSettingsDialog
             @Override
             public Object getItem(int position) {
                 return sims[position];
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = LayoutInflater.from(getActivity());
-                    v = inflater.inflate(R.layout.list_item, null);
-                }
-                TextView tv = (TextView) v;
-                tv.setText(sims[position]);
-                return v;
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = LayoutInflater.from(getActivity());
-                    v = inflater.inflate(R.layout.list_dropdown_item, null);
-                }
-                TextView tv = (TextView) v;
-                tv.setText(sims[position]);
-                return v;
             }
         });
 

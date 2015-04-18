@@ -48,16 +48,19 @@ import java.util.Vector;
 
 public abstract class DeviceBaseFragment
         extends MainFragment
-        implements AdapterView.OnItemClickListener {
+        implements AdapterView.OnItemClickListener,
+        View.OnClickListener {
 
     final static int REQUEST_CHECK_PATTERN = 200;
 
     final static int DO_TIMER = 1;
+    final static int DO_DELETE = 2;
 
     final static String DATA = "data";
     final static String CHANGED = "changed";
     final static String TIMERS = "timers";
     final static String TYPES = "types";
+    final static String TIMERS_CHANGED = "timers_changed";
 
     static int[] wdays = {
             R.id.wday1,
@@ -86,6 +89,7 @@ public abstract class DeviceBaseFragment
     Vector<TimerType> timerTypes;
     NumberFormat nf;
     NumberFormat df;
+    boolean timerChanged;
 
     abstract boolean filter(String id);
 
@@ -167,6 +171,7 @@ public abstract class DeviceBaseFragment
                     ex.printStackTrace();
                 }
             }
+            timerChanged = savedInstanceState.getBoolean(TIMERS_CHANGED);
         }
 
         nf = NumberFormat.getInstance(Locale.getDefault());
@@ -248,6 +253,7 @@ public abstract class DeviceBaseFragment
             if (data != null)
                 outState.putByteArray(TYPES, data);
         }
+        outState.putBoolean(TIMERS_CHANGED, timerChanged);
     }
 
     @Override
@@ -288,6 +294,39 @@ public abstract class DeviceBaseFragment
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if ((requestCode == REQUEST_CHECK_PATTERN) && (resultCode == Activity.RESULT_OK))
             send_update();
+        if ((requestCode == DO_TIMER) && (resultCode == Activity.RESULT_OK)) {
+            int pos = data.getIntExtra(Names.ID, 0);
+            Timer timer = null;
+            byte[] d = data.getByteArrayExtra(Names.MESSAGE);
+            if (data != null) {
+                try {
+                    ByteArrayInputStream bis = new ByteArrayInputStream(d);
+                    ObjectInput in = new ObjectInputStream(bis);
+                    timer = (Timer) in.readObject();
+                    in.close();
+                    bis.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            if (timer != null) {
+                if (pos >= timers.size()) {
+                    timers.add(timer);
+                } else {
+                    timers.set(pos, timer);
+                }
+                timerChanged = true;
+                BaseAdapter adapter = (BaseAdapter) vList.getAdapter();
+                adapter.notifyDataSetChanged();
+            }
+        }
+        if ((requestCode == DO_DELETE) && (resultCode == Activity.RESULT_OK)) {
+            int pos = Integer.parseInt(data.getStringExtra(Names.ID));
+            timers.remove(pos);
+            timerChanged = true;
+            BaseAdapter adapter = (BaseAdapter) vList.getAdapter();
+            adapter.notifyDataSetChanged();
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -306,6 +345,7 @@ public abstract class DeviceBaseFragment
                         }
                     }
                     changed = new HashMap<>();
+                    timerChanged = false;
                     BaseAdapter adapter = (BaseAdapter) vList.getAdapter();
                     adapter.notifyDataSetChanged();
 
@@ -462,6 +502,7 @@ public abstract class DeviceBaseFragment
                 timer = timers.get(i);
             TimerFragment fragment = new TimerFragment();
             Bundle args = new Bundle();
+            args.putInt(Names.ID, i);
             if (timer != null) {
                 byte[] data = null;
                 try {
@@ -477,6 +518,21 @@ public abstract class DeviceBaseFragment
                 if (data != null)
                     args.putByteArray(Names.MESSAGE, data);
             }
+            if (timerTypes != null) {
+                byte[] data = null;
+                try {
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    ObjectOutput out = new ObjectOutputStream(bos);
+                    out.writeObject(timerTypes);
+                    data = bos.toByteArray();
+                    out.close();
+                    bos.close();
+                } catch (Exception ex) {
+                    // ignore
+                }
+                if (data != null)
+                    args.putByteArray(Names.COMMANDS, data);
+            }
             fragment.setArguments(args);
             fragment.setTargetFragment(this, DO_TIMER);
             fragment.show(getActivity().getSupportFragmentManager(), "timer");
@@ -485,6 +541,18 @@ public abstract class DeviceBaseFragment
 
     void onChanged(String id) {
 
+    }
+
+    @Override
+    public void onClick(View v) {
+        Alert alert = new Alert();
+        Bundle args = new Bundle();
+        args.putString(Names.TITLE, getString(R.string.delete));
+        args.putString(Names.MESSAGE, getString(R.string.delete_timer));
+        args.putString(Names.ID, v.getTag().toString());
+        alert.setArguments(args);
+        alert.setTargetFragment(this, DO_DELETE);
+        alert.show(getFragmentManager(), "delete");
     }
 
     static class Param implements Serializable {
@@ -642,7 +710,7 @@ public abstract class DeviceBaseFragment
                     vSpinner.setVisibility(View.VISIBLE);
                     vText.setVisibility(View.GONE);
                     final String[] values = def.values.split("\\|");
-                    vSpinner.setAdapter(new BaseAdapter() {
+                    vSpinner.setAdapter(new ArrayAdapter(vSpinner) {
                         @Override
                         public int getCount() {
                             return values.length;
@@ -650,42 +718,9 @@ public abstract class DeviceBaseFragment
 
                         @Override
                         public Object getItem(int position) {
-                            return values[position];
+                            return values[position].split(":")[1];
                         }
 
-                        @Override
-                        public long getItemId(int position) {
-                            return position;
-                        }
-
-                        @Override
-                        public View getView(int position, View convertView, ViewGroup parent) {
-                            View v = convertView;
-                            if (v == null) {
-                                LayoutInflater inflater = LayoutInflater.from(getActivity());
-                                v = inflater.inflate(R.layout.list_item, null);
-                            }
-                            TextView tv = (TextView) v;
-                            String[] val = values[position].split(":");
-                            tv.setText(val[1]);
-                            return v;
-                        }
-
-                        @Override
-                        public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                            View v = convertView;
-                            if (v == null) {
-                                LayoutInflater inflater = LayoutInflater.from(getActivity());
-                                v = inflater.inflate(R.layout.list_dropdown_item, null);
-                            }
-                            TextView tv = (TextView) v;
-                            String[] val = values[position].split(":");
-                            tv.setText(val[1]);
-                            String fontName = "Exo2-";
-                            fontName += (position == vSpinner.getSelectedItemPosition()) ? "Medium" : "Light";
-                            tv.setTypeface(Font.getFont(getActivity(), fontName));
-                            return v;
-                        }
                     });
 
                     int iVal = 0;
@@ -826,7 +861,9 @@ public abstract class DeviceBaseFragment
                         int icon_id = getActivity().getResources().getIdentifier("w_" + icon, "drawable", getActivity().getPackageName());
                         ivIcon.setImageResource(icon_id);
                     }
-
+                    View vDelete = v.findViewById(R.id.delete);
+                    vDelete.setTag(position);
+                    vDelete.setOnClickListener(DeviceBaseFragment.this);
                 } else {
                     v.findViewById(R.id.add).setVisibility(View.VISIBLE);
                 }

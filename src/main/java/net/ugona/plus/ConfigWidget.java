@@ -3,7 +3,6 @@ package net.ugona.plus;
 import android.app.Activity;
 import android.app.Dialog;
 import android.appwidget.AppWidgetManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,11 +10,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.SeekBar;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.afollestad.materialdialogs.AlertDialogWrapper;
 import com.afollestad.materialdialogs.DialogAction;
@@ -67,7 +63,7 @@ public class ConfigWidget extends Activity {
         dialog.show();
 
         final Spinner lv = (Spinner) dialog.findViewById(R.id.list);
-        lv.setAdapter(new BaseAdapter() {
+        lv.setAdapter(new ArrayAdapter(lv) {
             @Override
             public int getCount() {
                 return cars.length;
@@ -75,41 +71,10 @@ public class ConfigWidget extends Activity {
 
             @Override
             public Object getItem(int position) {
-                return cars[position];
+                CarConfig carConfig = CarConfig.get(getBaseContext(), cars[position]);
+                return carConfig.getName();
             }
 
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = LayoutInflater.from(ConfigWidget.this);
-                    v = inflater.inflate(R.layout.list_item, null);
-                }
-                TextView tvName = (TextView) v;
-                CarConfig carConfig = CarConfig.get(ConfigWidget.this, cars[position]);
-                String name = carConfig.getName();
-                tvName.setText(name);
-                return v;
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = LayoutInflater.from(ConfigWidget.this);
-                    v = inflater.inflate(R.layout.list_dropdown_item, null);
-                }
-                TextView tvName = (TextView) v;
-                CarConfig carConfig = CarConfig.get(ConfigWidget.this, cars[position]);
-                String name = carConfig.getName();
-                tvName.setText(name);
-                return v;
-            }
         });
 
 
@@ -117,7 +82,7 @@ public class ConfigWidget extends Activity {
             lv.setVisibility(View.GONE);
 
         final Spinner lvTheme = (Spinner) dialog.findViewById(R.id.theme);
-        lvTheme.setAdapter(new ThemeAdapter(this));
+        lvTheme.setAdapter(new ThemeAdapter(lvTheme));
 
         final SeekBar sbTransparency = (SeekBar) dialog.findViewById(R.id.background);
 
@@ -163,14 +128,13 @@ public class ConfigWidget extends Activity {
         setResult(RESULT_OK, resultValue);
     }
 
-    static class ThemeAdapter extends BaseAdapter {
+    static class ThemeAdapter extends ArrayAdapter {
 
         final String[] themes;
-        Context context;
 
-        ThemeAdapter(Context context) {
-            themes = context.getResources().getStringArray(R.array.themes);
-            this.context = context;
+        ThemeAdapter(Spinner spinner) {
+            super(spinner);
+            themes = spinner.getContext().getResources().getStringArray(R.array.themes);
         }
 
         @Override
@@ -183,33 +147,5 @@ public class ConfigWidget extends Activity {
             return themes[position];
         }
 
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View v = convertView;
-            if (v == null) {
-                LayoutInflater inflater = LayoutInflater.from(context);
-                v = inflater.inflate(R.layout.list_item, null);
-            }
-            TextView tv = (TextView) v;
-            tv.setText(themes[position]);
-            return v;
-        }
-
-        @Override
-        public View getDropDownView(int position, View convertView, ViewGroup parent) {
-            View v = convertView;
-            if (v == null) {
-                LayoutInflater inflater = LayoutInflater.from(context);
-                v = inflater.inflate(R.layout.list_dropdown_item, null);
-            }
-            TextView tv = (TextView) v;
-            tv.setText(themes[position]);
-            return v;
-        }
     }
 }

@@ -105,7 +105,7 @@ public class MaintenanceDialog
             }
         });
 
-        vPeriod.setAdapter(new BaseAdapter() {
+        vPeriod.setAdapter(new ArrayAdapter(vPeriod) {
             @Override
             public int getCount() {
                 return periods.length;
@@ -114,34 +114,6 @@ public class MaintenanceDialog
             @Override
             public Object getItem(int i) {
                 return periods[i];
-            }
-
-            @Override
-            public long getItemId(int i) {
-                return i;
-            }
-
-            @Override
-            public View getView(int i, View convertView, ViewGroup viewGroup) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = LayoutInflater.from(getActivity());
-                    v = inflater.inflate(R.layout.list_item, null);
-                }
-                TextView tv = (TextView) v;
-                tv.setText(period(periods[i]));
-                return v;
-            }
-
-            public View getDropDownView(int i, View convertView, ViewGroup viewGroup) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = LayoutInflater.from(getActivity());
-                    v = inflater.inflate(R.layout.list_dropdown_item, null);
-                }
-                TextView tv = (TextView) v;
-                tv.setText(period(periods[i]));
-                return v;
             }
         });
 

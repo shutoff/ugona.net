@@ -1,15 +1,20 @@
 package net.ugona.plus;
 
+import android.app.Activity;
 import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -25,12 +30,14 @@ import java.io.ObjectOutputStream;
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Vector;
 
 public class TimerFragment
         extends DialogFragment
         implements View.OnClickListener,
         TimePicker.OnTimeChangedListener,
-        AdapterView.OnItemSelectedListener {
+        AdapterView.OnItemSelectedListener,
+        DialogInterface.OnClickListener {
 
     final static int[] days_id = {
             R.id.d1,
@@ -52,18 +59,20 @@ public class TimerFragment
             5
     };
     DeviceBaseFragment.Timer timer;
+    Vector<DeviceBaseFragment.TimerType> timerTypes;
+    int id;
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         if (savedInstanceState != null)
             setArgs(savedInstanceState);
-        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        final LayoutInflater inflater = LayoutInflater.from(getActivity());
         View v = inflater.inflate(R.layout.timer, null);
         Dialog dialog = new AlertDialogWrapper.Builder(getActivity())
                 .setTitle(R.string.timer)
                 .setView(v)
-                .setPositiveButton(R.string.ok, null)
+                .setPositiveButton(R.string.ok, this)
                 .setNegativeButton(R.string.cancel, null)
                 .create();
 
@@ -87,7 +96,7 @@ public class TimerFragment
 
         final Spinner repeat = (Spinner) v.findViewById(R.id.repeat);
         final String[] repeats = getResources().getStringArray(R.array.periods);
-        repeat.setAdapter(new BaseAdapter() {
+        repeat.setAdapter(new ArrayAdapter(repeat) {
             @Override
             public int getCount() {
                 return repeats.length;
@@ -97,38 +106,6 @@ public class TimerFragment
             public Object getItem(int position) {
                 return repeats[position];
             }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = LayoutInflater.from(getActivity());
-                    v = inflater.inflate(R.layout.list_item, null);
-                }
-                TextView tvName = (TextView) v;
-                tvName.setText(repeats[position]);
-                return v;
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = LayoutInflater.from(getActivity());
-                    v = inflater.inflate(R.layout.list_dropdown_item, null);
-                }
-                TextView tvName = (TextView) v;
-                tvName.setText(repeats[position]);
-                String fontName = "Exo2-";
-                fontName += (position == repeat.getSelectedItemPosition()) ? "Medium" : "Light";
-                tvName.setTypeface(Font.getFont(getActivity(), fontName));
-                return v;
-            }
         });
         for (int i = 0; i < period_values.length; i++) {
             if (period_values[i] == timer.period) {
@@ -137,6 +114,90 @@ public class TimerFragment
             }
         }
         repeat.setOnItemSelectedListener(this);
+        final Spinner vCommand = (Spinner) v.findViewById(R.id.command);
+        if ((timerTypes != null) && (timerTypes.size() > 1)) {
+            vCommand.setVisibility(View.VISIBLE);
+            vCommand.setAdapter(new BaseAdapter() {
+                @Override
+                public int getCount() {
+                    return timerTypes.size();
+                }
+
+                @Override
+                public Object getItem(int position) {
+                    return timerTypes.get(position);
+                }
+
+                @Override
+                public long getItemId(int position) {
+                    return position;
+                }
+
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    View v = convertView;
+                    if (v == null)
+                        v = inflater.inflate(R.layout.icon_list_item, null);
+                    TextView tvName = (TextView) v.findViewById(R.id.text);
+                    tvName.setText(timerTypes.get(position).name);
+                    ImageView iv = (ImageView) v.findViewById(R.id.icon);
+                    int id = 0;
+                    String icon = timerTypes.get(position).icon;
+                    if (icon != null)
+                        id = getResources().getIdentifier("w_" + icon, "drawable", getActivity().getPackageName());
+                    if (id != 0) {
+                        iv.setImageResource(id);
+                        iv.setVisibility(View.VISIBLE);
+                    } else {
+                        iv.setVisibility(View.GONE);
+                    }
+                    return v;
+                }
+
+                @Override
+                public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                    View v = convertView;
+                    if (v == null)
+                        v = inflater.inflate(R.layout.icon_list_dropdown_item, null);
+                    TextView tvName = (TextView) v.findViewById(R.id.text);
+                    tvName.setText(timerTypes.get(position).name);
+                    String fontName = "Exo2-";
+                    fontName += (position == vCommand.getSelectedItemPosition()) ? "Medium" : "Light";
+                    tvName.setTypeface(Font.getFont(inflater.getContext(), fontName));
+                    ImageView iv = (ImageView) v.findViewById(R.id.icon);
+                    int id = 0;
+                    String icon = timerTypes.get(position).icon;
+                    if (icon != null)
+                        id = getResources().getIdentifier("w_" + icon, "drawable", getActivity().getPackageName());
+                    if (id != 0) {
+                        iv.setImageResource(id);
+                        iv.setVisibility(View.VISIBLE);
+                    } else {
+                        iv.setVisibility(View.GONE);
+                    }
+                    return v;
+                }
+            });
+            for (int i = 0; i < timerTypes.size(); i++) {
+                if (timerTypes.get(i).id == timer.param) {
+                    vCommand.setSelection(i);
+                    break;
+                }
+            }
+            vCommand.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    timer.param = timerTypes.get(position).id;
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+        } else {
+            vCommand.setVisibility(View.GONE);
+        }
         return dialog;
     }
 
@@ -156,6 +217,22 @@ public class TimerFragment
         }
         if (data != null)
             outState.putByteArray(Names.MESSAGE, data);
+        data = null;
+        if (timerTypes != null) {
+            try {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                ObjectOutput out = new ObjectOutputStream(bos);
+                out.writeObject(timerTypes);
+                data = bos.toByteArray();
+                out.close();
+                bos.close();
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+        if (data != null)
+            outState.putByteArray(Names.COMMANDS, data);
+        outState.putInt(Names.ID, id);
     }
 
     @Override
@@ -180,6 +257,19 @@ public class TimerFragment
         if (timer == null) {
             timer = new DeviceBaseFragment.Timer();
         }
+        data = args.getByteArray(Names.COMMANDS);
+        if (data != null) {
+            try {
+                ByteArrayInputStream bis = new ByteArrayInputStream(data);
+                ObjectInput in = new ObjectInputStream(bis);
+                timerTypes = (Vector<DeviceBaseFragment.TimerType>) in.readObject();
+                in.close();
+                bis.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        id = args.getInt(Names.ID);
     }
 
     void setDayColor(TextView v) {
@@ -208,5 +298,28 @@ public class TimerFragment
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
+    }
+
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
+        Fragment fragment = getTargetFragment();
+        if (fragment != null) {
+            Intent intent = new Intent();
+            byte[] data = null;
+            try {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                ObjectOutput out = new ObjectOutputStream(bos);
+                out.writeObject(timer);
+                data = bos.toByteArray();
+                out.close();
+                bos.close();
+            } catch (Exception ex) {
+                // ignore
+            }
+            if (data != null)
+                intent.putExtra(Names.MESSAGE, data);
+            intent.putExtra(Names.ID, id);
+            fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, intent);
+        }
     }
 }

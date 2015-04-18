@@ -17,12 +17,23 @@
         app:pstsLeftPadding="40dp"
         app:pstsTabPaddingLeftRight="16dp"
         app:pstsUnderlineColor="@color/div"
-        app:pstsUnderlineHeight="1px" />
+        app:pstsUnderlineHeight="0px" />
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/pager"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1">
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:background="@drawable/nav_shadow" />
+
+    </FrameLayout>
 
 </LinearLayout>

@@ -10,10 +10,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.afollestad.materialdialogs.AlertDialogWrapper;
 
@@ -45,7 +42,7 @@ public class PointerDialog
                 continue;
             cars.add(id);
         }
-        vCars.setAdapter(new BaseAdapter() {
+        vCars.setAdapter(new ArrayAdapter(vCars) {
             @Override
             public int getCount() {
                 return cars.size();
@@ -53,40 +50,8 @@ public class PointerDialog
 
             @Override
             public Object getItem(int position) {
-                return cars.get(position);
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = LayoutInflater.from(getActivity());
-                    v = inflater.inflate(R.layout.list_item, null);
-                }
                 CarConfig carConfig = CarConfig.get(getActivity(), cars.get(position));
-                String name = carConfig.getName();
-                TextView tv = (TextView) v;
-                tv.setText(name);
-                return v;
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater inflater = LayoutInflater.from(getActivity());
-                    v = inflater.inflate(R.layout.list_dropdown_item, null);
-                }
-                CarConfig carConfig = CarConfig.get(getActivity(), cars.get(position));
-                String name = carConfig.getName();
-                TextView tv = (TextView) v;
-                tv.setText(name);
-                return v;
+                return carConfig.getName();
             }
 
         });
