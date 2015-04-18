@@ -150,8 +150,13 @@ public class CarImage {
 
         new_state += "|";
         parts = new Vector<String>();
-        if (s.isIgnition())
+        if (s.isIgnition()) {
             parts.add((s.isGuard() && !az) ? "r_ignition" : "b_ignition");
+            if (text == null)
+                text = "ignition";
+        }
+        if (s.isGuard() && (text == null))
+            text = "guard";
         int mode = s.getGuard_mode();
         if (mode == 1) {
             parts.add("r_block");
