@@ -235,4 +235,15 @@
     <string name="sos">СОС!!!</string>
     <string name="guard">В охране</string>
     <string name="ignition">Зажигание\nвключено</string>
+    <string name="timer">Таймер</string>
+    <string-array name="periods">
+        <item>еженедельно</item>
+        <item>один раз</item>
+        <item>ежедневно</item>
+        <item>1 час</item>
+        <item>2 часа</item>
+        <item>3 часа</item>
+        <item>4 часа</item>
+        <item>6 часов</item>
+    </string-array>
 </resources>

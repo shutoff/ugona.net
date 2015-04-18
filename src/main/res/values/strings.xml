@@ -231,4 +231,15 @@
     <string name="sos">SOS!!!</string>
     <string name="guard">Guard ON</string>
     <string name="ignition">Ignition</string>
+    <string name="timer">Timer</string>
+    <string-array name="periods">
+        <item>Weekly</item>
+        <item>Once</item>
+        <item>1 day</item>
+        <item>1 hour</item>
+        <item>2 hours</item>
+        <item>3 hours</item>
+        <item>4 hours</item>
+        <item>6 hours</item>
+    </string-array>
 </resources>

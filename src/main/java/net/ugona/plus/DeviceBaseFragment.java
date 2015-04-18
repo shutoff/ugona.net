@@ -52,6 +52,8 @@ public abstract class DeviceBaseFragment
 
     final static int REQUEST_CHECK_PATTERN = 200;
 
+    final static int DO_TIMER = 1;
+
     final static String DATA = "data";
     final static String CHANGED = "changed";
     final static String TIMERS = "timers";
@@ -451,6 +453,33 @@ public abstract class DeviceBaseFragment
             SmsSettingsFragment fragment = new SmsSettingsFragment();
             fragment.setArguments(args);
             fragment.show(getActivity().getSupportFragmentManager(), "sms");
+            return;
+        }
+        i -= adapter.defs.size() + 1;
+        if (i >= 0) {
+            Timer timer = null;
+            if (i < timers.size())
+                timer = timers.get(i);
+            TimerFragment fragment = new TimerFragment();
+            Bundle args = new Bundle();
+            if (timer != null) {
+                byte[] data = null;
+                try {
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    ObjectOutput out = new ObjectOutputStream(bos);
+                    out.writeObject(timer);
+                    data = bos.toByteArray();
+                    out.close();
+                    bos.close();
+                } catch (Exception ex) {
+                    // ignore
+                }
+                if (data != null)
+                    args.putByteArray(Names.MESSAGE, data);
+            }
+            fragment.setArguments(args);
+            fragment.setTargetFragment(this, DO_TIMER);
+            fragment.show(getActivity().getSupportFragmentManager(), "timer");
         }
     }
 
