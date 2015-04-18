@@ -37,6 +37,12 @@ public class StateFragment
             R.id.temp1,
             R.id.temp2
     };
+    static final int[] info_id = {
+            R.id.car_img1,
+            R.id.car_img2,
+            R.id.car_img3
+    };
+
     Indicator iGsm;
     Indicator iVoltage;
     Indicator iReserve;
@@ -60,6 +66,9 @@ public class StateFragment
     String error;
     View vPointers;
     TextView[] tvPointers;
+    View vInfo;
+    ImageView[] ivInfo;
+    TextView tvInfo;
 
     @Override
     int layout() {
@@ -135,6 +144,13 @@ public class StateFragment
         temp_indicators = new Indicator[temp_id.length];
         for (int i = 0; i < temp_id.length; i++) {
             temp_indicators[i] = (Indicator) v.findViewById(temp_id[i]);
+        }
+
+        vInfo = v.findViewById(R.id.car_info);
+        tvInfo = (TextView) v.findViewById(R.id.car_text);
+        ivInfo = new ImageView[info_id.length];
+        for (int i = 0; i < info_id.length; i++) {
+            ivInfo[i] = (ImageView) v.findViewById(info_id[i]);
         }
 
         IndicatorsView indicatorsView = (IndicatorsView) v.findViewById(R.id.indicators);
@@ -312,18 +328,6 @@ public class StateFragment
 
         String error_text = error;
         if (error_text == null) {
-            if (state.getGuard_mode() == 2) {
-                error_text = getString(R.string.valet_warning);
-            } else if (state.getGuard_mode() == 3) {
-                error_text = getString(R.string.ps_guard);
-            } else {
-                long guard_time = state.getGuard_time();
-                long card_time = state.getCard();
-                if ((guard_time > 0) && (card_time > 0) && (guard_time > card_time))
-                    error_text = getString(R.string.card_message);
-            }
-        }
-        if (error_text == null) {
             ConnectivityManager cm =
                     (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
@@ -443,6 +447,36 @@ public class StateFragment
         }
 
         vCar.update(state);
+        String[] states = vCar.carImage.state.split("\\|");
+        if (states.length > 1) {
+            String[] pictures = states[1].split(";");
+            int n = 0;
+            for (String picture : pictures) {
+                int id = getActivity().getResources().getIdentifier(picture, "drawable", pkg);
+                if (id == 0)
+                    continue;
+                ivInfo[n].setImageResource(id);
+                ivInfo[n].setVisibility(View.VISIBLE);
+                if (++n >= ivInfo.length)
+                    break;
+            }
+            if (n > 0)
+                vInfo.setVisibility(View.VISIBLE);
+            for (; n < ivInfo.length; n++)
+                ivInfo[n].setVisibility(View.GONE);
+            int id = 0;
+            if (states.length > 2)
+                id = getResources().getIdentifier(states[2], "string", pkg);
+            if (id == 0) {
+                tvInfo.setVisibility(View.GONE);
+            } else {
+                tvInfo.setText(id);
+                tvInfo.setVisibility(View.VISIBLE);
+            }
+        } else {
+            vInfo.setVisibility(View.GONE);
+        }
+
         if (state.getTime() > 0) {
             tvTime.setText(State.formatDateTime(getActivity(), state.getTime()));
         } else {

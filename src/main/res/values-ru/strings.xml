@@ -133,7 +133,6 @@
     <string name="open_door">Открыта дверь</string>
     <string name="zone_in">Въезд в зону</string>
     <string name="zone_out">Выезд из зоны</string>
-    <string name="ps_guard">Включен режим охраны с пассажирами</string>
     <string name="background">Фон</string>
     <string name="show_name">Показать название</string>
     <string name="widget_rows">К-во значений:</string>
@@ -213,11 +212,9 @@
     <string name="add_notification">Добавить напоминание</string>
     <string name="maintenance_info">Вы можете добавить напоминания о периодическом обслужтивании автомибиля на основе сроков, пробега или моточасов</string>
     <string name="net_warning">Нет соединения для передачи данных</string>
-    <string name="valet_warning">Не забудьте отключить режим АВТОСЕРВИС</string>
     <string name="data_error">Ошибка обновления данных</string>
     <string name="no_photo">Нет фотографий</string>
     <string name="on">Вкл.</string>
-    <string name="card_message">Возможно метка осталась в машине</string>
     <string name="once">1 раз</string>
     <string name="hour">1 час</string>
     <string name="hour2">2 часа</string>
@@ -229,4 +226,11 @@
     <string name="device_pswd">Требуется отправка пароля в СМС</string>
     <string name="input_device_pswd">Введите пароль устройства</string>
     <string name="add_phone">Добавить телефон</string>
+    <string name="clear_phones">Для очистки списка управляющих телефонов выполните команду Инициализация главного теоефона</string>
+    <string name="ps_guard">Охрана\nс пассажирами</string>
+    <string name="card">Возможно метка\nосталась в машине</string>
+    <string name="block">Двигатель заблокирован</string>
+    <string name="valet_mode">Режим\nАВТОСЕРВИС</string>
+    <string name="tilt">Датчик\nнаклона</string>
+    <string name="sos">СОС!!!</string>
 </resources>

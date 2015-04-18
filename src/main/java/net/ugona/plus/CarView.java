@@ -14,12 +14,6 @@ import android.view.View;
 
 public class CarView extends View {
 
-    final static int MIN_RADIUS_DP = 22;
-    final static int STROKE_DP = 4;
-    final static int X_PAD = 7;
-    final static int Y_PAD = 5;
-    final static int X_MARGIN = 5;
-
     final static int XC_LEFT = 20;
     final static int YC_BOTTOM = 15;
 
@@ -92,39 +86,7 @@ public class CarView extends View {
             canvas.drawBitmap(bitmap, null, rect, carImage.paint);
             bitmap.recycle();
         }
-        float min_radius = MIN_RADIUS_DP * pk;
-        float max_radius = min_radius * 2;
-        float radius = k * carImage.HEIGHT / 8;
-        if (radius < min_radius)
-            radius = min_radius;
-        if (radius > max_radius)
-            radius = max_radius;
-        float in_radius = radius - STROKE_DP * pk;
 
-        float xPos = x;
-        if (xPos < 0)
-            xPos = 0;
-        xPos += X_PAD * pk + radius;
-        float yPos = y + Y_PAD * pk + radius;
-
-        if (ext.length > 1) {
-            parts = ext[1].split(";");
-            for (int i = 0; i < parts.length; i++) {
-                String part = parts[i];
-                int id = carImage.getBitmapId(part);
-                if (id == 0)
-                    continue;
-                RectF rect = new RectF(xPos - radius, yPos - radius, xPos + radius, yPos + radius);
-                Bitmap bitmap = carImage.getBitmap(R.drawable.bg_circle);
-                canvas.drawBitmap(bitmap, null, rect, carImage.paint);
-                bitmap.recycle();
-                bitmap = carImage.getBitmap(id);
-                rect = new RectF(xPos - in_radius, yPos - in_radius, xPos + in_radius, yPos + in_radius);
-                canvas.drawBitmap(bitmap, null, rect, carImage.paint);
-                bitmap.recycle();
-                xPos += radius * 2 + X_MARGIN;
-            }
-        }
     }
 
     void update(CarState s) {

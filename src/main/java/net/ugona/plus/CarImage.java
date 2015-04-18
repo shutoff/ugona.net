@@ -41,13 +41,17 @@ public class CarImage {
         long guard_time = s.getGuard_time();
         long card_time = s.getCard();
         boolean card = false;
+        String text = null;
         animation = -1;
         if ((guard_time > 0) && (card_time > 0) && (guard_time > card_time)) {
             card = true;
             guard = false;
+            text = "card";
         }
-        if (s.getGuard_mode() == 3)
+        if (s.getGuard_mode() == 3) {
             guard = false;
+            text = "ps_guard";
+        }
         if (guard) {
             parts.add(prefix + "_" + (s.isAccessory() ? "r" : "b"));
         } else {
@@ -128,6 +132,7 @@ public class CarImage {
         if (s.isAz()) {
             animation = parts.size();
             parts.add(prefix + "_az");
+            text = "autostart";
         }
         if (s.isIn_sensor())
             parts.add(prefix + "_a_in");
@@ -150,17 +155,24 @@ public class CarImage {
         int mode = s.getGuard_mode();
         if (mode == 1) {
             parts.add("r_block");
+            text = "block";
         } else if (card) {
             parts.add("r_lock");
         } else if (s.isGuard()) {
             parts.add("b_lock");
         }
-        if (mode == 2)
+        if (mode == 2) {
             parts.add("b_valet");
-        if (s.isTilt())
+            text = "valet_mode";
+        }
+        if (s.isTilt()) {
             parts.add("r_slope");
-        if (s.isTilt())
+            text = "tilt";
+        }
+        if (s.isTilt()) {
             parts.add("r_sos");
+            text = "sos";
+        }
 
         String ext_state = null;
         for (String part : parts) {
@@ -172,6 +184,8 @@ public class CarImage {
         }
         if (ext_state != null)
             new_state += ext_state;
+        if (text != null)
+            new_state += "|" + text;
 
         if ((animation == -1) && new_state.equals(state))
             return false;

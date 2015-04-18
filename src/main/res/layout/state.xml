@@ -245,11 +245,55 @@
 
                     </LinearLayout>
 
-                    <net.ugona.plus.CarView
-                        android:id="@+id/car"
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1" />
+                        android:layout_weight="1">
+
+                        <net.ugona.plus.CarView
+                            android:id="@+id/car"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+
+                        <LinearLayout
+                            android:id="@+id/car_info"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:background="@drawable/shadow"
+                            android:gravity="center"
+                            android:visibility="gone">
+
+                            <ImageView
+                                android:id="@+id/car_img1"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:visibility="gone" />
+
+                            <ImageView
+                                android:id="@+id/car_img2"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:visibility="gone" />
+
+                            <ImageView
+                                android:id="@+id/car_img3"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:id="@+id/car_text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="4dp"
+                                android:textColor="@color/text_dark"
+                                android:textSize="14sp"
+                                android:typeface="sans" />
+
+                        </LinearLayout>
+
+                    </FrameLayout>
 
                 </LinearLayout>
 

@@ -316,7 +316,10 @@ public class SendCommandFragment extends DialogFragment {
                 sms = replace(sms, "pwd", data);
                 sms = replace(sms, "ccode_new", data);
                 if (Sms.send(getActivity(), car_id, c.id, sms)) {
-                    Commands.put(getActivity(), car_id, c, data.getStringExtra("pwd"));
+                    String pwd = null;
+                    if (data != null)
+                        pwd = data.getStringExtra("pwd");
+                    Commands.put(getActivity(), car_id, c, pwd);
                     Intent intent = new Intent(getActivity(), FetchService.class);
                     intent.setAction(FetchService.ACTION_UPDATE);
                     intent.putExtra(Names.ID, car_id);

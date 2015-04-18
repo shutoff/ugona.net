@@ -58,7 +58,7 @@ public class PhonesFragment
         vList.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
-                return phones.size() + 1;
+                return phones.size() + 2;
             }
 
             @Override
@@ -83,6 +83,7 @@ public class PhonesFragment
                 if (position < phones.size()) {
                     v.findViewById(R.id.phone_block).setVisibility(View.VISIBLE);
                     v.findViewById(R.id.add).setVisibility(View.GONE);
+                    v.findViewById(R.id.clear).setVisibility(View.GONE);
                     Phone phone = phones.get(position);
                     TextView vNumber = (TextView) v.findViewById(R.id.number);
                     vNumber.setText(State.formatPhoneNumber(phone.number));
@@ -99,9 +100,14 @@ public class PhonesFragment
                     } else {
                         iv.setImageBitmap(null);
                     }
+                } else if (position > phones.size()) {
+                    v.findViewById(R.id.phone_block).setVisibility(View.GONE);
+                    v.findViewById(R.id.add).setVisibility(View.GONE);
+                    v.findViewById(R.id.clear).setVisibility(View.VISIBLE);
                 } else {
                     v.findViewById(R.id.phone_block).setVisibility(View.GONE);
                     v.findViewById(R.id.add).setVisibility(View.VISIBLE);
+                    v.findViewById(R.id.clear).setVisibility(View.GONE);
                 }
                 return v;
             }

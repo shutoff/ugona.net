@@ -137,7 +137,6 @@
     <string name="open_door">Door open</string>
     <string name="zone_in">Zone in</string>
     <string name="zone_out">Zone out</string>
-    <string name="ps_guard">Guard with passengers is ON</string>
     <string name="background">Background</string>
     <string name="show_name">Show name</string>
     <string name="widget_rows">Show values:</string>
@@ -209,11 +208,9 @@
     <string name="add_notification">Add notification</string>
     <string name="maintenance_info">You can add notification about periodicaly maintenance</string>
     <string name="net_warning">No data connection</string>
-    <string name="valet_warning">VALET mode ON</string>
     <string name="data_error">Data update error</string>
     <string name="no_photo">No photo</string>
     <string name="on">On</string>
-    <string name="card_message">Security card in car</string>
     <string name="once">Once</string>
     <string name="hour">1 hour</string>
     <string name="hour2">2 hours</string>
@@ -225,4 +222,11 @@
     <string name="device_pswd">Device require password on SMS</string>
     <string name="input_device_pswd">Input device password</string>
     <string name="add_phone">Add phone</string>
+    <string name="clear_phones">For clear control phones list initialize main phone</string>
+    <string name="ps_guard">Guard\nwith passengers</string>
+    <string name="card">Security card\nin car</string>
+    <string name="block">Engine blocked</string>
+    <string name="valet_mode">VALET\nmode on</string>
+    <string name="tilt">Tilt</string>
+    <string name="sos">SOS!!!</string>
 </resources>

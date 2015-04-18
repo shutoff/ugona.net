@@ -784,9 +784,8 @@ public class EventsFragment extends MainFragment {
             }
             if (e.icon != 0) {
                 icon.setImageResource(e.icon);
-                icon.setVisibility(View.VISIBLE);
             } else {
-                icon.setVisibility(View.GONE);
+                icon.setImageResource(R.drawable.e_system);
             }
             tvName.setText(e.title);
             View progress = v.findViewById(R.id.progress);
