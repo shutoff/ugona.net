@@ -87,7 +87,9 @@ public class PhotoFragment extends MainFragment {
 
         preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
-        v.findViewById(R.id.footer).setVisibility(View.GONE);
+        View vFooter = v.findViewById(R.id.footer);
+        if (vFooter != null)
+            vFooter.setVisibility(View.GONE);
 
         vPhotos = (HoursList) v.findViewById(R.id.tracks);
         vError = v.findViewById(R.id.error);
