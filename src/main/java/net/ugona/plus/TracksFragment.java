@@ -48,6 +48,7 @@ public class TracksFragment extends MainFragment {
 
     boolean loaded;
     Vector<Track> tracks;
+    Vector<Track> works;
     long engine_time;
     long selected;
 
@@ -151,7 +152,6 @@ public class TracksFragment extends MainFragment {
         if (loaded) {
             vTracks.notifyChanges();
             tracks_done();
-            all_done();
         } else {
             onRefresh();
         }
@@ -249,13 +249,9 @@ public class TracksFragment extends MainFragment {
         fetcher = null;
     }
 
-    void tracks_done() {
-        if (getActivity() == null)
-            return;
+    void setStatus(Vector<Track> tracks) {
         if (tracks.size() == 0) {
-            vTracks.setVisibility(View.GONE);
-            vError.setVisibility(View.GONE);
-            refreshDone();
+            tvSummary.setText("");
             return;
         }
         double mileage = 0;
@@ -290,12 +286,12 @@ public class TracksFragment extends MainFragment {
             status += timeFormat((int) (engine_time / 60));
         }
         tvSummary.setText(State.createSpans(status, vSummary.selectedColor, true));
-        refreshDone();
     }
 
-    void all_done() {
+    void tracks_done() {
         if (getActivity() == null)
             return;
+        setStatus(tracks);
         vError.setVisibility(View.GONE);
         vTracks.setVisibility(View.VISIBLE);
         vTracks.setAdapter(new TracksAdapter());
@@ -315,7 +311,7 @@ public class TracksFragment extends MainFragment {
         void result(JsonObject res) throws ParseException {
             if (getActivity() == null)
                 return;
-            tracks = new Vector<Track>();
+            works = new Vector<Track>();
             JsonArray list = res.get("tracks").asArray();
             for (int i = list.size() - 1; i >= 0; i--) {
                 JsonObject v = list.get(i).asObject();
@@ -328,20 +324,19 @@ public class TracksFragment extends MainFragment {
                 track.avg_speed = v.get("avg_speed").asFloat();
                 track.day_mileage = v.get("day_mileage").asFloat();
                 track.day_max_speed = v.get("day_max_speed").asInt();
-                tracks.add(track);
+                works.add(track);
             }
             engine_time = 0;
             JsonValue engine = res.get("engine_time");
             if (engine != null)
                 engine_time = engine.asLong();
 
-            if (tracks.size() == 0) {
+            if (works.size() == 0) {
+                tracks = works;
                 tracks_done();
-                all_done();
                 return;
             }
-            tracks_done();
-
+            setStatus(works);
             TrackStartPositionFetcher fetcher = new TrackStartPositionFetcher();
             fetcher.update(0);
         }
@@ -409,13 +404,12 @@ public class TracksFragment extends MainFragment {
             if (getActivity() == null)
                 return;
             if (address == null) {
-                Track track = tracks.get(pos);
+                Track track = works.get(pos);
                 Track.Point p = getPoint(track);
                 address = p.latitude + "," + p.longitude;
             }
             process(address);
-            if (++pos >= tracks.size()) {
-                // All tracks done
+            if (++pos >= works.size()) {
                 done();
                 return;
             }
@@ -426,7 +420,7 @@ public class TracksFragment extends MainFragment {
 
         void update(int track_pos) {
             pos = track_pos;
-            Track track = tracks.get(pos);
+            Track track = works.get(pos);
             Track.Point p = getPoint(track);
             if (getActivity() == null)
                 return;
@@ -450,7 +444,7 @@ public class TracksFragment extends MainFragment {
 
         @Override
         void process(String address) {
-            tracks.get(pos).start = address;
+            works.get(pos).start = address;
         }
 
         @Override
@@ -478,7 +472,7 @@ public class TracksFragment extends MainFragment {
             if (finish_address == null)
                 return;
 
-            Track track = tracks.get(pos);
+            Track track = works.get(pos);
 
             String[] start_parts = track.start.split(", ");
             String[] finish_parts = finish_address.split(", ");
@@ -517,7 +511,8 @@ public class TracksFragment extends MainFragment {
 
         @Override
         void done() {
-            all_done();
+            tracks = works;
+            tracks_done();
         }
     }
 

@@ -169,18 +169,16 @@ public class Alarm
             player.release();
         }
         timer.cancel();
-        if (bDemo) {
-            CarState state = CarState.get(this, car_id);
-            state.setSos(false);
-            state.setShock(0);
-            state.setMove(false);
-            state.setTilt(true);
-            state.setIn_sensor(false);
-            state.setExt_sensor(false);
-            Intent intent = new Intent(Names.UPDATED);
-            intent.putExtra(Names.ID, car_id);
-            sendBroadcast(intent);
-        }
+        CarState state = CarState.get(this, car_id);
+        state.setSos(false);
+        state.setShock(0);
+        state.setMove(false);
+        state.setTilt(true);
+        state.setIn_sensor(false);
+        state.setExt_sensor(false);
+        Intent intent = new Intent(Names.UPDATED);
+        intent.putExtra(Names.ID, car_id);
+        sendBroadcast(intent);
         super.onDestroy();
     }
 }

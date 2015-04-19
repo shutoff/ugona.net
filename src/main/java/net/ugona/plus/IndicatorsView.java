@@ -73,6 +73,8 @@ public class IndicatorsView extends HorizontalScrollView {
             }
             int d = (int) ((getWidth() - last_x) / 2);
             layout.setPadding(d, 0, 0, 0);
+        } else {
+            layout.setPadding(0, 0, 0, 0);
         }
     }
 

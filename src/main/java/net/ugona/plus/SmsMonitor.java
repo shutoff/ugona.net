@@ -79,7 +79,6 @@ public class SmsMonitor extends BroadcastReceiver {
                 CarConfig carConfig = CarConfig.get(context, car_id);
                 if (!compareNumbers(carConfig.getPhone(), sms_from) && !State.isDebug())
                     continue;
-                State.appendLog(body);
                 if (Commands.processSms(context, car_id, body)) {
                     abortBroadcast();
                     return;
