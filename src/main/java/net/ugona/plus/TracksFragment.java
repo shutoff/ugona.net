@@ -294,7 +294,12 @@ public class TracksFragment extends MainFragment {
         setStatus(tracks);
         vError.setVisibility(View.GONE);
         vTracks.setVisibility(View.VISIBLE);
-        vTracks.setAdapter(new TracksAdapter());
+        if (vTracks.getAdapter() != null) {
+            BaseAdapter adapter = (BaseAdapter) vTracks.getAdapter();
+            adapter.notifyDataSetChanged();
+        } else {
+            vTracks.setAdapter(new TracksAdapter());
+        }
         refreshDone();
         loaded = true;
     }
