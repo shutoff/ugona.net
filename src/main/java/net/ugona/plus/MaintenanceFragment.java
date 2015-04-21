@@ -190,7 +190,7 @@ public class MaintenanceFragment
                         refresh(params);
                         return;
                     } catch (Exception ex) {
-                        // ignore
+                        ex.printStackTrace();
                     }
                 }
             }
