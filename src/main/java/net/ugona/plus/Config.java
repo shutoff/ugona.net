@@ -33,7 +33,7 @@ public class Config implements Serializable {
 
     static public void clear(Object o) {
         synchronized (o) {
-            List<Field> fields = getFields(o);
+            Field[] fields = o.getClass().getDeclaredFields();
             try {
                 for (Field f : fields) {
                     if ((f.getModifiers() & Modifier.STATIC) != 0)
