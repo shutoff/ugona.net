@@ -13,11 +13,13 @@ import java.util.Vector;
 
 public class ActionsAdapter extends BaseAdapter {
 
+    CarConfig carConfig;
     Vector<CarConfig.Command> commands;
     Context context;
     String car_id;
 
     ActionsAdapter(Context context, String car_id) {
+        carConfig = CarConfig.get(context, car_id);
         fill(context, car_id);
     }
 
@@ -64,6 +66,8 @@ public class ActionsAdapter extends BaseAdapter {
         TextView tvText = (TextView) v.findViewById(R.id.text);
         CarConfig.Command cmd = commands.get(position);
         String text = cmd.name;
+        if (cmd.custom_name)
+            text = carConfig.getCommandName(cmd.id);
         int pos = text.indexOf('\n');
         if (pos < 0) {
             tvName.setText(text);

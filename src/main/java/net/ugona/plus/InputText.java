@@ -21,6 +21,7 @@ public class InputText
 
     String title;
     String data;
+    String id;
     EditText editText;
     int flags;
 
@@ -52,6 +53,7 @@ public class InputText
         super.onSaveInstanceState(outState);
         outState.putString(Names.TITLE, title);
         outState.putInt(Names.FLAGS, flags);
+        outState.putString(Names.ID, id);
     }
 
     @Override
@@ -64,6 +66,7 @@ public class InputText
         title = args.getString(Names.TITLE);
         data = args.getString(Names.OK);
         flags = args.getInt(Names.FLAGS);
+        id = args.getString(Names.ID);
     }
 
     @Override
@@ -72,6 +75,7 @@ public class InputText
         if (getTargetFragment() != null) {
             Intent data = new Intent();
             data.putExtra(Names.OK, editText.getText().toString());
+            data.putExtra(Names.ID, id);
             fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, data);
         }
     }

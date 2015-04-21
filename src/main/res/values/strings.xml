@@ -243,4 +243,5 @@
         <item>6 hours</item>
     </string-array>
     <string name="delete_timer">Delete timer?</string>
+    <string name="grp_title">Commands on main screen:</string>
 </resources>

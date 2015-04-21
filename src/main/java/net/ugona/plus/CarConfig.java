@@ -37,6 +37,7 @@ public class CarConfig extends Config {
     private String alarmSound;
     private String notifySound;
     private int[] pointers;
+    private String customNames;
 
     private CarConfig() {
         init();
@@ -91,6 +92,7 @@ public class CarConfig extends Config {
         temp_settings = "";
         alarmSound = "";
         notifySound = "";
+        customNames = "";
     }
 
     void read(Context context, String id) {
@@ -190,6 +192,17 @@ public class CarConfig extends Config {
             return;
         this.event_filter = event_filter;
         upd = true;
+    }
+
+    public String getCustomNames() {
+        return customNames;
+    }
+
+    public void setCustomNames(String customNames) {
+        if (this.customNames.equals(customNames))
+            return;
+        upd = true;
+        this.customNames = customNames;
     }
 
     public int getVoltage_shift() {
@@ -305,6 +318,44 @@ public class CarConfig extends Config {
     public void setPointers(int[] pointers) {
         this.pointers = pointers;
         upd = true;
+    }
+
+    String getCommandName(int id) {
+        Map<String, Integer> groups = new HashMap<>();
+        String res = null;
+        for (Command c : cmd) {
+            if (c.group != null) {
+                String name = c.group;
+                if (name.equals(""))
+                    name = c.name;
+                if (groups.get(name) == null)
+                    groups.put(name, c.id);
+            }
+            if (c.id == id) {
+                res = c.name;
+                if (c.group != null) {
+                    String name = c.group;
+                    if (name.equals(""))
+                        name = c.name;
+                    if (groups.get(name) != null) {
+                        int c_id = groups.get(name);
+                        String subst = null;
+                        final String[] custom_names = customNames.split("\\|");
+                        for (String custom_name : custom_names) {
+                            String[] parts = custom_name.split(":");
+                            if (parts.length != 2)
+                                continue;
+                            if (Integer.parseInt(parts[0]) == c_id)
+                                subst = parts[1];
+                        }
+                        if (subst != null)
+                            res = res.replace(name, subst);
+                    }
+                }
+                break;
+            }
+        }
+        return res;
     }
 
     public static class Command implements Serializable {

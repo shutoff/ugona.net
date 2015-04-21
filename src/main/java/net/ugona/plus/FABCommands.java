@@ -37,6 +37,7 @@ public class FABCommands
     ListView vList;
     String pkg;
     Vector<CarConfig.Command> items;
+    CarConfig carConfig;
     boolean longTap;
     String car_id;
     boolean animate;
@@ -46,6 +47,8 @@ public class FABCommands
         setOwnerActivity(activity);
         this.items = items;
         this.car_id = car_id;
+
+        carConfig = CarConfig.get(activity, car_id);
 
         setContentView(R.layout.fab);
         pkg = activity.getPackageName();
@@ -81,7 +84,10 @@ public class FABCommands
                     v = getLayoutInflater().inflate(R.layout.fab_item, null);
                 CarConfig.Command cmd = items.get(position);
                 TextView tv = (TextView) v.findViewById(R.id.name);
-                tv.setText(cmd.name);
+                String name = cmd.name;
+                if (cmd.custom_name)
+                    name = carConfig.getCommandName(cmd.id);
+                tv.setText(name);
                 ImageView iv = (ImageView) v.findViewById(R.id.icon);
                 int id = getContext().getResources().getIdentifier("b_" + cmd.icon, "drawable", pkg);
                 if (id == 0) {

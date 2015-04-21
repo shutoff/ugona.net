@@ -247,4 +247,5 @@
         <item>6 часов</item>
     </string-array>
     <string name="delete_timer">Удалить таймер?</string>
+    <string name="grp_title">Команды для быстрого запуска:</string>
 </resources>
