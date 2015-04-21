@@ -55,6 +55,7 @@ public abstract class DeviceBaseFragment
 
     final static int DO_TIMER = 1;
     final static int DO_DELETE = 2;
+    final static int DO_CCODE = 3;
 
     final static String DATA = "data";
     final static String CHANGED = "changed";
@@ -268,6 +269,24 @@ public abstract class DeviceBaseFragment
                 toast.show();
                 return true;
             }
+            SettingsAdapter adapter = (SettingsAdapter) vList.getAdapter();
+            Vector<CarConfig.Setting> settings = adapter.defs;
+            boolean ccode = false;
+            for (CarConfig.Setting setting : settings) {
+                if (changed.get(setting.id) == null)
+                    continue;
+                if (setting.ccode) {
+                    ccode = true;
+                    break;
+                }
+            }
+            if (ccode) {
+                CCodeDialog cCodeDialog = new CCodeDialog();
+                cCodeDialog.setTargetFragment(this, DO_CCODE);
+                cCodeDialog.show(getFragmentManager(), "ccode");
+                return true;
+            }
+
             AppConfig config = AppConfig.get(getActivity());
             if (!config.getPattern().equals("")) {
                 Intent intent = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null,
@@ -277,7 +296,7 @@ public abstract class DeviceBaseFragment
                 return true;
             }
             if (config.getPassword().equals("")) {
-                send_update();
+                send_update(null);
                 return true;
             }
             PasswordDialog passwordDialog = new PasswordDialog();
@@ -285,15 +304,21 @@ public abstract class DeviceBaseFragment
             args.putString(Names.MESSAGE, config.getPassword());
             passwordDialog.setArguments(args);
             passwordDialog.setTargetFragment(this, REQUEST_CHECK_PATTERN);
-            passwordDialog.show(getActivity().getSupportFragmentManager(), "password");
+            passwordDialog.show(getFragmentManager(), "password");
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if ((requestCode == REQUEST_CHECK_PATTERN) && (resultCode == Activity.RESULT_OK))
-            send_update();
+        if ((requestCode == DO_CCODE) && (resultCode == Activity.RESULT_OK)) {
+            send_update(data.getStringExtra("ccode"));
+            return;
+        }
+        if ((requestCode == REQUEST_CHECK_PATTERN) && (resultCode == Activity.RESULT_OK)) {
+            send_update(null);
+            return;
+        }
         if ((requestCode == DO_TIMER) && (resultCode == Activity.RESULT_OK)) {
             int pos = data.getIntExtra(Names.ID, 0);
             Timer timer = null;
@@ -319,6 +344,7 @@ public abstract class DeviceBaseFragment
                 BaseAdapter adapter = (BaseAdapter) vList.getAdapter();
                 adapter.notifyDataSetChanged();
             }
+            return;
         }
         if ((requestCode == DO_DELETE) && (resultCode == Activity.RESULT_OK)) {
             int pos = Integer.parseInt(data.getStringExtra(Names.ID));
@@ -326,11 +352,12 @@ public abstract class DeviceBaseFragment
             timerChanged = true;
             BaseAdapter adapter = (BaseAdapter) vList.getAdapter();
             adapter.notifyDataSetChanged();
+            return;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    void send_update() {
+    void send_update(String ccode) {
         final ProgressDialog dialog = new ProgressDialog(getActivity());
         dialog.setMessage(getString(R.string.save_settings));
         dialog.show();
@@ -397,6 +424,8 @@ public abstract class DeviceBaseFragment
         }
         CarConfig config = CarConfig.get(getActivity(), id());
         params.add("skey", config.getKey());
+        if (ccode != null)
+            params.add("ccode", ccode);
         task.execute("/set", params);
     }
 

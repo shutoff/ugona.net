@@ -386,6 +386,7 @@ public class CarConfig extends Config {
         Integer max;
         double k;
         String text;
+        boolean ccode;
         int[] cmd;
     }
 

@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/background" />
 
-            <SeekBar
+            <net.ugona.plus.SeekBarEx
                 android:id="@+id/background"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
