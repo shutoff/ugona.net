@@ -180,7 +180,7 @@ public class Config implements Serializable {
         return res;
     }
 
-    static private JsonObject saveJson(Object o) {
+    static public JsonObject saveJson(Object o) {
         if (o instanceof JsonObject)
             return (JsonObject) o;
         List<Field> fields = getFields(o);

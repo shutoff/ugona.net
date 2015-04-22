@@ -260,11 +260,11 @@ public abstract class DeviceBaseFragment
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            if ((changed != null) && !changed.isEmpty())
+            if (((changed != null) && !changed.isEmpty()) || timerChanged)
                 return true;
         }
         if (item.getItemId() == R.id.ok) {
-            if ((changed == null) || changed.isEmpty()) {
+            if (!timerChanged && ((changed == null) || changed.isEmpty())) {
                 Toast toast = Toast.makeText(getActivity(), R.string.no_changed, Toast.LENGTH_LONG);
                 toast.show();
                 return true;
@@ -426,6 +426,14 @@ public abstract class DeviceBaseFragment
         params.add("skey", config.getKey());
         if (ccode != null)
             params.add("ccode", ccode);
+        if (timerChanged) {
+            params.add("get_timers", getTimer());
+            JsonArray t = new JsonArray();
+            for (Timer timer : timers) {
+                t.add(Config.saveJson(timer));
+            }
+            params.add("timers", t);
+        }
         task.execute("/set", params);
     }
 
@@ -865,7 +873,7 @@ public abstract class DeviceBaseFragment
                         TextView tWday = (TextView) v.findViewById(wdays[i]);
                         tWday.setText(dayNames[wd]);
                         int color = R.color.text_dark;
-                        if ((t.day & (1 << (wd % 7))) != 0)
+                        if ((t.day & (1 << ((wd + 6) % 7))) != 0)
                             color = R.color.main;
                         tWday.setTextColor(getResources().getColor(color));
                     }

@@ -274,13 +274,13 @@ public class TimerFragment
 
     void setDayColor(TextView v) {
         int day = (Integer) v.getTag();
-        v.setTextColor(getResources().getColor(((timer.day & (1 << day)) != 0) ? R.color.main : R.color.text_dark));
+        v.setTextColor(getResources().getColor(((timer.day & (1 << ((day + 6) % 7))) != 0) ? R.color.main : R.color.text_dark));
     }
 
     @Override
     public void onClick(View v) {
         int day = (Integer) v.getTag();
-        timer.day ^= 1 << day;
+        timer.day ^= 1 << ((day + 6) % 7);
         setDayColor((TextView) v);
     }
 
