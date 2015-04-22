@@ -163,7 +163,7 @@ public class CarImage {
             text = "block";
         } else if (card) {
             parts.add("r_lock");
-        } else if (s.isGuard()) {
+        } else if ((s.isGuard() || (mode == 3))) {
             parts.add("b_lock");
         }
         if (mode == 2) {
