@@ -41,7 +41,6 @@ import java.text.Format;
 import java.text.ParsePosition;
 import java.util.Date;
 import java.util.Set;
-import java.util.Vector;
 
 public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTouchListener {
 
@@ -456,15 +455,15 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
                 return;
 
             final JsonArray data_array = res.get("res").asArray();
-            final Vector<Data> data = new Vector<Data>();
+            final Data[] data = new Data[data_array.size()];
             for (int i = 0; i < data_array.size(); i++) {
                 Data d = new Data();
                 Config.update(d, data_array.get(i).asObject());
                 d.t /= 1000;
                 d.v += delta;
-                data.add(d);
+                data[i] = d;
             }
-            if (data.size() == 0) {
+            if (data.length == 0) {
                 if (mListener != null)
                     mListener.noData();
                 return;
@@ -473,17 +472,17 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
             XYSeries series = new XYSeries() {
                 @Override
                 public int size() {
-                    return data.size();
+                    return data.length;
                 }
 
                 @Override
                 public Number getX(int i) {
-                    return data.get(i).t;
+                    return data[i].t;
                 }
 
                 @Override
                 public Number getY(int i) {
-                    return data.get(i).v;
+                    return data[i].v;
                 }
 
                 @Override
@@ -501,7 +500,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
             if (screenMinX < screenMaxX - 86400)
                 screenMinX = screenMaxX - 86400;
 
-            double min_value = data.get(data.size() - 1).v;
+            double min_value = data[data.length - 1].v;
             double max_value = min_value;
             for (Data d : data) {
                 double v = d.v;

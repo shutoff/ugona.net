@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.ugona.plus"
     android:versionCode="16"
-    android:versionName="2.0 (beta 21-04-2015)">
+    android:versionName="2.0 (beta 22-04-2015)">
 
 <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
