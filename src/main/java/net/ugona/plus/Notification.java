@@ -34,6 +34,7 @@ public class Notification extends Config {
     private int info;
     private int alarm;
     private int balance;
+    private int maintenance;
     private String message;
     private String title;
     private String url;
@@ -288,6 +289,54 @@ public class Notification extends Config {
             notification.alarm = 0;
         }
         notification.alarm = create(context, text, R.drawable.w_warning_light, car_id, null, 0, false, null);
+    }
+
+    static void showMaintenance(Context context, String car_id) {
+        Notification notification = Notification.get(context, car_id);
+        if (notification.maintenance != 0) {
+            remove(context, notification.maintenance);
+            notification.maintenance = 0;
+        }
+
+        CarConfig carConfig = CarConfig.get(context, car_id);
+        String s = null;
+        int left_days = carConfig.getLeftDays();
+        int left_mileage = carConfig.getLeftMileage();
+        if (left_days <= 15) {
+            s = carConfig.getMaintenance() + "\n";
+            if (left_days >= 0) {
+                s += context.getString(R.string.left);
+            } else {
+                left_days = -left_days;
+                s += context.getString(R.string.delay);
+            }
+            s += " ";
+            if (left_days < 30) {
+                s += State.getPlural(context, R.plurals.days, left_days);
+            } else {
+                int month = (int) Math.round(left_days / 30.);
+                if (month < 12) {
+                    s += State.getPlural(context, R.plurals.months, month);
+                } else {
+                    int years = (int) Math.round(left_days / 265.25);
+                    s += State.getPlural(context, R.plurals.years, years);
+                }
+            }
+        }
+        if (left_mileage <= 500) {
+            s = carConfig.getMaintenance() + "\n";
+            if (left_mileage >= 0) {
+                s += context.getString(R.string.left);
+            } else {
+                left_mileage = -left_mileage;
+                s += context.getString(R.string.rerun);
+            }
+            s += String.format(" %,d ", left_mileage) + context.getString(R.string.km);
+        }
+        if (s != null) {
+            String[] p = s.split("\n");
+            notification.maintenance = create(context, p[1], R.drawable.info, car_id, null, 0, false, p[1]);
+        }
     }
 
     static void show(Context context, String car_id, String text, String title, int pictId, int max_id, String sound, long when, boolean outgoing) {

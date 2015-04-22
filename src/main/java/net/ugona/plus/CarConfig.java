@@ -38,6 +38,11 @@ public class CarConfig extends Config {
     private String notifySound;
     private int[] pointers;
     private String customNames;
+    private int leftDays;
+    private int leftMileage;
+    private int leftHours;
+    private String maintenance;
+    private long maintenance_time;
 
     private CarConfig() {
         init();
@@ -93,6 +98,10 @@ public class CarConfig extends Config {
         alarmSound = "";
         notifySound = "";
         customNames = "";
+        leftDays = 1000;
+        leftMileage = 1000;
+        leftHours = 1000;
+        maintenance = "";
     }
 
     void read(Context context, String id) {
@@ -317,6 +326,61 @@ public class CarConfig extends Config {
 
     public void setPointers(int[] pointers) {
         this.pointers = pointers;
+        upd = true;
+    }
+
+    public int getLeftDays() {
+        return leftDays;
+    }
+
+    public void setLeftDays(int leftDays) {
+        if (this.leftDays == leftDays)
+            return;
+        this.leftDays = leftDays;
+        upd = true;
+    }
+
+    public int getLeftMileage() {
+        return leftMileage;
+    }
+
+    public void setLeftMileage(int leftMileage) {
+        if (this.leftMileage == leftMileage)
+            return;
+        this.leftMileage = leftMileage;
+        upd = true;
+    }
+
+    public int getLeftHours() {
+        return leftHours;
+    }
+
+    public void setLeftHours(int leftHours) {
+        if (this.leftHours == leftHours)
+            return;
+        this.leftHours = leftHours;
+        upd = true;
+    }
+
+    public String getMaintenance() {
+        return maintenance;
+    }
+
+    public void setMaintenance(String maintenance) {
+        if (this.maintenance.equals(maintenance))
+            return;
+        this.maintenance = maintenance;
+        upd = true;
+    }
+
+    public long getMaintenance_time() {
+        return maintenance_time;
+    }
+
+    public void setMaintenance_time(long maintenance_time) {
+        if (this.maintenance_time == maintenance_time)
+            return;
+        this.maintenance_time = maintenance_time;
         upd = true;
     }
 

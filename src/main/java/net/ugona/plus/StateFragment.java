@@ -69,6 +69,7 @@ public class StateFragment
     View vInfo;
     ImageView[] ivInfo;
     TextView tvInfo;
+    TextView tvMaintenance;
 
     @Override
     int layout() {
@@ -152,6 +153,15 @@ public class StateFragment
         for (int i = 0; i < info_id.length; i++) {
             ivInfo[i] = (ImageView) v.findViewById(info_id[i]);
         }
+
+        tvMaintenance = (TextView) v.findViewById(R.id.maintenance);
+        tvMaintenance.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MainActivity activity = (MainActivity) getActivity();
+                activity.setFragment(new MaintenanceFragment());
+            }
+        });
 
         IndicatorsView indicatorsView = (IndicatorsView) v.findViewById(R.id.indicators);
         View vRightArrow = v.findViewById(R.id.ind_right);
@@ -584,6 +594,48 @@ public class StateFragment
         }
         for (; i < tvPointers.length; i++) {
             tvPointers[i].setVisibility(View.GONE);
+        }
+
+        String s = null;
+        int days = config.getLeftDays();
+        int mileage = config.getLeftMileage();
+        if (days < 16) {
+            s = config.getMaintenance() + "\n";
+            tvMaintenance.setTextColor(getResources().getColor((days < 1) ? R.color.error : R.color.neutral));
+            if (days >= 0) {
+                s += getString(R.string.left);
+            } else {
+                s += getString(R.string.delay);
+                days = -days;
+            }
+            s += " ";
+            if (days < 30) {
+                s += State.getPlural(getActivity(), R.plurals.days, days);
+            } else {
+                int month = (int) Math.round(days / 30.);
+                if (month < 12) {
+                    s += State.getPlural(getActivity(), R.plurals.months, month);
+                } else {
+                    int year = (int) Math.round(days / 365.25);
+                    s += State.getPlural(getActivity(), R.plurals.years, year);
+                }
+            }
+            tvMaintenance.setText(s);
+            tvMaintenance.setVisibility(View.VISIBLE);
+        } else if (mileage <= 500) {
+            s = config.getMaintenance() + "\n";
+            tvMaintenance.setTextColor(getResources().getColor((mileage < 50) ? R.color.error : R.color.neutral));
+            if (mileage >= 0) {
+                s += getString(R.string.left);
+            } else {
+                s += getString(R.string.rerun);
+                mileage = -mileage;
+            }
+            s += String.format(" %,d ", mileage) + getString(R.string.km);
+            tvMaintenance.setText(s);
+            tvMaintenance.setVisibility(View.VISIBLE);
+        } else {
+            tvMaintenance.setVisibility(View.GONE);
         }
     }
 

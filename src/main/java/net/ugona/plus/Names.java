@@ -36,6 +36,7 @@ public class Names {
     static final String FLAGS = "flags";
     static final String PASSWORD = "password";
     static final String PHONE = "phone";
+    static final String MAINTENANCE = "maintenance";
 
     static final String PKG_NAME = Names.class.getPackage().getName();
 

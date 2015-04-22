@@ -12,11 +12,16 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.IBinder;
 
+import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 
 import java.io.Serializable;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,6 +30,7 @@ public class FetchService extends Service {
     static final String ACTION_UPDATE = "net.ugona.plus.UPDATE";
     static final String ACTION_NOTIFICATION = "net.ugona.plus.NOTIFICATION";
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR_NOTIFICATION";
+    static final String ACTION_MAINTENANCE = "net.ugona.plus.MAINTENANCE";
 
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;
@@ -104,6 +110,8 @@ public class FetchService extends Service {
                     sendBroadcast(i);
                 }
             }
+            if (action.equals(ACTION_MAINTENANCE))
+                new MaintenanceRequest(intent.getStringExtra(Names.ID), intent.getStringExtra(Names.MAINTENANCE) != null);
         }
         if (startRequest())
             return START_STICKY;
@@ -165,6 +173,11 @@ public class FetchService extends Service {
         String skey;
         Long time;
         Integer connect;
+    }
+
+    static class MaintenanceParams implements Serializable {
+        String skey;
+        String lang;
     }
 
     abstract class ServerRequest extends HttpTask {
@@ -301,6 +314,86 @@ public class FetchService extends Service {
             if (connect)
                 params.connect = 1;
             execute("/", params);
+        }
+    }
+
+    class MaintenanceRequest extends ServerRequest {
+
+        boolean notify_;
+
+        MaintenanceRequest(String id, boolean notify) {
+            super("M", id);
+            notify_ = notify;
+        }
+
+        @Override
+        void result(JsonObject res) throws ParseException {
+            JsonArray data = res.get("data").asArray();
+            long score = 550;
+            CarConfig carConfig = CarConfig.get(FetchService.this, car_id);
+            Date now = new Date();
+            int left_days = carConfig.getLeftDays();
+            int left_mileage = carConfig.getLeftMileage();
+            carConfig.setLeftDays(1000);
+            carConfig.setLeftMileage(1000);
+            for (int i = 0; i < data.size(); i++) {
+                JsonObject v = data.get(i).asObject();
+                JsonValue vPeriod = v.get("period");
+                JsonValue vLast = v.get("last");
+                if ((vPeriod != null) && (vLast != null)) {
+                    Date last = new Date(vLast.asLong() * 1000);
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(last);
+                    cal.add(Calendar.MONTH, vPeriod.asInt());
+                    long days = (cal.getTime().getTime() - now.getTime()) / 86400000;
+                    if (days * 30 < score) {
+                        score = days * 30;
+                        carConfig.setMaintenance(v.get("name").asString());
+                        carConfig.setLeftDays((int) days);
+                        carConfig.setLeftMileage(1000);
+                    }
+                }
+                JsonValue vMileage = v.get("mileage");
+                JsonValue vCurrent = v.get("current");
+                if ((vMileage != null) && (vCurrent != null)) {
+                    double delta = vMileage.asLong() - vCurrent.asLong();
+                    if (delta < score) {
+                        score = (long) delta;
+                        boolean minus = false;
+                        if (delta < 0) {
+                            delta = -delta;
+                            minus = true;
+                        }
+                        if (delta > 10) {
+                            double k = Math.floor(Math.log10(delta));
+                            if (k < 2)
+                                k = 2;
+                            k = Math.pow(10, k) / 2;
+                            delta = Math.round(Math.round(delta / k) * k);
+                        }
+                        if (minus)
+                            delta = -delta;
+                        carConfig.setMaintenance(v.get("name").asString());
+                        carConfig.setLeftDays(1000);
+                        carConfig.setLeftMileage((int) delta);
+                    }
+                }
+            }
+            carConfig.setMaintenance_time(now.getTime());
+            if ((left_days != carConfig.getLeftDays()) || (left_mileage != carConfig.getLeftMileage()))
+                sendUpdate(ACTION_UPDATE, car_id);
+            if (!notify_)
+                return;
+            Notification.showMaintenance(FetchService.this, car_id);
+        }
+
+        @Override
+        void exec(String api_key) {
+            MaintenanceParams params = new MaintenanceParams();
+            CarConfig carConfig = CarConfig.get(FetchService.this, car_id);
+            params.skey = carConfig.getKey();
+            params.lang = Locale.getDefault().getLanguage();
+            execute("/maintenance", params);
         }
     }
 
