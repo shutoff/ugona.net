@@ -371,6 +371,11 @@ public class PhotoFragment extends MainFragment {
                         matrix.postRotate(180);
                         bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
                     }
+                    if (bmp == null) {
+                        file.delete();
+                        photo.loading = -1;
+                        return true;
+                    }
                     BitmapCache b = new BitmapCache();
                     b.bitmap = bmp;
                     b.counter = ++loading;

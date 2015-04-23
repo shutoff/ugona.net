@@ -144,11 +144,14 @@ public class MaintenanceFragment
     public void onRefresh() {
         super.onRefresh();
         vError.setVisibility(View.GONE);
-        Params param = new Params();
-        refresh(param);
+        ParamsGet params = new ParamsGet();
+        CarConfig config = CarConfig.get(getActivity(), id());
+        params.skey = config.getKey();
+        params.lang = Locale.getDefault().getLanguage();
+        refresh(params);
     }
 
-    void refresh(Params param) {
+    void refresh(Object param) {
         vList.setVisibility(View.GONE);
         vError.setVisibility(View.GONE);
         if (data_fetcher != null)
@@ -161,6 +164,9 @@ public class MaintenanceFragment
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if ((requestCode == DO_DELETE) && (resultCode == Activity.RESULT_OK)) {
             ParamsDelete params = new ParamsDelete();
+            CarConfig config = CarConfig.get(getActivity(), id());
+            params.skey = config.getKey();
+            params.lang = Locale.getDefault().getLanguage();
             params.set = Integer.parseInt(intent.getStringExtra(Names.ID));
             refresh(params);
             return;
@@ -174,20 +180,32 @@ public class MaintenanceFragment
                         ByteArrayInputStream bis = new ByteArrayInputStream(data);
                         ObjectInput in = new ObjectInputStream(bis);
                         Maintenance m = (Maintenance) in.readObject();
-                        ParamsAdd params = null;
+                        Object p = null;
                         if (pos < maintenances.size()) {
-                            ParamsSet paramsSet = new ParamsSet();
-                            paramsSet.set = m.id;
-                            params = paramsSet;
+                            ParamsSet params = new ParamsSet();
+                            params.set = m.id;
+                            params.name = m.name;
+                            params.mileage = m.mileage;
+                            params.mototime = m.mototime;
+                            params.period = m.period;
+                            params.last = m.last;
+                            CarConfig config = CarConfig.get(getActivity(), id());
+                            params.skey = config.getKey();
+                            params.lang = Locale.getDefault().getLanguage();
+                            p = params;
                         } else {
-                            params = new ParamsAdd();
+                            ParamsAdd params = new ParamsAdd();
+                            params.name = m.name;
+                            params.mileage = m.mileage;
+                            params.mototime = m.mototime;
+                            params.period = m.period;
+                            params.last = m.last;
+                            CarConfig config = CarConfig.get(getActivity(), id());
+                            params.skey = config.getKey();
+                            params.lang = Locale.getDefault().getLanguage();
+                            p = params;
                         }
-                        params.name = m.name;
-                        params.mileage = m.mileage;
-                        params.mototime = m.mototime;
-                        params.period = m.period;
-                        params.last = m.last;
-                        refresh(params);
+                        refresh(p);
                         return;
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -428,16 +446,20 @@ public class MaintenanceFragment
         dialog.show(getActivity().getSupportFragmentManager(), "item");
     }
 
-    static class Params implements Serializable {
+    static class ParamsGet implements Serializable {
         String skey;
         String lang;
     }
 
-    static class ParamsDelete extends Params {
+    static class ParamsDelete implements Serializable {
+        String skey;
+        String lang;
         int set;
     }
 
-    static class ParamsAdd extends Params {
+    static class ParamsAdd implements Serializable {
+        String skey;
+        String lang;
         String name;
         int period;
         int mileage;
@@ -445,7 +467,14 @@ public class MaintenanceFragment
         long last;
     }
 
-    static class ParamsSet extends ParamsAdd {
+    static class ParamsSet implements Serializable {
+        String skey;
+        String lang;
+        String name;
+        int period;
+        int mileage;
+        int mototime;
+        long last;
         int set;
     }
 
@@ -494,10 +523,7 @@ public class MaintenanceFragment
             refreshDone();
         }
 
-        void update(Params param) {
-            CarConfig config = CarConfig.get(getActivity(), id());
-            param.skey = config.getKey();
-            param.lang = Locale.getDefault().getLanguage();
+        void update(Object param) {
             execute("/maintenance", param);
         }
     }

@@ -13,23 +13,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class Config implements Serializable {
 
     protected boolean upd;
-
-    static List<Field> getFields(Object o) {
-        List<Field> fields = new ArrayList<Field>();
-        for (Class<?> c = o.getClass(); c != null; c = c.getSuperclass()) {
-            fields.addAll(Arrays.asList(c.getDeclaredFields()));
-        }
-        return fields;
-    }
 
     static public void clear(Object o) {
         synchronized (o) {
@@ -72,7 +61,7 @@ public class Config implements Serializable {
     static public Set<String> update(Object o, JsonObject from) {
         Set<String> res = new HashSet<>();
         synchronized (o) {
-            List<Field> fields = getFields(o);
+            Field[] fields = o.getClass().getDeclaredFields();
             for (Field f : fields) {
                 try {
                     if ((f.getModifiers() & Modifier.STATIC) != 0)
@@ -183,7 +172,7 @@ public class Config implements Serializable {
     static public JsonObject saveJson(Object o) {
         if (o instanceof JsonObject)
             return (JsonObject) o;
-        List<Field> fields = getFields(o);
+        Field[] fields = o.getClass().getDeclaredFields();
         JsonObject res = new JsonObject();
         try {
             for (Field f : fields) {
