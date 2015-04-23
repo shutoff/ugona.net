@@ -9,6 +9,7 @@
         <item name="android:checkboxStyle">@style/CheckBoxStyle</item>
         <item name="android:spinnerStyle">@style/SpinnerStyle</item>
         <item name="android:radioButtonStyle">@style/RadioButtonStyle</item>
+        <item name="android:seekBarStyle">@style/SeekbarStyle</item>
     </style>
 
     <style name="Theme.Transparent" parent="Theme.AppCompat.Light.Dialog">
@@ -68,6 +69,21 @@
     <style name="SpinnerStyle" parent="android:Widget">
         <item name="android:background">@drawable/spinner</item>
         <item name="android:clickable">true</item>
+    </style>
+
+    <style name="SeekbarStyle" parent="android:Widget.SeekBar">
+        <item name="android:progressDrawable">
+            @drawable/apptheme_scrubber_progress_horizontal_holo_light
+        </item>
+        <item name="android:indeterminateDrawable">
+            @drawable/apptheme_scrubber_progress_horizontal_holo_light
+        </item>
+        <item name="android:minHeight">13dip</item>
+        <item name="android:maxHeight">13dip</item>
+        <item name="android:thumb">@drawable/apptheme_scrubber_control_selector_holo_light</item>
+        <item name="android:thumbOffset">16dip</item>
+        <item name="android:paddingLeft">16dip</item>
+        <item name="android:paddingRight">16dip</item>
     </style>
 
     <style name="PauseDialogAnimation">
