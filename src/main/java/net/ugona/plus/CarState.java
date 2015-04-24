@@ -33,6 +33,7 @@ public class CarState extends Config {
     private boolean hood;
     private boolean trunk;
     private boolean ignition;
+    private boolean heater;
     private boolean accessory;
     private boolean online;
     private int power_state;
@@ -218,6 +219,10 @@ public class CarState extends Config {
 
     public boolean isIgnition() {
         return ignition;
+    }
+
+    public boolean isHeater() {
+        return heater;
     }
 
     public boolean isRelay1() {

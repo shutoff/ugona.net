@@ -154,6 +154,9 @@ public class CarImage {
             parts.add((s.isGuard() && !az) ? "r_ignition" : "b_ignition");
             if (text == null)
                 text = "ignition";
+        } else if (s.isHeater()) {
+            parts.add("b_heater");
+            text = "rele";
         }
         if (s.isGuard() && (text == null))
             text = "guard";

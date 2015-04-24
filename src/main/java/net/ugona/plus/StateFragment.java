@@ -553,7 +553,7 @@ public class StateFragment
         if (fab.size() > 0) {
             vFab.setVisibility(View.VISIBLE);
             boolean more = true;
-            if ((fab.size() == 1) && !fab.get(0).icon.equals("blocking")) {
+            if ((fab.size() == 1) && (fab.get(0).icon != null) && !fab.get(0).icon.equals("blocking")) {
                 CarConfig.Command cmd = fab.get(0);
                 int res_id = getResources().getIdentifier("b_" + cmd.icon, "drawable", pkg);
                 if (res_id != 0) {
