@@ -299,7 +299,11 @@ public class MaintenanceFragment
                             double k = Math.floor(Math.log10(delta));
                             if (k < 2)
                                 k = 2;
-                            k = Math.pow(10, k) / 2;
+                            if (k < 4) {
+                                k = Math.pow(10, k) / 2;
+                            } else {
+                                k = Math.pow(10, k - 1);
+                            }
                             delta = Math.round(Math.round(delta / k) * k);
                         }
                         s += " " + String.format("%,d", (long) delta) + " " + getString(R.string.km);
@@ -513,6 +517,8 @@ public class MaintenanceFragment
                 Config.update(p, arr.get(i).asObject());
                 presets.add(p);
             }
+            if (getActivity() != null)
+                FetchService.updateMaintenance(getActivity(), id(), res);
             done();
         }
 

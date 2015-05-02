@@ -52,6 +52,70 @@ public class FetchService extends Service {
         }
     }
 
+    public static void updateMaintenance(Context context, String car_id, JsonObject res) {
+        JsonArray data = res.get("data").asArray();
+        long score = 550;
+        CarConfig carConfig = CarConfig.get(context, car_id);
+        Date now = new Date();
+        int left_days = carConfig.getLeftDays();
+        int left_mileage = carConfig.getLeftMileage();
+        carConfig.setLeftDays(1000);
+        carConfig.setLeftMileage(1000);
+        for (int i = 0; i < data.size(); i++) {
+            JsonObject v = data.get(i).asObject();
+            JsonValue vPeriod = v.get("period");
+            JsonValue vLast = v.get("last");
+            if ((vPeriod != null) && (vLast != null)) {
+                Date last = new Date(vLast.asLong() * 1000);
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(last);
+                cal.add(Calendar.MONTH, vPeriod.asInt());
+                long days = (cal.getTime().getTime() - now.getTime()) / 86400000;
+                if (days * 30 < score) {
+                    score = days * 30;
+                    carConfig.setMaintenance(v.get("name").asString());
+                    carConfig.setLeftDays((int) days);
+                    carConfig.setLeftMileage(1000);
+                }
+            }
+            JsonValue vMileage = v.get("mileage");
+            JsonValue vCurrent = v.get("current");
+            if ((vMileage != null) && (vCurrent != null)) {
+                double delta = vMileage.asLong() - vCurrent.asLong();
+                if (delta < score) {
+                    score = (long) delta;
+                    boolean minus = false;
+                    if (delta < 0) {
+                        delta = -delta;
+                        minus = true;
+                    }
+                    if (delta > 10) {
+                        double k = Math.floor(Math.log10(delta));
+                        if (k < 2)
+                            k = 2;
+                        k = Math.pow(10, k) / 2;
+                        delta = Math.round(Math.round(delta / k) * k);
+                    }
+                    if (minus)
+                        delta = -delta;
+                    carConfig.setMaintenance(v.get("name").asString());
+                    carConfig.setLeftDays(1000);
+                    carConfig.setLeftMileage((int) delta);
+                }
+            }
+        }
+        carConfig.setMaintenance_time(now.getTime());
+        if ((left_days != carConfig.getLeftDays()) || (left_mileage != carConfig.getLeftMileage())) {
+            try {
+                Intent intent = new Intent(ACTION_UPDATE);
+                intent.putExtra(Names.ID, car_id);
+                context.sendBroadcast(intent);
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -328,60 +392,7 @@ public class FetchService extends Service {
 
         @Override
         void result(JsonObject res) throws ParseException {
-            JsonArray data = res.get("data").asArray();
-            long score = 550;
-            CarConfig carConfig = CarConfig.get(FetchService.this, car_id);
-            Date now = new Date();
-            int left_days = carConfig.getLeftDays();
-            int left_mileage = carConfig.getLeftMileage();
-            carConfig.setLeftDays(1000);
-            carConfig.setLeftMileage(1000);
-            for (int i = 0; i < data.size(); i++) {
-                JsonObject v = data.get(i).asObject();
-                JsonValue vPeriod = v.get("period");
-                JsonValue vLast = v.get("last");
-                if ((vPeriod != null) && (vLast != null)) {
-                    Date last = new Date(vLast.asLong() * 1000);
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(last);
-                    cal.add(Calendar.MONTH, vPeriod.asInt());
-                    long days = (cal.getTime().getTime() - now.getTime()) / 86400000;
-                    if (days * 30 < score) {
-                        score = days * 30;
-                        carConfig.setMaintenance(v.get("name").asString());
-                        carConfig.setLeftDays((int) days);
-                        carConfig.setLeftMileage(1000);
-                    }
-                }
-                JsonValue vMileage = v.get("mileage");
-                JsonValue vCurrent = v.get("current");
-                if ((vMileage != null) && (vCurrent != null)) {
-                    double delta = vMileage.asLong() - vCurrent.asLong();
-                    if (delta < score) {
-                        score = (long) delta;
-                        boolean minus = false;
-                        if (delta < 0) {
-                            delta = -delta;
-                            minus = true;
-                        }
-                        if (delta > 10) {
-                            double k = Math.floor(Math.log10(delta));
-                            if (k < 2)
-                                k = 2;
-                            k = Math.pow(10, k) / 2;
-                            delta = Math.round(Math.round(delta / k) * k);
-                        }
-                        if (minus)
-                            delta = -delta;
-                        carConfig.setMaintenance(v.get("name").asString());
-                        carConfig.setLeftDays(1000);
-                        carConfig.setLeftMileage((int) delta);
-                    }
-                }
-            }
-            carConfig.setMaintenance_time(now.getTime());
-            if ((left_days != carConfig.getLeftDays()) || (left_mileage != carConfig.getLeftMileage()))
-                sendUpdate(ACTION_UPDATE, car_id);
+            updateMaintenance(FetchService.this, car_id, res);
             if (!notify_)
                 return;
             Notification.showMaintenance(FetchService.this, car_id);
