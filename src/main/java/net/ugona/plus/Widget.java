@@ -205,6 +205,8 @@ public class Widget extends AppWidgetProvider {
     }
 
     String getPrefix(String prefix) {
+        if (prefix.equals(""))
+            prefix = "c";
         return prefix;
     }
 
