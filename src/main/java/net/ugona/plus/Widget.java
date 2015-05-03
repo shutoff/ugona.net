@@ -71,10 +71,7 @@ public class Widget extends AppWidgetProvider {
             android.R.color.secondary_text_dark,
             android.R.color.black
     };
-    static final int id_lock_layout[] = {
-            R.layout.lock_widget,
-            R.layout.lock_widget_light
-    };
+
     static final int[] id_gsm_level[] = {
             {
                     R.drawable.b_gsm_level0,
@@ -204,9 +201,11 @@ public class Widget extends AppWidgetProvider {
     }
 
     int getLayoutId(Context context, int widgetId, int theme) {
-        if (isLockScreen(context, widgetId))
-            return id_lock_layout[theme];
         return id_layout[theme];
+    }
+
+    String getPrefix(String prefix) {
+        return prefix;
     }
 
     void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetID) {
@@ -244,7 +243,9 @@ public class Widget extends AppWidgetProvider {
             CarState carState = CarState.get(context, car_id);
             CarConfig carConfig = CarConfig.get(context, car_id);
 
-            carImage.update(carState);
+            String prefix = carState.getPrefix();
+            carImage.update(carState, getPrefix(prefix));
+
             String[] ext = carImage.state.split("\\|");
             String car_state = URLEncoder.encode(ext[0], "utf-8");
             Uri uri = Uri.parse("content://net.ugona.plus.car/" + car_state);

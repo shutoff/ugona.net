@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/MainLayout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:cropToPadding="true"
+        android:scaleType="fitXY" />
+
+    <LinearLayout
+        android:id="@+id/widget"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:baselineAligned="false"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@+id/car"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingBottom="2dp"
+                    android:paddingTop="2dp"
+                    android:scaleType="fitCenter" />
+
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="@string/app_name"
+                android:textColor="@color/text_dark"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:id="@+id/level_block"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/level_img"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_margin="1dp"
+                    android:src="@drawable/w_gsm_level0" />
+
+                <TextView
+                    android:id="@+id/level"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:paddingLeft="2dp"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/text_dark" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/voltage_block"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:src="@drawable/w_voltage" />
+
+                <TextView
+                    android:id="@+id/voltage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:paddingLeft="2dp"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/text_dark"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/temperature1_block"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/icon_temperature1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:src="@drawable/w_temperature" />
+
+                <TextView
+                    android:id="@+id/temperature1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:paddingLeft="2dp"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/text_dark"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:id="@+id/update_block"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:orientation="horizontal"
+                android:paddingBottom="2dp">
+
+                <ProgressBar
+                    android:id="@+id/update"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/refresh"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:src="@drawable/w_update" />
+
+                <ImageView
+                    android:id="@+id/error"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:src="@drawable/w_warning"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/last"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="bottom"
+                    android:paddingLeft="10dp"
+                    android:text="\??:??"
+                    android:textColor="@color/text_dark"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="2" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

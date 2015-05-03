@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.ugona.plus"
     android:versionCode="17"
-    android:versionName="2.0">
+    android:versionName="2.1 beta 20150502">
 
 <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
@@ -133,6 +133,23 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_metadata" />
+        </receiver>
+
+        <receiver
+            android:name=".CompactWidget"
+            android:label="@string/compact">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="net.ugona.plus.UPDATED" />
+                <action android:name="net.ugona.plus.NO_UPDATED" />
+                <action android:name="net.ugona.plus.ERROR" />
+                <action android:name="net.ugona.plus.START_UPDATE" />
+                <action android:name="net.ugona.plus.WIDGET_SCREEN_ON" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/compact_widget_metadata" />
         </receiver>
 
         <receiver android:name=".LockWidget">

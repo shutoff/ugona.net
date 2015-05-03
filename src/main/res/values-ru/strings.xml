@@ -248,4 +248,5 @@
     </string-array>
     <string name="delete_timer">Удалить таймер?</string>
     <string name="grp_title">Команды для быстрого запуска:</string>
+    <string name="compact">Угона.Нет+ компактный</string>
 </resources>

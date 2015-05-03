@@ -17,6 +17,10 @@ public class CarImage {
 
     final static float WIDTH = 1080;
     final static float HEIGHT = 750;
+
+    final static int W_WIDTH = 256;
+    final static int W_HEIGHT = 386;
+
     static Pictures pictures = new Pictures();
     int animation;
     String state;
@@ -33,10 +37,14 @@ public class CarImage {
     }
 
     boolean update(CarState s) {
-        Vector<String> parts = new Vector<String>();
         String prefix = s.getPrefix();
         if (prefix.equals(""))
             prefix = "c";
+        return update(s, prefix);
+    }
+
+    boolean update(CarState s, String prefix) {
+        Vector<String> parts = new Vector<String>();
         boolean guard = s.isGuard();
         long guard_time = s.getGuard_time();
         long card_time = s.getCard();
@@ -61,6 +69,11 @@ public class CarImage {
             String p = prefix + "_4_o";
             if (guard)
                 p += "_r";
+            parts.add(p);
+        } else {
+            String p = prefix + "_4";
+            if (guard)
+                p += "_b";
             parts.add(p);
         }
         if (s.isDoor_bl()) {
@@ -122,22 +135,52 @@ public class CarImage {
         if (!s.isGuard())
             az = false;
 
-        int shock = s.getShock();
-        if (shock == 1)
-            parts.add(prefix + "_a_hit1");
-        if (shock == 2)
-            parts.add(prefix + "_a_hit2");
-        if (s.isMove())
-            parts.add(prefix + "_a_move");
-        if (s.isAz()) {
-            animation = parts.size();
-            parts.add(prefix + "_az");
-            text = "autostart";
+        if (prefix.charAt(0) == 'w') {
+            int mode = s.getGuard_mode();
+            if (mode == 2) {
+                parts.add(prefix + "_valet");
+            } else if (card) {
+                parts.add(prefix + "_lock_r");
+            } else if ((s.isGuard() || (mode == 3))) {
+                if (guard) {
+                    parts.add(prefix + "_lock");
+                } else {
+                    parts.add(prefix + "_lock_b");
+                }
+            }
+            if (az) {
+                String ign = prefix + "_az";
+                if (!guard)
+                    ign += "_b";
+                parts.add(ign);
+            } else if (s.isIgnition()) {
+                String ign = prefix + "_ignition";
+                if (guard) {
+                    if (s.isGuard())
+                        ign += "_r";
+                } else {
+                    ign += "_b";
+                }
+                parts.add(ign);
+            }
+        } else {
+            int shock = s.getShock();
+            if (shock == 1)
+                parts.add(prefix + "_a_hit1");
+            if (shock == 2)
+                parts.add(prefix + "_a_hit2");
+            if (s.isMove())
+                parts.add(prefix + "_a_move");
+            if (s.isAz()) {
+                animation = parts.size();
+                parts.add(prefix + "_az");
+                text = "autostart";
+            }
+            if (s.isIn_sensor())
+                parts.add(prefix + "_a_in");
+            if (s.isExt_sensor())
+                parts.add(prefix + "_a_out");
         }
-        if (s.isIn_sensor())
-            parts.add(prefix + "_a_in");
-        if (s.isExt_sensor())
-            parts.add(prefix + "_a_out");
 
         String new_state = null;
         for (String part : parts) {
@@ -210,14 +253,23 @@ public class CarImage {
     }
 
     Bitmap getBitmap() {
+        String[] ext = state.split("\\|");
+        String[] parts = ext[0].split(";");
+
         int w = (int) (WIDTH / 4);
         int h = (int) (HEIGHT / 4);
         float k = w / WIDTH;
+
+        if ((parts.length > 0) && (parts[0].charAt(0) == 'w')) {
+            w = W_WIDTH;
+            h = W_HEIGHT;
+            k = 1;
+        }
+
         Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         bitmap.eraseColor(Color.TRANSPARENT);
         Canvas canvas = new Canvas(bitmap);
-        String[] ext = state.split("\\|");
-        String[] parts = ext[0].split(";");
+
         for (int i = 0; i < parts.length; i++) {
             String part = parts[i];
             int id = getBitmapId(part);
@@ -300,6 +352,54 @@ public class CarImage {
             add(R.drawable.m_b, 97, 4);
             add(R.drawable.q, 119, 89);
             add(R.drawable.q_b, 119, 89);
+            add(R.drawable.wc_1, 43, 140);
+            add(R.drawable.wc_1_b, 43, 140);
+            add(R.drawable.wc_1_o, 0, 139);
+            add(R.drawable.wc_1_o_b, 0, 139);
+            add(R.drawable.wc_1_r, 43, 140);
+            add(R.drawable.wc_1_o_r, 0, 139);
+            add(R.drawable.wc_2, 180, 140);
+            add(R.drawable.wc_2_b, 180, 140);
+            add(R.drawable.wc_2_o, 200, 139);
+            add(R.drawable.wc_2_o_b, 200, 139);
+            add(R.drawable.wc_2_o_r, 200, 139);
+            add(R.drawable.wc_2_r, 180, 140);
+            add(R.drawable.wc_3, 47, 238);
+            add(R.drawable.wc_3_b, 47, 238);
+            add(R.drawable.wc_3_o, 22, 237);
+            add(R.drawable.wc_3_o_b, 22, 237);
+            add(R.drawable.wc_3_o_r, 22, 237);
+            add(R.drawable.wc_3_r, 47, 238);
+            add(R.drawable.wc_4, 180, 238);
+            add(R.drawable.wc_4_b, 180, 238);
+            add(R.drawable.wc_4_o, 185, 236);
+            add(R.drawable.wc_4_o_b, 185, 236);
+            add(R.drawable.wc_4_o_r, 185, 236);
+            add(R.drawable.wc_4_r, 180, 238);
+            add(R.drawable.wc_h, 55, 1);
+            add(R.drawable.wc_b, 48, 0);
+            add(R.drawable.wc_h_b, 55, 1);
+            add(R.drawable.wc_h_o, 55, 60);
+            add(R.drawable.wc_h_o_b, 55, 60);
+            add(R.drawable.wc_h_o_r, 55, 60);
+            add(R.drawable.wc_h_r, 55, 1);
+            add(R.drawable.wc_r, 48, 0);
+            add(R.drawable.wc_t, 78, 345);
+            add(R.drawable.wc_t_b, 78, 345);
+            add(R.drawable.wc_t_o, 76, 343);
+            add(R.drawable.wc_t_o_b, 76, 343);
+            add(R.drawable.wc_t_o_r, 76, 343);
+            add(R.drawable.wc_t_r, 78, 345);
+            add(R.drawable.wc, 48, 0);
+            add(R.drawable.wc_lock, 100, 196);
+            add(R.drawable.wc_lock_b, 99, 195);
+            add(R.drawable.wc_lock_r, 99, 195);
+            add(R.drawable.wc_valet, 92, 195);
+            add(R.drawable.wc_ignition, 96, 70);
+            add(R.drawable.wc_ignition_b, 96, 70);
+            add(R.drawable.wc_ignition_r, 96, 70);
+            add(R.drawable.wc_az, 106, 34);
+            add(R.drawable.wc_az_b, 106, 34);
         }
 
         void add(int id, int x, int y) {
