@@ -1,6 +1,7 @@
 package net.ugona.plus;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -9,6 +10,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Vibrator;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -22,8 +24,8 @@ public class Alarm
     String title;
     CarView carView;
     CountDownTimer timer;
-    CountDownTimer volumeTimer;
     AudioManager audioManager;
+    Vibrator vibro;
     MediaPlayer player;
     int start_level;
     int max_level;
@@ -58,21 +60,36 @@ public class Alarm
         audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         start_level = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
         max_level = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM);
+        vibro = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        CarConfig carConfig = CarConfig.get(this, car_id);
+        final int vibro_mode = carConfig.getAlarmVibro();
         prev_level = start_level;
         count = 0;
-        timer = new CountDownTimer(180000, 1000) {
+        timer = new CountDownTimer(180000, 2000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 count++;
                 if (count > 60)
                     count = 60;
-                int new_level = start_level + (int) ((count / 60.) * (max_level - start_level));
+                int new_level = start_level + (int) ((count / 30.) * (max_level - start_level));
                 if (new_level != prev_level) {
                     audioManager.setStreamVolume(AudioManager.STREAM_ALARM, new_level, 0);
                     prev_level = new_level;
                 }
+                switch (vibro_mode) {
+                    case 0:
+                        vibro.vibrate(1000);
+                        break;
+                    case 2:
+                        vibro.vibrate(Notification.SHORT_PATTERN, -1);
+                        break;
+                    case 3:
+                        vibro.vibrate(Notification.LONG_PATTERN, -1);
+                        break;
+                }
+
                 if (bDemo && (--demo_count <= 0)) {
-                    demo_count = 10;
+                    demo_count = 5;
                     CarState state = CarState.get(Alarm.this, car_id);
                     switch (++demo_state) {
                         case 1:
@@ -118,7 +135,6 @@ public class Alarm
             }
         };
         timer.start();
-        CarConfig carConfig = CarConfig.get(this, car_id);
         String sound = carConfig.getAlarmSound();
         Uri uri = Uri.parse(sound);
         if (sound.equals(""))

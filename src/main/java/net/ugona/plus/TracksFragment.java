@@ -53,6 +53,7 @@ public class TracksFragment extends MainFragment {
     long selected;
 
     TracksFetcher fetcher;
+    int fetcher_id;
 
     @Override
     int layout() {
@@ -342,7 +343,7 @@ public class TracksFragment extends MainFragment {
                 return;
             }
             setStatus(works);
-            TrackStartPositionFetcher fetcher = new TrackStartPositionFetcher();
+            TrackStartPositionFetcher fetcher = new TrackStartPositionFetcher(++fetcher_id);
             fetcher.update(0);
         }
 
@@ -382,14 +383,16 @@ public class TracksFragment extends MainFragment {
         Handler handler;
 
         int pos;
+        int id;
 
-        TrackPositionFetcher() {
+        TrackPositionFetcher(int id) {
             handler = new Handler();
+            this.id = id;
         }
 
         abstract Track.Point getPoint(Track track);
 
-        abstract TrackPositionFetcher create();
+        abstract TrackPositionFetcher create(int id);
 
         abstract void process(String address);
 
@@ -408,6 +411,8 @@ public class TracksFragment extends MainFragment {
         public void process_address(String address) {
             if (getActivity() == null)
                 return;
+            if (id != fetcher_id)
+                return;
             if (address == null) {
                 Track track = works.get(pos);
                 Track.Point p = getPoint(track);
@@ -418,7 +423,7 @@ public class TracksFragment extends MainFragment {
                 done();
                 return;
             }
-            TrackPositionFetcher fetcher = create();
+            TrackPositionFetcher fetcher = create(id);
             fetcher.update(pos);
         }
 
@@ -436,6 +441,10 @@ public class TracksFragment extends MainFragment {
 
     class TrackStartPositionFetcher extends TrackPositionFetcher {
 
+        TrackStartPositionFetcher(int id) {
+            super(id);
+        }
+
         @Override
         Track.Point getPoint(Track track) {
             String[] points = track.track.split("\\|");
@@ -443,8 +452,8 @@ public class TracksFragment extends MainFragment {
         }
 
         @Override
-        TrackPositionFetcher create() {
-            return new TrackStartPositionFetcher();
+        TrackPositionFetcher create(int id) {
+            return new TrackStartPositionFetcher(id);
         }
 
         @Override
@@ -454,12 +463,16 @@ public class TracksFragment extends MainFragment {
 
         @Override
         void done() {
-            TrackPositionFetcher fetcher = new TrackEndPositionFetcher();
+            TrackPositionFetcher fetcher = new TrackEndPositionFetcher(id);
             fetcher.update(0);
         }
     }
 
     class TrackEndPositionFetcher extends TrackPositionFetcher {
+
+        TrackEndPositionFetcher(int id) {
+            super(id);
+        }
 
         @Override
         Track.Point getPoint(Track track) {
@@ -468,8 +481,8 @@ public class TracksFragment extends MainFragment {
         }
 
         @Override
-        TrackPositionFetcher create() {
-            return new TrackEndPositionFetcher();
+        TrackPositionFetcher create(int id) {
+            return new TrackEndPositionFetcher(id);
         }
 
         @Override
@@ -478,6 +491,8 @@ public class TracksFragment extends MainFragment {
                 return;
 
             Track track = works.get(pos);
+            if (track.start == null)
+                return;
 
             String[] start_parts = track.start.split(", ");
             String[] finish_parts = finish_address.split(", ");

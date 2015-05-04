@@ -20,14 +20,16 @@ import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.Vector;
 
@@ -43,11 +45,9 @@ public class StatFragment extends MainFragment {
     Vector<Day> stat;
 
     static String monthYear(int year, int month) {
-        String s = new DateTime(year, month + 1, 1, 0, 0, 0, 0)
-                .monthOfYear().getAsText().toUpperCase();
-        s = s.replaceAll("\u0410\u042F$", "\u0410\u0419").replaceAll("\u042F$", "\u042C").replaceAll("\u0410$", "");
-        s = s.substring(0, 1) + s.substring(1).toLowerCase();
-        return s + " " + year;
+        Date d = new Date(year - 1900, month, 1);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("LLLL", Locale.getDefault());
+        return dateFormat.format(d) + " " + year;
     }
 
     @Override

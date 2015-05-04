@@ -28,7 +28,7 @@
         android:id="@+id/passwd"
         android:icon="@drawable/ic_password"
         android:orderInCategory="500"
-        android:title="@string/password" />
+        android:title="@string/set_password" />
 
     <item
         android:id="@+id/about"

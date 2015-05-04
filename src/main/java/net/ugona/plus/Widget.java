@@ -245,6 +245,14 @@ public class Widget extends AppWidgetProvider {
             CarState carState = CarState.get(context, car_id);
             CarConfig carConfig = CarConfig.get(context, car_id);
 
+            boolean show_name = preferences.getBoolean(Names.SHOW_NAME + widgetID, false);
+            if (show_name) {
+                widgetView.setTextViewText(R.id.name, carConfig.getName());
+                widgetView.setViewVisibility(R.id.name, View.VISIBLE);
+            } else {
+                widgetView.setViewVisibility(R.id.name, View.GONE);
+            }
+
             String prefix = carState.getPrefix();
             carImage.update(carState, getPrefix(prefix));
 
@@ -328,8 +336,6 @@ public class Widget extends AppWidgetProvider {
                 widgetView.setViewVisibility(R.id.balance_block, View.GONE);
             }
             widgetView.setViewVisibility(R.id.balance_block, show_balance ? View.VISIBLE : View.GONE);
-
-            widgetView.setViewVisibility(R.id.name, View.GONE);
 
             int gsm_level = carState.getGsm_level();
             boolean show_level = (show_count < MAX_ROWS);

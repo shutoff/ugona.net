@@ -210,22 +210,26 @@ public class EventsFragment extends MainFragment {
                     return;
                 if (!id().equals(intent.getStringExtra(Names.ID)))
                     return;
-                if (intent.getAction().equals(Names.UPDATED)) {
-                    LocalDate today = new LocalDate();
-                    if (!today.equals(date()) && loaded)
-                        return;
-                    if (fetcher != null)
-                        return;
-                    fetcher = new DataFetcher();
-                    fetcher.no_reload = true;
-                    fetcher.update();
-                }
-                if (intent.getAction().equals(Names.CONFIG_CHANGED)) {
-                    if (fetcher != null)
-                        fetcher.cancel();
-                    fetcher = new DataFetcher();
-                    fetcher.no_reload = true;
-                    fetcher.update();
+                try {
+                    if (intent.getAction().equals(Names.UPDATED)) {
+                        LocalDate today = new LocalDate();
+                        if (!today.equals(date()) && loaded)
+                            return;
+                        if (fetcher != null)
+                            return;
+                        fetcher = new DataFetcher();
+                        fetcher.no_reload = true;
+                        fetcher.update();
+                    }
+                    if (intent.getAction().equals(Names.CONFIG_CHANGED)) {
+                        if (fetcher != null)
+                            fetcher.cancel();
+                        fetcher = new DataFetcher();
+                        fetcher.no_reload = true;
+                        fetcher.update();
+                    }
+                } catch (Exception ex) {
+                    // ignore
                 }
             }
         };

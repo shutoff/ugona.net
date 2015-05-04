@@ -30,7 +30,8 @@
     <string name="charts">Графики</string>
     <string name="maintenance">Обслуживание</string>
     <string name="cars">Список автомобилей</string>
-    <string name="password">Установить пароль</string>
+    <string name="set_password">Установить пароль</string>
+    <string name="password">Введите пароль</string>
     <string name="about">О программе</string>
     <string name="version">Версия:</string>
     <string name="service">ФЕДЕРАЛЬНЫЙ СЕРВИС</string>
@@ -249,4 +250,12 @@
     <string name="delete_timer">Удалить таймер?</string>
     <string name="grp_title">Команды для быстрого запуска:</string>
     <string name="compact">Угона.Нет+ компактный</string>
+    <string name="lock_widget">Вмджет экрана блокировки</string>
+    <string name="add_lock_widget">Вы можете добавить виджет на экран блокировки</string>
+    <string-array name="vibro">
+        <item>Вибрация по умолчанию</item>
+        <item>Без вибрации</item>
+        <item>Короткая вибрация</item>
+        <item>Долгая вибрация</item>
+    </string-array>
 </resources>

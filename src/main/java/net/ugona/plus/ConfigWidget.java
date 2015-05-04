@@ -126,6 +126,8 @@ public class ConfigWidget extends Activity {
         ed.putInt(Names.THEME + widgetID, theme);
         ed.commit();
         setResult(RESULT_OK, resultValue);
+        Intent intent = new Intent(WidgetService.ACTION_SCREEN);
+        sendBroadcast(intent);
     }
 
     static class ThemeAdapter extends ArrayAdapter {

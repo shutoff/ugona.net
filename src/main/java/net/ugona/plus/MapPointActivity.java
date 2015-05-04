@@ -277,7 +277,7 @@ public class MapPointActivity extends MapActivity {
         params.skey = carConfig.getKey();
         params.end = carState.getTime();
         params.begin = params.end - 86400000;
-        trackTask.execute("/traks", params);
+        trackTask.execute("/tracks", params);
     }
 
     static class Params implements Serializable {

@@ -37,6 +37,8 @@ public class Names {
     static final String PASSWORD = "password";
     static final String PHONE = "phone";
     static final String MAINTENANCE = "maintenance";
+    static final String SHOW_NAME = "show_name";
+    static final String VIBRO = "vibro";
 
     static final String PKG_NAME = Names.class.getPackage().getName();
 

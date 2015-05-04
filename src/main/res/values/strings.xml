@@ -30,7 +30,8 @@
     <string name="charts">Charts</string>
     <string name="maintenance">Maintenance</string>
     <string name="cars">Cars</string>
-    <string name="password">Set password</string>
+    <string name="set_password">Set password</string>
+    <string name="password">Input password</string>
     <string name="about">About</string>
     <string name="version">Version:</string>
     <string name="service">FEDERAL SERVICE</string>
@@ -245,4 +246,12 @@
     <string name="delete_timer">Delete timer?</string>
     <string name="grp_title">Commands on main screen:</string>
     <string name="compact">Ugona.net+ compact</string>
+    <string name="lock_widget">Lock widget</string>
+    <string name="add_lock_widget">You can add widget on lockscreen</string>
+    <string-array name="vibro">
+        <item>Default vibro</item>
+        <item>No vibration</item>
+        <item>Short vibration</item>
+        <item>Long vibration</item>
+    </string-array>
 </resources>

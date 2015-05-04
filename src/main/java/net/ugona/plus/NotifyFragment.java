@@ -49,7 +49,7 @@ public class NotifyFragment
     void fill() {
         items = new Vector<>();
 
-        items.add(new SoundItem(R.string.alarm_sound, RingtoneManager.TYPE_RINGTONE, "alarmSound"));
+        items.add(new SoundItem(R.string.alarm_sound, RingtoneManager.TYPE_RINGTONE, "alarm"));
 
         items.add(new Item(getString(R.string.alarm_test), getString(R.string.alarm_test_sum), new Runnable() {
             @Override
@@ -62,7 +62,7 @@ public class NotifyFragment
             }
         }));
 
-        items.add(new SoundItem(R.string.notify_sound, RingtoneManager.TYPE_NOTIFICATION, "notifySound"));
+        items.add(new SoundItem(R.string.notify_sound, RingtoneManager.TYPE_NOTIFICATION, "notify"));
 
         CarState state = CarState.get(getActivity(), id());
         if (!state.getBalance().equals("")) {
@@ -245,6 +245,7 @@ public class NotifyFragment
         Uri uri;
         int type;
         String name;
+        int vibro;
 
         SoundItem(int title, int type, String name) {
             super(getString(title), "", null);
@@ -252,7 +253,7 @@ public class NotifyFragment
             this.name = name;
             CarConfig carConfig = CarConfig.get(getActivity(), id());
             try {
-                Field field = carConfig.getClass().getDeclaredField(name);
+                Field field = carConfig.getClass().getDeclaredField(name + "Sound");
                 field.setAccessible(true);
                 String sound = field.get(carConfig).toString();
                 if (sound.equals("")) {
@@ -260,6 +261,9 @@ public class NotifyFragment
                 } else {
                     uri = Uri.parse(sound);
                 }
+                field = carConfig.getClass().getDeclaredField(name + "Vibro");
+                field.setAccessible(true);
+                vibro = field.getInt(carConfig);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -277,6 +281,7 @@ public class NotifyFragment
                     args.putInt(Names.TYPE, type);
                     if (uri != null)
                         args.putString(Names.SOUND, uri.toString());
+                    args.putInt(Names.VIBRO, vibro);
                     picker.setArguments(args);
                     picker.setTargetFragment(NotifyFragment.this, i);
                     picker.show(getActivity().getSupportFragmentManager(), "ringtone");
@@ -304,9 +309,13 @@ public class NotifyFragment
                 try {
                     uri = Uri.parse(sound);
                     CarConfig carConfig = CarConfig.get(getActivity(), id());
-                    Field field = carConfig.getClass().getDeclaredField(name);
+                    Field field = carConfig.getClass().getDeclaredField(name + "Sound");
                     field.setAccessible(true);
                     field.set(carConfig, sound);
+                    field = carConfig.getClass().getDeclaredField(name + "Vibro");
+                    field.setAccessible(true);
+                    vibro = data.getIntExtra(Names.VIBRO, 0);
+                    field.setInt(carConfig, vibro);
                     carConfig.upd = true;
                 } catch (Exception ex) {
                     ex.printStackTrace();

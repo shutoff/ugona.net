@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,7 +33,8 @@ import java.util.Vector;
 
 public class ZonesFragment
         extends MainFragment
-        implements AdapterView.OnItemClickListener {
+        implements AdapterView.OnItemClickListener,
+        CheckBox.OnCheckedChangeListener {
 
     static final int ZONE_REQUEST = 200;
     ListView vList;
@@ -220,6 +222,8 @@ public class ZonesFragment
                     });
                     CheckBox checkBox = (CheckBox) v.findViewById(R.id.check);
                     checkBox.setChecked(z.device);
+                    checkBox.setTag(position);
+                    checkBox.setOnCheckedChangeListener(ZonesFragment.this);
                     v.findViewById(R.id.sms).setVisibility(z.sms ? View.VISIBLE : View.INVISIBLE);
                     vAdd.setVisibility(View.GONE);
                     vZone.setVisibility(View.VISIBLE);
@@ -356,6 +360,17 @@ public class ZonesFragment
                 return false;
         }
         return true;
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        int pos = (Integer) buttonView.getTag();
+        Zone z = zones.get(pos);
+        if (z.device == isChecked)
+            return;
+        z.device = isChecked;
+        BaseAdapter adapter = (BaseAdapter) vList.getAdapter();
+        adapter.notifyDataSetChanged();
     }
 
     static class Param implements Serializable {

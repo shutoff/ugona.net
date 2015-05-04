@@ -36,6 +36,8 @@ public class CarConfig extends Config {
     private int balance_limit;
     private String alarmSound;
     private String notifySound;
+    private int alarmVibro;
+    private int notifyVibro;
     private int[] pointers;
     private String customNames;
     private int leftDays;
@@ -284,6 +286,14 @@ public class CarConfig extends Config {
 
     public String getNotifySound() {
         return notifySound;
+    }
+
+    public int getAlarmVibro() {
+        return alarmVibro;
+    }
+
+    public int getNotifyVibro() {
+        return notifyVibro;
     }
 
     public int getBalance_limit() {

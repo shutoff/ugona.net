@@ -22,6 +22,8 @@ import java.util.Set;
 public class Notification extends Config {
 
     private static final String CAR_KEY = "notification_";
+    public static long[] SHORT_PATTERN = {0, 100, 500, 100};
+    public static long[] LONG_PATTERN = {0, 900, 500, 900};
     static int max_id;
     private static HashMap<String, Notification> notifications;
     private int az;
@@ -340,18 +342,17 @@ public class Notification extends Config {
     }
 
     static void show(Context context, String car_id, String text, String title, int pictId, int max_id, String sound, long when, boolean outgoing) {
-        if (title == null) {
-            CarConfig carConfig = CarConfig.get(context, car_id);
+        CarConfig carConfig = CarConfig.get(context, car_id);
+        if (title == null)
             title = carConfig.getName();
-        }
         if (sound == null) {
-            CarConfig carConfig = CarConfig.get(context, car_id);
             sound = carConfig.getNotifySound();
             if (sound.equals(""))
                 sound = null;
         }
         int defs = android.app.Notification.DEFAULT_LIGHTS;
-        defs |= android.app.Notification.DEFAULT_VIBRATE;
+        if (carConfig.getNotifyVibro() == 0)
+            defs |= android.app.Notification.DEFAULT_VIBRATE;
         if (sound == null)
             defs |= android.app.Notification.DEFAULT_SOUND;
 
@@ -369,6 +370,12 @@ public class Notification extends Config {
 
         if (uri != null)
             builder.setSound(uri);
+
+        if (carConfig.getNotifyVibro() == 2)
+            builder.setVibrate(SHORT_PATTERN);
+        if (carConfig.getNotifyVibro() == 3)
+            builder.setVibrate(LONG_PATTERN);
+
 
         builder.setContentTitle(title);
         if (text.length() > 80) {
