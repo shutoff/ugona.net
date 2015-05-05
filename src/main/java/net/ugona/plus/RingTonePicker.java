@@ -77,7 +77,7 @@ public class RingTonePicker
         if (def_sound != null) {
             RadioButton rb = new RadioButton(getActivity());
             rb.setText(R.string.def);
-            rb.setTag(def_sound);
+            rb.setTag("android.resource://net.ugona.plus/raw/" + def_sound);
             rb.setId(n++);
             if (sound.equals("android.resource://net.ugona.plus/raw/" + def_sound))
                 rb.setChecked(true);

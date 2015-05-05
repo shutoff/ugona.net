@@ -340,7 +340,7 @@ public class Notification extends Config {
         }
         if (s != null) {
             String[] p = s.split("\n");
-            notification.maintenance = create(context, p[1], R.drawable.info, car_id, null, 0, false, p[1]);
+            notification.maintenance = create(context, p[0], R.drawable.info, car_id, null, 0, false, p[1]);
         }
     }
 
