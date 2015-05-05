@@ -49,7 +49,7 @@ public class NotifyFragment
     void fill() {
         items = new Vector<>();
 
-        items.add(new SoundItem(R.string.alarm_sound, RingtoneManager.TYPE_RINGTONE, "alarm"));
+        items.add(new SoundItem(R.string.alarm_sound, RingtoneManager.TYPE_RINGTONE, "alarm", null));
 
         items.add(new Item(getString(R.string.alarm_test), getString(R.string.alarm_test_sum), new Runnable() {
             @Override
@@ -62,7 +62,10 @@ public class NotifyFragment
             }
         }));
 
-        items.add(new SoundItem(R.string.notify_sound, RingtoneManager.TYPE_NOTIFICATION, "notify"));
+        items.add(new SoundItem(R.string.notify_sound, RingtoneManager.TYPE_NOTIFICATION, "notify", null));
+        items.add(new SoundItem(R.string.notify_az_start, RingtoneManager.TYPE_NOTIFICATION, "azStart", "azStart"));
+        items.add(new SoundItem(R.string.zone_in, RingtoneManager.TYPE_NOTIFICATION, "zoneIn", null));
+        items.add(new SoundItem(R.string.zone_out, RingtoneManager.TYPE_NOTIFICATION, "zoneOut", null));
 
         CarState state = CarState.get(getActivity(), id());
         if (!state.getBalance().equals("")) {
@@ -245,19 +248,25 @@ public class NotifyFragment
         Uri uri;
         int type;
         String name;
+        String def_sound;
         int vibro;
 
-        SoundItem(int title, int type, String name) {
+        SoundItem(int title, int type, String name, String def_sound) {
             super(getString(title), "", null);
             this.type = type;
             this.name = name;
+            this.def_sound = def_sound;
             CarConfig carConfig = CarConfig.get(getActivity(), id());
             try {
                 Field field = carConfig.getClass().getDeclaredField(name + "Sound");
                 field.setAccessible(true);
                 String sound = field.get(carConfig).toString();
                 if (sound.equals("")) {
-                    uri = RingtoneManager.getDefaultUri(type);
+                    if (def_sound != null) {
+                        uri = Uri.parse("android.resource://net.ugona.plus/raw/" + def_sound);
+                    } else {
+                        uri = RingtoneManager.getDefaultUri(type);
+                    }
                 } else {
                     uri = Uri.parse(sound);
                 }
@@ -282,6 +291,7 @@ public class NotifyFragment
                     if (uri != null)
                         args.putString(Names.SOUND, uri.toString());
                     args.putInt(Names.VIBRO, vibro);
+                    args.putString(Names.DEFAULT, def_sound);
                     picker.setArguments(args);
                     picker.setTargetFragment(NotifyFragment.this, i);
                     picker.show(getActivity().getSupportFragmentManager(), "ringtone");
@@ -291,6 +301,17 @@ public class NotifyFragment
         }
 
         void setTitle() {
+            if (def_sound != null) {
+                if (uri.toString().equals("android.resource://net.ugona.plus/raw/" + def_sound)) {
+                    this.text = getString(R.string.def);
+                    return;
+                }
+                if (uri.toString().equals("-")) {
+                    this.text = getString(R.string.no_sound);
+                    return;
+                }
+            }
+
             Ringtone ringtone = RingtoneManager.getRingtone(getActivity(), uri);
             if (ringtone == null) {
                 uri = RingtoneManager.getDefaultUri(type);

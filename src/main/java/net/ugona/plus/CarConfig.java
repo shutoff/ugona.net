@@ -36,8 +36,16 @@ public class CarConfig extends Config {
     private int balance_limit;
     private String alarmSound;
     private String notifySound;
+    private String azStartSound;
+    private String azStopSound;
+    private String zoneInSound;
+    private String zoneOutSound;
     private int alarmVibro;
     private int notifyVibro;
+    private int azStartVibro;
+    private int azStopVibro;
+    private int zoneInVbro;
+    private int zoneOutVibro;
     private int[] pointers;
     private String customNames;
     private int leftDays;
@@ -99,6 +107,10 @@ public class CarConfig extends Config {
         temp_settings = "";
         alarmSound = "";
         notifySound = "";
+        azStartSound = "";
+        azStopSound = "";
+        zoneInSound = "";
+        zoneOutSound = "";
         customNames = "";
         leftDays = 1000;
         leftMileage = 1000;

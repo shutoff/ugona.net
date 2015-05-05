@@ -254,4 +254,6 @@
         <item>Short vibration</item>
         <item>Long vibration</item>
     </string-array>
+    <string name="notify_az_start">Engine start</string>
+    <string name="no_sound">no sound</string>
 </resources>

@@ -258,4 +258,6 @@
         <item>Короткая вибрация</item>
         <item>Долгая вибрация</item>
     </string-array>
+    <string name="notify_az_start">Запуск двигателя</string>
+    <string name="no_sound">без звука</string>
 </resources>

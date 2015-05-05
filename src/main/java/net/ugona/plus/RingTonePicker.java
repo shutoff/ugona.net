@@ -39,6 +39,7 @@ public class RingTonePicker
     int vibro;
     String title;
     String sound;
+    String def_sound;
     View btnOk;
     RadioGroup group;
     MediaPlayer player;
@@ -72,6 +73,26 @@ public class RingTonePicker
         RingtoneManager manager = new RingtoneManager(getActivity());
         manager.setType(type);
         int n = 100;
+
+        if (def_sound != null) {
+            RadioButton rb = new RadioButton(getActivity());
+            rb.setText(R.string.def);
+            rb.setTag(def_sound);
+            rb.setId(n++);
+            if (sound.equals("android.resource://net.ugona.plus/raw/" + def_sound))
+                rb.setChecked(true);
+            group.addView(rb);
+            group.setOnCheckedChangeListener(this);
+
+            rb = new RadioButton(getActivity());
+            rb.setText(R.string.no_sound);
+            rb.setTag("-");
+            rb.setId(n++);
+            if (sound.equals("-"))
+                rb.setChecked(true);
+            group.addView(rb);
+            group.setOnCheckedChangeListener(this);
+        }
 
         Uri defaultUri = RingtoneManager.getDefaultUri(type);
         Ringtone ringtone = RingtoneManager.getRingtone(getActivity(), defaultUri);
@@ -112,6 +133,7 @@ public class RingTonePicker
         outState.putInt(Names.TYPE, type);
         outState.putString(Names.SOUND, sound);
         outState.putInt(Names.VIBRO, vibro);
+        outState.putString(Names.DEFAULT, def_sound);
     }
 
     @Override
@@ -133,6 +155,7 @@ public class RingTonePicker
         type = args.getInt(Names.TYPE);
         sound = args.getString(Names.SOUND);
         vibro = args.getInt(Names.VIBRO);
+        def_sound = args.getString(Names.DEFAULT);
     }
 
     @Override

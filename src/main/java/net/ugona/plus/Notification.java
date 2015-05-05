@@ -126,7 +126,7 @@ public class Notification extends Config {
                 az_time = -az_time;
             if (az_time + 1200000 > now) {
                 if (state.getAz_time() > 0) {
-                    notification.az = create(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "start", state.getAz_start(), false, null);
+                    notification.az = create(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "azStart", state.getAz_start(), false, null);
                 } else if ((state.getAz_time() < 0) && !state.isIgnition()) {
                     String msg = context.getString(R.string.motor_off_ok);
                     long az_stop = -state.getAz_time();
@@ -164,11 +164,14 @@ public class Notification extends Config {
                 notification.zone = 0;
             }
             String text;
+            String grp;
             long time = state.getZone_time();
             if (time > 0) {
                 text = context.getString(R.string.zone_in);
+                grp = "zoneIn";
             } else {
                 text = context.getString(R.string.zone_out);
+                grp = "zoneOut";
                 time = -time;
             }
             String zone = state.getZone();
@@ -176,7 +179,7 @@ public class Notification extends Config {
                 zone = zone.substring(1);
             if (!zone.equals(""))
                 text += " " + zone;
-            notification.zone = create(context, text, R.drawable.white_zone, car_id, null, time, false, null);
+            notification.zone = create(context, text, R.drawable.white_zone, car_id, grp, time, false, null);
         }
         if (names.contains("guard_mode")) {
             if (notification.part_guard != 0) {
@@ -341,24 +344,36 @@ public class Notification extends Config {
         }
     }
 
-    static void show(Context context, String car_id, String text, String title, int pictId, int max_id, String sound, long when, boolean outgoing) {
+    static void show(Context context, String car_id, String text, String title, int pictId, int max_id, String grp, long when, boolean outgoing) {
         CarConfig carConfig = CarConfig.get(context, car_id);
         if (title == null)
             title = carConfig.getName();
-        if (sound == null) {
-            sound = carConfig.getNotifySound();
-            if (sound.equals(""))
-                sound = null;
+        if (grp == null)
+            grp = "notify";
+        String sound = null;
+        int vibro = 0;
+        try {
+            Field field = carConfig.getClass().getDeclaredField(grp + "Sound");
+            sound = field.get(carConfig).toString();
+            field = carConfig.getClass().getDeclaredField(grp + "Vibro");
+            vibro = field.getInt(carConfig);
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
+        if (sound.equals(""))
+            sound = null;
+        if ((sound == null) && grp.equals("azStart"))
+            sound = "android.resource://net.ugona.plus/raw/start";
+
         int defs = android.app.Notification.DEFAULT_LIGHTS;
-        if (carConfig.getNotifyVibro() == 0)
+        if (vibro == 0)
             defs |= android.app.Notification.DEFAULT_VIBRATE;
         if (sound == null)
             defs |= android.app.Notification.DEFAULT_SOUND;
 
         Uri uri = null;
         if (sound != null)
-            uri = Uri.parse("android.resource://net.ugona.plus/raw/" + sound);
+            Uri.parse(sound);
 
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context)
@@ -371,9 +386,9 @@ public class Notification extends Config {
         if (uri != null)
             builder.setSound(uri);
 
-        if (carConfig.getNotifyVibro() == 2)
+        if (vibro == 2)
             builder.setVibrate(SHORT_PATTERN);
-        if (carConfig.getNotifyVibro() == 3)
+        if (vibro == 3)
             builder.setVibrate(LONG_PATTERN);
 
 
