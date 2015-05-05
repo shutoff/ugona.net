@@ -63,7 +63,7 @@ public class NotifyFragment
         }));
 
         items.add(new SoundItem(R.string.notify_sound, RingtoneManager.TYPE_NOTIFICATION, "notify", null));
-        items.add(new SoundItem(R.string.notify_az_start, RingtoneManager.TYPE_NOTIFICATION, "azStart", "azStart"));
+        items.add(new SoundItem(R.string.notify_az_start, RingtoneManager.TYPE_NOTIFICATION, "azStart", "start"));
         items.add(new SoundItem(R.string.zone_in, RingtoneManager.TYPE_NOTIFICATION, "zoneIn", null));
         items.add(new SoundItem(R.string.zone_out, RingtoneManager.TYPE_NOTIFICATION, "zoneOut", null));
 
