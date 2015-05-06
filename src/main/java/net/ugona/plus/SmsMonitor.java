@@ -77,50 +77,63 @@ public class SmsMonitor extends BroadcastReceiver {
             String[] cars = appConfig.getCars();
             for (String car_id : cars) {
                 CarConfig carConfig = CarConfig.get(context, car_id);
-                if (!compareNumbers(carConfig.getPhone(), sms_from) && !State.isDebug())
+                if (!compareNumbers(carConfig.getPhone(), sms_from) && !State.isDebug()) {
+                    if (processSms(context, car_id, body, false))
+                        return;
                     continue;
+                }
                 if (Commands.processSms(context, car_id, body)) {
                     abortBroadcast();
                     return;
                 }
-                CarConfig.Sms[] sms = carConfig.getSms();
-                if (sms == null)
+                if (processSms(context, car_id, body, true))
                     return;
-                for (CarConfig.Sms s : sms) {
-                    try {
-                        Pattern pattern = Pattern.compile(s.sms);
-                        Matcher matcher = pattern.matcher(body);
-                        if (!matcher.find())
-                            continue;
-                        Set<String> changed = null;
-                        if (s.set != null) {
-                            CarState state = CarState.get(context, car_id);
-                            changed = State.update(context, car_id, null, s.set, state, matcher, null);
-                        }
-                        if (s.alarm != null) {
-                            Intent alarmIntent = new Intent(context, Alarm.class);
-                            alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            alarmIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            alarmIntent.putExtra(Names.TITLE, s.alarm);
-                            alarmIntent.putExtra(Names.ID, car_id);
-                            context.startActivity(alarmIntent);
-                            abortBroadcast();
-                            return;
-                        }
-                        if (s.notify != null) {
-                            Notification.showAlarm(context, car_id, s.notify);
-                            abortBroadcast();
-                            return;
-                        }
-                        if (changed != null)
-                            Notification.update(context, car_id, changed);
-                        abortBroadcast();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
             }
         }
+    }
+
+    boolean processSms(Context context, String car_id, String body, boolean all) {
+        CarConfig carConfig = CarConfig.get(context, car_id);
+        CarConfig.Sms[] sms = carConfig.getSms();
+        if (sms == null)
+            return false;
+        for (CarConfig.Sms s : sms) {
+            if (!all && !s.all)
+                continue;
+            try {
+                Pattern pattern = Pattern.compile(s.sms);
+                Matcher matcher = pattern.matcher(body);
+                if (!matcher.find())
+                    continue;
+                Set<String> changed = null;
+                if (s.set != null) {
+                    CarState state = CarState.get(context, car_id);
+                    changed = State.update(context, car_id, null, s.set, state, matcher, null);
+                }
+                if (s.alarm != null) {
+                    Intent alarmIntent = new Intent(context, Alarm.class);
+                    alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    alarmIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    alarmIntent.putExtra(Names.TITLE, s.alarm);
+                    alarmIntent.putExtra(Names.ID, car_id);
+                    context.startActivity(alarmIntent);
+                    abortBroadcast();
+                    return true;
+                }
+                if (s.notify != null) {
+                    Notification.showAlarm(context, car_id, s.notify);
+                    abortBroadcast();
+                    return true;
+                }
+                if (changed != null)
+                    Notification.update(context, car_id, changed);
+                abortBroadcast();
+                return true;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return false;
     }
 
 }

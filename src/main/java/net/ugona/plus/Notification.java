@@ -37,6 +37,7 @@ public class Notification extends Config {
     private int alarm;
     private int balance;
     private int maintenance;
+    private int no_gsm;
     private String message;
     private String title;
     private String url;
@@ -138,10 +139,26 @@ public class Notification extends Config {
                 }
             }
         }
+        if (names.contains("no_gsm")) {
+            if (notification.no_gsm != 0)
+                remove(context, notification.az);
+            if (state.isNo_gsm()) {
+                notification.no_gsm = create(context, context.getString(R.string.gprs_off), R.drawable.warning, car_id, null, 0, true, null);
+            } else {
+                notification.no_gsm = create(context, context.getString(R.string.gprs_on), R.drawable.warning, car_id, null, 0, false, null);
+            }
+        }
         if (names.contains("guard") || names.contains("ignition")) {
             if ((notification.az != 0) && (!state.isGuard() || (state.isIgnition() && !state.isAz()))) {
                 remove(context, notification.az);
                 notification.az = 0;
+            }
+        }
+        if (names.contains("time")) {
+            if ((state.getNo_gsm_time() > 0) && (state.getTime() > state.getNo_gsm_time())) {
+                if (notification.no_gsm != 0)
+                    remove(context, notification.az);
+                notification.no_gsm = create(context, context.getString(R.string.gprs_on), R.drawable.warning, car_id, null, 0, false, null);
             }
         }
         if (names.contains("guard_mode")) {

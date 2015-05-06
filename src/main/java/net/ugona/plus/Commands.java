@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -116,6 +115,14 @@ public class Commands {
                     continue;
                 queue.remove(command);
                 found = true;
+                if (command.time != null) {
+                    Intent intent = new Intent(context, FetchService.class);
+                    intent.setAction(FetchService.ACTION_ADD_TIMER);
+                    intent.putExtra(Names.ID, id);
+                    intent.putExtra(Names.COMMAND, command.time);
+                    context.startService(intent);
+                }
+                break;
             }
             if (!found)
                 return;
@@ -134,26 +141,30 @@ public class Commands {
             Queue queue = requests.get(id);
             CarState state = CarState.get(context, id);
             Set<Map.Entry<CarConfig.Command, CommandState>> entries = queue.entrySet();
-            Vector<CarConfig.Command> remove = new Vector<>();
             for (Map.Entry<CarConfig.Command, CommandState> entry : entries) {
                 CarConfig.Command command = entry.getKey();
                 if (command.sms == null)
                     continue;
                 String[] parts = command.sms.split("\\|");
-                if (parts.length < 2)
-                    continue;
-                Pattern pattern = null;
-                try {
-                    pattern = Pattern.compile(parts[1]);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    continue;
+                int i;
+                Matcher matcher = null;
+                for (i = 1; i < parts.length; i++) {
+                    Pattern pattern = null;
+                    try {
+                        pattern = Pattern.compile(parts[i]);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        continue;
+                    }
+                    if (pattern == null)
+                        continue;
+                    matcher = pattern.matcher(body);
+                    if (matcher.find())
+                        break;
                 }
-                if (pattern == null)
+                if (i >= parts.length)
                     continue;
-                Matcher matcher = pattern.matcher(body);
-                if (!matcher.find())
-                    continue;
+                ;
                 found = true;
                 if (command.onAnswer != null) {
                     command.onAnswer.run();
@@ -164,10 +175,14 @@ public class Commands {
                         Notification.update(context, id, update);
                     }
                 }
-                remove.add(command);
-            }
-            for (CarConfig.Command cmd : remove) {
-                queue.remove(cmd);
+                if (command.time != null) {
+                    Intent intent = new Intent(context, FetchService.class);
+                    intent.setAction(FetchService.ACTION_ADD_TIMER);
+                    intent.putExtra(Names.ID, id);
+                    intent.putExtra(Names.COMMAND, command.time);
+                    context.startService(intent);
+                }
+                break;
             }
             if (!found)
                 return false;

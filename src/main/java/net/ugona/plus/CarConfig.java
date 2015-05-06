@@ -457,6 +457,7 @@ public class CarConfig extends Config {
         String condition;
         String done;
         String data;
+        String time;
         boolean on;
         boolean always;
         Runnable onAnswer;
@@ -481,5 +482,6 @@ public class CarConfig extends Config {
         String set;
         String alarm;
         String notify;
+        boolean all;
     }
 }

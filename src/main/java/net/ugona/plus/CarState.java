@@ -69,6 +69,7 @@ public class CarState extends Config {
     private boolean zones;
     private boolean device_password;
     private long check_time;
+    private long no_gsm_time;
     private String check_version;
     private String version;
 
@@ -164,6 +165,17 @@ public class CarState extends Config {
 
     public long getAz_start() {
         return az_start;
+    }
+
+    public long getNo_gsm_time() {
+        return no_gsm_time;
+    }
+
+    public void setNo_gsm_time(long no_gsm_time) {
+        if (this.no_gsm_time == no_gsm_time)
+            return;
+        this.no_gsm_time = no_gsm_time;
+        upd = true;
     }
 
     public String getZone() {
@@ -465,6 +477,19 @@ public class CarState extends Config {
                 az_time = -now;
             ignition = false;
         }
+    }
+
+    public boolean isNo_gsm() {
+        return no_gsm_time != 0;
+    }
+
+    public void setNo_gsm(boolean no_gsm) {
+        if (no_gsm) {
+            if (no_gsm_time == 0)
+                no_gsm_time = new Date().getTime();
+            return;
+        }
+        no_gsm_time = 0;
     }
 
     public double getNotify_balance() {
