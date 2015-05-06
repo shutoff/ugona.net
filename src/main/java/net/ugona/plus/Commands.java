@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -133,6 +134,7 @@ public class Commands {
             Queue queue = requests.get(id);
             CarState state = CarState.get(context, id);
             Set<Map.Entry<CarConfig.Command, CommandState>> entries = queue.entrySet();
+            Vector<CarConfig.Command> remove = new Vector<>();
             for (Map.Entry<CarConfig.Command, CommandState> entry : entries) {
                 CarConfig.Command command = entry.getKey();
                 if (command.sms == null)
@@ -162,7 +164,10 @@ public class Commands {
                         Notification.update(context, id, update);
                     }
                 }
-                queue.remove(command);
+                remove.add(command);
+            }
+            for (CarConfig.Command cmd : remove) {
+                queue.remove(cmd);
             }
             if (!found)
                 return false;
