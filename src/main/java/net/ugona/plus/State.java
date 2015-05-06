@@ -54,7 +54,6 @@ public class State {
 /*
     static public void appendLog(String text) {
         Log.v("v", text);
-
         File logFile = Environment.getExternalStorageDirectory();
         logFile = new File(logFile, "car.log");
         if (!logFile.exists()) {
@@ -87,7 +86,7 @@ public class State {
         String s = sw.toString();
         appendLog(s);
     }
-*/
+    */
 
     static boolean isDebug() {
         return Build.FINGERPRINT.startsWith("generic");

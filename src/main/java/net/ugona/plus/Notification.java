@@ -354,8 +354,10 @@ public class Notification extends Config {
         int vibro = 0;
         try {
             Field field = carConfig.getClass().getDeclaredField(grp + "Sound");
+            field.setAccessible(true);
             sound = field.get(carConfig).toString();
             field = carConfig.getClass().getDeclaredField(grp + "Vibro");
+            field.setAccessible(true);
             vibro = field.getInt(carConfig);
         } catch (Exception ex) {
             ex.printStackTrace();
