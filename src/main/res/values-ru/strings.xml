@@ -260,6 +260,6 @@
     </string-array>
     <string name="notify_az_start">Запуск двигателя</string>
     <string name="no_sound">без звука</string>
-    <string name="gprs_on">Соединение GPRS восстановлено</string>
-    <string name="gprs_off">Соединение GPRS потеряно</string>
+    <string name="lost">Связь с автомобилем потеряна</string>
+    <string name="restore">Связь с автомобилем восстановлена</string>
 </resources>

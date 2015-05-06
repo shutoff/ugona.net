@@ -256,4 +256,6 @@
     </string-array>
     <string name="notify_az_start">Engine start</string>
     <string name="no_sound">no sound</string>
+    <string name="lost">Lost control channel</string>
+    <string name="restore">Restore control channel</string>
 </resources>
