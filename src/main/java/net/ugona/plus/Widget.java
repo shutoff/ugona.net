@@ -92,7 +92,7 @@ public class Widget extends AppWidgetProvider {
                     R.drawable.w_gsm_level
             }
     };
-    static Map<String, Integer> states;
+    static Map<String, Integer> widget_states;
     static SparseIntArray height_rows;
     static TrafficRequest request;
     static CarImage carImage;
@@ -130,28 +130,29 @@ public class Widget extends AppWidgetProvider {
         if (intent != null) {
             String action = intent.getAction();
             if (action != null) {
-                if (states == null)
-                    states = new HashMap<String, Integer>();
+                if (widget_states == null)
+                    widget_states = new HashMap<String, Integer>();
                 String car_id = intent.getStringExtra(Names.ID);
+                String key = getClass().getName() + car_id;
                 if (action.equalsIgnoreCase(Names.UPDATED)) {
-                    states.remove(car_id);
+                    widget_states.remove(key);
                     updateWidgets(context, car_id, false);
                 }
                 if (action.equalsIgnoreCase(Names.NO_UPDATED)) {
-                    if (states.containsKey(car_id)) {
-                        states.remove(car_id);
+                    if (widget_states.containsKey(key)) {
+                        widget_states.remove(key);
                         updateWidgets(context, car_id, false);
                     }
                 }
                 if (action.equalsIgnoreCase(Names.ERROR)) {
-                    if (!states.containsKey(car_id) || (states.get(car_id) != STATE_ERROR)) {
-                        states.put(car_id, STATE_ERROR);
+                    if (!widget_states.containsKey(key) || (widget_states.get(key) != STATE_ERROR)) {
+                        widget_states.put(car_id, STATE_ERROR);
                         updateWidgets(context, car_id, false);
                     }
                 }
                 if (action.equalsIgnoreCase(Names.START_UPDATE)) {
-                    if (!states.containsKey(car_id) || (states.get(car_id) != STATE_UPDATE)) {
-                        states.put(car_id, STATE_UPDATE);
+                    if (!widget_states.containsKey(key) || (widget_states.get(key) != STATE_UPDATE)) {
+                        widget_states.put(key, STATE_UPDATE);
                         updateWidgets(context, car_id, false);
                     }
                 }
@@ -175,8 +176,7 @@ public class Widget extends AppWidgetProvider {
     }
 
     void updateWidgets(Context context, String car_id, boolean sendUpdate) {
-        ComponentName thisAppWidget = new ComponentName(
-                context.getPackageName(), getClass().getName());
+        ComponentName thisAppWidget = new ComponentName(context.getPackageName(), getClass().getName());
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         if (appWidgetManager != null) {
             int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
@@ -363,12 +363,13 @@ public class Widget extends AppWidgetProvider {
                 widgetView.setViewVisibility(R.id.reserve_block, View.GONE);
             }
 
-            if ((states == null) || !states.containsKey(car_id)) {
+            String key = getClass().getName() + car_id;
+            if ((widget_states == null) || !widget_states.containsKey(key)) {
                 widgetView.setViewVisibility(R.id.update, View.GONE);
                 widgetView.setViewVisibility(R.id.refresh, View.VISIBLE);
                 widgetView.setViewVisibility(R.id.error, View.GONE);
             } else {
-                int state = states.get(car_id);
+                int state = widget_states.get(key);
                 if (state == STATE_ERROR) {
                     widgetView.setViewVisibility(R.id.update, View.GONE);
                     widgetView.setViewVisibility(R.id.refresh, View.GONE);
