@@ -12,8 +12,6 @@ import android.view.ViewConfiguration;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
-import org.joda.time.LocalDateTime;
-
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -24,6 +22,7 @@ import java.io.ObjectInputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Vector;
 
 public class TrackView extends MapActivity {
@@ -137,10 +136,9 @@ public class TrackView extends MapActivity {
                 return null;
             }
 
-            LocalDateTime d2 = new LocalDateTime(begin);
-            LocalDateTime d1 = new LocalDateTime(end);
-
-            String name = d2.toString("dd.MM.yy_HH.mm-") + d1.toString("HH.mm") + ".gpx";
+            DateFormat df = SimpleDateFormat.getDateTimeInstance();
+            DateFormat tf = SimpleDateFormat.getTimeInstance();
+            String name = df.format(begin) + "-" + tf.format(end) + ".gpx";
             File out = new File(path, name);
             out.createNewFile();
 
@@ -156,12 +154,13 @@ public class TrackView extends MapActivity {
             writer.append(" xmlns=\"http://www.topografix.com/GPX/1/0\"\n");
             writer.append(" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">\n");
             writer.append("<time>");
-            LocalDateTime now = new LocalDateTime();
-            writer.append(now.toString("yyyy-MM-dd'T'HH:mm:ss'Z"));
+            DateFormat tdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z");
+            writer.append(tdf.format(begin));
             writer.append("</time>\n");
             writer.append("<trk>\n");
 
             boolean trk = false;
+            DateFormat tsf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z");
             for (Track track : tracks) {
                 String[] points = track.track.split("\\|");
                 for (String point : points) {
@@ -178,8 +177,7 @@ public class TrackView extends MapActivity {
                         writer.append("<trkseg>\n");
                     }
                     writer.append("<trkpt lat=\"").append(p.latitude + "").append("\" lon=\"").append(p.longitude + "").append("\">\n");
-                    LocalDateTime t = new LocalDateTime(p.time);
-                    writer.append("<time>").append(t.toString("yyyy-MM-dd'T'HH:mm:ss'Z")).append("</time>\n");
+                    writer.append("<time>").append(tsf.format(p.time)).append("</time>\n");
                     writer.append("</trkpt>\n");
                 }
                 if (trk)

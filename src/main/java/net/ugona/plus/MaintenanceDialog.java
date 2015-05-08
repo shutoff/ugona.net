@@ -28,8 +28,6 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
 
-import org.joda.time.LocalDate;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInput;
@@ -37,6 +35,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.text.DateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Vector;
 
@@ -262,7 +261,8 @@ public class MaintenanceDialog
 
     @Override
     public void onClick(View v) {
-        LocalDate d = new LocalDate(maintenance.last * 1000);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(maintenance.last * 1000));
         final CalendarDatePickerDialog dialog = new CalendarDatePickerDialog() {
             @Override
             public void onDayOfMonthSelected(int year, int month, int day) {
@@ -273,12 +273,13 @@ public class MaintenanceDialog
         dialog.initialize(new CalendarDatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(CalendarDatePickerDialog calendarDatePickerDialog, int i, int i2, int i3) {
-                LocalDate d = new LocalDate(i, i2 + 1, i3);
-                maintenance.last = d.toDate().getTime() / 1000;
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(i, i2, i3);
+                maintenance.last = calendar.getTime().getTime() / 1000;
                 DateFormat df = android.text.format.DateFormat.getMediumDateFormat(getActivity());
-                vDate.setText(df.format(d.toDate()));
+                vDate.setText(df.format(calendar.getTime()));
             }
-        }, d.getYear(), d.getMonthOfYear() - 1, d.getDayOfMonth());
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
         dialog.show(getActivity().getSupportFragmentManager(), "DATE_PICKER_TAG");
     }
 

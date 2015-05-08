@@ -29,15 +29,13 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -106,10 +104,11 @@ public class PhotoFragment extends MainFragment {
             @Override
             public int setHour(int h) {
                 int i;
+                Calendar calendar = Calendar.getInstance();
                 for (i = 0; i < photos.size(); i++) {
                     Photo p = photos.get(i);
-                    LocalTime time = new LocalTime(p.time);
-                    if (time.getHourOfDay() < h)
+                    calendar.setTime(new Date(p.time));
+                    if (calendar.get(Calendar.HOUR) < h)
                         break;
                 }
                 i--;
@@ -344,14 +343,20 @@ public class PhotoFragment extends MainFragment {
         }
 
         void update() {
-            DateTime start = date().toDateTime(new LocalTime(0, 0));
-            LocalDate next = date().plusDays(1);
-            DateTime finish = next.toDateTime(new LocalTime(0, 0));
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date(date()));
+            calendar.set(Calendar.HOUR, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            long start = calendar.getTimeInMillis();
+            calendar.add(Calendar.DATE, 1);
+            long finish = calendar.getTimeInMillis();
             CarConfig config = CarConfig.get(getActivity(), id());
             PhotosParam param = new PhotosParam();
             param.skey = config.getKey();
-            param.begin = start.toDate().getTime();
-            param.end = finish.toDate().getTime();
+            param.begin = start;
+            param.end = finish;
             execute("/photos", param);
         }
     }

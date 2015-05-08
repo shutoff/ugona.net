@@ -20,8 +20,6 @@ import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
-import org.joda.time.LocalDate;
-
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.NumberFormat;
@@ -238,15 +236,20 @@ public class StatFragment extends MainFragment {
                         if (d.level == 0)
                             title.setText(monthYear(d.year, d.month));
                         if (d.level == 1) {
-                            LocalDate begin = new LocalDate(d.year, d.month + 1, d.day);
-                            LocalDate end = begin.plusDays(6);
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.set(d.year, d.month, d.day, 0, 0, 0);
+
                             DateFormat df = android.text.format.DateFormat.getDateFormat(getActivity());
-                            title.setText(df.format(begin.toDate()) + " - " + df.format(end.toDate()));
+                            String start = df.format(calendar.getTime());
+
+                            calendar.add(Calendar.DATE, 6);
+                            title.setText(start + " - " + df.format(calendar.getTime()));
                         }
                         if (d.level == 2) {
-                            LocalDate day = new LocalDate(d.year, d.month + 1, d.day);
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.set(d.year, d.month, d.day);
                             DateFormat df = android.text.format.DateFormat.getDateFormat(getActivity());
-                            title.setText(df.format(day.toDate()));
+                            title.setText(df.format(calendar.getTime()));
                         }
                         TextView tvMileage = (TextView) v.findViewById(R.id.mileage);
                         NumberFormat formatter = NumberFormat.getInstance(getResources().getConfiguration().locale);
@@ -338,15 +341,18 @@ public class StatFragment extends MainFragment {
     }
 
     void openMonth(Day d, int position) {
-        LocalDate begin = new LocalDate(d.year, d.month + 1, 1);
-        LocalDate end = begin.plusMonths(1);
-        while (begin.getDayOfWeek() != 1) {
-            begin = begin.minusDays(1);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(d.year, d.month, 1);
+        while (calendar.get(Calendar.DAY_OF_WEEK) != calendar.getFirstDayOfWeek()) {
+            calendar.add(Calendar.DATE, -1);
         }
-        while (end.getDayOfWeek() != 7) {
-            end = end.plusDays(1);
+        long begin = calendar.getTimeInMillis();
+        calendar.set(d.year, d.month, 1);
+        calendar.add(Calendar.MONTH, 1);
+        while (calendar.get(Calendar.DAY_OF_WEEK) != calendar.getFirstDayOfWeek()) {
+            calendar.add(Calendar.DATE, 1);
         }
-        LocalDate end_week = begin.plusDays(6);
+        long end = calendar.getTimeInMillis();
         Day cur = null;
         boolean week = false;
         for (Day dd : days) {
@@ -354,21 +360,22 @@ public class StatFragment extends MainFragment {
                 continue;
             if (dd.compare(end) > 0)
                 break;
+/*
             if (dd.compare(end_week) > 0) {
                 if ((cur != null) && week)
                     stat.insertElementAt(cur, position);
                 cur = null;
             }
+*/
             if (cur == null) {
-                begin = new LocalDate(dd.year, dd.month + 1, dd.day);
-                while (begin.getDayOfWeek() != 1) {
-                    begin = begin.minusDays(1);
+                calendar.set(dd.year, dd.month, dd.day);
+                while (calendar.get(Calendar.DAY_OF_WEEK) != calendar.getFirstDayOfWeek()) {
+                    calendar.add(Calendar.DATE, -1);
                 }
-                end_week = begin.plusDays(6);
                 cur = new Day();
-                cur.year = begin.getYear();
-                cur.month = begin.getMonthOfYear() - 1;
-                cur.day = begin.getDayOfMonth();
+                cur.year = calendar.get(Calendar.YEAR);
+                cur.month = calendar.get(Calendar.MONTH);
+                cur.day = calendar.get(Calendar.DAY_OF_MONTH);
                 cur.level = 1;
                 week = false;
             }
@@ -392,8 +399,11 @@ public class StatFragment extends MainFragment {
                 break;
         }
         Day dw = stat.get(position - 1);
-        LocalDate begin = new LocalDate(dw.year, dw.month + 1, dw.day);
-        LocalDate end = begin.plusDays(6);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(dw.year, dw.month, dw.day);
+        long begin = calendar.getTimeInMillis();
+        calendar.add(Calendar.DATE, 6);
+        long end = calendar.getTimeInMillis();
         for (Day dd : days) {
             if (dd.compare(begin) < 0)
                 continue;
@@ -430,18 +440,20 @@ public class StatFragment extends MainFragment {
         long engine_time;
         int level;
 
-        int compare(LocalDate d) {
-            if (year < d.getYear())
+        int compare(long d) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date(d));
+            if (year < calendar.get(Calendar.YEAR))
                 return -1;
-            if (year > d.getYear())
+            if (year > calendar.get(Calendar.YEAR))
                 return 1;
-            if (month < d.getMonthOfYear() - 1)
+            if (month < calendar.get(Calendar.MONTH))
                 return -1;
-            if (month > d.getMonthOfYear() - 1)
+            if (month > calendar.get(Calendar.MONTH))
                 return 1;
-            if (day < d.getDayOfMonth())
+            if (day < calendar.get(Calendar.DAY_OF_MONTH))
                 return -1;
-            if (day > d.getDayOfMonth())
+            if (day > calendar.get(Calendar.DAY_OF_MONTH))
                 return 1;
             return 0;
         }

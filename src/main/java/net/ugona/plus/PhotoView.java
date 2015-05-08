@@ -18,9 +18,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import org.joda.time.DateTime;
-
 import java.io.File;
+import java.text.DateFormat;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 
@@ -49,8 +48,8 @@ public class PhotoView extends MainFragment {
 
     @Override
     public String getTitle() {
-        DateTime t = new DateTime(time);
-        return t.toString("dd.MM.yy HH:mm:ss");
+        DateFormat df = DateFormat.getDateTimeInstance();
+        return df.format(time);
     }
 
     @Override

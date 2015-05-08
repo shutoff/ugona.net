@@ -21,10 +21,10 @@ import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
-import org.joda.time.LocalDateTime;
-
 import java.io.Serializable;
 import java.text.DateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -317,10 +317,10 @@ public class MapPointActivity extends MapActivity {
 
             long last_stand = carState.getLast_stand();
             if (last_stand > 0) {
-                LocalDateTime stand = new LocalDateTime(last_stand);
-                LocalDateTime now = new LocalDateTime();
-                data += "<b>";
-                if (stand.toLocalDate().equals(now.toLocalDate())) {
+                Calendar stand = Calendar.getInstance();
+                stand.setTime(new Date(last_stand));
+                Calendar now = Calendar.getInstance();
+                if ((stand.get(Calendar.DAY_OF_MONTH) == now.get(Calendar.DAY_OF_MONTH)) && (stand.get(Calendar.MONTH) == now.get(Calendar.MONTH))) {
                     data += tf.format(last_stand);
                 } else {
                     data += df.format(last_stand) + " " + tf.format(last_stand);

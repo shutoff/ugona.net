@@ -25,10 +25,6 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInput;
@@ -37,6 +33,8 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.text.DateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -95,7 +93,7 @@ public class EventsFragment extends MainFragment {
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
         if (savedInstanceState != null) {
-            if (savedInstanceState.getLong(DATE) == date().toDate().getTime()) {
+            if (savedInstanceState.getLong(DATE) == date()) {
                 byte[] track_data = savedInstanceState.getByteArray(EVENTS_DATA);
                 if (track_data != null) {
                     try {
@@ -181,10 +179,11 @@ public class EventsFragment extends MainFragment {
                 @Override
                 public int setHour(int h) {
                     int i;
+                    Calendar calendar = Calendar.getInstance();
                     for (i = 0; i < filtered.size(); i++) {
                         Event e = filtered.get(i);
-                        LocalTime time = new LocalTime(e.time);
-                        if (time.getHourOfDay() < h)
+                        calendar.setTime(new Date(e.time));
+                        if (calendar.get(Calendar.HOUR) < h)
                             break;
                     }
                     i--;
@@ -212,8 +211,12 @@ public class EventsFragment extends MainFragment {
                     return;
                 try {
                     if (intent.getAction().equals(Names.UPDATED)) {
-                        LocalDate today = new LocalDate();
-                        if (!today.equals(date()) && loaded)
+                        Calendar today = Calendar.getInstance();
+                        Calendar d = Calendar.getInstance();
+                        d.setTime(new Date(date()));
+                        if (loaded &&
+                                ((today.get(Calendar.DAY_OF_YEAR) != d.get(Calendar.DAY_OF_YEAR)) ||
+                                        (today.get(Calendar.YEAR) != d.get(Calendar.YEAR))))
                             return;
                         if (fetcher != null)
                             return;
@@ -266,7 +269,7 @@ public class EventsFragment extends MainFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putLong(DATE, date().toDate().getTime());
+        outState.putLong(DATE, date());
         if (loaded) {
             byte[] data = null;
             try {
@@ -541,20 +544,25 @@ public class EventsFragment extends MainFragment {
         }
 
         void update() {
-            DateTime start = date().toDateTime(new LocalTime(0, 0));
-            LocalDate next = date().plusDays(1);
-            DateTime finish = next.toDateTime(new LocalTime(0, 0));
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date(date()));
+            calendar.set(Calendar.HOUR, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            long start = calendar.getTimeInMillis();
+            calendar.add(Calendar.DATE, 1);
+            long finish = calendar.getTimeInMillis();
             if (state.isPointer()) {
-                finish = new DateTime();
-                start = finish.minusDays(30);
+                calendar.add(Calendar.DATE, -30);
+                start = calendar.getTimeInMillis();
             }
-            LocalDate today = new LocalDate();
-            first = today.equals(date());
+            first = finish > new Date().getTime();
             EventsParams params = new EventsParams();
             CarConfig config = CarConfig.get(getActivity(), id());
             params.skey = config.getKey();
-            params.begin = start.toDate().getTime();
-            params.end = finish.toDate().getTime();
+            params.begin = start;
+            params.end = finish;
             if (params.skey.equals("")) {
                 fetcher = null;
                 refreshDone();

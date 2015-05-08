@@ -10,8 +10,6 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.joda.time.LocalDate;
-
 public abstract class MainFragment
         extends Fragment
         implements SwipeRefreshLayout.OnRefreshListener {
@@ -39,10 +37,10 @@ public abstract class MainFragment
         return mainActivity.id;
     }
 
-    LocalDate date() {
+    long date() {
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity == null)
-            return null;
+            return 0;
         return mainActivity.current;
     }
 

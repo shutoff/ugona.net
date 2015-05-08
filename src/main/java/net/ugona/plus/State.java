@@ -23,13 +23,13 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import com.seppius.i18n.plurals.PluralResources;
 
-import org.joda.time.LocalDate;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -174,9 +174,10 @@ public class State {
     }
 
     static String formatDateTime(Context context, long time) {
-        LocalDate now = new LocalDate();
-        LocalDate date = new LocalDate(time);
-        if (now.equals(date))
+        Calendar now = Calendar.getInstance();
+        Calendar date = Calendar.getInstance();
+        date.setTime(new Date(time));
+        if ((now.get(Calendar.DAY_OF_MONTH) == date.get(Calendar.DAY_OF_MONTH)) && (now.get(Calendar.MONTH) == date.get(Calendar.MONTH)))
             return formatTime(context, time);
         DateFormat df = android.text.format.DateFormat.getDateFormat(context);
         return formatTime(context, time) + " " + df.format(time);

@@ -48,11 +48,10 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
-import org.joda.time.LocalDate;
-
 import java.io.Reader;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
+import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -83,7 +82,7 @@ public class MainActivity
     Menu topSubMenu;
     Menu sideMenu;
     Menu fragmentMenu;
-    LocalDate current;
+    long current;
     DrawerLayout drawer;
     ActionBarDrawerToggle drawerToggle;
     View vLogo;
@@ -125,11 +124,11 @@ public class MainActivity
 
         Intent intent = getIntent();
         id = intent.getStringExtra(Names.ID);
-        current = new LocalDate();
+        current = new Date().getTime();
 
         if (savedInstanceState != null) {
             id = savedInstanceState.getString(Names.ID);
-            current = new LocalDate(savedInstanceState.getLong(Names.DATE));
+            current = savedInstanceState.getLong(Names.DATE);
         }
 
         config = AppConfig.get(this);
@@ -216,7 +215,7 @@ public class MainActivity
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(Names.ID, id);
-        outState.putLong(Names.DATE, current.toDate().getTime());
+        outState.putLong(Names.DATE, current);
     }
 
     @Override
@@ -287,7 +286,8 @@ public class MainActivity
         MainFragment fragment = getFragment();
         if (fragment != null) {
             if (fragment.isShowDate()) {
-                item.setTitle(current.toString("d MMMM"));
+                DateFormat df = DateFormat.getDateInstance();
+                item.setTitle(df.format(current));
             } else {
                 menu.removeItem(R.id.date);
             }
@@ -329,16 +329,20 @@ public class MainActivity
         switch (item.getItemId()) {
             case R.id.date: {
                 final CalendarDatePickerDialog dialog = new DatePicker();
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(new Date(current));
                 dialog.initialize(new CalendarDatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(CalendarDatePickerDialog calendarDatePickerDialog, int i, int i2, int i3) {
-                        current = new LocalDate(i, i2 + 1, i3);
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.set(i, i2, i3);
+                        current = calendar.getTimeInMillis();
                         updateMenu();
                         MainFragment fragment = getFragment();
                         if (fragment != null)
                             fragment.changeDate();
                     }
-                }, current.getYear(), current.getMonthOfYear() - 1, current.getDayOfMonth());
+                }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
                 dialog.show(getSupportFragmentManager(), "DATE_PICKER_TAG");
                 return true;
             }

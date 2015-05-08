@@ -17,10 +17,6 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -32,6 +28,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Vector;
 
@@ -104,11 +102,11 @@ public class TracksFragment extends MainFragment {
             @Override
             public int setHour(int h) {
                 int i;
+                Calendar calendar = Calendar.getInstance();
                 for (i = 0; i < tracks.size(); i++) {
                     Track t = tracks.get(i);
-                    LocalTime time = new LocalTime(t.begin);
-                    int th = time.getHourOfDay();
-                    if (th < h)
+                    calendar.setTime(new Date(t.begin));
+                    if (calendar.get(Calendar.HOUR) < h)
                         break;
                 }
                 i--;
@@ -132,7 +130,7 @@ public class TracksFragment extends MainFragment {
         selected = -1;
         if (savedInstanceState != null) {
             long current = savedInstanceState.getLong(DATE);
-            if (current == date().toDate().getTime()) {
+            if (current == date()) {
                 selected = savedInstanceState.getLong(SELECTED);
                 byte[] track_data = savedInstanceState.getByteArray(TRACK);
                 if (track_data != null) {
@@ -164,7 +162,7 @@ public class TracksFragment extends MainFragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putLong(SELECTED, selected);
-        outState.putLong(DATE, date().toDate().getTime());
+        outState.putLong(DATE, date());
         if (loaded) {
             byte[] data = null;
             try {
@@ -196,7 +194,7 @@ public class TracksFragment extends MainFragment {
         if (tracks.size() == 0)
             return;
         DateFormat df = android.text.format.DateFormat.getMediumDateFormat(getActivity());
-        String title = df.format(date().toDate());
+        String title = df.format(date());
         showTracks(tracks, title);
     }
 
@@ -258,9 +256,15 @@ public class TracksFragment extends MainFragment {
         double mileage = 0;
         int max_speed = 0;
         long time = 0;
-        long start = date().toDateTime(new LocalTime(0, 0)).toDate().getTime();
-        LocalDate next = date().plusDays(1);
-        long finish = next.toDateTime(new LocalTime(0, 0)).toDate().getTime();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(date()));
+        calendar.set(Calendar.HOUR, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        long start = calendar.getTimeInMillis();
+        calendar.add(Calendar.DATE, 1);
+        long finish = calendar.getTimeInMillis();
         for (Track track : tracks) {
             long begin = track.begin;
             if (begin < start)
@@ -365,13 +369,18 @@ public class TracksFragment extends MainFragment {
         }
 
         void update() {
-            LocalDate current = date();
-            DateTime start = current.toDateTime(new LocalTime(0, 0));
-            LocalDate next = current.plusDays(1);
-            DateTime finish = next.toDateTime(new LocalTime(0, 0));
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date(date()));
+            calendar.set(Calendar.HOUR, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            long start = calendar.getTimeInMillis();
+            calendar.add(Calendar.DATE, 1);
+            long finish = calendar.getTimeInMillis();
             TrackParams params = new TrackParams();
-            params.begin = start.toDate().getTime();
-            params.end = finish.toDate().getTime();
+            params.begin = start;
+            params.end = finish;
             CarConfig config = CarConfig.get(getActivity(), id());
             params.skey = config.getKey();
             execute("/tracks", params);

@@ -33,8 +33,6 @@ import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
-import org.joda.time.LocalDate;
-
 import java.io.Serializable;
 import java.text.FieldPosition;
 import java.text.Format;
@@ -67,7 +65,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
     boolean zoomChanged;
     Paint markerPaint;
     Paint markerTextPaint;
-    LocalDate current;
+    long current;
     CarConfig config;
     LineAndPointFormatter formatter;
     Paint mainLabelPaint;
@@ -193,7 +191,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         setOnTouchListener(this);
     }
 
-    public void init(Context context, String id, String t, LocalDate c) {
+    public void init(Context context, String id, String t, long c) {
         car_id = id;
         type = t;
         current = c;
@@ -431,7 +429,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
 
         String m_id;
         String m_type;
-        LocalDate m_date;
+        long m_date;
         double delta;
 
         FetchTask() {
@@ -442,7 +440,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
             HistoryParams params = new HistoryParams();
             params.skey = config.getKey();
             params.type = type;
-            params.end = current.toDate().getTime() + 86400000;
+            params.end = current + 86400000;
             params.begin = params.end - LOAD_INTERVAL;
 
             execute("/history", params);
@@ -451,7 +449,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         @Override
         void result(JsonObject res) throws ParseException {
 
-            if (!m_id.equals(car_id) || !m_type.equals(type) || !m_date.equals(current))
+            if (!m_id.equals(car_id) || !m_type.equals(type) || (m_date != current))
                 return;
 
             final JsonArray data_array = res.get("res").asArray();
@@ -540,7 +538,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
 
         @Override
         void error() {
-            if (!m_id.equals(car_id) || !m_type.equals(type) || !m_date.equals(current))
+            if (!m_id.equals(car_id) || !m_type.equals(type) || (m_date != current))
                 return;
             mListener.errorLoading();
         }
