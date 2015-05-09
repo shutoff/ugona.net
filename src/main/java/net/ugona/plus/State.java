@@ -29,7 +29,6 @@ import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -176,7 +175,7 @@ public class State {
     static String formatDateTime(Context context, long time) {
         Calendar now = Calendar.getInstance();
         Calendar date = Calendar.getInstance();
-        date.setTime(new Date(time));
+        date.setTimeInMillis(time);
         if ((now.get(Calendar.DAY_OF_MONTH) == date.get(Calendar.DAY_OF_MONTH)) && (now.get(Calendar.MONTH) == date.get(Calendar.MONTH)))
             return formatTime(context, time);
         DateFormat df = android.text.format.DateFormat.getDateFormat(context);

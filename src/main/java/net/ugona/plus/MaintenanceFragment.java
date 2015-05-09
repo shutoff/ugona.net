@@ -337,7 +337,7 @@ public class MaintenanceFragment
                     TextView vTimeLeft = (TextView) v.findViewById(R.id.time_left);
                     if ((m.period > 0) && (m.last != 0)) {
                         Calendar cal = Calendar.getInstance();
-                        cal.setTime(new Date(m.last * 1000));
+                        cal.setTimeInMillis(m.last * 1000);
                         cal.add(Calendar.MONTH, m.period);
                         Date end = cal.getTime();
                         double delta = (end.getTime() - new Date().getTime()) / 86400000;

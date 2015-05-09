@@ -24,7 +24,6 @@ import com.eclipsesource.json.ParseException;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -318,7 +317,7 @@ public class MapPointActivity extends MapActivity {
             long last_stand = carState.getLast_stand();
             if (last_stand > 0) {
                 Calendar stand = Calendar.getInstance();
-                stand.setTime(new Date(last_stand));
+                stand.setTimeInMillis(last_stand);
                 Calendar now = Calendar.getInstance();
                 if ((stand.get(Calendar.DAY_OF_MONTH) == now.get(Calendar.DAY_OF_MONTH)) && (stand.get(Calendar.MONTH) == now.get(Calendar.MONTH))) {
                     data += tf.format(last_stand);

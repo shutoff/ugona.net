@@ -35,7 +35,6 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -107,7 +106,7 @@ public class PhotoFragment extends MainFragment {
                 Calendar calendar = Calendar.getInstance();
                 for (i = 0; i < photos.size(); i++) {
                     Photo p = photos.get(i);
-                    calendar.setTime(new Date(p.time));
+                    calendar.setTimeInMillis(p.time);
                     if (calendar.get(Calendar.HOUR) < h)
                         break;
                 }
@@ -344,7 +343,7 @@ public class PhotoFragment extends MainFragment {
 
         void update() {
             Calendar calendar = Calendar.getInstance();
-            calendar.setTime(new Date(date()));
+            calendar.setTimeInMillis(date());
             calendar.set(Calendar.HOUR, 0);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);

@@ -29,7 +29,6 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Vector;
 
@@ -105,7 +104,7 @@ public class TracksFragment extends MainFragment {
                 Calendar calendar = Calendar.getInstance();
                 for (i = 0; i < tracks.size(); i++) {
                     Track t = tracks.get(i);
-                    calendar.setTime(new Date(t.begin));
+                    calendar.setTimeInMillis(t.begin);
                     if (calendar.get(Calendar.HOUR) < h)
                         break;
                 }
@@ -257,7 +256,7 @@ public class TracksFragment extends MainFragment {
         int max_speed = 0;
         long time = 0;
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date(date()));
+        calendar.setTimeInMillis(date());
         calendar.set(Calendar.HOUR, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
@@ -370,7 +369,7 @@ public class TracksFragment extends MainFragment {
 
         void update() {
             Calendar calendar = Calendar.getInstance();
-            calendar.setTime(new Date(date()));
+            calendar.setTimeInMillis(date());
             calendar.set(Calendar.HOUR, 0);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);

@@ -182,7 +182,7 @@ public class EventsFragment extends MainFragment {
                     Calendar calendar = Calendar.getInstance();
                     for (i = 0; i < filtered.size(); i++) {
                         Event e = filtered.get(i);
-                        calendar.setTime(new Date(e.time));
+                        calendar.setTimeInMillis(e.time);
                         if (calendar.get(Calendar.HOUR) < h)
                             break;
                     }
@@ -213,7 +213,7 @@ public class EventsFragment extends MainFragment {
                     if (intent.getAction().equals(Names.UPDATED)) {
                         Calendar today = Calendar.getInstance();
                         Calendar d = Calendar.getInstance();
-                        d.setTime(new Date(date()));
+                        d.setTimeInMillis(date());
                         if (loaded &&
                                 ((today.get(Calendar.DAY_OF_YEAR) != d.get(Calendar.DAY_OF_YEAR)) ||
                                         (today.get(Calendar.YEAR) != d.get(Calendar.YEAR))))
@@ -545,7 +545,7 @@ public class EventsFragment extends MainFragment {
 
         void update() {
             Calendar calendar = Calendar.getInstance();
-            calendar.setTime(new Date(date()));
+            calendar.setTimeInMillis(date());
             calendar.set(Calendar.HOUR, 0);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);

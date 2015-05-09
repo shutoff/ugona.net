@@ -349,10 +349,17 @@ public class StatFragment extends MainFragment {
         long begin = calendar.getTimeInMillis();
         calendar.set(d.year, d.month, 1);
         calendar.add(Calendar.MONTH, 1);
+        calendar.add(Calendar.DATE, 1);
         while (calendar.get(Calendar.DAY_OF_WEEK) != calendar.getFirstDayOfWeek()) {
             calendar.add(Calendar.DATE, 1);
         }
+        calendar.add(Calendar.DATE, -1);
         long end = calendar.getTimeInMillis();
+
+        calendar.setTimeInMillis(begin);
+        calendar.add(Calendar.DATE, 7);
+        long end_week = calendar.getTimeInMillis();
+
         Day cur = null;
         boolean week = false;
         for (Day dd : days) {
@@ -360,13 +367,14 @@ public class StatFragment extends MainFragment {
                 continue;
             if (dd.compare(end) > 0)
                 break;
-/*
-            if (dd.compare(end_week) > 0) {
+            if (dd.compare(end_week) >= 0) {
                 if ((cur != null) && week)
                     stat.insertElementAt(cur, position);
                 cur = null;
+                calendar.setTimeInMillis(end_week);
+                calendar.add(Calendar.DATE, 7);
+                end_week = calendar.getTimeInMillis();
             }
-*/
             if (cur == null) {
                 calendar.set(dd.year, dd.month, dd.day);
                 while (calendar.get(Calendar.DAY_OF_WEEK) != calendar.getFirstDayOfWeek()) {
@@ -442,7 +450,7 @@ public class StatFragment extends MainFragment {
 
         int compare(long d) {
             Calendar calendar = Calendar.getInstance();
-            calendar.setTime(new Date(d));
+            calendar.setTimeInMillis(d);
             if (year < calendar.get(Calendar.YEAR))
                 return -1;
             if (year > calendar.get(Calendar.YEAR))

@@ -262,7 +262,7 @@ public class MaintenanceDialog
     @Override
     public void onClick(View v) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date(maintenance.last * 1000));
+        calendar.setTimeInMillis(maintenance.last * 1000);
         final CalendarDatePickerDialog dialog = new CalendarDatePickerDialog() {
             @Override
             public void onDayOfMonthSelected(int year, int month, int day) {

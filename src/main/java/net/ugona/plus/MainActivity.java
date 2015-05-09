@@ -52,6 +52,7 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -286,7 +287,13 @@ public class MainActivity
         MainFragment fragment = getFragment();
         if (fragment != null) {
             if (fragment.isShowDate()) {
-                DateFormat df = DateFormat.getDateInstance();
+                DateFormat df = DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault());
+                SimpleDateFormat sf = (SimpleDateFormat) df;
+                String pat = sf.toLocalizedPattern();
+                pat = pat.replaceAll("[yY]", "");
+                pat = pat.replaceAll("^[^A-Za-z]+", "");
+                pat = pat.replaceAll("[^A-Za-z]+$", "");
+                df = new SimpleDateFormat(pat);
                 item.setTitle(df.format(current));
             } else {
                 menu.removeItem(R.id.date);
@@ -330,7 +337,7 @@ public class MainActivity
             case R.id.date: {
                 final CalendarDatePickerDialog dialog = new DatePicker();
                 Calendar calendar = Calendar.getInstance();
-                calendar.setTime(new Date(current));
+                calendar.setTimeInMillis(current);
                 dialog.initialize(new CalendarDatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(CalendarDatePickerDialog calendarDatePickerDialog, int i, int i2, int i3) {
