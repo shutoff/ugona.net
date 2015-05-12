@@ -107,7 +107,7 @@ public class PhotoFragment extends MainFragment {
                 for (i = 0; i < photos.size(); i++) {
                     Photo p = photos.get(i);
                     calendar.setTimeInMillis(p.time);
-                    if (calendar.get(Calendar.HOUR) < h)
+                    if (calendar.get(Calendar.HOUR_OF_DAY) < h)
                         break;
                 }
                 i--;
@@ -344,7 +344,7 @@ public class PhotoFragment extends MainFragment {
         void update() {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(date());
-            calendar.set(Calendar.HOUR, 0);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);
             calendar.set(Calendar.MILLISECOND, 0);

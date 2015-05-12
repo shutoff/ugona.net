@@ -183,7 +183,7 @@ public class EventsFragment extends MainFragment {
                     for (i = 0; i < filtered.size(); i++) {
                         Event e = filtered.get(i);
                         calendar.setTimeInMillis(e.time);
-                        if (calendar.get(Calendar.HOUR) < h)
+                        if (calendar.get(Calendar.HOUR_OF_DAY) < h)
                             break;
                     }
                     i--;
@@ -546,7 +546,7 @@ public class EventsFragment extends MainFragment {
         void update() {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(date());
-            calendar.set(Calendar.HOUR, 0);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);
             calendar.set(Calendar.MILLISECOND, 0);

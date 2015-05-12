@@ -105,7 +105,7 @@ public class TracksFragment extends MainFragment {
                 for (i = 0; i < tracks.size(); i++) {
                     Track t = tracks.get(i);
                     calendar.setTimeInMillis(t.begin);
-                    if (calendar.get(Calendar.HOUR) < h)
+                    if (calendar.get(Calendar.HOUR_OF_DAY) < h)
                         break;
                 }
                 i--;
@@ -257,7 +257,7 @@ public class TracksFragment extends MainFragment {
         long time = 0;
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(date());
-        calendar.set(Calendar.HOUR, 0);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
@@ -370,7 +370,7 @@ public class TracksFragment extends MainFragment {
         void update() {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(date());
-            calendar.set(Calendar.HOUR, 0);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);
             calendar.set(Calendar.MILLISECOND, 0);
