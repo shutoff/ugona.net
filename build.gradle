@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.2.2'
+        classpath 'com.android.tools.build:gradle:1.2.3'
     }
 }
 apply plugin: 'com.android.application'
@@ -35,11 +35,11 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:22.1.1'
-    compile 'com.android.support:appcompat-v7:22.1.1'
+    compile 'com.android.support:support-v4:22.2.0'
+    compile 'com.android.support:appcompat-v7:22.2.0'
     compile 'com.android.support:recyclerview-v7:22.1.1'
-    compile 'com.google.android.gms:play-services:7.3.0'
-    compile 'com.googlecode.libphonenumber:libphonenumber:7.0.4'
+    compile 'com.google.android.gms:play-services:7.5.0'
+    compile 'com.googlecode.libphonenumber:libphonenumber:7.0.5'
     compile 'com.github.chrisbanes.photoview:library:1.2.3'
     compile 'com.eclipsesource.minimal-json:minimal-json:0.9.2'
     compile 'com.nineoldandroids:library:2.4.0'
