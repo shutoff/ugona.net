@@ -26,6 +26,7 @@ public class AppConfig extends Config {
     private String info_title;
     private String info_message;
     private String info_url;
+    private boolean start_password;
 
     private AppConfig(Context context) {
         ids = "";
@@ -284,6 +285,17 @@ public class AppConfig extends Config {
         if (this.info_url.equals(info_url))
             return;
         this.info_url = info_url;
+        upd = true;
+    }
+
+    public boolean isStart_password() {
+        return start_password;
+    }
+
+    public void setStart_password(boolean start_password) {
+        if (this.start_password == start_password)
+            return;
+        this.start_password = start_password;
         upd = true;
     }
 }

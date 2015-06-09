@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import com.haibison.android.lockpattern.LockPatternActivity;
 
@@ -18,6 +19,7 @@ public class SetPassword extends MainFragment {
     static final int REQUEST_PATTERN = 102;
 
     AppConfig config;
+    Spinner actions;
 
     @Override
     int layout() {
@@ -30,7 +32,7 @@ public class SetPassword extends MainFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
         config = AppConfig.get(getActivity());
 
@@ -91,6 +93,7 @@ public class SetPassword extends MainFragment {
                     return;
                 config.setPassword(etPass1.getText().toString());
                 config.setPattern("");
+                config.setStart_password(actions.getSelectedItemPosition() > 0);
                 getActivity().onBackPressed();
             }
         });
@@ -120,6 +123,21 @@ public class SetPassword extends MainFragment {
         etPass1.addTextChangedListener(watcher);
         etPass2.addTextChangedListener(watcher);
 
+        actions = (Spinner) v.findViewById(R.id.actions);
+        actions.setAdapter(new ArrayAdapter(actions) {
+            @Override
+            public int getCount() {
+                return 2;
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return (position == 0) ? getString(R.string.password_actions) : getString(R.string.password_start);
+            }
+        });
+        if (config.isStart_password())
+            actions.setSelection(1);
+
         return v;
     }
 
@@ -130,6 +148,7 @@ public class SetPassword extends MainFragment {
                 char[] pattern = data.getCharArrayExtra(LockPatternActivity.EXTRA_PATTERN);
                 config.setPattern(String.copyValueOf(pattern));
                 config.setPassword("");
+                config.setStart_password(actions.getSelectedItemPosition() > 0);
                 getActivity().onBackPressed();
             }
         }

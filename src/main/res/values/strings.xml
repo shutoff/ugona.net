@@ -46,7 +46,9 @@
     <string name="invalid_confirm">Invalid confirm</string>
     <string name="input_password">Input password</string>
     <string name="graphics_code">Set graphic pattern</string>
-    <string name="password_summary">Set password for actions</string>
+    <string name="password_summary">Set password for:</string>
+    <string name="password_actions">for actions</string>
+    <string name="password_start">for start application</string>
     <string name="error_load">Data loading error</string>
     <string name="loading">Loading data…</string>
         <string name="status" formatted="false">Mileage: |%s km|\nRoute time: |%s|\nAverage speed: |%.2f

@@ -46,7 +46,9 @@
     <string name="invalid_confirm">Пароли не совпадают</string>
     <string name="input_password">Введите пароль</string>
     <string name="graphics_code">Графический пароль</string>
-    <string name="password_summary">Укажите пароль для управления устройством из приложения</string>
+    <string name="password_summary">Пароль для:</string>
+    <string name="password_actions">выполнения комманд</string>
+    <string name="password_start">входа в приложение</string>
     <string name="error_load">Ошибка загрузки данных</string>
     <string name="loading">Загрузка данных…</string>
     <string name="status" formatted="false">Расстояние: |%s км|\nВремя в пути: |%s|\nСредняя скорость: |%.2f км/ч|\nМаксимальная скорость: |%d км/ч|</string>

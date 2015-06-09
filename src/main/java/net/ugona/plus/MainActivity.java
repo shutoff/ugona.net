@@ -65,6 +65,7 @@ public class MainActivity
 
     static final int DO_AUTH = 1;
     static final int REQUEST_CHECK_PATTERN = 2;
+    static final int DO_START = 3;
 
     static final String PRIMARY = "primary";
     static final String FRAGMENT = "fragment";
@@ -199,9 +200,24 @@ public class MainActivity
             return;
         }
 
-        Notification.clear(this, id);
+        AppConfig appConfig = AppConfig.get(this);
+        if (appConfig.isStart_password()) {
+            if (!appConfig.getPattern().equals("")) {
+                Intent i = new Intent(LockPatternActivity.ACTION_COMPARE_PATTERN, null, this, LockPatternActivity.class);
+                i.putExtra(LockPatternActivity.EXTRA_PATTERN, appConfig.getPattern().toCharArray());
+                startActivityForResult(i, DO_START);
+                return;
+            }
+            if (!config.getPassword().equals("")) {
+                Intent i = new Intent(this, PasswordActivity.class);
+                startActivityForResult(i, DO_START);
+                return;
+            }
+        }
 
+        Notification.clear(this, id);
         setPrimary();
+
         checkCaps(id);
     }
 
@@ -256,6 +272,16 @@ public class MainActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == DO_START) {
+            if (resultCode == RESULT_OK) {
+                Notification.clear(this, id);
+                setPrimary();
+                checkCaps(id);
+                return;
+            }
+            finish();
+            return;
+        }
         if (requestCode == DO_AUTH) {
             CarConfig carConfig = CarConfig.get(this, id);
             if (carConfig.getKey().equals("")) {
