@@ -47,7 +47,7 @@ public class StyledToolbar extends Toolbar {
             ((ImageButton) v).getDrawable().setColorFilter(colorFilter);
         }
 
-        if (v instanceof ImageView) {
+        if ((v instanceof ImageView) && !(v instanceof ToolbarImageView)) {
             ((ImageView) v).getDrawable().setAlpha(255);
             ((ImageView) v).getDrawable().setColorFilter(colorFilter);
         }

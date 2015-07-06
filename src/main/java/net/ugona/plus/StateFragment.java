@@ -267,8 +267,13 @@ public class StateFragment
                     update();
                     return;
                 }
-                if (!id().equals(intent.getStringExtra(Names.ID)))
+                String upd_id = intent.getStringExtra(Names.ID);
+                if (upd_id == null)
                     return;
+                String[] upd = upd_id.split("_");
+                if (!upd[0].equals(id()) && !upd_id.equals(id()))
+                    return;
+
                 if (intent.getAction().equals(Names.ERROR)) {
                     error = intent.getStringExtra(Names.ERROR);
                     if (error == null)
@@ -308,10 +313,22 @@ public class StateFragment
         intFilter.addAction(Names.ADDRESS_UPDATE);
         intFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         getActivity().registerReceiver(br, intFilter);
+
         Intent intent = new Intent(getActivity(), FetchService.class);
         intent.setAction(FetchService.ACTION_UPDATE);
         intent.putExtra(Names.ID, id());
         getActivity().startService(intent);
+
+        CarConfig config = CarConfig.get(getActivity(), id());
+        int[] pointers = config.getPointers();
+        if (pointers != null) {
+            for (int pointer : pointers) {
+                Intent i = new Intent(getActivity(), FetchService.class);
+                i.setAction(FetchService.ACTION_UPDATE);
+                i.putExtra(Names.ID, id() + "_" + pointer);
+                getActivity().startService(i);
+            }
+        }
         return v;
     }
 
