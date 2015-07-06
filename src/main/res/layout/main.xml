@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <android.support.v7.widget.Toolbar
+        <net.ugona.plus.StyledToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -38,7 +38,7 @@
                 android:layout_height="30dp"
                 android:src="@drawable/logo" />
 
-        </android.support.v7.widget.Toolbar>
+        </net.ugona.plus.StyledToolbar>
 
         <FrameLayout
             android:id="@+id/fragment"

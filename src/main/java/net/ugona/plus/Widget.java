@@ -176,6 +176,7 @@ public class Widget extends AppWidgetProvider {
     }
 
     void updateWidgets(Context context, String car_id, boolean sendUpdate) {
+        State.appendLog("Update " + car_id);
         ComponentName thisAppWidget = new ComponentName(context.getPackageName(), getClass().getName());
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         if (appWidgetManager != null) {
@@ -416,6 +417,7 @@ public class Widget extends AppWidgetProvider {
     }
 
     void updateLockWidget(Context context, RemoteViews widgetView, int widgetID, String car_id) {
+        State.appendLog("update widget " + car_id);
         DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
         Date now = new Date();
         widgetView.setTextViewText(R.id.time, tf.format(now));
