@@ -14,20 +14,33 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.afollestad.materialdialogs.AlertDialogWrapper;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 
 public class PasswordDialog extends DialogFragment
-        implements View.OnClickListener, TextWatcher {
+        implements View.OnClickListener,
+        TextWatcher,
+        SeekBar.OnSeekBarChangeListener {
 
     EditText etPasswd;
     View btnOk;
     String password;
     String title;
+    String data;
+    String units;
+    TextView tvUnits;
+    int min_value;
     View vError;
     boolean sent;
+    SeekBar vValue;
+    String car_id;
+    int id;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -60,6 +73,32 @@ public class PasswordDialog extends DialogFragment
         btnOk = dialog.getActionButton(DialogAction.POSITIVE);
         btnOk.setOnClickListener(this);
         etPasswd.addTextChangedListener(this);
+        if (data != null) {
+            try {
+                JsonObject def = JsonValue.readFrom(data).asObject();
+                String title = def.getString("title", "");
+                min_value = def.getInt("min", 0);
+                int max_value = def.getInt("max", 1);
+                units = def.getString("units", "");
+                vValue = (SeekBar) dialog.findViewById(R.id.value);
+                vValue.setMax(max_value - min_value);
+                TextView tvValueTitle = (TextView) dialog.findViewById(R.id.value_title);
+                tvValueTitle.setText(title);
+                tvUnits = (TextView) dialog.findViewById(R.id.value_text);
+                vValue.setOnSeekBarChangeListener(this);
+                CarConfig carConfig = CarConfig.get(getActivity(), car_id);
+                int v = carConfig.getCommandValue(id);
+                if (v < min_value)
+                    v = min_value;
+                if (v > max_value)
+                    v = max_value;
+                tvUnits.setText(v + " " + units);
+                vValue.setProgress(v - min_value);
+                dialog.findViewById(R.id.value_block).setVisibility(View.VISIBLE);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         afterTextChanged(etPasswd.getText());
     }
 
@@ -68,6 +107,9 @@ public class PasswordDialog extends DialogFragment
         super.setArguments(args);
         password = args.getString(Names.MESSAGE);
         title = args.getString(Names.TITLE);
+        data = args.getString(Names.VALUE);
+        car_id = args.getString(Names.ID);
+        id = args.getInt(Names.COMMAND);
     }
 
     @Override
@@ -75,6 +117,9 @@ public class PasswordDialog extends DialogFragment
         super.onSaveInstanceState(outState);
         outState.putString(Names.MESSAGE, password);
         outState.putString(Names.TITLE, title);
+        outState.putString(Names.VALUE, data);
+        outState.putString(Names.ID, car_id);
+        outState.putInt(Names.COMMAND, id);
     }
 
     @Override
@@ -114,6 +159,8 @@ public class PasswordDialog extends DialogFragment
             if (fragment != null) {
                 Intent data = new Intent();
                 data.putExtra("pwd", etPasswd.getText().toString() + " ");
+                if (vValue != null)
+                    data.putExtra("v", vValue.getProgress() + min_value + "");
                 fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, data);
             }
             return;
@@ -129,5 +176,23 @@ public class PasswordDialog extends DialogFragment
         Fragment fragment = getTargetFragment();
         if ((fragment != null) && !sent)
             fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_CANCELED, null);
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        progress += min_value;
+        tvUnits.setText(progress + " " + units);
+        CarConfig carConfig = CarConfig.get(getActivity(), car_id);
+        carConfig.setCommandValue(id, progress);
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
     }
 }

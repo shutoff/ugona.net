@@ -48,6 +48,7 @@ public class SmsMonitor extends BroadcastReceiver {
                 toast.show();
                 String[] sms = c.sms.split("\\|");
                 if (sms.length == 1) {
+                    Commands.remove(context, id, c);
                     if (c.done != null) {
                         CarState state = CarState.get(context, id);
                         Set<String> upd = State.update(context, id, c, c.done, state, null, null);

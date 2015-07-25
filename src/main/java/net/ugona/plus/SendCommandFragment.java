@@ -202,19 +202,19 @@ public class SendCommandFragment extends DialogFragment {
             return false;
         if (!State.hasTelephony(getActivity()))
             return false;
-        if (cmd.data != null) {
-            CCodeDialog dialog = new CCodeDialog();
-            Bundle args = new Bundle();
-            args.putString(Names.ID, car_id);
-            args.putString(Names.MESSAGE, cmd.data);
-            args.putString(Names.TITLE, cmd.name);
-            dialog.setArguments(args);
-            dialog.setTargetFragment(this, DO_CCODE_SMS);
-            dialog.show(getFragmentManager(), "ccode");
-            return true;
-        }
         String sms = cmd.sms.split("\\|")[0];
         if (sms.indexOf("{ccode}") >= 0) {
+            if (cmd.data != null) {
+                CCodeDialog dialog = new CCodeDialog();
+                Bundle args = new Bundle();
+                args.putString(Names.ID, car_id);
+                args.putString(Names.MESSAGE, cmd.data);
+                args.putString(Names.TITLE, cmd.name);
+                dialog.setArguments(args);
+                dialog.setTargetFragment(this, DO_CCODE_SMS);
+                dialog.show(getFragmentManager(), "ccode");
+                return true;
+            }
             CCodeDialog dialog = new CCodeDialog();
             Bundle args = new Bundle();
             args.putString(Names.ID, car_id);
@@ -226,10 +226,16 @@ public class SendCommandFragment extends DialogFragment {
         if (sms.indexOf("{pwd}") >= 0) {
             CarConfig config = CarConfig.get(getActivity(), car_id);
             CarState state = CarState.get(getActivity(), car_id);
-            if (config.isDevice_password() && state.isDevice_password()) {
+            if (state.isDevice_pswd() ||
+                    (config.isDevice_password() && state.isDevice_password())) {
                 PasswordDialog dialog = new PasswordDialog();
                 Bundle args = new Bundle();
                 args.putString(Names.TITLE, getString(R.string.input_device_pswd));
+                if (sms.indexOf("{v}") >= 0) {
+                    args.putString(Names.VALUE, cmd.data);
+                    args.putString(Names.ID, car_id);
+                    args.putInt(Names.COMMAND, cmd.id);
+                }
                 dialog.setArguments(args);
                 dialog.setTargetFragment(this, DO_CCODE_SMS);
                 dialog.show(getFragmentManager(), "password");
@@ -315,6 +321,7 @@ public class SendCommandFragment extends DialogFragment {
                 sms = replace(sms, "ccode", data);
                 sms = replace(sms, "pwd", data);
                 sms = replace(sms, "ccode_new", data);
+                sms = replace(sms, "v", data);
                 if (Sms.send(getActivity(), car_id, c.id, sms)) {
                     String pwd = null;
                     if (data != null)

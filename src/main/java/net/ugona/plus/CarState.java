@@ -68,6 +68,7 @@ public class CarState extends Config {
     private boolean history;
     private boolean zones;
     private boolean device_password;
+    private boolean device_pswd;
     private long check_time;
     private long no_gsm_time;
     private String check_version;
@@ -343,6 +344,10 @@ public class CarState extends Config {
 
     public boolean isDevice_password() {
         return device_password;
+    }
+
+    public boolean isDevice_pswd() {
+        return device_pswd;
     }
 
     public long getCheck_time() {

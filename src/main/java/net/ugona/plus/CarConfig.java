@@ -53,6 +53,7 @@ public class CarConfig extends Config {
     private int leftHours;
     private String maintenance;
     private long maintenance_time;
+    private String command_values;
 
     private CarConfig() {
         init();
@@ -403,6 +404,48 @@ public class CarConfig extends Config {
         if (this.maintenance_time == maintenance_time)
             return;
         this.maintenance_time = maintenance_time;
+        upd = true;
+    }
+
+    public int getCommandValue(int cmd) {
+        if (command_values == null)
+            return 0;
+        String[] values = command_values.split(",");
+        for (String v : values) {
+            String[] pair = v.split(":");
+            if (pair[0].equals(cmd + ""))
+                return Integer.parseInt(pair[1]);
+        }
+        return 0;
+    }
+
+    public void setCommandValue(int cmd, int value) {
+        if (command_values == null) {
+            command_values = cmd + ":" + value;
+            upd = true;
+            return;
+        }
+        String[] values = command_values.split(",");
+        Vector<String> res = new Vector<>();
+        for (String v : values) {
+            String[] pair = v.split(":");
+            if (pair[0].equals(cmd + "")) {
+                if (pair[1].equals(value + ""))
+                    return;
+                continue;
+            }
+            res.add(v);
+        }
+        res.add(cmd + ":" + value);
+        String r = null;
+        for (String v : res) {
+            if (r == null) {
+                r = v;
+                continue;
+            }
+            r += "," + v;
+        }
+        command_values = r;
         upd = true;
     }
 
