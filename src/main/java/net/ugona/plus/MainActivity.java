@@ -599,12 +599,15 @@ public class MainActivity
 
             public View getView(int position, View convertView, int layout_id) {
                 View v = convertView;
+                if ((v != null) && !v.getTag().equals(layout_id))
+                    v = null;
                 if (v == null) {
                     LayoutInflater inflater = LayoutInflater.from(getSupportActionBar().getThemedContext());
                     v = inflater.inflate(layout_id, null);
                 }
                 TextView tv = (TextView) v.findViewById(R.id.name);
                 tv.setText(combo.getItem(position).getTitle());
+                v.setTag(layout_id);
                 return v;
             }
         });
