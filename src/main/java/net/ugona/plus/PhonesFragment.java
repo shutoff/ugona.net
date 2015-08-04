@@ -152,7 +152,7 @@ public class PhonesFragment
                 sms = passwd + " ";
             sms += "NEW USER " + phone.replaceAll("[^0-9+]", "");
             if (Sms.send(getActivity(), car_id, c.id, sms)) {
-                Commands.put(getActivity(), car_id, c, data.getStringExtra("pwd"));
+                Commands.put(getActivity(), car_id, c, data);
             } else {
                 refreshDone();
             }

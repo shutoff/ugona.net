@@ -65,7 +65,7 @@ public class Commands {
         return true;
     }
 
-    static void put(Context context, String id, CarConfig.Command cmd, String passwd) {
+    static void put(Context context, String id, CarConfig.Command cmd, Intent data) {
         synchronized (requests) {
             if (!requests.containsKey(id))
                 requests.put(id, new Queue());
@@ -74,7 +74,7 @@ public class Commands {
                 return;
             CommandState state = new CommandState();
             state.time = new Date().getTime();
-            state.passwd = passwd;
+            state.data = data;
             queue.put(cmd, state);
         }
         Intent i = new Intent(Names.COMMANDS);
@@ -82,18 +82,21 @@ public class Commands {
         context.sendBroadcast(i);
     }
 
-    static void remove(Context context, String id, CarConfig.Command cmd) {
+    static Intent remove(Context context, String id, CarConfig.Command cmd) {
+        Intent data = null;
         synchronized (requests) {
             if (!requests.containsKey(id))
-                return;
+                return null;
             Queue queue = requests.get(id);
             if (!queue.containsKey(cmd))
-                return;
+                return null;
+            data = queue.get(cmd).data;
             queue.remove(cmd);
         }
         Intent i = new Intent(Names.COMMANDS);
         i.putExtra(Names.ID, id);
         context.sendBroadcast(i);
+        return data;
     }
 
     static void check(Context context, String id) {
@@ -200,7 +203,7 @@ public class Commands {
 
     static class CommandState {
         long time;
-        String passwd;
+        Intent data;
     }
 
     static class Queue extends HashMap<CarConfig.Command, CommandState> {

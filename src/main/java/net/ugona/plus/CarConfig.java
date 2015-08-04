@@ -1,6 +1,7 @@
 package net.ugona.plus;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
@@ -88,6 +89,16 @@ public class CarConfig extends Config {
         }
         if (ed != null)
             ed.commit();
+    }
+
+    static String replace(String text, String subst, Intent data) {
+        String s = "";
+        if (data != null) {
+            s = data.getStringExtra(subst);
+            if (s == null)
+                s = "";
+        }
+        return text.replace("{" + subst + "}", s);
     }
 
     public void save(Context context, String id) {
@@ -494,6 +505,7 @@ public class CarConfig extends Config {
         String sms;
         String call;
         int inet;
+        int next;
         boolean inet_ccode;
         boolean custom_name;
         String group;
@@ -504,6 +516,15 @@ public class CarConfig extends Config {
         boolean on;
         boolean always;
         Runnable onAnswer;
+
+        String smsText(Intent data) {
+            String text = sms.split("\\|")[0];
+            text = replace(text, "ccode", data);
+            text = replace(text, "pwd", data);
+            text = replace(text, "ccode_new", data);
+            text = replace(text, "v", data);
+            return text;
+        }
     }
 
     public static class Setting implements Serializable {

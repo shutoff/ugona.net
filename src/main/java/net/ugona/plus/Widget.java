@@ -337,6 +337,15 @@ public class Widget extends AppWidgetProvider {
             }
             widgetView.setViewVisibility(R.id.balance_block, show_balance ? View.VISIBLE : View.GONE);
 
+            double card_voltage = carState.getCard_voltage();
+            if ((card_voltage > 0) && (show_count < MAX_ROWS)) {
+                widgetView.setTextViewText(R.id.card, card_voltage + " V");
+                widgetView.setViewVisibility(R.id.card_block, View.VISIBLE);
+                show_count++;
+            } else {
+                widgetView.setViewVisibility(R.id.card_block, View.GONE);
+            }
+
             int gsm_level = carState.getGsm_level();
             boolean show_level = (show_count < MAX_ROWS);
             if (gsm_level == 0)

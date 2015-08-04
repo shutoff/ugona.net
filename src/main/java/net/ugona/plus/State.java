@@ -497,8 +497,11 @@ public class State {
                     if (cmd != null)
                         intent.putExtra(Names.TITLE, cmd.name);
                     intent.putExtra(Names.MESSAGE, v);
-                    if (state != null)
-                        intent.putExtra(Names.PASSWORD, state.passwd);
+                    if ((state != null) && (state.data != null)) {
+                        String passwd = state.data.getStringExtra("pwd");
+                        if (passwd != null)
+                            intent.putExtra(Names.PASSWORD, passwd);
+                    }
                     intent.putExtra(Names.ID, car_id);
                     context.startActivity(intent);
                 }

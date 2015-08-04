@@ -34,16 +34,6 @@ public class SendCommandFragment extends DialogFragment {
     boolean longTap;
     boolean no_prompt;
 
-    static String replace(String text, String subst, Intent data) {
-        String s = "";
-        if (data != null) {
-            s = data.getStringExtra(subst);
-            if (s == null)
-                s = "";
-        }
-        return text.replace("{" + subst + "}", s);
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (savedInstanceState != null)
@@ -317,16 +307,9 @@ public class SendCommandFragment extends DialogFragment {
         CarConfig.Command[] cmd = config.getCmd();
         for (final CarConfig.Command c : cmd) {
             if (c.id == cmd_id) {
-                String sms = c.sms.split("\\|")[0];
-                sms = replace(sms, "ccode", data);
-                sms = replace(sms, "pwd", data);
-                sms = replace(sms, "ccode_new", data);
-                sms = replace(sms, "v", data);
+                String sms = c.smsText(data);
                 if (Sms.send(getActivity(), car_id, c.id, sms)) {
-                    String pwd = null;
-                    if (data != null)
-                        pwd = data.getStringExtra("pwd");
-                    Commands.put(getActivity(), car_id, c, pwd);
+                    Commands.put(getActivity(), car_id, c, data);
                     Intent intent = new Intent(getActivity(), FetchService.class);
                     intent.setAction(FetchService.ACTION_UPDATE);
                     intent.putExtra(Names.ID, car_id);
