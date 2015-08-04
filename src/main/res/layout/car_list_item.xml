@@ -11,9 +11,10 @@
         style="@style/spinnerItemStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginRight="20dp"
         android:layout_weight="1"
-        android:padding="5dp"
+        android:gravity="center"
+        android:paddingLeft="5dp"
+        android:paddingRight="25dp"
         android:singleLine="true" />
 
 </LinearLayout>

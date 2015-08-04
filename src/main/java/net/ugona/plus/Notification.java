@@ -156,6 +156,7 @@ public class Notification extends Config {
         }
         if (names.contains("time")) {
             if ((state.getNo_gsm_time() > 0) && (state.getTime() > state.getNo_gsm_time())) {
+                state.setNo_gsm(false);
                 if (notification.no_gsm != 0)
                     remove(context, notification.az);
                 notification.no_gsm = create(context, context.getString(R.string.restore), R.drawable.warning, car_id, null, 0, false, null);
