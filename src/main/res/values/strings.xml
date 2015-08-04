@@ -226,10 +226,10 @@
     <string name="input_device_pswd">Input device password</string>
     <string name="add_phone">Add phone</string>
     <string name="clear_phones">For clear control phones list initialize main phone</string>
-    <string name="ps_guard">Guard\nwith passengers</string>
+    <string name="ps_guard">Guard with passengers</string>
     <string name="card">Security card\nin car</string>
     <string name="block">Engine blocked</string>
-    <string name="valet_mode">VALET\nmode on</string>
+    <string name="valet_mode">VALET mode on</string>
     <string name="tilt">Tilt</string>
     <string name="sos">SOS!!!</string>
     <string name="guard">Guard ON</string>

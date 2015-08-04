@@ -163,12 +163,12 @@ public class Notification extends Config {
             }
         }
         if (names.contains("guard_mode")) {
-            if (state.isValet() != (state.getGuard_mode() == 1)) {
+            if (state.isValet() != (state.getGuard_mode() == 2)) {
                 if (notification.valet != 0) {
                     remove(context, notification.valet);
                     notification.valet = 0;
                 }
-                state.setValet(state.getGuard_mode() == 1);
+                state.setValet(state.getGuard_mode() == 2);
                 if (state.isValet()) {
                     notification.valet = create(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet, car_id, "valet_on", 0, true, null);
                 } else {
