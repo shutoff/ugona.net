@@ -143,9 +143,9 @@ public class Notification extends Config {
             if (notification.no_gsm != 0)
                 remove(context, notification.az);
             if (state.isNo_gsm()) {
-                notification.no_gsm = create(context, context.getString(R.string.lost), R.drawable.warning, car_id, null, 0, true, null);
+                notification.no_gsm = create(context, context.getString(R.string.lost), R.drawable.w_warning_light, car_id, null, 0, true, null);
             } else {
-                notification.no_gsm = create(context, context.getString(R.string.restore), R.drawable.warning, car_id, null, 0, false, null);
+                notification.no_gsm = create(context, context.getString(R.string.restore), R.drawable.w_warning_light, car_id, null, 0, false, null);
             }
         }
         if (names.contains("guard") || names.contains("ignition")) {
@@ -159,7 +159,7 @@ public class Notification extends Config {
                 state.setNo_gsm(false);
                 if (notification.no_gsm != 0)
                     remove(context, notification.az);
-                notification.no_gsm = create(context, context.getString(R.string.restore), R.drawable.warning, car_id, null, 0, false, null);
+                notification.no_gsm = create(context, context.getString(R.string.restore), R.drawable.w_warning_light, car_id, null, 0, false, null);
             }
         }
         if (names.contains("guard_mode")) {
