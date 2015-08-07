@@ -92,7 +92,7 @@ public class Notification extends Config {
                 if (v > 0) {
                     if (f.getName().equals("valet")) {
                         CarState state = CarState.get(context, car_id);
-                        if (state.getGuard_mode() == 1)
+                        if (state.getGuard_mode() == 2)
                             continue;
                     }
                     f.setInt(o, 0);
@@ -380,7 +380,7 @@ public class Notification extends Config {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        if (sound.equals(""))
+        if ((sound != null) && sound.equals(""))
             sound = null;
         if ((sound == null) && grp.equals("azStart"))
             sound = "android.resource://net.ugona.plus/raw/start";
