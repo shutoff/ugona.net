@@ -43,6 +43,7 @@ public class SwipeRefresh extends SwipeRefreshLayout {
             if (canChildScrollUp(getChildAt(i)))
                 return true;
         }
-        return super.canChildScrollUp();
+        return false;
     }
+
 }

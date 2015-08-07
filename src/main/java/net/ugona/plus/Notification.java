@@ -27,7 +27,8 @@ public class Notification extends Config {
     static int max_id;
     private static HashMap<String, Notification> notifications;
     private int az;
-    private int valet;
+    private int valet_on;
+    private int valet_off;
     private int part_guard;
     private int doors;
     private int hood;
@@ -90,9 +91,9 @@ public class Notification extends Config {
                     continue;
                 int v = f.getInt(o);
                 if (v > 0) {
-                    if (f.getName().equals("valet")) {
+                    if (f.getName().equals("valet_on")) {
                         CarState state = CarState.get(context, car_id);
-                        if (state.getGuard_mode() == 2)
+                        if (state.isValet())
                             continue;
                     }
                     f.setInt(o, 0);
@@ -164,15 +165,19 @@ public class Notification extends Config {
         }
         if (names.contains("guard_mode")) {
             if (state.isValet() != (state.getGuard_mode() == 2)) {
-                if (notification.valet != 0) {
-                    remove(context, notification.valet);
-                    notification.valet = 0;
+                if (notification.valet_on != 0) {
+                    remove(context, notification.valet_on);
+                    notification.valet_on = 0;
+                }
+                if (notification.valet_off != 0) {
+                    remove(context, notification.valet_off);
+                    notification.valet_off = 0;
                 }
                 state.setValet(state.getGuard_mode() == 2);
                 if (state.isValet()) {
-                    notification.valet = create(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet, car_id, "valet_on", 0, true, null);
+                    notification.valet_on = create(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet, car_id, "valet_on", 0, true, null);
                 } else {
-                    notification.valet = create(context, context.getString(R.string.valet_off_ok), R.drawable.white_valet, car_id, "valet_off", 0, false, null);
+                    notification.valet_off = create(context, context.getString(R.string.valet_off_ok), R.drawable.white_valet, car_id, "valet_off", 0, false, null);
                 }
             }
         }
