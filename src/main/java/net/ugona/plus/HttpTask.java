@@ -7,6 +7,7 @@ import android.util.Log;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
+import com.squareup.okhttp.ConnectionSpec;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -16,10 +17,12 @@ import com.squareup.okhttp.Response;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 public abstract class HttpTask {
 
+    static ConnectionSpec spec;
     public static final OkHttpClient client = createClient();
     AsyncTask<Object, Void, JsonObject> bgTask;
     String error_text;
@@ -29,6 +32,9 @@ public abstract class HttpTask {
         OkHttpClient client = new OkHttpClient();
         client.setConnectTimeout(15, TimeUnit.SECONDS);
         client.setReadTimeout(40, TimeUnit.SECONDS);
+        if (spec == null)
+            spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS).build();
+        client.setConnectionSpecs(Collections.singletonList(spec));
         return client;
     }
 

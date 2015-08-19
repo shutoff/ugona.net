@@ -3,7 +3,6 @@ package net.ugona.plus;
 import android.content.Context;
 import android.text.Layout;
 import android.util.AttributeSet;
-import android.util.FloatMath;
 import android.widget.TextView;
 
 public class TightTextView extends TextView {
@@ -25,7 +24,7 @@ public class TightTextView extends TextView {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         Layout layout = getLayout();
         if (layout != null) {
-            int width = (int) FloatMath.ceil(getMaxLineWidth(layout))
+            int width = (int) Math.ceil(getMaxLineWidth(layout))
                     + getCompoundPaddingLeft() + getCompoundPaddingRight();
             int height = getMeasuredHeight();
             setMeasuredDimension(width, height);
