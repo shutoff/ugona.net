@@ -60,6 +60,8 @@
     @android.webkit.JavascriptInterface <methods>;
 }
 
+-dontwarn android.support.**
+-dontwarn com.google.android.gms.**
 -dontwarn org.joda.convert.**
 -dontwarn sun.misc.**
 -dontwarn android.os.**

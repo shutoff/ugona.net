@@ -65,78 +65,78 @@ public class Alarm
         final int vibro_mode = carConfig.getAlarmVibro();
         prev_level = start_level;
         count = 0;
-        if (bDemo) {
-            timer = new CountDownTimer(180000, 2000) {
-                @Override
-                public void onTick(long millisUntilFinished) {
-                    count++;
-                    if (count > 60)
-                        count = 60;
-                    int new_level = start_level + (int) ((count / 30.) * (max_level - start_level));
-                    if (new_level != prev_level) {
-                        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, new_level, 0);
-                        prev_level = new_level;
-                    }
-                    switch (vibro_mode) {
-                        case 0:
-                            vibro.vibrate(1000);
+
+        timer = new CountDownTimer(180000, 2000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                count++;
+                if (count > 60)
+                    count = 60;
+                int new_level = start_level + (int) ((count / 30.) * (max_level - start_level));
+                if (new_level != prev_level) {
+                    audioManager.setStreamVolume(AudioManager.STREAM_ALARM, new_level, 0);
+                    prev_level = new_level;
+                }
+                switch (vibro_mode) {
+                    case 0:
+                        vibro.vibrate(1000);
+                        break;
+                    case 2:
+                        vibro.vibrate(Notification.SHORT_PATTERN, -1);
+                        break;
+                    case 3:
+                        vibro.vibrate(Notification.LONG_PATTERN, -1);
+                        break;
+                }
+
+                if (bDemo && (--demo_count <= 0)) {
+                    demo_count = 5;
+                    CarState state = CarState.get(Alarm.this, car_id);
+                    switch (++demo_state) {
+                        case 1:
+                            state.setShock(1);
                             break;
                         case 2:
-                            vibro.vibrate(Notification.SHORT_PATTERN, -1);
+                            state.setShock(2);
                             break;
                         case 3:
-                            vibro.vibrate(Notification.LONG_PATTERN, -1);
+                            state.setShock(0);
+                            state.setMove(true);
                             break;
+                        case 4:
+                            state.setTilt(true);
+                            break;
+                        case 5:
+                            state.setSos(true);
+                            break;
+                        case 6:
+                            state.setMove(false);
+                            state.setSos(false);
+                            state.setTilt(false);
+                            state.setIn_sensor(true);
+                            break;
+                        case 7:
+                            state.setExt_sensor(true);
+                            break;
+                        case 8:
+                            state.setIn_sensor(false);
+                            state.setExt_sensor(false);
+                            state.setSos(true);
+                        default:
+                            demo_state = 0;
                     }
-
-                    if (bDemo && (--demo_count <= 0)) {
-                        demo_count = 5;
-                        CarState state = CarState.get(Alarm.this, car_id);
-                        switch (++demo_state) {
-                            case 1:
-                                state.setShock(1);
-                                break;
-                            case 2:
-                                state.setShock(2);
-                                break;
-                            case 3:
-                                state.setShock(0);
-                                state.setMove(true);
-                                break;
-                            case 4:
-                                state.setTilt(true);
-                                break;
-                            case 5:
-                                state.setSos(true);
-                                break;
-                            case 6:
-                                state.setMove(false);
-                                state.setSos(false);
-                                state.setTilt(false);
-                                state.setIn_sensor(true);
-                                break;
-                            case 7:
-                                state.setExt_sensor(true);
-                                break;
-                            case 8:
-                                state.setIn_sensor(false);
-                                state.setExt_sensor(false);
-                                state.setSos(true);
-                            default:
-                                demo_state = 0;
-                        }
-                        carView.update(state);
-                    }
+                    carView.update(state);
                 }
+            }
 
-                @Override
-                public void onFinish() {
-                    Notification.showAlarm(Alarm.this, car_id, title);
-                    finish();
-                }
-            };
-            timer.start();
-        }
+            @Override
+            public void onFinish() {
+                Notification.showAlarm(Alarm.this, car_id, title);
+                finish();
+            }
+        };
+        timer.start();
+
         String sound = carConfig.getAlarmSound();
         Uri uri = Uri.parse(sound);
         if (sound.equals(""))
@@ -188,16 +188,18 @@ public class Alarm
         }
         if (timer != null)
             timer.cancel();
-        CarState state = CarState.get(this, car_id);
-        state.setSos(false);
-        state.setShock(0);
-        state.setMove(false);
-        state.setTilt(true);
-        state.setIn_sensor(false);
-        state.setExt_sensor(false);
-        Intent intent = new Intent(Names.UPDATED);
-        intent.putExtra(Names.ID, car_id);
-        sendBroadcast(intent);
+        if (bDemo) {
+            CarState state = CarState.get(this, car_id);
+            state.setSos(false);
+            state.setShock(0);
+            state.setMove(false);
+            state.setTilt(true);
+            state.setIn_sensor(false);
+            state.setExt_sensor(false);
+            Intent intent = new Intent(Names.UPDATED);
+            intent.putExtra(Names.ID, car_id);
+            sendBroadcast(intent);
+        }
         super.onDestroy();
     }
 }
