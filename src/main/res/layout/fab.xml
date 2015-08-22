@@ -9,7 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginRight="10dp"
-        android:listSelector="@android:color/transparent" />
+        android:listSelector="@android:color/transparent"
+        android:paddingBottom="180dp" />
 
     <ImageView
         android:id="@+id/fab"

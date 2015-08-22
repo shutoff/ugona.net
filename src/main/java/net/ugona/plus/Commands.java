@@ -144,6 +144,7 @@ public class Commands {
             Queue queue = requests.get(id);
             CarState state = CarState.get(context, id);
             Set<Map.Entry<CarConfig.Command, CommandState>> entries = queue.entrySet();
+            body = body.toUpperCase();
             for (Map.Entry<CarConfig.Command, CommandState> entry : entries) {
                 CarConfig.Command command = entry.getKey();
                 if (command.sms == null)
@@ -167,8 +168,8 @@ public class Commands {
                 }
                 if (i >= parts.length)
                     continue;
-                ;
                 found = true;
+                queue.remove(command);
                 if (command.onAnswer != null) {
                     command.onAnswer.run();
                 } else if (command.done != null) {

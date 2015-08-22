@@ -7,12 +7,14 @@ import android.util.Log;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
+import com.squareup.okhttp.CipherSuite;
 import com.squareup.okhttp.ConnectionSpec;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
+import com.squareup.okhttp.TlsVersion;
 
 import java.io.Reader;
 import java.net.HttpURLConnection;
@@ -33,7 +35,32 @@ public abstract class HttpTask {
         client.setConnectTimeout(15, TimeUnit.SECONDS);
         client.setReadTimeout(40, TimeUnit.SECONDS);
         if (spec == null)
-            spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS).build();
+            spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+                    .tlsVersions(
+                            TlsVersion.TLS_1_2,
+                            TlsVersion.TLS_1_1,
+                            TlsVersion.TLS_1_0)
+                    .cipherSuites(
+                            CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                            CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+                            CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+                            CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+                            CipherSuite.TLS_ECDHE_ECDSA_WITH_RC4_128_SHA,
+                            CipherSuite.TLS_ECDHE_RSA_WITH_RC4_128_SHA,
+                            CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+                            CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
+                            CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
+                            CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256,
+                            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+                            CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
+                            CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
+                            CipherSuite.TLS_RSA_WITH_RC4_128_SHA,
+                            CipherSuite.TLS_RSA_WITH_RC4_128_MD5)
+                    .supportsTlsExtensions(true)
+                    .build();
         client.setConnectionSpecs(Collections.singletonList(spec));
         return client;
     }

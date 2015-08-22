@@ -27,6 +27,7 @@ import java.util.Vector;
 
 public class TrackView extends MapActivity {
 
+    private final SimpleDateFormat GPXTIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     Vector<Track> tracks;
 
     @Override
@@ -117,7 +118,7 @@ public class TrackView extends MapActivity {
             path = new File(path, "Tracks");
             path.mkdirs();
 
-            long begin = 0;
+            long begin = Long.MAX_VALUE;
             long end = 0;
             for (Track track : tracks) {
                 String[] points = track.track.split("\\|");
@@ -125,9 +126,10 @@ public class TrackView extends MapActivity {
                     Track.Point p = new Track.Point(point);
                     if ((p.latitude < min_lat) || (p.latitude > max_lat) || (p.longitude < min_lon) || (p.longitude > max_lon))
                         continue;
-                    if (begin == 0)
+                    if (p.time < begin)
                         begin = p.time;
-                    end = p.time;
+                    if (p.time > end)
+                        end = p.time;
                 }
             }
             if (begin >= end) {
@@ -139,6 +141,7 @@ public class TrackView extends MapActivity {
             DateFormat df = SimpleDateFormat.getDateTimeInstance();
             DateFormat tf = SimpleDateFormat.getTimeInstance();
             String name = df.format(begin) + "-" + tf.format(end) + ".gpx";
+            name = name.replaceAll("[|\\?*<\":>+\\[\\]/']", ".");
             File out = new File(path, name);
             out.createNewFile();
 
@@ -154,13 +157,11 @@ public class TrackView extends MapActivity {
             writer.append(" xmlns=\"http://www.topografix.com/GPX/1/0\"\n");
             writer.append(" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">\n");
             writer.append("<time>");
-            DateFormat tdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z");
-            writer.append(tdf.format(begin));
+            writer.append(GPXTIME_FORMAT.format(begin));
             writer.append("</time>\n");
             writer.append("<trk>\n");
 
             boolean trk = false;
-            DateFormat tsf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z");
             for (Track track : tracks) {
                 String[] points = track.track.split("\\|");
                 for (String point : points) {
@@ -177,7 +178,7 @@ public class TrackView extends MapActivity {
                         writer.append("<trkseg>\n");
                     }
                     writer.append("<trkpt lat=\"").append(p.latitude + "").append("\" lon=\"").append(p.longitude + "").append("\">\n");
-                    writer.append("<time>").append(tsf.format(p.time)).append("</time>\n");
+                    writer.append("<time>").append(GPXTIME_FORMAT.format(p.time)).append("</time>\n");
                     writer.append("</trkpt>\n");
                 }
                 if (trk)

@@ -89,6 +89,8 @@ public class Notification extends Config {
                 Class<?> c = f.getType();
                 if (c != int.class)
                     continue;
+                if (f.getName().equals("max_id"))
+                    continue;
                 int v = f.getInt(o);
                 if (v > 0) {
                     if (f.getName().equals("valet_on")) {
