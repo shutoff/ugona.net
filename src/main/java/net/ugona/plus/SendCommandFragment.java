@@ -34,6 +34,42 @@ public class SendCommandFragment extends DialogFragment {
     boolean longTap;
     boolean no_prompt;
 
+    public static void send_inet(final Context context, final CarConfig.Command c, final String car_id, String ccode) {
+        HttpTask task = new HttpTask() {
+            @Override
+            void result(JsonObject res) throws ParseException {
+                Toast toast = Toast.makeText(context, R.string.command_sent, Toast.LENGTH_LONG);
+                toast.show();
+                if (c.done == null)
+                    Commands.remove(context, car_id, c);
+                Intent intent = new Intent(context, FetchService.class);
+                intent.setAction(FetchService.ACTION_UPDATE);
+                intent.putExtra(Names.ID, car_id);
+                context.startService(intent);
+            }
+
+            @Override
+            void error() {
+                String text = context.getString(R.string.send_command_error);
+                if (error_text != null) {
+                    text += ": ";
+                    text += error_text;
+                }
+                Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
+                toast.show();
+                Commands.remove(context, car_id, c);
+            }
+        };
+        CarConfig config = CarConfig.get(context, car_id);
+        JsonObject params = new JsonObject();
+        params.add("skey", config.getKey());
+        params.add("command", c.inet);
+        if (ccode != null)
+            params.add("ccode", ccode);
+        task.execute("/command", params);
+        Commands.put(context, car_id, c, null);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (savedInstanceState != null)
@@ -263,38 +299,7 @@ public class SendCommandFragment extends DialogFragment {
         CarConfig.Command[] cmd = config.getCmd();
         for (final CarConfig.Command c : cmd) {
             if (c.id == cmd_id) {
-                HttpTask task = new HttpTask() {
-                    @Override
-                    void result(JsonObject res) throws ParseException {
-                        Toast toast = Toast.makeText(context, R.string.command_sent, Toast.LENGTH_LONG);
-                        toast.show();
-                        if (c.done == null)
-                            Commands.remove(context, car_id, c);
-                        Intent intent = new Intent(context, FetchService.class);
-                        intent.setAction(FetchService.ACTION_UPDATE);
-                        intent.putExtra(Names.ID, car_id);
-                        context.startService(intent);
-                    }
-
-                    @Override
-                    void error() {
-                        String text = context.getString(R.string.send_command_error);
-                        if (error_text != null) {
-                            text += ": ";
-                            text += error_text;
-                        }
-                        Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
-                        toast.show();
-                        Commands.remove(context, car_id, c);
-                    }
-                };
-                JsonObject params = new JsonObject();
-                params.add("skey", config.getKey());
-                params.add("command", c.inet);
-                if (ccode != null)
-                    params.add("ccode", ccode);
-                task.execute("/command", params);
-                Commands.put(getActivity(), car_id, c, null);
+                send_inet(context, c, car_id, ccode);
                 break;
             }
         }

@@ -17,6 +17,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.androidplot.Plot;
 import com.androidplot.ui.YLayoutStyle;
 import com.androidplot.ui.YPositionMetric;
 import com.androidplot.util.FontUtils;
@@ -186,6 +187,10 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
                 super.fillPath(canvas, path);
             }
         };
+
+        getGraphWidget().setMarginTop(0);
+        getGraphWidget().setMarginRight(0);
+        setBorderStyle(Plot.BorderStyle.SQUARE, null, null);
 
         setOnTouchListener(this);
     }

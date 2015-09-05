@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.ugona.plus"
     android:versionCode="18"
-    android:versionName="2.2 beta5">
+    android:versionName="2.2 beta6">
 
 <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
@@ -110,6 +110,7 @@
             <intent-filter android:priority="7000">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
                 <action android:name="net.ugona.plus.SMS_SENT" />
+                <action android:name="net.ugona.plus.COMMAND" />
             </intent-filter>
         </receiver>
 

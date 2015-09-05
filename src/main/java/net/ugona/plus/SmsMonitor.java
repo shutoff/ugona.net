@@ -20,7 +20,7 @@ public class SmsMonitor extends BroadcastReceiver {
     }
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, Intent intent) {
         if (intent == null)
             return;
         String action = intent.getAction();
@@ -98,6 +98,72 @@ public class SmsMonitor extends BroadcastReceiver {
                 }
                 if (processSms(context, car_id, body, true))
                     return;
+            }
+        }
+        if (action.equals("net.ugona.plus.COMMAND")) {
+            String car = intent.getStringExtra("car");
+            AppConfig appConfig = AppConfig.get(context);
+            String[] cars = appConfig.getCars();
+            String car_id = null;
+            if (car == null) {
+                if (cars.length > 0)
+                    car_id = cars[0];
+            } else {
+                for (String id : cars) {
+                    CarConfig carConfig = CarConfig.get(context, id);
+                    if (carConfig.getName().equals(car)) {
+                        car_id = id;
+                        break;
+                    }
+                }
+            }
+            if (car_id == null)
+                return;
+            String commamd = intent.getStringExtra("command");
+            if (commamd == null)
+                return;
+            CarConfig carConfig = CarConfig.get(context, car_id);
+            CarConfig.Command[] cmds = carConfig.getCmd();
+            if (cmds == null)
+                return;
+            for (CarConfig.Command cmd : cmds) {
+                if (cmd.name.equals(commamd)) {
+                    boolean sms = (cmd.sms != null);
+                    boolean inet = (cmd.inet != 0);
+                    if (!State.hasTelephony(context))
+                        sms = false;
+                    if (!sms && !inet)
+                        return;
+                    if (sms && inet) {
+                        String route = intent.getStringExtra("route");
+                        if (route != null) {
+                            if (route.equals("sms"))
+                                inet = false;
+                            if (route.equals("inet"))
+                                sms = false;
+                        }
+                    }
+                    if (sms && inet) {
+                        if (carConfig.isInet_cmd()) {
+                            sms = false;
+                        } else {
+                            inet = false;
+                        }
+                    }
+                    if (sms) {
+                        String sms_text = cmd.smsText(intent);
+                        if (Sms.send(context, car_id, cmd.id, sms_text)) {
+                            Commands.put(context, car_id, cmd, intent);
+                            Intent i = new Intent(context, FetchService.class);
+                            intent.setAction(FetchService.ACTION_UPDATE);
+                            intent.putExtra(Names.ID, car_id);
+                            context.startService(intent);
+                        }
+                    }
+                    if (inet)
+                        SendCommandFragment.send_inet(context, cmd, car_id, intent.getStringExtra("ccode"));
+                    break;
+                }
             }
         }
     }

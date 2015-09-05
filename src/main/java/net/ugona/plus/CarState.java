@@ -303,7 +303,7 @@ public class CarState extends Config {
     }
 
     public boolean isGuard() {
-        return guard;
+        return guard || (guard_mode == 2);
     }
 
     public int getGuard_mode() {
