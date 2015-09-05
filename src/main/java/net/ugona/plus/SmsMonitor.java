@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsMessage;
 import android.widget.Toast;
@@ -100,70 +102,52 @@ public class SmsMonitor extends BroadcastReceiver {
                     return;
             }
         }
-        if (action.equals("net.ugona.plus.COMMAND")) {
-            String car = intent.getStringExtra("car");
-            AppConfig appConfig = AppConfig.get(context);
-            String[] cars = appConfig.getCars();
-            String car_id = null;
-            if (car == null) {
-                if (cars.length > 0)
-                    car_id = cars[0];
-            } else {
-                for (String id : cars) {
-                    CarConfig carConfig = CarConfig.get(context, id);
-                    if (carConfig.getName().equals(car)) {
-                        car_id = id;
-                        break;
-                    }
-                }
-            }
-            if (car_id == null)
-                return;
-            String commamd = intent.getStringExtra("command");
-            if (commamd == null)
-                return;
+        if (action.equals("com.twofortyfouram.locale.intent.action.FIRE_SETTING")) {
+            Bundle data = intent.getBundleExtra(EditActivity.EXTRA_BUNDLE);
+            String car_id = data.getString(Names.ID);
             CarConfig carConfig = CarConfig.get(context, car_id);
+            int command = data.getInt(Names.COMMAND);
             CarConfig.Command[] cmds = carConfig.getCmd();
-            if (cmds == null)
-                return;
             for (CarConfig.Command cmd : cmds) {
-                if (cmd.name.equals(commamd)) {
-                    boolean sms = (cmd.sms != null);
-                    boolean inet = (cmd.inet != 0);
-                    if (!State.hasTelephony(context))
-                        sms = false;
-                    if (!sms && !inet)
+                if (cmd.id != command)
+                    continue;
+                if (cmd.call != null) {
+                    String phone = carConfig.getPhone();
+                    if (phone.equals(""))
                         return;
-                    if (sms && inet) {
-                        String route = intent.getStringExtra("route");
-                        if (route != null) {
-                            if (route.equals("sms"))
-                                inet = false;
-                            if (route.equals("inet"))
-                                sms = false;
-                        }
-                    }
-                    if (sms && inet) {
-                        if (carConfig.isInet_cmd()) {
-                            sms = false;
-                        } else {
-                            inet = false;
-                        }
-                    }
-                    if (sms) {
-                        String sms_text = cmd.smsText(intent);
-                        if (Sms.send(context, car_id, cmd.id, sms_text)) {
-                            Commands.put(context, car_id, cmd, intent);
-                            Intent i = new Intent(context, FetchService.class);
-                            intent.setAction(FetchService.ACTION_UPDATE);
-                            intent.putExtra(Names.ID, car_id);
-                            context.startService(intent);
-                        }
-                    }
-                    if (inet)
-                        SendCommandFragment.send_inet(context, cmd, car_id, intent.getStringExtra("ccode"));
-                    break;
+                    phone = cmd.call.replace("{phone}", phone);
+                    Intent i = new Intent(android.content.Intent.ACTION_CALL, Uri.parse("tel:" + phone));
+                    context.startActivity(i);
+                    return;
                 }
+                boolean inet = (cmd.inet > 0);
+                boolean sms = (cmd.sms != null);
+                if (!State.hasTelephony(context))
+                    sms = false;
+                if (inet && sms) {
+                    if (data.getInt(Names.ROUTE) > 0) {
+                        sms = false;
+                    } else {
+                        inet = false;
+                    }
+                }
+                if (sms) {
+                    Intent d = new Intent();
+                    d.putExtra("ccode", data.getString("ccode"));
+                    d.putExtra("pwd", data.getString("pwd"));
+                    String sms_text = cmd.smsText(d);
+                    if (Sms.send(context, car_id, cmd.id, sms_text)) {
+                        Commands.put(context, car_id, cmd, d);
+                        Intent i = new Intent(context, FetchService.class);
+                        intent.setAction(FetchService.ACTION_UPDATE);
+                        intent.putExtra(Names.ID, car_id);
+                        context.startService(intent);
+                    }
+                    return;
+                }
+                if (inet)
+                    SendCommandFragment.send_inet(context, cmd, car_id, data.getString("ccode"));
+                return;
             }
         }
     }

@@ -113,6 +113,10 @@
         <item>SMS, долгое нажатие - интернет</item>
         <item>Интернет, долгое нажатие - SMS</item>
     </string-array>
+    <string-array name="cmd_route">
+        <item>SMS</item>
+        <item>Интернет</item>
+    </string-array>
     <string name="sim_card">SIM карта для отправки SMS</string>
     <string-array name="sim_entries">
         <item>По умолчанию</item>

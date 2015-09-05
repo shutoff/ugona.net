@@ -117,6 +117,10 @@
         <item>SMS, Long tap - internet</item>
         <item>Internet, Long tap - SMS</item>
     </string-array>
+    <string-array name="cmd_route">
+        <item>SMS</item>
+        <item>Internet</item>
+    </string-array>
     <string name="sim_card">SIM card for sent SMS</string>
     <string-array name="sim_entries">
         <item>Default</item>
