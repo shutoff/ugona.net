@@ -9,9 +9,10 @@ import android.widget.TextView;
 
 public abstract class ArrayAdapter extends BaseAdapter {
 
+    final String DROP_DOWN = "dropdown";
+    final String NON_DROP_DOWN = "nondropdown";
     Spinner spinner;
     LayoutInflater inflater;
-
     ArrayAdapter(Spinner spinner) {
         this.spinner = spinner;
         inflater = LayoutInflater.from(spinner.getContext());
@@ -25,8 +26,12 @@ public abstract class ArrayAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View v = convertView;
-        if (v == null)
+        if ((v != null) && !v.getTag().equals(NON_DROP_DOWN))
+            v= null;
+        if (v == null) {
             v = inflater.inflate(R.layout.list_item, null);
+            v.setTag(NON_DROP_DOWN);
+        }
         TextView tvName = (TextView) v;
         tvName.setText(getItem(position).toString());
         return v;
@@ -35,8 +40,12 @@ public abstract class ArrayAdapter extends BaseAdapter {
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
         View v = convertView;
-        if (v == null)
+        if ((v != null) && !v.getTag().equals(DROP_DOWN))
+            v= null;
+        if (v == null) {
             v = inflater.inflate(R.layout.list_dropdown_item, null);
+            v.setTag(DROP_DOWN);
+        }
         TextView tvName = (TextView) v;
         tvName.setText(getItem(position).toString());
         String fontName = "Exo2-";

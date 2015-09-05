@@ -604,6 +604,7 @@ public class MainActivity
                 if (v == null) {
                     LayoutInflater inflater = LayoutInflater.from(getSupportActionBar().getThemedContext());
                     v = inflater.inflate(layout_id, null);
+                    v.setTag(layout_id);
                 }
                 TextView tv = (TextView) v.findViewById(R.id.name);
                 tv.setText(combo.getItem(position).getTitle());

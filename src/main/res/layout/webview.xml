@@ -21,6 +21,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/spinner_white"
             android:gravity="left"
+            android:paddingRight="5dp"
             android:visibility="gone" />
 
         <ImageView
