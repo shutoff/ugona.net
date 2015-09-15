@@ -9,6 +9,7 @@ import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 import com.squareup.okhttp.CipherSuite;
 import com.squareup.okhttp.ConnectionSpec;
+import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -16,6 +17,7 @@ import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 import com.squareup.okhttp.TlsVersion;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
@@ -24,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class HttpTask {
 
+    final static String userAgent = System.getProperty("http.agent");
     static ConnectionSpec spec;
     public static final OkHttpClient client = createClient();
     AsyncTask<Object, Void, JsonObject> bgTask;
@@ -34,6 +37,17 @@ public abstract class HttpTask {
         OkHttpClient client = new OkHttpClient();
         client.setConnectTimeout(15, TimeUnit.SECONDS);
         client.setReadTimeout(40, TimeUnit.SECONDS);
+        client.interceptors().add(new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request originalRequest = chain.request();
+                Request requestWithUserAgent = originalRequest.newBuilder()
+                        .removeHeader("User-Agent")
+                        .addHeader("User-Agent", userAgent)
+                        .build();
+                return chain.proceed(requestWithUserAgent);
+            }
+        });
         if (spec == null)
             spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
                     .tlsVersions(
