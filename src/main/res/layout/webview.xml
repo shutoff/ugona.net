@@ -24,7 +24,7 @@
             android:paddingRight="5dp"
             android:visibility="gone" />
 
-        <ImageView
+        <net.ugona.plus.ToolbarImageView
             android:id="@+id/logo"
             android:layout_width="134dp"
             android:layout_height="30dp"

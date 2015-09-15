@@ -445,7 +445,6 @@ public class MainActivity
 
     void setFragment(MainFragment fragment) {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         ft.replace(R.id.fragment, fragment, FRAGMENT);
         ft.addToBackStack(FRAGMENT);
         ft.commit();
@@ -462,7 +461,6 @@ public class MainActivity
 
         PrimaryFragment primaryFragment = new PrimaryFragment();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.setTransition(FragmentTransaction.TRANSIT_ENTER_MASK);
         ft.add(R.id.fragment, primaryFragment, PRIMARY);
         ft.commitAllowingStateLoss();
         setSideMenu();

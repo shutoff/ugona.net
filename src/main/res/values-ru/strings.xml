@@ -256,7 +256,7 @@
     <string name="delete_timer">Удалить таймер?</string>
     <string name="grp_title">Команды для быстрого запуска:</string>
     <string name="compact">Угона.Нет+ компактный</string>
-    <string name="lock_widget">Вмджет экрана блокировки</string>
+    <string name="lock_widget">Виджет экрана блокировки</string>
     <string name="add_lock_widget">Вы можете добавить виджет на экран блокировки</string>
     <string-array name="vibro">
         <item>Вибрация по умолчанию</item>
