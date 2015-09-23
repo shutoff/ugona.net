@@ -64,8 +64,9 @@ public class StateFragment
     Indicator[] temp_indicators;
     CenteredScrollView vAddressView;
     String error;
-    View vPointers;
+    ImageView vPointers;
     TextView[] tvPointers;
+    HashSet<String> pointer_errors;
     View vInfo;
     ImageView[] ivInfo;
     TextView tvInfo;
@@ -129,7 +130,7 @@ public class StateFragment
             }
         };
 
-        vPointers = v.findViewById(R.id.pointer);
+        vPointers = (ImageView) v.findViewById(R.id.pointer);
         vPointers.setTag(0);
         vPointers.setOnClickListener(pointerClick);
         tvPointers = new TextView[2];
@@ -273,6 +274,23 @@ public class StateFragment
                 String[] upd = upd_id.split("_");
                 if (!upd[0].equals(id()) && !upd_id.equals(id()))
                     return;
+
+                if (!upd_id.equals(id())) {
+                    if (intent.getAction().equals(Names.ERROR)) {
+                        if (pointer_errors == null)
+                            pointer_errors = new HashSet<>();
+                        pointer_errors.add(upd[1]);
+                        update();
+                        return;
+                    }
+                    if (pointer_errors == null)
+                        return;
+                    if (intent.getAction().equals(Names.UPDATED) || intent.getAction().equals(Names.NO_UPDATED)) {
+                        pointer_errors.remove(upd[1]);
+                        update();
+                    }
+                    return;
+                }
 
                 if (intent.getAction().equals(Names.ERROR)) {
                     error = intent.getStringExtra(Names.ERROR);
@@ -595,17 +613,24 @@ public class StateFragment
         if (len > tvPointers.length)
             len = tvPointers.length;
         int i = 0;
+        boolean error = false;
         if (len > 0) {
             vPointers.setVisibility(View.VISIBLE);
             for (i = 0; i < len; i++) {
                 CarState pointerState = CarState.get(getActivity(), id() + "_" + pointers[i]);
+                if ((pointer_errors != null) && pointer_errors.contains(pointers[i] + ""))
+                    error = true;
                 tvPointers[i].setVisibility(View.VISIBLE);
                 if (pointerState.getTime() > 0) {
                     tvPointers[i].setText(State.formatDateTime(getActivity(), pointerState.getTime()));
+                    if (state.getTime() - pointerState.getTime() > 86400000 * 3)
+                        error = true;
                 } else {
                     tvPointers[i].setText("???");
+                    error = true;
                 }
             }
+            vPointers.setImageResource(error ? R.drawable.pointer_error : R.drawable.pointer);
         } else {
             vPointers.setVisibility(View.GONE);
         }
