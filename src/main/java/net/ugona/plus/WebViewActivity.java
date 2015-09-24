@@ -24,6 +24,8 @@ abstract public class WebViewActivity extends ActionBarActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Font font = new Font("Exo2");
+        font.install(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.webview);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
