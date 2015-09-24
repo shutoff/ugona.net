@@ -1,5 +1,6 @@
 package net.ugona.plus;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -24,6 +25,8 @@ import java.util.Locale;
 public class PointerStateFragment
         extends MainFragment
         implements AdapterView.OnItemClickListener {
+
+    static final int DO_AUTH = 1;
 
     ListView vCmd;
     CenteredScrollView vAddressView;
@@ -93,6 +96,7 @@ public class PointerStateFragment
                                 Bundle args = new Bundle();
                                 args.putString(Names.ID, id());
                                 authDialog.setArguments(args);
+                                authDialog.setTargetFragment(PointerStateFragment.this, DO_AUTH);
                                 authDialog.show(getParentFragment().getFragmentManager(), "auth_dialog");
                             }
                         });
@@ -134,6 +138,7 @@ public class PointerStateFragment
         IndicatorsView indicatorsView = (IndicatorsView) v.findViewById(R.id.indicators);
         View vRightArrow = v.findViewById(R.id.ind_right);
         indicatorsView.setArrows(vRightArrow);
+        refresh();
         update();
         return v;
     }
@@ -148,6 +153,13 @@ public class PointerStateFragment
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ActionsAdapter actionsAdapter = (ActionsAdapter) vCmd.getAdapter();
         actionsAdapter.itemClick(position, false);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if ((requestCode == DO_AUTH) && (resultCode == Activity.RESULT_OK))
+            refresh();
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     void update() {

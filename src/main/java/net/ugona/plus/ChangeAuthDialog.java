@@ -8,13 +8,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -27,13 +24,15 @@ import com.eclipsesource.json.ParseException;
 import java.io.Serializable;
 import java.util.Locale;
 
-public class AuthDialog extends DialogFragment implements TextWatcher {
+public class ChangeAuthDialog extends DialogFragment implements TextWatcher {
 
     String car_id;
     CarConfig config;
 
     EditText etLogin;
     EditText etPass;
+    EditText etConfirm;
+    EditText etOld;
     View btnOk;
     TextView tvError;
     View vProgress;
@@ -42,10 +41,13 @@ public class AuthDialog extends DialogFragment implements TextWatcher {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
-        View v = inflater.inflate(R.layout.auth_dialog, null);
+        View v = inflater.inflate(R.layout.change_auth, null);
 
         etLogin = (EditText) v.findViewById(R.id.login);
         etPass = (EditText) v.findViewById(R.id.passwd);
+        etConfirm = (EditText) v.findViewById(R.id.confirm);
+        etOld = (EditText) v.findViewById(R.id.old);
+
         tvError = (TextView) v.findViewById(R.id.error);
         vProgress = v.findViewById(R.id.progress);
 
@@ -57,25 +59,11 @@ public class AuthDialog extends DialogFragment implements TextWatcher {
 
         etLogin.addTextChangedListener(this);
         etPass.addTextChangedListener(this);
-
-        final CheckBox chkPswd = (CheckBox) v.findViewById(R.id.show_password);
-        final int initial_type = chkPswd.getInputType();
-        chkPswd.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                int type = initial_type;
-                if (isChecked) {
-                    type |= InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
-                } else {
-                    type = initial_type;
-                }
-                etPass.setInputType(type);
-                etPass.setSelection(etPass.getText().length());
-            }
-        });
+        etConfirm.addTextChangedListener(this);
+        etOld.addTextChangedListener(this);
 
         return new AlertDialogWrapper.Builder(getActivity())
-                .setTitle(R.string.auth)
+                .setTitle(R.string.change_auth)
                 .setView(v)
                 .setPositiveButton(R.string.ok, null)
                 .setNegativeButton(R.string.cancel, null)
@@ -91,7 +79,7 @@ public class AuthDialog extends DialogFragment implements TextWatcher {
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                doLogin(etLogin.getText().toString(), etPass.getText().toString());
+                doChangeLogin(etLogin.getText().toString(), etPass.getText().toString(), etOld.getText().toString());
             }
         });
         afterTextChanged(null);
@@ -109,7 +97,7 @@ public class AuthDialog extends DialogFragment implements TextWatcher {
         car_id = args.getString(Names.ID);
     }
 
-    void doLogin(final String login, String password) {
+    void doChangeLogin(final String login, String password, String old) {
         btnOk.setEnabled(false);
         tvError.setVisibility(View.GONE);
         vProgress.setVisibility(View.VISIBLE);
@@ -156,11 +144,14 @@ public class AuthDialog extends DialogFragment implements TextWatcher {
                 afterTextChanged(null);
             }
         };
-        AuthParam authParam = new AuthParam();
+        CarConfig carConfig = CarConfig.get(getActivity(), car_id);
+        SetAuthParam authParam = new SetAuthParam();
+        authParam.skey = carConfig.getKey();
         authParam.login = login;
         authParam.password = password;
+        authParam.old = old;
         authParam.lang = Locale.getDefault().getLanguage();
-        task.execute("/key", authParam);
+        task.execute("/set_auth", authParam);
     }
 
     @Override
@@ -175,18 +166,38 @@ public class AuthDialog extends DialogFragment implements TextWatcher {
 
     @Override
     public void afterTextChanged(Editable editable) {
-        boolean bProgress = (vProgress.getVisibility() == View.VISIBLE);
-        if (btnOk != null)
-            btnOk.setEnabled(!bProgress &&
-                    !etLogin.getText().toString().equals("") &&
-                    !etPass.getText().toString().equals(""));
+        if (vProgress.getVisibility() == View.VISIBLE) {
+            btnOk.setEnabled(false);
+            return;
+        }
+        if (btnOk == null)
+            return;
+        String login = etLogin.getText().toString();
+        String pass = etPass.getText().toString();
+        String confirm = etConfirm.getText().toString();
+        String old = etOld.getText().toString();
+        if (login.equals("") || pass.equals("") || confirm.equals("") || old.equals("")) {
+            tvError.setVisibility(View.VISIBLE);
+            tvError.setText("");
+            btnOk.setEnabled(false);
+            return;
+        }
+        if (!pass.equals(confirm)) {
+            tvError.setVisibility(View.VISIBLE);
+            tvError.setText(R.string.invalid_confirm);
+            btnOk.setEnabled(false);
+            return;
+        }
+        tvError.setVisibility(View.VISIBLE);
+        tvError.setText("");
+        btnOk.setEnabled(true);
     }
 
-    static class AuthParam implements Serializable {
+    static class SetAuthParam implements Serializable {
+        String skey;
         String login;
         String password;
+        String old;
         String lang;
     }
-
-
 }

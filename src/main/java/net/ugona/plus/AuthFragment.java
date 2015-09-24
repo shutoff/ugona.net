@@ -96,6 +96,20 @@ public class AuthFragment extends MainFragment {
                 phoneDialog.show(getParentFragment().getFragmentManager(), "phone");
             }
         }));
+        final CarState state = CarState.get(getActivity(), id());
+        if (state.isSet_auth()) {
+            items.add(new Item(getString(R.string.change_auth), "", new Runnable() {
+                @Override
+                public void run() {
+                    ChangeAuthDialog authDialog = new ChangeAuthDialog();
+                    Bundle args = new Bundle();
+                    args.putString(Names.ID, id());
+                    authDialog.setArguments(args);
+                    authDialog.setTargetFragment(AuthFragment.this, DO_AUTH);
+                    authDialog.show(getParentFragment().getFragmentManager(), "auth_dialog");
+                }
+            }));
+        }
 
         CarConfig.Setting[] settings = config.getSettings();
         final CarConfig.Command[] commands = config.getCmd();
@@ -158,7 +172,6 @@ public class AuthFragment extends MainFragment {
             }
         }
 
-        CarState state = CarState.get(getActivity(), id());
         if (!state.getVersion().equals(""))
             items.add(new Item(getString(R.string.version), state.getVersion(), null));
         vList.setAdapter(new BaseAdapter() {
