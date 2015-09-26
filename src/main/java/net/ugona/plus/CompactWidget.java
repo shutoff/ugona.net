@@ -13,9 +13,10 @@ public class CompactWidget extends Widget {
         return id_layout[theme];
     }
 
-    String getPrefix(String prefix) {
-        if (prefix.equals(""))
-            prefix = "c";
-        return "w" + prefix;
+    void updateCarImage(Context context, CarState carState) {
+        if (carImage == null)
+            carImage = new CarImage(context, "compact");
+        carImage.update(carState, true);
     }
+
 }

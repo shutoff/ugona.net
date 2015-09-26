@@ -5,9 +5,9 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.RectF;
 import android.os.Handler;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -34,34 +34,35 @@ public class CarView extends View {
 
     public CarView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        carImage = new CarImage(context);
         pRed = new Paint();
         pRed.setFlags(Paint.ANTI_ALIAS_FLAG);
         pRed.setColor(Color.rgb(0xC0, 0, 0));
         pBlue = new Paint();
         pBlue.setFlags(Paint.ANTI_ALIAS_FLAG);
-        pBlue.setColor(carImage.resources.getColor(R.color.main));
+        pBlue.setColor(ContextCompat.getColor(context, R.color.main));
         pWhite = new Paint();
         pWhite.setFlags(Paint.ANTI_ALIAS_FLAG);
         pWhite.setColor(Color.rgb(255, 255, 255));
-        DisplayMetrics metrics = carImage.resources.getDisplayMetrics();
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         pk = metrics.densityDpi / 160f;
         handler = new Handler();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if (carImage == null)
+            return;
         if ((getWidth() == 0) || (getHeight() == 0))
             return;
         float add_x = XC_LEFT * pk;
         float add_y = YC_BOTTOM * pk;
-        float k = (getWidth() + add_x) / carImage.WIDTH;
+        float k = (getWidth() + add_x) / carImage.theme.width;
         float x = 0;
         float y = 0;
-        float h = carImage.HEIGHT * k;
+        float h = carImage.theme.height * k;
         if (h > getHeight() + add_y) {
-            k = (getHeight() + add_y) / carImage.HEIGHT;
-            float w = k * carImage.WIDTH;
+            k = (getHeight() + add_y) / carImage.theme.height;
+            float w = k * carImage.theme.width;
             x = (getWidth() + add_x - w) / 2.f;
         } else {
             y = (getHeight() + add_y - h) / 2.f;
@@ -77,12 +78,11 @@ public class CarView extends View {
                     frame = 1;
                 part += frame;
             }
-            int id = carImage.getBitmapId(part);
-            if (id == 0)
+            Theme.Pict pict = carImage.theme.get(part);
+            if (pict == null)
                 continue;
-            Bitmap bitmap = carImage.getBitmap(id);
-            Point p = carImage.pictures.get(id);
-            RectF rect = new RectF(x + p.x * k, y + p.y * k, x + (p.x + bitmap.getWidth()) * k, y + (bitmap.getHeight() + p.y) * k);
+            Bitmap bitmap = pict.bitmap;
+            RectF rect = new RectF(x + pict.x * k, y + pict.y * k, x + (pict.x + bitmap.getWidth()) * k, y + (bitmap.getHeight() + pict.y) * k);
             canvas.drawBitmap(bitmap, null, rect, carImage.paint);
             bitmap.recycle();
         }
@@ -90,7 +90,11 @@ public class CarView extends View {
     }
 
     void update(CarState s) {
-        if (!carImage.update(s))
+        if ((carImage != null) && !carImage.name.equals(s.getTheme()))
+            carImage = null;
+        if (carImage == null)
+            carImage = new CarImage(getContext(), s.getTheme());
+        if (!carImage.update(s, false))
             return;
         invalidate();
         next_frame();

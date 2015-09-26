@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 
+import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
@@ -119,7 +120,7 @@ public abstract class HttpTask {
         JsonObject result;
         Reader reader = response.body().charStream();
         try {
-            JsonValue res = JsonValue.readFrom(reader);
+            JsonValue res = Json.parse(reader);
             reader.close();
 
             if (res.isObject()) {

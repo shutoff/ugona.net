@@ -1,49 +1,31 @@
 package net.ugona.plus;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.RectF;
-import android.util.SparseArray;
 
 import java.util.Vector;
 
 public class CarImage {
 
-    final static float WIDTH = 1080;
-    final static float HEIGHT = 750;
-
-    final static int W_WIDTH = 256;
-    final static int W_HEIGHT = 386;
-
-    static Pictures pictures = new Pictures();
     int animation;
     String state;
-    Resources resources;
-    String pkg;
     Paint paint;
+    Theme theme;
+    String name;
 
-    CarImage(Context context) {
-        resources = context.getResources();
+    CarImage(Context context, String theme_name) {
         state = "";
-        pkg = context.getPackageName();
         paint = new Paint();
         paint.setFlags(Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG);
+        theme = Theme.getTheme(context, theme_name);
+        name = theme_name;
     }
 
-    boolean update(CarState s) {
-        String prefix = s.getPrefix();
-        if (prefix.equals(""))
-            prefix = "c";
-        return update(s, prefix);
-    }
-
-    boolean update(CarState s, String prefix) {
+    boolean update(CarState s, boolean compact) {
         Vector<String> parts = new Vector<String>();
         boolean guard = s.isGuard();
         long guard_time = s.getGuard_time();
@@ -61,72 +43,72 @@ public class CarImage {
             text = "ps_guard";
         }
         if (guard) {
-            parts.add(prefix + "_" + (s.isAccessory() ? "r" : "b"));
+            parts.add(s.isAccessory() ? "r" : "b");
         } else {
-            parts.add(prefix);
+            parts.add("_");
         }
         if (s.isDoor_br()) {
-            String p = prefix + "_4_o";
+            String p = "4_o";
             if (guard)
                 p += "_r";
             parts.add(p);
         } else {
-            String p = prefix + "_4";
+            String p = "4";
             if (guard)
                 p += "_b";
             parts.add(p);
         }
         if (s.isDoor_bl()) {
-            String p = prefix + "_3_o";
+            String p = "3_o";
             if (guard)
                 p += "_r";
             parts.add(p);
         } else {
-            String p = prefix + "_3";
+            String p = "3";
             if (guard)
                 p += "_b";
             parts.add(p);
         }
         if (s.isDoor_fr()) {
-            String p = prefix + "_2_o";
+            String p = "2_o";
             if (guard)
                 p += "_r";
             parts.add(p);
         } else {
-            String p = prefix + "_2";
+            String p = "2";
             if (guard)
                 p += "_b";
             parts.add(p);
         }
         if (s.isDoor_fl()) {
-            String p = prefix + "_1_o";
+            String p = "1_o";
             if (guard)
                 p += "_r";
             parts.add(p);
         } else {
-            String p = prefix + "_1";
+            String p = "1";
             if (guard)
                 p += "_b";
             parts.add(p);
         }
         if (s.isHood()) {
-            String p = prefix + "_h_o";
+            String p = "h_o";
             if (guard)
                 p += "_r";
             parts.add(p);
         } else {
-            String p = prefix + "_h";
+            String p = "h";
             if (guard)
                 p += "_b";
             parts.add(p);
         }
         if (s.isTrunk()) {
-            String p = prefix + "_t_o";
+            String p = "t_o";
             if (guard)
                 p += "_r";
             parts.add(p);
         } else {
-            String p = prefix + "_t";
+            String p = "t";
             if (guard)
                 p += "_b";
             parts.add(p);
@@ -135,26 +117,26 @@ public class CarImage {
         if (!s.isGuard())
             az = false;
 
-        if (prefix.charAt(0) == 'w') {
+        if (compact) {
             int mode = s.getGuard_mode();
             if (mode == 2) {
-                parts.add(prefix + "_valet");
+                parts.add("valet");
             } else if (card) {
-                parts.add(prefix + "_lock_r");
+                parts.add("lock_r");
             } else if ((s.isGuard() || (mode == 3))) {
                 if (guard) {
-                    parts.add(prefix + "_lock");
+                    parts.add("lock");
                 } else {
-                    parts.add(prefix + "_lock_b");
+                    parts.add("lock_b");
                 }
             }
             if (az) {
-                String ign = prefix + "_az";
+                String ign = "az";
                 if (!guard)
                     ign += "_b";
                 parts.add(ign);
             } else if (s.isIgnition()) {
-                String ign = prefix + "_ignition";
+                String ign = "ignition";
                 if (guard) {
                     if (s.isGuard())
                         ign += "_r";
@@ -166,20 +148,20 @@ public class CarImage {
         } else {
             int shock = s.getShock();
             if (shock == 1)
-                parts.add(prefix + "_a_hit1");
+                parts.add("a_hit1");
             if (shock == 2)
-                parts.add(prefix + "_a_hit2");
+                parts.add("a_hit2");
             if (s.isMove())
-                parts.add(prefix + "_a_move");
+                parts.add("a_move");
             if (s.isAz()) {
                 animation = parts.size();
-                parts.add(prefix + "_az");
+                parts.add("az");
                 text = "autostart";
             }
             if (s.isIn_sensor())
-                parts.add(prefix + "_a_in");
+                parts.add("a_in");
             if (s.isExt_sensor())
-                parts.add(prefix + "_a_out");
+                parts.add("a_out");
         }
 
         String new_state = null;
@@ -244,27 +226,17 @@ public class CarImage {
         return true;
     }
 
-    int getBitmapId(String image) {
-        return resources.getIdentifier(image, "drawable", pkg);
-    }
-
-    Bitmap getBitmap(int id) {
-        return getBitmapSafely(id, 0);
-    }
-
     Bitmap getBitmap() {
         String[] ext = state.split("\\|");
         String[] parts = ext[0].split(";");
 
-        int w = (int) (WIDTH / 4);
-        int h = (int) (HEIGHT / 4);
-        float k = w / WIDTH;
-
-        if ((parts.length > 0) && (parts[0].charAt(0) == 'w')) {
-            w = W_WIDTH;
-            h = W_HEIGHT;
-            k = 1;
+        int w = theme.width;
+        int h = theme.height;
+        while (w > 256) {
+            w = w >> 1;
         }
+        float k = (float) w / theme.width;
+        h = (int) ((float) h * k);
 
         Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         bitmap.eraseColor(Color.TRANSPARENT);
@@ -272,138 +244,15 @@ public class CarImage {
 
         for (int i = 0; i < parts.length; i++) {
             String part = parts[i];
-            int id = getBitmapId(part);
-            if (id == 0)
+            Theme.Pict pict = theme.get(part);
+            if (pict == null)
                 continue;
-            Bitmap bmp = getBitmap(id);
-            Point p = pictures.get(id);
-            RectF rect = new RectF(p.x * k, p.y * k, (p.x + bmp.getWidth()) * k, (bmp.getHeight() + p.y) * k);
+            Bitmap bmp = pict.bitmap;
+            RectF rect = new RectF(pict.x * k, pict.y * k, (pict.x + bmp.getWidth()) * k, (bmp.getHeight() + pict.y) * k);
             canvas.drawBitmap(bmp, null, rect, paint);
             bmp.recycle();
         }
         return bitmap;
     }
 
-    private Bitmap getBitmapSafely(int id, int sampleSize) {
-        Bitmap bitmap = null;
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPurgeable = true;
-        options.inSampleSize = sampleSize;
-        try {
-            bitmap = BitmapFactory.decodeResource(resources, id, options);
-        } catch (OutOfMemoryError oom) {
-            System.gc();
-            bitmap = getBitmapSafely(id, sampleSize + 1);
-        }
-
-        return bitmap;
-    }
-
-    static class Pictures extends SparseArray<Point> {
-        Pictures() {
-            add(R.drawable.c_1, 563, 221);
-            add(R.drawable.c_1_o, 569, 361);
-            add(R.drawable.c_2, 337, 208);
-            add(R.drawable.c_3, 715, 185);
-            add(R.drawable.c_2_o, 261, 73);
-            add(R.drawable.c_3_o, 725, 217);
-            add(R.drawable.c_4_o, 477, 46);
-            add(R.drawable.c_h, 167, 287);
-            add(R.drawable.c_h_o, 167, 286);
-            add(R.drawable.c_t_o, 727, 6);
-            add(R.drawable.c_t, 753, 57);
-            add(R.drawable.c, 36, 57);
-            add(R.drawable.c_1_o_b, 570, 360);
-            add(R.drawable.c_2_b, 338, 207);
-            add(R.drawable.c_2_o_b, 262, 72);
-            add(R.drawable.c_3_b, 717, 185);
-            add(R.drawable.c_3_o_b, 726, 216);
-            add(R.drawable.c_4_o_b, 478, 44);
-            add(R.drawable.c_h_o_b, 168, 286);
-            add(R.drawable.c_t_b, 754, 56);
-            add(R.drawable.c_t_o_b, 726, 6);
-            add(R.drawable.c_1_b, 564, 220);
-            add(R.drawable.c_h_b, 168, 286);
-            add(R.drawable.c_b, 36, 56);
-            add(R.drawable.c_2_o_r, 262, 72);
-            add(R.drawable.c_2_r, 338, 207);
-            add(R.drawable.c_3_r, 716, 182);
-            add(R.drawable.c_3_o_r, 725, 217);
-            add(R.drawable.c_4_o_r, 477, 44);
-            add(R.drawable.c_t_o_r, 725, 5);
-            add(R.drawable.c_h_o_r, 167, 286);
-            add(R.drawable.c_t_r, 754, 56);
-            add(R.drawable.c_1_o_r, 570, 360);
-            add(R.drawable.c_1_r, 564, 220);
-            add(R.drawable.c_h_r, 168, 286);
-            add(R.drawable.c_r, 36, 56);
-            add(R.drawable.c_a_out, 697, 265);
-            add(R.drawable.c_a_in, 325, 67);
-            add(R.drawable.c_a_hit1, 32, 184);
-            add(R.drawable.c_a_hit2, 58, 222);
-            add(R.drawable.c_a_move, 61, 336);
-            add(R.drawable.c_az1, 927, 0);
-            add(R.drawable.c_az2, 920, 0);
-            add(R.drawable.c_az4, 912, 0);
-            add(R.drawable.c_az3, 919, 0);
-            add(R.drawable.c_az6, 907, 0);
-            add(R.drawable.c_az5, 907, 0);
-            add(R.drawable.m, 97, 4);
-            add(R.drawable.m_b, 97, 4);
-            add(R.drawable.q, 119, 89);
-            add(R.drawable.q_b, 119, 89);
-            add(R.drawable.wc_1, 43, 140);
-            add(R.drawable.wc_1_b, 43, 140);
-            add(R.drawable.wc_1_o, 0, 139);
-            add(R.drawable.wc_1_o_b, 0, 139);
-            add(R.drawable.wc_1_r, 43, 140);
-            add(R.drawable.wc_1_o_r, 0, 139);
-            add(R.drawable.wc_2, 180, 140);
-            add(R.drawable.wc_2_b, 180, 140);
-            add(R.drawable.wc_2_o, 200, 139);
-            add(R.drawable.wc_2_o_b, 200, 139);
-            add(R.drawable.wc_2_o_r, 200, 139);
-            add(R.drawable.wc_2_r, 180, 140);
-            add(R.drawable.wc_3, 47, 238);
-            add(R.drawable.wc_3_b, 47, 238);
-            add(R.drawable.wc_3_o, 22, 237);
-            add(R.drawable.wc_3_o_b, 22, 237);
-            add(R.drawable.wc_3_o_r, 22, 237);
-            add(R.drawable.wc_3_r, 47, 238);
-            add(R.drawable.wc_4, 180, 238);
-            add(R.drawable.wc_4_b, 180, 238);
-            add(R.drawable.wc_4_o, 185, 236);
-            add(R.drawable.wc_4_o_b, 185, 236);
-            add(R.drawable.wc_4_o_r, 185, 236);
-            add(R.drawable.wc_4_r, 180, 238);
-            add(R.drawable.wc_h, 55, 1);
-            add(R.drawable.wc_b, 48, 0);
-            add(R.drawable.wc_h_b, 55, 1);
-            add(R.drawable.wc_h_o, 55, 60);
-            add(R.drawable.wc_h_o_b, 55, 60);
-            add(R.drawable.wc_h_o_r, 55, 60);
-            add(R.drawable.wc_h_r, 55, 1);
-            add(R.drawable.wc_r, 48, 0);
-            add(R.drawable.wc_t, 78, 345);
-            add(R.drawable.wc_t_b, 78, 345);
-            add(R.drawable.wc_t_o, 76, 343);
-            add(R.drawable.wc_t_o_b, 76, 343);
-            add(R.drawable.wc_t_o_r, 76, 343);
-            add(R.drawable.wc_t_r, 78, 345);
-            add(R.drawable.wc, 48, 0);
-            add(R.drawable.wc_lock, 100, 196);
-            add(R.drawable.wc_lock_b, 99, 195);
-            add(R.drawable.wc_lock_r, 99, 195);
-            add(R.drawable.wc_valet, 92, 195);
-            add(R.drawable.wc_ignition, 96, 70);
-            add(R.drawable.wc_ignition_b, 96, 70);
-            add(R.drawable.wc_ignition_r, 96, 70);
-            add(R.drawable.wc_az, 106, 34);
-            add(R.drawable.wc_az_b, 106, 34);
-        }
-
-        void add(int id, int x, int y) {
-            put(id, new Point(x, y));
-        }
-    }
 }

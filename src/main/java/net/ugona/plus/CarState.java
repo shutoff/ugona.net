@@ -63,7 +63,6 @@ public class CarState extends Config {
     private boolean use_phone;
     private boolean show_photo;
     private boolean show_tracks;
-    private String prefix;
     private boolean pointer;
     private boolean history;
     private boolean zones;
@@ -74,6 +73,7 @@ public class CarState extends Config {
     private long no_gsm_time;
     private String check_version;
     private String version;
+    private String theme;
 
     private boolean alert_doors;
     private boolean alert_hood;
@@ -98,7 +98,7 @@ public class CarState extends Config {
         gsm_region = "";
         address = "";
         address_type = "";
-        prefix = "";
+        theme = "";
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String s = preferences.getString(CAR_KEY + id, "");
@@ -149,6 +149,10 @@ public class CarState extends Config {
         ed.commit();
     }
 
+    public String getTheme() {
+        return theme;
+    }
+
     public long getTime() {
         return time;
     }
@@ -193,10 +197,6 @@ public class CarState extends Config {
         if (zone.substring(0, 1).equals("-"))
             zone_time = -zone_time;
         upd = true;
-    }
-
-    public String getPrefix() {
-        return prefix;
     }
 
     public long getZone_time() {

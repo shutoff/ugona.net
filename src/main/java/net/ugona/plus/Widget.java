@@ -204,12 +204,6 @@ public class Widget extends AppWidgetProvider {
         return id_layout[theme];
     }
 
-    String getPrefix(String prefix) {
-        if (prefix.equals(""))
-            prefix = "c";
-        return prefix;
-    }
-
     void updateWidget(Context context, AppWidgetManager appWidgetManager, int widgetID) {
         try {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -239,11 +233,10 @@ public class Widget extends AppWidgetProvider {
             PendingIntent pIntent = PendingIntent.getService(context, widgetID, configIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             widgetView.setOnClickPendingIntent(R.id.update_block, pIntent);
 
-            if (carImage == null)
-                carImage = new CarImage(context);
-
             CarState carState = CarState.get(context, car_id);
             CarConfig carConfig = CarConfig.get(context, car_id);
+
+            updateCarImage(context, carState);
 
             boolean show_name = preferences.getBoolean(Names.SHOW_NAME + widgetID, false);
             if (show_name) {
@@ -253,12 +246,9 @@ public class Widget extends AppWidgetProvider {
                 widgetView.setViewVisibility(R.id.name, View.GONE);
             }
 
-            String prefix = carState.getPrefix();
-            carImage.update(carState, getPrefix(prefix));
-
             String[] ext = carImage.state.split("\\|");
             String car_state = URLEncoder.encode(ext[0], "utf-8");
-            Uri uri = Uri.parse("content://net.ugona.plus.car/" + car_state);
+            Uri uri = Uri.parse("content://net.ugona.plus.car/" + carImage.name + "_" + car_state);
             widgetView.setImageViewUri(R.id.car, uri);
 
             int kn = 0;
@@ -406,6 +396,14 @@ public class Widget extends AppWidgetProvider {
         } catch (Exception ex) {
             // ignore
         }
+    }
+
+    void updateCarImage(Context context, CarState carState) {
+        if ((carImage != null) && !carImage.name.equals(carState.getTheme()))
+            carImage = null;
+        if (carImage == null)
+            carImage = new CarImage(context, carState.getTheme());
+        carImage.update(carState, false);
     }
 
     boolean isLockScreen(Context context, int widgetID) {

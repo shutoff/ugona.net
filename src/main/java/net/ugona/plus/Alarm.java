@@ -192,7 +192,8 @@ public class Alarm
         state.setSos(false);
         state.setShock(0);
         state.setMove(false);
-        state.setTilt(true);
+        state.setTilt(false);
+        state.setSos(false);
         state.setIn_sensor(false);
         state.setExt_sensor(false);
         Intent intent = new Intent(Names.UPDATED);

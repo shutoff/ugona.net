@@ -2,8 +2,10 @@ package net.ugona.plus;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 
@@ -14,11 +16,22 @@ import java.net.URLEncoder;
 
 public class CarPictureProvider extends ContentProvider {
 
-    CarImage carImage;
+    static private Bitmap getBitmapSafely(Resources resources, int id, int sampleSize) {
+        Bitmap bitmap = null;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPurgeable = true;
+        options.inSampleSize = sampleSize;
+        try {
+            bitmap = BitmapFactory.decodeResource(resources, id, options);
+        } catch (OutOfMemoryError oom) {
+            System.gc();
+            bitmap = getBitmapSafely(resources, id, sampleSize + 1);
+        }
+        return bitmap;
+    }
 
     @Override
     public boolean onCreate() {
-        carImage = new CarImage(getContext());
         return true;
     }
 
@@ -53,13 +66,19 @@ public class CarPictureProvider extends ContentProvider {
             File outputDir = getContext().getCacheDir();
             String state = uri.getPath().substring(1);
             File file = new File(outputDir, URLEncoder.encode(state, "utf-8"));
-            if (!file.exists()) {
-                synchronized (carImage) {
+            //           if (!file.exists()) {
+            synchronized (this) {
                     Bitmap bitmap = null;
-                    if ((state.length() > 2) && (state.substring(0, 2).equals("__"))) {
-                        int id = carImage.getBitmapId(state.substring(2));
-                        bitmap = carImage.getBitmap(id);
-                    } else {
+                if ((state.length() > 2) && (state.substring(0, 2).equals("__"))) {
+                    state = state.substring(2);
+                    Resources resources = getContext().getResources();
+                    int id = resources.getIdentifier(state, "drawable", getContext().getPackageName());
+                    bitmap = getBitmapSafely(resources, id, 0);
+                } else {
+                    int pos = state.indexOf('_');
+                    String theme_name = state.substring(0, pos);
+                    state = state.substring(pos + 1);
+                    CarImage carImage = new CarImage(getContext(), theme_name);
                         carImage.state = state;
                         bitmap = carImage.getBitmap();
                     }
@@ -69,7 +88,7 @@ public class CarPictureProvider extends ContentProvider {
                     out.close();
                     bitmap.recycle();
                 }
-            }
+            //         }
             return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
         } catch (Exception ex) {
             ex.printStackTrace();
