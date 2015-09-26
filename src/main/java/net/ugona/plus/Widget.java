@@ -248,7 +248,7 @@ public class Widget extends AppWidgetProvider {
 
             String[] ext = carImage.state.split("\\|");
             String car_state = URLEncoder.encode(ext[0], "utf-8");
-            Uri uri = Uri.parse("content://net.ugona.plus.car/" + carImage.name + "_" + car_state);
+            Uri uri = Uri.parse("content://net.ugona.plus.car/" + carImage.name + "-" + car_state);
             widgetView.setImageViewUri(R.id.car, uri);
 
             int kn = 0;

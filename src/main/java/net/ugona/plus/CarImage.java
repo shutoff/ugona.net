@@ -232,7 +232,7 @@ public class CarImage {
 
         int w = theme.width;
         int h = theme.height;
-        while (w > 256) {
+        while (w > 512) {
             w = w >> 1;
         }
         float k = (float) w / theme.width;

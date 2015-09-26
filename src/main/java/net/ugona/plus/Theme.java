@@ -31,11 +31,11 @@ public class Theme {
     static Theme getTheme(Context context, String name) {
         if (themes == null)
             themes = new HashMap<>();
+        if (name.length() == 0)
+            name = "theme";
         Theme res = themes.get(name);
         if (res != null)
             return res;
-        if (name == "")
-            name = "theme";
         res = new Theme();
         if (!res.open(context, name))
             return null;

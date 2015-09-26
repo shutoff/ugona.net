@@ -66,7 +66,7 @@ public class CarPictureProvider extends ContentProvider {
             File outputDir = getContext().getCacheDir();
             String state = uri.getPath().substring(1);
             File file = new File(outputDir, URLEncoder.encode(state, "utf-8"));
-            if (!file.exists()) {
+//            if (!file.exists()) {
                 synchronized (this) {
                     Bitmap bitmap = null;
                     if ((state.length() > 2) && (state.substring(0, 2).equals("__"))) {
@@ -75,7 +75,7 @@ public class CarPictureProvider extends ContentProvider {
                         int id = resources.getIdentifier(state, "drawable", getContext().getPackageName());
                         bitmap = getBitmapSafely(resources, id, 0);
                     } else {
-                        int pos = state.indexOf('_');
+                        int pos = state.indexOf("-");
                         String theme_name = state.substring(0, pos);
                         state = state.substring(pos + 1);
                         CarImage carImage = new CarImage(getContext(), theme_name);
@@ -88,7 +88,7 @@ public class CarPictureProvider extends ContentProvider {
                     out.close();
                     bitmap.recycle();
                 }
-            }
+            //          }
             return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
         } catch (Exception ex) {
             ex.printStackTrace();
