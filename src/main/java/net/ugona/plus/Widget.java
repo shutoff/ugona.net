@@ -236,7 +236,7 @@ public class Widget extends AppWidgetProvider {
             CarState carState = CarState.get(context, car_id);
             CarConfig carConfig = CarConfig.get(context, car_id);
 
-            updateCarImage(context, carState);
+            updateCarImage(context, carState, carConfig);
 
             boolean show_name = preferences.getBoolean(Names.SHOW_NAME + widgetID, false);
             if (show_name) {
@@ -398,11 +398,11 @@ public class Widget extends AppWidgetProvider {
         }
     }
 
-    void updateCarImage(Context context, CarState carState) {
-        if ((carImage != null) && !carImage.name.equals(carState.getTheme()))
+    void updateCarImage(Context context, CarState carState, CarConfig carConfig) {
+        if ((carImage != null) && !carImage.name.equals(carConfig.getTheme()))
             carImage = null;
         if (carImage == null)
-            carImage = new CarImage(context, carState.getTheme());
+            carImage = new CarImage(context, carConfig.getTheme());
         carImage.update(carState, false);
     }
 

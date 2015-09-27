@@ -491,7 +491,7 @@ public class StateFragment
             iFuel.setVisibility(View.GONE);
         }
 
-        vCar.update(state);
+        vCar.update(state, config);
         String[] states = vCar.carImage.state.split("\\|");
         if (states.length > 1) {
             String[] pictures = states[1].split(";");

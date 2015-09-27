@@ -50,7 +50,7 @@ public class CarView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (carImage == null)
+        if ((carImage == null) || (carImage.theme == null))
             return;
         if ((getWidth() == 0) || (getHeight() == 0))
             return;
@@ -89,11 +89,11 @@ public class CarView extends View {
 
     }
 
-    void update(CarState s) {
-        if ((carImage != null) && !carImage.name.equals(s.getTheme()))
+    void update(CarState s, CarConfig config) {
+        if ((carImage != null) && !carImage.name.equals(config.getTheme()))
             carImage = null;
         if (carImage == null)
-            carImage = new CarImage(getContext(), s.getTheme());
+            carImage = new CarImage(getContext(), config.getTheme());
         if (!carImage.update(s, false))
             return;
         invalidate();

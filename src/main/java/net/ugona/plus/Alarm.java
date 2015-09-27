@@ -55,13 +55,13 @@ public class Alarm
         tvTitle.setText(title);
         findViewById(R.id.close).setOnClickListener(this);
         carView = (CarView) findViewById(R.id.car);
-        CarState state = CarState.get(this, car_id);
-        carView.update(state);
+        final CarState state = CarState.get(this, car_id);
+        final CarConfig carConfig = CarConfig.get(this, car_id);
+        carView.update(state, carConfig);
         audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         start_level = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
         max_level = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM);
         vibro = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        CarConfig carConfig = CarConfig.get(this, car_id);
         final int vibro_mode = carConfig.getAlarmVibro();
         prev_level = start_level;
         count = 0;
@@ -91,7 +91,6 @@ public class Alarm
 
                 if (bDemo && (--demo_count <= 0)) {
                     demo_count = 5;
-                    CarState state = CarState.get(Alarm.this, car_id);
                     switch (++demo_state) {
                         case 1:
                             state.setShock(1);
@@ -125,7 +124,7 @@ public class Alarm
                         default:
                             demo_state = 0;
                     }
-                    carView.update(state);
+                    carView.update(state, carConfig);
                 }
             }
 

@@ -1,19 +1,25 @@
 package net.ugona.plus;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -23,6 +29,7 @@ public class Theme {
     static final int BUF_SIZE = 0x1000;
 
     static HashMap<String, Theme> themes;
+    static boolean download = false;
     HashMap<String, Position> parts;
     int width;
     int height;
@@ -43,9 +50,10 @@ public class Theme {
         return res;
     }
 
-    boolean open(Context context, String name) {
-        File path = context.getFilesDir();
-        path = new File(path, name);
+    boolean open(final Context context, String name) {
+
+        final File dir = context.getFilesDir();
+        File path = new File(dir, name);
 
         long theme_time = 0;
         long pkg_time = 0;
@@ -62,25 +70,94 @@ public class Theme {
             } catch (Exception ex) {
                 // ignore
             }
+            long now = System.currentTimeMillis();
+            if (now < pkg_time)
+                pkg_time = now;
         }
 
         if (pkg_time >= theme_time) {
             try {
                 InputStream from = context.getAssets().open(name);
                 OutputStream to = context.openFileOutput(name, Context.MODE_PRIVATE);
-                byte[] buf = new byte[BUF_SIZE];
-                while (true) {
-                    int r = from.read(buf);
-                    if (r == -1) {
-                        break;
+                try {
+                    byte[] buf = new byte[BUF_SIZE];
+                    while (true) {
+                        int r = from.read(buf);
+                        if (r == -1) {
+                            break;
+                        }
+                        to.write(buf, 0, r);
                     }
-                    to.write(buf, 0, r);
+                } finally {
+                    try {
+                        from.close();
+                        to.close();
+                    } catch (Exception ex) {
+                        // ignore
+                    }
                 }
-                from.close();
-                to.close();
             } catch (IOException e) {
                 e.printStackTrace();
-                return false;
+                if (!download) {
+                    download = true;
+                    AsyncTask<String, Void, String> downloader = new AsyncTask<String, Void, String>() {
+                        @Override
+                        protected String doInBackground(String... params) {
+                            try {
+                                String name = params[0];
+                                String url = Names.API_URL + "/themes/" + params[0];
+                                Request request = new Request.Builder().url(url).build();
+                                Response response = HttpTask.client.newCall(request).execute();
+                                if (response.code() != HttpURLConnection.HTTP_OK)
+                                    return null;
+                                File part = new File(dir, name + ".part");
+                                part.createNewFile();
+                                FileOutputStream out = new FileOutputStream(part);
+
+                                InputStream in = response.body().byteStream();
+                                byte[] buffer = new byte[4096];
+                                int bytesRead;
+                                while ((bytesRead = in.read(buffer)) != -1) {
+                                    out.write(buffer, 0, bytesRead);
+                                }
+                                in.close();
+                                out.close();
+
+                                File new_file = new File(dir, name);
+                                new_file.delete();
+                                part.renameTo(new_file);
+
+                                return name;
+
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                            return null;
+                        }
+
+                        @Override
+                        protected void onPostExecute(String res) {
+                            download = false;
+                            if (res == null)
+                                return;
+                            try {
+                                AppConfig appConfig = AppConfig.get(context);
+                                String[] cars = appConfig.getIds().split(";");
+                                for (String car : cars) {
+                                    CarConfig carConfig = CarConfig.get(context, car);
+                                    if (res.equals(carConfig.getTheme())) {
+                                        Intent intent = new Intent(Names.UPDATED);
+                                        intent.putExtra(Names.ID, car);
+                                        context.sendBroadcast(intent);
+                                    }
+                                }
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    };
+                    downloader.execute(name);
+                }
             }
         }
 

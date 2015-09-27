@@ -55,6 +55,7 @@ public class CarConfig extends Config {
     private String maintenance;
     private long maintenance_time;
     private String command_values;
+    private String theme;
 
     private CarConfig() {
         init();
@@ -128,6 +129,7 @@ public class CarConfig extends Config {
         leftMileage = 1000;
         leftHours = 1000;
         maintenance = "";
+        theme = "";
     }
 
     void read(Context context, String id) {
@@ -329,6 +331,10 @@ public class CarConfig extends Config {
             return;
         this.balance_limit = balance_limit;
         upd = true;
+    }
+
+    public String getTheme() {
+        return theme;
     }
 
     public int[] getFab() {
