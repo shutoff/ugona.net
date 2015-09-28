@@ -31,6 +31,7 @@ public class PrimaryFragment
     static final int PAGE_EVENT = 3;
     static final int PAGE_TRACK = 4;
     static final int PAGE_STAT = 5;
+    static final int PAGE_SETTINGS = 6;
 
     static final int DO_PHONE = 1;
 
@@ -46,7 +47,7 @@ public class PrimaryFragment
 
     Menu carsMenu;
 
-    boolean show_page[] = new boolean[6];
+    boolean show_page[] = new boolean[7];
 
     @Override
     int layout() {
@@ -92,7 +93,7 @@ public class PrimaryFragment
                     int page_id = getPageId(vPager.getCurrentItem());
                     state = CarState.get(getActivity(), id());
                     setPageState();
-                    vPager.setAdapter(new PagesAdapter(getChildFragmentManager()));
+                    vPager.setAdapter(new PagesAdapter(getChildFragmentManager(), state.isPointer()));
                     if (tabs != null)
                         tabs.notifyDataSetChanged();
                     vPager.setCurrentItem(getPagePosition(page_id));
@@ -200,7 +201,8 @@ public class PrimaryFragment
         if (vPager.getAdapter() != null)
             return;
         setPageState();
-        vPager.setAdapter(new PagesAdapter(getChildFragmentManager()));
+        CarState carState = CarState.get(getActivity(), id());
+        vPager.setAdapter(new PagesAdapter(getChildFragmentManager(), carState.isPointer()));
         if (tabs != null) {
             tabs.setViewPager(vPager);
             tabs.delegatePageListener = this;
@@ -213,6 +215,7 @@ public class PrimaryFragment
     boolean setPageState() {
         boolean cmd = false;
         CarConfig carConfig = CarConfig.get(getActivity(), id());
+        CarState carState = CarState.get(getActivity(), id());
         CarConfig.Command[] commands = carConfig.getCmd();
         if (commands != null) {
             for (CarConfig.Command command : commands) {
@@ -223,29 +226,64 @@ public class PrimaryFragment
             }
         }
         boolean upd = false;
-        if (show_page[PAGE_PHOTO] != state.isShow_photo()) {
-            show_page[PAGE_PHOTO] = state.isShow_photo();
-            upd = true;
-        }
-        if (show_page[PAGE_ACTIONS] != cmd) {
-            show_page[PAGE_ACTIONS] = cmd;
-            upd = true;
-        }
-        if (!show_page[PAGE_STATE]) {
-            show_page[PAGE_STATE] = true;
-            upd = true;
-        }
-        if (!show_page[PAGE_EVENT]) {
-            show_page[PAGE_EVENT] = true;
-            upd = true;
-        }
-        if (show_page[PAGE_TRACK] != state.isShow_tracks()) {
-            show_page[PAGE_TRACK] = state.isShow_tracks();
-            upd = true;
-        }
-        if (show_page[PAGE_STAT] != state.isShow_tracks()) {
-            show_page[PAGE_STAT] = state.isShow_tracks();
-            upd = true;
+        if (carState.isPointer()) {
+            if (show_page[PAGE_PHOTO]) {
+                show_page[PAGE_PHOTO] = false;
+                upd = true;
+            }
+            if (show_page[PAGE_ACTIONS]) {
+                show_page[PAGE_ACTIONS] = false;
+                upd = true;
+            }
+            if (!show_page[PAGE_STATE]) {
+                show_page[PAGE_STATE] = true;
+                upd = true;
+            }
+            if (!show_page[PAGE_EVENT]) {
+                show_page[PAGE_EVENT] = true;
+                upd = true;
+            }
+            if (show_page[PAGE_TRACK]) {
+                show_page[PAGE_TRACK] = false;
+                upd = true;
+            }
+            if (show_page[PAGE_STAT]) {
+                show_page[PAGE_STAT] = false;
+                upd = true;
+            }
+            if (!show_page[PAGE_SETTINGS]) {
+                show_page[PAGE_SETTINGS] = true;
+                upd = true;
+            }
+        } else {
+            if (show_page[PAGE_PHOTO] != state.isShow_photo()) {
+                show_page[PAGE_PHOTO] = state.isShow_photo();
+                upd = true;
+            }
+            if (show_page[PAGE_ACTIONS] != cmd) {
+                show_page[PAGE_ACTIONS] = cmd;
+                upd = true;
+            }
+            if (!show_page[PAGE_STATE]) {
+                show_page[PAGE_STATE] = true;
+                upd = true;
+            }
+            if (!show_page[PAGE_EVENT]) {
+                show_page[PAGE_EVENT] = true;
+                upd = true;
+            }
+            if (show_page[PAGE_TRACK] != state.isShow_tracks()) {
+                show_page[PAGE_TRACK] = state.isShow_tracks();
+                upd = true;
+            }
+            if (show_page[PAGE_STAT] != state.isShow_tracks()) {
+                show_page[PAGE_STAT] = state.isShow_tracks();
+                upd = true;
+            }
+            if (show_page[PAGE_SETTINGS]) {
+                show_page[PAGE_SETTINGS] = false;
+                upd = true;
+            }
         }
         return upd;
     }
@@ -254,7 +292,8 @@ public class PrimaryFragment
         int id = getPageId(vPager.getCurrentItem());
         if (!setPageState())
             return;
-        vPager.setAdapter(new PagesAdapter(getChildFragmentManager()));
+        CarState carState = CarState.get(getActivity(), id());
+        vPager.setAdapter(new PagesAdapter(getChildFragmentManager(), carState.isPointer()));
         if (tabs != null)
             tabs.notifyDataSetChanged();
         vPager.setCurrentItem(getPagePosition(id));
@@ -276,7 +315,7 @@ public class PrimaryFragment
 
     int getPageId(int n) {
         int last = 0;
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 7; i++) {
             if (!isShowPage(i))
                 continue;
             last = i;
@@ -344,8 +383,11 @@ public class PrimaryFragment
 
     class PagesAdapter extends FragmentStatePagerAdapter {
 
-        public PagesAdapter(FragmentManager fm) {
+        boolean pointer;
+
+        public PagesAdapter(FragmentManager fm, boolean pointer) {
             super(fm);
+            this.pointer = pointer;
         }
 
         @Override
@@ -359,7 +401,11 @@ public class PrimaryFragment
                     fragment = new ActionFragment();
                     break;
                 case PAGE_STATE:
-                    fragment = new StateFragment();
+                    if (pointer) {
+                        fragment = new PointerStateFragment();
+                    } else {
+                        fragment = new StateFragment();
+                    }
                     break;
                 case PAGE_EVENT:
                     fragment = new EventsFragment();
@@ -369,6 +415,9 @@ public class PrimaryFragment
                     break;
                 case PAGE_STAT:
                     fragment = new StatFragment();
+                    break;
+                case PAGE_SETTINGS:
+                    fragment = new AuthFragment();
                     break;
             }
             return fragment;
@@ -383,18 +432,22 @@ public class PrimaryFragment
                 id = 1;
             if (object instanceof StateFragment)
                 id = 2;
+            if (object instanceof PointerStateFragment)
+                id = 2;
             if (object instanceof EventsFragment)
                 id = 3;
             if (object instanceof TracksFragment)
                 id = 4;
             if (object instanceof StatFragment)
                 id = 5;
+            if (object instanceof AuthFragment)
+                id = 6;
             return getPagePosition(id);
         }
 
         @Override
         public int getCount() {
-            return getPagePosition(6);
+            return getPagePosition(7);
         }
 
         @Override
@@ -412,6 +465,8 @@ public class PrimaryFragment
                     return getString(R.string.tracks);
                 case PAGE_STAT:
                     return getString(R.string.stat);
+                case PAGE_SETTINGS:
+                    return getString(R.string.preferences);
             }
             return super.getPageTitle(position);
         }

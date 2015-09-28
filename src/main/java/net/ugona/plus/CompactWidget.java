@@ -13,7 +13,7 @@ public class CompactWidget extends Widget {
         return id_layout[theme];
     }
 
-    void updateCarImage(Context context, CarState carState) {
+    void updateCarImage(Context context, CarState carState, CarConfig carConfig) {
         if (carImage == null)
             carImage = new CarImage(context, "compact");
         carImage.update(carState, true);

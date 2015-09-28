@@ -117,7 +117,7 @@ public class PointerFragment
             if (object instanceof EventsFragment)
                 return 1;
             if (object instanceof AuthFragment)
-                return 1;
+                return 2;
             return 0;
         }
 
