@@ -32,6 +32,8 @@ public class SwipeRefresh extends SwipeRefreshLayout {
                     return true;
             }
         }
+        if (v instanceof CarView)
+            return true;
         if (v instanceof HistoryView)
             return true;
         return false;
