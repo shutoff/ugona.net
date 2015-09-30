@@ -111,7 +111,17 @@ public class CarView extends ImageView {
         }
 
         bUpdate = false;
+        boolean bForeground = false;
         if (bmpImage == null) {
+            try {
+                MainActivity activity = (MainActivity) getContext();
+                bForeground = (System.currentTimeMillis() < activity.start_time + 2000);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        if (bForeground) {
             bmpImage = createBitmap(getWidth(), getHeight());
             Bitmap bitmap = bmpImage;
             if (bitmap == null) {

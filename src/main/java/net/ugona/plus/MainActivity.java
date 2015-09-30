@@ -94,6 +94,7 @@ public class MainActivity
     GoogleCloudMessaging gcm;
     boolean bActive;
     PendingIntent piRefresh;
+    long start_time;
 
     private FragmentManager.OnBackStackChangedListener
             mOnBackStackChangedListener = new FragmentManager.OnBackStackChangedListener() {
@@ -226,6 +227,12 @@ public class MainActivity
         getSupportFragmentManager().removeOnBackStackChangedListener(mOnBackStackChangedListener);
         unregisterReceiver(br);
         super.onDestroy();
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        start_time = System.currentTimeMillis();
+        super.onAttachedToWindow();
     }
 
     @Override

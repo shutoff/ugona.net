@@ -74,6 +74,7 @@ public class PrimaryFragment
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
         vPager = (ViewPager) v.findViewById(R.id.pager);
+        vPager.setOffscreenPageLimit(2);
         tabs = (PagerSlidingTabStrip) v.findViewById(R.id.tabs);
         state = CarState.get(getActivity(), id());
         setTabs();
