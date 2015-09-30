@@ -109,59 +109,29 @@ public class CarView extends ImageView {
             bUpdate = true;
             return;
         }
-        bDrawing = true;
+
         bUpdate = false;
+        if (bmpImage == null) {
+            bmpImage = createBitmap(getWidth(), getHeight());
+            Bitmap bitmap = bmpImage;
+            if (bitmap == null) {
+                if (bmpEmpty == null) {
+                    bmpEmpty = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+                    Canvas c = new Canvas(bmpEmpty);
+                    c.drawColor(Color.TRANSPARENT);
+                }
+                bitmap = bmpEmpty;
+            }
+            setImageBitmap(bitmap);
+            return;
+        }
+
+        bDrawing = true;
+
         AsyncTask<Integer, Void, Bitmap> task = new AsyncTask<Integer, Void, Bitmap>() {
             @Override
             protected Bitmap doInBackground(Integer... params) {
-                int width = params[0];
-                int height = params[1];
-                if ((width == 0) || (height == 0))
-                    return null;
-                if ((carImage == null) || (carImage.theme == null))
-                    return null;
-                try {
-                    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                    Canvas canvas = new Canvas(bitmap);
-                    canvas.drawColor(Color.TRANSPARENT);
-
-                    float add_x = XC_LEFT * pk;
-                    float add_y = YC_BOTTOM * pk;
-                    float k = (width + add_x) / carImage.theme.width;
-                    float x = 0;
-                    float y = 0;
-                    float h = carImage.theme.height * k;
-                    if (h > height + add_y) {
-                        k = (height + add_y) / carImage.theme.height;
-                        float w = k * carImage.theme.width;
-                        x = (width + add_x - w) / 2.f;
-                    } else {
-                        y = (height + add_y - h) / 2.f;
-                    }
-                    x -= add_x;
-                    String[] ext = carImage.state.split("\\|");
-                    String[] parts = ext[0].split(";");
-                    for (int i = 0; i < parts.length; i++) {
-                        String part = parts[i];
-                        if (i == carImage.animation) {
-                            frame++;
-                            if (frame > 6)
-                                frame = 1;
-                            part += frame;
-                        }
-                        Theme.Pict pict = carImage.theme.get(part);
-                        if (pict == null)
-                            continue;
-                        Bitmap src = pict.bitmap;
-                        RectF rect = new RectF(x + pict.x * k, y + pict.y * k, x + (pict.x + src.getWidth()) * k, y + (src.getHeight() + pict.y) * k);
-                        canvas.drawBitmap(src, null, rect, carImage.paint);
-                        src.recycle();
-                    }
-                    return bitmap;
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                return null;
+                return createBitmap(params[0], params[1]);
             }
 
             @Override
@@ -184,6 +154,55 @@ public class CarView extends ImageView {
             }
         };
         task.execute(getWidth(), getHeight());
+    }
+
+    Bitmap createBitmap(int width, int height) {
+        if ((width == 0) || (height == 0))
+            return null;
+        if ((carImage == null) || (carImage.theme == null))
+            return null;
+        try {
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            canvas.drawColor(Color.TRANSPARENT);
+
+            float add_x = XC_LEFT * pk;
+            float add_y = YC_BOTTOM * pk;
+            float k = (width + add_x) / carImage.theme.width;
+            float x = 0;
+            float y = 0;
+            float h = carImage.theme.height * k;
+            if (h > height + add_y) {
+                k = (height + add_y) / carImage.theme.height;
+                float w = k * carImage.theme.width;
+                x = (width + add_x - w) / 2.f;
+            } else {
+                y = (height + add_y - h) / 2.f;
+            }
+            x -= add_x;
+            String[] ext = carImage.state.split("\\|");
+            String[] parts = ext[0].split(";");
+            for (int i = 0; i < parts.length; i++) {
+                String part = parts[i];
+                if (i == carImage.animation) {
+                    frame++;
+                    if (frame > 6)
+                        frame = 1;
+                    part += frame;
+                }
+                Theme.Pict pict = carImage.theme.get(part);
+                if (pict == null)
+                    continue;
+                Bitmap src = pict.bitmap;
+                RectF rect = new RectF(x + pict.x * k, y + pict.y * k, x + (pict.x + src.getWidth()) * k, y + (src.getHeight() + pict.y) * k);
+                canvas.drawBitmap(src, null, rect, carImage.paint);
+                src.recycle();
+            }
+            return bitmap;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 
 }
