@@ -69,7 +69,7 @@ public class Widget extends AppWidgetProvider {
 
     static final int id_color[] = {
             android.R.color.secondary_text_dark,
-            android.R.color.black
+            R.color.text_dark
     };
 
     static final int[] id_gsm_level[] = {
@@ -236,7 +236,9 @@ public class Widget extends AppWidgetProvider {
             CarState carState = CarState.get(context, car_id);
             CarConfig carConfig = CarConfig.get(context, car_id);
 
-            updateCarImage(context, carState, carConfig);
+            if (carImage == null)
+                carImage = new CarImage(context, carConfig.getTheme());
+            carImage.update(carState, isCompact());
 
             boolean show_name = preferences.getBoolean(Names.SHOW_NAME + widgetID, false);
             if (show_name) {
@@ -248,7 +250,7 @@ public class Widget extends AppWidgetProvider {
 
             String[] ext = carImage.state.split("\\|");
             String car_state = URLEncoder.encode(ext[0], "utf-8");
-            Uri uri = Uri.parse("content://net.ugona.plus.car/" + carImage.name + "-" + car_state);
+            Uri uri = Uri.parse("content://net.ugona.plus.car/" + getTheme(carConfig) + "-" + car_state);
             widgetView.setImageViewUri(R.id.car, uri);
 
             int kn = 0;
@@ -283,6 +285,7 @@ public class Widget extends AppWidgetProvider {
                 widgetView.setTextViewText(R.id.voltage, power + " V");
                 widgetView.setViewVisibility(R.id.voltage_block, View.VISIBLE);
                 show_count++;
+                setPowerState(context, widgetView, theme, R.id.voltage, carState.getPower_state());
             } else {
                 widgetView.setViewVisibility(R.id.voltage_block, View.GONE);
             }
@@ -311,16 +314,28 @@ public class Widget extends AppWidgetProvider {
             if (balance.equals(""))
                 show_balance = false;
             if (show_balance) {
+                int color = id_color[theme];
                 try {
                     NumberFormat nf = NumberFormat.getCurrencyInstance();
-                    String str = nf.format(Double.parseDouble(balance));
+                    double value = Double.parseDouble(balance);
+                    double abs_value = Math.abs(value);
+                    String str = nf.format(value);
                     Currency currency = Currency.getInstance(Locale.getDefault());
                     str = str.replace(currency.getSymbol(), "");
+                    if (abs_value > 10000) {
+                        NumberFormat f = NumberFormat.getInstance(context.getResources().getConfiguration().locale);
+                        str = f.format(Math.round(value));
+                    }
                     widgetView.setTextViewText(R.id.balance, str);
+                    int balance_limit = carConfig.getBalance_limit();
+                    if (value <= balance_limit) {
+                        color = R.color.error;
+                    }
                 } catch (Exception ex) {
                     widgetView.setTextViewText(R.id.balance, balance);
                 }
                 widgetView.setViewVisibility(R.id.balance_block, View.GONE);
+                widgetView.setTextColor(R.id.balance, context.getResources().getColor(color));
                 show_count++;
             } else {
                 widgetView.setViewVisibility(R.id.balance_block, View.GONE);
@@ -358,6 +373,7 @@ public class Widget extends AppWidgetProvider {
             if (show_reserve) {
                 widgetView.setTextViewText(R.id.reserve, reserved + " V");
                 widgetView.setViewVisibility(R.id.reserve_block, View.VISIBLE);
+                setPowerState(context, widgetView, theme, R.id.reserve, carState.getReserved_state());
             } else {
                 widgetView.setViewVisibility(R.id.reserve_block, View.GONE);
             }
@@ -398,12 +414,25 @@ public class Widget extends AppWidgetProvider {
         }
     }
 
-    void updateCarImage(Context context, CarState carState, CarConfig carConfig) {
-        if ((carImage != null) && !carImage.name.equals(carConfig.getTheme()))
-            carImage = null;
-        if (carImage == null)
-            carImage = new CarImage(context, carConfig.getTheme());
-        carImage.update(carState, false);
+    String getTheme(CarConfig carConfig) {
+        return carConfig.getTheme();
+    }
+
+    boolean isCompact() {
+        return false;
+    }
+
+    void setPowerState(Context context, RemoteViews widgetView, int theme, int resId, int state) {
+        int color = id_color[theme];
+        switch (state) {
+            case 0:
+                color = R.color.error;
+                break;
+            case 2:
+                color = R.color.neutral;
+                break;
+        }
+        widgetView.setTextColor(resId, context.getResources().getColor(color));
     }
 
     boolean isLockScreen(Context context, int widgetID) {

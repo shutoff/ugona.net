@@ -13,10 +13,13 @@ public class CompactWidget extends Widget {
         return id_layout[theme];
     }
 
-    void updateCarImage(Context context, CarState carState, CarConfig carConfig) {
-        if (carImage == null)
-            carImage = new CarImage(context, "compact");
-        carImage.update(carState, true);
+    @Override
+    String getTheme(CarConfig carConfig) {
+        return "compact";
     }
 
+    @Override
+    boolean isCompact() {
+        return true;
+    }
 }
