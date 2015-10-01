@@ -373,19 +373,28 @@ public class Notification extends Config {
         CarConfig carConfig = CarConfig.get(context, car_id);
         if (title == null)
             title = carConfig.getName();
-        if (grp == null)
-            grp = "notify";
+
         String sound = null;
-        int vibro = 0;
         try {
             Field field = carConfig.getClass().getDeclaredField(grp + "Sound");
             field.setAccessible(true);
             sound = field.get(carConfig).toString();
-            field = carConfig.getClass().getDeclaredField(grp + "Vibro");
+        } catch (Exception ex) {
+            if (grp != null) {
+                int id = context.getResources().getIdentifier("raw/" + grp, null, context.getPackageName());
+                if (id != 0)
+                    sound = "android.resource://net.ugona.plus/raw/" + grp;
+            }
+        }
+        int vibro = 0;
+        try {
+            if (grp == null)
+                grp = "notify";
+            Field field = carConfig.getClass().getDeclaredField(grp + "Vibro");
             field.setAccessible(true);
             vibro = field.getInt(carConfig);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            // ignore
         }
         if ((sound != null) && sound.equals(""))
             sound = null;
@@ -399,8 +408,13 @@ public class Notification extends Config {
             defs |= android.app.Notification.DEFAULT_SOUND;
 
         Uri uri = null;
-        if (sound != null)
-            Uri.parse(sound);
+        if (sound != null) {
+            try {
+                uri = Uri.parse(sound);
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
 
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context)

@@ -229,22 +229,22 @@ public class State {
             try {
                 if (m.find() && !getBoolean(o, m.group(1)))
                     return false;
-                m = not_bool.matcher(condition);
+                m = not_bool.matcher(part);
                 if (m.find() && getBoolean(o, m.group(1)))
                     return false;
-                m = eq_int.matcher(condition);
+                m = eq_int.matcher(part);
                 if (m.find() && (getInteger(o, m.group(1)) != Integer.parseInt(m.group(2))))
                     return false;
-                m = ne_int.matcher(condition);
+                m = ne_int.matcher(part);
                 if (m.find() && (getInteger(o, m.group(1)) == Integer.parseInt(m.group(2))))
                     return false;
-                m = eq_str.matcher(condition);
+                m = eq_str.matcher(part);
                 if (m.find())
                     return false;
-                m = map_str.matcher(condition);
+                m = map_str.matcher(part);
                 if (m.find())
                     return false;
-                m = alert_str.matcher(condition);
+                m = alert_str.matcher(part);
                 if (m.find())
                     return false;
             } catch (Exception ex) {
@@ -255,6 +255,13 @@ public class State {
     }
 
     static boolean getBoolean(Object o, String name) {
+        String method_name = "is" + name.substring(0, 1).toUpperCase() + name.substring(1);
+        try {
+            Method method = o.getClass().getDeclaredMethod(method_name);
+            return (Boolean) method.invoke(o);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         try {
             Field field = o.getClass().getDeclaredField(name);
             if (field.getType() != boolean.class)
@@ -263,13 +270,6 @@ public class State {
             return field.getBoolean(o);
         } catch (Exception ex) {
             // ignore
-        }
-        name = "is" + name.substring(0, 1).toUpperCase() + name.substring(1);
-        try {
-            Method method = o.getClass().getDeclaredMethod(name);
-            return (Boolean) method.invoke(o);
-        } catch (Exception ex) {
-            ex.printStackTrace();
         }
         return false;
     }
