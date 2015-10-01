@@ -41,8 +41,6 @@ public class Widget extends AppWidgetProvider {
     static final int STATE_UPDATE = 1;
     static final int STATE_ERROR = 2;
 
-    static final int MAX_ROWS = 6;
-
     final static int[] trafic_pict = {
             R.drawable.p0,
             R.drawable.p1,
@@ -308,7 +306,7 @@ public class Widget extends AppWidgetProvider {
             }
 
             boolean show_balance = carConfig.isShowBalance();
-            if (show_count >= MAX_ROWS)
+            if (show_count >= getRows())
                 show_balance = false;
             String balance = carState.getBalance();
             if (balance.equals(""))
@@ -334,16 +332,15 @@ public class Widget extends AppWidgetProvider {
                 } catch (Exception ex) {
                     widgetView.setTextViewText(R.id.balance, balance);
                 }
-                widgetView.setViewVisibility(R.id.balance_block, View.GONE);
+                widgetView.setViewVisibility(R.id.balance_block, View.VISIBLE);
                 widgetView.setTextColor(R.id.balance, context.getResources().getColor(color));
                 show_count++;
             } else {
                 widgetView.setViewVisibility(R.id.balance_block, View.GONE);
             }
-            widgetView.setViewVisibility(R.id.balance_block, show_balance ? View.VISIBLE : View.GONE);
 
             double card_voltage = carState.getCard_voltage();
-            if ((card_voltage > 0) && (show_count < MAX_ROWS)) {
+            if ((card_voltage > 0) && (show_count < getRows())) {
                 widgetView.setTextViewText(R.id.card, card_voltage + " V");
                 widgetView.setViewVisibility(R.id.card_block, View.VISIBLE);
                 show_count++;
@@ -352,7 +349,7 @@ public class Widget extends AppWidgetProvider {
             }
 
             int gsm_level = carState.getGsm_level();
-            boolean show_level = (show_count < MAX_ROWS);
+            boolean show_level = (show_count < getRows());
             if (gsm_level == 0)
                 show_level = false;
             if (show_level) {
@@ -365,7 +362,7 @@ public class Widget extends AppWidgetProvider {
                 widgetView.setViewVisibility(R.id.level_block, View.GONE);
             }
 
-            boolean show_reserve = (show_count < MAX_ROWS);
+            boolean show_reserve = (show_count < getRows());
             double reserved = carState.getReserved();
             if (reserved == 0)
                 show_reserve = false;
@@ -420,6 +417,10 @@ public class Widget extends AppWidgetProvider {
 
     boolean isCompact() {
         return false;
+    }
+
+    int getRows() {
+        return 6;
     }
 
     void setPowerState(Context context, RemoteViews widgetView, int theme, int resId, int state) {

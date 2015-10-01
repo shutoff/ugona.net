@@ -22,4 +22,10 @@ public class CompactWidget extends Widget {
     boolean isCompact() {
         return true;
     }
+
+    @Override
+    int getRows() {
+        return 3;
+    }
 }
+
