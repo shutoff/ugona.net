@@ -833,6 +833,7 @@ public class MainActivity
     void setCarId(String new_id) {
         if (id.equals(new_id))
             return;
+        start_time = System.currentTimeMillis();
         config.setCurrent_id(new_id);
         config.save(this);
         id = new_id;
@@ -841,7 +842,6 @@ public class MainActivity
         sendBroadcast(intent);
         Notification.clear(this, id);
         checkCaps(id);
-
     }
 
     static class KeyParam implements Serializable {
