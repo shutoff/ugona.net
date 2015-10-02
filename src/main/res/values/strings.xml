@@ -265,4 +265,5 @@
     <string name="lost">Lost control channel</string>
     <string name="restore">Restore control channel</string>
     <string name="change_auth">Change login and password</string>
+    <string name="appearance">Appearance</string>
 </resources>

@@ -141,12 +141,13 @@ public class Theme {
                             if (res == null)
                                 return;
                             try {
+                                CarPictureProvider.themeInstalled(context, res);
                                 AppConfig appConfig = AppConfig.get(context);
                                 String[] cars = appConfig.getIds().split(";");
                                 for (String car : cars) {
                                     CarConfig carConfig = CarConfig.get(context, car);
                                     if (res.equals(carConfig.getTheme())) {
-                                        Intent intent = new Intent(Names.UPDATED);
+                                        Intent intent = new Intent(Names.UPDATED_THEME);
                                         intent.putExtra(Names.ID, car);
                                         context.sendBroadcast(intent);
                                     }

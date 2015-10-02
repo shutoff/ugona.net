@@ -136,6 +136,9 @@ public class Widget extends AppWidgetProvider {
                     widget_states.remove(key);
                     updateWidgets(context, car_id, false);
                 }
+                if (action.equalsIgnoreCase(Names.UPDATED_THEME)) {
+                    updateWidgets(context, car_id, false);
+                }
                 if (action.equalsIgnoreCase(Names.NO_UPDATED)) {
                     if (widget_states.containsKey(key)) {
                         widget_states.remove(key);

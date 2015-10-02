@@ -2,6 +2,7 @@ package net.ugona.plus;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -28,6 +29,20 @@ public class CarPictureProvider extends ContentProvider {
             bitmap = getBitmapSafely(resources, id, sampleSize + 1);
         }
         return bitmap;
+    }
+
+    public static void themeInstalled(Context context, String theme) {
+        theme = theme + "-";
+        File outputDir = context.getCacheDir();
+        File[] files = outputDir.listFiles();
+        for (File file : files) {
+            String name = file.getName();
+            if (name.length() < theme.length())
+                continue;
+            if (!theme.equals(name.substring(0, theme.length())))
+                continue;
+            file.delete();
+        }
     }
 
     @Override

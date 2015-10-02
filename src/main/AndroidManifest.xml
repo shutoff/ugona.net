@@ -141,6 +141,7 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="net.ugona.plus.UPDATED" />
+                <action android:name="net.ugona.plus.UPDATED_THEME" />
                 <action android:name="net.ugona.plus.NO_UPDATED" />
                 <action android:name="net.ugona.plus.ERROR" />
                 <action android:name="net.ugona.plus.START_UPDATE" />
@@ -158,6 +159,7 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="net.ugona.plus.UPDATED" />
+                <action android:name="net.ugona.plus.UPDATED_THEME" />
                 <action android:name="net.ugona.plus.NO_UPDATED" />
                 <action android:name="net.ugona.plus.ERROR" />
                 <action android:name="net.ugona.plus.START_UPDATE" />
@@ -173,6 +175,7 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="net.ugona.plus.UPDATED" />
+                <action android:name="net.ugona.plus.UPDATED_THEME" />
                 <action android:name="net.ugona.plus.NO_UPDATED" />
                 <action android:name="net.ugona.plus.ERROR" />
                 <action android:name="net.ugona.plus.START_UPDATE" />

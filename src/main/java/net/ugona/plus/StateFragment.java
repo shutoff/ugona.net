@@ -315,6 +315,11 @@ public class StateFragment
                         });
                     }
                 }
+                if (intent.getAction().equals(Names.UPDATED_THEME)) {
+                    CarState state = CarState.get(context, id());
+                    CarConfig config = CarConfig.get(context, id());
+                    vCar.forceUpdate(state, config);
+                }
                 if (intent.getAction().equals(Names.UPDATED))
                     error = null;
                 if (intent.getAction().equals(Names.NO_UPDATED))
@@ -323,6 +328,7 @@ public class StateFragment
             }
         };
         IntentFilter intFilter = new IntentFilter(Names.UPDATED);
+        intFilter.addAction(Names.UPDATED_THEME);
         intFilter.addAction(Names.ERROR);
         intFilter.addAction(Names.START_UPDATE);
         intFilter.addAction(Names.NO_UPDATED);

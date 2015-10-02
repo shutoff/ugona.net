@@ -44,6 +44,7 @@ public class Names {
     static final String PKG_NAME = Names.class.getPackage().getName();
 
     static final String UPDATED = PKG_NAME + ".UPDATED";
+    static final String UPDATED_THEME = PKG_NAME + ".UPDATED_THEME";
     static final String NO_UPDATED = PKG_NAME + ".NO_UPDATED";
     static final String CONFIG_CHANGED = PKG_NAME + ".CHANGED";
     static final String COMMANDS = PKG_NAME + ".COMMAND";

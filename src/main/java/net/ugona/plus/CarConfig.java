@@ -23,6 +23,7 @@ public class CarConfig extends Config {
     private String login;
     private String phone;
     private Command[] cmd;
+    private Theme[] themes;
     private int event_filter;
     private int voltage_shift;
     private String temp_settings;
@@ -337,6 +338,13 @@ public class CarConfig extends Config {
         return theme;
     }
 
+    public void setTheme(String theme) {
+        if (this.theme.equals(theme))
+            return;
+        this.theme = theme;
+        upd = true;
+    }
+
     public int[] getFab() {
         if ((fab == null) && (cmd != null)) {
             Vector<Integer> res = new Vector<>();
@@ -504,6 +512,28 @@ public class CarConfig extends Config {
         return res;
     }
 
+    public String[] getThemesTitles() {
+        if (themes == null)
+            return new String[0];
+        String[] res = new String[themes.length];
+        int i = 0;
+        for (Theme theme : themes) {
+            res[i++] = theme.title;
+        }
+        return res;
+    }
+
+    public String[] getThemesNames() {
+        if (themes == null)
+            return new String[0];
+        String[] res = new String[themes.length];
+        int i = 0;
+        for (Theme theme : themes) {
+            res[i++] = theme.name;
+        }
+        return res;
+    }
+
     public static class Command implements Serializable {
         int id;
         String name;
@@ -553,5 +583,10 @@ public class CarConfig extends Config {
         String alarm;
         String notify;
         boolean all;
+    }
+
+    public static class Theme implements Serializable {
+        String name;
+        String title;
     }
 }

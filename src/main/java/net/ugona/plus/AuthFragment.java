@@ -12,8 +12,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
+
+import java.io.Serializable;
 import java.util.Vector;
 
 public class AuthFragment extends MainFragment {
@@ -111,6 +116,37 @@ public class AuthFragment extends MainFragment {
             }));
         }
 
+        int theme = 0;
+        final String[] themes = config.getThemesNames();
+        for (int i = 0; i < themes.length; i++) {
+            if (themes[i].equals(config.getTheme())) {
+                theme = i;
+                break;
+            }
+        }
+
+        items.add(new ValuesItem(getString(R.string.appearance), config.getThemesTitles(), theme) {
+            @Override
+            void onChanged() {
+                config.setTheme(themes[current]);
+                HttpTask task = new HttpTask() {
+                    @Override
+                    void result(JsonObject res) throws ParseException {
+
+                    }
+
+                    @Override
+                    void error() {
+
+                    }
+                };
+                ThemeParams params = new ThemeParams();
+                params.skey = config.getKey();
+                params.theme = themes[current];
+                task.execute("/set", params);
+            }
+        });
+
         CarConfig.Setting[] settings = config.getSettings();
         final CarConfig.Command[] commands = config.getCmd();
         if (settings != null) {
@@ -197,14 +233,7 @@ public class AuthFragment extends MainFragment {
                     LayoutInflater inflater = LayoutInflater.from(getActivity());
                     v = inflater.inflate(R.layout.auth_item, null);
                 }
-                Item item = items.get(position);
-                TextView tvTitle = (TextView) v.findViewById(R.id.title);
-                TextView tvText = (TextView) v.findViewById(R.id.text);
-                tvTitle.setText(item.title);
-                tvText.setText(item.text);
-                View vProgress = v.findViewById(R.id.progress);
-                vProgress.setVisibility(item.isProgress() ? View.VISIBLE : View.GONE);
-                return v;
+                return items.get(position).getView(v);
             }
         });
         vList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -251,5 +280,77 @@ public class AuthFragment extends MainFragment {
             return false;
         }
 
+        View getView(View v) {
+            TextView tvTitle = (TextView) v.findViewById(R.id.title);
+            TextView tvText = (TextView) v.findViewById(R.id.text);
+            Spinner spinner = (Spinner) v.findViewById(R.id.spinner);
+            tvTitle.setText(title);
+            spinner.setVisibility(View.GONE);
+            tvText.setText(text);
+            tvText.setVisibility(View.VISIBLE);
+            View vProgress = v.findViewById(R.id.progress);
+            vProgress.setVisibility(isProgress() ? View.VISIBLE : View.GONE);
+            return v;
+        }
+
+    }
+
+    static class ValuesItem extends Item implements AdapterView.OnItemSelectedListener {
+        String[] values;
+        int current;
+
+        ValuesItem(String title, String[] values, int current) {
+            super(title, null, null);
+            this.values = values;
+            this.current = current;
+        }
+
+        @Override
+        View getView(View v) {
+            TextView tvTitle = (TextView) v.findViewById(R.id.title);
+            TextView tvText = (TextView) v.findViewById(R.id.text);
+            Spinner spinner = (Spinner) v.findViewById(R.id.spinner);
+            tvTitle.setText(title);
+            spinner.setVisibility(View.VISIBLE);
+            tvText.setVisibility(View.GONE);
+            View vProgress = v.findViewById(R.id.progress);
+            vProgress.setVisibility(View.GONE);
+            spinner.setAdapter(new ArrayAdapter(spinner) {
+                @Override
+                public int getCount() {
+                    return values.length;
+                }
+
+                @Override
+                public Object getItem(int position) {
+                    return values[position];
+                }
+            });
+            spinner.setOnItemSelectedListener(this);
+            spinner.setSelection(current);
+            return v;
+        }
+
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            if (current == position)
+                return;
+            current = position;
+            onChanged();
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+
+        }
+
+        void onChanged() {
+
+        }
+    }
+
+    static class ThemeParams implements Serializable {
+        String skey;
+        String theme;
     }
 }

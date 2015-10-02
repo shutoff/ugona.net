@@ -269,4 +269,5 @@
     <string name="lost">Связь с автомобилем потеряна</string>
     <string name="restore">Связь с автомобилем восстановлена</string>
     <string name="change_auth">Изменить логин и пароль</string>
+    <string name="appearance">Вид</string>
 </resources>
