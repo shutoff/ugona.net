@@ -63,6 +63,7 @@ public class CarState extends Config {
     private boolean use_phone;
     private boolean show_photo;
     private boolean show_tracks;
+    private boolean set_phone;
     private boolean pointer;
     private boolean history;
     private boolean zones;
@@ -327,6 +328,10 @@ public class CarState extends Config {
 
     public boolean isShow_tracks() {
         return show_tracks;
+    }
+
+    public boolean isSet_phone() {
+        return set_phone;
     }
 
     public boolean isHistory() {

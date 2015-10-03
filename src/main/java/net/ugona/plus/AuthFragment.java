@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -102,6 +103,29 @@ public class AuthFragment extends MainFragment {
             }
         }));
         final CarState state = CarState.get(getActivity(), id());
+        if (state.isSet_phone()) {
+            items.add(new Item(getString(R.string.set_phone), "", new Runnable() {
+                @Override
+                public void run() {
+                    String my_number = null;
+                    try {
+                        TelephonyManager manager = (TelephonyManager) getContext().getSystemService(Context.TELEPHONY_SERVICE);
+                        my_number = manager.getLine1Number();
+                    } catch (Exception ex) {
+                        // ignore
+                    }
+                    InputPhoneDialog phoneDialog = new InputPhoneDialog();
+                    Bundle args = new Bundle();
+                    args.putString(Names.TITLE, getString(R.string.set_phone));
+                    if (my_number != null)
+                        args.putString(Names.PHONE, my_number);
+                    args.putBoolean(Names.SET, true);
+                    args.putString(Names.ID, id());
+                    phoneDialog.setArguments(args);
+                    phoneDialog.show(getParentFragment().getFragmentManager(), "phone");
+                }
+            }));
+        }
         if (state.isSet_auth()) {
             items.add(new Item(getString(R.string.change_auth), "", new Runnable() {
                 @Override
@@ -125,27 +149,29 @@ public class AuthFragment extends MainFragment {
             }
         }
 
-        items.add(new ValuesItem(getString(R.string.appearance), config.getThemesTitles(), theme) {
-            @Override
-            void onChanged() {
-                config.setTheme(themes[current]);
-                HttpTask task = new HttpTask() {
-                    @Override
-                    void result(JsonObject res) throws ParseException {
+        if (config.getThemesNames().length > 1) {
+            items.add(new ValuesItem(getString(R.string.appearance), config.getThemesTitles(), theme) {
+                @Override
+                void onChanged() {
+                    config.setTheme(themes[current]);
+                    HttpTask task = new HttpTask() {
+                        @Override
+                        void result(JsonObject res) throws ParseException {
 
-                    }
+                        }
 
-                    @Override
-                    void error() {
+                        @Override
+                        void error() {
 
-                    }
-                };
-                ThemeParams params = new ThemeParams();
-                params.skey = config.getKey();
-                params.theme = themes[current];
-                task.execute("/set", params);
-            }
-        });
+                        }
+                    };
+                    ThemeParams params = new ThemeParams();
+                    params.skey = config.getKey();
+                    params.theme = themes[current];
+                    task.execute("/set", params);
+                }
+            });
+        }
 
         CarConfig.Setting[] settings = config.getSettings();
         final CarConfig.Command[] commands = config.getCmd();

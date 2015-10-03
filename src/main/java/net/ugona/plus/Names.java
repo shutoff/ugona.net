@@ -40,6 +40,7 @@ public class Names {
     static final String SHOW_NAME = "show_name";
     static final String VIBRO = "vibro";
     static final String DEFAULT = "default";
+    static final String SET = "set";
 
     static final String PKG_NAME = Names.class.getPackage().getName();
 

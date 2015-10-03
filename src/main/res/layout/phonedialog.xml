@@ -28,6 +28,72 @@
             android:layout_height="wrap_content"
             android:src="@android:drawable/ic_menu_more" />
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ccode_block"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/ccode_num"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/ccode"
+            android:inputType="textPassword|numberDecimal"
+            android:maxEms="6"
+            android:maxLength="6"
+            android:minEms="6"
+            android:password="true" />
+
+        <EditText
+            android:id="@+id/ccode_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/ccode"
+            android:inputType="textPassword"
+            android:maxEms="6"
+            android:maxLength="6"
+            android:minEms="6"
+            android:password="true"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <CheckBox
+        android:id="@+id/number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/number"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/error"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"
+        android:textColor="@color/error" />
+
+    <LinearLayout
+        android:id="@+id/progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/auth" />
 
     </LinearLayout>
 
