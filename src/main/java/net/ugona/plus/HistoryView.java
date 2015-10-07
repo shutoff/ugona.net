@@ -17,7 +17,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.androidplot.Plot;
 import com.androidplot.ui.YLayoutStyle;
 import com.androidplot.ui.YPositionMetric;
 import com.androidplot.util.FontUtils;
@@ -82,7 +81,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         setRangeValueFormat(new ValueFormat());
         getLegendWidget().setVisible(false);
         getGraphWidget().setMarginBottom(PixelUtils.dpToPix(16));
-        getGraphWidget().setMarginLeft(PixelUtils.dpToPix(14));
+        getGraphWidget().setMarginLeft(PixelUtils.dpToPix(1));
         getGraphWidget().addDomainAxisValueLabelRegion(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, new AxisValueLabelFormatter() {
             @Override
             public boolean isMain(double value) {
@@ -188,9 +187,13 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
             }
         };
 
+        setPlotMarginLeft(0);
+        setPlotMarginRight(0);
+        setPlotMarginBottom(0);
+
         getGraphWidget().setMarginTop(0);
         getGraphWidget().setMarginRight(0);
-        setBorderStyle(Plot.BorderStyle.SQUARE, null, null);
+        setBorderStyle(BorderStyle.NONE, null, null);
 
         setOnTouchListener(this);
     }
@@ -531,8 +534,20 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
             v10 = (int) Math.floor(Math.log10(delta_val));
             double val_step = Math.pow(10, (double) v10);
             setRangeStep(XYStepMode.INCREMENT_BY_VAL, val_step);
-            setUserRangeOrigin(Math.ceil(min_value / val_step) * val_step);
 
+            double val = Math.ceil(min_value / val_step) * val_step;
+            setUserRangeOrigin(val);
+            Format vFormat = getRangeValueFormat();
+            Rect bounds = new Rect();
+
+            int left = 0;
+            for (; val <= max_value; val += val_step) {
+                String text = vFormat.format(val);
+                getGraphWidget().getRangeLabelPaint().getTextBounds(text, 0, text.length(), bounds);
+                if (bounds.width() > left)
+                    left = bounds.width();
+            }
+            getGraphWidget().setMarginLeft(left - PixelUtils.dpToPix(24));
             setRangeBoundaries(min_value, max_value, BoundaryMode.FIXED);
 
             redraw();
