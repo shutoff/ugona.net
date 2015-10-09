@@ -68,6 +68,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
     CarConfig config;
     LineAndPointFormatter formatter;
     Paint mainLabelPaint;
+    boolean bLoaded;
 
     public HistoryView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -80,6 +81,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         setDomainValueFormat(new DateFormat());
         setRangeValueFormat(new ValueFormat());
         getLegendWidget().setVisible(false);
+        getGraphWidget().setPadding(0, 0, 0, 0);
         getGraphWidget().setMarginBottom(PixelUtils.dpToPix(16));
         getGraphWidget().setMarginLeft(PixelUtils.dpToPix(1));
         getGraphWidget().addDomainAxisValueLabelRegion(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, new AxisValueLabelFormatter() {
@@ -187,12 +189,10 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
             }
         };
 
-        setPlotMarginLeft(0);
-        setPlotMarginRight(0);
-        setPlotMarginBottom(0);
-
-        getGraphWidget().setMarginTop(0);
-        getGraphWidget().setMarginRight(0);
+        setPlotPadding(0, 0, 0, 0);
+        getGraphWidget().setPadding(0, 0, 0, 0);
+        getGraphWidget().setMarginLeft(0);
+        getGraphWidget().setMarginRight(PixelUtils.dpToPix(2));
         setBorderStyle(BorderStyle.NONE, null, null);
 
         setOnTouchListener(this);
@@ -203,6 +203,8 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
         type = t;
         current = c;
         config = CarConfig.get(context, id);
+        bLoaded = false;
+        getGraphWidget().setRangeLabelWidth(0);
         loadData();
         removeXMarkers();
         postInvalidate();
@@ -540,6 +542,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
             Format vFormat = getRangeValueFormat();
             Rect bounds = new Rect();
 
+            bLoaded = true;
             int left = 0;
             for (; val <= max_value; val += val_step) {
                 String text = vFormat.format(val);
@@ -547,7 +550,7 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
                 if (bounds.width() > left)
                     left = bounds.width();
             }
-            getGraphWidget().setMarginLeft(left - PixelUtils.dpToPix(24));
+            getGraphWidget().setRangeLabelWidth(left + PixelUtils.dpToPix(3));
             setRangeBoundaries(min_value, max_value, BoundaryMode.FIXED);
 
             redraw();
@@ -587,6 +590,8 @@ public class HistoryView extends com.androidplot.xy.XYPlot implements View.OnTou
 
         @Override
         public StringBuffer format(Object object, StringBuffer buffer, FieldPosition field) {
+            if (!bLoaded)
+                return buffer;
             double v = (Double) object;
             if (v10 >= 0) {
                 buffer.append(String.format("%,d", (int) v));
