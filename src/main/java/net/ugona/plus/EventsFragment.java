@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -207,6 +208,10 @@ public class EventsFragment extends MainFragment {
             public void onReceive(Context context, Intent intent) {
                 if (intent == null)
                     return;
+                if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                    if (vError.getVisibility() == View.VISIBLE)
+                        onRefresh();
+                }
                 if (!id().equals(intent.getStringExtra(Names.ID)))
                     return;
                 try {
@@ -238,6 +243,7 @@ public class EventsFragment extends MainFragment {
         };
         IntentFilter intFilter = new IntentFilter(Names.UPDATED);
         intFilter.addAction(Names.CONFIG_CHANGED);
+        intFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         getActivity().registerReceiver(br, intFilter);
 
         return v;

@@ -1,7 +1,11 @@
 package net.ugona.plus;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -42,6 +46,7 @@ public class TracksFragment extends MainFragment {
     View vError;
     HoursList vTracks;
     CenteredScrollView vSummary;
+    BroadcastReceiver br;
 
     boolean loaded;
     Vector<Track> tracks;
@@ -154,7 +159,27 @@ public class TracksFragment extends MainFragment {
             onRefresh();
         }
 
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent == null)
+                    return;
+                if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                    if (vError.getVisibility() == View.VISIBLE)
+                        onRefresh();
+                }
+            }
+        };
+        IntentFilter intFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        getActivity().registerReceiver(br, intFilter);
+
         return v;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        getActivity().unregisterReceiver(br);
     }
 
     @Override

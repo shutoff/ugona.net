@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
+import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -66,6 +67,7 @@ public class Theme {
                 ZipFile zf = new ZipFile(ai.sourceDir);
                 ZipEntry ze = zf.getEntry("classes.dex");
                 pkg_time = ze.getTime();
+                pkg_time -= TimeZone.getDefault().getOffset(pkg_time);
                 zf.close();
             } catch (Exception ex) {
                 // ignore
@@ -88,6 +90,7 @@ public class Theme {
                         }
                         to.write(buf, 0, r);
                     }
+                    CarPictureProvider.themeInstalled(context, name);
                 } finally {
                     try {
                         from.close();
