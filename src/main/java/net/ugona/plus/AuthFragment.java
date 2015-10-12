@@ -140,13 +140,35 @@ public class AuthFragment extends MainFragment {
             }));
         }
 
-        int theme = 0;
+        int theme = -1;
         final String[] themes = config.getThemesNames();
         for (int i = 0; i < themes.length; i++) {
             if (themes[i].equals(config.getTheme())) {
                 theme = i;
                 break;
             }
+        }
+        if (theme < 0) {
+            theme = 0;
+            config.setTheme(themes[0]);
+            HttpTask task = new HttpTask() {
+                @Override
+                void result(JsonObject res) throws ParseException {
+
+                }
+
+                @Override
+                void error() {
+
+                }
+            };
+            ThemeParams params = new ThemeParams();
+            params.skey = config.getKey();
+            params.theme = themes[0];
+            task.execute("/set", params);
+            Intent intent = new Intent(Names.UPDATED_THEME);
+            intent.putExtra(Names.ID, id());
+            getActivity().sendBroadcast(intent);
         }
 
         if (config.getThemesNames().length > 1) {
