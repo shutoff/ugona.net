@@ -385,6 +385,9 @@ public class StateFragment
             if ((activeNetwork == null) || !activeNetwork.isConnectedOrConnecting())
                 error_text = getString(R.string.net_warning);
         }
+        if (error_text == null) {
+
+        }
 
         if (error_text == null) {
             tvError.setVisibility(View.GONE);

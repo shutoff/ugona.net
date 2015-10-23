@@ -22,11 +22,14 @@ public class AppConfig extends Config {
     private boolean no_google;
     private String GCM_id;
     private long GCM_time;
+    private long time_delta;
     private String GCM_version;
     private String info_title;
     private String info_message;
     private String info_url;
     private boolean start_password;
+    private boolean tz_warn;
+    private boolean time_warn;
 
     private AppConfig(Context context) {
         ids = "";
@@ -244,6 +247,17 @@ public class AppConfig extends Config {
         upd = true;
     }
 
+    public long getTime_delta() {
+        return time_delta;
+    }
+
+    public void setTime_delta(long time_delta) {
+        if (this.time_delta == time_delta)
+            return;
+        this.time_delta = time_delta;
+        upd = true;
+    }
+
     public String getGCM_version() {
         return GCM_version;
     }
@@ -296,6 +310,28 @@ public class AppConfig extends Config {
         if (this.start_password == start_password)
             return;
         this.start_password = start_password;
+        upd = true;
+    }
+
+    public boolean isTz_warn() {
+        return tz_warn;
+    }
+
+    public void setTz_warn(boolean tz_warn) {
+        if (this.tz_warn == tz_warn)
+            return;
+        this.tz_warn = tz_warn;
+        upd = true;
+    }
+
+    public boolean isTime_warn() {
+        return time_warn;
+    }
+
+    public void setTime_warn(boolean time_warn) {
+        if (this.time_warn == time_warn)
+            return;
+        this.time_warn = time_warn;
         upd = true;
     }
 }

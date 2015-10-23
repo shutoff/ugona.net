@@ -271,4 +271,12 @@
     <string name="change_auth">Изменить логин и пароль</string>
     <string name="appearance">Вид</string>
     <string name="set_phone">Установить управляющий телефон</string>
+    <string name="bad_tz">Неверный часовой пояс</string>
+    <string name="bad_tz_warn">Похоже на Вашем устройстве установлен неправильный часовой пояс.\n
+        Укажите в настройках времени правильный часовой пояс.\n
+        Обновить базу часовых поясов Вам поможет приложение ClockSync</string>
+    <string name="clock_sync">ClockSync</string>
+    <string name="bad_time">Неверное время</string>
+    <string name="bad_time_warn">Время на телефоне установлено неправильно.\n
+        Для правильного отображения состояния скорректируйте время на телефоне</string>
 </resources>

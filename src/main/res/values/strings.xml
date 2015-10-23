@@ -267,4 +267,12 @@
     <string name="change_auth">Change login and password</string>
     <string name="appearance">Appearance</string>
     <string name="set_phone">Set control phone</string>
+    <string name="bad_tz">Incorrect time zone</string>
+    <string name="bad_tz_warn">Incorrect time zone.\n
+        Change time zone in time setup.\n
+        Application ClockSync can help update time zones.</string>
+    <string name="clock_sync">ClockSync</string>
+    <string name="bad_time">Incorrect time</string>
+    <string name="bad_time_warn">Incorrect time on the phone.\n
+        Adjust the time on your phone for properly car state</string>
 </resources>

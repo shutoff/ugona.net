@@ -385,6 +385,13 @@ public class FetchService extends Service {
             } else {
                 sendUpdate(Names.NO_UPDATED, car_id);
             }
+            JsonValue server_time = res.get("server_time");
+            if (server_time != null) {
+                Date now = new Date();
+                long delta = server_time.asLong() - now.getTime();
+                AppConfig appConfig = AppConfig.get(FetchService.this);
+                appConfig.setTime_delta(delta);
+            }
         }
 
         @Override

@@ -258,10 +258,6 @@ public class MainActivity
     protected void onResume() {
         super.onResume();
         registerGCM();
-        if (!config.getInfo_message().equals("")) {
-            MessageDialog dialog = new MessageDialog();
-            dialog.show(getSupportFragmentManager(), "info");
-        }
         bActive = true;
         Intent intent = new Intent(this, FetchService.class);
         intent.setAction(Names.START_UPDATE);

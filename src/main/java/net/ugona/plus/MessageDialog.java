@@ -2,8 +2,6 @@ package net.ugona.plus;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -14,25 +12,23 @@ public class MessageDialog
         extends DialogFragment
         implements DialogInterface.OnClickListener {
 
-    String url;
+    String title;
     String message;
+    String more;
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(getActivity());
-        AppConfig config = AppConfig.get(getActivity());
-        message = config.getInfo_message();
         if (savedInstanceState != null)
-            message = savedInstanceState.getString(Names.MESSAGE);
-        config.setInfo_message("");
-        if (!config.getInfo_title().equals(""))
-            builder.setTitle(config.getInfo_title());
+            setArgs(savedInstanceState);
+        AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(getActivity());
+        if (title != null)
+            builder.setTitle(title);
         builder.setMessage(message);
-        builder.setNegativeButton(R.string.cancel, null);
-        url = config.getInfo_url();
-        if (!url.equals(""))
-            builder.setPositiveButton(R.string.more, this);
+        builder.setNegativeButton(R.string.cancel, this);
+        builder.setPositiveButton(R.string.ok, this);
+        if (more != null)
+            builder.setNeutralButton(more, this);
         AppConfig.save(getActivity());
         return builder.create();
     }
@@ -41,12 +37,28 @@ public class MessageDialog
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(Names.MESSAGE, message);
+        if (title != null)
+            outState.putString(Names.TITLE, title);
+        if (more != null)
+            outState.putString(Names.MORE, more);
+    }
+
+    @Override
+    public void setArguments(Bundle args) {
+        super.setArguments(args);
+        setArgs(args);
+    }
+
+    void setArgs(Bundle args) {
+        title = args.getString(Names.TITLE);
+        message = args.getString(Names.MESSAGE);
+        more = args.getString(Names.MORE);
     }
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        startActivity(browserIntent);
+        getTargetFragment().onActivityResult(getTargetRequestCode(), which, null);
+        dismiss();
     }
 
 }

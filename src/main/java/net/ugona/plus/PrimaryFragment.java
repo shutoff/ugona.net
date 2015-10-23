@@ -2,8 +2,10 @@ package net.ugona.plus;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -34,6 +36,9 @@ public class PrimaryFragment
     static final int PAGE_SETTINGS = 6;
 
     static final int DO_PHONE = 1;
+    static final int DO_MESSAGE = 2;
+    static final int DO_TZ = 3;
+    static final int DO_TIME = 4;
 
     static final int PRIMARY_START_ID = 20;
 
@@ -137,6 +142,39 @@ public class PrimaryFragment
             CarConfig carConfig = CarConfig.get(getActivity(), id());
             carConfig.setPhone(data.getStringExtra(Names.PHONE));
         }
+        AppConfig appConfig = AppConfig.get(getContext());
+        if (requestCode == DO_MESSAGE) {
+            if (requestCode == DialogInterface.BUTTON_POSITIVE) {
+                appConfig.setInfo_message("");
+                appConfig.setInfo_title("");
+                appConfig.setInfo_url("");
+            } else if (requestCode == DialogInterface.BUTTON_NEUTRAL) {
+                String url = appConfig.getInfo_url();
+                appConfig.setInfo_message("");
+                appConfig.setInfo_title("");
+                appConfig.setInfo_url("");
+                if (!url.equals("")) {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(browserIntent);
+                }
+            }
+        }
+        if (requestCode == DO_TZ) {
+            if (resultCode == DialogInterface.BUTTON_POSITIVE) {
+                appConfig.setTz_warn(true);
+            } else if (resultCode == DialogInterface.BUTTON_NEUTRAL) {
+                String appPackageName = "ru.org.amip.ClockSync";
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                } catch (android.content.ActivityNotFoundException anfe) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=" + appPackageName)));
+                }
+            }
+        }
+        if (requestCode == DO_TIME) {
+            if (resultCode == DialogInterface.BUTTON_POSITIVE)
+                appConfig.setTime_warn(true);
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -145,6 +183,58 @@ public class PrimaryFragment
         super.onDestroyView();
         getActivity().unregisterReceiver(br);
         carsMenu = null;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        String message = null;
+        String title = null;
+        String more = null;
+        int request_id = 0;
+        AppConfig appConfig = AppConfig.get(getContext());
+        if (!appConfig.getInfo_message().equals("")) {
+            message = appConfig.getInfo_message();
+            title = appConfig.getInfo_title();
+            if (!appConfig.getInfo_url().equals(""))
+                more = getString(R.string.more);
+            request_id = DO_MESSAGE;
+        } else {
+            long delta = appConfig.getTime_delta();
+            if (delta < 0)
+                delta = -delta;
+            boolean bad_time = (delta > 150000);
+            boolean bad_tz = bad_time && ((delta + 150000) % 3600000 < 300000);
+            if (bad_tz) {
+                if (!appConfig.isTz_warn()) {
+                    message = getString(R.string.bad_tz_warn);
+                    title = getString(R.string.bad_tz);
+                    more = getString(R.string.clock_sync);
+                    request_id = DO_TZ;
+                }
+            } else if (bad_time) {
+                if (!appConfig.isTime_warn()) {
+                    message = getString(R.string.bad_time_warn);
+                    title = getString(R.string.bad_time);
+                    request_id = DO_TIME;
+                }
+            } else {
+                appConfig.setTz_warn(false);
+                appConfig.setTime_warn(false);
+            }
+        }
+        if (message != null) {
+            MessageDialog dialog = new MessageDialog();
+            Bundle args = new Bundle();
+            args.putString(Names.MESSAGE, message);
+            if (title != null)
+                args.putString(Names.TITLE, title);
+            if (more != null)
+                args.putString(Names.MORE, more);
+            dialog.setArguments(args);
+            dialog.setTargetFragment(this, request_id);
+            dialog.show(getFragmentManager(), "info");
+        }
     }
 
     @Override

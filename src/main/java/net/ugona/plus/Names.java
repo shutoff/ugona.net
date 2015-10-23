@@ -17,6 +17,7 @@ public class Names {
     static final String DATE = "date";
     static final String CONNECT = "connect";
     static final String MESSAGE = "message";
+    static final String MORE = "more";
     static final String OK = "ok";
     static final String VALUE = "value";
     static final String COMMAND = "command";
