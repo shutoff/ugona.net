@@ -1,6 +1,7 @@
 package net.ugona.plus;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.AttributeSet;
 import android.view.View;
@@ -48,4 +49,12 @@ public class SwipeRefresh extends SwipeRefreshLayout {
         return false;
     }
 
+    @Override
+    public void draw(Canvas canvas) {
+        try {
+            super.draw(canvas);
+        } catch (Error error) {
+            error.printStackTrace();
+        }
+    }
 }
