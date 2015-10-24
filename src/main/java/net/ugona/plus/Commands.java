@@ -2,6 +2,7 @@ package net.ugona.plus;
 
 import android.content.Context;
 import android.content.Intent;
+import android.widget.Toast;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -152,10 +153,17 @@ public class Commands {
                 String[] parts = command.sms.split("\\|");
                 int i;
                 Matcher matcher = null;
+                boolean bError = false;
                 for (i = 1; i < parts.length; i++) {
+                    String part = parts[i];
+                    bError = false;
+                    if (part.substring(0, 1).equals("!")) {
+                        bError = true;
+                        part = part.substring(1);
+                    }
                     Pattern pattern = null;
                     try {
-                        pattern = Pattern.compile(parts[i]);
+                        pattern = Pattern.compile(part);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         continue;
@@ -170,6 +178,11 @@ public class Commands {
                     continue;
                 found = true;
                 queue.remove(command);
+                if (bError) {
+                    Toast toast = Toast.makeText(context, R.string.cmd_error, Toast.LENGTH_LONG);
+                    toast.show();
+                    break;
+                }
                 if (command.onAnswer != null) {
                     command.onAnswer.run();
                 } else if (command.done != null) {

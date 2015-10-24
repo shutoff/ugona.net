@@ -279,4 +279,5 @@
     <string name="bad_time">Неверное время</string>
     <string name="bad_time_warn">Время на телефоне установлено неправильно.\n
         Для правильного отображения состояния скорректируйте время на телефоне</string>
+    <string name="cmd_error">Ошибка выполнения команды</string>
 </resources>

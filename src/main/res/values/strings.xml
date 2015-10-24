@@ -275,4 +275,5 @@
     <string name="bad_time">Incorrect time</string>
     <string name="bad_time_warn">Incorrect time on the phone.\n
         Adjust the time on your phone for properly car state</string>
+    <string name="cmd_error">Execute command error</string>
 </resources>
