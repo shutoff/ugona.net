@@ -476,7 +476,7 @@ public class CarState extends Config {
     public void setAz(boolean az) {
         long now = new Date().getTime();
         if (az) {
-            if (az_time < now - 1500000) {
+            if (az_time < now - 150000) {
                 az_time = now;
                 az_start = now;
             }
@@ -486,6 +486,7 @@ public class CarState extends Config {
                 az_time = -now;
             ignition = false;
         }
+        upd = true;
     }
 
     public boolean isNo_gsm() {
@@ -496,9 +497,11 @@ public class CarState extends Config {
         if (no_gsm) {
             if (no_gsm_time == 0)
                 no_gsm_time = new Date().getTime();
+            upd = true;
             return;
         }
         no_gsm_time = 0;
+        upd = true;
     }
 
     public double getNotify_balance() {
