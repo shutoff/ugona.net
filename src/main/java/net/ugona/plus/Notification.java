@@ -131,7 +131,7 @@ public class Notification extends Config {
             if (az_time + 1200000 > now) {
                 if (state.getAz_time() > 0) {
                     notification.setAz(create(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "azStart", state.getAz_start(), false, null));
-                } else if ((state.getAz_time() < 0) && !state.isIgnition()) {
+                } else if ((state.getAz_time() < 0) && !state.isGuard()) {
                     String msg = context.getString(R.string.motor_off_ok);
                     long az_stop = -state.getAz_time();
                     long az_start = state.getAz_start();

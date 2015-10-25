@@ -21,6 +21,7 @@ public class CarState extends Config {
     private long last_stand;
     private long az_time;
     private long az_start;
+    private long ignition_time;
     private String zone;
     private long zone_time;
     private long card;
@@ -166,6 +167,10 @@ public class CarState extends Config {
 
     public long getAz_start() {
         return az_start;
+    }
+
+    public long getIgnition_time() {
+        return ignition_time;
     }
 
     public long getNo_gsm_time() {
@@ -466,7 +471,7 @@ public class CarState extends Config {
             return false;
         if (!guard)
             return false;
-        if (!ignition)
+        if (ignition_time < 0)
             return false;
         if (guard_time >= az_time)
             return false;
@@ -479,11 +484,14 @@ public class CarState extends Config {
             if (az_time < now - 150000) {
                 az_time = now;
                 az_start = now;
+                ignition_time = now;
             }
             ignition = true;
         } else {
-            if (az_time > 0)
+            if (az_time > 0) {
                 az_time = -now;
+                ignition_time = -now;
+            }
             ignition = false;
         }
         upd = true;
