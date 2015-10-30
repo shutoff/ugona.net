@@ -92,9 +92,6 @@
     <string name="balance">Balance</string>
     <string name="sensor">Sensor</string>
     <string name="card_info" formatted="false">Signal level: %d dB\nVoltage: %.2f V</string>
-    <string name="actions">Actions</string>
-    <string name="contacts">Contacts</string>
-    <string name="system">System</string>
     <string name="event">Event</string>
     <string name="demo">Demo mode</string>
     <string name="rotate">Rotate</string>

@@ -94,6 +94,16 @@ public class Config implements Serializable {
                             }
                             if (cel.isPrimitive())
                                 continue;
+                            if (cel == String.class) {
+                                String value = arr.get(i).asString();
+                                String prev = (String) Array.get(av, i);
+                                if (prev == null)
+                                    prev = "";
+                                if (!prev.equals(value))
+                                    bChanged = true;
+                                Array.set(av, i, value);
+                                continue;
+                            }
                             Object el = Array.get(av, i);
                             if (el == null) {
                                 el = cel.newInstance();
@@ -200,6 +210,10 @@ public class Config implements Serializable {
                         Object el = Array.get(v, i);
                         if (el == null)
                             continue;
+                        if (cel == String.class) {
+                            arr.add(el.toString());
+                            continue;
+                        }
                         JsonObject r = saveJson(el);
                         if (r != null)
                             arr.add(r);

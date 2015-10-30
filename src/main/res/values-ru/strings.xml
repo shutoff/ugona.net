@@ -86,9 +86,6 @@
     <string name="balance">Баланс</string>
     <string name="sensor">Датчик</string>
     <string name="card_info" formatted="false">Уровень сигнала: %d dB\nЗаряд батареи: %.2f V</string>
-    <string name="actions">Действия</string>
-    <string name="contacts">Контакты</string>
-    <string name="system">Система</string>
     <string name="event">Событие</string>
     <string name="show_traffic">Показывать пробки</string>
     <string name="show_speed">Показывать скорость</string>

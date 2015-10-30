@@ -87,6 +87,8 @@ public class CarState extends Config {
     private double addr_lon;
     private String address_type;
 
+    private String[] events;
+
     private CarState(Context context, String id) {
 
         gsm = "";
@@ -495,6 +497,10 @@ public class CarState extends Config {
             ignition = false;
         }
         upd = true;
+    }
+
+    public String[] getEvents() {
+        return events;
     }
 
     public boolean isNo_gsm() {
