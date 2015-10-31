@@ -148,7 +148,7 @@ public class AuthFragment extends MainFragment {
                 break;
             }
         }
-        if (theme < 0) {
+        if ((theme < 0) && (themes.length > 0)) {
             theme = 0;
             config.setTheme(themes[0]);
             HttpTask task = new HttpTask() {
