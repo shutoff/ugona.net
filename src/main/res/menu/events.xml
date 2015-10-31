@@ -3,16 +3,16 @@
     xmlns:car="http://schemas.android.com/apk/res-auto">
     <group android:checkableBehavior="all">
         <item
-            android:id="@+id/actions"
-            android:title="@string/actions"
+            android:id="@+id/level1"
             car:showAsAction="never" />
         <item
-            android:id="@+id/contacts"
-            android:title="@string/contacts"
+            android:id="@+id/level2"
             car:showAsAction="never" />
         <item
-            android:id="@+id/system"
-            android:title="@string/system"
+            android:id="@+id/level3"
+            car:showAsAction="never" />
+        <item
+            android:id="@+id/level4"
             car:showAsAction="never" />
     </group>
 </menu>

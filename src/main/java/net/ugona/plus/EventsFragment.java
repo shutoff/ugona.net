@@ -45,20 +45,17 @@ public class EventsFragment extends MainFragment {
 
     static final String DATE = "date";
     static final String EVENTS_DATA = "data";
-
+    static int[] ids = {R.id.level1, R.id.level2, R.id.level3, R.id.level4};
     boolean loaded;
     long current_id;
     int current_state;
     int filter;
-
     Vector<Event> events;
     Vector<Event> filtered;
     Event firstEvent;
-
     HoursList vEvents;
     TextView tvNoEvents;
     View vError;
-
     CarState state;
     DataFetcher fetcher;
     BroadcastReceiver br;
@@ -83,10 +80,23 @@ public class EventsFragment extends MainFragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         if (isButton)
             return;
+        CarState carState = CarState.get(getActivity(), id());
         inflater.inflate(R.menu.events, menu);
-        menu.findItem(R.id.actions).setChecked((filter & 1) != 0);
-        menu.findItem(R.id.contacts).setChecked((filter & 2) != 0);
-        menu.findItem(R.id.system).setChecked((filter & 4) != 0);
+        String[] levels = carState.getEvents();
+        int len = 0;
+        if (levels != null)
+            len = levels.length;
+        if (len > 4)
+            len = 4;
+        int i;
+        for (i = 0; i < len; i++) {
+            MenuItem item = menu.findItem(ids[i]);
+            item.setTitle(levels[i]);
+            item.setChecked((filter & (1 << i)) != 0);
+        }
+        for (; i < 4; i++) {
+            menu.removeItem(ids[i]);
+        }
     }
 
     @Override
@@ -173,9 +183,22 @@ public class EventsFragment extends MainFragment {
         } else {
             CarConfig config = CarConfig.get(getActivity(), id());
             filter = config.getEvent_filter();
-            setupButton(v, R.id.actions, 1);
-            setupButton(v, R.id.contacts, 2);
-            setupButton(v, R.id.system, 4);
+            CarState carState = CarState.get(getActivity(), id());
+            String[] levels = carState.getEvents();
+            int len = 0;
+            if (levels != null)
+                len = levels.length;
+            if (len > 4)
+                len = 4;
+            int i;
+            for (i = 0; i < len; i++) {
+                Button button = (Button) v.findViewById(ids[i]);
+                if (button == null)
+                    continue;
+                button.setText(levels[i]);
+                button.setVisibility(View.VISIBLE);
+                setupButton(v, ids[i], 1 << i);
+            }
             vEvents.setListener(new HoursList.Listener() {
                 @Override
                 public int setHour(int h) {
@@ -195,7 +218,7 @@ public class EventsFragment extends MainFragment {
             });
         }
 
-        isButton = (v.findViewById(R.id.actions) != null);
+        isButton = (v.findViewById(R.id.level1) != null);
 
         if (loaded) {
             filterEvents(false);
@@ -258,16 +281,18 @@ public class EventsFragment extends MainFragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.actions:
+            case R.id.level1:
                 toggle(1);
                 return true;
-            case R.id.contacts:
+            case R.id.level2:
                 toggle(2);
                 return true;
-            case R.id.system:
+            case R.id.level3:
                 toggle(4);
                 return true;
-
+            case R.id.level4:
+                toggle(8);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
