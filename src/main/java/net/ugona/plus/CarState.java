@@ -22,6 +22,7 @@ public class CarState extends Config {
     private long az_time;
     private long az_start;
     private long ignition_time;
+    private long heater_time;
     private String zone;
     private long zone_time;
     private long card;
@@ -34,7 +35,6 @@ public class CarState extends Config {
     private boolean hood;
     private boolean trunk;
     private boolean ignition;
-    private boolean heater;
     private boolean accessory;
     private boolean online;
     private int power_state;
@@ -235,10 +235,6 @@ public class CarState extends Config {
 
     public boolean isIgnition() {
         return ignition;
-    }
-
-    public boolean isHeater() {
-        return heater;
     }
 
     public boolean isRelay1() {
@@ -573,4 +569,20 @@ public class CarState extends Config {
         return address;
     }
 
+    public boolean isHeater() {
+        if (heater_time == 0)
+            return false;
+        if (ignition)
+            return false;
+        return new Date().getTime() < heater_time;
+    }
+
+    public void setHeater(boolean heater) {
+        if (heater) {
+            heater_time = new Date().getTime() + 600000;
+        } else {
+            heater_time = 0;
+        }
+        upd = true;
+    }
 }

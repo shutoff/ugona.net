@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 public class FetchService extends Service {
 
@@ -33,7 +32,6 @@ public class FetchService extends Service {
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR_NOTIFICATION";
     static final String ACTION_MAINTENANCE = "net.ugona.plus.MAINTENANCE";
     static final String ACTION_ADD_TIMER = "net.ugona.plus.ADD_TIMER";
-    static final String ACTION_TIMER = "net.ugona.plus.TIMER";
 
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;
@@ -41,7 +39,6 @@ public class FetchService extends Service {
     private static final long LONG_TIMEOUT = 5 * 60 * 60 * 1000;
 
     static private Map<String, ServerRequest> requests;
-    static private Set<Timer> timers;
 
     private BroadcastReceiver mReceiver;
     private PendingIntent piTimer;
@@ -158,18 +155,6 @@ public class FetchService extends Service {
                 String[] timer = intent.getStringExtra(Names.COMMAND).split("\\|");
                 new SettingsRequest(car_id, timer[0], timer[1]);
             }
-            if (action.equals(ACTION_TIMER)) {
-                Vector<Timer> remove = new Vector<>();
-                long time = new Date().getTime();
-                for (Timer t : timers) {
-                    if (t.time > time)
-                        continue;
-                    remove.add(t);
-                }
-                for (Timer t : remove) {
-                    timers.remove(t);
-                }
-            }
             if (action.equals(ACTION_NOTIFICATION)) {
                 String car_id = intent.getStringExtra(Names.ID);
                 String sound = intent.getStringExtra(Names.SOUND);
@@ -264,12 +249,6 @@ public class FetchService extends Service {
     static class MaintenanceParams implements Serializable {
         String skey;
         String lang;
-    }
-
-    static class Timer {
-        String id;
-        String done;
-        long time;
     }
 
     abstract class ServerRequest extends HttpTask {
@@ -456,16 +435,17 @@ public class FetchService extends Service {
 
         @Override
         void result(JsonObject res) throws ParseException {
-            long time = res.get(name).asInt() * 60000;
-            Timer t = new Timer();
-            t.id = car_id;
-            t.done = set;
-            t.time = new Date().getTime() + time;
-            timers.add(t);
-            Intent iTimer = new Intent(FetchService.this, FetchService.class);
-            iTimer.setAction(ACTION_TIMER);
-            PendingIntent piTimer = PendingIntent.getService(FetchService.this, 0, iTimer, 0);
-            alarmMgr.set(AlarmManager.RTC, System.currentTimeMillis() + time, piTimer);
+            long delta = res.get(name).asInt() * 60000;
+            long time = new Date().getTime() + delta;
+            CarState carState = CarState.get(FetchService.this, car_id);
+            JsonObject obj = new JsonObject();
+            obj.add(name, time);
+            Config.update(carState, obj);
+            Intent iUpd = new Intent(FetchService.this, FetchService.class);
+            iUpd.setAction(FetchService.ACTION_UPDATE);
+            iUpd.putExtra(Names.ID, car_id);
+            PendingIntent piUpd = PendingIntent.getService(FetchService.this, 0, iUpd, 0);
+            alarmMgr.set(AlarmManager.RTC, System.currentTimeMillis() + delta, piUpd);
         }
 
         @Override
