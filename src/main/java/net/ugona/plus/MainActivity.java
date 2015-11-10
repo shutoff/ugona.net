@@ -321,7 +321,12 @@ public class MainActivity
                 pat = pat.replaceAll("[yY]", "");
                 pat = pat.replaceAll("^[^A-Za-z]+", "");
                 pat = pat.replaceAll("[^A-Za-z]+$", "");
-                df = new SimpleDateFormat(pat);
+                pat = pat.replaceAll("N", "");
+                try {
+                    df = new SimpleDateFormat(pat);
+                } catch (Exception ex) {
+                    df = new SimpleDateFormat("d MMMM");
+                }
                 item.setTitle(df.format(current));
             } else {
                 menu.removeItem(R.id.date);

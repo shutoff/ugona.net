@@ -148,7 +148,7 @@ public class AuthFragment extends MainFragment {
                 break;
             }
         }
-        if (theme < 0) {
+        if ((theme < 0) && (themes.length > 0)) {
             theme = 0;
             config.setTheme(themes[0]);
             HttpTask task = new HttpTask() {
@@ -301,14 +301,18 @@ public class AuthFragment extends MainFragment {
             carConfig.setName(data.getStringExtra(Names.OK));
             Intent intent = new Intent(Names.CAR_CHANGED);
             getActivity().sendBroadcast(intent);
+            fill();
         }
         if (requestCode == DO_PHONE) {
             CarConfig carConfig = CarConfig.get(getActivity(), id());
             carConfig.setPhone(data.getStringExtra(Names.PHONE));
             Intent intent = new Intent(Names.CAR_CHANGED);
             getActivity().sendBroadcast(intent);
+            fill();
         }
-        fill();
+        if (requestCode == DO_AUTH) {
+            fill();
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
