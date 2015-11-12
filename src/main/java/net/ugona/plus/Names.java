@@ -43,6 +43,7 @@ public class Names {
     static final String VIBRO = "vibro";
     static final String DEFAULT = "default";
     static final String SET = "set";
+    static final String EXTRA = "extra";
 
     static final String PKG_NAME = Names.class.getPackage().getName();
 

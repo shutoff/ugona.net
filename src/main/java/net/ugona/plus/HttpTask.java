@@ -8,7 +8,6 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
-import com.squareup.okhttp.CipherSuite;
 import com.squareup.okhttp.ConnectionSpec;
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.MediaType;
@@ -16,20 +15,18 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
-import com.squareup.okhttp.TlsVersion;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 public abstract class HttpTask {
 
     final static String userAgent = System.getProperty("http.agent");
-    static ConnectionSpec spec;
     public static final OkHttpClient client = createClient();
+    static ConnectionSpec spec;
     AsyncTask<Object, Void, JsonObject> bgTask;
     String error_text;
     boolean canceled;
@@ -49,6 +46,7 @@ public abstract class HttpTask {
                 return chain.proceed(requestWithUserAgent);
             }
         });
+        /*
         if (spec == null)
             spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
                     .tlsVersions(
@@ -77,6 +75,7 @@ public abstract class HttpTask {
                     .supportsTlsExtensions(true)
                     .build();
         client.setConnectionSpecs(Collections.singletonList(spec));
+        */
         return client;
     }
 

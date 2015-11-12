@@ -32,6 +32,7 @@ public class FetchService extends Service {
     static final String ACTION_CLEAR = "net.ugona.plus.CLEAR_NOTIFICATION";
     static final String ACTION_MAINTENANCE = "net.ugona.plus.MAINTENANCE";
     static final String ACTION_ADD_TIMER = "net.ugona.plus.ADD_TIMER";
+    static final String ACTION_COMMAND = "net.ugona.plus.COMMAND";
 
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;
@@ -150,6 +151,10 @@ public class FetchService extends Service {
             action = intent.getAction();
         }
         if (action != null) {
+            if (action.equals(ACTION_COMMAND)) {
+                String car_id = intent.getStringExtra(Names.ID);
+                int cmd_id = intent.getIntExtra(Names.COMMAND, 0);
+            }
             if (action.equals(ACTION_ADD_TIMER)) {
                 String car_id = intent.getStringExtra(Names.ID);
                 String[] timer = intent.getStringExtra(Names.COMMAND).split("\\|");
@@ -164,7 +169,8 @@ public class FetchService extends Service {
                 int max_id = intent.getIntExtra(Names.NOTIFY_ID, 0);
                 long when = intent.getLongExtra(Names.WHEN, 0);
                 boolean outgoing = intent.getBooleanExtra(Names.OUTGOING, false);
-                Notification.show(this, car_id, text, title, pictId, max_id, sound, when, outgoing);
+                String actions = intent.getStringExtra(Names.EXTRA);
+                Notification.show(this, car_id, text, title, pictId, max_id, sound, when, outgoing, actions);
             }
             if (action.equals(ACTION_CLEAR)) {
                 String car_id = intent.getStringExtra(Names.ID);

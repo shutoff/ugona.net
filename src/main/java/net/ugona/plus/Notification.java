@@ -130,7 +130,7 @@ public class Notification extends Config {
                 az_time = -az_time;
             if (az_time + 1200000 > now) {
                 if (state.getAz_time() > 0) {
-                    notification.setAz(create(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "azStart", state.getAz_start(), false, null));
+                    notification.setAz(create(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "azStart", state.getAz_start(), false, null, null));
                 } else if ((state.getAz_time() < 0) && !state.isGuard()) {
                     String msg = context.getString(R.string.motor_off_ok);
                     long az_stop = -state.getAz_time();
@@ -138,7 +138,7 @@ public class Notification extends Config {
                     long time = (az_stop - az_start) / 60000;
                     if ((time > 0) && (time <= 20))
                         msg += " " + context.getString(R.string.motor_time).replace("$1", time + "");
-                    notification.setAz(create(context, msg, R.drawable.white_motor_off, car_id, null, -state.getAz_time(), false, null));
+                    notification.setAz(create(context, msg, R.drawable.white_motor_off, car_id, null, -state.getAz_time(), false, null, null));
                 }
             }
         }
@@ -146,9 +146,9 @@ public class Notification extends Config {
             if (notification.getNo_gsm() != 0)
                 remove(context, notification.getNo_gsm());
             if (state.isNo_gsm()) {
-                notification.setNo_gsm(create(context, context.getString(R.string.lost), R.drawable.w_warning_light, car_id, null, 0, true, null));
+                notification.setNo_gsm(create(context, context.getString(R.string.lost), R.drawable.w_warning_light, car_id, null, 0, true, null, null));
             } else {
-                notification.setNo_gsm(create(context, context.getString(R.string.restore), R.drawable.w_warning_light, car_id, null, 0, false, null));
+                notification.setNo_gsm(create(context, context.getString(R.string.restore), R.drawable.w_warning_light, car_id, null, 0, false, null, null));
             }
         }
         if (names.contains("guard") || names.contains("ignition")) {
@@ -162,7 +162,7 @@ public class Notification extends Config {
                 state.setNo_gsm(false);
                 if (notification.getNo_gsm() != 0)
                     remove(context, notification.az);
-                notification.setNo_gsm(create(context, context.getString(R.string.restore), R.drawable.w_warning_light, car_id, null, 0, false, null));
+                notification.setNo_gsm(create(context, context.getString(R.string.restore), R.drawable.w_warning_light, car_id, null, 0, false, null, null));
             }
         }
         if (names.contains("guard_mode")) {
@@ -177,9 +177,9 @@ public class Notification extends Config {
                 }
                 state.setValet(state.getGuard_mode() == 2);
                 if (state.isValet()) {
-                    notification.setValet_on(create(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet, car_id, "valet_on", 0, true, null));
+                    notification.setValet_on(create(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet, car_id, "valet_on", 0, true, null, null));
                 } else {
-                    notification.setValet_off(create(context, context.getString(R.string.valet_off_ok), R.drawable.white_valet, car_id, "valet_off", 0, false, null));
+                    notification.setValet_off(create(context, context.getString(R.string.valet_off_ok), R.drawable.white_valet, car_id, "valet_off", 0, false, null, null));
                 }
             }
         }
@@ -204,7 +204,7 @@ public class Notification extends Config {
                 zone = zone.substring(1);
             if (!zone.equals(""))
                 text += " " + zone;
-            notification.setZone(create(context, text, R.drawable.white_zone, car_id, grp, time, false, null));
+            notification.setZone(create(context, text, R.drawable.white_zone, car_id, grp, time, false, null, null));
         }
         if (names.contains("guard_mode")) {
             if (notification.getPart_guard() != 0) {
@@ -212,7 +212,7 @@ public class Notification extends Config {
                 notification.setPart_guard(0);
             }
             if (state.getGuard_mode() == 3)
-                notification.setPart_guard(create(context, context.getString(R.string.ps_guard), R.drawable.white_zone, car_id, null, 0, false, null));
+                notification.setPart_guard(create(context, context.getString(R.string.ps_guard), R.drawable.white_zone, car_id, null, 0, false, null, null));
         }
         if (names.contains("balance")) {
             try {
@@ -225,7 +225,7 @@ public class Notification extends Config {
                         if ((h >= 9) && (h <= 21)) {
                             state.setNotify_balance(balance);
                             if (notification.getBalance() == 0)
-                                notification.setBalance(create(context, context.getString(R.string.low_balance), R.drawable.white_balance, car_id, null, 0, false, null));
+                                notification.setBalance(create(context, context.getString(R.string.low_balance), R.drawable.white_balance, car_id, null, 0, false, null, null));
                         }
                     } else {
                         if (notification.getBalance() != 0) {
@@ -242,7 +242,7 @@ public class Notification extends Config {
         if (state.isGuard() && doors != state.isAlert_doors()) {
             state.setAlert_doors(state.isGuard() && doors);
             if (state.isAlert_doors()) {
-                notification.setDoors(create(context, context.getString(R.string.open_door), R.drawable.w_warning_light, car_id, null, 0, false, null));
+                notification.setDoors(create(context, context.getString(R.string.open_door), R.drawable.w_warning_light, car_id, null, 0, false, null, null));
             } else {
                 if (notification.getDoors() != 0) {
                     remove(context, notification.getDoors());
@@ -253,7 +253,7 @@ public class Notification extends Config {
         if (state.isGuard() && state.isHood() != state.isAlert_hood()) {
             state.setAlert_hood(state.isGuard() && state.isHood());
             if (state.isAlert_hood()) {
-                notification.setHood(create(context, context.getString(R.string.open_hood), R.drawable.w_warning_light, car_id, null, 0, false, null));
+                notification.setHood(create(context, context.getString(R.string.open_hood), R.drawable.w_warning_light, car_id, null, 0, false, null, null));
             } else {
                 if (notification.getHood() != 0) {
                     remove(context, notification.getHood());
@@ -264,7 +264,7 @@ public class Notification extends Config {
         if (state.isGuard() && state.isTrunk() != state.isAlert_trunk()) {
             state.setAlert_trunk(state.isGuard() && state.isTrunk());
             if (state.isAlert_trunk()) {
-                notification.setTrunk(create(context, context.getString(R.string.open_trunk), R.drawable.w_warning_light, car_id, null, 0, false, null));
+                notification.setTrunk(create(context, context.getString(R.string.open_trunk), R.drawable.w_warning_light, car_id, null, 0, false, null, null));
             } else {
                 if (notification.getTrunk() != 0) {
                     remove(context, notification.getTrunk());
@@ -274,7 +274,7 @@ public class Notification extends Config {
         }
     }
 
-    static int create(Context context, String text, int pictId, String car_id, String sound, long when, boolean outgoing, String title) {
+    static int create(Context context, String text, int pictId, String car_id, String sound, long when, boolean outgoing, String title, String actions) {
         Intent iNotification = new Intent(context, FetchService.class);
         iNotification.setAction(FetchService.ACTION_NOTIFICATION);
         iNotification.putExtra(Names.ID, car_id);
@@ -285,6 +285,8 @@ public class Notification extends Config {
         iNotification.putExtra(Names.PICTURE, pictId);
         iNotification.putExtra(Names.NOTIFY_ID, ++max_id);
         iNotification.putExtra(Names.OUTGOING, outgoing);
+        if (actions != null)
+            iNotification.putExtra(Names.EXTRA, actions);
         if (when != 0)
             iNotification.putExtra(Names.WHEN, when);
         Uri data = Uri.withAppendedPath(Uri.parse("http://service/notification/"), car_id);
@@ -299,7 +301,7 @@ public class Notification extends Config {
         Notification notification = Notification.get(context, "");
         if (notification.info > 0)
             remove(context, notification.info);
-        notification.info = create(context, message, R.drawable.info, "", null, 0, false, title);
+        notification.info = create(context, message, R.drawable.info, "", null, 0, false, title, null);
         save(context);
         AppConfig config = AppConfig.get(context);
         if (title == null)
@@ -318,7 +320,7 @@ public class Notification extends Config {
             remove(context, notification.alarm);
             notification.alarm = 0;
         }
-        notification.alarm = create(context, text, R.drawable.w_warning_light, car_id, null, 0, false, null);
+        notification.alarm = create(context, text, R.drawable.w_warning_light, car_id, null, 0, false, null, null);
     }
 
     static void showMaintenance(Context context, String car_id) {
@@ -365,11 +367,11 @@ public class Notification extends Config {
         }
         if (s != null) {
             String[] p = s.split("\n");
-            notification.maintenance = create(context, p[0], R.drawable.info, car_id, null, 0, false, p[1]);
+            notification.maintenance = create(context, p[0], R.drawable.info, car_id, null, 0, false, p[1], null);
         }
     }
 
-    static void show(Context context, String car_id, String text, String title, int pictId, int max_id, String grp, long when, boolean outgoing) {
+    static void show(Context context, String car_id, String text, String title, int pictId, int max_id, String grp, long when, boolean outgoing, String actions) {
         CarConfig carConfig = CarConfig.get(context, car_id);
         if (title == null)
             title = carConfig.getName();
@@ -434,10 +436,28 @@ public class Notification extends Config {
 
 
         builder.setContentTitle(title);
-        if (text.length() > 80) {
+        if ((text.length() > 80) || (actions != null)) {
             builder.setStyle(new NotificationCompat.BigTextStyle().bigText(text));
         } else {
             builder.setContentText(text);
+        }
+        if (actions != null) {
+            String[] parts = actions.split(";");
+            for (int i = 1; i < parts.length; i++) {
+                String[] p = parts[i].split(":");
+                int id = Integer.parseInt(p[0]);
+                int icon = Integer.parseInt(p[1]);
+                Intent cmdIntent = new Intent(context, FetchService.class);
+                cmdIntent.setAction(parts[0]);
+                cmdIntent.putExtra(Names.ID, car_id);
+                cmdIntent.putExtra(Names.NOTIFY_ID, max_id);
+                cmdIntent.putExtra(Names.COMMAND, id);
+                Uri data = Uri.withAppendedPath(Uri.parse("http://notification_cmd/id/"), max_id + "_" + id + "_" + icon);
+                cmdIntent.setData(data);
+                PendingIntent piCmd = PendingIntent.getService(context, 0, cmdIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                builder.addAction(icon, p[2], piCmd);
+                builder.addAction(icon, p[2], piCmd);
+            }
         }
 
         Intent notificationIntent = new Intent(context, MainActivity.class);

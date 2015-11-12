@@ -55,8 +55,9 @@ public class SendCommandFragment extends DialogFragment {
                     text += ": ";
                     text += error_text;
                 }
-                Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
-                toast.show();
+                String actions = FetchService.ACTION_COMMAND + ";";
+                actions += c.id + ":" + R.drawable.b_reset + ":" + context.getString(R.string.retry);
+                Notification.create(context, text, R.drawable.w_warning_light, car_id, null, 0, false, c.name, actions);
                 Commands.remove(context, car_id, c);
             }
         };
