@@ -56,7 +56,7 @@ public class SendCommandFragment extends DialogFragment {
                     text += error_text;
                 }
                 String actions = FetchService.ACTION_COMMAND + ";";
-                actions += c.id + ":" + R.drawable.b_reset + ":" + context.getString(R.string.retry);
+                actions += c.id + ":" + android.R.drawable.ic_popup_sync + ":" + context.getString(R.string.retry);
                 Notification.create(context, text, R.drawable.w_warning_light, car_id, null, 0, false, c.name, actions);
                 Commands.remove(context, car_id, c);
             }
