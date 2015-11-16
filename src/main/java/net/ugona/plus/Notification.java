@@ -456,7 +456,6 @@ public class Notification extends Config {
                 cmdIntent.setData(data);
                 PendingIntent piCmd = PendingIntent.getService(context, 0, cmdIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 builder.addAction(icon, p[2], piCmd);
-                builder.addAction(icon, p[2], piCmd);
             }
         }
 
