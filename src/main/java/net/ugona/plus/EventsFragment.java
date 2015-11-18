@@ -431,6 +431,7 @@ public class EventsFragment extends MainFragment {
         String skey;
         long begin;
         long end;
+        int level;
         Integer first;
         Integer pointer;
         String lang;
@@ -603,6 +604,7 @@ public class EventsFragment extends MainFragment {
                 params.first = 1;
             if (state.isPointer())
                 params.pointer = 1;
+            params.level = 4;
             params.lang = Locale.getDefault().getLanguage();
             execute("/events", params);
         }
