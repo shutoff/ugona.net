@@ -14,6 +14,7 @@
 
     <attr name="md_title_color" format="color" />
     <attr name="md_content_color" format="color" />
+    <attr name="md_link_color" format="color" />
 
     <attr name="md_positive_color" format="color" />
     <attr name="md_neutral_color" format="color" />
@@ -28,6 +29,8 @@
     <attr name="md_btn_positive_selector" format="reference" />
     <attr name="md_btn_neutral_selector" format="reference" />
     <attr name="md_btn_negative_selector" format="reference" />
+
+    <attr name="md_btn_ripple_color" format="color" />
 
     <attr name="md_title_gravity" format="enum">
         <enum name="start" value="0" />
@@ -62,5 +65,8 @@
     <declare-styleable name="MDRootLayout">
         <attr name="md_reduce_padding_no_title_no_buttons" format="boolean" />
     </declare-styleable>
+
+    <attr name="md_medium_font" format="string" />
+    <attr name="md_regular_font" format="string" />
 
 </resources>

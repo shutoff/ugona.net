@@ -4,10 +4,12 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.res.Configuration;
 import android.os.Build;
+import android.support.annotation.LayoutRes;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
@@ -18,14 +20,17 @@ import com.afollestad.materialdialogs.internal.MDTintHelper;
 
 import net.ugona.plus.R;
 
-class MaterialDialogAdapter extends ArrayAdapter<CharSequence> {
+class DefaultAdapter extends BaseAdapter {
 
     private final MaterialDialog dialog;
+    @LayoutRes
+    private final int layout;
+
     private final GravityEnum itemGravity;
 
-    public MaterialDialogAdapter(MaterialDialog dialog, int resource, int textViewResourceId, CharSequence[] objects) {
-        super(dialog.mBuilder.context, resource, textViewResourceId, objects);
+    public DefaultAdapter(MaterialDialog dialog, @LayoutRes int layout) {
         this.dialog = dialog;
+        this.layout = layout;
         this.itemGravity = dialog.mBuilder.itemsGravity;
     }
 
@@ -35,21 +40,33 @@ class MaterialDialogAdapter extends ArrayAdapter<CharSequence> {
     }
 
     @Override
+    public int getCount() {
+        return dialog.mBuilder.items != null ? dialog.mBuilder.items.length : 0;
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return dialog.mBuilder.items[position];
+    }
+
+    @Override
     public long getItemId(int position) {
         return position;
     }
 
     @SuppressLint("WrongViewCast")
     @Override
-    public View getView(final int index, View convertView, ViewGroup parent) {
-        final View view = super.getView(index, convertView, parent);
+    public View getView(final int index, View view, ViewGroup parent) {
+        if (view == null)
+            view = LayoutInflater.from(dialog.getContext()).inflate(layout, parent, false);
+
         TextView tv = (TextView) view.findViewById(R.id.title);
         switch (dialog.listType) {
             case SINGLE: {
                 @SuppressLint("CutPasteId")
                 RadioButton radio = (RadioButton) view.findViewById(R.id.control);
                 boolean selected = dialog.mBuilder.selectedIndex == index;
-                MDTintHelper.setRadioButtonTint(radio, dialog.mBuilder.widgetColor);
+                MDTintHelper.setTint(radio, dialog.mBuilder.widgetColor);
                 radio.setChecked(selected);
                 break;
             }
@@ -57,7 +74,7 @@ class MaterialDialogAdapter extends ArrayAdapter<CharSequence> {
                 @SuppressLint("CutPasteId")
                 CheckBox checkbox = (CheckBox) view.findViewById(R.id.control);
                 boolean selected = dialog.selectedIndicesList.contains(index);
-                MDTintHelper.setCheckBoxTint(checkbox, dialog.mBuilder.widgetColor);
+                MDTintHelper.setTint(checkbox, dialog.mBuilder.widgetColor);
                 checkbox.setChecked(selected);
                 break;
             }
@@ -65,8 +82,15 @@ class MaterialDialogAdapter extends ArrayAdapter<CharSequence> {
         tv.setText(dialog.mBuilder.items[index]);
         tv.setTextColor(dialog.mBuilder.itemColor);
         dialog.setTypeface(tv, dialog.mBuilder.regularFont);
+
         view.setTag(index + ":" + dialog.mBuilder.items[index]);
         setupGravity((ViewGroup) view);
+
+        if (dialog.mBuilder.itemIds != null) {
+            if (index < dialog.mBuilder.itemIds.length)
+                view.setId(dialog.mBuilder.itemIds[index]);
+            else view.setId(-1);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ViewGroup group = (ViewGroup) view;
@@ -119,7 +143,7 @@ class MaterialDialogAdapter extends ArrayAdapter<CharSequence> {
     private boolean isRTL() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1)
             return false;
-        Configuration config = getContext().getResources().getConfiguration();
+        Configuration config = dialog.getBuilder().getContext().getResources().getConfiguration();
         return config.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
     }
 }

@@ -485,11 +485,13 @@ public class Widget extends AppWidgetProvider {
         double lon = 0;
         CarState carState = CarState.get(context, car_id);
         try {
+            State.appendLog(carState.getGps());
             String[] gps = carState.getGps().split(",");
             lat = Double.parseDouble(gps[0]);
             lon = Double.parseDouble(gps[1]);
         } catch (Exception ex) {
             // ignore
+            State.print(ex);
         }
         if ((lat == 0) && (lon == 0))
             return;
