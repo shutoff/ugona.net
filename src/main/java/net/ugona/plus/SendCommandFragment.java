@@ -34,7 +34,25 @@ public class SendCommandFragment extends DialogFragment {
     boolean longTap;
     boolean no_prompt;
 
-    public static void send_inet(final Context context, final CarConfig.Command c, final String car_id, String ccode) {
+    public static void retry_command(final Context context, String car_id, String data) {
+        String[] parts = data.split("\\|");
+        int cmd_id = Integer.parseInt(parts[0]);
+        String ccode = parts[1];
+        boolean inet = parts[2].equals("1");
+        CarConfig config = CarConfig.get(context, car_id);
+        CarConfig.Command[] cmd = config.getCmd();
+        for (CarConfig.Command c : cmd) {
+            if (c.id == cmd_id) {
+                if (inet) {
+                    send_inet(context, c, car_id, ccode);
+                }
+                return;
+            }
+        }
+
+    }
+
+    public static void send_inet(final Context context, final CarConfig.Command c, final String car_id, final String ccode) {
         HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
@@ -56,7 +74,7 @@ public class SendCommandFragment extends DialogFragment {
                     text += error_text;
                 }
                 String actions = FetchService.ACTION_COMMAND + ";";
-                actions += c.id + ":" + android.R.drawable.ic_popup_sync + ":" + context.getString(R.string.retry);
+                actions += c.id + "|" + ccode + "|1:" + android.R.drawable.ic_popup_sync + ":" + context.getString(R.string.retry);
                 Notification.create(context, text, R.drawable.w_warning_light, car_id, null, 0, false, c.name, actions);
                 Commands.remove(context, car_id, c);
             }

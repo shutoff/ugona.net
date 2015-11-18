@@ -445,14 +445,13 @@ public class Notification extends Config {
             String[] parts = actions.split(";");
             for (int i = 1; i < parts.length; i++) {
                 String[] p = parts[i].split(":");
-                int id = Integer.parseInt(p[0]);
                 int icon = Integer.parseInt(p[1]);
                 Intent cmdIntent = new Intent(context, FetchService.class);
                 cmdIntent.setAction(parts[0]);
                 cmdIntent.putExtra(Names.ID, car_id);
                 cmdIntent.putExtra(Names.NOTIFY_ID, max_id);
-                cmdIntent.putExtra(Names.COMMAND, id);
-                Uri data = Uri.withAppendedPath(Uri.parse("http://notification_cmd/id/"), max_id + "_" + id + "_" + icon);
+                cmdIntent.putExtra(Names.COMMAND, p[0]);
+                Uri data = Uri.withAppendedPath(Uri.parse("http://notification_cmd/id/"), max_id + "_" + max_id + "_" + icon);
                 cmdIntent.setData(data);
                 PendingIntent piCmd = PendingIntent.getService(context, 0, cmdIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 builder.addAction(icon, p[2], piCmd);

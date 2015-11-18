@@ -21,6 +21,7 @@ public class CarState extends Config {
     private long last_stand;
     private long az_time;
     private long az_start;
+    private long az_fail;
     private long ignition_time;
     private long heater_time;
     private String zone;

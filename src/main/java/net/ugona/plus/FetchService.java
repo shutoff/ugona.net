@@ -153,9 +153,10 @@ public class FetchService extends Service {
         if (action != null) {
             if (action.equals(ACTION_COMMAND)) {
                 String car_id = intent.getStringExtra(Names.ID);
-                int cmd_id = intent.getIntExtra(Names.COMMAND, 0);
+                String data = intent.getStringExtra(Names.COMMAND);
                 int notify = intent.getIntExtra(Names.NOTIFY_ID, 0);
                 Notification.remove(this, notify);
+                SendCommandFragment.retry_command(this, car_id, data);
             }
             if (action.equals(ACTION_ADD_TIMER)) {
                 String car_id = intent.getStringExtra(Names.ID);
