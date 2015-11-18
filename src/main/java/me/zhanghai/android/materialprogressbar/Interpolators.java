@@ -28,8 +28,6 @@ class Interpolators {
         // C 0.3958333333336,0.0 0.474845090492,0.206797621729 0.5916666666664,0.417082932942
         // C 0.7151610251224,0.639379624869 0.81625,0.974556908664 1.0,1.0
         private static final Path PATH_INDETERMINATE_HORIZONTAL_RECT1_TRANSLATE_X;
-        public static final Interpolator INSTANCE =
-                PathInterpolatorCompat.create(PATH_INDETERMINATE_HORIZONTAL_RECT1_TRANSLATE_X);
 
         static {
             PATH_INDETERMINATE_HORIZONTAL_RECT1_TRANSLATE_X = new Path();
@@ -40,6 +38,9 @@ class Interpolators {
             PATH_INDETERMINATE_HORIZONTAL_RECT1_TRANSLATE_X.cubicTo(0.7151610251224f,
                     0.639379624869f, 0.81625f, 0.974556908664f, 1, 1);
         }
+
+        public static final Interpolator INSTANCE =
+                PathInterpolatorCompat.create(PATH_INDETERMINATE_HORIZONTAL_RECT1_TRANSLATE_X);
     }
 
     /**
@@ -52,8 +53,6 @@ class Interpolators {
         // C 0.47252618112021,0.062409910275 0.61541608570164,0.5 0.68325,0.5
         // C 0.75475061236836,0.5 0.75725829093844,0.814510098964 1.0,1.0
         private static final Path PATH_INDETERMINATE_HORIZONTAL_RECT1_SCALE_X;
-        public static final Interpolator INSTANCE =
-                PathInterpolatorCompat.create(PATH_INDETERMINATE_HORIZONTAL_RECT1_SCALE_X);
 
         static {
             PATH_INDETERMINATE_HORIZONTAL_RECT1_SCALE_X = new Path();
@@ -64,6 +63,9 @@ class Interpolators {
             PATH_INDETERMINATE_HORIZONTAL_RECT1_SCALE_X.cubicTo(0.75475061236836f, 0.5f,
                     0.75725829093844f, 0.814510098964f, 1, 1);
         }
+
+        public static final Interpolator INSTANCE =
+                PathInterpolatorCompat.create(PATH_INDETERMINATE_HORIZONTAL_RECT1_SCALE_X);
     }
 
     /**
@@ -77,8 +79,6 @@ class Interpolators {
         //     0.483333333333,0.489826169306
         // C 0.69,0.80972296795 0.793333333333,0.950016125212 1.0,1.0
         private static final Path PATH_INDETERMINATE_HORIZONTAL_RECT2_TRANSLATE_X;
-        public static final Interpolator INSTANCE =
-                PathInterpolatorCompat.create(PATH_INDETERMINATE_HORIZONTAL_RECT2_TRANSLATE_X);
 
         static {
             PATH_INDETERMINATE_HORIZONTAL_RECT2_TRANSLATE_X = new Path();
@@ -90,6 +90,9 @@ class Interpolators {
             PATH_INDETERMINATE_HORIZONTAL_RECT2_TRANSLATE_X.cubicTo(0.69f, 0.80972296795f,
                     0.793333333333f, 0.950016125212f, 1, 1);
         }
+
+        public static final Interpolator INSTANCE =
+                PathInterpolatorCompat.create(PATH_INDETERMINATE_HORIZONTAL_RECT2_TRANSLATE_X);
     }
 
     /**
@@ -104,8 +107,6 @@ class Interpolators {
         //     0.68279962777002
         // C 0.752586273196,0.68179620963216 0.737253971954,0.878896194318 1,1
         private static final Path PATH_INDETERMINATE_HORIZONTAL_RECT2_SCALE_X;
-        public static final Interpolator INSTANCE =
-                PathInterpolatorCompat.create(PATH_INDETERMINATE_HORIZONTAL_RECT2_SCALE_X);
 
         static {
             PATH_INDETERMINATE_HORIZONTAL_RECT2_SCALE_X = new Path();
@@ -117,6 +118,9 @@ class Interpolators {
             PATH_INDETERMINATE_HORIZONTAL_RECT2_SCALE_X.cubicTo(0.752586273196f, 0.68179620963216f,
                     0.737253971954f, 0.878896194318f, 1, 1);
         }
+
+        public static final Interpolator INSTANCE =
+                PathInterpolatorCompat.create(PATH_INDETERMINATE_HORIZONTAL_RECT2_SCALE_X);
     }
 
     /**
@@ -126,14 +130,15 @@ class Interpolators {
         // L 0.5,0
         // C 0.7,0 0.6,1 1,1
         private static final Path PATH_TRIM_PATH_START;
-        public static final Interpolator INSTANCE =
-                PathInterpolatorCompat.create(PATH_TRIM_PATH_START);
 
         static {
             PATH_TRIM_PATH_START = new Path();
             PATH_TRIM_PATH_START.lineTo(0.5f, 0);
             PATH_TRIM_PATH_START.cubicTo(0.7f, 0, 0.6f, 1, 1, 1);
         }
+
+        public static final Interpolator INSTANCE =
+                PathInterpolatorCompat.create(PATH_TRIM_PATH_START);
     }
 
     /**
@@ -143,13 +148,13 @@ class Interpolators {
         // C 0.2,0 0.1,1 0.5,1
         // L 1,1
         private static final Path PATH_TRIM_PATH_END;
-        public static final Interpolator INSTANCE = PathInterpolatorCompat.create(PATH_TRIM_PATH_END);
-
         static {
             PATH_TRIM_PATH_END = new Path();
             PATH_TRIM_PATH_END.cubicTo(0.2f, 0, 0.1f, 1, 0.5f, 1);
             PATH_TRIM_PATH_END.lineTo(1, 1);
         }
+
+        public static final Interpolator INSTANCE = PathInterpolatorCompat.create(PATH_TRIM_PATH_END);
     }
 
     /**
