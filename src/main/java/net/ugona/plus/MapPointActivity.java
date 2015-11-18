@@ -74,6 +74,7 @@ public class MapPointActivity extends MapActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowTitleEnabled(false);
         if (ids.length > 1) {
+            findViewById(R.id.logo).setVisibility(View.GONE);
             Spinner navSpinner = (Spinner) findViewById(R.id.spinner_nav);
             navSpinner.setVisibility(View.VISIBLE);
             navSpinner.setAdapter(new BaseAdapter() {
@@ -144,6 +145,7 @@ public class MapPointActivity extends MapActivity {
             });
         } else {
             findViewById(R.id.logo).setVisibility(View.VISIBLE);
+            findViewById(R.id.spinner_nav).setVisibility(View.GONE);
         }
         updateTrack();
 

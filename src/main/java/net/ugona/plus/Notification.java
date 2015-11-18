@@ -121,7 +121,7 @@ public class Notification extends Config {
         Notification notification = Notification.get(context, car_id);
         if (names.contains("az_time") || names.contains("az")) {
             if (notification.getAz() != 0) {
-                remove(context, notification.az);
+                remove(context, notification.getAz());
                 notification.setAz(0);
             }
             long now = new Date().getTime();
@@ -140,6 +140,18 @@ public class Notification extends Config {
                         msg += " " + context.getString(R.string.motor_time).replace("$1", time + "");
                     notification.setAz(create(context, msg, R.drawable.white_motor_off, car_id, null, -state.getAz_time(), false, null, null));
                 }
+            }
+        }
+        if (names.contains("az_fail")) {
+            long az_fail = state.getAz_fail();
+            long az_time = state.getAz_time();
+            if (az_time < 0)
+                az_time = -az_time;
+            long now = new Date().getTime();
+            if ((az_fail > az_time) && (az_fail + 1200000 > now)) {
+                if (notification.getAz() != 0)
+                    remove(context, notification.getAz());
+                notification.setAz(create(context, context.getString(R.string.engine_fail), R.drawable.white_motor_off, car_id, null, -state.getAz_time(), false, null, null));
             }
         }
         if (names.contains("no_gsm")) {
@@ -200,8 +212,6 @@ public class Notification extends Config {
                 time = -time;
             }
             String zone = state.getZone();
-            if (zone.length() >= 1)
-                zone = zone.substring(1);
             if (!zone.equals(""))
                 text += " " + zone;
             notification.setZone(create(context, text, R.drawable.white_zone, car_id, grp, time, false, null, null));

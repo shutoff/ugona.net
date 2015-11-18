@@ -172,6 +172,10 @@ public class CarState extends Config {
         return az_start;
     }
 
+    public long getAz_fail() {
+        return az_fail;
+    }
+
     public long getIgnition_time() {
         return ignition_time;
     }

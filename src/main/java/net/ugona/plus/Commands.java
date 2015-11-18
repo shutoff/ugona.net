@@ -2,7 +2,6 @@ package net.ugona.plus;
 
 import android.content.Context;
 import android.content.Intent;
-import android.widget.Toast;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -179,8 +178,10 @@ public class Commands {
                 found = true;
                 queue.remove(command);
                 if (bError) {
-                    Toast toast = Toast.makeText(context, R.string.cmd_error, Toast.LENGTH_LONG);
-                    toast.show();
+                    String text = context.getString(R.string.cmd_error);
+                    String actions = FetchService.ACTION_COMMAND + ";";
+                    actions += command.id + "|" + "|:" + android.R.drawable.ic_popup_sync + ":" + context.getString(R.string.retry);
+                    Notification.create(context, text, R.drawable.w_warning_light, id, null, 0, false, command.name, actions);
                     break;
                 }
                 if (command.onAnswer != null) {

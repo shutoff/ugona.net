@@ -3,6 +3,7 @@ package net.ugona.plus;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -33,24 +34,6 @@ public class SendCommandFragment extends DialogFragment {
     int cmd_id;
     boolean longTap;
     boolean no_prompt;
-
-    public static void retry_command(final Context context, String car_id, String data) {
-        String[] parts = data.split("\\|");
-        int cmd_id = Integer.parseInt(parts[0]);
-        String ccode = parts[1];
-        boolean inet = parts[2].equals("1");
-        CarConfig config = CarConfig.get(context, car_id);
-        CarConfig.Command[] cmd = config.getCmd();
-        for (CarConfig.Command c : cmd) {
-            if (c.id == cmd_id) {
-                if (inet) {
-                    send_inet(context, c, car_id, ccode);
-                }
-                return;
-            }
-        }
-
-    }
 
     public static void send_inet(final Context context, final CarConfig.Command c, final String car_id, final String ccode) {
         HttpTask task = new HttpTask() {
@@ -112,6 +95,15 @@ public class SendCommandFragment extends DialogFragment {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
         dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         return dialog;
+    }
+
+    @Override
+    public void onDismiss(final DialogInterface dialog) {
+        super.onDismiss(dialog);
+        final Activity activity = getActivity();
+        if (activity instanceof DialogInterface.OnDismissListener) {
+            ((DialogInterface.OnDismissListener) activity).onDismiss(dialog);
+        }
     }
 
     @Override

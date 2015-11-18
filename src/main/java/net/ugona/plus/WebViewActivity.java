@@ -2,7 +2,7 @@ package net.ugona.plus;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.ViewGroup;
@@ -12,7 +12,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 
-abstract public class WebViewActivity extends ActionBarActivity {
+abstract public class WebViewActivity
+        extends AppCompatActivity {
 
     boolean loaded;
     private FrameLayout holder;

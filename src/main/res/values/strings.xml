@@ -274,4 +274,5 @@
         Adjust the time on your phone for properly car state</string>
     <string name="cmd_error">Execute command error</string>
     <string name="retry">Retry</string>
+    <string name="enigne_fail">Engine start failed</string>
 </resources>

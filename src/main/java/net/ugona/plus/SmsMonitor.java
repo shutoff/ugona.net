@@ -41,8 +41,10 @@ public class SmsMonitor extends BroadcastReceiver {
                 if (c.sms == null)
                     return;
                 if (getResultCode() != Activity.RESULT_OK) {
-                    Toast toast = Toast.makeText(context, R.string.sms_error, Toast.LENGTH_LONG);
-                    toast.show();
+                    String text = context.getString(R.string.sms_error);
+                    String actions = FetchService.ACTION_COMMAND + ";";
+                    actions += c.id + "|" + "|:" + android.R.drawable.ic_popup_sync + ":" + context.getString(R.string.retry);
+                    Notification.create(context, text, R.drawable.w_warning_light, id, null, 0, false, c.name, actions);
                     Commands.remove(context, id, c);
                     return;
                 }

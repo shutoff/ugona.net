@@ -278,4 +278,5 @@
         Для правильного отображения состояния скорректируйте время на телефоне</string>
     <string name="cmd_error">Ошибка выполнения команды</string>
     <string name="retry">Повторить</string>
+    <string name="engine_fail">Двигатель не заведен или заглох</string>
 </resources>

@@ -18,8 +18,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.view.KeyEvent;
@@ -60,7 +60,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class MainActivity
-        extends ActionBarActivity {
+        extends AppCompatActivity {
 
     static final int DO_AUTH = 1;
     static final int REQUEST_CHECK_PATTERN = 2;
