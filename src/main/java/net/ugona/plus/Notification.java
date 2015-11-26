@@ -120,6 +120,7 @@ public class Notification extends Config {
         CarState state = CarState.get(context, car_id);
         Notification notification = Notification.get(context, car_id);
         if (names.contains("az_time") || names.contains("az")) {
+            State.appendLog("az " + notification.getAz());
             if (notification.getAz() != 0) {
                 remove(context, notification.getAz());
                 notification.setAz(0);
@@ -130,7 +131,9 @@ public class Notification extends Config {
                 az_time = -az_time;
             if (az_time + 1200000 > now) {
                 if (state.getAz_time() > 0) {
-                    notification.setAz(create(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "azStart", state.getAz_start(), false, null, null));
+                    int id = create(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "azStart", state.getAz_start(), false, null, null);
+                    State.appendLog("set az " + id);
+                    notification.setAz(id);
                 } else if ((state.getAz_time() < 0) && !state.isIgnition()) {
                     String msg = context.getString(R.string.motor_off_ok);
                     long az_stop = -state.getAz_time();
@@ -138,7 +141,9 @@ public class Notification extends Config {
                     long time = (az_stop - az_start) / 60000;
                     if ((time > 0) && (time <= 20))
                         msg += " " + context.getString(R.string.motor_time).replace("$1", time + "");
-                    notification.setAz(create(context, msg, R.drawable.white_motor_off, car_id, null, -state.getAz_time(), false, null, null));
+                    int id = create(context, msg, R.drawable.white_motor_off, car_id, null, -state.getAz_time(), false, null, null);
+                    State.appendLog("set az " + id);
+                    notification.setAz(id);
                 }
             }
         }
@@ -165,6 +170,7 @@ public class Notification extends Config {
         }
         if (names.contains("guard") || names.contains("ignition")) {
             if ((notification.getAz() != 0) && (!state.isGuard() || (state.isIgnition() && !state.isAz()))) {
+                State.appendLog("Remove az " + notification.getAz());
                 remove(context, notification.getAz());
                 notification.setAz(0);
             }
