@@ -790,7 +790,7 @@ public class MainActivity
                     }
                     if (!phone.equals(""))
                         data.add("phone", phone);
-                    String url = Names.API_URL + "/reg";
+                    String url = PhoneSettings.get().getServer() + "/reg";
                     RequestBody body = RequestBody.create(MediaType.parse("application/json"), data.toString());
                     Request request = new Request.Builder().url(url).post(body).build();
                     Response response = HttpTask.client.newCall(request).execute();

@@ -108,7 +108,7 @@ public class Theme {
                         protected String doInBackground(String... params) {
                             try {
                                 String name = params[0];
-                                String url = Names.API_URL + "/themes/" + params[0];
+                                String url = PhoneSettings.get().getServer() + "/themes/" + params[0];
                                 Request request = new Request.Builder().url(url).build();
                                 Response response = HttpTask.client.newCall(request).execute();
                                 if (response.code() != HttpURLConnection.HTTP_OK)

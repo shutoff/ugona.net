@@ -428,7 +428,7 @@ public class PhotoFragment extends MainFragment {
                 pp.id = p.id;
                 String data = Config.save(pp);
                 RequestBody body = RequestBody.create(MediaType.parse("application/json"), data);
-                Request request = new Request.Builder().url(Names.API_URL + "/photo").post(body).build();
+                Request request = new Request.Builder().url(PhoneSettings.get().getServer() + "/photo").post(body).build();
                 Response response = HttpTask.client.newCall(request).execute();
                 if (response.code() != HttpURLConnection.HTTP_OK)
                     return null;

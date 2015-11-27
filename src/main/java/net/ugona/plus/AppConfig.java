@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.Json;
 
 public class AppConfig extends Config {
 
@@ -47,7 +47,7 @@ public class AppConfig extends Config {
         String s = preferences.getString(CONFIG_KEY, "");
         if (!s.equals("")) {
             try {
-                update(this, JsonObject.readFrom(s));
+                update(this, Json.parse(s).asObject());
                 return;
             } catch (Exception ex) {
                 // ignore

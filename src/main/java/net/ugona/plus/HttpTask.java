@@ -83,7 +83,7 @@ public abstract class HttpTask {
         String url = params[0].toString();
         String data = "";
         if (url.charAt(0) == '/')
-            url = Names.API_URL + url;
+            url = PhoneSettings.get().getServer() + url;
         int last_param = 1;
         for (; ; last_param++) {
             if (!url.contains("$" + last_param))
