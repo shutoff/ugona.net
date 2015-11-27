@@ -82,10 +82,7 @@ public class CarView extends ImageView {
     }
 
     void forceUpdate(CarState s, CarConfig config) {
-        if ((carImage != null) && !carImage.name.equals(config.getTheme()))
-            carImage = null;
-        if (carImage == null)
-            carImage = new CarImage(getContext(), config.getTheme());
+        carImage = new CarImage(getContext(), config.getTheme());
         carImage.update(s, false);
         sendUpdate();
         next_frame();

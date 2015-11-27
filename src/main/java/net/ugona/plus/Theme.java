@@ -76,8 +76,9 @@ public class Theme {
             if (now < pkg_time)
                 pkg_time = now;
         }
+        final long package_time = pkg_time;
 
-        if (pkg_time >= theme_time) {
+        if (pkg_time > theme_time) {
             try {
                 InputStream from = context.getAssets().open(name);
                 OutputStream to = context.openFileOutput(name, Context.MODE_PRIVATE);
@@ -99,6 +100,7 @@ public class Theme {
                         // ignore
                     }
                 }
+                path.setLastModified(pkg_time);
             } catch (IOException e) {
                 e.printStackTrace();
                 if (!download) {
@@ -108,7 +110,7 @@ public class Theme {
                         protected String doInBackground(String... params) {
                             try {
                                 String name = params[0];
-                                String url = PhoneSettings.get().getServer() + "/themes/" + params[0];
+                                String url = "https://car-online.ugona.net/themes/" + params[0];
                                 Request request = new Request.Builder().url(url).build();
                                 Response response = HttpTask.client.newCall(request).execute();
                                 if (response.code() != HttpURLConnection.HTTP_OK)
@@ -129,6 +131,7 @@ public class Theme {
                                 File new_file = new File(dir, name);
                                 new_file.delete();
                                 part.renameTo(new_file);
+                                part.setLastModified(package_time);
 
                                 return name;
 
