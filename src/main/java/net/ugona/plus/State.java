@@ -8,11 +8,11 @@ import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Environment;
-import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.format.DateFormat;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -33,7 +33,6 @@ import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -154,7 +153,7 @@ public class State {
 
     static String formatTime(Context context, long time) {
         try {
-            if (Settings.System.getInt(context.getContentResolver(), Settings.System.TIME_12_24) == 12) {
+            if (!DateFormat.is24HourFormat(context)) {
                 SimpleDateFormat sf = new SimpleDateFormat("KK:mm:ss a");
                 return sf.format(time);
             }
@@ -167,7 +166,7 @@ public class State {
 
     static String shortFormatTime(Context context, long time) {
         try {
-            if (Settings.System.getInt(context.getContentResolver(), Settings.System.TIME_12_24) == 12) {
+            if (!DateFormat.is24HourFormat(context)) {
                 SimpleDateFormat sf = new SimpleDateFormat("KK:mm a");
                 return sf.format(time);
             }
@@ -184,7 +183,7 @@ public class State {
         date.setTimeInMillis(time);
         if ((now.get(Calendar.DAY_OF_MONTH) == date.get(Calendar.DAY_OF_MONTH)) && (now.get(Calendar.MONTH) == date.get(Calendar.MONTH)))
             return formatTime(context, time);
-        DateFormat df = android.text.format.DateFormat.getDateFormat(context);
+        java.text.DateFormat df = android.text.format.DateFormat.getDateFormat(context);
         return formatTime(context, time) + " " + df.format(time);
     }
 

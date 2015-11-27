@@ -386,10 +386,6 @@ public class StateFragment
                 error_text = getString(R.string.net_warning);
         }
         if (error_text == null) {
-
-        }
-
-        if (error_text == null) {
             tvError.setVisibility(View.GONE);
         } else {
             tvError.setVisibility(View.VISIBLE);
