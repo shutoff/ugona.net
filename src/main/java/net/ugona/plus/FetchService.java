@@ -33,6 +33,7 @@ public class FetchService extends Service {
     static final String ACTION_MAINTENANCE = "net.ugona.plus.MAINTENANCE";
     static final String ACTION_ADD_TIMER = "net.ugona.plus.ADD_TIMER";
     static final String ACTION_COMMAND = "net.ugona.plus.COMMAND";
+    static final String ACTION_CHECK_COMMAND = "net.ugona.plus.CHECK_COMMAND";
 
     private static final long REPEAT_AFTER_ERROR = 20 * 1000;
     private static final long REPEAT_AFTER_500 = 600 * 1000;
@@ -158,6 +159,11 @@ public class FetchService extends Service {
                 Notification.remove(this, notify);
                 SendCommandActivity.retry_command(this, car_id, data);
             }
+            if (action.equals(ACTION_CHECK_COMMAND)) {
+                String car_id = intent.getStringExtra(Names.ID);
+                int cmd_id = intent.getIntExtra(Names.COMMAND, 0);
+                createCommandRequest(car_id, cmd_id);
+            }
             if (action.equals(ACTION_ADD_TIMER)) {
                 String car_id = intent.getStringExtra(Names.ID);
                 String[] timer = intent.getStringExtra(Names.COMMAND).split("\\|");
@@ -228,6 +234,13 @@ public class FetchService extends Service {
         return false;
     }
 
+    void createCommandRequest(String car_id, int cmd) {
+        int id = Commands.getId(this, car_id, cmd);
+        if (id == 0)
+            return;
+        new CheckCommandRequest(car_id, cmd, id);
+    }
+
     void sendUpdate(String action, String car_id) {
         try {
             Intent intent = new Intent(action);
@@ -258,6 +271,11 @@ public class FetchService extends Service {
     static class MaintenanceParams implements Serializable {
         String skey;
         String lang;
+    }
+
+    static class CommandStateParams implements Serializable {
+        String skey;
+        int id;
     }
 
     abstract class ServerRequest extends HttpTask {
@@ -404,6 +422,38 @@ public class FetchService extends Service {
         }
     }
 
+    class CheckCommandRequest extends ServerRequest {
+
+        int cmd;
+        int cmd_id;
+
+        CheckCommandRequest(String id, int cmd, int cmd_id) {
+            super("C" + cmd_id, id);
+            this.cmd = cmd;
+            this.cmd_id = cmd_id;
+        }
+
+        @Override
+        void result(JsonObject res) throws ParseException {
+            super.result(res);
+            if (res.get("result") == null) {
+                createCommandRequest(car_id, cmd);
+                startRequest();
+                return;
+            }
+            Commands.setCommandResult(FetchService.this, car_id, cmd, res.getInt("result", 0));
+        }
+
+        @Override
+        void exec(String api_key) {
+            CommandStateParams params = new CommandStateParams();
+            CarConfig carConfig = CarConfig.get(FetchService.this, car_id);
+            params.skey = carConfig.getKey();
+            params.id = cmd_id;
+            execute("/command", params);
+        }
+    }
+
     class MaintenanceRequest extends ServerRequest {
 
         boolean notify_;
@@ -415,6 +465,7 @@ public class FetchService extends Service {
 
         @Override
         void result(JsonObject res) throws ParseException {
+            super.result(res);
             updateMaintenance(FetchService.this, car_id, res);
             if (!notify_)
                 return;
@@ -444,6 +495,7 @@ public class FetchService extends Service {
 
         @Override
         void result(JsonObject res) throws ParseException {
+            super.result(res);
             long delta = res.get(name).asInt() * 60000;
             long time = new Date().getTime() + delta;
             CarState carState = CarState.get(FetchService.this, car_id);

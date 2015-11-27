@@ -99,6 +99,70 @@ public class Commands {
         return data;
     }
 
+    static void setId(Context context, String car_id, CarConfig.Command cmd, int cmd_id) {
+        synchronized (requests) {
+            if (!requests.containsKey(car_id))
+                return;
+            Queue queue = requests.get(car_id);
+            if (!queue.containsKey(cmd))
+                return;
+            queue.get(cmd).id = cmd_id;
+            Intent intent = new Intent(context, FetchService.class);
+            intent.setAction(FetchService.ACTION_CHECK_COMMAND);
+            intent.putExtra(Names.ID, car_id);
+            intent.putExtra(Names.COMMAND, cmd.id);
+            context.startService(intent);
+        }
+    }
+
+    static int getId(Context context, String car_id, int cmd_id) {
+        synchronized (requests) {
+            if (!requests.containsKey(car_id))
+                return 0;
+            Queue queue = requests.get(car_id);
+            CarConfig config = CarConfig.get(context, car_id);
+            CarConfig.Command[] commands = config.getCmd();
+            for (CarConfig.Command c : commands) {
+                if (c.id == cmd_id) {
+                    CommandState state = queue.get(c);
+                    if (state == null)
+                        return 0;
+                    long now = new Date().getTime();
+                    if (state.time + 900000 < now)
+                        return 0;
+                    return queue.get(c).id;
+                }
+            }
+            return 0;
+        }
+    }
+
+    static void setCommandResult(Context context, String car_id, int cmd, int result) {
+        CarConfig carConfig = CarConfig.get(context, car_id);
+        CarConfig.Command[] commands = carConfig.getCmd();
+        for (CarConfig.Command c : commands) {
+            if (c.id == cmd) {
+                Commands.remove(context, car_id, c);
+                if (result > 0) {
+                    String text = context.getString(R.string.cmd_error);
+                    String actions = FetchService.ACTION_COMMAND + ";";
+                    actions += cmd + "|" + "|1:" + android.R.drawable.ic_popup_sync + ":" + context.getString(R.string.retry);
+                    Notification.create(context, text, R.drawable.w_warning_light, car_id, null, 0, false, c.name, actions);
+                } else if (result == 0) {
+                    if (c.onAnswer != null) {
+                        c.onAnswer.run();
+                    } else if (c.done != null) {
+                        CarState state = CarState.get(context, car_id);
+                        Set<String> update = State.update(context, car_id, c, c.done, state, null, null);
+                        if (update != null)
+                            Notification.update(context, car_id, update);
+                    }
+                }
+                break;
+            }
+        }
+    }
+
     static void check(Context context, String id) {
         synchronized (requests) {
             if (!requests.containsKey(id))
@@ -218,6 +282,7 @@ public class Commands {
 
     static class CommandState {
         long time;
+        int id;
         Intent data;
     }
 

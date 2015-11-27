@@ -219,7 +219,7 @@ public class Notification extends Config {
             }
             String zone = state.getZone();
             if (!zone.equals(""))
-                text += " " + zone;
+                text += " " + zone.substring(1);
             notification.setZone(create(context, text, R.drawable.white_zone, car_id, grp, time, false, null, null));
         }
         if (names.contains("guard_mode")) {

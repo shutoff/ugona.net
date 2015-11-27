@@ -43,6 +43,15 @@ public class SendCommandFragment extends DialogFragment {
                 toast.show();
                 if (c.done == null)
                     Commands.remove(context, car_id, c);
+                if (res.get("result") != null) {
+                    Commands.setCommandResult(context, car_id, c.id, res.getInt("result", 0));
+                    return;
+                }
+                int id = res.getInt("id", 0);
+                if (id != 0) {
+                    Commands.setId(context, car_id, c, id);
+                    return;
+                }
                 Intent intent = new Intent(context, FetchService.class);
                 intent.setAction(FetchService.ACTION_UPDATE);
                 intent.putExtra(Names.ID, car_id);
@@ -58,6 +67,8 @@ public class SendCommandFragment extends DialogFragment {
                 }
                 String actions = FetchService.ACTION_COMMAND + ";";
                 actions += c.id + "|" + ccode + "|1:" + android.R.drawable.ic_popup_sync + ":" + context.getString(R.string.retry);
+                if (c.sms != null)
+                    actions += ";" + c.id + "||:" + android.R.drawable.ic_menu_call + ":" + context.getString(R.string.send_sms);
                 Notification.create(context, text, R.drawable.w_warning_light, car_id, null, 0, false, c.name, actions);
                 Commands.remove(context, car_id, c);
             }
