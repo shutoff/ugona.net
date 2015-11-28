@@ -57,26 +57,22 @@ public class Theme {
         File path = new File(dir, name);
 
         long theme_time = 0;
-        long pkg_time = 0;
+        long pkg_time = System.currentTimeMillis();
 
-        if (path.exists()) {
-            theme_time = path.lastModified();
-            pkg_time = theme_time;
-            try {
-                ApplicationInfo ai = context.getPackageManager().getApplicationInfo(context.getPackageName(), 0);
-                ZipFile zf = new ZipFile(ai.sourceDir);
-                ZipEntry ze = zf.getEntry("classes.dex");
-                pkg_time = ze.getTime();
-                pkg_time -= TimeZone.getDefault().getOffset(pkg_time);
-                zf.close();
-            } catch (Exception ex) {
-                // ignore
-            }
-            long now = System.currentTimeMillis();
-            if (now < pkg_time)
-                pkg_time = now;
+        try {
+            ApplicationInfo ai = context.getPackageManager().getApplicationInfo(context.getPackageName(), 0);
+            ZipFile zf = new ZipFile(ai.sourceDir);
+            ZipEntry ze = zf.getEntry("classes.dex");
+            pkg_time = ze.getTime();
+            pkg_time -= TimeZone.getDefault().getOffset(pkg_time);
+            zf.close();
+        } catch (Exception ex) {
+            // ignore
         }
         final long package_time = pkg_time;
+
+        if (path.exists())
+            theme_time = path.lastModified();
 
         if (pkg_time > theme_time) {
             try {
@@ -185,6 +181,7 @@ public class Theme {
             height = root.getInt("height", 0);
         } catch (Exception ex) {
             ex.printStackTrace();
+            path.delete();
             return false;
         }
         return true;
