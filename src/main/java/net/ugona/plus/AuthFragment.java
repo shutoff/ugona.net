@@ -204,6 +204,15 @@ public class AuthFragment extends MainFragment {
                 items.add(new Item(setting.name, setting.text, new Runnable() {
                     @Override
                     public void run() {
+                        if (setting.values != null) {
+                            Bundle args = new Bundle();
+                            args.putString(Names.ID, id());
+                            args.putString(Names.TITLE, setting.id);
+                            SetSettingsFragment fragment = new SetSettingsFragment();
+                            fragment.setArguments(args);
+                            fragment.show(getActivity().getSupportFragmentManager(), "set");
+                            return;
+                        }
                         if (setting.cmd == null)
                             return;
                         if (commands != null) {
