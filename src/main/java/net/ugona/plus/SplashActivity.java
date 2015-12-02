@@ -11,7 +11,7 @@ public class SplashActivity extends FragmentActivity implements DialogInterface.
         super.onCreate(savedInstanceState);
         setResult(RESULT_CANCELED);
         setContentView(R.layout.splash);
-        StyledAuthDialog styledAuthDialog = new StyledAuthDialog(this, "");
+        StyledAuthDialog styledAuthDialog = new StyledAuthDialog(this);
         styledAuthDialog.show();
         styledAuthDialog.setOnDismissListener(this);
     }

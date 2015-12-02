@@ -16,11 +16,13 @@ import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.AlertDialogWrapper;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
@@ -37,6 +39,11 @@ public class AuthDialog extends DialogFragment implements TextWatcher {
     View btnOk;
     TextView tvError;
     View vProgress;
+    JsonArray data;
+
+    View vAuthBlock;
+    View vDevicesBlock;
+    Spinner sDevices;
 
     @NonNull
     @Override
@@ -48,6 +55,9 @@ public class AuthDialog extends DialogFragment implements TextWatcher {
         etPass = (EditText) v.findViewById(R.id.passwd);
         tvError = (TextView) v.findViewById(R.id.error);
         vProgress = v.findViewById(R.id.progress);
+        vAuthBlock = v.findViewById(R.id.auth_block);
+        vDevicesBlock = v.findViewById(R.id.device_block);
+        sDevices = (Spinner) v.findViewById(R.id.devices);
 
         config = CarConfig.get(getActivity(), car_id);
 
@@ -110,37 +120,43 @@ public class AuthDialog extends DialogFragment implements TextWatcher {
     }
 
     void doLogin(final String login, String password) {
+        if (data != null) {
+            setResult(data.get(sDevices.getSelectedItemPosition()).asObject(), login);
+            return;
+        }
+
         btnOk.setEnabled(false);
         tvError.setVisibility(View.GONE);
         vProgress.setVisibility(View.VISIBLE);
         final HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
-                Config.clear(config);
-                Config.update(config, res);
-                CarState state = CarState.get(getActivity(), car_id);
-                Config.clear(state);
-                if (CarState.update(state, res.get("state").asObject()) != null) {
-                    Intent intent = new Intent(Names.UPDATED);
-                    intent.putExtra(Names.ID, car_id);
-                    getActivity().sendBroadcast(intent);
+                if (res.get("data") != null) {
+                    data = res.get("data").asArray();
+                    vAuthBlock.setVisibility(View.GONE);
+                    vDevicesBlock.setVisibility(View.VISIBLE);
+                    sDevices.setAdapter(new ArrayAdapter(sDevices) {
+                        @Override
+                        public int getCount() {
+                            return data.size();
+                        }
+
+                        @Override
+                        public Object getItem(int position) {
+                            return data.get(position).asObject().getString("name", "???");
+                        }
+                    });
+                    vProgress.setVisibility(View.GONE);
+                    btnOk.setEnabled(true);
+                    for (int i = 0; i < data.size(); i++) {
+                        if (config.getName().equals(data.get(i).asObject().getString("name", ""))) {
+                            sDevices.setSelection(i);
+                            break;
+                        }
+                    }
+                    return;
                 }
-                JsonObject caps = res.get("caps").asObject();
-                boolean changed = CarState.update(state, caps.get("caps").asObject()) != null;
-                changed |= (CarState.update(config, caps) != null);
-                if (changed) {
-                    Intent intent = new Intent(Names.CONFIG_CHANGED);
-                    intent.putExtra(Names.ID, car_id);
-                    getActivity().sendBroadcast(intent);
-                }
-                config.setLogin(login);
-                dismiss();
-                Fragment fragment = getTargetFragment();
-                if (fragment != null) {
-                    Intent data = new Intent();
-                    data.putExtra(Names.ID, car_id);
-                    fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, data);
-                }
+                setResult(res, login);
             }
 
             @Override
@@ -161,6 +177,34 @@ public class AuthDialog extends DialogFragment implements TextWatcher {
         authParam.password = password;
         authParam.lang = Locale.getDefault().getLanguage();
         task.execute("/key", authParam);
+    }
+
+    void setResult(JsonObject res, String login) {
+        Config.clear(config);
+        Config.update(config, res);
+        CarState state = CarState.get(getActivity(), car_id);
+        Config.clear(state);
+        if (CarState.update(state, res.get("state").asObject()) != null) {
+            Intent intent = new Intent(Names.UPDATED);
+            intent.putExtra(Names.ID, car_id);
+            getActivity().sendBroadcast(intent);
+        }
+        JsonObject caps = res.get("caps").asObject();
+        boolean changed = CarState.update(state, caps.get("caps").asObject()) != null;
+        changed |= (CarState.update(config, caps) != null);
+        if (changed) {
+            Intent intent = new Intent(Names.CONFIG_CHANGED);
+            intent.putExtra(Names.ID, car_id);
+            getActivity().sendBroadcast(intent);
+        }
+        config.setLogin(login);
+        dismiss();
+        Fragment fragment = getTargetFragment();
+        if (fragment != null) {
+            Intent data = new Intent();
+            data.putExtra(Names.ID, car_id);
+            fragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, data);
+        }
     }
 
     @Override

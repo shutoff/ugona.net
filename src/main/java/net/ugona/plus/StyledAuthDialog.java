@@ -17,6 +17,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 
@@ -25,9 +26,6 @@ import java.io.Serializable;
 public class StyledAuthDialog
         extends Dialog
         implements ViewTreeObserver.OnGlobalLayoutListener {
-
-    String car_id;
-    CarConfig config;
 
     EditText etLogin;
     EditText etPass;
@@ -38,9 +36,8 @@ public class StyledAuthDialog
     TextWatcher watcher;
     float pk;
 
-    public StyledAuthDialog(Context context, String car_id) {
+    public StyledAuthDialog(Context context) {
         super(context, R.style.CustomDialogTheme);
-        this.car_id = car_id;
         setContentView(R.layout.styled_auth_dialog);
 
         Resources resources = context.getResources();
@@ -56,8 +53,8 @@ public class StyledAuthDialog
         vProgress = findViewById(R.id.progress);
         btnOk = (Button) findViewById(R.id.ok);
 
-        config = CarConfig.get(context, car_id);
         btnOk.setEnabled(false);
+        CarConfig config = CarConfig.get(getContext(), "");
         String login = config.getLogin();
         if (!login.equals("demo"))
             etLogin.setText(config.getLogin());
@@ -140,25 +137,23 @@ public class StyledAuthDialog
         final HttpTask task = new HttpTask() {
             @Override
             void result(JsonObject res) throws ParseException {
-                Config.clear(config);
-                Config.update(config, res);
-                CarState state = CarState.get(getContext(), car_id);
-                Config.clear(state);
-                if (CarState.update(state, res.get("state").asObject()) != null) {
-                    Intent intent = new Intent(Names.UPDATED);
-                    intent.putExtra(Names.ID, car_id);
-                    getContext().sendBroadcast(intent);
+                String ids = "";
+                if (res.get("data") != null) {
+                    JsonArray r = res.get("data").asArray();
+                    for (int i = 0; i < r.size(); i++) {
+                        String car_id = i + "";
+                        if (i == 0) {
+                            car_id = "";
+                        } else {
+                            ids += ";" + car_id;
+                        }
+                        addDevice(r.get(i).asObject(), car_id, login);
+                    }
+                } else {
+                    addDevice(res, "", login);
                 }
-                JsonObject caps = res.get("caps").asObject();
-                boolean changed = (CarState.update(state, caps.get("caps").asObject()) != null);
-                changed |= (CarState.update(config, caps) != null);
-                if (changed) {
-                    Intent intent = new Intent(Names.CONFIG_CHANGED);
-                    intent.putExtra(Names.ID, car_id);
-                    getContext().sendBroadcast(intent);
-                }
-                CarState.update(config, res);
-                config.setLogin(login);
+                AppConfig appConfig = AppConfig.get(getContext());
+                appConfig.setIds(ids);
                 dismiss();
             }
 
@@ -181,6 +176,29 @@ public class StyledAuthDialog
         authParam.password = password;
         authParam.lang = getContext().getResources().getConfiguration().locale.getLanguage();
         task.execute("/key", authParam);
+    }
+
+    void addDevice(JsonObject res, String car_id, String login) {
+        CarConfig config = CarConfig.get(getContext(), car_id);
+        Config.clear(config);
+        Config.update(config, res);
+        CarState state = CarState.get(getContext(), car_id);
+        Config.clear(state);
+        if (CarState.update(state, res.get("state").asObject()) != null) {
+            Intent intent = new Intent(Names.UPDATED);
+            intent.putExtra(Names.ID, "");
+            getContext().sendBroadcast(intent);
+        }
+        JsonObject caps = res.get("caps").asObject();
+        boolean changed = (CarState.update(state, caps.get("caps").asObject()) != null);
+        changed |= (CarState.update(config, caps) != null);
+        if (changed) {
+            Intent intent = new Intent(Names.CONFIG_CHANGED);
+            intent.putExtra(Names.ID, "");
+            getContext().sendBroadcast(intent);
+        }
+        CarState.update(config, res);
+        config.setLogin(login);
     }
 
     @Override
