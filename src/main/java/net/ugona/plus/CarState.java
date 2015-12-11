@@ -58,6 +58,8 @@ public class CarState extends Config {
     private String temperature;
     private String balance;
     private boolean guard;
+    private boolean hijack;
+    private boolean panic;
     private int guard_mode;
     private double fuel;
     private double card_voltage;
@@ -324,6 +326,28 @@ public class CarState extends Config {
 
     public double getCard_level() {
         return card_level;
+    }
+
+    public boolean isHijack() {
+        return hijack;
+    }
+
+    public void setHijack(boolean hijack) {
+        if (this.hijack == hijack)
+            return;
+        this.hijack = hijack;
+        upd = true;
+    }
+
+    public boolean isPanic() {
+        return panic;
+    }
+
+    public void setPanic(boolean panic) {
+        if (this.panic == panic)
+            return;
+        this.panic = panic;
+        upd = true;
     }
 
     public boolean isUse_phone() {
