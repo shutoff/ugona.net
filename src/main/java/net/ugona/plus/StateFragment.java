@@ -529,7 +529,7 @@ public class StateFragment
         }
 
         if (state.getTime() > 0) {
-            if (state.isOnline() && ((state.getTime() + 180000) > new Date().getTime()) {
+            if (state.isOnline() && ((state.getTime() + 180000) > new Date().getTime())) {
                 tvTime.setText(getString(R.string.online));
             }else{
                 tvTime.setText(State.formatDateTime(getActivity(), state.getTime()));
