@@ -273,8 +273,12 @@ public class Widget extends AppWidgetProvider {
             long last = carState.getTime();
             Date now = new Date();
             if (last > now.getTime() - 24 * 60 * 60 * 1000) {
-                DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
-                widgetView.setTextViewText(R.id.last, tf.format(last));
+                if (carState.isOnline() && (last > now.getTime() - 180000)) {
+                    widgetView.setTextViewText(R.id.last, context.getString(R.string.online));
+                } else {
+                    DateFormat tf = android.text.format.DateFormat.getTimeFormat(context);
+                    widgetView.setTextViewText(R.id.last, tf.format(last));
+                }
             } else {
                 widgetView.setTextViewText(R.id.last, "??:??");
             }

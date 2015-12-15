@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
@@ -458,6 +459,19 @@ public class Notification extends Config {
             builder.setContentText(text);
         }
         if (actions != null) {
+
+            if (MainActivity.foreground != null) {
+                ErrorFragment fragment = new ErrorFragment();
+                Bundle args = new Bundle();
+                args.putString(Names.TITLE, title);
+                args.putString(Names.MESSAGE, text);
+                args.putString(Names.COMMANDS, actions);
+                args.putString(Names.ID, car_id);
+                fragment.setArgs(args);
+                fragment.show(MainActivity.foreground.getSupportFragmentManager(), "error");
+                return;
+            }
+
             String[] parts = actions.split(";");
             for (int i = 1; i < parts.length; i++) {
                 String[] p = parts[i].split(":");

@@ -278,4 +278,5 @@
     <string name="send_sms">Send SMS</string>
     <string name="select_device">Select device</string>
     <string name="processed">Processed</string>
+    <string name="online">online</string>
 </resources>

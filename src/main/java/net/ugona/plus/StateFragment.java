@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import java.text.NumberFormat;
 import java.util.Currency;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -528,7 +529,11 @@ public class StateFragment
         }
 
         if (state.getTime() > 0) {
-            tvTime.setText(State.formatDateTime(getActivity(), state.getTime()));
+            if (state.isOnline() && ((state.getTime() + 180000) > new Date().getTime()) {
+                tvTime.setText(getString(R.string.online));
+            }else{
+                tvTime.setText(State.formatDateTime(getActivity(), state.getTime()));
+            }
         } else {
             tvTime.setText("???");
         }

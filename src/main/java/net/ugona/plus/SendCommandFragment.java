@@ -21,6 +21,8 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
 import com.haibison.android.lockpattern.LockPatternActivity;
 
+import java.util.Locale;
+
 
 public class SendCommandFragment extends DialogFragment {
 
@@ -44,7 +46,7 @@ public class SendCommandFragment extends DialogFragment {
                 if (c.done == null)
                     Commands.remove(context, car_id, c);
                 if (res.get("result") != null) {
-                    Commands.setCommandResult(context, car_id, c.id, res.getInt("result", 0));
+                    Commands.setCommandResult(context, car_id, c.id, res.getInt("result", 0), res.getString("message", null));
                     return;
                 }
                 int id = res.getInt("id", 0);
@@ -77,6 +79,7 @@ public class SendCommandFragment extends DialogFragment {
         JsonObject params = new JsonObject();
         params.add("skey", config.getKey());
         params.add("command", c.inet);
+        params.add("lang", Locale.getDefault().getLanguage());
         if (ccode != null)
             params.add("ccode", ccode);
         task.execute("/command", params);

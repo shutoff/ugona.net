@@ -137,14 +137,16 @@ public class Commands {
         }
     }
 
-    static void setCommandResult(Context context, String car_id, int cmd, int result) {
+    static void setCommandResult(Context context, String car_id, int cmd, int result, String message) {
         CarConfig carConfig = CarConfig.get(context, car_id);
         CarConfig.Command[] commands = carConfig.getCmd();
         for (CarConfig.Command c : commands) {
             if (c.id == cmd) {
                 Commands.remove(context, car_id, c);
                 if (result > 0) {
-                    String text = context.getString(R.string.cmd_error);
+                    String text = message;
+                    if (text == null)
+                        text = context.getString(R.string.cmd_error);
                     String actions = FetchService.ACTION_COMMAND + ";";
                     actions += cmd + "|" + "|1:" + android.R.drawable.ic_popup_sync + ":" + context.getString(R.string.retry);
                     Notification.create(context, text, R.drawable.w_warning_light, car_id, null, 0, false, c.name, actions);
@@ -154,8 +156,12 @@ public class Commands {
                     } else if (c.done != null) {
                         CarState state = CarState.get(context, car_id);
                         Set<String> update = State.update(context, car_id, c, c.done, state, null, null);
-                        if (update != null)
+                        if (update != null) {
                             Notification.update(context, car_id, update);
+                            Intent intent = new Intent(FetchService.ACTION_UPDATE);
+                            intent.putExtra(Names.ID, car_id);
+                            context.sendBroadcast(intent);
+                        }
                     }
                 }
                 break;

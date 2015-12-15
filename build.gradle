@@ -51,7 +51,7 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:23.1.1'
     compile 'com.google.android.gms:play-services:8.3.0'
     compile 'com.googlecode.libphonenumber:libphonenumber:7.2.1'
-    compile 'com.squareup.okhttp:okhttp:2.5.0'
+    compile 'com.squareup.okhttp:okhttp:2.7.0'
     compile 'com.eclipsesource.minimal-json:minimal-json:0.9.4'
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'com.android.support:multidex:1.0.1'

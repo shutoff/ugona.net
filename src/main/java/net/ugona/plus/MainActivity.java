@@ -75,6 +75,8 @@ public class MainActivity
     static Menu homeMenu;
     static Runnable password_request;
 
+    static MainActivity foreground;
+
     String id;
 
     AppConfig config;
@@ -261,6 +263,7 @@ public class MainActivity
         intent.setAction(Names.START_UPDATE);
         intent.putExtra(Names.ID, id);
         startService(intent);
+        foreground = this;
     }
 
     @Override
@@ -268,6 +271,7 @@ public class MainActivity
         super.onPause();
         AppConfig.save(this);
         bActive = false;
+        foreground = null;
     }
 
     @Override

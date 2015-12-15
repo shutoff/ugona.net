@@ -156,7 +156,8 @@ public class FetchService extends Service {
                 String car_id = intent.getStringExtra(Names.ID);
                 String data = intent.getStringExtra(Names.COMMAND);
                 int notify = intent.getIntExtra(Names.NOTIFY_ID, 0);
-                Notification.remove(this, notify);
+                if (notify != 0)
+                    Notification.remove(this, notify);
                 SendCommandActivity.retry_command(this, car_id, data);
             }
             if (action.equals(ACTION_CHECK_COMMAND)) {
@@ -275,6 +276,7 @@ public class FetchService extends Service {
 
     static class CommandStateParams implements Serializable {
         String skey;
+        String lang;
         int id;
     }
 
@@ -441,7 +443,7 @@ public class FetchService extends Service {
                 startRequest();
                 return;
             }
-            Commands.setCommandResult(FetchService.this, car_id, cmd, res.getInt("result", 0));
+            Commands.setCommandResult(FetchService.this, car_id, cmd, res.getInt("result", 0), res.getString("message", null));
         }
 
         @Override
@@ -450,6 +452,7 @@ public class FetchService extends Service {
             CarConfig carConfig = CarConfig.get(FetchService.this, car_id);
             params.skey = carConfig.getKey();
             params.id = cmd_id;
+            params.lang = Locale.getDefault().getLanguage();
             execute("/command", params);
         }
     }
