@@ -4,6 +4,8 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.ParseException;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 public class GcmService extends IntentService {
@@ -29,6 +31,23 @@ public class GcmService extends IntentService {
                 i.putExtra(Names.ID, car_id);
                 i.putExtra(Names.MAINTENANCE, extras.getString("maintenance"));
                 startService(i);
+            }
+            if (extras.getString("alarm") != null) {
+                String alarm = extras.getString("alarm");
+                HttpTask httpTask = new HttpTask() {
+                    @Override
+                    void result(JsonObject res) throws ParseException {
+
+                    }
+
+                    @Override
+                    void error() {
+
+                    }
+                };
+                JsonObject params = new JsonObject();
+                params.add("alarm", alarm);
+                httpTask.execute("/alarm_ok", params);
             }
             String message = extras.getString("message");
             if (message != null) {
