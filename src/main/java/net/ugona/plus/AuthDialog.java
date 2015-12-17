@@ -180,10 +180,12 @@ public class AuthDialog extends DialogFragment implements TextWatcher {
     }
 
     void setResult(JsonObject res, String login) {
-        Config.clear(config);
-        Config.update(config, res);
         CarState state = CarState.get(getActivity(), car_id);
-        Config.clear(state);
+        if (!config.getLogin().equals(login)) {
+            Config.clear(config);
+            Config.clear(state);
+        }
+        Config.update(config, res);
         if (CarState.update(state, res.get("state").asObject()) != null) {
             Intent intent = new Intent(Names.UPDATED);
             intent.putExtra(Names.ID, car_id);

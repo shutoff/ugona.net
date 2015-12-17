@@ -22,6 +22,7 @@ public class CarConfig extends Config {
     private String auth;
     private String login;
     private String phone;
+    private String ccode;
     private Command[] cmd;
     private Theme[] themes;
     private int event_filter;
@@ -131,6 +132,8 @@ public class CarConfig extends Config {
         leftHours = 1000;
         maintenance = "";
         theme = "";
+        ccode = "";
+        inet_cmd = true;
     }
 
     void read(Context context, String id) {
@@ -274,6 +277,10 @@ public class CarConfig extends Config {
             return;
         this.phone = phone;
         upd = true;
+    }
+
+    public String getCcode() {
+        return ccode;
     }
 
     public boolean isDevice_password() {

@@ -10,11 +10,27 @@ public class SendCommandActivity
         extends FragmentActivity
         implements DialogInterface.OnDismissListener {
 
-    public static void retry_command(final Context context, String car_id, String data) {
+    public static void retry_command(final Context context, String car_id, String cmd_data) {
+        if (MainActivity.foreground != null) {
+            SendCommandFragment fragment = new SendCommandFragment();
+            Bundle args = new Bundle();
+            args.putString(Names.ID, car_id);
+            String[] data = cmd_data.split("\\|");
+            args.putInt(Names.COMMAND, Integer.parseInt(data[0]));
+            boolean longTap = !data[2].equals("");
+            CarConfig carConfig = CarConfig.get(context, car_id);
+            if (carConfig.isInet_cmd())
+                longTap = !longTap;
+            args.putBoolean(Names.ROUTE, longTap);
+            args.putBoolean(Names.NO_PROMPT, true);
+            fragment.setArguments(args);
+            fragment.show(MainActivity.foreground.getSupportFragmentManager(), "send");
+            return;
+        }
         Intent intent = new Intent(context, SendCommandActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(Names.ID, car_id);
-        intent.putExtra(Names.COMMAND, data);
+        intent.putExtra(Names.COMMAND, cmd_data);
         context.startActivity(intent);
     }
 

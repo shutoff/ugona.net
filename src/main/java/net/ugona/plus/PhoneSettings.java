@@ -14,7 +14,7 @@ public class PhoneSettings extends Config {
     private String server;
 
     private PhoneSettings() {
-        server = "http://178.62.226.138";
+        server = "https://car-online.ugona.net";
         File settings = Environment.getExternalStorageDirectory();
         settings = new File(settings, "car.cfg");
         if (settings.exists()) {

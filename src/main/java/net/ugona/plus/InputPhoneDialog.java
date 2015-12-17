@@ -90,6 +90,7 @@ public class InputPhoneDialog
         tvError = (TextView) v.findViewById(R.id.error);
         if (bSet) {
             tvError.setVisibility(View.VISIBLE);
+            CarConfig config = CarConfig.get(getActivity(), id);
             v.findViewById(R.id.ccode_block).setVisibility(View.VISIBLE);
             etCCodeNum = (EditText) v.findViewById(R.id.ccode_num);
             etCCodeText = (EditText) v.findViewById(R.id.ccode_text);
@@ -98,9 +99,14 @@ public class InputPhoneDialog
             chkNumber = (CheckBox) v.findViewById(R.id.number);
             chkNumber.setOnCheckedChangeListener(this);
             afterTextChanged(null);
-            CarConfig config = CarConfig.get(getActivity(), id);
             chkNumber.setChecked(config.isCcode_text());
             chkNumber.setVisibility(View.VISIBLE);
+            String ccode = config.getCcode();
+            if (ccode.length() > 0) {
+                v.findViewById(R.id.ccode_block).setVisibility(View.GONE);
+                etCCodeNum.setText(ccode);
+                etCCodeText.setText(ccode);
+            }
         }
         if (phone != null) {
             etPhone.setText(phone);

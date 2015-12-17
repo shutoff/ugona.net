@@ -60,14 +60,14 @@
             android:password="true"
             android:visibility="gone" />
 
-    </LinearLayout>
+        <CheckBox
+            android:id="@+id/number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/number"
+            android:visibility="gone" />
 
-    <CheckBox
-        android:id="@+id/number"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/number"
-        android:visibility="gone" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/error"

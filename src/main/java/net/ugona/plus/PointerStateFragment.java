@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,7 +25,8 @@ import java.util.Locale;
 
 public class PointerStateFragment
         extends MainFragment
-        implements AdapterView.OnItemClickListener {
+        implements AdapterView.OnItemClickListener,
+        AdapterView.OnItemLongClickListener {
 
     static final int DO_AUTH = 1;
 
@@ -40,6 +42,7 @@ public class PointerStateFragment
     Handler handler;
     Indicator iReserve;
     Indicator iBalance;
+    boolean longTap;
 
     @Override
     int layout() {
@@ -52,6 +55,7 @@ public class PointerStateFragment
         vCmd = (ListView) v.findViewById(R.id.cmd);
         vCmd.setAdapter(new ActionsAdapter(getActivity(), id()));
         vCmd.setOnItemClickListener(this);
+        vCmd.setOnItemLongClickListener(this);
         vCmd.setDivider(null);
         vCmd.setDividerHeight(0);
         tvAddress = (TextView) v.findViewById(R.id.address);
@@ -152,7 +156,20 @@ public class PointerStateFragment
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ActionsAdapter actionsAdapter = (ActionsAdapter) vCmd.getAdapter();
-        actionsAdapter.itemClick(position, false);
+        actionsAdapter.itemClick(position, longTap);
+        longTap = false;
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+        try {
+            Vibrator vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+            vibrator.vibrate(700);
+        } catch (Exception ex) {
+            // ignore
+        }
+        longTap = true;
+        return false;
     }
 
     @Override
@@ -293,4 +310,5 @@ public class PointerStateFragment
         intent.putExtra(Names.CONNECT, true);
         getActivity().startService(intent);
     }
+
 }
