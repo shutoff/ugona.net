@@ -98,8 +98,11 @@ public class CarConfig extends Config {
         String s = "";
         if (data != null) {
             s = data.getStringExtra(subst);
-            if (s == null)
+            if (s == null) {
                 s = "";
+            } else {
+                s = s.trim();
+            }
         }
         return text.replace("{" + subst + "}", s);
     }
