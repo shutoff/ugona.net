@@ -86,6 +86,7 @@ public abstract class DeviceBaseFragment
     HashMap<String, Object> changed;
     ListView vList;
     View vError;
+    TextView tvError;
     Vector<Timer> timers;
     Vector<TimerType> timerTypes;
     NumberFormat nf;
@@ -116,6 +117,7 @@ public abstract class DeviceBaseFragment
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
         vList = (ListView) v.findViewById(R.id.list);
+        tvError = (TextView) v.findViewById(R.id.error_text);
         vError = v.findViewById(R.id.error);
         vError.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -483,6 +485,10 @@ public abstract class DeviceBaseFragment
 
             @Override
             void error() {
+                String text = error_text;
+                if (text == null)
+                    text = getString(R.string.error_load);
+                tvError.setText(text);
                 vError.setVisibility(View.VISIBLE);
                 vList.setVisibility(View.GONE);
                 refreshDone();
