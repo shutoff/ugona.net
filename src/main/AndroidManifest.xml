@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.ugona.plus"
     android:versionCode="21"
-    android:versionName="2.3.2 beta 20151218">
+    android:versionName="2.3.2 beta 20151221">
 
     <uses-sdk
         android:minSdkVersion="8"

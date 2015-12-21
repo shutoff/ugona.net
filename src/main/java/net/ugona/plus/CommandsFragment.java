@@ -49,21 +49,36 @@ public class CommandsFragment
         vList = (ListView) v.findViewById(R.id.list);
         final CarConfig config = CarConfig.get(getActivity(), id());
         final CarState state = CarState.get(getActivity(), id());
+        final CarConfig.Command[] cmd = config.getCmd();
 
         items = new Vector<>();
         if (State.hasTelephony(getActivity())) {
-            items.add(new SpinnerItem(R.string.control_method, 0, R.array.ctrl_entries) {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    config.setInet_cmd(position > 0);
-                }
 
-                @Override
-                int current() {
-                    return config.isInet_cmd() ? 1 : 0;
-                }
+            boolean is_inet = false;
+            boolean is_sms = false;
+            for (CarConfig.Command c : cmd) {
+                if (c.sms != null)
+                    is_sms = true;
+                if (c.inet != 0)
+                    is_inet = true;
+                if (is_sms && is_inet)
+                    break;
+            }
 
-            });
+            if (is_inet && is_sms) {
+                items.add(new SpinnerItem(R.string.control_method, 0, R.array.ctrl_entries) {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        config.setInet_cmd(position > 0);
+                    }
+
+                    @Override
+                    int current() {
+                        return config.isInet_cmd() ? 1 : 0;
+                    }
+                });
+            }
+
             if (state.isDevice_password()) {
                 items.add(new Item() {
                     @Override
@@ -111,7 +126,6 @@ public class CommandsFragment
 
         final Set<String> used = new HashSet<>();
 
-        final CarConfig.Command[] cmd = config.getCmd();
         int[] selected = config.getFab();
         for (CarConfig.Command c : cmd) {
             if (c.group == null)

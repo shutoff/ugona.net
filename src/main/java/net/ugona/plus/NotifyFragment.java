@@ -64,10 +64,13 @@ public class NotifyFragment
 
         items.add(new SoundItem(R.string.notify_sound, RingtoneManager.TYPE_NOTIFICATION, "notify", null));
         items.add(new SoundItem(R.string.notify_az_start, RingtoneManager.TYPE_NOTIFICATION, "azStart", "start"));
-        items.add(new SoundItem(R.string.zone_in, RingtoneManager.TYPE_NOTIFICATION, "zoneIn", null));
-        items.add(new SoundItem(R.string.zone_out, RingtoneManager.TYPE_NOTIFICATION, "zoneOut", null));
 
-        CarState state = CarState.get(getActivity(), id());
+        CarState state = CarState.get(getContext(), id());
+        if (state.isZones()) {
+            items.add(new SoundItem(R.string.zone_in, RingtoneManager.TYPE_NOTIFICATION, "zoneIn", null));
+            items.add(new SoundItem(R.string.zone_out, RingtoneManager.TYPE_NOTIFICATION, "zoneOut", null));
+        }
+
         if (!state.getBalance().equals("")) {
             items.add(new CheckBoxItem(getString(R.string.show_balance), "showBalance"));
             items.add(new BalanceLimitItem(getString(R.string.balance_notification)));
