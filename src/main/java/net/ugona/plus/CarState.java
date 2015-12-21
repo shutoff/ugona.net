@@ -58,8 +58,8 @@ public class CarState extends Config {
     private String temperature;
     private String balance;
     private boolean guard;
-    private boolean hijack;
-    private boolean panic;
+    private int hijack;
+    private int panic;
     private int guard_mode;
     private double fuel;
     private double card_voltage;
@@ -89,6 +89,8 @@ public class CarState extends Config {
     private double addr_lat;
     private double addr_lon;
     private String address_type;
+
+    private int az_state;
 
     private String[] events;
 
@@ -328,22 +330,22 @@ public class CarState extends Config {
         return card_level;
     }
 
-    public boolean isHijack() {
+    public int isHijack() {
         return hijack;
     }
 
-    public void setHijack(boolean hijack) {
+    public void setHijack(int hijack) {
         if (this.hijack == hijack)
             return;
         this.hijack = hijack;
         upd = true;
     }
 
-    public boolean isPanic() {
+    public int isPanic() {
         return panic;
     }
 
-    public void setPanic(boolean panic) {
+    public void setPanic(int panic) {
         if (this.panic == panic)
             return;
         this.panic = panic;
@@ -494,6 +496,8 @@ public class CarState extends Config {
     }
 
     public boolean isAz() {
+        if (az_state != 0)
+            return az_state == 2;
         if (az_time <= 0)
             return false;
         if (!guard)
@@ -506,6 +510,18 @@ public class CarState extends Config {
     }
 
     public void setAz(boolean az) {
+        if (az_state != 0) {
+            if (az) {
+                az_state = 2;
+                ignition = true;
+            } else {
+                az_state = 1;
+                ignition = false;
+            }
+            upd = true;
+            return;
+        }
+
         long now = new Date().getTime();
         if (az) {
             if (az_time < now - 150000) {

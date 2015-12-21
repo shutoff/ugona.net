@@ -30,6 +30,7 @@ public class SendCommandFragment extends DialogFragment {
     static final int DO_INET = 2;
     static final int DO_CCODE_SMS = 3;
     static final int DO_SMS = 4;
+    static final int DO_PHONE = 5;
 
     Handler handler;
     String car_id;
@@ -151,6 +152,13 @@ public class SendCommandFragment extends DialogFragment {
                 case DO_SMS:
                     send_command_sms(null);
                     return;
+                case DO_PHONE:
+                    CarConfig carConfig = CarConfig.get(getActivity(), car_id);
+                    carConfig.setPhone(data.getStringExtra(Names.PHONE));
+                    Intent intent = new Intent(Names.CAR_CHANGED);
+                    getActivity().sendBroadcast(intent);
+                    process();
+                    return;
             }
         }
         switch (requestCode) {
@@ -158,6 +166,7 @@ public class SendCommandFragment extends DialogFragment {
             case DO_INET:
             case DO_CCODE_SMS:
             case DO_SMS:
+            case DO_PHONE:
                 try {
                     dismiss();
                 } catch (Exception ex) {
@@ -191,8 +200,16 @@ public class SendCommandFragment extends DialogFragment {
         CarConfig config = CarConfig.get(getActivity(), car_id);
         if (cmd.call != null) {
             String phone = config.getPhone();
-            if (phone.equals(""))
+            if (phone.equals("")) {
+                InputPhoneDialog phoneDialog = new InputPhoneDialog();
+                Bundle args = new Bundle();
+                args.putString(Names.TITLE, getString(R.string.device_phone_number));
+                args.putString(Names.ID, car_id);
+                phoneDialog.setArguments(args);
+                phoneDialog.setTargetFragment(this, DO_PHONE);
+                phoneDialog.show(getFragmentManager(), "phone");
                 return;
+            }
             phone = cmd.call.replace("{phone}", phone);
             Intent i = new Intent(android.content.Intent.ACTION_CALL, Uri.parse("tel:" + phone));
             startActivity(i);
