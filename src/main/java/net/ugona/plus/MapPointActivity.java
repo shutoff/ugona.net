@@ -296,9 +296,7 @@ public class MapPointActivity extends MapActivity {
             double lat = Double.parseDouble(gps[0]);
             double lng = Double.parseDouble(gps[1]);
             String location = Math.round(lat * 10000) / 10000. + "," + Math.round(lng * 10000) / 10000.;
-            String zone = "";
-            if (!carState.isGps_valid() && !carState.getGsm_region().equals("")) {
-                zone = carState.getGsm_region();
+            if (!carState.isGps_valid()) {
                 String gsm_sector = carState.getGsm();
                 if (!gsm_sector.equals("")) {
                     String[] parts = gsm_sector.split(" ");
@@ -306,10 +304,10 @@ public class MapPointActivity extends MapActivity {
                         location = "LAC: " + parts[2] + " CID: " + parts[3];
                 }
             }
-            int course = carState.getCourse();
-            if (!carState.isGps_valid())
-                course = 0;
-            String data = lat + ";" + lng + ";" + course + ";";
+            String data = lat + ";" + lng + ";";
+            if (carState.isGps_valid())
+                data += carState.getCourse();
+            data += ";";
             if (ids.length > 1) {
                 CarConfig carConfig = CarConfig.get(MapPointActivity.this, id);
                 String name = carConfig.getName();
@@ -348,7 +346,7 @@ public class MapPointActivity extends MapActivity {
                 }
                 data += address;
             }
-            data += ";" + zone;
+            data += ";" + carState.getHdop();
             if (times.containsKey(id))
                 data += ";" + times.get(id);
             return data;

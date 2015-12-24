@@ -562,6 +562,7 @@ public class CarConfig extends Config {
         boolean on;
         boolean always;
         Runnable onAnswer;
+        boolean confirm;
 
         String smsText(Intent data) {
             String text = sms.split("\\|")[0];

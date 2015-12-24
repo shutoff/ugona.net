@@ -51,7 +51,7 @@ public class CarState extends Config {
     private int shock;
     private String gsm;
     private String gps;
-    private String gsm_region;
+    private int hdop;
     private boolean gps_valid;
     private int speed;
     private int course;
@@ -103,7 +103,6 @@ public class CarState extends Config {
         balance = "";
         zone = "";
         check_version = "";
-        gsm_region = "";
         address = "";
         address_type = "";
 
@@ -286,8 +285,8 @@ public class CarState extends Config {
         return gps;
     }
 
-    public String getGsm_region() {
-        return gsm_region;
+    public int getHdop() {
+        return hdop;
     }
 
     public int getSpeed() {
@@ -497,7 +496,7 @@ public class CarState extends Config {
 
     public boolean isAz() {
         if (az_state != 0)
-            return az_state == 2;
+            return (az_state == 1) && ignition;
         if (az_time <= 0)
             return false;
         if (!guard)
@@ -512,10 +511,10 @@ public class CarState extends Config {
     public void setAz(boolean az) {
         if (az_state != 0) {
             if (az) {
-                az_state = 2;
+                az_state = 1;
                 ignition = true;
             } else {
-                az_state = 1;
+                az_state = 2;
                 ignition = false;
             }
             upd = true;

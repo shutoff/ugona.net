@@ -257,7 +257,7 @@ public class SendCommandFragment extends DialogFragment {
             dialog.show(getFragmentManager(), "password");
             return true;
         }
-        if (no_prompt) {
+        if (no_prompt || !cmd.confirm) {
             onActivityResult(DO_INET, Activity.RESULT_OK, null);
             return true;
         }
