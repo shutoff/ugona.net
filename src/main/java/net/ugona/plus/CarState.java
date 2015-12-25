@@ -402,6 +402,14 @@ public class CarState extends Config {
         return online;
     }
 
+    public boolean isSos() {
+        return sos;
+    }
+
+    public void setSos(boolean sos) {
+        this.sos = sos;
+    }
+
     public boolean isTilt() {
         return tilt;
     }
@@ -456,10 +464,6 @@ public class CarState extends Config {
 
     public void setShock(int shock) {
         this.shock = shock;
-    }
-
-    public void setSos(boolean sos) {
-        this.sos = sos;
     }
 
     public boolean isIn_sensor() {

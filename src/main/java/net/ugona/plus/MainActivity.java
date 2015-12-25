@@ -502,7 +502,7 @@ public class MainActivity
 
         CarState state = CarState.get(this, id);
         if (!state.isHistory())
-            sideMenu.removeItem(R.id.history);
+            sideMenu.removeItem(R.id.charts);
 
         MainFragment fragment = getFragment();
         if (fragment != null)

@@ -202,7 +202,7 @@ public class CarImage {
             parts.add("r_slope");
             text = "tilt";
         }
-        if (s.isTilt()) {
+        if (s.isSos()) {
             parts.add("r_sos");
             text = "sos";
         }
