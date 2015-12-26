@@ -237,6 +237,7 @@
     <string name="valet_mode">Режим\nАВТОСЕРВИС</string>
     <string name="tilt">Датчик\nнаклона</string>
     <string name="sos">СОС!!!</string>
+    <string name="brake">Тормоз</string>
     <string name="guard">В охране</string>
     <string name="ignition">Зажигание\nвключено</string>
     <string name="timer">Таймер</string>

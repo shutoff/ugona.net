@@ -46,6 +46,7 @@ public class CarState extends Config {
     private boolean tilt;
     private boolean move;
     private boolean sos;
+    private boolean brake;
     private boolean in_sensor;
     private boolean ext_sensor;
     private int shock;
@@ -472,6 +473,14 @@ public class CarState extends Config {
 
     public void setIn_sensor(boolean in_sensor) {
         this.in_sensor = in_sensor;
+    }
+
+    public boolean isBrake() {
+        return brake;
+    }
+
+    public void setBrake(boolean brake) {
+        this.brake = brake;
     }
 
     public boolean isExt_sensor() {

@@ -233,6 +233,7 @@
     <string name="valet_mode">VALET mode on</string>
     <string name="tilt">Tilt</string>
     <string name="sos">SOS!!!</string>
+    <string name="brake">Brake</string>
     <string name="guard">Guard ON</string>
     <string name="ignition">Ignition</string>
     <string name="timer">Timer</string>

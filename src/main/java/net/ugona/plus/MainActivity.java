@@ -845,6 +845,7 @@ public class MainActivity
         sendBroadcast(intent);
         Notification.clear(this, id);
         checkCaps(id);
+        setSideMenu();
     }
 
     static class KeyParam implements Serializable {

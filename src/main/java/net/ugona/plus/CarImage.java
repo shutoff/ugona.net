@@ -198,6 +198,10 @@ public class CarImage {
             parts.add("b_valet");
             text = "valet_mode";
         }
+        if (s.isBrake()) {
+            parts.add("r_brake");
+            text = "brake";
+        }
         if (s.isTilt()) {
             parts.add("r_slope");
             text = "tilt";
