@@ -25,16 +25,13 @@ import okhttp3.Response;
 public abstract class HttpTask {
 
     final static String userAgent = System.getProperty("http.agent");
-    public static OkHttpClient httpClient = createClient();
-    static OkHttpClient client;
+    public static final OkHttpClient client = createClient();
     AsyncTask<Object, Void, JsonObject> bgTask;
     String error_text;
     boolean canceled;
 
-    static OkHttpClient createClient() {
-        if (httpClient != null)
-            return httpClient;
-        httpClient = new OkHttpClient.Builder()
+    private static OkHttpClient createClient() {
+        OkHttpClient httpClient = new OkHttpClient.Builder()
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(40, TimeUnit.SECONDS).build();
         httpClient.interceptors().add(new Interceptor() {
