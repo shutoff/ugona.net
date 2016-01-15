@@ -10,8 +10,6 @@ import android.os.AsyncTask;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,6 +22,9 @@ import java.util.HashMap;
 import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class Theme {
 

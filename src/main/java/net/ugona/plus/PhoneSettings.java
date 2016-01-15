@@ -12,6 +12,7 @@ public class PhoneSettings extends Config {
     static private PhoneSettings config;
 
     private String server;
+    private boolean debug;
 
     private PhoneSettings() {
         server = "https://car-online.ugona.net";
@@ -37,5 +38,9 @@ public class PhoneSettings extends Config {
 
     public String getServer() {
         return server;
+    }
+
+    public boolean isDebug() {
+        return debug;
     }
 }

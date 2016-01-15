@@ -59,6 +59,8 @@ public class State {
 
     static public void appendLog(String text) {
         Log.v("v", text);
+        if (!PhoneSettings.get().isDebug())
+            return;
         File logFile = Environment.getExternalStorageDirectory();
         logFile = new File(logFile, "car.log");
         if (!logFile.exists()) {
@@ -85,6 +87,8 @@ public class State {
 
     static public void print(Throwable ex) {
         ex.printStackTrace();
+        if (!PhoneSettings.get().isDebug())
+            return;
         appendLog("Error: " + ex.toString());
         StringWriter sw = new StringWriter();
         ex.printStackTrace(new PrintWriter(sw));

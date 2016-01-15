@@ -8,13 +8,6 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
-import com.squareup.okhttp.ConnectionSpec;
-import com.squareup.okhttp.Interceptor;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -22,20 +15,29 @@ import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Interceptor;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 public abstract class HttpTask {
 
     final static String userAgent = System.getProperty("http.agent");
-    public static final OkHttpClient client = createClient();
-    static ConnectionSpec spec;
+    public static OkHttpClient httpClient = createClient();
+    static OkHttpClient client;
     AsyncTask<Object, Void, JsonObject> bgTask;
     String error_text;
     boolean canceled;
 
     static OkHttpClient createClient() {
-        OkHttpClient client = new OkHttpClient();
-        client.setConnectTimeout(15, TimeUnit.SECONDS);
-        client.setReadTimeout(40, TimeUnit.SECONDS);
-        client.interceptors().add(new Interceptor() {
+        if (httpClient != null)
+            return httpClient;
+        httpClient = new OkHttpClient.Builder()
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(40, TimeUnit.SECONDS).build();
+        httpClient.interceptors().add(new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
                 Request originalRequest = chain.request();
@@ -46,37 +48,7 @@ public abstract class HttpTask {
                 return chain.proceed(requestWithUserAgent);
             }
         });
-        /*
-        if (spec == null)
-            spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-                    .tlsVersions(
-                            TlsVersion.TLS_1_2,
-                            TlsVersion.TLS_1_1,
-                            TlsVersion.TLS_1_0)
-                    .cipherSuites(
-                            CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-                            CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
-                            CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
-                            CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
-                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-                            CipherSuite.TLS_ECDHE_ECDSA_WITH_RC4_128_SHA,
-                            CipherSuite.TLS_ECDHE_RSA_WITH_RC4_128_SHA,
-                            CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
-                            CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
-                            CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
-                            CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256,
-                            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                            CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
-                            CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
-                            CipherSuite.TLS_RSA_WITH_RC4_128_SHA,
-                            CipherSuite.TLS_RSA_WITH_RC4_128_MD5)
-                    .supportsTlsExtensions(true)
-                    .build();
-        client.setConnectionSpecs(Collections.singletonList(spec));
-        */
-        return client;
+        return httpClient;
     }
 
     static JsonObject request(Object... params) throws Exception {
