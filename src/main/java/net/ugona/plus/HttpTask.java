@@ -33,18 +33,19 @@ public abstract class HttpTask {
     private static OkHttpClient createClient() {
         OkHttpClient httpClient = new OkHttpClient.Builder()
                 .connectTimeout(15, TimeUnit.SECONDS)
-                .readTimeout(40, TimeUnit.SECONDS).build();
-        httpClient.interceptors().add(new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                Request originalRequest = chain.request();
-                Request requestWithUserAgent = originalRequest.newBuilder()
-                        .removeHeader("User-Agent")
-                        .addHeader("User-Agent", userAgent)
-                        .build();
-                return chain.proceed(requestWithUserAgent);
-            }
-        });
+                .readTimeout(40, TimeUnit.SECONDS)
+                .addInterceptor(new Interceptor() {
+                    @Override
+                    public Response intercept(Chain chain) throws IOException {
+                        Request originalRequest = chain.request();
+                        Request requestWithUserAgent = originalRequest.newBuilder()
+                                .removeHeader("User-Agent")
+                                .addHeader("User-Agent", userAgent)
+                                .build();
+                        return chain.proceed(requestWithUserAgent);
+                    }
+                })
+                .build();
         return httpClient;
     }
 
