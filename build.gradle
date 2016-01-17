@@ -60,5 +60,6 @@ dependencies {
     compile 'com.eclipsesource.minimal-json:minimal-json:0.9.4'
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'com.android.support:multidex:1.0.1'
+    compile 'com.github.chrisbanes.photoview:library:1.2.4'
     compile fileTree(dir: 'libs', include: '*.jar')
 }
