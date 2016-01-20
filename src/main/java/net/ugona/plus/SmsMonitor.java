@@ -69,7 +69,7 @@ public class SmsMonitor extends BroadcastReceiver {
                             Intent i = new Intent(Names.UPDATED);
                             i.putExtra(Names.ID, id);
                             context.sendBroadcast(i);
-                            Notification.update(context, id, upd);
+                            Notification.update(context, id, upd, true);
                         }
                     }
                 }
@@ -188,7 +188,7 @@ public class SmsMonitor extends BroadcastReceiver {
                     return true;
                 }
                 if (changed != null)
-                    Notification.update(context, car_id, changed);
+                    Notification.update(context, car_id, changed, false);
                 abortBroadcast();
                 return true;
             } catch (Exception ex) {

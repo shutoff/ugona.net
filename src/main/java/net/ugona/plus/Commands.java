@@ -157,7 +157,7 @@ public class Commands {
                         CarState state = CarState.get(context, car_id);
                         Set<String> update = State.update(context, car_id, c, c.done, state, null, null);
                         if (update != null) {
-                            Notification.update(context, car_id, update);
+                            Notification.update(context, car_id, update, true);
                             Intent intent = new Intent(FetchService.ACTION_UPDATE);
                             intent.putExtra(Names.ID, car_id);
                             context.sendBroadcast(intent);
@@ -260,7 +260,7 @@ public class Commands {
                     Set<String> update = State.update(context, id, command, command.done, state, matcher, entry.getValue());
                     if (update != null) {
                         upd = true;
-                        Notification.update(context, id, update);
+                        Notification.update(context, id, update, true);
                     }
                 }
                 if (command.time != null) {

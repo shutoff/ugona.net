@@ -27,7 +27,8 @@ public class Notification extends Config {
     public static long[] LONG_PATTERN = {0, 900, 500, 900};
     static int max_id;
     private static HashMap<String, Notification> notifications;
-    private int az;
+    private int az_start;
+    private int az_stop;
     private int valet_on;
     private int valet_off;
     private int part_guard;
@@ -115,36 +116,47 @@ public class Notification extends Config {
         return false;
     }
 
-    static void update(Context context, String car_id, Set<String> names) {
+    static void update(Context context, String car_id, Set<String> names, boolean cmd) {
         if (names == null)
             return;
         CarState state = CarState.get(context, car_id);
         Notification notification = Notification.get(context, car_id);
         if (names.contains("az_time") || names.contains("az")) {
-            State.appendLog("az " + notification.getAz());
-            if (notification.getAz() != 0) {
-                remove(context, notification.getAz());
-                notification.setAz(0);
-            }
             long now = new Date().getTime();
             long az_time = state.getAz_time();
             if (az_time < 0)
                 az_time = -az_time;
             if (az_time + 1200000 > now) {
                 if (state.getAz_time() > 0) {
-                    int id = create(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "azStart", state.getAz_start(), false, null, null);
-                    State.appendLog("set az " + id);
-                    notification.setAz(id);
+                    if (cmd) {
+                        if (notification.getAz_start() != 0)
+                            notification.remove(context, notification.getAz_start());
+                        if (notification.getAz_stop() != 0) {
+                            notification.remove(context, notification.getAz_stop());
+                            notification.setAz_stop(0);
+                        }
+                        int id = create(context, context.getString(R.string.motor_on_ok), R.drawable.white_motor_on, car_id, "azStart", state.getAz_start(), false, null, null);
+                        State.appendLog("set az " + id);
+                        notification.setAz_start(id);
+                    }
                 } else if ((state.getAz_time() < 0) && !state.isIgnition()) {
-                    String msg = context.getString(R.string.motor_off_ok);
-                    long az_stop = -state.getAz_time();
-                    long az_start = state.getAz_start();
-                    long time = (az_stop - az_start) / 60000;
-                    if ((time > 0) && (time <= 20))
-                        msg += " " + context.getString(R.string.motor_time).replace("$1", time + "");
-                    int id = create(context, msg, R.drawable.white_motor_off, car_id, null, -state.getAz_time(), false, null, null);
-                    State.appendLog("set az " + id);
-                    notification.setAz(id);
+                    if (notification.getAz_start() != 0) {
+                        if (notification.getAz_start() != 0) {
+                            notification.remove(context, notification.getAz_start());
+                            notification.setAz_start(0);
+                        }
+                        if (notification.getAz_stop() != 0)
+                            notification.remove(context, notification.getAz_stop());
+                        String msg = context.getString(R.string.motor_off_ok);
+                        long az_stop = -state.getAz_time();
+                        long az_start = state.getAz_start();
+                        long time = (az_stop - az_start) / 60000;
+                        if ((time > 0) && (time <= 20))
+                            msg += " " + context.getString(R.string.motor_time).replace("$1", time + "");
+                        int id = create(context, msg, R.drawable.white_motor_off, car_id, null, -state.getAz_time(), false, null, null);
+                        State.appendLog("set az " + id);
+                        notification.setAz_stop(id);
+                    }
                 }
             }
         }
@@ -155,9 +167,15 @@ public class Notification extends Config {
                 az_time = -az_time;
             long now = new Date().getTime();
             if ((az_fail > az_time) && (az_fail + 1200000 > now)) {
-                if (notification.getAz() != 0)
-                    remove(context, notification.getAz());
-                notification.setAz(create(context, context.getString(R.string.engine_fail), R.drawable.white_motor_off, car_id, null, -state.getAz_time(), false, null, null));
+                if (notification.getAz_start() != 0) {
+                    remove(context, notification.getAz_start());
+                    notification.setAz_start(0);
+                }
+                if (notification.getAz_stop() != 0) {
+                    remove(context, notification.getAz_stop());
+                    notification.setAz_stop(0);
+                }
+                notification.setAz_stop(create(context, context.getString(R.string.engine_fail), R.drawable.white_motor_off, car_id, null, -state.getAz_time(), false, null, null));
             }
         }
         if (names.contains("no_gsm")) {
@@ -170,17 +188,24 @@ public class Notification extends Config {
             }
         }
         if (names.contains("guard") || names.contains("ignition")) {
-            if ((notification.getAz() != 0) && (!state.isGuard() || (state.isIgnition() && !state.isAz()))) {
-                State.appendLog("Remove az " + notification.getAz());
-                remove(context, notification.getAz());
-                notification.setAz(0);
+            if (!state.isGuard() || (state.isIgnition() && !state.isAz())) {
+                if (notification.getAz_start() != 0) {
+                    State.appendLog("Remove az " + notification.getAz_start());
+                    remove(context, notification.getAz_start());
+                    notification.setAz_start(0);
+                }
+                if (notification.getAz_stop() != 0) {
+                    State.appendLog("Remove az " + notification.getAz_stop());
+                    remove(context, notification.getAz_stop());
+                    notification.setAz_stop(0);
+                }
             }
         }
         if (names.contains("time")) {
             if ((state.getNo_gsm_time() > 0) && (state.getTime() > state.getNo_gsm_time())) {
                 state.setNo_gsm(false);
                 if (notification.getNo_gsm() != 0)
-                    remove(context, notification.az);
+                    remove(context, notification.getNo_gsm());
                 notification.setNo_gsm(create(context, context.getString(R.string.restore), R.drawable.w_warning_light, car_id, null, 0, false, null, null));
             }
         }
@@ -195,10 +220,12 @@ public class Notification extends Config {
                     notification.setValet_off(0);
                 }
                 state.setValet(state.getGuard_mode() == 2);
-                if (state.isValet()) {
-                    notification.setValet_on(create(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet, car_id, "valet_on", 0, true, null, null));
-                } else {
-                    notification.setValet_off(create(context, context.getString(R.string.valet_off_ok), R.drawable.white_valet, car_id, "valet_off", 0, false, null, null));
+                if (cmd) {
+                    if (state.isValet()) {
+                        notification.setValet_on(create(context, context.getString(R.string.valet_on_ok), R.drawable.white_valet, car_id, "valet_on", 0, true, null, null));
+                    } else {
+                        notification.setValet_off(create(context, context.getString(R.string.valet_off_ok), R.drawable.white_valet, car_id, "valet_off", 0, false, null, null));
+                    }
                 }
             }
         }
@@ -544,14 +571,25 @@ public class Notification extends Config {
         remove(context, id);
     }
 
-    public int getAz() {
-        return az;
+    public int getAz_start() {
+        return az_start;
     }
 
-    public void setAz(int az) {
-        if (this.az == az)
+    public void setAz_start(int az_start) {
+        if (this.az_start == az_start)
             return;
-        this.az = az;
+        this.az_start = az_start;
+        upd = true;
+    }
+
+    public int getAz_stop() {
+        return az_stop;
+    }
+
+    public void setAz_stop(int az_stop) {
+        if (this.az_stop == az_stop)
+            return;
+        this.az_stop = az_stop;
         upd = true;
     }
 

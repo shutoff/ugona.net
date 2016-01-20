@@ -389,7 +389,7 @@ public class FetchService extends Service {
             if (upd != null) {
                 sendUpdate(Names.UPDATED, car_id);
                 Commands.check(FetchService.this, car_id);
-                Notification.update(FetchService.this, car_id, upd);
+                Notification.update(FetchService.this, car_id, upd, false);
             } else {
                 sendUpdate(Names.NO_UPDATED, car_id);
             }
