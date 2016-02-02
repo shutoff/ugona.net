@@ -827,7 +827,7 @@ public abstract class DeviceBaseFragment
                         bChecked = (boolean) val;
                     if (sVal == null)
                         sVal = (Boolean) bChecked;
-                    final boolean start_checked = (Boolean) sVal;
+                    final boolean start_checked = bChecked;
                     vCheck.setTextColor(getResources().getColor(isChanged ? R.color.main : R.color.text_dark));
                     vCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                         @Override
