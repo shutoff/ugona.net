@@ -44,6 +44,7 @@ public class MaintenanceDialog
         implements DialogInterface.OnClickListener,
         View.OnClickListener,
         TextWatcher,
+        Runnable,
         AdapterView.OnItemSelectedListener {
 
     static int[] periods = new int[]{
@@ -263,13 +264,8 @@ public class MaintenanceDialog
     public void onClick(View v) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(maintenance.last * 1000);
-        final CalendarDatePickerDialog dialog = new CalendarDatePickerDialog() {
-            @Override
-            public void onDayOfMonthSelected(int year, int month, int day) {
-                super.onDayOfMonthSelected(year, month, day);
-                getView().findViewById(R.id.done).performClick();
-            }
-        };
+        final CalendarPicker dialog = new CalendarPicker();
+        dialog.daySelectedListener = this;
         dialog.initialize(new CalendarDatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(CalendarDatePickerDialog calendarDatePickerDialog, int i, int i2, int i3) {
@@ -317,6 +313,23 @@ public class MaintenanceDialog
         if ((n % 12) == 0)
             return State.getPlural(getActivity(), R.plurals.years, n / 12);
         return State.getPlural(getActivity(), R.plurals.months, n);
+    }
+
+    @Override
+    public void run() {
+        getView().findViewById(R.id.done).performClick();
+    }
+
+    static public class CalendarPicker extends CalendarDatePickerDialog {
+
+        Runnable daySelectedListener;
+
+        @Override
+        public void onDayOfMonthSelected(int year, int month, int day) {
+            super.onDayOfMonthSelected(year, month, day);
+            if (daySelectedListener != null)
+                daySelectedListener.run();
+        }
     }
 
     class NamesAdapter extends BaseAdapter implements Filterable {
