@@ -53,10 +53,16 @@
    *;
 }
 
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+
 -keepattributes Signature
 
 -dontwarn android.support.**
 -dontwarn com.google.android.gms.**
 -dontwarn sun.misc.**
 -dontwarn android.os.**
+-dontwarn okio.**
+
 
