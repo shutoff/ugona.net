@@ -702,7 +702,7 @@ public class MainActivity
     String getAppVer() {
         try {
             PackageManager pkgManager = getPackageManager();
-            PackageInfo info = pkgManager.getPackageInfo("net.ugona.plus", 0);
+            PackageInfo info = pkgManager.getPackageInfo(getPackageName(), 0);
             return info.versionName;
         } catch (Exception ex) {
             // ignore

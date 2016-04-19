@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="net.ugona.plus"
-    android:versionCode="22"
-    android:versionName="2.3.3 test 20160202">
+    package="net.ugona.plus">
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -190,7 +188,7 @@
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
 
-                <category android:name="ru.caronline.app" />
+                <category android:name="net.ugona.plu" />
             </intent-filter>
         </receiver>
 

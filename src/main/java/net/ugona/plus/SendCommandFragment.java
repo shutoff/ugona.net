@@ -1,16 +1,19 @@
 package net.ugona.plus;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,12 +34,14 @@ public class SendCommandFragment extends DialogFragment {
     static final int DO_CCODE_SMS = 3;
     static final int DO_SMS = 4;
     static final int DO_PHONE = 5;
+    static final int DO_PERMISSION = 6;
 
     Handler handler;
     String car_id;
     int cmd_id;
     boolean longTap;
     boolean no_prompt;
+    boolean is_dismiss;
 
     public static void send_inet(final Context context, final CarConfig.Command c, final String car_id, final String ccode) {
         HttpTask task = new HttpTask() {
@@ -177,6 +182,27 @@ public class SendCommandFragment extends DialogFragment {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    process();
+                }
+            });
+            return;
+        }
+        is_dismiss = true;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (is_dismiss)
+            dismiss();
+    }
+
     void setArgs(Bundle args) {
         car_id = args.getString(Names.ID);
         cmd_id = args.getInt(Names.COMMAND);
@@ -199,6 +225,11 @@ public class SendCommandFragment extends DialogFragment {
     void process(CarConfig.Command cmd) {
         CarConfig config = CarConfig.get(getActivity(), car_id);
         if (cmd.call != null) {
+            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.CALL_PHONE},
+                        DO_PERMISSION);
+                return;
+            }
             String phone = config.getPhone();
             if (phone.equals("")) {
                 InputPhoneDialog phoneDialog = new InputPhoneDialog();
@@ -211,8 +242,13 @@ public class SendCommandFragment extends DialogFragment {
                 return;
             }
             phone = cmd.call.replace("{phone}", phone);
-            Intent i = new Intent(android.content.Intent.ACTION_CALL, Uri.parse("tel:" + phone));
-            startActivity(i);
+            try {
+                Intent i = new Intent(android.content.Intent.ACTION_CALL, Uri.parse("tel:" + phone));
+                startActivity(i);
+            } catch (Exception ex) {
+                Toast toast = Toast.makeText(getContext(), ex.getLocalizedMessage(), Toast.LENGTH_LONG);
+                toast.show();
+            }
             dismiss();
             return;
         }
@@ -354,6 +390,11 @@ public class SendCommandFragment extends DialogFragment {
         CarConfig.Command[] cmd = config.getCmd();
         for (final CarConfig.Command c : cmd) {
             if (c.id == cmd_id) {
+                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.SEND_SMS},
+                            DO_PERMISSION);
+                    return;
+                }
                 String sms = c.smsText(data);
                 if (Sms.send(getActivity(), car_id, c.id, sms)) {
                     Commands.put(getActivity(), car_id, c, data);

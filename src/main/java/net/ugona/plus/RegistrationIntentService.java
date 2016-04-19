@@ -42,13 +42,10 @@ public class RegistrationIntentService extends IntentService {
             InstanceID instanceID = InstanceID.getInstance(this);
             String token = instanceID.getToken(getString(R.string.gcm_defaultSenderId),
                     GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
-
-            String reg = null;
             Reader reader = null;
             HttpURLConnection connection = null;
-
             JsonObject data = new JsonObject();
-            data.add("reg", reg);
+            data.add("reg", token);
             String[] cars = config.getCars();
             String d = null;
             JsonObject jCars = new JsonObject();
@@ -116,7 +113,7 @@ public class RegistrationIntentService extends IntentService {
     String getAppVer() {
         try {
             PackageManager pkgManager = getPackageManager();
-            PackageInfo info = pkgManager.getPackageInfo("net.ugona.plus", 0);
+            PackageInfo info = pkgManager.getPackageInfo(getPackageName(), 0);
             return info.versionName;
         } catch (Exception ex) {
             // ignore

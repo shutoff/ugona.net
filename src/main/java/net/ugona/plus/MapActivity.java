@@ -1,13 +1,17 @@
 package net.ugona.plus;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -62,16 +66,38 @@ abstract public class MapActivity extends WebViewActivity {
     }
 
     void stopListener() {
-        if (netListener != null)
-            locationManager.removeUpdates(netListener);
-        if (gpsListener != null)
-            locationManager.removeUpdates(gpsListener);
+        try {
+            if (netListener != null)
+                locationManager.removeUpdates(netListener);
+            if (gpsListener != null)
+                locationManager.removeUpdates(gpsListener);
+        } catch (SecurityException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    boolean requestPermissions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            startListener();
+            return true;
+        }
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                1);
+        return true;
     }
 
     void startListener() {
 
         if (noLocation)
             return;
+
+        boolean granted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        if (!granted) {
+            requestPermissions();
+            return;
+        }
+
 
         netListener = new LocationListener() {
             @Override
@@ -271,14 +297,14 @@ abstract public class MapActivity extends WebViewActivity {
         try {
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
                 locationGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        } catch (Exception ex) {
+        } catch (SecurityException ex) {
             // ignore
         }
         Location locationNet = null;
         try {
             if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
                 locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        } catch (Exception ex) {
+        } catch (SecurityException ex) {
             // ignore
         }
         long GPSLocationTime = 0;
