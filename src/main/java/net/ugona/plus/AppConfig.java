@@ -20,7 +20,6 @@ public class AppConfig extends Config {
     private boolean show_speed;
     private String map_type;
     private boolean no_google;
-    private String GCM_id;
     private long GCM_time;
     private long time_delta;
     private String GCM_version;
@@ -38,7 +37,6 @@ public class AppConfig extends Config {
         pattern = "";
         map_type = "OSM";
         show_speed = true;
-        GCM_id = "";
         GCM_version = "";
         info_title = "";
         info_message = "";
@@ -222,17 +220,6 @@ public class AppConfig extends Config {
         if (this.no_google == no_google)
             return;
         this.no_google = no_google;
-        upd = true;
-    }
-
-    public String getGCM_id() {
-        return GCM_id;
-    }
-
-    public void setGCM_id(String GCM_id) {
-        if (this.GCM_id.equals(GCM_id))
-            return;
-        this.GCM_id = GCM_id;
         upd = true;
     }
 

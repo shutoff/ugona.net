@@ -65,6 +65,7 @@ dependencies {
     compile 'com.jaredrummler:android-device-names:1.0.8'
     compile 'com.eclipsesource.minimal-json:minimal-json:0.9.4'
     compile 'com.github.chrisbanes.photoview:library:1.2.4'
+    compile 'com.squareup.okhttp3:okhttp:3.2.0'
     compile fileTree(dir: 'libs', include: '*.jar')
 }
 

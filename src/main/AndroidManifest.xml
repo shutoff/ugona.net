@@ -28,11 +28,6 @@
 
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
-    <permission
-        android:name="${applicationId}.permission.C2D_MESSAGE"
-        android:protectionLevel="signature" />
-    <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE" />
-
     <uses-feature
         android:name="android.hardware.location"
         android:required="false" />
@@ -125,7 +120,6 @@
 
         <service android:name=".FetchService" />
         <service android:name=".WidgetService" />
-        <service android:name=".GcmService" />
 
         <receiver
             android:name=".SmsMonitor"
@@ -135,17 +129,6 @@
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
                 <action android:name="net.ugona.plus.SMS_SENT" />
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
-            </intent-filter>
-        </receiver>
-
-        <receiver
-            android:name=".GcmReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND">
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-
-                <category android:name="net.ugona.plus" />
             </intent-filter>
         </receiver>
 
@@ -198,6 +181,38 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/lockwidget_metadata" />
         </receiver>
+
+        <receiver
+            android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+
+                <category android:name="ru.caronline.app" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".GcmService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".InstanceIDService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".RegistrationIntentService"
+            android:exported="false" />
 
         <provider
             android:name=".CarPictureProvider"

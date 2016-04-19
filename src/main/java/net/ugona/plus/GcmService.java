@@ -1,61 +1,54 @@
 package net.ugona.plus;
 
-import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.ParseException;
+import com.google.android.gms.gcm.GcmListenerService;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
-public class GcmService extends IntentService {
-
-    public GcmService() {
-        super("GcmIntentService");
-    }
+public class GcmService extends GcmListenerService {
 
     @Override
-    protected void onHandleIntent(Intent intent) {
-        Bundle extras = intent.getExtras();
+    public void onMessageReceived(String from, Bundle data) {
         GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
-        String messageType = gcm.getMessageType(intent);
-        if ((extras != null) && GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-            AppConfig config = AppConfig.get(this);
-            String car_id = config.getId(extras.getString(Names.ID));
-            Intent i = new Intent(this, FetchService.class);
+
+        AppConfig config = AppConfig.get(this);
+        String car_id = config.getId(data.getString(Names.ID));
+        Intent i = new Intent(this, FetchService.class);
+        i.putExtra(Names.ID, car_id);
+        startService(i);
+        if (data.getString("maintenance") != null) {
+            i = new Intent(this, FetchService.class);
+            i.setAction(FetchService.ACTION_MAINTENANCE);
             i.putExtra(Names.ID, car_id);
+            i.putExtra(Names.MAINTENANCE, data.getString("maintenance"));
             startService(i);
-            if (extras.getString("maintenance") != null) {
-                i = new Intent(this, FetchService.class);
-                i.setAction(FetchService.ACTION_MAINTENANCE);
-                i.putExtra(Names.ID, car_id);
-                i.putExtra(Names.MAINTENANCE, extras.getString("maintenance"));
-                startService(i);
-            }
-            if (extras.getString("alarm") != null) {
-                String alarm = extras.getString("alarm");
-                HttpTask httpTask = new HttpTask() {
-                    @Override
-                    void result(JsonObject res) throws ParseException {
-
-                    }
-
-                    @Override
-                    void error() {
-
-                    }
-                };
-                JsonObject params = new JsonObject();
-                params.add("alarm", alarm);
-                httpTask.execute("/alarm_ok", params);
-            }
-            String message = extras.getString("message");
-            if (message != null) {
-                String title = extras.getString("title");
-                String url = extras.getString("url");
-                Notification.showMessage(this, title, message, url);
-            }
         }
-        GcmReceiver.completeWakefulIntent(intent);
+        if (data.getString("alarm") != null) {
+            String alarm = data.getString("alarm");
+            HttpTask httpTask = new HttpTask() {
+                @Override
+                void result(JsonObject res) throws ParseException {
+
+                }
+
+                @Override
+                void error() {
+
+                }
+            };
+            JsonObject params = new JsonObject();
+            params.add("alarm", alarm);
+            httpTask.execute("/alarm_ok", params);
+        }
+        String message = data.getString("message");
+        if (message != null) {
+            String title = data.getString("title");
+            String url = data.getString("url");
+            Notification.showMessage(this, title, message, url);
+        }
+
     }
 }
