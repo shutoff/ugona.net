@@ -1,76 +1,61 @@
 {
-  "project_info": {
-    "project_id": "shutoff.ru:api-project-588326592509",
-    "project_number": "588326592509",
-    "name": "ugonanet"
-  },
-  "client": [
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:588326592509:android:705820def2ec95c3",
-        "client_id": "android:net.ugona.plus",
-        "client_type": 1,
-        "android_client_info": {
-          "package_name": "net.ugona.plus",
-          "certificate_hash": []
-        }
-      },
-      "oauth_client": [],
-      "api_key": [],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "cloud_messaging_service": {
-          "status": 2,
-          "apns_config": []
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "google_signin_service": {
-          "status": 1
-        },
-        "ads_service": {
-          "status": 1
-        }
-      }
+    "project_info": {
+        "project_number": "588326592509",
+        "project_id": "shutoff.ru:api-project-588326592509"
     },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:588326592509:android:705820def2ec95c3",
-        "client_id": "android:net.ugona.plus",
-        "client_type": 1,
-        "android_client_info": {
-          "package_name": "net.ugona.plus.debug",
-          "certificate_hash": []
+    "client": [
+        {
+            "client_info": {
+                "mobilesdk_app_id": "1:588326592509:android:705820def2ec95c3",
+                "android_client_info": {
+                    "package_name": "net.ugona.plus"
+                }
+        },
+            "oauth_client": [],
+            "api_key": [
+                {
+                    "current_key": "AIzaSyAqkKywcgjvZhHf_Me8dylwfwbgefb0aUQ"
+                }
+            ],
+            "services": {
+                "analytics_service": {
+                    "status": 1
+                },
+                "appinvite_service": {
+                    "status": 1,
+                    "other_platform_oauth_client": []
+                },
+                "ads_service": {
+                    "status": 1
+                }
         }
-      },
-      "oauth_client": [],
-      "api_key": [],
-      "services": {
-        "analytics_service": {
-          "status": 1
         },
-        "cloud_messaging_service": {
-          "status": 2,
-          "apns_config": []
+        {
+            "client_info": {
+                "mobilesdk_app_id": "1:588326592509:android:705820def2ec95c3",
+                "android_client_info": {
+                    "package_name": "net.ugona.plus.debug"
+                }
         },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "google_signin_service": {
-          "status": 1
-        },
-        "ads_service": {
-          "status": 1
+            "oauth_client": [],
+            "api_key": [
+                {
+                    "current_key": "AIzaSyAqkKywcgjvZhHf_Me8dylwfwbgefb0aUQ"
+                }
+            ],
+            "services": {
+                "analytics_service": {
+                    "status": 1
+                },
+                "appinvite_service": {
+                    "status": 1,
+                    "other_platform_oauth_client": []
+                },
+                "ads_service": {
+                    "status": 1
+                }
         }
-      }
-    }
-  ],
-  "client_info": [],
-  "ARTIFACT_VERSION": "1"
+        }
+    ],
+    "configuration_version": "1"
 }
-
