@@ -769,7 +769,7 @@ public abstract class DeviceBaseFragment
                     int iVal = 0;
                     if ((val != null) && (val instanceof Integer))
                         iVal = (int) val;
-                    if (sVal == null)
+                    if ((sVal == null) || !(sVal instanceof Integer))
                         sVal = (Integer) iVal;
                     final int start_val = (Integer) sVal;
                     for (int i = 0; i < values.length; i++) {
@@ -825,9 +825,9 @@ public abstract class DeviceBaseFragment
                     boolean bChecked = false;
                     if ((val != null) && (val instanceof Boolean))
                         bChecked = (boolean) val;
-                    if (sVal == null)
+                    if ((sVal == null) || !(sVal instanceof Boolean))
                         sVal = (Boolean) bChecked;
-                    final boolean start_checked = bChecked;
+                    final boolean start_checked = (Boolean) sVal;
                     vCheck.setTextColor(getResources().getColor(isChanged ? R.color.main : R.color.text_dark));
                     vCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                         @Override
