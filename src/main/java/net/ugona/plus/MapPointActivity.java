@@ -289,8 +289,7 @@ public class MapPointActivity extends MapActivity {
 
     class JsInterface extends MapActivity.JsInterface {
 
-        @JavascriptInterface
-        String createData(String id) {
+        private String createData(String id) {
             CarState carState = CarState.get(MapPointActivity.this, id);
             String[] gps = carState.getGps().split(",");
             double lat = Double.parseDouble(gps[0]);

@@ -43,7 +43,9 @@ public class SendCommandActivity
         args.putString(Names.ID, car_id);
         String[] data = getIntent().getStringExtra(Names.COMMAND).split("\\|");
         args.putInt(Names.COMMAND, Integer.parseInt(data[0]));
-        boolean longTap = !data[2].equals("");
+        boolean longTap = false;
+        if (data.length > 2)
+            longTap = !data[2].equals("");
         CarConfig carConfig = CarConfig.get(this, car_id);
         if (carConfig.isInet_cmd())
             longTap = !longTap;

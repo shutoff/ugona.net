@@ -24,7 +24,7 @@ import okhttp3.Response;
 
 public abstract class HttpTask {
 
-    final static String userAgent = System.getProperty("http.agent");
+    final static String userAgent = "Ugona.Net " + System.getProperty("http.agent");
     public static final OkHttpClient client = createClient();
     AsyncTask<Object, Void, JsonObject> bgTask;
     String error_text;
