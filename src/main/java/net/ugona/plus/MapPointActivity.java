@@ -385,7 +385,11 @@ public class MapPointActivity extends MapActivity {
             for (String i : ids) {
                 if ((id != null) && id.equals(i))
                     continue;
-                data += "|" + createData(i);
+                try {
+                    data += "|" + createData(i);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
             return data;
         }
