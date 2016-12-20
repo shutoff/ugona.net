@@ -41,7 +41,9 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.haibison.android.lockpattern.LockPatternActivity;
 
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -101,7 +103,22 @@ public class MainActivity
             public void uncaughtException(Thread thread, Throwable ex) {
                 ex.printStackTrace();
                 State.print(ex);
-                System.exit(1);
+                StringWriter sw = new StringWriter();
+                ex.printStackTrace(new PrintWriter(sw));
+                ErrorParam param = new ErrorParam();
+                param.error = sw.toString();
+                HttpTask task = new HttpTask() {
+                    @Override
+                    void result(JsonObject res) throws ParseException {
+                        System.exit(1);
+                    }
+
+                    @Override
+                    void error() {
+
+                    }
+                };
+                task.execute("/error", param);
             }
         });
 
@@ -741,6 +758,10 @@ public class MainActivity
 
     static class KeyParam implements Serializable {
         String skey;
+    }
+
+    static class ErrorParam implements Serializable {
+        String error;
     }
 }
 

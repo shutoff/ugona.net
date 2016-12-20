@@ -36,6 +36,7 @@ public class CarState extends Config {
     private boolean hood;
     private boolean trunk;
     private boolean ignition;
+    private boolean secure;
     private boolean accessory;
     private boolean online;
     private int power_state;
