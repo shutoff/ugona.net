@@ -8,8 +8,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
+import android.text.method.PasswordTransformationMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -67,19 +67,13 @@ public class AuthDialog extends DialogFragment implements TextWatcher {
 
         etLogin.addTextChangedListener(this);
         etPass.addTextChangedListener(this);
+        etPass.setTransformationMethod(PasswordTransformationMethod.getInstance());
 
         final CheckBox chkPswd = (CheckBox) v.findViewById(R.id.show_password);
-        final int initial_type = chkPswd.getInputType();
         chkPswd.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                int type = initial_type;
-                if (isChecked) {
-                    type |= InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
-                } else {
-                    type = initial_type;
-                }
-                etPass.setInputType(type);
+                etPass.setTransformationMethod(isChecked ? null : PasswordTransformationMethod.getInstance());
                 etPass.setSelection(etPass.getText().length());
             }
         });

@@ -33,8 +33,8 @@ android {
         applicationId "net.ugona.plus"
         minSdkVersion 9
         targetSdkVersion 25
-        versionCode 30
-        versionName "2.5.11 test 20161220"
+        versionCode 31
+        versionName "2.5.11 test 20170208"
         multiDexEnabled true
     }
 
@@ -52,8 +52,8 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:25.0.1'
-    compile 'com.android.support:recyclerview-v7:25.0.1'
+    compile 'com.android.support:appcompat-v7:25.1.1'
+    compile 'com.android.support:recyclerview-v7:25.1.1'
     compile 'com.google.android.gms:play-services-gcm:10.0.1'
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'com.googlecode.libphonenumber:libphonenumber:8.0.0'

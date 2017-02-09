@@ -6,8 +6,8 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
+import android.text.method.PasswordTransformationMethod;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -80,19 +80,13 @@ public class StyledAuthDialog
         };
         etLogin.addTextChangedListener(watcher);
         etPass.addTextChangedListener(watcher);
+        etPass.setTransformationMethod(PasswordTransformationMethod.getInstance());
 
         final CheckBox chkPswd = (CheckBox) findViewById(R.id.show_password);
-        final int initial_type = chkPswd.getInputType();
         chkPswd.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                int type = initial_type;
-                if (isChecked) {
-                    type |= InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
-                } else {
-                    type = initial_type;
-                }
-                etPass.setInputType(type);
+                etPass.setTransformationMethod(isChecked ? null : PasswordTransformationMethod.getInstance());
                 etPass.setSelection(etPass.getText().length());
             }
         });
