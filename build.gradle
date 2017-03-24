@@ -5,7 +5,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:2.3.0'
         classpath 'com.google.gms:google-services:3.0.0'
     }
 }
@@ -31,10 +31,10 @@ android {
 
     defaultConfig {
         applicationId "net.ugona.plus"
-        minSdkVersion 9
+        minSdkVersion 14
         targetSdkVersion 25
-        versionCode 31
-        versionName "2.5.11 test 20170208"
+        versionCode 32
+        versionName "2.5.11 test 20170324"
         multiDexEnabled true
     }
 
@@ -52,9 +52,9 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:25.1.1'
-    compile 'com.android.support:recyclerview-v7:25.1.1'
-    compile 'com.google.android.gms:play-services-gcm:10.0.1'
+    compile 'com.android.support:appcompat-v7:25.3.0'
+    compile 'com.android.support:recyclerview-v7:25.3.0'
+    compile 'com.google.android.gms:play-services-gcm:10.2.1'
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'com.googlecode.libphonenumber:libphonenumber:8.0.0'
     compile 'com.nineoldandroids:library:2.4.0'
