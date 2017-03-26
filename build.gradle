@@ -33,8 +33,8 @@ android {
         applicationId "net.ugona.plus"
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 32
-        versionName "2.5.11 test 20170324"
+        versionCode 34
+        versionName "2.5.11 test 20170325"
         multiDexEnabled true
     }
 
@@ -56,11 +56,11 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:25.3.0'
     compile 'com.google.android.gms:play-services-gcm:10.2.1'
     compile 'org.apache.commons:commons-lang3:3.4'
-    compile 'com.googlecode.libphonenumber:libphonenumber:8.0.0'
+    compile 'com.googlecode.libphonenumber:libphonenumber:8.3.3'
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'com.eclipsesource.minimal-json:minimal-json:0.9.4'
     compile 'com.github.chrisbanes.photoview:library:1.2.4'
-    compile 'com.squareup.okhttp3:okhttp:3.5.0'
+    compile 'com.squareup.okhttp3:okhttp:3.6.0'
     compile 'com.android.support:multidex:1.0.1'
     compile fileTree(dir: 'libs', include: '*.jar')
 }
