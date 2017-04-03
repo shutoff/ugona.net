@@ -33,7 +33,7 @@ android {
         applicationId "net.ugona.plus"
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 35
+        versionCode 36
         versionName "2.5.11 test 20170402"
         multiDexEnabled true
     }
