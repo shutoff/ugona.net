@@ -269,7 +269,7 @@ public class State {
             Method method = o.getClass().getDeclaredMethod(method_name);
             return (Boolean) method.invoke(o);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            // ex.printStackTrace();
         }
         try {
             Field field = o.getClass().getDeclaredField(name);
@@ -278,7 +278,7 @@ public class State {
             field.setAccessible(true);
             return field.getBoolean(o);
         } catch (Exception ex) {
-            // ignore
+            ex.printStackTrace();
         }
         return false;
     }

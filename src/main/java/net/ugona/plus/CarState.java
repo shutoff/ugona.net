@@ -219,6 +219,10 @@ public class CarState extends Config {
         return card;
     }
 
+    public boolean isSecure() {
+        return secure;
+    }
+
     public boolean isDoor_fl() {
         return door_fl;
     }
