@@ -184,7 +184,7 @@ public class CarImage {
             text = "rele";
         }
         if (s.isGuard() && (text == null))
-            text = "guard";
+            text = s.isSecure() ? "secure" : "guard";
         int mode = s.getGuard_mode();
         if (mode == 1) {
             parts.add("r_block");

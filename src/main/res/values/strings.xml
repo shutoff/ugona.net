@@ -280,4 +280,5 @@
     <string name="select_device">Select device</string>
     <string name="processed">Processed</string>
     <string name="online">online</string>
+    <string name="secure">Secure guard</string>
 </resources>
