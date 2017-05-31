@@ -5,7 +5,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.1'
+        classpath 'com.android.tools.build:gradle:2.3.2'
         classpath 'com.google.gms:google-services:3.0.0'
     }
 }
@@ -27,14 +27,14 @@ repositories {
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    buildToolsVersion "25.0.3"
 
     defaultConfig {
         applicationId "net.ugona.plus"
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 37
-        versionName "2.5.11 test 20170408"
+        versionCode 41
+        versionName "2.5.13"
         multiDexEnabled true
     }
 
@@ -54,9 +54,9 @@ android {
 dependencies {
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:recyclerview-v7:25.3.1'
-    compile 'com.google.android.gms:play-services-gcm:10.2.1'
+    compile 'com.google.android.gms:play-services-gcm:10.2.6'
     compile 'org.apache.commons:commons-lang3:3.5'
-    compile 'com.googlecode.libphonenumber:libphonenumber:8.4.0'
+    compile 'com.googlecode.libphonenumber:libphonenumber:8.4.3'
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'com.eclipsesource.minimal-json:minimal-json:0.9.4'
     compile 'com.github.chrisbanes.photoview:library:1.2.4'

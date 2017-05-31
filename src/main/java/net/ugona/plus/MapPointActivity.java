@@ -345,9 +345,9 @@ public class MapPointActivity extends MapActivity {
                 }
                 data += address;
             }
-            data += ";" + carState.getHdop();
+            data += ";" + carState.getHdop() + ";";
             if (times.containsKey(id))
-                data += ";" + times.get(id);
+                data += times.get(id);
             return data;
         }
 
