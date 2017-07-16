@@ -210,6 +210,10 @@ public class CarImage {
             parts.add("r_sos");
             text = "sos";
         }
+        if (s.isSecure()) {
+            parts.add("b_secure");
+            text = "secure";
+        }
 
         String ext_state = null;
         for (String part : parts) {
