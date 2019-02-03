@@ -890,7 +890,7 @@ public class XYGraphWidget extends Widget {
 
         // int canvasState = canvas.save();
         try {
-            canvas.save(Canvas.ALL_SAVE_FLAG);
+            canvas.save();
             canvas.clipRect(gridRect, android.graphics.Region.Op.INTERSECT);
             for (XYSeriesRenderer renderer : plot.getRendererList()) {
                 renderer.render(canvas, paddedGridRect);

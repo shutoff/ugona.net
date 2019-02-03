@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -19,6 +20,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.telephony.TelephonyManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,20 +37,30 @@ import android.widget.TextView;
 
 import com.doomonafireball.betterpickers.calendardatepicker.CalendarDatePickerDialog;
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.haibison.android.lockpattern.LockPatternActivity;
 
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.net.HttpURLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
+
+import okhttp3.MediaType;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class MainActivity
         extends AppCompatActivity {
@@ -737,8 +749,75 @@ public class MainActivity
             config.setGCM_time(0);
         if (now < config.getGCM_time())
             return;
-        Intent intent = new Intent(this, RegistrationIntentService.class);
-        startService(intent);
+        AppConfig config = AppConfig.get(this);
+        try {
+            String token = FirebaseInstanceId.getInstance().getToken();
+            Reader reader = null;
+            HttpURLConnection connection = null;
+            JsonObject data = new JsonObject();
+            data.add("reg", token);
+            String[] cars = config.getCars();
+            String d = null;
+            JsonObject jCars = new JsonObject();
+            for (String car : cars) {
+                CarConfig carConfig = CarConfig.get(this, car);
+                String key = carConfig.getKey();
+                if (key.equals("") || (key.equals("demo")))
+                    continue;
+                JsonObject c = new JsonObject();
+                c.add("id", car);
+                c.add("phone", carConfig.getPhone());
+                c.add("auth", carConfig.getAuth());
+                jCars.add(key, c);
+            }
+            data.add("car_data", jCars);
+            Calendar cal = Calendar.getInstance();
+            TimeZone tz = cal.getTimeZone();
+            data.add("tz", tz.getID());
+            data.add("version", getAppVer());
+            TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            String id = "";
+            try {
+                id = tm.getDeviceId();
+            } catch (Exception ex) {
+                // ignore
+            }
+            if (id.equals("")) {
+                try {
+                    id = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+                } catch (Exception ex) {
+                    // ignore
+                }
+            }
+            if (!id.equals(""))
+                data.add("uid", id);
+            data.add("lang", Locale.getDefault().getLanguage());
+            data.add("os", Build.VERSION.RELEASE);
+            data.add("model", Build.MODEL);
+            String phone = "";
+            try {
+                phone = tm.getLine1Number();
+            } catch (Exception ex) {
+                // ignore
+            }
+            if (!phone.equals(""))
+                data.add("phone", phone);
+            String url = PhoneSettings.get().getServer() + "/reg";
+            RequestBody body = RequestBody.create(MediaType.parse("application/json"), data.toString());
+            Request request = new Request.Builder().url(url).post(body).build();
+            Response response = HttpTask.client.newCall(request).execute();
+            if (response.code() != HttpURLConnection.HTTP_OK)
+                return;
+            reader = response.body().charStream();
+            JsonObject res = JsonValue.readFrom(reader).asObject();
+            if (res.asObject().get("error") != null)
+                return;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return;
+        }
+        config.setGCM_time(new Date().getTime());
+        config.setGCM_version(getAppVer());
     }
 
     void setCarId(String new_id) {

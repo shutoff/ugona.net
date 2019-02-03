@@ -65,7 +65,7 @@ public abstract class SeriesRenderer
     public void drawSeriesLegendIcon(Canvas canvas, RectF rect, SeriesFormatterType formatter) {
         //int state = canvas.save(Canvas.CLIP_SAVE_FLAG);
         try {
-            canvas.save(Canvas.ALL_SAVE_FLAG);
+            canvas.save();
             canvas.clipRect(rect, Region.Op.INTERSECT);
             doDrawLegendIcon(canvas, rect, formatter);
             //canvas.restoreToCount(state);
